@@ -1,0 +1,11 @@
+#draft-cwl-container {
+    flex-direction: row;
+    margin-top: 1rem;
+    padding: 1rem;
+}
+
+#add-draft-cwl {
+    width: 5rem;
+    height: 5rem;
+    margin: 0.5rem;
+}

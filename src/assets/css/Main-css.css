@@ -1,0 +1,73 @@
+body {
+    background-color: white;
+    /*background-image: url("./pictures/tools_for_clash_background.webp");*/
+    overflow: hidden;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+.left img {
+    height: 55px;
+    width: auto;
+}
+
+.center {
+    display: flex;
+    gap: 35px;
+}
+
+.center a {
+    position: relative;
+    text-decoration: none;
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+    transition: all 0.25s ease;
+}
+
+.center a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    width: 0;
+    height: 2px;
+    background-color: white;
+    transition: width 0.25s ease;
+}
+
+.center a:hover {
+    transform: translateY(-2px);
+}
+
+.center a:hover::after {
+    width: 100%;
+}
+
+.right {
+    display: flex;
+    gap: 15px;
+}
+
+.right button {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.right button:hover {
+    color: #ffd700;
+}
+
+.hidden {
+    display: none !important;
+}

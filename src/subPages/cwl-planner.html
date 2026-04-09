@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CWL</title>
+    <link rel="stylesheet" href="../assets/css/Main-css.css">
+    <link rel="icon" type="image/png" href="../assets/css/pictures/shield_with_hamer_logov2.png">
+    <link rel="stylesheet" href="../assets/css/cwlPlanner.css">
+    <script type="module" src="../assets/js/cwl-planner.js"></script>
+</head>
+<body>
+<header>
+    <div class="left">
+        <a href="../index.html">
+            <img src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="ToolsforClash_logo">
+        </a>
+    </div>
+
+    <nav class="center">
+        <a href="./cwl-planner-drafts.html">CWL planner</a>
+        <a href="./bracket-generator.html">Bracket generator</a>
+        <a href="./groups.html">Groepen</a>
+    </nav>
+
+    <div class="right">
+        <button>Taal</button>
+        <button>Instellingen</button>
+        <button>Gebruiker</button>
+    </div>
+</header>
+<main>
+    <section>
+        <article>
+            <div>
+                <h3>Players</h3>
+                <button id="cwl-add-clan-players-button">Add clan</button>
+                <button id="cwl-add-player-button">Add player</button>
+                <select id="cwl-player-sorting">
+                    <option value="townhall">Townhall</option>
+                    <option value="name">Name</option>
+                </select>
+                <p id="cwl-total-player-amount">0</p>
+            </div>
+            <div id="cwl-available-players">
+
+            </div>
+        </article>
+    </section>
+    <section>
+        <div>
+            <h3>Clans</h3>
+            <button id="cwl-add-clan-button">Add Clan</button>
+        </div>
+        <article id="cwl-all-clans">
+
+        </article>
+    </section>
+</main>
+<div class="overlay hidden" id="cwl-overlay-add-players">
+    <div class="overlay-container" id="cwl-container-add-players">
+        <input id="cwl-input-tag" type="text" placeholder="Tag: #">
+        <br>
+        <button id="cwl-overlay-add-players-button">Confirm</button>
+    </div>
+</div>
+
+<div class="overlay hidden" id="cwl-overlay-add-clan">
+    <div class="overlay-container" id="cwl-container-add-clan">
+        <input id="cwl-input-clan-clancode" type="text" placeholder="Clancode: #">
+        <select id="cwl-overlay-select-amount-players-in-clan">
+            <option value="15">15v15</option>
+            <option value="30">30v30</option>
+        </select>
+        <br>
+        <button id="cwl-overlay-add-clan-button">Confirm</button>
+    </div>
+</div>
+</body>
+
+<template id="cwl-player-template">
+    <article class="cwl-player-article">
+        <img class="cwl-player-townhall-foto" src="" alt="townhallFoto">
+        <div class="cwl-player-info">
+            <p class="cwl-player-name"></p>
+            <p class="cwl-player-clan"></p>
+            <p class="cwl-player-hashtag"></p>
+        </div>
+    </article>
+</template>
+
+<template id="cwl-clan-template">
+    <article class="cwl-clan-article">
+        <div class="cwl-clan-info-card">
+            <img src="../assets/css/pictures/default-clan-banner.png" alt="clanLogo" class="cwl-clan-logo">
+            <p class="cwl-clan-name">Clan name</p>
+            <p class="cwl-amount-of-players-in-clan">0/30</p>
+            <img class="cwl-confirm-clan-is-full" src="../assets/css/pictures/checkmark.svg" alt="confirmButton">
+            <img class="cwl-delete-clan" src="../assets/css/pictures/bin.svg" alt="deleteButton">
+        </div>
+        <div class="cwl-clan-player-list">
+
+        </div>
+    </article>
+</template>
+</html>

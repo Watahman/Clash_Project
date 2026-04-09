@@ -1,0 +1,628 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+/* ============================================================
+   CSS CUSTOM PROPERTIES
+   ============================================================ */
+:root {
+    /* Neutrals */
+    --bg:           #111214;
+    --surface-1:    #18191d;
+    --surface-2:    #1e2025;
+    --surface-3:    #252730;
+    --surface-4:    #2c2e3a;
+
+    /* Borders */
+    --border-subtle:#2a2c36;
+    --border-mid:   #353845;
+    --border-focus: #5b5f78;
+
+    /* Accents — muted slate-blue */
+    --accent:       #6c78f0;
+    --accent-dim:   rgba(108,120,240,0.15);
+    --accent-glow:  rgba(108,120,240,0.08);
+
+    /* Status */
+    --green:        #3fb97a;
+    --green-dim:    rgba(63,185,122,0.12);
+    --red:          #e05252;
+
+    /* Text */
+    --text-1:       #e8eaf0;
+    --text-2:       #8b90a8;
+    --text-3:       #4e5268;
+
+    /* Type */
+    --font-ui:      'DM Sans', sans-serif;
+    --font-mono:    'DM Mono', monospace;
+
+    /* Shape */
+    --radius-sm:    0.3rem;
+    --radius-md:    0.5rem;
+    --radius-lg:    0.75rem;
+    --radius-xl:    1rem;
+
+    /* Shadows */
+    --shadow-sm:    0 1px 3px rgba(0,0,0,0.4);
+    --shadow-md:    0 4px 16px rgba(0,0,0,0.5);
+    --shadow-lg:    0 8px 32px rgba(0,0,0,0.6);
+
+    /* Layout */
+    --header-h:     3.5rem;
+    --sidebar-w:    clamp(15rem, 20vw, 20rem);
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+    font-family: var(--font-ui);
+    background: var(--bg);
+    color: var(--text-1);
+    font-size: clamp(13px, 0.9vw + 0.4rem, 15px);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle dot-grid background */
+body {
+    background-image: radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 28px 28px;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.75rem;
+    height: var(--header-h);
+    background: var(--surface-1);
+    border-bottom: 1px solid var(--border-subtle);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+header .left img {
+    height: 2rem;
+    width: 2rem;
+    object-fit: contain;
+    display: block;
+    opacity: 0.85;
+    transition: opacity 0.2s, transform 0.2s;
+}
+header .left img:hover {
+    opacity: 1;
+    transform: scale(1.06);
+}
+
+header nav.center {
+    display: flex;
+    gap: 0.125rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 0.25rem;
+}
+
+header nav.center a {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text-2);
+    text-decoration: none;
+    padding: 0.3rem 0.9rem;
+    border-radius: var(--radius-sm);
+    transition: color 0.15s, background 0.15s;
+}
+header nav.center a:hover {
+    color: var(--text-1);
+    background: var(--surface-3);
+}
+header nav.center a[aria-current="page"] {
+    color: var(--text-1);
+    background: var(--surface-4);
+}
+
+header .right {
+    display: flex;
+    gap: 0.4rem;
+}
+
+header .right button {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-2);
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 0.3rem 0.75rem;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+header .right button:hover {
+    color: var(--text-1);
+    border-color: var(--border-mid);
+    background: var(--surface-3);
+}
+
+/* ============================================================
+   MAIN LAYOUT
+   ============================================================ */
+main {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    height: calc(100vh - var(--header-h));
+    overflow: hidden;
+}
+
+main > section {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Sidebar */
+main > section:first-child {
+    border-right: 1px solid var(--border-subtle);
+    background: var(--surface-1);
+}
+
+main > section:first-child > article {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Main content */
+main > section:last-child {
+    background: var(--bg);
+}
+
+/* ============================================================
+   SECTION HEADERS
+   ============================================================ */
+main > section > div,
+main > section > article > div:first-child {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem 0.875rem;
+    border-bottom: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+main > section > div h3,
+main > section > article > div h3 {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-right: auto;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+button {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    padding: 0.3rem 0.75rem;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+    border: 1px solid var(--border-mid);
+    background: var(--surface-3);
+    color: var(--text-2);
+}
+
+button:hover {
+    background: var(--surface-4);
+    border-color: var(--border-focus);
+    color: var(--text-1);
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+button.primary {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+button.primary:hover {
+    background: rgba(108,120,240,0.25);
+    color: #8891f5;
+}
+
+/* ============================================================
+   SELECT
+   ============================================================ */
+select {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: var(--surface-2);
+    color: var(--text-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 0.3rem 1.6rem 0.3rem 0.6rem;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234e5268'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    transition: border-color 0.15s, color 0.15s;
+    outline: none;
+}
+select:hover, select:focus {
+    border-color: var(--border-focus);
+    color: var(--text-1);
+}
+
+/* ============================================================
+   PLAYER COUNT BADGE
+   ============================================================ */
+#cwl-total-player-amount {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    background: var(--surface-3);
+    color: var(--text-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    padding: 0.15rem 0.6rem;
+    min-width: 2rem;
+    text-align: center;
+    letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   AVAILABLE PLAYERS LIST
+   ============================================================ */
+#cwl-available-players {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1rem;
+    overflow-y: auto;
+    flex: 1;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-mid) transparent;
+}
+
+#cwl-available-players::-webkit-scrollbar { width: 0.25rem; }
+#cwl-available-players::-webkit-scrollbar-track { background: transparent; }
+#cwl-available-players::-webkit-scrollbar-thumb {
+    background: var(--border-mid);
+    border-radius: 0.2rem;
+}
+
+/* ============================================================
+   PLAYER CARD
+   ============================================================ */
+.cwl-player-article {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.875rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border-subtle);
+    border-left: 2px solid var(--green);
+    border-radius: var(--radius-md);
+    cursor: grab;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+    user-select: none;
+}
+
+.cwl-player-article:hover {
+    background: var(--surface-3);
+    border-color: var(--border-mid);
+    border-left-color: var(--accent);
+    transform: translateX(2px);
+}
+
+.cwl-player-townhall-foto {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--border-subtle);
+    background: var(--surface-3);
+}
+
+.cwl-player-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.cwl-player-name {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cwl-player-clan {
+    font-size: 0.72rem;
+    color: var(--text-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cwl-player-hashtag {
+    font-size: 0.68rem;
+    color: var(--text-3);
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   ALL CLANS AREA
+   ============================================================ */
+#cwl-all-clans {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+    gap: 1.25rem;
+    padding: 1.5rem;
+    flex: 1;
+    align-content: start;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-mid) transparent;
+}
+
+#cwl-all-clans::-webkit-scrollbar { width: 0.25rem; }
+#cwl-all-clans::-webkit-scrollbar-thumb {
+    background: var(--border-mid);
+    border-radius: 0.2rem;
+}
+
+/* ============================================================
+   CLAN CARD
+   ============================================================ */
+.cwl-clan-article {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+    height: calc(44vh + 5.75rem);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.cwl-clan-article:hover {
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-md);
+}
+
+.cwl-clan-info-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.125rem;
+    border-bottom: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+}
+
+.cwl-clan-logo {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    border: 1px solid var(--border-mid);
+    flex-shrink: 0;
+    background: var(--surface-3);
+}
+
+.cwl-clan-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-1);
+    letter-spacing: 0.01em;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cwl-amount-of-players-in-clan {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--text-3);
+    background: var(--surface-3);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    padding: 0.15rem 0.55rem;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+}
+
+.cwl-confirm-clan-is-full, .cwl-delete-clan {
+    width: 1.225rem;
+    height: 1.225rem;
+    flex-shrink: 0;
+    opacity: 0.8;
+    transition: opacity 0.2s, filter 0.2s;
+}
+
+.cwl-clan-article.is-full .cwl-confirm-clan-is-full {
+    opacity: 1;
+    filter: brightness(0) saturate(100%) invert(64%) sepia(60%) saturate(400%) hue-rotate(100deg) brightness(100%);
+}
+
+/* Clan player list */
+.cwl-clan-player-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.875rem;
+    height: 44vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-subtle) transparent;
+}
+
+.cwl-clan-player-list::-webkit-scrollbar { width: 0.2rem; }
+.cwl-clan-player-list::-webkit-scrollbar-thumb {
+    background: var(--border-subtle);
+    border-radius: 0.125rem;
+}
+
+/* Players inside a clan */
+.cwl-clan-player-list .cwl-player-article {
+    width: 100%;
+    padding: 0.45rem 0.7rem;
+    border-left-color: var(--border-focus);
+}
+
+.cwl-clan-player-list .cwl-player-article:hover {
+    border-left-color: var(--accent);
+}
+
+.cwl-clan-player-list .cwl-player-townhall-foto {
+    width: 2rem;
+    height: 2rem;
+}
+
+/* Drop zone highlight */
+.cwl-clan-player-list.drag-over {
+    background: var(--accent-glow);
+    border-radius: var(--radius-sm);
+    outline: 1px dashed var(--accent);
+    outline-offset: -4px;
+}
+
+/* ============================================================
+   OVERLAYS
+   ============================================================ */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.overlay-container {
+    padding: 2rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border-mid);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    min-width: clamp(16rem, 28vw, 22rem);
+    animation: overlayIn 0.18s ease;
+}
+
+@keyframes overlayIn {
+    from { opacity: 0; transform: scale(0.95) translateY(6px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ============================================================
+   INPUT
+   ============================================================ */
+input[type="text"] {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    background: var(--surface-3);
+    color: var(--text-1);
+    border: 1px solid var(--border-mid);
+    border-radius: var(--radius-md);
+    padding: 0.6rem 0.875rem;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+}
+
+input[type="text"]::placeholder {
+    color: var(--text-3);
+}
+
+input[type="text"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108,120,240,0.12);
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.cwl-empty-hint {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--text-3);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    border: 1px dashed var(--border-subtle);
+    border-radius: var(--radius-md);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 56.25rem) {
+    main {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+    }
+    main > section:first-child {
+        border-right: none;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+    #cwl-available-players {
+        height: 40vh;
+        flex: none;
+    }
+    #cwl-all-clans {
+        justify-content: center;
+        padding-bottom: 2rem;
+    }
+}
+
+@media (max-width: 37.5rem) {
+    header { padding: 0 1rem; }
+    header nav.center a { font-size: 0.7rem; padding: 0.28rem 0.55rem; }
+    .cwl-clan-article { width: 100%; }
+}

@@ -1,0 +1,44 @@
+export const _BASE_URL = "http://localhost:8080";
+
+export const _EXT_CLAN_CURRENTWAR_LEAGUEGROUP = "/ClanCurrentWarLeagueGroup";
+export const _EXT_CLAN_WARLEAGUES_WARS = "/ClanWarLeaguesWars";
+export const _EXT_CLAN_WAR_LOG = "/ClanWarLog";
+export const _EXT_CLAN_SEARCH = "/ClanSearch";
+export const _EXT_CLAN_CURRENTWAR = "/ClanCurrentWar";
+export const _EXT_CLAN_INFO = "/ClanInfo";
+export const _EXT_CLAN_MEMBERS = "/ClanMembers";
+export const _EXT_CLAN_CAPITALRAIDSEASONS = "/ClanCapitalRaidSeasons";
+
+export const _EXT_PLAYER_INFO = "/Player";
+export const _EXT_PLAYER_BATTLE_LOG = "/PlayerBattleLog";
+export const _EXT_PLAYER_LEAGUE_HISTORY = "/PlayerLeagueHistory";
+export const _EXT_PLAYER_VERIFY_TOKEN = "/PlayerVerifyToken";
+
+export const _EXT_LEAGUE_LEAGUETIERS_INFO = "/LeagueTierInfo"
+export const _EXT_LEAGUE_CAPITAL_LEAGUES = "/LeagueCapitalLeagues"
+export const _EXT_LEAGUE_LEAGUETIERS = "/LeagueTiers"
+export const _EXT_LEAGUE_LEAGUES = "/Leagues"
+export const _EXT_LEAGUE_LEAGUE_SEASON_INFO = "/LeagueLeagueSeasonInfo"
+export const _EXT_LEAGUE_CAPITAL_LEAGUE_INFO = "/LeagueCapitalLeagueInfo"
+export const _EXT_LEAGUE_BUILDERBASE_LEAGUE_INFO = "/LeagueBuilderbaseLeagueInfo"
+export const _EXT_LEAGUE_BUILDERBASE_LEAGUES = "/LeagueBuilderbaseLeagues"
+export const _EXT_LEAGUE_LEAGUE_INFO = "/LeagueInfo"
+export const _EXT_LEAGUE_LEAGUEGROUP_INFO= "/LeagueGroupInfo"
+export const _EXT_LEAGUE_LEAGUE_SEASONS= "/LeagueSeasons"
+export const _EXT_LEAGUE_WARLEAGUE_INFO= "/LeagueWarInfo"
+export const _EXT_LEAGUE_WARLEAGUES= "/LeagueWar"
+
+export const _EXT_LOCATIONS_RANKINGS_CLANS_INFO = "/LocationsRankingsClansInfo"
+export const _EXT_LOCATIONS_RANKINGS_PLAYERS_INFO = "/LocationsRankingsPlayersInfo"
+export const _EXT_LOCATIONS_RANKINGS_PLAYERS_BUILDERBASE_INFO = "/LocationsRankingsPlayersBuilderbaseInfo"
+export const _EXT_LOCATIONS_RANKINGS_CLANS_BUILDERBASE_INFO = "/LocationsRankingsClansBuilderbaseInfo"
+export const _EXT_LOCATIONS = "/Locations"
+export const _EXT_LOCATIONS_RANKINGS_CAPITAL_INFO = "/LocationsRankingsCapitalInfo"
+export const _EXT_LOCATIONS_INFO = "/LocationsInfo"
+
+export const _EXT_GOLDPASS = "/GoldPass"
+
+export const _EXT_LABELS_PLAYERS = "/LabelsPlayers"
+export const _EXT_LABELS_CLANS = "/LabelsClans"
+
+
