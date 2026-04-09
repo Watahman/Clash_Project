@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inloggen · Tools for Clash</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="../assets/css/login-css.css">
+</head>
+<body>
+
+<header>
+    <div class="left">
+        <a href="../index.html">
+            <img src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="ToolsforClash_logo">
+        </a>
+    </div>
+    <nav class="center">
+        <a href="cwl-planner.html">CWL planner</a>
+        <a href="bracket-generator.html">Bracket generator</a>
+        <a href="#">Groepen</a>
+    </nav>
+    <div class="right">
+        <button>Taal</button>
+        <button>Instellingen</button>
+    </div>
+</header>
+
+<main>
+    <div class="card">
+
+        <div class="card-head">
+            <img class="card-logo" src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="logo">
+            <h1>Welkom terug</h1>
+            <p>Nog geen account? <a href="register.html">Registreren</a></p>
+        </div>
+
+        <form class="form" onsubmit="return false;">
+
+            <div class="field">
+                <label for="email">E-mailadres</label>
+                <input type="email" id="email" placeholder="jij@voorbeeld.com" autocomplete="email">
+            </div>
+
+            <div class="field">
+                <div class="field-row">
+                    <label for="password">Wachtwoord</label>
+                    <a href="#">Vergeten?</a>
+                </div>
+                <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+            </div>
+
+            <button class="btn-submit" type="submit">Inloggen</button>
+
+            <div class="or-divider">
+                <hr><span>of</span><hr>
+            </div>
+
+            <button class="btn-google" type="button">
+                <!-- Google "G" icon -->
+                <svg width="16" height="16" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#EA4335" d="M24 9.5c3.14 0 5.95 1.08 8.17 2.86l6.1-6.1C34.46 3.09 29.48 1 24 1 14.82 1 7.07 6.48 3.64 14.18l7.12 5.53C12.4 13.67 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.54 24.5c0-1.64-.15-3.22-.42-4.74H24v8.98h12.67c-.55 2.94-2.2 5.43-4.68 7.1l7.19 5.59C43.27 37.42 46.54 31.39 46.54 24.5z"/>
+                    <path fill="#FBBC05" d="M10.76 28.29A14.56 14.56 0 0 1 9.5 24c0-1.49.26-2.93.71-4.29l-7.12-5.53A23.94 23.94 0 0 0 0 24c0 3.87.93 7.52 2.57 10.74l8.19-6.45z"/>
+                    <path fill="#34A853" d="M24 47c5.48 0 10.08-1.82 13.43-4.93l-7.19-5.59c-1.98 1.33-4.52 2.12-6.24 2.12-6.26 0-11.6-4.17-13.24-9.81l-8.19 6.45C7.07 41.52 14.82 47 24 47z"/>
+                </svg>
+                Doorgaan met Google
+            </button>
+
+        </form>
+
+    </div>
+</main>
+
+</body>
+</html>
