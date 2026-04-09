@@ -8,27 +8,213 @@
     <script type="module" src="assets/js/mainJS.js"></script>
 </head>
 <body>
+
 <header>
     <div class="left">
         <a href="index.html">
             <img src="assets/css/pictures/shield_with_hamer_logov2.png" alt="ToolsforClash_logo">
         </a>
     </div>
-
     <nav class="center">
         <a href="./subPages/cwl-planner.html">CWL planner</a>
         <a href="./subPages/bracket-generator.html">Bracket generator</a>
         <a href="#">Groepen</a>
     </nav>
-
     <div class="right">
         <button>Taal</button>
         <button>Instellingen</button>
         <button>Gebruiker</button>
     </div>
 </header>
+
 <main>
+
+    <section class="hero">
+        <div class="hero-eyebrow">Tools for Clash of Clans</div>
+        <h1>Plan slimmer.<br><span>Win vaker.</span></h1>
+        <p>Alles wat je clan nodig heeft om CWL, toernooien en competities efficiënt te organiseren — op één plek.</p>
+        <div class="hero-actions">
+            <a href="./subPages/cwl-planner.html" class="btn btn-primary">CWL Planner openen</a>
+            <a href="./subPages/bracket-generator.html" class="btn btn-secondary">Bracket generator</a>
+        </div>
+    </section>
+
+    <section class="how-section">
+
+        <div class="section-divider">
+            <hr><span>Hoe het werkt</span><hr>
+        </div>
+
+        <!-- TABS -->
+        <div class="tool-tabs" role="tablist">
+            <button class="tool-tab active" role="tab" data-panel="cwl" aria-selected="true">
+                <span class="tab-dot"></span>CWL Planner
+            </button>
+            <button class="tool-tab" role="tab" data-panel="bracket" aria-selected="false">
+                <span class="tab-dot"></span>Bracket Generator
+            </button>
+            <button class="tool-tab" role="tab" data-panel="groepen" aria-selected="false">
+                <span class="tab-dot"></span>Groepen
+            </button>
+        </div>
+
+        <!-- ══ PANEL: CWL Planner ══════════════════════════════════ -->
+        <!--
+            TEMPLATE — kopieer dit blok voor elke nieuwe tool.
+            Vul in: id="panel-{naam}", data-panel="{naam}" op de tab,
+            en pas de stappen + CTA aan.
+        -->
+        <div class="tool-panel active" id="panel-cwl" role="tabpanel">
+            <div class="steps">
+
+                <div class="step">
+                    <div class="step-left">
+                        <div class="step-number">01</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-title">Voeg je spelers toe</div>
+                        <div class="step-desc">Vul de hashtags van je clan in en laad alle spelers automatisch in via de Clash of Clans API. Namen, town hall levels en clantags worden direct opgehaald.</div>
+                        <span class="step-tag">Importeren</span>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-left">
+                        <div class="step-number">02</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-title">Stel je opstelling samen</div>
+                        <div class="step-desc">Sleep spelers naar de juiste clan via drag-and-drop. De planner houdt bij hoeveel plekken er nog beschikbaar zijn en markeert clans zodra ze vol zitten.</div>
+                        <span class="step-tag">Drag & Drop</span>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-left">
+                        <div class="step-number">03</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-title">Bevestig en exporteer</div>
+                        <div class="step-desc">Markeer clans als volledig en deel de definitieve opstelling met je clan leaders. Klaar voor de CWL-aanmelding.</div>
+                        <span class="step-tag">Exporteren</span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="panel-cta">
+                <span class="panel-cta-label">Klaar om te plannen?</span>
+                <a href="./subPages/cwl-planner.html" class="btn btn-primary">CWL Planner openen →</a>
+            </div>
+        </div>
+        <!-- ══ EINDE PANEL TEMPLATE ══════════════════════════════════ -->
+
+        <!-- ══ PANEL: Bracket Generator ══════════════════════════════ -->
+        <div class="tool-panel" id="panel-bracket" role="tabpanel">
+            <div class="steps">
+
+                <div class="step">
+                    <div class="step-left">
+                        <div class="step-number">01</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-title">Voer deelnemers in</div>
+                        <div class="step-desc">Voeg de namen van clans of spelers toe die deelnemen aan het toernooi. De generator past het schema automatisch aan op het aantal deelnemers.</div>
+                        <span class="step-tag">Instellen</span>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-left">
+                        <div class="step-number">02</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-title">Kies je format</div>
+                        <div class="step-desc">Selecteer knock-out, groepsfase of een combinatie van beide. De brackets worden direct gegenereerd op basis van je keuze.</div>
+                        <span class="step-tag">Bracket format</span>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-left">
+                        <div class="step-number">03</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-title">Vul uitslagen in</div>
+                        <div class="step-desc">Werk het schema bij naarmate rondes gespeeld worden. De volgende ronde wordt automatisch ingevuld op basis van de resultaten.</div>
+                        <span class="step-tag">Live bijhouden</span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="panel-cta">
+                <span class="panel-cta-label">Toernooi organiseren?</span>
+                <a href="./subPages/bracket-generator.html" class="btn btn-primary">Bracket Generator openen →</a>
+            </div>
+        </div>
+
+        <!-- ══ PANEL: Groepen ════════════════════════════════════════ -->
+        <div class="tool-panel" id="panel-groepen" role="tabpanel">
+            <div class="steps">
+
+                <div class="step">
+                    <div class="step-left">
+                        <div class="step-number">01</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-title">Maak een groep aan</div>
+                        <div class="step-desc">Stel een seizoen of competitie in en voeg deelnemende clans toe. Elke groep heeft zijn eigen ranglijst en overzicht.</div>
+                        <span class="step-tag">Aanmaken</span>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-left">
+                        <div class="step-number">02</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-title">Bijhouden per ronde</div>
+                        <div class="step-desc">Voer resultaten in per speelronde. De ranglijst wordt automatisch bijgewerkt op basis van winst, verlies en sterren.</div>
+                        <span class="step-tag">Binnenkort</span>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-left">
+                        <div class="step-number">03</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-body">
+                        <div class="step-title">Seizoensoverzicht</div>
+                        <div class="step-desc">Bekijk aan het einde van het seizoen een volledig overzicht van alle rondes, uitslagen en de eindrangschikking.</div>
+                        <span class="step-tag">Binnenkort</span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="panel-cta">
+                <span class="panel-cta-label">Nog niet beschikbaar — komt binnenkort.</span>
+                <a href="#" class="btn btn-secondary" style="opacity:0.5;pointer-events:none;">Groepen openen →</a>
+            </div>
+        </div>
+
+    </section>
 </main>
-<footer></footer>
+
+<footer>
+    <div class="footer-left">© 2025 Tools for Clash · Niet gelieerd aan Supercell</div>
+    <nav class="footer-links">
+        <a href="#">Over</a>
+        <a href="#">Contact</a>
+        <a href="#">Privacy</a>
+    </nav>
+</footer>
 </body>
 </html>
