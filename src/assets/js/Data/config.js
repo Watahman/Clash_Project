@@ -43,4 +43,6 @@ export const _EXT_LABELS_CLANS = "/LabelsClans"
 
 export const _EXT_SUPA_CONF = "/SupabaseConfigInfo";
 
+export const _EXT_SUPA_USER_MAKE = "/SupabaseUserMake"
+
 

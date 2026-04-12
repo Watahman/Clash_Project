@@ -57,4 +57,6 @@ public class Config {
     String _EXT_LABELS_CLANS = "/LabelsClans";
 
     String _EXT_SUPA_CONF = "/SupabaseConfigInfo";
+
+    String _EXT_SUPA_USER_MAKE = "/SupabaseUserMake";
 }
