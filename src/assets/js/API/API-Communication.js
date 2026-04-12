@@ -10,3 +10,11 @@ export function fetchRequest(path, body, callback){
         .then(data => {callback(data)})
         .catch(error => console.log(error));
 }
+
+export async function getRequest(path) {
+    const request = await fetch(path, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" }
+    });
+    return await request.json();
+}

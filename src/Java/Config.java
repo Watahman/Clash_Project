@@ -8,8 +8,8 @@ public class Config {
 
     String _API_KEY_ACTIVE = _API_KEY_ALL;
 
-    String _BASE_URL_SUPABASE = "https://cibxpltbmvjadfnnfqom.supabase.co";
-    String _BASE_URL_CLASH = "https://api.clashofclans.com/v1";
+    String _BASE_URL_SUPABASE = System.getenv("_BASE_URL_SUPABASE");
+    String _BASE_URL_CLASH = System.getenv("_BASE_URL_CLASH");
 
     String _CLAN_TAG = "#2P8JUCR9C";
     String _MY_TAG = "#LQURPQJOY";
@@ -55,4 +55,6 @@ public class Config {
 
     String _EXT_LABELS_PLAYERS = "/LabelsPlayers";
     String _EXT_LABELS_CLANS = "/LabelsClans";
+
+    String _EXT_SUPA_CONF = "/SupabaseConfigInfo";
 }
