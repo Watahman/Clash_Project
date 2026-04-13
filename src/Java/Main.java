@@ -72,6 +72,7 @@ public class Main {
         apiLabels.getLabelsClans();
 
         supaUser.createUser();
+        supaUser.getUserInfo();
 
         server.start();
         System.out.println("Server gestart op http://localhost:8080");

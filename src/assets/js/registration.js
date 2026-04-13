@@ -20,7 +20,9 @@ function clicklistener(){
                 password: password
             });
 
-            databaseRequest(path, data)
+            databaseRequest(path, data).then(data=>{
+                localStorage.setItem("id", data.id);
+            })
         }
     })
 }

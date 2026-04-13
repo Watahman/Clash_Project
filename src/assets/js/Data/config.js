@@ -41,8 +41,9 @@ export const _EXT_GOLDPASS = "/GoldPass"
 export const _EXT_LABELS_PLAYERS = "/LabelsPlayers"
 export const _EXT_LABELS_CLANS = "/LabelsClans"
 
-export const _EXT_SUPA_CONF = "/SupabaseConfigInfo";
+export const _EXT_SUPA_CONF = "/SupabaseConfigInfo"
 
 export const _EXT_SUPA_USER_MAKE = "/SupabaseUserMake"
+export const _EXT_SUPA_USER_INFO = "/SupabaseUserInfo"
 
 

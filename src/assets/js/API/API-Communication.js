@@ -20,7 +20,6 @@ export function databaseRequest(path, body){
         body: body
     })
         .then(response => response.json())
-        .then(data => {console.log(data)})
         .catch(error => console.log(error));
 }
 

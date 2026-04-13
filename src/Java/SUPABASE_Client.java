@@ -1,7 +1,5 @@
 package Java;
 
-import com.sun.net.httpserver.HttpServer;
-
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -12,8 +10,12 @@ public class SUPABASE_Client {
     private static final String API_KEY = System.getenv("_API_KEY_SECR_SUPABASE");
 
     // GET — data ophalen
-    public static String get(String table) throws Exception {
+    public static String getWithBody(String table) throws Exception {
         return sendRequest("GET", table, null);
+    }
+
+    public static String getWithBody(String table, String filter) throws Exception {
+        return sendRequest("GET", table + "?" + filter, null);
     }
 
     // POST — data aanmaken
@@ -39,7 +41,8 @@ public class SUPABASE_Client {
                 .uri(URI.create(BASE_URL + "/rest/v1/" + table))
                 .header("apikey", API_KEY)
                 .header("Authorization", "Bearer " + API_KEY)
-                .header("Content-Type", "application/json");
+                .header("Content-Type", "application/json")
+                .header("Prefer", "return=representation");
 
         if (body != null) {
             builder.method(method, HttpRequest.BodyPublishers.ofString(body));
