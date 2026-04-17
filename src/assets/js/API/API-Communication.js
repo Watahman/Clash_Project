@@ -11,8 +11,8 @@ export function fetchRequest(path, body, callback){
         .catch(error => console.log(error));
 }
 
-export function databaseRequest(path, body){
-    fetch(path, {
+export async function databaseRequest(path, body){
+    return fetch(path, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

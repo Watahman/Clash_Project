@@ -21,7 +21,7 @@ function clicklistener(){
             });
 
             databaseRequest(path, data).then(data=>{
-                localStorage.setItem("id", data.id);
+                console.log(data)
             })
         }
     })

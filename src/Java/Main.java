@@ -73,6 +73,7 @@ public class Main {
 
         supaUser.createUser();
         supaUser.getUserInfo();
+        supaUser.checkUserLogin();
 
         server.start();
         System.out.println("Server gestart op http://localhost:8080");
