@@ -74,7 +74,7 @@ public class SUPABASE_User {
                     JsonArray users = JsonParser.parseString(result).getAsJsonArray();
 
                     if (users.size() == 0) {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"user not found\"}", 404);
+                        utils.sendJsonResponse(exchange, "{\"success\":false, \"error\":\"user not found\"}", 404);
                         return;
                     }
 
@@ -84,12 +84,12 @@ public class SUPABASE_User {
                     if (storedPassword.equals(hashedPassword)) {
                         utils.sendJsonResponse(exchange, "{\"success\":true, \"id\":\"" + user.get("id").getAsString() + "\"}", 200);
                     } else {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"wrong password\"}", 401);
+                        utils.sendJsonResponse(exchange, "{\"success\":false, \"error\":\"wrong password\"}", 401);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                     try {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500);
+                        utils.sendJsonResponse(exchange, "{\"success\":false, \"error\":\"failed\"}", 500);
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }
