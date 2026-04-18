@@ -1,6 +1,12 @@
 package Java;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
+
+import java.security.MessageDigest;
+import java.util.Base64;
 
 public class SUPABASE_User {
     private HttpServer server;
@@ -14,7 +20,7 @@ public class SUPABASE_User {
     }
 
     public void getUserInfo(){
-        server.createContext("/api/vrienden", exchange -> {
+        server.createContext(conf._EXT_SUPA_USER_INFO, exchange -> {
             utils.addCORS(exchange);
 
             if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
@@ -22,10 +28,109 @@ public class SUPABASE_User {
                 return;
             }
 
-            if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 try {
-                    String data = SUPABASE_Client.get("vrienden");
-                    utils.sendJsonResponse(exchange, data, 200);
+                    String body = new String(exchange.getRequestBody().readAllBytes());
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+
+                    String id = json.get("id").getAsString();
+
+                    String result = SUPABASE_Client.getWithBody("users", "id=eq." + id);
+                    utils.sendJsonResponse(exchange, result, 201);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
+    }
+
+    public void checkUserLogin(){
+        server.createContext(conf._EXT_SUPA_USER_CHECK, exchange -> {
+            utils.addCORS(exchange);
+
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                try {
+                    String body = new String(exchange.getRequestBody().readAllBytes());
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+
+                    String email = json.get("email").getAsString();
+                    String password = json.get("password").getAsString();
+
+                    MessageDigest md = MessageDigest.getInstance("SHA-256");
+                    byte[] hash = md.digest(password.getBytes());
+                    String hashedPassword = Base64.getEncoder().encodeToString(hash);
+
+                    String result = SUPABASE_Client.getWithBody("users", "email=eq." + email);
+                    JsonArray users = JsonParser.parseString(result).getAsJsonArray();
+
+                    if (users.size() == 0) {
+                        utils.sendJsonResponse(exchange, "{\"success\":false, \"error\":\"user not found\"}", 404);
+                        return;
+                    }
+
+                    JsonObject user = users.get(0).getAsJsonObject();
+                    String storedPassword = user.get("password").getAsString();
+
+                    if (storedPassword.equals(hashedPassword)) {
+                        utils.sendJsonResponse(exchange, "{\"success\":true, \"id\":\"" + user.get("id").getAsString() + "\"}", 200);
+                    } else {
+                        utils.sendJsonResponse(exchange, "{\"success\":false, \"error\":\"wrong password\"}", 401);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"success\":false, \"error\":\"failed\"}", 500);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
+    }
+
+    public void createUser(){
+        server.createContext(conf._EXT_SUPA_USER_MAKE, exchange -> {
+            utils.addCORS(exchange);
+
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                try {
+                    String body = new String(exchange.getRequestBody().readAllBytes());
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+
+                    String naam = json.get("name").getAsString();
+                    String email = json.get("email").getAsString();
+                    String password = json.get("password").getAsString();
+
+                    // wachtwoord hashen
+                    MessageDigest md = MessageDigest.getInstance("SHA-256");
+                    byte[] hash = md.digest(password.getBytes());
+                    String hashedPassword = Base64.getEncoder().encodeToString(hash);
+
+                    // user object aanmaken
+                    JsonObject user = new JsonObject();
+                    user.addProperty("name", naam);
+                    user.addProperty("email", email);
+                    user.addProperty("password", hashedPassword);
+
+                    // opslaan in Supabase
+                    String result = SUPABASE_Client.post("users", user.toString());
+                    System.out.println(result);
+                    utils.sendJsonResponse(exchange, result, 201);
                 } catch (Exception e) {
                     e.printStackTrace();
                     try {

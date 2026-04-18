@@ -12,6 +12,7 @@ public class Main {
     private API_Leagues apiLeagues;
     private API_Locations apiLocations;
     private API_Player apiPlayer;
+    private SUPABASE_User supaUser;
 
     static void main() throws Exception {
         new Main().run();
@@ -27,6 +28,7 @@ public class Main {
         apiLeagues = new API_Leagues(server, conf);
         apiLocations = new API_Locations(server, conf);
         apiPlayer = new API_Player(server, conf);
+        supaUser = new SUPABASE_User(server, conf);
 
         apiClan.getClanCurrentWarLeagueGroup();
         apiClan.getClanWarLeagueWar();
@@ -68,6 +70,10 @@ public class Main {
 
         apiLabels.getLabelsPlayers();
         apiLabels.getLabelsClans();
+
+        supaUser.createUser();
+        supaUser.getUserInfo();
+        supaUser.checkUserLogin();
 
         server.start();
         System.out.println("Server gestart op http://localhost:8080");

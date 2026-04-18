@@ -11,6 +11,18 @@ export function fetchRequest(path, body, callback){
         .catch(error => console.log(error));
 }
 
+export async function databaseRequest(path, body){
+    return fetch(path, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: body
+    })
+        .then(response => response.json())
+        .catch(error => console.log(error));
+}
+
 export async function getRequest(path) {
     const request = await fetch(path, {
         method: "GET",

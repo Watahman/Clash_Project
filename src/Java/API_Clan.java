@@ -111,7 +111,7 @@ public class API_Clan {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 try {
 //                    JsonObject json = utils.parseRequestBody(exchange);
-//                    String clanTag = json.get("clanTag").getAsString();
+//                    String clanTag = json.getWithBody("clanTag").getAsString();
 //
 //                    String clashUrl = conf._BASE_URL_CLASH + "/clans/" + URLEncoder.encode(clanTag, "UTF-8");
 //                    String responseText = utils.getClashApiResponse(clashUrl);
