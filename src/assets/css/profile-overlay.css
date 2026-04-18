@@ -1,0 +1,273 @@
+#profile-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    padding: 1.5rem;
+}
+
+#profile-overlay.po-open {
+    display: flex;
+}
+
+.po-card {
+    background: var(--surface-1);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-mid);
+    width: 100%;
+    max-width: 560px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Top label row ── */
+.po-topbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 24px 24px 0;
+    flex-shrink: 0;
+}
+
+.po-topbar-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    font-family: var(--font-mono);
+}
+
+#po-close {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--surface-3);
+    border: 1px solid var(--border-subtle);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--text-2);
+    transition: background 0.15s, color 0.15s;
+}
+#po-close:hover {
+    background: var(--surface-4);
+    color: var(--text-1);
+}
+
+/* ── Header ── */
+.po-header {
+    display: flex;
+    align-items: flex-end;
+    gap: 18px;
+    padding: 18px 24px 20px;
+    border-bottom: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+}
+
+.po-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--surface-3);
+    border: 2px solid var(--border-mid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--text-2);
+}
+
+.po-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    flex: 1;
+    min-width: 0;
+}
+
+#po-username {
+    font-size: 1.18rem;
+    font-weight: 700;
+    color: var(--text-1);
+    letter-spacing: -0.02em;
+}
+
+#po-code-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--surface-3);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 3px 9px;
+    cursor: pointer;
+    font-size: 0.68rem;
+    font-family: var(--font-mono);
+    color: var(--text-2);
+    letter-spacing: 0.07em;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+#po-code-btn:hover {
+    background: var(--surface-4);
+    border-color: var(--border-mid);
+    color: var(--text-1);
+}
+#po-code-btn svg { flex-shrink: 0; }
+#po-ico-check { color: var(--green); }
+.po-hidden { display: none !important; }
+
+/* ── Tabs ── */
+.po-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+}
+
+.po-tab {
+    flex: 1;
+    padding: 13px 8px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: var(--font-ui);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    color: var(--text-3);
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.po-tab:hover {
+    color: var(--text-2);
+    background: var(--surface-2);
+}
+.po-tab.po-tab-active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+/* ── Panels ── */
+.po-panel {
+    overflow-y: auto;
+    /* fits exactly 3 base cards (74px each) + 2 gaps (9px) + add-button (50px) + padding (28px) */
+    max-height: 310px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+.po-panel.po-hidden {
+    display: none;
+}
+
+/* ── Base items ── */
+.po-base-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 14px 15px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+}
+.po-base-item:hover {
+    background: var(--surface-2);
+    border-color: var(--border-mid);
+}
+
+.po-base-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: var(--radius-md);
+    background: var(--surface-3);
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--accent);
+}
+
+.po-base-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.po-base-name {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-1);
+}
+.po-base-info {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-2);
+    margin-top: 3px;
+}
+
+.po-base-chevron {
+    color: var(--text-3);
+    flex-shrink: 0;
+}
+
+#po-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: 100%;
+    padding: 13px;
+    border: 1px dashed var(--border-mid);
+    border-radius: var(--radius-lg);
+    background: none;
+    cursor: pointer;
+    color: var(--text-3);
+    font-size: 0.72rem;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+#po-add:hover {
+    background: var(--surface-2);
+    color: var(--text-2);
+    border-color: var(--border-focus);
+}
+
+/* ── Empty state ── */
+.po-empty {
+    color: var(--text-3);
+    font-size: 0.75rem;
+    text-align: center;
+    margin: 3rem 0;
+    font-family: var(--font-mono);
+}
+
+/* ── Footer ── */
+.po-footer {
+    padding: 13px 18px;
+    border-top: 1px solid var(--border-subtle);
+    background: var(--bg);
+    flex-shrink: 0;
+}
+
+.po-footer-label {
+    font-size: 0.68rem;
+    font-family: var(--font-mono);
+    color: var(--text-3);
+    letter-spacing: 0.04em;
+}
