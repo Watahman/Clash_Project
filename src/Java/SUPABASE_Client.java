@@ -24,8 +24,8 @@ public class SUPABASE_Client {
     }
 
     // PATCH — data updaten
-    public static String patch(String table, String body) throws Exception {
-        return sendRequest("PATCH", table, body);
+    public static String patch(String table, String filter, String body) throws Exception {
+        return sendRequest("PATCH", table + "?" + filter, body);
     }
 
     // DELETE — data verwijderen

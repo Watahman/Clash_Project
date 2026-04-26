@@ -1,12 +1,16 @@
 import { getClanMembersWithBattleData, getPlayerWithBattleData } from "./API/API-Functions.js"
 import { getClanInfoRequest } from "./API/API-Clan.js"
 import { createPlayerCard, createClanCard } from "./Templates.js";
+import { databaseRequest } from "./API/API-Communication.js";
+import * as conf from "./Data/config.js"
+
 
 function init(){
     overlayHide();
     addClanPlayersButton();
     addPlayerButton()
     addClanButton();
+    savePlanButton();
     guessCwlSize()
 }
 
@@ -63,6 +67,49 @@ function addClanButton(){
     })
 }
 
+function savePlanButton(){
+    document.querySelector("#cwl-save-plan-button").addEventListener("click", () => {
+        const allClans = []
+
+        const noClan = []
+        document.querySelector("#cwl-available-players").querySelectorAll(".cwl-player-article").forEach(player => {
+            noClan.push(player.querySelector(".cwl-player-hashtag").textContent)
+        })
+
+        const noClanData = {
+            clanTag: "none",
+            players: noClan
+        }
+
+        allClans.push(noClanData);
+
+        document.querySelectorAll(".cwl-clan-article").forEach(clan => {
+            const clanName = clan.querySelector(".cwl-clan-name").textContent
+            const clanTag = localStorage.getItem("clanId_" + clanName)
+            const allPlayersInClan = []
+            clan.querySelectorAll(".cwl-player-article").forEach(player => {
+                allPlayersInClan.push(player.querySelector(".cwl-player-hashtag").textContent)
+            })
+            const data = {
+                clantag: clanTag,
+                players: allPlayersInClan
+            }
+
+            allClans.push(data)
+        })
+        const data = {
+            id: localStorage.getItem("id"),
+            name: "test",
+            clans: allClans
+        }
+        console.log(data)
+        const path = conf._BASE_URL + conf._EXT_SUPA_CWLPLANNER_DATA_SET
+        databaseRequest(path, data).then(data => {
+            console.log(data)
+        })
+    })
+}
+
 function overlayHide(){
     document.querySelectorAll(".overlay").forEach(overlay =>
         overlay.addEventListener("click", () => overlay.classList.add("hidden")));
@@ -85,7 +132,6 @@ function guessCwlSize(){
             }
             console.log(league)
         })
-
     })
 }
 

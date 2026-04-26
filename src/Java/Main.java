@@ -13,6 +13,7 @@ public class Main {
     private API_Locations apiLocations;
     private API_Player apiPlayer;
     private SUPABASE_User supaUser;
+    private SUPABASE_CWLPlanner supaCWLPlanner;
 
     static void main() throws Exception {
         new Main().run();
@@ -29,6 +30,7 @@ public class Main {
         apiLocations = new API_Locations(server, conf);
         apiPlayer = new API_Player(server, conf);
         supaUser = new SUPABASE_User(server, conf);
+        supaCWLPlanner = new SUPABASE_CWLPlanner(server, conf);
 
         apiClan.getClanCurrentWarLeagueGroup();
         apiClan.getClanWarLeagueWar();
@@ -74,6 +76,8 @@ public class Main {
         supaUser.createUser();
         supaUser.getUserInfo();
         supaUser.checkUserLogin();
+
+        supaCWLPlanner.createCWLPlanner();
 
         server.start();
         System.out.println("Server gestart op http://localhost:8080");

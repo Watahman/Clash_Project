@@ -34,6 +34,7 @@ function createClanCard(clanInfo, playerAmount){
     clanTemplateClone.querySelector(".cwl-clan-player-list").id = "cwl-clan-player-list-template-" + (document.querySelector("#cwl-all-clans").children.length + 1);
     clanTemplateClone.id = "cwl-clan-template-" + document.querySelector("#cwl-all-clans").children.length + 1;
     document.querySelector("#cwl-all-clans").appendChild(clanTemplateClone);
+    localStorage.setItem("clanId_" + clanInfo.name, clanInfo.tag);
 }
 
 function makeDraggable(element) {
