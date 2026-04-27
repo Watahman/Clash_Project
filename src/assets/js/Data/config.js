@@ -49,6 +49,7 @@ export const _EXT_SUPA_USER_CHECK = "/SupabaseUserCheck";
 
 export const _EXT_SUPA_CWLPLANNER_DATA_SET = "/SupabaseCwplannerDataSet";
 export const _EXT_SUPA_CWLPLANNER_DATA_GET = "/SupabaseCwplannerDataGet";
+export const _EXT_SUPA_CWLPLANNER_DATA_GET_ALL = "/SupabaseCwplannerDataGetAll";
 
 
 

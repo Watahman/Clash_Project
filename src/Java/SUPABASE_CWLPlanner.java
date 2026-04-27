@@ -63,4 +63,63 @@ public class SUPABASE_CWLPlanner {
             }
         });
     }
+
+    public void getAllPlanners(){
+        server.createContext(conf._EXT_SUPA_CWLPLANNER_DATA_GET_ALL, exchange -> {
+            utils.addCORS(exchange);
+
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                try {
+                    String result = SUPABASE_Client.getWithBody("plans", "$select=name");
+                    JsonArray plans = JsonParser.parseString(result).getAsJsonArray();
+
+                    utils.sendJsonResponse(exchange, String.valueOf(plans), 200);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
+    }
+
+    public void getPlanner(){
+        server.createContext(conf._EXT_SUPA_CWLPLANNER_DATA_GET, exchange -> {
+            utils.addCORS(exchange);
+
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                try {
+                    String body = new String(exchange.getRequestBody().readAllBytes());
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+
+                    String name = json.get("name").getAsString();
+
+                    String result = SUPABASE_Client.getWithBody("plans", "name=eq." + name);
+                    JsonArray plans = JsonParser.parseString(result).getAsJsonArray();
+
+                    utils.sendJsonResponse(exchange, String.valueOf(plans), 200);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
+    }
 }

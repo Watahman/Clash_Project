@@ -78,6 +78,8 @@ public class Main {
         supaUser.checkUserLogin();
 
         supaCWLPlanner.createCWLPlanner();
+        supaCWLPlanner.getAllPlanners();
+        supaCWLPlanner.getPlanner();
 
         server.start();
         System.out.println("Server gestart op http://localhost:8080");
