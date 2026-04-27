@@ -97,9 +97,10 @@ function savePlanButton(){
 
             allClans.push(data)
         })
+        const planName = document.querySelector("#cwl-plan-name").textContent
         const data = {
             id: localStorage.getItem("id"),
-            name: "test",
+            name: planName,
             clans: allClans
         }
         console.log(data)
