@@ -1,6 +1,6 @@
 import { averageOfObjects } from './Calculations.js';
 
-function createPlayerCard(playerInfo){
+function createPlayerCard(playerInfo, clanTag){
     const playerTemplate = document.querySelector("#cwl-player-template");
 
     playerInfo.forEach(player => {
@@ -10,14 +10,24 @@ function createPlayerCard(playerInfo){
         playerTemplateClone.querySelector(".cwl-player-hashtag").textContent = player.tag;
         playerTemplateClone.querySelector(".cwl-player-name").textContent = player.name;
         playerTemplateClone.querySelector(".cwl-player-clan").textContent = player.clanName;
-        console.log(player.leagueHistory);
-        console.log(averageOfObjects(player.leagueHistory));
 
         const element = playerTemplateClone.querySelector(".cwl-player-article");
         element.originalContainer = document.querySelector("#cwl-available-players");
         makeDraggable(element);
 
-        document.querySelector("#cwl-available-players").appendChild(playerTemplateClone);
+        if(clanTag != null){
+            document.querySelectorAll(".cwl-clan-article").forEach(article => {
+                const clanName = article.querySelector(".cwl-clan-name").textContent
+                const clantag = localStorage.getItem("clanId_" + clanName);
+                if(clantag === clanTag){
+                    article.querySelector(".cwl-clan-player-list").appendChild(playerTemplateClone)
+                    const prevPlayers = article.querySelector(".cwl-amount-of-players-in-clan").textContent.split("/")
+                    article.querySelector(".cwl-amount-of-players-in-clan").textContent = parseInt(prevPlayers[0]) + 1 + "/" + prevPlayers[1]
+                }
+            })
+        }else{
+            document.querySelector("#cwl-available-players").appendChild(playerTemplateClone);
+        }
         const totalPlayers = document.querySelector("#cwl-total-player-amount");
         totalPlayers.textContent = parseInt(totalPlayers.textContent) + 1 + "";
     })

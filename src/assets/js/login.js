@@ -1,4 +1,4 @@
-import {databaseRequest} from "./API/API-Communication.js";
+import { databaseRequestWithBody } from "./API/API-Communication.js";
 import * as config from "./Data/config.js";
 
 function init(){
@@ -16,7 +16,7 @@ function clicklistener(){
             password: password
         });
 
-        databaseRequest(path, data).then(data=>{
+        databaseRequestWithBody(path, data).then(data=>{
             console.log(data);
             if(data.success){
                 localStorage.setItem("id", data.id);

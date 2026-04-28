@@ -75,7 +75,7 @@ public class SUPABASE_CWLPlanner {
 
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 try {
-                    String result = SUPABASE_Client.getWithBody("plans", "$select=name");
+                    String result = SUPABASE_Client.getWithBody("plans", "select=name");
                     JsonArray plans = JsonParser.parseString(result).getAsJsonArray();
 
                     utils.sendJsonResponse(exchange, String.valueOf(plans), 200);
@@ -108,9 +108,14 @@ public class SUPABASE_CWLPlanner {
                     String name = json.get("name").getAsString();
 
                     String result = SUPABASE_Client.getWithBody("plans", "name=eq." + name);
-                    JsonArray plans = JsonParser.parseString(result).getAsJsonArray();
+                    JsonArray planArray = JsonParser.parseString(result).getAsJsonArray();
+                    JsonObject plan = planArray.get(0).getAsJsonObject();
 
-                    utils.sendJsonResponse(exchange, String.valueOf(plans), 200);
+                    JsonObject planInfo = new JsonObject();
+                    planInfo.addProperty("name", plan.get("name").getAsString());
+                    planInfo.add("info", plan.get("info").getAsJsonArray());
+
+                    utils.sendJsonResponse(exchange, planInfo.toString(), 200);
                 } catch (Exception e) {
                     e.printStackTrace();
                     try {

@@ -11,13 +11,24 @@ export function fetchRequest(path, body, callback){
         .catch(error => console.log(error));
 }
 
-export async function databaseRequest(path, body){
+export async function databaseRequestWithBody(path, body){
     return fetch(path, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify(body)
+    })
+        .then(response => response.json())
+        .catch(error => console.log(error));
+}
+
+export async function databaseRequest(path){
+    return fetch(path, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
     })
         .then(response => response.json())
         .catch(error => console.log(error));

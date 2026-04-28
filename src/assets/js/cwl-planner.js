@@ -1,7 +1,7 @@
 import { getClanMembersWithBattleData, getPlayerWithBattleData } from "./API/API-Functions.js"
 import { getClanInfoRequest } from "./API/API-Clan.js"
 import { createPlayerCard, createClanCard } from "./Templates.js";
-import { databaseRequest } from "./API/API-Communication.js";
+import {databaseRequest, databaseRequestWithBody} from "./API/API-Communication.js";
 import * as conf from "./Data/config.js"
 
 
@@ -12,6 +12,8 @@ function init(){
     addClanButton();
     savePlanButton();
     guessCwlSize()
+    loadAllPlans()
+    loadPlan()
 }
 
 function addClanPlayersButton(){
@@ -105,7 +107,7 @@ function savePlanButton(){
         }
         console.log(data)
         const path = conf._BASE_URL + conf._EXT_SUPA_CWLPLANNER_DATA_SET
-        databaseRequest(path, data).then(data => {
+        databaseRequestWithBody(path, data).then(data => {
             console.log(data)
         })
     })
@@ -132,6 +134,53 @@ function guessCwlSize(){
                     document.querySelector("#cwl-overlay-select-amount-players-in-clan").remove(1);
             }
             console.log(league)
+        })
+    })
+}
+
+function loadAllPlans(){
+    const planSelect = document.querySelector("#cwl-load-plan")
+    const path = conf._BASE_URL + conf._EXT_SUPA_CWLPLANNER_DATA_GET_ALL
+    databaseRequest(path).then(data => {
+        data.forEach(plan => {
+            let newOption = document.createElement("option");
+            newOption.value = plan.name
+            newOption.textContent = plan.name
+            planSelect.appendChild(newOption)
+        })
+
+        if(planSelect.options.length > 1){
+            planSelect.remove(0)
+        }
+    })
+}
+
+function loadPlan(){
+    const planSelect = document.querySelector("#cwl-load-plan")
+    planSelect.addEventListener("change", (e) => {
+        const path = conf._BASE_URL + conf._EXT_SUPA_CWLPLANNER_DATA_GET
+        const data = {name: e.target.value}
+        databaseRequestWithBody(path, data).then(data => {
+            document.querySelector("#cwl-plan-name").value = data.name
+            const playersWithClan = data.info
+            if(playersWithClan.length >= 1){
+                playersWithClan[0].players.forEach(player => {
+                    getPlayerWithBattleData(player, (data) => {createPlayerCard(data)});
+                })
+                playersWithClan.shift()
+                if(playersWithClan.length >= 1){
+                    playersWithClan.forEach(clan => {
+                        getClanInfoRequest(clan.clantag, (data) => {
+                            createClanCard(data, 15)
+                            clan.players.forEach(player => {
+                                console.log(player)
+                                getPlayerWithBattleData(player, (data) => {createPlayerCard(data, clan.clantag)});
+                            })
+                        });
+                    })
+                }
+            }
+            console.log(data.info)
         })
     })
 }
