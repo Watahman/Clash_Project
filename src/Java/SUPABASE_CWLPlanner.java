@@ -1,6 +1,7 @@
 package Java;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
@@ -16,7 +17,7 @@ public class SUPABASE_CWLPlanner {
         utils = new API_Utils(conf);
     }
 
-    public void createCWLPlanner(){
+    public void saveCWLPlanner(){
         server.createContext(conf._EXT_SUPA_CWLPLANNER_DATA_SET, exchange -> {
             utils.addCORS(exchange);
 
@@ -75,10 +76,28 @@ public class SUPABASE_CWLPlanner {
 
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 try {
-                    String result = SUPABASE_Client.getWithBody("plans", "select=name");
-                    JsonArray plans = JsonParser.parseString(result).getAsJsonArray();
+                    String body = new String(exchange.getRequestBody().readAllBytes());
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
 
-                    utils.sendJsonResponse(exchange, String.valueOf(plans), 200);
+                    String userId = json.get("user").getAsString();
+
+                    String userPlanIds = SUPABASE_Client.getWithBody("plan_users", "select=plan_id&user_id=eq."+ userId);
+
+                    JsonArray userPlanIdArray = JsonParser.parseString(userPlanIds).getAsJsonArray();
+                    JsonArray planNames = new JsonArray();
+
+                    for (JsonElement element : userPlanIdArray) {
+                        String planId = element.getAsJsonObject().get("plan_id").getAsString();
+                        String planResult = SUPABASE_Client.getWithBody("plans", "select=name&id=eq." + planId);
+
+                        JsonArray planArray = JsonParser.parseString(planResult).getAsJsonArray();
+                        if (!planArray.isEmpty()) {
+                            String name = planArray.get(0).getAsJsonObject().get("name").getAsString();
+                            planNames.add(name);
+                        }
+                    }
+
+                    utils.sendJsonResponse(exchange, String.valueOf(planNames), 200);
                 } catch (Exception e) {
                     e.printStackTrace();
                     try {

@@ -11,10 +11,10 @@ function clicklistener(){
         const password = document.querySelector("#password").value
 
         const path = config._BASE_URL + config._EXT_SUPA_USER_CHECK
-        const data = JSON.stringify({
+        const data = {
             email: email,
             password: password
-        });
+        }
 
         databaseRequestWithBody(path, data).then(data=>{
             console.log(data);

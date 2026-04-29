@@ -141,11 +141,12 @@ function guessCwlSize(){
 function loadAllPlans(){
     const planSelect = document.querySelector("#cwl-load-plan")
     const path = conf._BASE_URL + conf._EXT_SUPA_CWLPLANNER_DATA_GET_ALL
-    databaseRequest(path).then(data => {
+    const data = {user: localStorage.getItem("id")}
+    databaseRequestWithBody(path, data).then(data => {
         data.forEach(plan => {
             let newOption = document.createElement("option");
-            newOption.value = plan.name
-            newOption.textContent = plan.name
+            newOption.value = plan
+            newOption.textContent = plan
             planSelect.appendChild(newOption)
         })
 
