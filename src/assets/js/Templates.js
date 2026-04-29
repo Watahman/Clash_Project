@@ -43,6 +43,14 @@ function createClanCard(clanInfo, playerAmount){
     clanTemplateClone.querySelector(".cwl-amount-of-players-in-clan").id = "cwl-clan-playeramount-template-" + (document.querySelector("#cwl-all-clans").children.length + 1);
     clanTemplateClone.querySelector(".cwl-clan-player-list").id = "cwl-clan-player-list-template-" + (document.querySelector("#cwl-all-clans").children.length + 1);
     clanTemplateClone.id = "cwl-clan-template-" + document.querySelector("#cwl-all-clans").children.length + 1;
+    clanTemplateClone.querySelector(".cwl-delete-clan").addEventListener("click", (e) => {
+        e.target.closest("article").querySelector(".cwl-clan-player-list").querySelectorAll(".cwl-player-article").forEach(article => {
+            document.querySelector("#cwl-available-players").appendChild(article);
+            document.querySelector("#cwl-total-player-amount").textContent = parseInt(document.querySelector("#cwl-total-player-amount").textContent) + 1 + "";
+        })
+
+        e.target.closest("article").remove()
+    })
     document.querySelector("#cwl-all-clans").appendChild(clanTemplateClone);
     localStorage.setItem("clanId_" + clanInfo.name, clanInfo.tag);
 }

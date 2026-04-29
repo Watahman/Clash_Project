@@ -161,6 +161,9 @@ function loadPlan(){
         const path = conf._BASE_URL + conf._EXT_SUPA_CWLPLANNER_DATA_GET
         const data = {name: e.target.value}
         databaseRequestWithBody(path, data).then(data => {
+            document.querySelector("#cwl-available-players").innerHTML = ""
+            document.querySelector("#cwl-all-clans").innerHTML = ""
+            document.querySelector("#cwl-total-player-amount").innerHTML = "0"
             document.querySelector("#cwl-plan-name").value = data.name
             const playersWithClan = data.info
             if(playersWithClan.length >= 1){
@@ -173,14 +176,12 @@ function loadPlan(){
                         getClanInfoRequest(clan.clantag, (data) => {
                             createClanCard(data, 15)
                             clan.players.forEach(player => {
-                                console.log(player)
                                 getPlayerWithBattleData(player, (data) => {createPlayerCard(data, clan.clantag)});
                             })
                         });
                     })
                 }
             }
-            console.log(data.info)
         })
     })
 }
