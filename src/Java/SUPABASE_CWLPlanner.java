@@ -41,18 +41,25 @@ public class SUPABASE_CWLPlanner {
                     plan.add("info", clans);
                     plan.addProperty("owner_id", userId);
 
-                    String planExists = SUPABASE_Client.getWithBody("plans", "id=eq." + plannerId);
-                    JsonArray planExistsArray = JsonParser.parseString(planExists).getAsJsonArray();
+                    String planId = "";
+                    if(plannerId != null && !plannerId.isEmpty() && !plannerId.equals("undefined")){
+                        String planExists = SUPABASE_Client.getWithBody("plans", "id=eq." + plannerId);
+                        JsonElement planExistsElement = JsonParser.parseString(planExists);
 
-                    if(!planExistsArray.isEmpty()){
-                        JsonObject editPlan = new JsonObject();
-                        editPlan.add("info", clans);
-                        String planResult = SUPABASE_Client.patch("plans", "id=eq." + plannerId, editPlan.toString());
+                        if(planExistsElement.isJsonArray() || !planExistsElement.getAsJsonArray().isEmpty()){
+                            JsonObject editPlan = new JsonObject();
+                            editPlan.add("info", clans);
+                            editPlan.addProperty("name", planName);
+                            String planResult = SUPABASE_Client.patch("plans", "id=eq." + plannerId, editPlan.toString());
+
+                            JsonArray planArray = JsonParser.parseString(planResult).getAsJsonArray();
+                            planId = planArray.get(0).getAsJsonObject().get("id").getAsString();
+                        }
                     }else{
                         String planResult = SUPABASE_Client.post("plans", plan.toString());
 
                         JsonArray planArray = JsonParser.parseString(planResult).getAsJsonArray();
-                        String planId = planArray.get(0).getAsJsonObject().get("id").getAsString();
+                        planId = planArray.get(0).getAsJsonObject().get("id").getAsString();
 
                         JsonObject link = new JsonObject();
                         link.addProperty("plan_id", planId);
@@ -61,7 +68,7 @@ public class SUPABASE_CWLPlanner {
                         String linkResult = SUPABASE_Client.post("plan_users", link.toString());
                     }
 
-                    utils.sendJsonResponse(exchange, "{\"success\":true}", 200);
+                    utils.sendJsonResponse(exchange, "{\"success\":true, \"uuid\": \"" + planId + "\"}", 200);
                 } catch (Exception e) {
                     e.printStackTrace();
                     try {

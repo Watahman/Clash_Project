@@ -1,7 +1,6 @@
-import { averageOfObjects } from './Calculations.js';
 import { savePlan } from './cwl-planner.js'
 
-function createPlayerCard(playerInfo, clanTag){
+function createPlayerCard(playerInfo, clanuuid){
     const playerTemplate = document.querySelector("#cwl-player-template");
 
     playerInfo.forEach(player => {
@@ -16,11 +15,9 @@ function createPlayerCard(playerInfo, clanTag){
         element.originalContainer = document.querySelector("#cwl-available-players");
         makeDraggable(element);
 
-        if(clanTag != null){
+        if(clanuuid != null){
             document.querySelectorAll(".cwl-clan-article").forEach(article => {
-                const clanName = article.querySelector(".cwl-clan-name").textContent
-                const clantag = localStorage.getItem("clanId_" + clanName);
-                if(clantag === clanTag){
+                if(article.id === "cwl-clan-template_" + clanuuid){
                     article.querySelector(".cwl-clan-player-list").appendChild(playerTemplateClone)
                     const prevPlayers = article.querySelector(".cwl-amount-of-players-in-clan").textContent.split("/")
                     article.querySelector(".cwl-amount-of-players-in-clan").textContent = parseInt(prevPlayers[0]) + 1 + "/" + prevPlayers[1]
@@ -28,15 +25,14 @@ function createPlayerCard(playerInfo, clanTag){
             })
         }else{
             document.querySelector("#cwl-available-players").appendChild(playerTemplateClone);
+            const totalPlayers = document.querySelector("#cwl-total-player-amount");
+            totalPlayers.textContent = parseInt(totalPlayers.textContent) + 1 + "";
         }
-        const totalPlayers = document.querySelector("#cwl-total-player-amount");
-        totalPlayers.textContent = parseInt(totalPlayers.textContent) + 1 + "";
     })
-
     savePlan()
 }
 
-function createClanCard(clanInfo, playerAmount){
+function createClanCard(clanInfo, playerAmount, uuid = ""){
     const clanTemplate = document.querySelector("#cwl-clan-template");
     const clanTemplateClone = clanTemplate.content.cloneNode(true);
 
@@ -44,8 +40,9 @@ function createClanCard(clanInfo, playerAmount){
     clanTemplateClone.querySelector(".cwl-clan-name").textContent = clanInfo.name;
     clanTemplateClone.querySelector(".cwl-amount-of-players-in-clan").textContent = `0/${playerAmount}`;
     clanTemplateClone.querySelector(".cwl-amount-of-players-in-clan").id = "cwl-clan-playeramount-template-" + (document.querySelector("#cwl-all-clans").children.length + 1);
-    clanTemplateClone.querySelector(".cwl-clan-player-list").id = "cwl-clan-player-list-template-" + (document.querySelector("#cwl-all-clans").children.length + 1);
-    clanTemplateClone.id = "cwl-clan-template-" + document.querySelector("#cwl-all-clans").children.length + 1;
+    if(uuid === ""){
+        clanTemplateClone.querySelector("article").id = "cwl-clan-template_" + crypto.randomUUID()
+    }else clanTemplateClone.querySelector("article").id = "cwl-clan-template_" + uuid;
     clanTemplateClone.querySelector(".cwl-delete-clan").addEventListener("click", (e) => {
         e.target.closest("article").querySelector(".cwl-clan-player-list").querySelectorAll(".cwl-player-article").forEach(article => {
             document.querySelector("#cwl-available-players").appendChild(article);
@@ -53,12 +50,11 @@ function createClanCard(clanInfo, playerAmount){
         })
 
         e.target.closest("article").remove()
-
         savePlan()
     })
     document.querySelector("#cwl-all-clans").appendChild(clanTemplateClone);
     localStorage.setItem("clanId_" + clanInfo.name, clanInfo.tag);
-    savePlan()
+    savePlan();
 }
 
 function makeDraggable(element) {
@@ -111,8 +107,6 @@ function makeDraggable(element) {
                 ) {
                     list.appendChild(element);
                     element.originalContainer = list;
-                    console.log(element);
-                    console.log(element.originalContainer);
                     updatePlayerAmount(element, true);
                     dropped = true;
 

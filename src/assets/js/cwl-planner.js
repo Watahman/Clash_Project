@@ -3,7 +3,7 @@ import { getClanInfoRequest } from "./API/API-Clan.js"
 import { createPlayerCard, createClanCard } from "./Templates.js";
 import {databaseRequest, databaseRequestWithBody} from "./API/API-Communication.js";
 import * as conf from "./Data/config.js"
-
+import {isLoading, setLoading} from "./Data/config.js";
 
 function init(){
     overlayHide();
@@ -14,6 +14,7 @@ function init(){
     guessCwlSize()
     loadAllPlans()
     loadPlan()
+    localStorage.setItem("planner_id", "")
 }
 
 function addClanPlayersButton(){
@@ -99,8 +100,8 @@ function guessCwlSize(){
 }
 
 export function savePlan(){
+    if (isLoading) return;
     const allClans = []
-
     const noClan = []
     document.querySelector("#cwl-available-players").querySelectorAll(".cwl-player-article").forEach(player => {
         noClan.push(player.querySelector(".cwl-player-hashtag").textContent)
@@ -116,29 +117,37 @@ export function savePlan(){
     document.querySelectorAll(".cwl-clan-article").forEach(clan => {
         const clanName = clan.querySelector(".cwl-clan-name").textContent
         const clanTag = localStorage.getItem("clanId_" + clanName)
+        console.log(clan.querySelector(".cwl-amount-of-players-in-clan").textContent)
+        console.log(clan.querySelector(".cwl-amount-of-players-in-clan").textContent.split("/"))
+        const amountOfPlayers = clan.querySelector(".cwl-amount-of-players-in-clan").textContent.split("/")[1]
         const allPlayersInClan = []
         clan.querySelectorAll(".cwl-player-article").forEach(player => {
             allPlayersInClan.push(player.querySelector(".cwl-player-hashtag").textContent)
         })
         const data = {
             clantag: clanTag,
+            amountOfPlayers: amountOfPlayers,
+            uuid: clan.id.split("_").at(-1),
             players: allPlayersInClan
         }
 
+        console.log(data)
+
         allClans.push(data)
     })
-    const planName = document.querySelector("#cwl-plan-name").textContent
+    const planName = document.querySelector("#cwl-plan-name").value
     const data = {
         id: localStorage.getItem("id"),
         currentPlanId: localStorage.getItem("planner_id"),
         name: planName,
         clans: allClans
     }
-    console.log(data)
     const path = conf._BASE_URL + conf._EXT_SUPA_CWLPLANNER_DATA_SET
     databaseRequestWithBody(path, data).then(data => {
-        console.log(data)
+        localStorage.setItem("planner_id", data.uuid)
     })
+
+    console.log("done")
 }
 
 function loadAllPlans(){
@@ -152,10 +161,7 @@ function loadAllPlans(){
             newOption.textContent = plan
             planSelect.appendChild(newOption)
         })
-
-        if(planSelect.options.length > 1){
-            planSelect.remove(0)
-        }
+        planSelect.selectedIndex = -1;
     })
 }
 
@@ -171,22 +177,31 @@ function loadPlan(){
             document.querySelector("#cwl-plan-name").value = data.name
             localStorage.setItem("planner_id", data.id)
             const playersWithClan = data.info
-            if(playersWithClan.length >= 1){
-                playersWithClan[0].players.forEach(player => {
-                    getPlayerWithBattleData(player, (data) => {createPlayerCard(data)});
-                })
-                playersWithClan.shift()
-                if(playersWithClan.length >= 1){
-                    playersWithClan.forEach(clan => {
-                        getClanInfoRequest(clan.clantag, (data) => {
-                            createClanCard(data, 15)
-                            clan.players.forEach(player => {
-                                getPlayerWithBattleData(player, (data) => {createPlayerCard(data, clan.clantag)});
-                            })
+
+            const clansToLoad = playersWithClan.slice(1);
+            let pending = playersWithClan[0].players.length + clansToLoad.reduce((acc, clan) => acc + clan.players.length, 0);
+
+            setLoading(true);
+            if(pending === 0) setLoading(false);
+
+            playersWithClan[0].players.forEach(player => {
+                getPlayerWithBattleData(player, (data) => {
+                    createPlayerCard(data, null);
+                    if(--pending === 0) setLoading(false);
+                });
+            })
+
+            clansToLoad.forEach(clan => {
+                getClanInfoRequest(clan.clantag, (data) => {
+                    createClanCard(data, clan.amountOfPlayers, clan.uuid)
+                    clan.players.forEach(player => {
+                        getPlayerWithBattleData(player, (data) => {
+                            createPlayerCard(data, clan.uuid);
+                            if(--pending === 0) setLoading(false);
                         });
                     })
-                }
-            }
+                });
+            })
         })
     })
 }

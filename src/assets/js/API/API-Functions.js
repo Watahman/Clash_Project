@@ -31,7 +31,8 @@ export function getPlayerWithBattleData(playerTag, callback) {
             tag: data.tag,
             townHallLevel: data.townHallLevel,
             role: data.role,
-            clanName: data.clan.name
+            clanName: data.clan.name,
+            clanTag: data.clan.tag
         })
 
         processBatch(player, 0, callback);

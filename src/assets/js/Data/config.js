@@ -1,3 +1,8 @@
+export let isLoading = false;
+export function setLoading(value) {
+    isLoading = value;
+}
+
 export const _BASE_URL = "http://localhost:8080";
 
 export const _EXT_CLAN_CURRENTWAR_LEAGUEGROUP = "/ClanCurrentWarLeagueGroup";
