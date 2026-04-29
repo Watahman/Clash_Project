@@ -1,4 +1,5 @@
 import { averageOfObjects } from './Calculations.js';
+import { savePlan } from './cwl-planner.js'
 
 function createPlayerCard(playerInfo, clanTag){
     const playerTemplate = document.querySelector("#cwl-player-template");
@@ -31,6 +32,8 @@ function createPlayerCard(playerInfo, clanTag){
         const totalPlayers = document.querySelector("#cwl-total-player-amount");
         totalPlayers.textContent = parseInt(totalPlayers.textContent) + 1 + "";
     })
+
+    savePlan()
 }
 
 function createClanCard(clanInfo, playerAmount){
@@ -50,9 +53,12 @@ function createClanCard(clanInfo, playerAmount){
         })
 
         e.target.closest("article").remove()
+
+        savePlan()
     })
     document.querySelector("#cwl-all-clans").appendChild(clanTemplateClone);
     localStorage.setItem("clanId_" + clanInfo.name, clanInfo.tag);
+    savePlan()
 }
 
 function makeDraggable(element) {
@@ -142,6 +148,7 @@ function updatePlayerAmount(element, dropped){
             const totalElement = document.querySelector(`#cwl-clan-playeramount-template-${parentIdNumber}`);
             totalElement.textContent = parseInt(totalElement.textContent.split("/")[0]) + 1 + "/" + totalElement.textContent.split("/")[1];
         }
+        savePlan()
     }else{
         if(element.parentElement.id === "cwl-available-players"){
             const totalElement = document.querySelector("#cwl-total-player-amount");

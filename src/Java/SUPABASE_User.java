@@ -73,7 +73,7 @@ public class SUPABASE_User {
                     String result = SUPABASE_Client.getWithBody("users", "email=eq." + email);
                     JsonArray users = JsonParser.parseString(result).getAsJsonArray();
 
-                    if (users.size() == 0) {
+                    if (users.isEmpty()) {
                         utils.sendJsonResponse(exchange, "{\"success\":false, \"error\":\"user not found\"}", 404);
                         return;
                     }

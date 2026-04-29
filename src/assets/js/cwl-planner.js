@@ -70,47 +70,7 @@ function addClanButton(){
 }
 
 function savePlanButton(){
-    document.querySelector("#cwl-save-plan-button").addEventListener("click", () => {
-        const allClans = []
-
-        const noClan = []
-        document.querySelector("#cwl-available-players").querySelectorAll(".cwl-player-article").forEach(player => {
-            noClan.push(player.querySelector(".cwl-player-hashtag").textContent)
-        })
-
-        const noClanData = {
-            clanTag: "none",
-            players: noClan
-        }
-
-        allClans.push(noClanData);
-
-        document.querySelectorAll(".cwl-clan-article").forEach(clan => {
-            const clanName = clan.querySelector(".cwl-clan-name").textContent
-            const clanTag = localStorage.getItem("clanId_" + clanName)
-            const allPlayersInClan = []
-            clan.querySelectorAll(".cwl-player-article").forEach(player => {
-                allPlayersInClan.push(player.querySelector(".cwl-player-hashtag").textContent)
-            })
-            const data = {
-                clantag: clanTag,
-                players: allPlayersInClan
-            }
-
-            allClans.push(data)
-        })
-        const planName = document.querySelector("#cwl-plan-name").textContent
-        const data = {
-            id: localStorage.getItem("id"),
-            name: planName,
-            clans: allClans
-        }
-        console.log(data)
-        const path = conf._BASE_URL + conf._EXT_SUPA_CWLPLANNER_DATA_SET
-        databaseRequestWithBody(path, data).then(data => {
-            console.log(data)
-        })
-    })
+    document.querySelector("#cwl-save-plan-button").addEventListener("click", () => {savePlan()})
 }
 
 function overlayHide(){
@@ -135,6 +95,49 @@ function guessCwlSize(){
             }
             console.log(league)
         })
+    })
+}
+
+export function savePlan(){
+    const allClans = []
+
+    const noClan = []
+    document.querySelector("#cwl-available-players").querySelectorAll(".cwl-player-article").forEach(player => {
+        noClan.push(player.querySelector(".cwl-player-hashtag").textContent)
+    })
+
+    const noClanData = {
+        clanTag: "none",
+        players: noClan
+    }
+
+    allClans.push(noClanData);
+
+    document.querySelectorAll(".cwl-clan-article").forEach(clan => {
+        const clanName = clan.querySelector(".cwl-clan-name").textContent
+        const clanTag = localStorage.getItem("clanId_" + clanName)
+        const allPlayersInClan = []
+        clan.querySelectorAll(".cwl-player-article").forEach(player => {
+            allPlayersInClan.push(player.querySelector(".cwl-player-hashtag").textContent)
+        })
+        const data = {
+            clantag: clanTag,
+            players: allPlayersInClan
+        }
+
+        allClans.push(data)
+    })
+    const planName = document.querySelector("#cwl-plan-name").textContent
+    const data = {
+        id: localStorage.getItem("id"),
+        currentPlanId: localStorage.getItem("planner_id"),
+        name: planName,
+        clans: allClans
+    }
+    console.log(data)
+    const path = conf._BASE_URL + conf._EXT_SUPA_CWLPLANNER_DATA_SET
+    databaseRequestWithBody(path, data).then(data => {
+        console.log(data)
     })
 }
 
@@ -166,6 +169,7 @@ function loadPlan(){
             document.querySelector("#cwl-all-clans").innerHTML = ""
             document.querySelector("#cwl-total-player-amount").innerHTML = "0"
             document.querySelector("#cwl-plan-name").value = data.name
+            localStorage.setItem("planner_id", data.id)
             const playersWithClan = data.info
             if(playersWithClan.length >= 1){
                 playersWithClan[0].players.forEach(player => {
