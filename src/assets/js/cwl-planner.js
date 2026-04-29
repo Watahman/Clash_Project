@@ -1,7 +1,7 @@
 import { getClanMembersWithBattleData, getPlayerWithBattleData } from "./API/API-Functions.js"
 import { getClanInfoRequest } from "./API/API-Clan.js"
 import { createPlayerCard, createClanCard } from "./Templates.js";
-import {databaseRequest, databaseRequestWithBody} from "./API/API-Communication.js";
+import {databaseRequestWithBody} from "./API/API-Communication.js";
 import * as conf from "./Data/config.js"
 import {canAutosave, isLoading, setLoading} from "./Data/config.js";
 
@@ -101,7 +101,6 @@ function guessCwlSize(){
                 case "Champion League III":
                     document.querySelector("#cwl-overlay-select-amount-players-in-clan").remove(1);
             }
-            console.log(league)
         })
     })
 }
@@ -124,8 +123,6 @@ export function savePlan(){
     document.querySelectorAll(".cwl-clan-article").forEach(clan => {
         const clanName = clan.querySelector(".cwl-clan-name").textContent
         const clanTag = localStorage.getItem("clanId_" + clanName)
-        console.log(clan.querySelector(".cwl-amount-of-players-in-clan").textContent)
-        console.log(clan.querySelector(".cwl-amount-of-players-in-clan").textContent.split("/"))
         const amountOfPlayers = clan.querySelector(".cwl-amount-of-players-in-clan").textContent.split("/")[1]
         const allPlayersInClan = []
         clan.querySelectorAll(".cwl-player-article").forEach(player => {
@@ -138,11 +135,12 @@ export function savePlan(){
             players: allPlayersInClan
         }
 
-        console.log(data)
-
         allClans.push(data)
     })
-    const planName = document.querySelector("#cwl-plan-name").value
+    let planName = document.querySelector("#cwl-plan-name").value
+    if(planName === ""){
+        planName = "nameless"
+    }
     const data = {
         id: localStorage.getItem("id"),
         currentPlanId: localStorage.getItem("planner_id"),
@@ -153,8 +151,6 @@ export function savePlan(){
     databaseRequestWithBody(path, data).then(data => {
         localStorage.setItem("planner_id", data.uuid)
     })
-
-    console.log("done")
 }
 
 function loadAllPlans(){
