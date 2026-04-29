@@ -677,3 +677,11 @@ input[type="text"]:focus {
     color: var(--text-2);
     border-color: var(--border-focus);
 }
+
+.cwl-clan-info-card {
+    cursor: grab;
+}
+
+.cwl-clan-article[style*="fixed"] .cwl-clan-info-card {
+    cursor: grabbing;
+}

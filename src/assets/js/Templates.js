@@ -13,7 +13,7 @@ function createPlayerCard(playerInfo, clanuuid){
 
         const element = playerTemplateClone.querySelector(".cwl-player-article");
         element.originalContainer = document.querySelector("#cwl-available-players");
-        makeDraggable(element);
+        makePlayerDraggable(element);
 
         if(clanuuid != null){
             document.querySelectorAll(".cwl-clan-article").forEach(article => {
@@ -54,10 +54,14 @@ function createClanCard(clanInfo, playerAmount, uuid = ""){
     })
     document.querySelector("#cwl-all-clans").appendChild(clanTemplateClone);
     localStorage.setItem("clanId_" + clanInfo.name, clanInfo.tag);
+
+    const newClanArticle = document.querySelector("#cwl-all-clans").lastElementChild;
+    makeClanDraggable(newClanArticle);
+
     savePlan();
 }
 
-function makeDraggable(element) {
+function makePlayerDraggable(element) {
     let offsetX, offsetY;
     let startLeft, startTop;
     let dragging = false;
@@ -65,6 +69,7 @@ function makeDraggable(element) {
 
     element.addEventListener("mousedown", (e) => {
         e.preventDefault();
+        e.stopPropagation();
 
         if (dragging) return;
         dragging = true;
@@ -132,27 +137,113 @@ function makeDraggable(element) {
     });
 }
 
-function updatePlayerAmount(element, dropped){
-    if(dropped){
-        if(element.parentElement.id === "cwl-available-players"){
-            const totalElement = document.querySelector("#cwl-total-player-amount");
-            totalElement.textContent = parseInt(totalElement.textContent) + 1 + "";
-        }else {
-            const parentIdNumber = element.parentElement.id.split("-").pop();
-            const totalElement = document.querySelector(`#cwl-clan-playeramount-template-${parentIdNumber}`);
-            totalElement.textContent = parseInt(totalElement.textContent.split("/")[0]) + 1 + "/" + totalElement.textContent.split("/")[1];
-        }
-        savePlan()
-    }else{
-        if(element.parentElement.id === "cwl-available-players"){
-            const totalElement = document.querySelector("#cwl-total-player-amount");
-            totalElement.textContent = parseInt(totalElement.textContent) - 1 + "";
-        }else {
-            const parentIdNumber = element.parentElement.id.split("-").pop();
-            const totalElement = document.querySelector(`#cwl-clan-playeramount-template-${parentIdNumber}`);
-            totalElement.textContent = parseInt(totalElement.textContent.split("/")[0]) - 1 + "/" + totalElement.textContent.split("/")[1];
-        }
+function makeClanDraggable(clanArticle) {
+    const handle = clanArticle.querySelector(".cwl-clan-info-card");
+    handle.style.cursor = "grab";
+
+    let dragging = false;
+    let placeholder = null;
+    let offsetX, offsetY;
+
+    handle.addEventListener("mousedown", (e) => {
+        if (e.target.closest(".cwl-delete-clan") ||
+            e.target.closest(".cwl-confirm-clan-is-full") ||
+            e.target.closest(".cwl-player-article")) return;
+
+        e.preventDefault();
+        if (dragging) return;
+        dragging = true;
+
+        const container = document.querySelector("#cwl-all-clans");
+        const rect = clanArticle.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+
+        // Maak een placeholder aan op de originele plek
+        placeholder = document.createElement("div");
+        placeholder.style.width = rect.width + "px";
+        placeholder.style.height = rect.height + "px";
+        placeholder.style.border = "2px dashed var(--border-focus)";
+        placeholder.style.borderRadius = "var(--radius-xl)";
+        placeholder.style.background = "var(--accent-glow)";
+        placeholder.style.flexShrink = "0";
+        container.insertBefore(placeholder, clanArticle);
+
+        // Float de kaart vrij
+        clanArticle.style.position = "fixed";
+        clanArticle.style.left = rect.left + "px";
+        clanArticle.style.top = rect.top + "px";
+        clanArticle.style.width = rect.width + "px";
+        clanArticle.style.zIndex = "500";
+        clanArticle.style.opacity = "0.92";
+        clanArticle.style.boxShadow = "var(--shadow-lg)";
+        clanArticle.style.pointerEvents = "none";
+        document.body.appendChild(clanArticle);
+
+        const onMouseMove = (e) => {
+            clanArticle.style.left = (e.clientX - offsetX) + "px";
+            clanArticle.style.top  = (e.clientY - offsetY) + "px";
+
+            // Zoek welke clan we overheen bewegen en verplaats placeholder
+            clanArticle.style.pointerEvents = "none";
+            const target = document.elementFromPoint(e.clientX, e.clientY)?.closest(".cwl-clan-article");
+            clanArticle.style.pointerEvents = "";
+
+            if (target && target !== clanArticle) {
+                const targetRect = target.getBoundingClientRect();
+                const midX = targetRect.left + targetRect.width / 2;
+                if (e.clientX < midX) {
+                    container.insertBefore(placeholder, target);
+                } else {
+                    container.insertBefore(placeholder, target.nextSibling);
+                }
+            }
+        };
+
+        const onMouseUp = () => {
+            dragging = false;
+            handle.style.cursor = "grab";
+
+            // Zet de kaart op de plek van de placeholder
+            clanArticle.style.position = "";
+            clanArticle.style.left = "";
+            clanArticle.style.top = "";
+            clanArticle.style.width = "";
+            clanArticle.style.zIndex = "";
+            clanArticle.style.opacity = "";
+            clanArticle.style.boxShadow = "";
+            clanArticle.style.pointerEvents = "";
+
+            container.insertBefore(clanArticle, placeholder);
+            placeholder.remove();
+            placeholder = null;
+
+            savePlan();
+
+            document.removeEventListener("mousemove", onMouseMove);
+            document.removeEventListener("mouseup", onMouseUp);
+        };
+
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+    });
+}
+
+function updatePlayerAmount(element, dropped) {
+    const clan = element.parentElement.closest(".cwl-clan-article");
+    const playersInClan = clan?.querySelector(".cwl-amount-of-players-in-clan");
+    const total = document.querySelector("#cwl-total-player-amount");
+
+    const delta = dropped ? 1 : -1;
+
+    if (clan && playersInClan) {
+        const [current, max] = playersInClan.textContent.split("/");
+        playersInClan.textContent = `${parseInt(current) + delta}/${max}`;
+    } else {
+        total.textContent = parseInt(total.textContent) + delta + "";
     }
+
+    if (dropped) savePlan();
 }
 
 export { createPlayerCard, createClanCard };
