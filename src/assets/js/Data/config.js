@@ -1,3 +1,7 @@
+export let canAutosave = false;
+export function setCanAutosave(value) {
+    canAutosave = value;
+}
 export let isLoading = false;
 export function setLoading(value) {
     isLoading = value;

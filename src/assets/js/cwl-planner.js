@@ -3,7 +3,7 @@ import { getClanInfoRequest } from "./API/API-Clan.js"
 import { createPlayerCard, createClanCard } from "./Templates.js";
 import {databaseRequest, databaseRequestWithBody} from "./API/API-Communication.js";
 import * as conf from "./Data/config.js"
-import {isLoading, setLoading} from "./Data/config.js";
+import {canAutosave, isLoading, setLoading} from "./Data/config.js";
 
 function init(){
     overlayHide();
@@ -71,7 +71,14 @@ function addClanButton(){
 }
 
 function savePlanButton(){
-    document.querySelector("#cwl-save-plan-button").addEventListener("click", () => {savePlan()})
+    document.querySelector("#cwl-save-plan-button").addEventListener("click", () => {
+        if(document.querySelector("#cwl-plan-name").value === ""){
+            // make indicator
+        }else{
+            conf.setCanAutosave(true);
+            savePlan();
+        }
+    });
 }
 
 function overlayHide(){
@@ -100,7 +107,7 @@ function guessCwlSize(){
 }
 
 export function savePlan(){
-    if (isLoading) return;
+    if (isLoading || !canAutosave) return;
     const allClans = []
     const noClan = []
     document.querySelector("#cwl-available-players").querySelectorAll(".cwl-player-article").forEach(player => {
@@ -176,6 +183,7 @@ function loadPlan(){
             document.querySelector("#cwl-total-player-amount").innerHTML = "0"
             document.querySelector("#cwl-plan-name").value = data.name
             localStorage.setItem("planner_id", data.id)
+            conf.setCanAutosave(true)
             const playersWithClan = data.info
 
             const clansToLoad = playersWithClan.slice(1);
