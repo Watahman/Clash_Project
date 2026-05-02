@@ -4,6 +4,7 @@ import { createPlayerCard, createClanCard } from "./Templates.js";
 import {databaseRequestWithBody} from "./API/API-Communication.js";
 import * as conf from "./Data/config.js"
 import {canAutosave, isLoading, setLoading} from "./Data/config.js";
+import { profileHTML } from "./profile_popup.js"
 
 function init(){
     overlayHide();
@@ -14,6 +15,7 @@ function init(){
     guessCwlSize()
     loadAllPlans()
     loadPlan()
+    profileHTML()
     localStorage.setItem("planner_id", "")
 }
 

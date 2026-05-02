@@ -2,12 +2,12 @@ export function profileHTML(){
     fetch("../../subpages/popup_HTMLs/profile_popup.html")
         .then(res => res.text())
         .then(html => {
-            document.querySelector("#profile-placeholder").innerHTML = html;
+            document.querySelector(".profile-placeholder").innerHTML = html;
             profileInit()
         })
 }
 
-export function profileInit(){
+function profileInit(){
     document.querySelector("#profile-btn").addEventListener('click', () => {openProfile("Emile", "#" + "42323")})
     document.querySelector("#profile-overlay").addEventListener('click', (e) => {poBackdrop(e)})
     document.querySelector("#po-close").addEventListener('click', () => {closeProfile()})
