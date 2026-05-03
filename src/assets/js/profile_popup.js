@@ -1,3 +1,6 @@
+import { databaseRequestWithBody } from "./API/API-Communication.js";
+import * as conf from "./Data/config.js";
+
 export function profileHTML(){
     fetch("../../subpages/popup_HTMLs/profile_popup.html")
         .then(res => res.text())
@@ -8,7 +11,18 @@ export function profileHTML(){
 }
 
 function profileInit(){
-    document.querySelector("#profile-btn").addEventListener('click', () => {openProfile("Emile", "#" + "42323")})
+    document.querySelector("#profile-btn").addEventListener('click', () => {
+        if(localStorage.getItem("id") !== null){
+            const path = conf._BASE_URL + conf._EXT_SUPA_USER_IDCHECK
+            const data = {
+                id: localStorage.getItem("id")
+            }
+            databaseRequestWithBody(path, data)
+                .then(data => {
+                openProfile(data.name, "#" + localStorage.getItem("id").split("-")[0])
+            })
+        }
+    })
     document.querySelector("#profile-overlay").addEventListener('click', (e) => {poBackdrop(e)})
     document.querySelector("#po-close").addEventListener('click', () => {closeProfile()})
     document.querySelector("#po-code-btn").addEventListener('click', () => {poCopy()})

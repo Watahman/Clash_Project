@@ -1,6 +1,7 @@
 package Java;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
@@ -90,6 +91,53 @@ public class SUPABASE_User {
                     e.printStackTrace();
                     try {
                         utils.sendJsonResponse(exchange, "{\"success\":false, \"error\":\"failed\"}", 500);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
+    }
+
+    public void compareUserId(){
+        server.createContext(conf._EXT_SUPA_USER_IDCHECK, exchange -> {
+            utils.addCORS(exchange);
+
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                try {
+                    String body = new String(exchange.getRequestBody().readAllBytes());
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+
+                    String id = json.get("id").getAsString();
+                    String user = SUPABASE_Client.getWithBody("users", "id=eq." + id);
+                    JsonArray userArray = JsonParser.parseString(user).getAsJsonArray();
+                    JsonObject userJson = new JsonObject();
+
+                    if (!userArray.isEmpty()) {
+                        userJson.addProperty("name", userArray.get(0).getAsJsonObject().get("name").getAsString());
+                        userJson.addProperty("email", userArray.get(0).getAsJsonObject().get("email").getAsString());
+
+                        JsonElement accounts = userArray.get(0).getAsJsonObject().get("accounts");
+
+                        if (accounts != null && !accounts.isJsonNull()) {
+                            userJson.add("accounts", accounts.getAsJsonObject());
+                        } else {
+                            userJson.add("accounts", null);
+                        }
+
+                        userJson.addProperty("created_at", userArray.get(0).getAsJsonObject().get("created_at").getAsString());
+                    }
+
+                    utils.sendJsonResponse(exchange, String.valueOf(userJson), 200);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500);
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }

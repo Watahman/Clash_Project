@@ -76,6 +76,7 @@ public class Main {
         supaUser.createUser();
         supaUser.getUserInfo();
         supaUser.checkUserLogin();
+        supaUser.compareUserId();
 
         supaCWLPlanner.saveCWLPlanner();
         supaCWLPlanner.getAllPlanners();

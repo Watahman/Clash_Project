@@ -55,6 +55,7 @@ export const _EXT_SUPA_CONF = "/SupabaseConfigInfo"
 export const _EXT_SUPA_USER_MAKE = "/SupabaseUserMake"
 export const _EXT_SUPA_USER_INFO = "/SupabaseUserInfo"
 export const _EXT_SUPA_USER_CHECK = "/SupabaseUserCheck";
+export const _EXT_SUPA_USER_IDCHECK = "/SupabaseUserIdCheck"
 
 export const _EXT_SUPA_CWLPLANNER_DATA_SET = "/SupabaseCwplannerDataSet";
 export const _EXT_SUPA_CWLPLANNER_DATA_GET = "/SupabaseCwplannerDataGet";
