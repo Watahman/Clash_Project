@@ -54,17 +54,41 @@ function poBackdrop(e) {
 function poTab(btn) {
     document.querySelectorAll('.po-tab').forEach(t => t.classList.remove('po-tab-active'));
     btn.classList.add('po-tab-active');
+    switch(btn.id){
+        case 'po-tab-bases':
+            document.querySelector(".po-empty").textContent = "No Bases"
+            document.querySelector(".po-empty").classList.remove('hidden');
+            document.querySelector("#po-add").innerHTML = '' + '<img src="assets/css/pictures/add.svg" alt="add" />' + "ADD BASE"
+            document.querySelector("#po-add").classList.remove('hidden');
+            break;
+        case 'po-tab-friends':
+            document.querySelector(".po-empty").textContent = "No Friends"
+            document.querySelector(".po-empty").classList.remove('hidden');
+            document.querySelector("#po-add").innerHTML = '' + '<img src="assets/css/pictures/add.svg" alt="add" />' + "ADD FRIEND"
+            document.querySelector("#po-add").classList.remove('hidden');
+            break;
+        case 'po-tab-clans':
+            document.querySelector(".po-empty").textContent = "No Clans"
+            document.querySelector(".po-empty").classList.remove('hidden');
+            document.querySelector("#po-add").innerHTML = '' + '<img src="assets/css/pictures/add.svg" alt="add" />' + "ADD CLAN"
+            document.querySelector("#po-add").classList.remove('hidden');
+            break;
+        case 'po-tab-settings':
+            document.querySelector(".po-empty").classList.add('hidden');
+            document.querySelector("#po-add").classList.add('hidden');
+            break;
+    }
 }
 
 let poCopyTimer;
 function poCopy() {
-    navigator.clipboard.writeText(document.getElementById('po-code').textContent).catch(() => {});
-    document.getElementById('po-ico-copy').classList.add('po-hidden');
-    document.getElementById('po-ico-check').classList.remove('po-hidden');
+    navigator.clipboard.writeText(document.querySelector('#po-code').textContent).catch(() => {});
+    document.querySelector('#po-ico-copy').classList.add('po-hidden');
+    document.querySelector('#po-ico-check').classList.remove('po-hidden');
     clearTimeout(poCopyTimer);
     poCopyTimer = setTimeout(() => {
-        document.getElementById('po-ico-copy').classList.remove('po-hidden');
-        document.getElementById('po-ico-check').classList.add('po-hidden');
+        document.querySelector('#po-ico-copy').classList.remove('po-hidden');
+        document.querySelector('#po-ico-check').classList.add('po-hidden');
     }, 1800);
 }
 

@@ -265,3 +265,15 @@ footer {
     .tool-tabs { width: 100%; }
     .tool-tab { flex: 1; justify-content: center; }
 }
+
+#profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.profile-svg-header {
+    height: 1rem;
+    width: 1rem;
+    filter: brightness(0) invert(1);
+}

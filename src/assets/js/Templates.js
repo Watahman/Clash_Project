@@ -246,4 +246,6 @@ function updatePlayerAmount(element, dropped) {
     if (dropped) savePlan();
 }
 
+
+
 export { createPlayerCard, createClanCard };
