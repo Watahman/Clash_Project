@@ -2,7 +2,7 @@ import { databaseRequestWithBody } from "./API/API-Communication.js";
 import * as conf from "./Data/config.js";
 
 export function profileHTML(){
-    fetch("../../subpages/popup_HTMLs/profile_popup.html")
+    fetch("subpages/popup_HTMLs/profile_popup.html")
         .then(res => res.text())
         .then(html => {
             document.querySelector(".profile-placeholder").innerHTML = html;
@@ -21,6 +21,8 @@ function profileInit(){
                 .then(data => {
                 openProfile(data.name, "#" + localStorage.getItem("id").split("-")[0])
             })
+        }else{
+            window.location.href = "subpages/login.html"
         }
     })
     document.querySelector("#profile-overlay").addEventListener('click', (e) => {poBackdrop(e)})
