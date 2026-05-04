@@ -275,3 +275,50 @@
 .hidden {
     display: none !important;
 }
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.overlay-container {
+    padding: 2rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border-mid);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    min-width: clamp(16rem, 28vw, 22rem);
+    animation: overlayIn 0.18s ease;
+}
+
+input[type="text"] {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    background: var(--surface-3);
+    color: var(--text-1);
+    border: 1px solid var(--border-mid);
+    border-radius: var(--radius-md);
+    padding: 0.6rem 0.875rem;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+}
+
+input[type="text"]::placeholder {
+    color: var(--text-3);
+}
+
+input[type="text"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108,120,240,0.12);
+}

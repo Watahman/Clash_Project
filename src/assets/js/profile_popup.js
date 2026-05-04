@@ -2,7 +2,7 @@ import { databaseRequestWithBody } from "./API/API-Communication.js";
 import * as conf from "./Data/config.js";
 
 export function profileHTML(){
-    fetch("subpages/popup_HTMLs/profile_popup.html")
+    fetch("/subpages/popup_HTMLs/profile_popup.html")
         .then(res => res.text())
         .then(html => {
             document.querySelector(".profile-placeholder").innerHTML = html;
@@ -19,7 +19,7 @@ function profileInit(){
             }
             databaseRequestWithBody(path, data)
                 .then(data => {
-                openProfile(data.name, "#" + localStorage.getItem("id").split("-")[0])
+                openProfile(data.name, "#" + localStorage.getItem("id").split("-")[0], data.created_at.split("T")[0])
             })
         }else{
             window.location.href = "subpages/login.html"
@@ -38,6 +38,7 @@ function openProfile(username, code, memberSince) {
     document.querySelector("#po-member-since").textContent = memberSince ? 'Lid sinds ' + memberSince : 'Lid sinds 18 februari';
     document.querySelector("#profile-overlay").classList.add('po-open');
     document.body.style.overflow = 'hidden';
+    poTab(document.querySelector(".po-tab-active"))
 }
 
 function closeProfile() {
@@ -51,31 +52,74 @@ function poBackdrop(e) {
     }
 }
 
+let controller = new AbortController();
 function poTab(btn) {
     document.querySelectorAll('.po-tab').forEach(t => t.classList.remove('po-tab-active'));
     btn.classList.add('po-tab-active');
     switch(btn.id){
         case 'po-tab-bases':
-            document.querySelector(".po-empty").textContent = "No Bases"
+            controller.abort();
+            controller = new AbortController();
+            document.querySelector(".po-empty").textContent = "No Bases";
             document.querySelector(".po-empty").classList.remove('hidden');
-            document.querySelector("#po-add").innerHTML = '' + '<img src="assets/css/pictures/add.svg" alt="add" />' + "ADD BASE"
+            document.querySelector("#po-add").innerHTML ='' + '<img src="assets/css/pictures/add.svg" alt="add" />ADD BASE';
             document.querySelector("#po-add").classList.remove('hidden');
+            document.querySelector("#po-add").onclick = () => {
+                document.querySelector("#po-add-base").classList.remove('hidden');
+                document.addEventListener('keydown', e => {
+                    if (e.key === 'Escape') {
+                        document.querySelector("#po-add-base").classList.add('hidden');
+                    }
+                }, { once: true });
+                document.querySelector("#po-overlay-add-base-button").onclick = () => {
+                    document.querySelector("#po-add-base").classList.add('hidden');
+                };
+            };
             break;
         case 'po-tab-friends':
-            document.querySelector(".po-empty").textContent = "No Friends"
+            controller.abort();
+            controller = new AbortController();
+            document.querySelector(".po-empty").textContent = "No Friends";
             document.querySelector(".po-empty").classList.remove('hidden');
-            document.querySelector("#po-add").innerHTML = '' + '<img src="assets/css/pictures/add.svg" alt="add" />' + "ADD FRIEND"
+            document.querySelector("#po-add").innerHTML ='' + '<img src="assets/css/pictures/add.svg" alt="add" />ADD FRIEND';
             document.querySelector("#po-add").classList.remove('hidden');
+            document.querySelector("#po-add").onclick = () => {
+                document.querySelector("#po-add-clan").classList.remove('hidden');
+                document.addEventListener('keydown', e => {
+                    if (e.key === 'Escape') {
+                        document.querySelector("#po-add-clan").classList.add('hidden');
+                    }
+                }, { once: true });
+                document.querySelector("#po-overlay-add-clan-button").onclick = () => {
+                    document.querySelector("#po-add-clan").classList.add('hidden');
+                };
+            };
             break;
         case 'po-tab-clans':
-            document.querySelector(".po-empty").textContent = "No Clans"
+            controller.abort();
+            controller = new AbortController();
+            document.querySelector(".po-empty").textContent = "No Clans";
             document.querySelector(".po-empty").classList.remove('hidden');
-            document.querySelector("#po-add").innerHTML = '' + '<img src="assets/css/pictures/add.svg" alt="add" />' + "ADD CLAN"
+            document.querySelector("#po-add").innerHTML ='' + '<img src="assets/css/pictures/add.svg" alt="add" />ADD CLAN';
             document.querySelector("#po-add").classList.remove('hidden');
+            document.querySelector("#po-add").onclick = () => {
+                document.querySelector("#po-add-clan").classList.remove('hidden');
+                document.addEventListener('keydown', e => {
+                    if (e.key === 'Escape') {
+                        document.querySelector("#po-add-clan").classList.add('hidden');
+                    }
+                }, { once: true });
+                document.querySelector("#po-overlay-add-clan-button").onclick = () => {
+                    document.querySelector("#po-add-clan").classList.add('hidden');
+                };
+            };
             break;
         case 'po-tab-settings':
+            controller.abort();
+            controller = new AbortController();
             document.querySelector(".po-empty").classList.add('hidden');
             document.querySelector("#po-add").classList.add('hidden');
+            document.querySelector("#po-add").onclick = null;
             break;
     }
 }
@@ -93,5 +137,12 @@ function poCopy() {
 }
 
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeProfile();
+    if (e.key === 'Escape') {
+        if (!document.querySelector("#po-add-base").classList.contains('hidden') ||
+            !document.querySelector("#po-add-clan").classList.contains('hidden')) {
+            return;
+        }
+
+        closeProfile();
+    }
 });

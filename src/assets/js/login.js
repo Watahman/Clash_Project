@@ -20,7 +20,7 @@ function clicklistener(){
             console.log(data);
             if(data.success){
                 localStorage.setItem("id", data.id);
-                window.location.href = "../index.html";
+                window.location.href = "../../index.html";
             }else{
                 console.log("error");
             }
