@@ -5,5 +5,5 @@ export function createBaseCard(baseInfo){
     baseTemplateCopy.querySelector(".po-base-name").textContent = baseInfo.name;
     baseTemplateCopy.querySelector(".po-base-info").textContent = baseInfo.tag;
 
-    document.querySelector(".po-panel").insertBefore(baseTemplateCopy, document.querySelector("#po-add-container"));
+    document.querySelector(".po-panel-content").appendChild(baseTemplateCopy);
 }

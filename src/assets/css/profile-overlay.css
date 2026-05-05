@@ -23,6 +23,7 @@
     box-shadow: var(--shadow-md);
     display: flex;
     flex-direction: column;
+    height: 85vh;
 }
 
 /* ── Top label row ── */
@@ -157,13 +158,11 @@
 
 /* ── Panels ── */
 .po-panel {
-    overflow-y: auto;
-    /* fits exactly 3 base cards (74px each) + 2 gaps (9px) + add-button (50px) + padding (28px) */
-    max-height: 310px;
     padding: 14px 18px;
     display: flex;
+    flex: 1;
     flex-direction: column;
-    gap: 9px;
+    overflow: hidden;
 }
 .po-panel.po-hidden {
     display: none;
@@ -253,7 +252,7 @@
     color: var(--text-3);
     font-size: 0.75rem;
     text-align: center;
-    margin: 3rem 0;
+    margin: auto;
     font-family: var(--font-mono);
 }
 
@@ -336,6 +335,8 @@ input[type="text"]:focus {
 #po-add-container {
     display: flex;
     gap: 7px;
+    padding-top: 9px;
+    flex-shrink: 0;
 }
 
 #po-add {
@@ -369,4 +370,12 @@ input[type="text"]:focus {
     background: var(--surface-2);
     color: var(--text-2);
     border-color: var(--border-focus);
+}
+
+.po-panel-content {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    overflow-y: auto;
+    flex: 1;
 }
