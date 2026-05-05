@@ -125,7 +125,7 @@ public class SUPABASE_User {
                         JsonElement accounts = userArray.get(0).getAsJsonObject().get("accounts");
 
                         if (accounts != null && !accounts.isJsonNull()) {
-                            userJson.add("accounts", accounts.getAsJsonObject());
+                            userJson.add("accounts", accounts.getAsJsonArray());
                         } else {
                             userJson.add("accounts", null);
                         }

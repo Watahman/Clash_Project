@@ -22,7 +22,8 @@ function profileInit(){
             }
             databaseRequestWithBody(path, data)
                 .then(data => {
-                openProfile(data.name, "#" + localStorage.getItem("id").split("-")[0], data.created_at.split("T")[0])
+                    openProfile(data.name, "#" + localStorage.getItem("id").split("-")[0], data.created_at.split("T")[0])
+                    loadBases(data.accounts)
             })
         }else{
             window.location.href = "subpages/login.html"
@@ -63,10 +64,17 @@ function poTab(btn) {
         case 'po-tab-bases':
             controller.abort();
             controller = new AbortController();
-            document.querySelector(".po-empty").textContent = "No Bases";
-            document.querySelector(".po-empty").classList.remove('hidden');
+            if(document.querySelectorAll(".po-base-item").length > 0){
+                document.querySelector(".po-empty").classList.add('hidden');
+                document.querySelectorAll(".po-base-item").forEach(t => t.classList.remove('hidden'));
+            } else {
+                document.querySelector(".po-empty").textContent = "No Bases";
+                document.querySelector(".po-empty").classList.remove('hidden');
+            }
             document.querySelector("#po-add").innerHTML ='' + '<img src="assets/css/pictures/add.svg" alt="add" />ADD BASE';
             document.querySelector("#po-add").classList.remove('hidden');
+            document.querySelector("#po-friend-requests-btn").classList.add('hidden');
+            document.querySelector("#po-friend-pending-btn").classList.add('hidden');
             document.querySelector("#po-add").onclick = () => {
                 document.querySelector("#po-add-base").classList.remove('hidden');
                 document.addEventListener('keydown', e => {
@@ -80,7 +88,7 @@ function poTab(btn) {
                     postPlayerVerifyTokenRequest(playerId, playerToken, (confirmation) => {
                     if(confirmation.status === "ok"){
                         getPlayerWithBattleData(playerId, (playerData) => {
-                            createBaseCard(playerData);
+                            createBaseCard(playerData[0]);
                             const path = conf._BASE_URL + conf._EXT_SUPA_USER_ADD_ACCOUNT;
                             const data = {
                                 id: localStorage.getItem("id"),
@@ -98,8 +106,11 @@ function poTab(btn) {
         case 'po-tab-friends':
             controller.abort();
             controller = new AbortController();
+            document.querySelectorAll(".po-base-item").forEach(t => t.classList.add('hidden'));
             document.querySelector(".po-empty").textContent = "No Friends";
             document.querySelector(".po-empty").classList.remove('hidden');
+            document.querySelector("#po-friend-requests-btn").classList.remove('hidden');
+            document.querySelector("#po-friend-pending-btn").classList.remove('hidden');
             document.querySelector("#po-add").innerHTML ='' + '<img src="assets/css/pictures/add.svg" alt="add" />ADD FRIEND';
             document.querySelector("#po-add").classList.remove('hidden');
             document.querySelector("#po-add").onclick = () => {
@@ -117,8 +128,11 @@ function poTab(btn) {
         case 'po-tab-clans':
             controller.abort();
             controller = new AbortController();
+            document.querySelectorAll(".po-base-item").forEach(t => t.classList.add('hidden'));
             document.querySelector(".po-empty").textContent = "No Clans";
             document.querySelector(".po-empty").classList.remove('hidden');
+            document.querySelector("#po-friend-requests-btn").classList.add('hidden');
+            document.querySelector("#po-friend-pending-btn").classList.add('hidden');
             document.querySelector("#po-add").innerHTML ='' + '<img src="assets/css/pictures/add.svg" alt="add" />ADD CLAN';
             document.querySelector("#po-add").classList.remove('hidden');
             document.querySelector("#po-add").onclick = () => {
@@ -136,8 +150,11 @@ function poTab(btn) {
         case 'po-tab-settings':
             controller.abort();
             controller = new AbortController();
+            document.querySelectorAll(".po-base-item").forEach(t => t.classList.add('hidden'));
             document.querySelector(".po-empty").classList.add('hidden');
             document.querySelector("#po-add").classList.add('hidden');
+            document.querySelector("#po-friend-requests-btn").classList.add('hidden');
+            document.querySelector("#po-friend-pending-btn").classList.add('hidden');
             document.querySelector("#po-add").onclick = null;
             break;
     }
@@ -165,3 +182,9 @@ document.addEventListener('keydown', e => {
         closeProfile();
     }
 });
+
+function loadBases(baseArray){
+    if(baseArray.length === 0) return
+    document.querySelector(".po-empty").classList.add('hidden');
+    baseArray.forEach((element) => {createBaseCard(element)});
+}

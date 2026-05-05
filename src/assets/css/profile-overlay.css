@@ -332,3 +332,41 @@ input[type="text"]:focus {
     border: 1px solid var(--border-subtle);
     background: var(--surface-3);
 }
+
+#po-add-container {
+    display: flex;
+    gap: 7px;
+}
+
+#po-add {
+    flex: 1; /* ipv width: 100% */
+}
+
+#po-friend-requests-btn,
+#po-friend-pending-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 13px;
+    border: 1px dashed var(--border-mid);
+    border-radius: var(--radius-lg);
+    background: none;
+    cursor: pointer;
+    color: var(--text-3);
+    font-size: 0.72rem;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+#po-friend-requests-btn:hover,
+#po-friend-pending-btn:hover {
+    background: var(--surface-2);
+    color: var(--text-2);
+    border-color: var(--border-focus);
+}
