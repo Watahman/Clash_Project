@@ -5,6 +5,7 @@ public class Config {
     String _API_KEY_BRUGGE = System.getenv("_API_KEY_BRUGGE");
     String _API_KEY_HOME = System.getenv("_API_KEY_HOME");
     String _API_KEY_ALL = System.getenv("_API_KEY_ALL");
+    String _API_KEY_0505 = System.getenv("_API_KEY_0505");
 
     String _API_KEY_ACTIVE = _API_KEY_ALL;
 
@@ -62,6 +63,7 @@ public class Config {
     String _EXT_SUPA_USER_INFO = "/SupabaseUserInfo";
     String _EXT_SUPA_USER_CHECK = "/SupabaseUserCheck";
     String _EXT_SUPA_USER_IDCHECK = "/SupabaseUserIdCheck";
+    String _EXT_SUPA_USER_ADD_ACCOUNT = "/SupabaseUserAddAccount";
 
     String _EXT_SUPA_CWLPLANNER_DATA_SET = "/SupabaseCwplannerDataSet";
     String _EXT_SUPA_CWLPLANNER_DATA_GET = "/SupabaseCwplannerDataGet";

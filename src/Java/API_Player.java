@@ -83,16 +83,17 @@ public class API_Player {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 try {
                     JsonObject json = utils.parseRequestBody(exchange);
-                    String playerTag = json.get("playerTag").getAsString();
-                    String playerToken = json.get("playerToken").getAsString();
+                    System.out.println(json);
 
+                    String playerTag = json.get("playerID").getAsString();
+                    String playerToken = json.get("playerToken").getAsString();
                     String clashUrl = conf._BASE_URL_CLASH + "/players/" + URLEncoder.encode(playerTag, "UTF-8") + "/verifytoken";
 
                     JsonObject body = new JsonObject();
                     body.addProperty("token", playerToken);
 
                     String responseText = utils.postClashApiResponse(clashUrl, body.toString());
-
+                    System.out.println(responseText);
                     utils.sendJsonResponse(exchange, responseText, 200);
                 } catch (Exception e) {
                     e.printStackTrace();

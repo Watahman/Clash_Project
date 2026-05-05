@@ -1,6 +1,6 @@
 import { getClanMembersWithBattleData, getPlayerWithBattleData } from "./API/API-Functions.js"
 import { getClanInfoRequest } from "./API/API-Clan.js"
-import { createPlayerCard, createClanCard } from "./Templates.js";
+import { createPlayerCard, createClanCard } from "./CWL-Templates.js";
 import {databaseRequestWithBody} from "./API/API-Communication.js";
 import * as conf from "./Data/config.js"
 import {canAutosave, isLoading, setLoading} from "./Data/config.js";

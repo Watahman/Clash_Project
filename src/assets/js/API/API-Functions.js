@@ -26,13 +26,14 @@ export function getClanMembersWithBattleData(clanTag, callback) {
 export function getPlayerWithBattleData(playerTag, callback) {
     let player = []
     playerAPI.getPlayerInfoRequest(playerTag, (data) => {
+        console.log(data)
         player.push({
             name: data.name,
             tag: data.tag,
             townHallLevel: data.townHallLevel,
-            role: data.role,
-            clanName: data.clan.name,
-            clanTag: data.clan.tag
+            role: data.role ?? null,
+            clanName: data.clan?.name ?? null,
+            clanTag: data.clan?.tag ?? null
         })
 
         processBatch(player, 0, callback);

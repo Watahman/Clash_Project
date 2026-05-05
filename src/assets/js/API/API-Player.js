@@ -25,7 +25,7 @@ export function postPlayerVerifyTokenRequest(playerID, playerToken, callback){
         playerID: playerID,
         playerToken: playerToken
     })
-
+    console.log(body)
     fetchRequest(path, body, (data) => {callback(data)})
 }
 

@@ -1,5 +1,8 @@
 import { databaseRequestWithBody } from "./API/API-Communication.js";
 import * as conf from "./Data/config.js";
+import { postPlayerVerifyTokenRequest } from "./API/API-Player.js";
+import { getPlayerWithBattleData } from "./API/API-Functions.js";
+import { createBaseCard } from "./Templates.js";
 
 export function profileHTML(){
     fetch("/subpages/popup_HTMLs/profile_popup.html")
@@ -72,6 +75,22 @@ function poTab(btn) {
                     }
                 }, { once: true });
                 document.querySelector("#po-overlay-add-base-button").onclick = () => {
+                    const playerId = document.querySelector("#po-input-base-tag").value;
+                    const playerToken = document.querySelector("#po-input-base-token").value;
+                    postPlayerVerifyTokenRequest(playerId, playerToken, (confirmation) => {
+                    if(confirmation.status === "ok"){
+                        getPlayerWithBattleData(playerId, (playerData) => {
+                            createBaseCard(playerData);
+                            const path = conf._BASE_URL + conf._EXT_SUPA_USER_ADD_ACCOUNT;
+                            const data = {
+                                id: localStorage.getItem("id"),
+                                account: playerData[0]
+                            }
+                            databaseRequestWithBody(path, data).then(confirm => {console.log(confirm)})
+                        });
+                    }else{
+                        //send error
+                    }});
                     document.querySelector("#po-add-base").classList.add('hidden');
                 };
             };

@@ -190,4 +190,59 @@ public class SUPABASE_User {
             }
         });
     }
+
+    public void addAccountToUser(){
+        server.createContext(conf._EXT_SUPA_USER_ADD_ACCOUNT, exchange -> {
+            utils.addCORS(exchange);
+
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                try {
+                    String body = new String(exchange.getRequestBody().readAllBytes());
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+
+                    String userId = json.get("id").getAsString();
+                    JsonObject newAccount = json.get("account").getAsJsonObject();
+
+                    // Huidige accounts ophalen
+                    String result = SUPABASE_Client.getWithBody("users", "id=eq." + userId);
+                    JsonArray users = JsonParser.parseString(result).getAsJsonArray();
+
+                    if (users.isEmpty()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"user not found\"}", 404);
+                        return;
+                    }
+
+                    JsonElement accountsEl = users.get(0).getAsJsonObject().get("accounts");
+                    JsonArray accounts;
+
+                    if (accountsEl == null || accountsEl.isJsonNull()) {
+                        accounts = new JsonArray(); // was null, start fresh
+                    } else {
+                        accounts = accountsEl.getAsJsonArray();
+                    }
+
+                    accounts.add(newAccount);
+
+                    // Opslaan
+                    JsonObject patch = new JsonObject();
+                    patch.add("accounts", accounts);
+                    SUPABASE_Client.patch("users", "id=eq." + userId, patch.toString());
+
+                    utils.sendJsonResponse(exchange, patch.toString(), 200);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
+    }
 }

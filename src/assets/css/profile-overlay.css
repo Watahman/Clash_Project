@@ -322,3 +322,13 @@ input[type="text"]:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(108,120,240,0.12);
 }
+
+.po-base-img {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--border-subtle);
+    background: var(--surface-3);
+}
