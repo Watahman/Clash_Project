@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 
 import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.util.Base64;
 
 public class SUPABASE_User {
@@ -131,6 +132,7 @@ public class SUPABASE_User {
                         }
 
                         userJson.addProperty("created_at", userArray.get(0).getAsJsonObject().get("created_at").getAsString());
+                        userJson.addProperty("code",  userArray.get(0).getAsJsonObject().get("code").getAsString());
                     }
 
                     utils.sendJsonResponse(exchange, String.valueOf(userJson), 200);
@@ -163,6 +165,7 @@ public class SUPABASE_User {
                     String naam = json.get("name").getAsString();
                     String email = json.get("email").getAsString();
                     String password = json.get("password").getAsString();
+                    String code = API_Utils.generateCode();
 
                     // wachtwoord hashen
                     MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -174,6 +177,7 @@ public class SUPABASE_User {
                     user.addProperty("name", naam);
                     user.addProperty("email", email);
                     user.addProperty("password", hashedPassword);
+                    user.addProperty("code", code);
 
                     // opslaan in Supabase
                     String result = SUPABASE_Client.post("users", user.toString());

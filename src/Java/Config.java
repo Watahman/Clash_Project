@@ -64,6 +64,7 @@ public class Config {
     String _EXT_SUPA_USER_CHECK = "/SupabaseUserCheck";
     String _EXT_SUPA_USER_IDCHECK = "/SupabaseUserIdCheck";
     String _EXT_SUPA_USER_ADD_ACCOUNT = "/SupabaseUserAddAccount";
+    String _EXT_SUPA_USER_ADD_FRIEND = "/SupabaseUserAddFriend";
 
     String _EXT_SUPA_CWLPLANNER_DATA_SET = "/SupabaseCwplannerDataSet";
     String _EXT_SUPA_CWLPLANNER_DATA_GET = "/SupabaseCwplannerDataGet";

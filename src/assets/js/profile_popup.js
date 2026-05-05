@@ -22,7 +22,8 @@ function profileInit(){
             }
             databaseRequestWithBody(path, data)
                 .then(data => {
-                    openProfile(data.name, "#" + localStorage.getItem("id").split("-")[0], data.created_at.split("T")[0])
+                    console.log("data: ", data);
+                    openProfile(data.name, "#" + data.code, data.created_at.split("T")[0])
                     loadBases(data.accounts)
             })
         }else{
@@ -121,6 +122,13 @@ function poTab(btn) {
                     }
                 }, { once: true });
                 document.querySelector("#po-overlay-add-clan-button").onclick = () => {
+                    const friendCode = document.querySelector("#po-input-clan-tag").value.split("#")[1];
+                    const path = conf._BASE_URL + conf._EXT_SUPA_USER_ADD_FRIEND;
+                    const data = {
+                        userId: localStorage.getItem("id"),
+                        friendCode: friendCode
+                    }
+                    databaseRequestWithBody(path, data).then(confirm => {console.log(confirm)})
                     document.querySelector("#po-add-clan").classList.add('hidden');
                 };
             };
