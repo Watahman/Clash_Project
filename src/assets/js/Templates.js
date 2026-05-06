@@ -63,3 +63,15 @@ export function createFriendCard(friendId){
         document.querySelector(".po-panel-content").appendChild(friendTemplateCopy)
     })
 }
+
+export function createFriendPendingCard(friendId){
+    const friendPendingTemplateCopy = document.querySelector("#po-friend-pending-template").content.cloneNode(true)
+
+    const path = conf._BASE_URL + conf._EXT_SUPA_USER_INFO
+    const body = { id: friendId }
+    databaseRequestWithBody(path, body).then(data => {
+        friendPendingTemplateCopy.querySelector(".po-base-name").textContent = data[0].name
+        friendPendingTemplateCopy.querySelector(".po-base-info").textContent = "#" + data[0].code
+        document.querySelector(".po-friend-list-content").appendChild(friendPendingTemplateCopy)
+    })
+}

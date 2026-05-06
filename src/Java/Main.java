@@ -86,7 +86,8 @@ public class Main {
         supaCWLPlanner.getPlanner();
 
         supaFriend.addFriend();
-        supaFriend.getPendingFriends();
+        supaFriend.getPendingRequests();
+        supaFriend.getFriendRequests();
         supaFriend.acceptFriend();
         supaFriend.rejectFriend();
         supaFriend.getFriends();

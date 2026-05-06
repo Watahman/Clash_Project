@@ -60,6 +60,7 @@ export const _EXT_SUPA_USER_ADD_ACCOUNT = "/SupabaseUserAddAccount";
 
 export const _EXT_SUPA_USER_ADD_FRIEND = "/SupabaseUserAddFriend";
 export const _EXT_SUPA_USER_GET_PENDING_FRIENDS = "/SupabaseUserGetPendingFriends";
+export const _EXT_SUPA_USER_GET_FRIEND_REQUESTS =  "/SupabaseUserGetFriendRequests";
 export const _EXT_SUPA_USER_ACCEPT_FRIEND =  "/SupabaseUserAcceptFriend";
 export const _EXT_SUPA_USER_REJECT_FRIEND = "/SupabaseUserRejectFriend";
 export const _EXT_SUPA_USER_GET_FRIENDS = "/SupabaseUserGetFriends";

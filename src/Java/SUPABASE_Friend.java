@@ -66,62 +66,51 @@ public class SUPABASE_Friend {
         });
     }
 
-    public void getPendingFriends(){
+    public void getPendingRequests(){
         server.createContext(conf._EXT_SUPA_USER_GET_PENDING_FRIENDS, exchange -> {
             utils.addCORS(exchange);
-            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1);
-                return;
-            }
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) { exchange.sendResponseHeaders(204, -1); return; }
 
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 try {
                     String body = new String(exchange.getRequestBody().readAllBytes());
                     JsonObject json = JsonParser.parseString(body).getAsJsonObject();
-
                     String userId = json.get("userId").getAsString();
 
-                    String checkA = SUPABASE_Client.getWithBody("friends",
+                    // ik ben user_a, ik heb de request gestuurd
+                    String result = SUPABASE_Client.getWithBody("friends",
                             "user_a=eq." + userId + "&status=eq.pending&select=user_b,status");
-                    String checkB = SUPABASE_Client.getWithBody("friends",
-                            "user_b=eq." + userId + "&status=eq.pending&select=user_a,status");
 
-                    JsonArray resultsA = JsonParser.parseString(checkA).getAsJsonArray();
-                    JsonArray resultsB = JsonParser.parseString(checkB).getAsJsonArray();
-
-                    JsonArray combined = new JsonArray();
-                    Set<String> seen = new HashSet<>();
-
-                    for (JsonElement e : resultsA) {
-                        String friendId = e.getAsJsonObject().get("user_b").getAsString();
-                        if (seen.add(friendId)) {
-                            JsonObject entry = new JsonObject();
-                            entry.addProperty("user_a", userId);
-                            entry.addProperty("user_b", friendId);
-                            entry.addProperty("status", e.getAsJsonObject().get("status").getAsString());
-                            combined.add(entry);
-                        }
-                    }
-
-                    for (JsonElement e : resultsB) {
-                        String friendId = e.getAsJsonObject().get("user_a").getAsString();
-                        if (seen.add(friendId)) {
-                            JsonObject entry = new JsonObject();
-                            entry.addProperty("user_a", userId);
-                            entry.addProperty("user_b", friendId);
-                            entry.addProperty("status", e.getAsJsonObject().get("status").getAsString());
-                            combined.add(entry);
-                        }
-                    }
-
-                    utils.sendJsonResponse(exchange, combined.toString(), 200);
+                    utils.sendJsonResponse(exchange, result, 200);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    try {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500);
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
+                    try { utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500); }
+                    catch (Exception ex) { throw new RuntimeException(ex); }
+                }
+            }
+        });
+    }
+
+    public void getFriendRequests(){
+        server.createContext(conf._EXT_SUPA_USER_GET_FRIEND_REQUESTS, exchange -> {
+            utils.addCORS(exchange);
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) { exchange.sendResponseHeaders(204, -1); return; }
+
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                try {
+                    String body = new String(exchange.getRequestBody().readAllBytes());
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+                    String userId = json.get("userId").getAsString();
+
+                    // ik ben user_b, iemand heeft mij gevraagd
+                    String result = SUPABASE_Client.getWithBody("friends",
+                            "user_b=eq." + userId + "&status=eq.pending&select=user_a,status");
+
+                    utils.sendJsonResponse(exchange, result, 200);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try { utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500); }
+                    catch (Exception ex) { throw new RuntimeException(ex); }
                 }
             }
         });

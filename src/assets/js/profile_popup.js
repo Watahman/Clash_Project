@@ -2,7 +2,7 @@ import { databaseRequestWithBody } from "./API/API-Communication.js";
 import * as conf from "./Data/config.js";
 import { postPlayerVerifyTokenRequest } from "./API/API-Player.js";
 import { getPlayerWithBattleData } from "./API/API-Functions.js";
-import { createBaseCard, createFriendRequestCard, createFriendCard } from "./Templates.js";
+import { createBaseCard, createFriendRequestCard, createFriendCard, createFriendPendingCard } from "./Templates.js";
 
 let profile, closeProfileBtn, userCode, profileTabs, openProfileBtn, activeTab
 let friendRequestBtn, friendPendingBtn, friendList, emptyFriendRequest
@@ -14,6 +14,7 @@ let overlayAddBaseBtn, overlayAddClanBtn
 let inputBaseTag, inputBaseToken, inputClanTag
 let controller = new AbortController()
 let poCopyTimer
+let friendListTitle
 
 export function profileHTML(){
     fetch("/subpages/popup_HTMLs/profile_popup.html")
@@ -52,6 +53,7 @@ function labelInit(){
     inputBaseTag      = document.querySelector("#po-input-base-tag")
     inputBaseToken    = document.querySelector("#po-input-base-token")
     inputClanTag      = document.querySelector("#po-input-clan-tag")
+    friendListTitle   = document.querySelector("#po-friend-list-title")
 }
 
 function profileInit(){
@@ -63,6 +65,25 @@ function profileInit(){
     friendListClose.onclick = () => { friendList.classList.add('hidden') }
 
     friendRequestBtn.onclick = () => {
+        friendListTitle.textContent = "Friend Requests"
+        emptyFriendRequest.textContent = "No requests"
+        friendList.classList.remove('hidden')
+        const data = { userId: localStorage.getItem("id") }
+        databaseRequestWithBody(conf._BASE_URL + conf._EXT_SUPA_USER_GET_FRIEND_REQUESTS, data)
+            .then(res => {
+                friendListContent.querySelectorAll(".po-base-item").forEach(item => item.remove())
+                if (res.length === 0) {
+                    emptyFriendRequest.classList.remove('hidden')
+                    return
+                }
+                emptyFriendRequest.classList.add('hidden')
+                res.forEach(friend => { createFriendRequestCard(friend.user_b) })
+            })
+    }
+
+    friendPendingBtn.onclick = () => {
+        friendListTitle.textContent = "Pending"
+        emptyFriendRequest.textContent = "No pending requests"
         friendList.classList.remove('hidden')
         const data = { userId: localStorage.getItem("id") }
         databaseRequestWithBody(conf._BASE_URL + conf._EXT_SUPA_USER_GET_PENDING_FRIENDS, data)
@@ -73,7 +94,7 @@ function profileInit(){
                     return
                 }
                 emptyFriendRequest.classList.add('hidden')
-                res.forEach(friend => { createFriendRequestCard(friend.user_b) })
+                res.forEach(friend => { createFriendPendingCard(friend.user_b) })
             })
     }
 
