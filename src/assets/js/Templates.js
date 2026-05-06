@@ -50,16 +50,16 @@ export function createFriendRequestCard(friendId){
 }
 
 export function createFriendCard(friendId){
-    const friendTemplate = document.querySelector("#po-friend-template")
-    const friendTemplateCopy = friendTemplate.content.cloneNode(true);
+    const friendTemplateCopy = document.querySelector("#po-friend-template").content.cloneNode(true)
+    const activeTab = document.querySelector(".po-tab-active")
 
     const path = conf._BASE_URL + conf._EXT_SUPA_USER_INFO
-    const body = {
-        id: friendId
-    }
+    const body = { id: friendId }
     databaseRequestWithBody(path, body).then(data => {
-        friendTemplateCopy.querySelector(".po-base-name").textContent = data[0].name;
-        friendTemplateCopy.querySelector(".po-base-info").textContent = "#" + data[0].code;
-        document.querySelector(".po-panel-content").appendChild(friendTemplateCopy);
+        const item = friendTemplateCopy.querySelector(".po-base-item")
+        friendTemplateCopy.querySelector(".po-base-name").textContent = data[0].name
+        friendTemplateCopy.querySelector(".po-base-info").textContent = "#" + data[0].code
+        if (activeTab.id !== "po-tab-friends") item.classList.add('hidden')
+        document.querySelector(".po-panel-content").appendChild(friendTemplateCopy)
     })
 }
