@@ -33,6 +33,10 @@ public class SUPABASE_Client {
         return sendRequest("DELETE", table, null);
     }
 
+    public static String deleteColumn(String table, String filter) throws Exception {
+        return sendRequest("DELETE", table + "?" + filter, null);
+    }
+
     // algemene helper
     private static String sendRequest(String method, String table, String body) throws Exception {
         HttpClient client = HttpClient.newHttpClient();

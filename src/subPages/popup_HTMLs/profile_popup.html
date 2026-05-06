@@ -74,10 +74,72 @@
     </div>
 </div>
 
-<template id="po-base-template">
+<div class="overlay hidden" id="po-friend-list">
+    <div class="overlay-container" id="po-container-friend-list">
+        <div class="po-friend-list-header">
+            <span id="po-friend-list-title" class="po-friend-list-title">Friend requests</span>
+            <button id="po-friend-list-close" class="po-friend-list-close">
+                <img src="../../assets/css/pictures/close-btn.svg" alt="Sluiten">
+            </button>
+        </div>
+        <div id="po-friend-list-content" class="po-friend-list-content">
+            <p id="po-empty-friendrequest" class="po-empty">No requests</p>
+        </div>
+    </div>
+</div>
+
+<template id="po-friend-request-template">
     <div class="po-base-item">
+        <div class="po-friend-avatar">
+            <img src="../../assets/css/pictures/profile.svg" alt="Profiel">
+        </div>
+        <div class="po-base-text">
+            <span class="po-base-name">Username</span>
+            <span class="po-base-info">Friend code</span>
+        </div>
+        <div class="po-friend-actions">
+            <button class="po-friend-accept" aria-label="Accepteren">
+                <img src="../../assets/css/pictures/checkmark_blank.svg" alt="Accepteer">
+            </button>
+            <button class="po-friend-reject" aria-label="Weigeren">
+                <img src="../../assets/css/pictures/close-btn.svg" alt="Weiger">
+            </button>
+        </div>
+    </div>
+</template>
+
+<template id="po-friend-pending-template">
+    <div class="po-base-item">
+        <div class="po-friend-avatar">
+            <img src="../../assets/css/pictures/profile.svg" alt="Profiel">
+        </div>
+        <div class="po-base-text">
+            <span class="po-base-name">Username</span>
+            <span class="po-base-info">Friend code</span>
+        </div>
+        <div class="po-friend-clock" aria-label="Wachten op acceptatie">
+            <img src="../../assets/css/pictures/clock.svg" alt="Wachten">
+        </div>
+    </div>
+</template>
+
+<template id="po-base-template">
+    <div class="po-base-item po-card-base">
         <div class="po-base-icon">
             <img class="po-base-img" src="../../assets/css/pictures/base_icon.svg" alt="Profiel">
+        </div>
+        <div class="po-base-text">
+            <span class="po-base-name">Name</span>
+            <span class="po-base-info">Info</span>
+        </div>
+        <img class="po-base-chevron" src="../../assets/css/pictures/next.svg" alt="next">
+    </div>
+</template>
+
+<template id="po-friend-template">
+    <div class="po-base-item po-card-friend">
+        <div class="po-base-icon">
+            <img class="po-base-img" src="../../assets/css/pictures/profile.svg" alt="Profiel">
         </div>
         <div class="po-base-text">
             <span class="po-base-name">Name</span>

@@ -86,6 +86,10 @@ public class Main {
         supaCWLPlanner.getPlanner();
 
         supaFriend.addFriend();
+        supaFriend.getPendingFriends();
+        supaFriend.acceptFriend();
+        supaFriend.rejectFriend();
+        supaFriend.getFriends();
 
         server.start();
         System.out.println("Server gestart op http://localhost:8080");
