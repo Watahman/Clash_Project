@@ -2,30 +2,143 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Groepen · Tools for Clash</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="../assets/css/Main-css.css">
+    <link rel="stylesheet" href="../assets/css/profile-overlay.css">
+    <link rel="stylesheet" href="../assets/css/groups.css">
     <link rel="icon" type="image/png" href="../assets/css/pictures/shield_with_hamer_logov2.png">
-    <script type="module" src="../assets/js/mainJS.js"></script>
+    <script type="module" src="../assets/js/groups.js"></script>
 </head>
 <body>
+
 <header>
-  <div class="left">
-    <a href="../index.html">
-      <img src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="ToolsforClash_logo">
-    </a>
-  </div>
-
-  <nav class="center">
-    <a href="./cwl-planner-drafts.html">CWL planner</a>
-    <a href="./bracket-generator.html">Bracket generator</a>
-    <a href="./groups.html">Groepen</a>
-  </nav>
-
-  <div class="right">
-    <button>Taal</button>
-    <button>Instellingen</button>
-    <button id="profile-btn">Gebruiker</button>
-  </div>
+    <div class="left">
+        <a href="../index.html">
+            <img src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="ToolsforClash_logo">
+        </a>
+    </div>
+    <nav class="center">
+        <a href="cwl-planner.html">CWL planner</a>
+        <a href="bracket-generator.html">Bracket generator</a>
+        <a href="groups.html" aria-current="page">Groepen</a>
+    </nav>
+    <div class="right">
+        <button>Taal</button>
+        <button>Instellingen</button>
+        <button id="profile-btn">
+            <img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt="profile">
+            Gebruiker
+        </button>
+    </div>
 </header>
+
+<main id="groups-main">
+    <section id="groups-sidebar">
+        <div class="groups-sidebar-header">
+            <h3>Jouw groepen</h3>
+            <button id="groups-new-btn" class="btn-groups-accent">
+                <img src="../assets/css/pictures/add.svg" alt="">
+                Nieuw
+            </button>
+        </div>
+
+        <div id="groups-list">
+            <p class="groups-empty">Geen groepen</p>
+        </div>
+    </section>
+
+    <button id="groups-collapse-btn" aria-label="Sidebar inklappen" title="Inklappen">
+        <img src="../assets/css/pictures/next.svg" alt="" id="groups-collapse-icon">
+    </button>
+
+    <section id="groups-detail">
+        <div id="groups-detail-empty">
+            <p class="groups-empty">Selecteer een groep</p>
+        </div>
+
+        <div id="groups-detail-content" class="hidden">
+
+            <div class="groups-detail-header">
+                <div class="groups-detail-logo" id="groups-detail-logo">🛡️</div>
+                <div class="groups-detail-info">
+                    <span class="groups-detail-name" id="groups-detail-name">Groepsnaam</span>
+                    <div class="groups-detail-meta">
+                        <span id="groups-detail-count">0 leden</span>
+                        <button class="groups-code-pill" id="groups-detail-code" title="Kopieer code">
+                            <img src="../assets/css/pictures/copy.svg" alt="kopieer">
+                            <span>------</span>
+                        </button>
+                        <span class="groups-role-badge" id="groups-detail-role">Lid</span>
+                        <span class="groups-since" id="groups-detail-since">sinds —</span>
+                    </div>
+                </div>
+                <div class="groups-header-actions">
+                    <!-- Enkel zichtbaar voor (co-)leiders -->
+                    <button class="btn-groups-accent groups-leader-only hidden" id="groups-poll-btn">
+                        <img src="../assets/css/pictures/add.svg" alt="">
+                        Poll
+                    </button>
+                    <button class="btn-groups-default" id="groups-invite-btn">
+                        <img src="../assets/css/pictures/add.svg" alt="">
+                        Uitnodigen
+                    </button>
+                    <div class="groups-action-divider"></div>
+                    <!-- Enkel zichtbaar voor (co-)leiders -->
+                    <button class="btn-groups-icon groups-leader-only hidden" id="groups-settings-btn" title="Beheren">
+                        <img src="../assets/css/pictures/settings.svg" alt="Instellingen">
+                    </button>
+                    <button class="btn-groups-icon groups-danger" id="groups-leave-btn" title="Groep verlaten">
+                        <img src="../assets/css/pictures/close-btn.svg" alt="Verlaten">
+                    </button>
+                </div>
+            </div>
+
+            <div class="groups-members-panel">
+                <p class="groups-panel-title" id="groups-members-title">Leden (0)</p>
+                <div id="groups-member-list">
+                    <p class="groups-empty">Geen leden</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</main>
+
+<div class="overlay hidden" id="groups-overlay-new">
+    <div class="overlay-container">
+        <p class="groups-overlay-title">Groep aanmaken of joinen</p>
+        <input id="groups-input-name" type="text" placeholder="Groepsnaam">
+        <button id="groups-overlay-create-btn">Aanmaken</button>
+        <div class="groups-or-divider"><hr><span>of</span><hr></div>
+        <input id="groups-input-join-code" type="text" placeholder="Code: ######">
+        <button id="groups-overlay-join-btn">Joinen</button>
+    </div>
+</div>
+
+<div class="profile-placeholder"></div>
+
+<template id="groups-item-template">
+    <div class="groups-item">
+        <div class="groups-item-logo">🛡️</div>
+        <div class="groups-item-info">
+            <span class="groups-item-name">Naam</span>
+            <span class="groups-item-meta">0 leden</span>
+        </div>
+        <span class="groups-role-badge">Lid</span>
+    </div>
+</template>
+
+<template id="groups-member-template">
+    <div class="groups-member-item">
+        <div class="groups-member-avatar">??</div>
+        <span class="groups-member-name">Username</span>
+        <span class="groups-member-clan">Clan</span>
+        <span class="groups-role-badge">Lid</span>
+    </div>
+</template>
+
 </body>
 </html>
