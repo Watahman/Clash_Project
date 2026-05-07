@@ -69,5 +69,8 @@ export const _EXT_SUPA_CWLPLANNER_DATA_SET = "/SupabaseCwplannerDataSet";
 export const _EXT_SUPA_CWLPLANNER_DATA_GET = "/SupabaseCwplannerDataGet";
 export const _EXT_SUPA_CWLPLANNER_DATA_GET_ALL = "/SupabaseCwplannerDataGetAll";
 
+export const _EXT_SUPA_GROUP_MAKE = "/SupabaseGroupMake";
+
+
 
 

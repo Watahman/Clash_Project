@@ -1,3 +1,6 @@
+import {fetchRequest, databaseRequestWithBody} from "./API/API-Communication.js";
+import * as conf from "./Data/config.js"
+
 const groupsMain         = document.querySelector('#groups-main');
 const groupsSidebar      = document.querySelector('#groups-sidebar');
 const groupsNewBtn       = document.querySelector('#groups-new-btn');
@@ -78,7 +81,12 @@ function newGroupOverlay(){
 }
 
 function createNewGroup(name, option){
+    if(option === "name"){
+        const data = {name: name, ownerId: localStorage.getItem("id")}
+        databaseRequestWithBody(conf._BASE_URL + conf._EXT_SUPA_GROUP_MAKE, data).then(data => console.log(data))
+    }else if(option === "clanTag"){
 
+    }
 }
 
 function sideBarToggle(){

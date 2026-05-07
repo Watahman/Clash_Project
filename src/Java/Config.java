@@ -75,4 +75,6 @@ public class Config {
     String _EXT_SUPA_CWLPLANNER_DATA_SET = "/SupabaseCwplannerDataSet";
     String _EXT_SUPA_CWLPLANNER_DATA_GET = "/SupabaseCwplannerDataGet";
     String _EXT_SUPA_CWLPLANNER_DATA_GET_ALL = "/SupabaseCwplannerDataGetAll";
+
+    String _EXT_SUPA_GROUP_MAKE = "/SupabaseGroupMake";
 }

@@ -15,6 +15,7 @@ public class Main {
     private SUPABASE_User supaUser;
     private SUPABASE_CWLPlanner supaCWLPlanner;
     private SUPABASE_Friend supaFriend;
+    private SUPABASE_Group supaGroup;
 
     static void main() throws Exception {
         new Main().run();
@@ -33,6 +34,7 @@ public class Main {
         supaUser = new SUPABASE_User(server, conf);
         supaCWLPlanner = new SUPABASE_CWLPlanner(server, conf);
         supaFriend = new SUPABASE_Friend(server, conf);
+        supaGroup = new SUPABASE_Group(server, conf);
 
         apiClan.getClanCurrentWarLeagueGroup();
         apiClan.getClanWarLeagueWar();
@@ -91,6 +93,8 @@ public class Main {
         supaFriend.acceptFriend();
         supaFriend.rejectFriend();
         supaFriend.getFriends();
+
+        supaGroup.createGroup();
 
         server.start();
         System.out.println("Server gestart op http://localhost:8080");
