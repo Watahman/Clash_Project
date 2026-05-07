@@ -1,39 +1,38 @@
 import * as config from "../Data/config.js"
-import { fetchRequest } from "./API-Communication.js"
+import {fetchClashAPIRequest} from "./API-Communication.js"
 
-export function getPlayerInfoRequest(playerID, callback){
+export async function getPlayerInfoRequest(playerID){
     const path = config._BASE_URL + config._EXT_PLAYER_INFO;
     const body = JSON.stringify({
         playerID: playerID
     })
 
-    fetchRequest(path, body, (data) => {callback(data)})
+    return fetchClashAPIRequest(path, body)
 }
 
-export function getPlayerBattleLogRequest(playerID, callback) {
+export async function getPlayerBattleLogRequest(playerID) {
     const path = config._BASE_URL + config._EXT_PLAYER_BATTLE_LOG;
     const body = JSON.stringify({
         playerID: playerID
     })
 
-    fetchRequest(path, body, (data) => {callback(data)})
+    return fetchClashAPIRequest(path, body)
 }
 
-export function postPlayerVerifyTokenRequest(playerID, playerToken, callback){
+export async function postPlayerVerifyTokenRequest(playerID, playerToken){
     const path = config._BASE_URL + config._EXT_PLAYER_VERIFY_TOKEN;
     const body = JSON.stringify({
         playerID: playerID,
         playerToken: playerToken
     })
-    console.log(body)
-    fetchRequest(path, body, (data) => {callback(data)})
+    return fetchClashAPIRequest(path, body)
 }
 
-export function getPlayerLeagueHistoryRequest(playerID, callback){
+export async function getPlayerLeagueHistoryRequest(playerID){
     const path = config._BASE_URL + config._EXT_PLAYER_LEAGUE_HISTORY;
     const body = JSON.stringify({
         playerID: playerID
     })
 
-    fetchRequest(path, body, (data) => {callback(data)})
+    return fetchClashAPIRequest(path, body)
 }

@@ -1,5 +1,5 @@
-export function fetchRequest(path, body, callback){
-    fetch(path, {
+export async function fetchClashAPIRequest(path, body){
+    return fetch(path, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -7,7 +7,6 @@ export function fetchRequest(path, body, callback){
         body: body
     })
         .then(response => response.json())
-        .then(data => {callback(data)})
         .catch(error => console.log(error));
 }
 

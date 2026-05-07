@@ -1,63 +1,51 @@
 import * as clanAPI from "./API-Clan.js"
 import * as playerAPI from "./API-Player.js"
 
-export function getClanMembersWithBattleData(clanTag, callback) {
-    let clanName;
-    clanAPI.getClanInfoRequest(clanTag, (data) => {
-        clanName = data.name;
-    })
-
-    let clanMembers = [];
-    clanAPI.getClanMembersRequest(clanTag, (data) => {
-        data.items.forEach(clanMember => {
-            clanMembers.push({
+export function getClanMembersWithBattleData(clanTag) {
+    return clanAPI.getClanInfoRequest(clanTag).then(clanData => {
+        const clanName = clanData.name;
+        return clanAPI.getClanMembersRequest(clanTag).then(membersData => {
+            const clanMembers = membersData.items.map(clanMember => ({
                 name: clanMember.name,
                 tag: clanMember.tag,
                 townHallLevel: clanMember.townHallLevel,
                 role: clanMember.role,
                 clanName: clanName
-            });
+            }));
+            return processBatch(clanMembers);
         });
-
-        processBatch(clanMembers, 0, callback);
     });
 }
 
-export function getPlayerWithBattleData(playerTag, callback) {
-    let player = []
-    playerAPI.getPlayerInfoRequest(playerTag, (data) => {
-        console.log(data)
-        player.push({
+export function getPlayerWithBattleData(playerTag) {
+    return playerAPI.getPlayerInfoRequest(playerTag).then(data => {
+        const player = {
             name: data.name,
             tag: data.tag,
             townHallLevel: data.townHallLevel,
             role: data.role ?? null,
             clanName: data.clan?.name ?? null,
             clanTag: data.clan?.tag ?? null
-        })
-
-        processBatch(player, 0, callback);
-    })
-
+        };
+        return processBatch([player]);
+    });
 }
 
-function processBatch(members, startIndex, callback) {
-    const batch = members.slice(startIndex, startIndex + 1);
+function processBatch(members, startIndex = 0, results = []) {
+    const batch = members.slice(startIndex, startIndex + 50);
 
-    let completed = 0;
-
-    batch.forEach(member => {
-        playerAPI.getPlayerLeagueHistoryRequest(member.tag, (data) => {
-            member.leagueHistory = data;
-            completed++;
-
-            if (completed === batch.length) {
-                callback(batch);
-
-                if (startIndex + 1 < members.length) {
-                    processBatch(members, startIndex + 1, callback);
-                }
-            }
-        });
+    return Promise.all(
+        batch.map(member => {
+            return playerAPI.getPlayerLeagueHistoryRequest(member.tag).then(data => {
+                member.leagueHistory = data;
+                return member;
+            });
+        })
+    ).then(batchResults => {
+        results.push(...batchResults);
+        if (startIndex + 50 < members.length) {
+            return processBatch(members, startIndex + 50, results);
+        }
+        return results;
     });
 }
