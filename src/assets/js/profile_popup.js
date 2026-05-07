@@ -189,9 +189,9 @@ function openAddOverlay(overlay, onConfirm) {
 function handleAddBase() {
     const playerId    = inputBaseTag.value
     const playerToken = inputBaseToken.value
-    postPlayerVerifyTokenRequest(playerId, playerToken, (confirmation) => {
+    postPlayerVerifyTokenRequest(playerId, playerToken).then(confirmation => {
         if (confirmation.status === "ok") {
-            getPlayerWithBattleData(playerId, (playerData) => {
+            getPlayerWithBattleData(playerId).then(playerData => {
                 createBaseCard(playerData[0])
                 const data = { id: localStorage.getItem("id"), account: playerData[0] }
                 databaseRequestWithBody(conf._BASE_URL + conf._EXT_SUPA_USER_ADD_ACCOUNT, data)

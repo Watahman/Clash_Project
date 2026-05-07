@@ -28,7 +28,7 @@ function addClanPlayersButton(){
         document.querySelectorAll(".overlay").forEach(overlay =>
             overlay.classList.add("hidden"));
         if(clanTag !== ""){
-            getClanMembersWithBattleData(clanTag, (data) => {createPlayerCard(data)});
+            getClanMembersWithBattleData(clanTag).then(data => createPlayerCard(data));
         }
     });
 }
@@ -43,7 +43,7 @@ function addPlayerButton(){
             overlay.classList.add("hidden"));
         if(playerTag !== ""){
             console.log(playerTag);
-            getPlayerWithBattleData(playerTag, (data) => {createPlayerCard(data)});
+            getPlayerWithBattleData(playerTag).then(data => createPlayerCard(data));
         }
     });
 }
@@ -65,7 +65,7 @@ function addClanButton(){
         document.querySelectorAll(".overlay").forEach(overlay =>
             overlay.classList.add("hidden"));
         if(clanID !== ""){
-            getClanInfoRequest(clanID, (data) => {createClanCard(data, playerAmount)});
+            getClanInfoRequest(clanID).then(data => createClanCard(data, playerAmount));
         }
 
         document.querySelector("#cwl-input-clan-clancode").value = ""
@@ -93,9 +93,8 @@ function overlayHide(){
 
 function guessCwlSize(){
     document.querySelector("#cwl-input-clan-clancode").addEventListener("input", (event) => {
-        let league;
-        getClanInfoRequest(event.target.value, (data) => {
-            league = data.warLeague.name
+        getClanInfoRequest(event.target.value).then(data => {
+            const league = data.warLeague.name;
 
             switch (league) {
                 case "Champion League I":
@@ -191,17 +190,17 @@ function loadPlan(){
             if(pending === 0) setLoading(false);
 
             playersWithClan[0].players.forEach(player => {
-                getPlayerWithBattleData(player, (data) => {
+                getPlayerWithBattleData(player).then(data => {
                     createPlayerCard(data, null);
                     if(--pending === 0) setLoading(false);
                 });
             })
 
             clansToLoad.forEach(clan => {
-                getClanInfoRequest(clan.clantag, (data) => {
+                getClanInfoRequest(clan.clantag).then(data => {
                     createClanCard(data, clan.amountOfPlayers, clan.uuid)
                     clan.players.forEach(player => {
-                        getPlayerWithBattleData(player, (data) => {
+                        getPlayerWithBattleData(player).then(data => {
                             createPlayerCard(data, clan.uuid);
                             if(--pending === 0) setLoading(false);
                         });
