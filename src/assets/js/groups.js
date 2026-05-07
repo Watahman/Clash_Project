@@ -1,4 +1,5 @@
-import {fetchRequest, databaseRequestWithBody} from "./API/API-Communication.js";
+import { databaseRequestWithBody} from "./API/API-Communication.js";
+import { getClanInfoRequest } from "./API/API-Clan.js";
 import * as conf from "./Data/config.js"
 
 const groupsMain         = document.querySelector('#groups-main');
@@ -80,12 +81,16 @@ function newGroupOverlay(){
     }
 }
 
-function createNewGroup(name, option){
+function createNewGroup(value, option){
     if(option === "name"){
-        const data = {name: name, ownerId: localStorage.getItem("id")}
+        const data = {name: value, ownerId: localStorage.getItem("id")}
         databaseRequestWithBody(conf._BASE_URL + conf._EXT_SUPA_GROUP_MAKE, data).then(data => console.log(data))
     }else if(option === "clanTag"){
-
+        getClanInfoRequest(value)
+            .then(clanInfo => {
+                const data = {name: clanInfo.name, ownerId: localStorage.getItem("id")}
+                databaseRequestWithBody(conf._BASE_URL + conf._EXT_SUPA_GROUP_MAKE, data).then(data => console.log(data))
+            })
     }
 }
 
