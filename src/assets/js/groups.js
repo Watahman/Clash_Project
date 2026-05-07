@@ -36,11 +36,59 @@ const groupsOverlayJoinBtn= document.querySelector('#groups-overlay-join-btn');
 const groupsItemTemplate = document.querySelector('#groups-item-template');
 const groupsMemberTemplate = document.querySelector('#groups-member-template');
 
-// sidebar toggle
-groupsCollapseBtn.addEventListener('click', () => {
-    groupsMain.classList.toggle('sidebar-collapsed');
+function init(){
+    sideBarToggle()
+    groupsNewBtn.onclick = () => {newGroupOverlay()}
+}
 
-    const collapsed = groupsMain.classList.contains('sidebar-collapsed');
-    groupsCollapseBtn.setAttribute('aria-label', collapsed ? 'Sidebar uitklappen' : 'Sidebar inklappen');
-    groupsCollapseBtn.setAttribute('title',      collapsed ? 'Uitklappen'         : 'Inklappen');
-});
+function newGroupOverlay(){
+    groupsOverlayNew.classList.remove('hidden');
+    groupsOverlayCreateBtn.onclick = () => {
+        const name = groupsInputName.value
+        createNewGroup(name, "name")
+    }
+
+    groupsTabCreate.onclick = () => {
+        groupsPanelCreate.classList.remove('hidden')
+        groupsPanelJoin.classList.add('hidden')
+        groupsTabJoin.classList.remove('groups-overlay-tab-active')
+        groupsTabCreate.classList.add('groups-overlay-tab-active')
+    }
+
+    groupsCreateOptName.onclick = () => {
+        groupsCreateOptName.classList.add('groups-create-option-active')
+        groupsCreateOptClan.classList.remove('groups-create-option-active')
+        groupsCreateByName.classList.remove('hidden')
+        groupsCreateByClan.classList.add('hidden')
+    }
+
+    groupsCreateOptClan.onclick = () => {
+        groupsCreateOptClan.classList.add('groups-create-option-active')
+        groupsCreateOptName.classList.remove('groups-create-option-active')
+        groupsCreateByName.classList.add('hidden')
+        groupsCreateByClan.classList.remove('hidden')
+    }
+
+    groupsTabJoin.onclick = () => {
+        groupsPanelCreate.classList.add('hidden')
+        groupsPanelJoin.classList.remove('hidden')
+        groupsTabJoin.classList.add('groups-overlay-tab-active')
+        groupsTabCreate.classList.remove('groups-overlay-tab-active')
+    }
+}
+
+function createNewGroup(name, option){
+
+}
+
+function sideBarToggle(){
+    groupsCollapseBtn.addEventListener('click', () => {
+        groupsMain.classList.toggle('sidebar-collapsed');
+
+        const collapsed = groupsMain.classList.contains('sidebar-collapsed');
+        groupsCollapseBtn.setAttribute('aria-label', collapsed ? 'Sidebar uitklappen' : 'Sidebar inklappen');
+        groupsCollapseBtn.setAttribute('title',      collapsed ? 'Uitklappen'         : 'Inklappen');
+    });
+}
+
+init()
