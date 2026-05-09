@@ -1,3 +1,8 @@
+/* ============================================================
+   GROUPS PAGE
+   Depends on: Main-css.css (variables, header, reset, overlay)
+   ============================================================ */
+
 /* ── Layout ── */
 main#groups-main {
     display: grid;
@@ -427,6 +432,7 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon {
     gap: 0.3rem;
     overflow-y: auto;
     flex: 1;
+    align-content: start;
     scrollbar-width: thin;
     scrollbar-color: var(--border-mid) transparent;
 }

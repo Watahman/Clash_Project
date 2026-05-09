@@ -75,3 +75,48 @@ export function createFriendPendingCard(friendId){
         document.querySelector(".po-friend-list-content").appendChild(friendPendingTemplateCopy)
     })
 }
+
+export function createGroupCard(groupsInfo){
+    groupsInfo.forEach((group) => {
+        const groupCard = document.querySelector("#groups-item-template").content.cloneNode(true)
+        const path = conf._BASE_URL + conf._EXT_SUPA_GROUP_INFO
+        const data = {id: group.group_id}
+        databaseRequestWithBody(path, data).then(groupData => {
+            const path = conf._BASE_URL + conf._EXT_SUPA_GROUP_MEMBERS
+            const data = {id: groupData[0].id}
+            databaseRequestWithBody(path, data).then(groupMembers => {
+                groupCard.querySelector(".groups-item-meta").textContent = groupMembers.length + " leden"
+                groupCard.querySelector(".groups-item-name").textContent = groupData[0].name
+
+                groupCard.querySelector(".groups-item").onclick = () => {
+                    openGroup(groupData[0], groupMembers)
+                }
+
+                document.querySelector("#groups-list").appendChild(groupCard)
+                document.querySelector(".groups-empty").classList.add("hidden")
+            })
+        })
+    })
+}
+
+function openGroup(data, groupMembers){
+    document.querySelector("#groups-detail-empty").classList.add("hidden")
+    document.querySelector("#groups-detail-content").classList.remove("hidden")
+    document.querySelector("#groups-detail-name").textContent = data.name
+    document.querySelector("#groups-detail-count").textContent = groupMembers.length + " Leden"
+    document.querySelector("#groups-detail-code-text").textContent = data.code
+    addAllMembers(groupMembers)
+}
+
+function addAllMembers(groupMembers){
+    groupMembers.forEach(member => {
+        const groupMemberCard = document.querySelector("#groups-member-template").content.cloneNode(true)
+        const path = conf._BASE_URL + conf._EXT_SUPA_USER_INFO
+        const body = {id: member.user_id}
+        databaseRequestWithBody(path, body).then(userData => {
+            groupMemberCard.querySelector(".groups-member-name").textContent = userData[0].name
+            document.querySelector("#groups-member-list").appendChild(groupMemberCard)
+            document.querySelector(".groups-members-panel .groups-empty").classList.add("hidden")
+        })
+    })
+}

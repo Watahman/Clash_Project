@@ -70,7 +70,6 @@ export const _EXT_SUPA_CWLPLANNER_DATA_GET = "/SupabaseCwplannerDataGet";
 export const _EXT_SUPA_CWLPLANNER_DATA_GET_ALL = "/SupabaseCwplannerDataGetAll";
 
 export const _EXT_SUPA_GROUP_MAKE = "/SupabaseGroupMake";
-
-
-
-
+export const _EXT_SUPA_GROUP_MEMBER = "/SupabaseGroupMember";
+export const _EXT_SUPA_GROUP_MEMBERS = "/SupabaseGroupMembers";
+export const _EXT_SUPA_GROUP_INFO = "/SupabaseGroupInfo";

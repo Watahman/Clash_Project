@@ -1,6 +1,8 @@
 import { databaseRequestWithBody} from "./API/API-Communication.js";
 import { getClanInfoRequest } from "./API/API-Clan.js";
 import * as conf from "./Data/config.js"
+import { createGroupCard } from "./Templates.js";
+import { profileHTML } from "./profile_popup.js"
 
 const groupsMain         = document.querySelector('#groups-main');
 const groupsSidebar      = document.querySelector('#groups-sidebar');
@@ -43,6 +45,8 @@ const groupsMemberTemplate = document.querySelector('#groups-member-template');
 function init(){
     sideBarToggle()
     groupsNewBtn.onclick = () => {newGroupOverlay()}
+    initGroups()
+    profileHTML()
 }
 
 function newGroupOverlay(){
@@ -79,6 +83,12 @@ function newGroupOverlay(){
         groupsTabJoin.classList.add('groups-overlay-tab-active')
         groupsTabCreate.classList.remove('groups-overlay-tab-active')
     }
+}
+
+function initGroups(){
+    const path = conf._BASE_URL + conf._EXT_SUPA_GROUP_MEMBER
+    const data = {id: localStorage.getItem("id")}
+    databaseRequestWithBody(path, data).then(data => {createGroupCard(data)})
 }
 
 function createNewGroup(value, option){

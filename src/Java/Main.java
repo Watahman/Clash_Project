@@ -95,6 +95,9 @@ public class Main {
         supaFriend.getFriends();
 
         supaGroup.createGroup();
+        supaGroup.getUserGroups();
+        supaGroup.getGroupInfo();
+        supaGroup.getGroupMembers();
 
         server.start();
         System.out.println("Server gestart op http://localhost:8080");
