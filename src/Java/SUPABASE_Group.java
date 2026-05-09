@@ -152,4 +152,44 @@ public class SUPABASE_Group {
             }
         });
     }
+
+    public void joinGroup(){
+        server.createContext(conf._EXT_SUPA_GROUP_JOIN, exchange -> {
+            utils.addCORS(exchange);
+
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                try {
+                    String body = new String(exchange.getRequestBody().readAllBytes());
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+
+                    String userId = json.get("id").getAsString();
+                    String code = json.get("code").getAsString();
+
+                    String getGroup = SUPABASE_Client.getWithBody("groups", "code=eq." + code);
+
+                    JsonArray getGroupArray = JsonParser.parseString(getGroup).getAsJsonArray();
+                    String groupId = getGroupArray.get(0).getAsJsonObject().get("id").getAsString();
+
+                    JsonObject group = new JsonObject();
+                    group.addProperty("user_id", userId);
+                    group.addProperty("group_id", groupId);
+
+                    String addMemberResult = SUPABASE_Client.post("group_members", group.toString());
+                    utils.sendJsonResponse(exchange, addMemberResult, 201);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
+    }
 }

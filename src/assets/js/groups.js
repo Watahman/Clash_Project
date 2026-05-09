@@ -57,6 +57,12 @@ function newGroupOverlay(){
         groupsOverlayNew.classList.add('hidden');
     }
 
+    groupsOverlayJoinBtn.onclick = () => {
+        const code = groupsInputJoinCode.value
+        joinGroup(code);
+        groupsOverlayNew.classList.add('hidden');
+    }
+
     groupsTabCreate.onclick = () => {
         groupsPanelCreate.classList.remove('hidden')
         groupsPanelJoin.classList.add('hidden')
@@ -113,6 +119,12 @@ function createNewGroup(value, option){
                 databaseRequestWithBody(conf._BASE_URL + conf._EXT_SUPA_GROUP_MAKE, data).then(data => console.log(data))
             })
     }
+}
+
+function joinGroup(code){
+    const path = conf._BASE_URL + conf._EXT_SUPA_GROUP_JOIN
+    const data = {id: localStorage.getItem("id"), code: code}
+    databaseRequestWithBody(path, data).then(data => console.log(data))
 }
 
 function sideBarToggle(){

@@ -80,4 +80,5 @@ public class Config {
     String _EXT_SUPA_GROUP_MEMBER = "/SupabaseGroupMember";
     String _EXT_SUPA_GROUP_MEMBERS = "/SupabaseGroupMembers";
     String _EXT_SUPA_GROUP_INFO = "/SupabaseGroupInfo";
+    String _EXT_SUPA_GROUP_JOIN = "/SupabaseGroupJoin";
 }
