@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#e05252" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Door frame -->
+  <path d="M14 3H5a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h9"/>
+  <!-- Arrow going right (leaving) -->
+  <polyline points="17 8 21 12 17 16"/>
+  <line x1="21" y1="12" x2="9" y2="12"/>
+  <!-- Door knob -->
+  <circle cx="11" cy="12" r="0.75" fill="#e05252" stroke="none"/>
+</svg>

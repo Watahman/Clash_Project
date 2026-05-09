@@ -89,7 +89,7 @@
                         Poll
                     </button>
                     <button class="btn-groups-default" id="groups-invite-btn">
-                        <img src="../assets/css/pictures/add.svg" alt="">
+                        <img src="../assets/css/pictures/userAdd.svg" alt="">
                         Uitnodigen
                     </button>
                     <div class="groups-action-divider"></div>
@@ -98,13 +98,12 @@
                         <img src="../assets/css/pictures/settings.svg" alt="Instellingen">
                     </button>
                     <button class="btn-groups-icon groups-danger" id="groups-leave-btn" title="Groep verlaten">
-                        <img src="../assets/css/pictures/close-btn.svg" alt="Verlaten">
+                        <img src="../assets/css/pictures/leaving-door.svg" alt="Verlaten">
                     </button>
                 </div>
             </div>
 
             <div class="groups-members-panel">
-                <p class="groups-panel-title" id="groups-members-title">Leden (0)</p>
                 <div id="groups-member-list">
                     <p class="groups-empty">Geen leden</p>
                 </div>
@@ -175,7 +174,9 @@
 
 <template id="groups-member-template">
     <div class="groups-member-item">
-        <div class="groups-member-avatar">??</div>
+        <div class="groups-member-avatar">
+            <img src="../assets/css/pictures/profile.svg" alt="">
+        </div>
         <span class="groups-member-name">Username</span>
         <span class="groups-member-clan">Clan</span>
         <span class="groups-role-badge">Lid</span>

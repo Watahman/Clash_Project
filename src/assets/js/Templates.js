@@ -87,7 +87,10 @@ export function createGroupCard(groupsInfo){
             databaseRequestWithBody(path, data).then(groupMembers => {
                 groupCard.querySelector(".groups-item-meta").textContent = groupMembers.length + " leden"
                 groupCard.querySelector(".groups-item-name").textContent = groupData[0].name
-
+                if(localStorage.getItem("id") === groupData[0].owner_id){
+                    groupCard.querySelector(".groups-role-badge").textContent = "Leader"
+                    groupCard.querySelector(".groups-role-badge").classList.add("leader")
+                }
                 groupCard.querySelector(".groups-item").onclick = () => {
                     openGroup(groupData[0], groupMembers)
                 }
@@ -105,16 +108,21 @@ function openGroup(data, groupMembers){
     document.querySelector("#groups-detail-name").textContent = data.name
     document.querySelector("#groups-detail-count").textContent = groupMembers.length + " Leden"
     document.querySelector("#groups-detail-code-text").textContent = data.code
-    addAllMembers(groupMembers)
+    document.querySelector("#groups-detail-since").textContent = "since - " + data.created_at.split("T")[0]
+    addAllMembers(groupMembers, data.owner_id)
 }
 
-function addAllMembers(groupMembers){
+function addAllMembers(groupMembers, creatorId){
     groupMembers.forEach(member => {
         const groupMemberCard = document.querySelector("#groups-member-template").content.cloneNode(true)
         const path = conf._BASE_URL + conf._EXT_SUPA_USER_INFO
         const body = {id: member.user_id}
         databaseRequestWithBody(path, body).then(userData => {
             groupMemberCard.querySelector(".groups-member-name").textContent = userData[0].name
+            if(userData[0].id === creatorId){
+                groupMemberCard.querySelector(".groups-role-badge").textContent = "Leader"
+                groupMemberCard.querySelector(".groups-role-badge").classList.add("leader")
+            }
             document.querySelector("#groups-member-list").appendChild(groupMemberCard)
             document.querySelector(".groups-members-panel .groups-empty").classList.add("hidden")
         })

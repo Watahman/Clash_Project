@@ -467,6 +467,11 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon {
     font-family: var(--font-mono);
 }
 
+.groups-member-avatar img{
+    height: 70%;
+    width: 70%;
+}
+
 .groups-member-name {
     font-size: 0.78rem;
     font-weight: 600;
