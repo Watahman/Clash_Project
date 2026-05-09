@@ -69,6 +69,11 @@ function newGroupOverlay(){
         groupsCreateOptClan.classList.remove('groups-create-option-active')
         groupsCreateByName.classList.remove('hidden')
         groupsCreateByClan.classList.add('hidden')
+        groupsOverlayCreateBtn.onclick = () => {
+            const name = groupsInputName.value
+            createNewGroup(name, "name")
+            groupsOverlayNew.classList.add('hidden');
+        }
     }
 
     groupsCreateOptClan.onclick = () => {
@@ -76,6 +81,11 @@ function newGroupOverlay(){
         groupsCreateOptName.classList.remove('groups-create-option-active')
         groupsCreateByName.classList.add('hidden')
         groupsCreateByClan.classList.remove('hidden')
+        groupsOverlayCreateBtn.onclick = () => {
+            const name = groupsInputClanTag.value
+            createNewGroup(name, "clanTag")
+            groupsOverlayNew.classList.add('hidden');
+        }
     }
 
     groupsTabJoin.onclick = () => {
