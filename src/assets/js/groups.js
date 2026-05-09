@@ -54,6 +54,7 @@ function newGroupOverlay(){
     groupsOverlayCreateBtn.onclick = () => {
         const name = groupsInputName.value
         createNewGroup(name, "name")
+        groupsOverlayNew.classList.add('hidden');
     }
 
     groupsTabCreate.onclick = () => {
