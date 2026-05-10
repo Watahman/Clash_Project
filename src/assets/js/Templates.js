@@ -92,6 +92,7 @@ export function createGroupCard(groupsInfo){
                     groupCard.querySelector(".groups-role-badge").classList.add("leader")
                 }
                 groupCard.querySelector(".groups-item").onclick = () => {
+                    document.querySelector("#groups-member-list").replaceChildren()
                     openGroup(groupData[0], groupMembers)
                 }
 
