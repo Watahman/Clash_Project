@@ -10,21 +10,32 @@
 
         <div class="po-topbar">
             <button id="po-close" aria-label="Sluiten">
-                <img src="../../assets/css/pictures/close-btn.svg" alt="Sluiten">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
             </button>
             <span class="po-topbar-label">Profiel</span>
         </div>
 
         <div class="po-header">
             <div class="po-avatar">
-                <img src="../../assets/css/pictures/profile.svg" alt="Profiel">
+                <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                </svg>
             </div>
             <div class="po-user-info">
                 <span id="po-username">User</span>
                 <button id="po-code-btn">
                     <span id="po-code">8K47TS</span>
-                    <img id="po-ico-copy" src="../../assets/css/pictures/copy.svg" alt="Code">
-                    <img id="po-ico-check" src="../../assets/css/pictures/checkmark_blank.svg" alt="Edit">
+                    <svg id="po-ico-copy" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    <svg id="po-ico-check" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
                 </button>
             </div>
         </div>
@@ -42,8 +53,11 @@
             </div>
             <div id="po-add-container">
                 <button id="po-add">
-                    <img src="../../assets/css/pictures/add.svg" alt="Plus">
-                    Add Base
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    <span id="po-add-text">Add Base</span>
                 </button>
                 <button id="po-friend-requests-btn" class="hidden">Requests</button>
                 <button id="po-friend-pending-btn" class="hidden">Pending</button>
@@ -79,7 +93,10 @@
         <div class="po-friend-list-header">
             <span id="po-friend-list-title" class="po-friend-list-title">Friend requests</span>
             <button id="po-friend-list-close" class="po-friend-list-close">
-                <img src="../../assets/css/pictures/close-btn.svg" alt="Sluiten">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
             </button>
         </div>
         <div id="po-friend-list-content" class="po-friend-list-content">
@@ -91,7 +108,10 @@
 <template id="po-friend-request-template">
     <div class="po-base-item">
         <div class="po-friend-avatar">
-            <img src="../../assets/css/pictures/profile.svg" alt="Profiel">
+            <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
         </div>
         <div class="po-base-text">
             <span class="po-base-name">Username</span>
@@ -99,10 +119,15 @@
         </div>
         <div class="po-friend-actions">
             <button class="po-friend-accept" aria-label="Accepteren">
-                <img src="../../assets/css/pictures/checkmark_blank.svg" alt="Accepteer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
             </button>
             <button class="po-friend-reject" aria-label="Weigeren">
-                <img src="../../assets/css/pictures/close-btn.svg" alt="Weiger">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
             </button>
         </div>
     </div>
@@ -111,7 +136,10 @@
 <template id="po-friend-pending-template">
     <div class="po-base-item">
         <div class="po-friend-avatar">
-            <img src="../../assets/css/pictures/profile.svg" alt="Profiel">
+            <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
         </div>
         <div class="po-base-text">
             <span class="po-base-name">Username</span>
@@ -139,7 +167,10 @@
 <template id="po-friend-template">
     <div class="po-base-item po-card-friend">
         <div class="po-base-icon">
-            <img class="po-base-img" src="../../assets/css/pictures/profile.svg" alt="Profiel">
+            <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
         </div>
         <div class="po-base-text">
             <span class="po-base-name">Name</span>

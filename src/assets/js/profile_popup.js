@@ -8,7 +8,7 @@ let profile, closeProfileBtn, userCode, profileTabs, openProfileBtn, activeTab
 let friendRequestBtn, friendPendingBtn, friendList, emptyFriendRequest
 let addBase, addClan, addBtn, emptyLabel
 let poUsername, poCode, poMemberSince
-let poIcoCopy, poIcoCheck
+let poIcoCopy, poIcoCheck, poAddText
 let friendListContent, friendListClose
 let overlayAddBaseBtn, overlayAddClanBtn
 let inputBaseTag, inputBaseToken, inputClanTag
@@ -54,6 +54,7 @@ function labelInit(){
     inputBaseToken    = document.querySelector("#po-input-base-token")
     inputClanTag      = document.querySelector("#po-input-clan-tag")
     friendListTitle   = document.querySelector("#po-friend-list-title")
+    poAddText         = document.querySelector("#po-add-text")
 }
 
 function profileInit(){
@@ -169,7 +170,7 @@ function poTab(btn) {
         emptyLabel.classList.remove('hidden')
     }
 
-    addBtn.innerHTML = `<img src="assets/css/pictures/add.svg" alt="add" />${addLabel}`
+    poAddText.textContent = addLabel
     addBtn.classList.remove('hidden')
 
     if (isBase) addBtn.onclick = () => { openAddOverlay(addBase, handleAddBase) }
