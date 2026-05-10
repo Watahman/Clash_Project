@@ -41,12 +41,16 @@ const groupsInputJoinCode= document.querySelector('#groups-input-join-code');
 const groupsOverlayJoinBtn= document.querySelector('#groups-overlay-join-btn');
 const groupsItemTemplate = document.querySelector('#groups-item-template');
 const groupsMemberTemplate = document.querySelector('#groups-member-template');
+const groupsDetailCheckmark = document.querySelector("#groups-detail-checkmark");
+const groupsDetailCopy   = document.querySelector("#groups-detail-copy");
+let timer
 
 function init(){
     sideBarToggle()
     groupsNewBtn.onclick = () => {newGroupOverlay()}
     initGroups()
     profileHTML()
+    copyCodeInit()
 }
 
 function newGroupOverlay(){
@@ -134,6 +138,21 @@ function sideBarToggle(){
         const collapsed = groupsMain.classList.contains('sidebar-collapsed');
         groupsCollapseBtn.setAttribute('aria-label', collapsed ? 'Sidebar uitklappen' : 'Sidebar inklappen');
         groupsCollapseBtn.setAttribute('title',      collapsed ? 'Uitklappen'         : 'Inklappen');
+    });
+}
+
+function copyCodeInit(){
+    groupsDetailCode.addEventListener('click', () => {
+        const code = groupsDetailCode.querySelector('span').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            groupsDetailCheckmark.classList.remove('hidden');
+            groupsDetailCopy.classList.add('hidden');
+            clearTimeout(timer)
+            timer = setTimeout(() => {
+                groupsDetailCheckmark.classList.add('hidden')
+                groupsDetailCopy.classList.remove('hidden')
+            }, 1800)
+        });
     });
 }
 
