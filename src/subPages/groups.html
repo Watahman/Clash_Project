@@ -184,5 +184,23 @@
     </div>
 </template>
 
+<!-- ── Leave group confirmation popup ── -->
+<div class="overlay hidden" id="groups-overlay-leave">
+    <div class="overlay-container groups-overlay-leave-container">
+        <h3 class="groups-leave-title">Groep verlaten?</h3>
+        <p class="groups-leave-desc">
+            Ben je zeker dat je <strong id="groups-leave-name"></strong> wilt verlaten?
+            Je kan opnieuw joinen met de groepscode.
+        </p>
+        <div class="groups-leave-actions">
+            <button class="btn-groups-default" id="groups-leave-cancel-btn">Annuleren</button>
+            <button class="btn-groups-icon btn-groups-danger groups-leave-confirm-btn" id="groups-leave-confirm-btn">
+                <img src="../assets/css/pictures/leaving-door.svg" alt="">
+                Verlaten
+            </button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

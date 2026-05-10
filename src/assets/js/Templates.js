@@ -114,6 +114,9 @@ function openGroup(data, groupMembers){
 }
 
 function addAllMembers(groupMembers, creatorId){
+    const memberList = document.querySelector("#groups-member-list")
+    const emptyEl = memberList.querySelector(".groups-empty")
+
     groupMembers.forEach(member => {
         const groupMemberCard = document.querySelector("#groups-member-template").content.cloneNode(true)
         const path = conf._BASE_URL + conf._EXT_SUPA_USER_INFO
@@ -124,8 +127,8 @@ function addAllMembers(groupMembers, creatorId){
                 groupMemberCard.querySelector(".groups-role-badge").textContent = "Leader"
                 groupMemberCard.querySelector(".groups-role-badge").classList.add("leader")
             }
-            document.querySelector("#groups-member-list").appendChild(groupMemberCard)
-            document.querySelector(".groups-members-panel .groups-empty").classList.add("hidden")
+            memberList.appendChild(groupMemberCard)
+            if(emptyEl) emptyEl.classList.add("hidden")  // null-check voor de zekerheid
         })
     })
 }

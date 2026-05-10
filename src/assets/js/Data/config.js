@@ -74,3 +74,4 @@ export const _EXT_SUPA_GROUP_MEMBER = "/SupabaseGroupMember";
 export const _EXT_SUPA_GROUP_MEMBERS = "/SupabaseGroupMembers";
 export const _EXT_SUPA_GROUP_INFO = "/SupabaseGroupInfo";
 export const _EXT_SUPA_GROUP_JOIN = "/SupabaseGroupJoin";
+export const _EXT_SUPA_GROUP_LEAVE = "/SupabaseGroupLeave";

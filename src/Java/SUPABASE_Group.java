@@ -5,6 +5,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 
+import java.util.Objects;
+
 public class SUPABASE_Group {
     private HttpServer server;
     private Config conf;
@@ -181,6 +183,44 @@ public class SUPABASE_Group {
 
                     String addMemberResult = SUPABASE_Client.post("group_members", group.toString());
                     utils.sendJsonResponse(exchange, addMemberResult, 201);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
+    }
+
+    public void leaveGroup(){
+        server.createContext(conf._EXT_SUPA_GROUP_LEAVE, exchange -> {
+            utils.addCORS(exchange);
+
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                try {
+                    String body = new String(exchange.getRequestBody().readAllBytes());
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+
+                    String userId = json.get("id").getAsString();
+                    String code = json.get("code").getAsString().trim();
+                    String getGroup = SUPABASE_Client.getWithBody("groups", "code=eq." + code);
+
+                    JsonArray getGroupArray = JsonParser.parseString(getGroup).getAsJsonArray();
+                    String groupId = getGroupArray.get(0).getAsJsonObject().get("id").getAsString();
+
+                    String removeMemberResult = SUPABASE_Client.deleteColumn("group_members","group_id=eq." + groupId + "&user_id=eq." + userId);
+                    if(Objects.equals(getGroupArray.get(0).getAsJsonObject().get("owner_id").getAsString(), userId)){
+                        SUPABASE_Client.deleteColumn("groups", "id=eq." + groupId);
+                    }
+                    utils.sendJsonResponse(exchange, removeMemberResult, 201);
                 } catch (Exception e) {
                     e.printStackTrace();
                     try {

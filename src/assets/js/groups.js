@@ -43,6 +43,9 @@ const groupsItemTemplate = document.querySelector('#groups-item-template');
 const groupsMemberTemplate = document.querySelector('#groups-member-template');
 const groupsDetailCheckmark = document.querySelector("#groups-detail-checkmark");
 const groupsDetailCopy   = document.querySelector("#groups-detail-copy");
+const groupOverlayLeave  = document.querySelector("#groups-overlay-leave")
+const groupsLeaveCancelBtn= document.querySelector('#groups-leave-cancel-btn');
+const groupsLeaveConfirmBtn = document.querySelector('#groups-leave-confirm-btn')
 let timer
 
 function init(){
@@ -51,6 +54,7 @@ function init(){
     initGroups()
     profileHTML()
     copyCodeInit()
+    groupsLeaveBtn.onclick = () => {leaveGroup()}
 }
 
 function newGroupOverlay(){
@@ -129,6 +133,17 @@ function joinGroup(code){
     const path = conf._BASE_URL + conf._EXT_SUPA_GROUP_JOIN
     const data = {id: localStorage.getItem("id"), code: code}
     databaseRequestWithBody(path, data).then(data => console.log(data))
+}
+
+function leaveGroup(){
+    groupsLeaveBtn.onclick = () => {groupOverlayLeave.classList.remove('hidden')}
+    groupsLeaveCancelBtn.onclick = () => {groupOverlayLeave.classList.add('hidden')}
+    groupsLeaveConfirmBtn.onclick = () => {
+        groupOverlayLeave.classList.add('hidden')
+        const path = conf._BASE_URL + conf._EXT_SUPA_GROUP_LEAVE
+        const data = {id: localStorage.getItem("id"), code: groupsDetailCode.textContent}
+        databaseRequestWithBody(path, data).then(data => console.log(data))
+    }
 }
 
 function sideBarToggle(){

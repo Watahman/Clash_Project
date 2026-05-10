@@ -99,6 +99,7 @@ public class Main {
         supaGroup.getGroupInfo();
         supaGroup.getGroupMembers();
         supaGroup.joinGroup();
+        supaGroup.leaveGroup();
 
         server.start();
         System.out.println("Server gestart op http://localhost:8080");
