@@ -533,3 +533,49 @@ input[type="text"]:focus {
     color: var(--accent);
     border: 1px solid rgba(108,120,240,0.3);
 }
+
+.po-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto;
+}
+
+#po-logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    padding: 13px;
+    border-radius: var(--radius-lg);
+
+    background: rgba(220, 80, 80, 0.08);
+    border: 1px solid rgba(220, 80, 80, 0.18);
+
+    color: #ff8b8b;
+
+    cursor: pointer;
+
+    font-size: 0.72rem;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    transition:
+            background 0.15s,
+            border-color 0.15s,
+            color 0.15s;
+}
+
+#po-logout-btn:hover {
+    background: rgba(220, 80, 80, 0.14);
+    border-color: rgba(220, 80, 80, 0.35);
+    color: #ffb3b3;
+}
+
+#po-logout-btn svg {
+    flex-shrink: 0;
+}

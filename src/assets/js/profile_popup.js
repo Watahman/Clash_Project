@@ -12,6 +12,7 @@ let poIcoCopy, poIcoCheck, poAddText
 let friendListContent, friendListClose
 let overlayAddBaseBtn, overlayAddClanBtn
 let inputBaseTag, inputBaseToken, inputClanTag
+let poLogoutBtn, poSettings
 let controller = new AbortController()
 let poCopyTimer
 let friendListTitle
@@ -60,6 +61,8 @@ function labelInit(){
     friendListTitle   = document.querySelector("#po-friend-list-title")
     poAddText         = document.querySelector("#po-add-text")
     poGroupList       = document.querySelector("#po-group-list")
+    poLogoutBtn      = document.querySelector("#po-logout-btn")
+    poSettings       = document.querySelector(".po-settings")
 }
 
 function profileInit(){
@@ -111,6 +114,11 @@ function profileInit(){
                 emptyFriendRequest.classList.add('hidden')
                 res.forEach(friend => { createFriendPendingCard(friend.user_b) })
             })
+    }
+
+    poLogoutBtn.onclick = () => {
+        localStorage.clear()
+        window.location.href = "index.html"
     }
 
     document.addEventListener('keydown', e => {
@@ -167,14 +175,21 @@ function poTab(btn) {
     controller.abort()
     controller = new AbortController()
 
-    const isBase   = btn.id === 'po-tab-bases'
-    const isFriend = btn.id === 'po-tab-friends'
-    const isClan   = btn.id === 'po-tab-clans'
-    const isGroup  = btn.id === 'po-tab-groups'
+    const isBase     = btn.id === 'po-tab-bases'
+    const isFriend   = btn.id === 'po-tab-friends'
+    const isClan     = btn.id === 'po-tab-clans'
+    const isSettings = btn.id === 'po-tab-settings'
 
-    document.querySelectorAll(".po-card-base").forEach(t => t.classList.toggle('hidden', !isBase))
-    document.querySelectorAll(".po-card-friend").forEach(t => t.classList.toggle('hidden', !isFriend))
-    document.querySelectorAll(".po-card-clan").forEach(t => t.classList.toggle('hidden', !isClan))
+    document.querySelectorAll(".po-card-base")
+        .forEach(t => t.classList.toggle('hidden', !isBase))
+
+    document.querySelectorAll(".po-card-friend")
+        .forEach(t => t.classList.toggle('hidden', !isFriend))
+
+    document.querySelectorAll(".po-card-clan")
+        .forEach(t => t.classList.toggle('hidden', !isClan))
+
+    poSettings.classList.toggle('hidden', !isSettings)
 
     friendRequestBtn.classList.toggle('hidden', !isFriend)
     friendPendingBtn.classList.toggle('hidden', !isFriend)
@@ -183,16 +198,30 @@ function poTab(btn) {
     const friendCards = document.querySelectorAll(".po-card-friend")
     const clanCards   = document.querySelectorAll(".po-card-clan")
 
-    if (btn.id === 'po-tab-settings') {
+    if (isSettings) {
         emptyLabel.classList.add('hidden')
         addBtn.classList.add('hidden')
         addBtn.onclick = null
         return
     }
 
-    const cards     = isBase ? baseCards : isFriend ? friendCards : isClan ? clanCards : null
-    const emptyText = isBase ? "No Bases" : isFriend ? "No Friends" : isClan ? "No Clans" : "No Groups"
-    const addLabel  = isBase ? "ADD BASE"  : isFriend ? "ADD FRIEND" : isClan ? "ADD CLAN" : "ADD GROUP"
+    const cards =
+        isBase ? baseCards :
+            isFriend ? friendCards :
+                isClan ? clanCards :
+                    null
+
+    const emptyText =
+        isBase ? "No Bases" :
+            isFriend ? "No Friends" :
+                isClan ? "No Clans" :
+                    "Empty"
+
+    const addLabel =
+        isBase ? "ADD BASE" :
+            isFriend ? "ADD FRIEND" :
+                isClan ? "ADD CLAN" :
+                    "ADD"
 
     if (cards && cards.length > 0) {
         emptyLabel.classList.add('hidden')
@@ -204,9 +233,9 @@ function poTab(btn) {
     poAddText.textContent = addLabel
     addBtn.classList.remove('hidden')
 
-    if (isBase)   addBtn.onclick = () => { openAddOverlay(addBase, handleAddBase) }
-    if (isFriend) addBtn.onclick = () => { openAddOverlay(addBase, handleAddFriend) }
-    if (isClan)   addBtn.onclick = () => { openAddOverlay(addClan, handleAddClan) }
+    if (isBase) {addBtn.onclick = () => {openAddOverlay(addBase, handleAddBase)}}
+    if (isFriend) {addBtn.onclick = () => {openAddOverlay(addBase, handleAddFriend)}}
+    if (isClan) {addBtn.onclick = () => {openAddOverlay(addClan, handleAddClan)}}
 }
 
 function openAddOverlay(overlay, onConfirm) {
