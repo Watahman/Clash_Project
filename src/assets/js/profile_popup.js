@@ -17,8 +17,7 @@ let poCopyTimer
 let friendListTitle
 let poGroupList
 let clansLoaded = false
-
-let cachedProfile = null  // <-- nieuw: cache voor preloaded data
+let cachedProfile = null
 
 export function profileHTML(){
     fetch("/subpages/popup_HTMLs/profile_popup.html")
@@ -27,7 +26,7 @@ export function profileHTML(){
             document.querySelector(".profile-placeholder").innerHTML = html;
             labelInit()
             profileInit()
-            preloadProfileData()  // <-- nieuw: start preload meteen na init
+            preloadProfileData()
         })
 }
 
@@ -64,12 +63,10 @@ function labelInit(){
 }
 
 function profileInit(){
-    // Klik op profielknop: gebruik cache als die al klaar is
     openProfileBtn.onclick = () => {
         if (cachedProfile) {
             openProfile(cachedProfile.name, "#" + cachedProfile.code, cachedProfile.created_at.split("T")[0])
         } else if (localStorage.getItem("id") !== null) {
-            // Cache nog niet klaar (trage verbinding), toch fetchen
             isUserLoggedIn()
         } else {
             window.location.href = "subpages/login.html"
@@ -130,7 +127,6 @@ function profileInit(){
     })
 }
 
-// Nieuw: haalt profieldata op bij paginalading, zonder de popup te openen
 function preloadProfileData() {
     if (localStorage.getItem("id") === null) return
     const data = { id: localStorage.getItem("id") }
@@ -310,7 +306,6 @@ function loadClans() {
     })
 }
 
-// Originele functie blijft als fallback (trage verbinding of cache nog niet klaar)
 function isUserLoggedIn() {
     if (localStorage.getItem("id") !== null) {
         const data = { id: localStorage.getItem("id") }

@@ -111,6 +111,15 @@ function openGroup(data, groupMembers){
     document.querySelector("#groups-detail-count").textContent = groupMembers.length + " Leden"
     document.querySelector("#groups-detail-code-text").textContent = data.code
     document.querySelector("#groups-detail-since").textContent = "since - " + data.created_at.split("T")[0]
+    const roleBadge = document.querySelector("#groups-detail-role")
+    roleBadge.classList.remove("leader")
+
+    if(localStorage.getItem("id") === data.owner_id){
+        roleBadge.textContent = "Leader"
+        roleBadge.classList.add("leader")
+    }else{
+        roleBadge.textContent = "Lid"
+    }
     addAllMembers(groupMembers, data.owner_id)
 }
 
