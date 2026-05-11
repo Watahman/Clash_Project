@@ -72,7 +72,11 @@ function profileInit(){
         } else if (localStorage.getItem("id") !== null) {
             isUserLoggedIn()
         } else {
-            window.location.href = "subpages/login.html"
+            if (window.location.pathname.includes("index.html")) {
+                window.location.href = "subpages/login.html"
+            }else{
+                window.location.href = "./login.html"
+            }
         }
     }
 
@@ -118,7 +122,11 @@ function profileInit(){
 
     poLogoutBtn.onclick = () => {
         localStorage.clear()
-        window.location.href = "index.html"
+        if (window.location.pathname.includes("index.html")) {
+            window.location.href = "#"
+        }else{
+            window.location.href = "../index.html"
+        }
     }
 
     document.addEventListener('keydown', e => {
@@ -140,7 +148,7 @@ function preloadProfileData() {
     const data = { id: localStorage.getItem("id") }
     databaseRequestWithBody(conf._BASE_URL + conf._EXT_SUPA_USER_IDCHECK, data)
         .then(res => {
-            cachedProfile = res          // sla op zodat openProfileBtn.onclick het kan gebruiken
+            cachedProfile = res
             loadBases(res.accounts)
             loadFriends()
             loadClans()
@@ -347,6 +355,10 @@ function isUserLoggedIn() {
                 loadClans()
             })
     } else {
-        window.location.href = "subpages/login.html"
+        if (window.location.pathname.includes("index.html")) {
+            window.location.href = "subpages/login.html"
+        }else{
+            window.location.href = "./login.html"
+        }
     }
 }
