@@ -14,11 +14,11 @@ function clicklistener(){
 
         if(password === password_confirmation){
             const path = config._BASE_URL + config._EXT_SUPA_USER_MAKE
-            const data = JSON.stringify({
+            const data = {
                 name: name,
                 email: email,
                 password: password
-            });
+            };
 
             databaseRequestWithBody(path, data).then(data=>{
                 console.log(data)
