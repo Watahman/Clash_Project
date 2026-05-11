@@ -6,25 +6,48 @@ import * as conf from "./Data/config.js"
 import {canAutosave, isLoading, setLoading} from "./Data/config.js";
 import { profileHTML } from "./profile_popup.js"
 
+let addClanPlayersBtn, overlayAddPlayersBtn, addPlayerBtn, addClanBtn, overlayAddClanBtn
+let cwlInputTag, cwlInputClanCode, selectAmountPlayers
+let savePlanBtn, planName, loadPlan
+let availablePlayers, allClans, totalPlayerAmount
+
+function labelInit(){
+    addClanPlayersBtn      = document.querySelector("#cwl-add-clan-players-button")
+    overlayAddPlayersBtn   = document.querySelector("#cwl-overlay-add-players-button")
+    addPlayerBtn           = document.querySelector("#cwl-add-player-button")
+    addClanBtn             = document.querySelector("#cwl-add-clan-button")
+    overlayAddClanBtn      = document.querySelector("#cwl-overlay-add-clan-button")
+    cwlInputTag            = document.querySelector("#cwl-input-tag")
+    cwlInputClanCode       = document.querySelector("#cwl-input-clan-clancode")
+    selectAmountPlayers    = document.querySelector("#cwl-overlay-select-amount-players-in-clan")
+    savePlanBtn            = document.querySelector("#cwl-save-plan-button")
+    planName               = document.querySelector("#cwl-plan-name")
+    loadPlan               = document.querySelector("#cwl-load-plan")
+    availablePlayers       = document.querySelector("#cwl-available-players")
+    allClans               = document.querySelector("#cwl-all-clans")
+    totalPlayerAmount      = document.querySelector("#cwl-total-player-amount")
+}
+
 function init(){
     overlayHide();
+    labelInit();
     addClanPlayersButton();
     addPlayerButton()
     addClanButton();
     savePlanButton();
     guessCwlSize()
     loadAllPlans()
-    loadPlan()
+    loadPlanListener()
     profileHTML()
     localStorage.setItem("planner_id", "")
 }
 
 function addClanPlayersButton(){
-    document.querySelector("#cwl-add-clan-players-button").addEventListener("click", () => {
+    addClanPlayersBtn.addEventListener("click", () => {
         document.querySelector("#cwl-overlay-add-players").classList.remove("hidden");
     })
-    document.querySelector("#cwl-overlay-add-players-button").addEventListener("click", () => {
-        const clanTag = document.querySelector("#cwl-input-tag").value;
+    overlayAddPlayersBtn.addEventListener("click", () => {
+        const clanTag = cwlInputTag.value;
         document.querySelectorAll(".overlay").forEach(overlay =>
             overlay.classList.add("hidden"));
         if(clanTag !== ""){
@@ -34,11 +57,11 @@ function addClanPlayersButton(){
 }
 
 function addPlayerButton(){
-    document.querySelector("#cwl-add-player-button").addEventListener("click", () => {
+    addPlayerBtn.addEventListener("click", () => {
         document.querySelector("#cwl-overlay-add-players").classList.remove("hidden");
     })
-    document.querySelector("#cwl-overlay-add-players-button").addEventListener("click", () => {
-        const playerTag = document.querySelector("#cwl-input-tag").value;
+    overlayAddPlayersBtn.addEventListener("click", () => {
+        const playerTag = cwlInputTag.value;
         document.querySelectorAll(".overlay").forEach(overlay =>
             overlay.classList.add("hidden"));
         if(playerTag !== ""){
@@ -49,32 +72,31 @@ function addPlayerButton(){
 }
 
 function addClanButton(){
-    document.querySelector("#cwl-add-clan-button").addEventListener("click", () => {
+    addClanBtn.addEventListener("click", () => {
         document.querySelector("#cwl-overlay-add-clan").classList.remove("hidden")
-        const option = document.querySelector("#cwl-overlay-select-amount-players-in-clan option[value=\"30\"]")
+        const option = selectAmountPlayers.querySelector("option[value=\"30\"]")
         if(!option){
             let newOption = document.createElement("option");
             newOption.value = 30;
             newOption.textContent = "30v30";
-            document.querySelector("#cwl-overlay-select-amount-players-in-clan").appendChild(newOption);
+            selectAmountPlayers.appendChild(newOption);
         }
     })
-    document.querySelector("#cwl-overlay-add-clan-button").addEventListener("click", () => {
-        const clanID = document.querySelector("#cwl-input-clan-clancode").value;
-        const playerAmount = document.querySelector("#cwl-overlay-select-amount-players-in-clan").value;
+    overlayAddClanBtn.addEventListener("click", () => {
+        const clanID = cwlInputClanCode.value;
+        const playerAmount = selectAmountPlayers.value;
         document.querySelectorAll(".overlay").forEach(overlay =>
             overlay.classList.add("hidden"));
         if(clanID !== ""){
             getClanInfoRequest(clanID).then(data => createClanCard(data, playerAmount));
         }
-
-        document.querySelector("#cwl-input-clan-clancode").value = ""
+        cwlInputClanCode.value = ""
     })
 }
 
 function savePlanButton(){
-    document.querySelector("#cwl-save-plan-button").addEventListener("click", () => {
-        if(document.querySelector("#cwl-plan-name").value === ""){
+    savePlanBtn.addEventListener("click", () => {
+        if(planName.value === ""){
             // make indicator
         }else{
             conf.setCanAutosave(true);
@@ -92,7 +114,7 @@ function overlayHide(){
 }
 
 function guessCwlSize(){
-    document.querySelector("#cwl-input-clan-clancode").addEventListener("input", (event) => {
+    cwlInputClanCode.addEventListener("input", (event) => {
         getClanInfoRequest(event.target.value).then(data => {
             const league = data.warLeague.name;
 
@@ -100,7 +122,7 @@ function guessCwlSize(){
                 case "Champion League I":
                 case "Champion League II":
                 case "Champion League III":
-                    document.querySelector("#cwl-overlay-select-amount-players-in-clan").remove(1);
+                    selectAmountPlayers.remove(1);
             }
         })
     })
@@ -108,9 +130,9 @@ function guessCwlSize(){
 
 export function savePlan(){
     if (isLoading || !canAutosave) return;
-    const allClans = []
+    const allClansData = []
     const noClan = []
-    document.querySelector("#cwl-available-players").querySelectorAll(".cwl-player-article").forEach(player => {
+    availablePlayers.querySelectorAll(".cwl-player-article").forEach(player => {
         noClan.push(player.querySelector(".cwl-player-hashtag").textContent)
     })
 
@@ -119,9 +141,9 @@ export function savePlan(){
         players: noClan
     }
 
-    allClans.push(noClanData);
+    allClansData.push(noClanData);
 
-    document.querySelectorAll(".cwl-clan-article").forEach(clan => {
+    allClans.querySelectorAll(".cwl-clan-article").forEach(clan => {
         const clanName = clan.querySelector(".cwl-clan-name").textContent
         const clanTag = localStorage.getItem("clanId_" + clanName)
         const amountOfPlayers = clan.querySelector(".cwl-amount-of-players-in-clan").textContent.split("/")[1]
@@ -136,17 +158,17 @@ export function savePlan(){
             players: allPlayersInClan
         }
 
-        allClans.push(data)
+        allClansData.push(data)
     })
-    let planName = document.querySelector("#cwl-plan-name").value
-    if(planName === ""){
-        planName = "nameless"
+    let name = planName.value
+    if(name === ""){
+        name = "nameless"
     }
     const data = {
         id: localStorage.getItem("id"),
         currentPlanId: localStorage.getItem("planner_id"),
-        name: planName,
-        clans: allClans
+        name: name,
+        clans: allClansData
     }
     const path = conf._BASE_URL + conf._EXT_SUPA_CWLPLANNER_DATA_SET
     databaseRequestWithBody(path, data).then(data => {
@@ -155,7 +177,6 @@ export function savePlan(){
 }
 
 function loadAllPlans(){
-    const planSelect = document.querySelector("#cwl-load-plan")
     const path = conf._BASE_URL + conf._EXT_SUPA_CWLPLANNER_DATA_GET_ALL
     const data = {user: localStorage.getItem("id")}
     databaseRequestWithBody(path, data).then(data => {
@@ -163,22 +184,21 @@ function loadAllPlans(){
             let newOption = document.createElement("option");
             newOption.value = plan
             newOption.textContent = plan
-            planSelect.appendChild(newOption)
+            loadPlan.appendChild(newOption)
         })
-        planSelect.selectedIndex = -1;
+        loadPlan.selectedIndex = -1;
     })
 }
 
-function loadPlan(){
-    const planSelect = document.querySelector("#cwl-load-plan")
-    planSelect.addEventListener("change", (e) => {
+function loadPlanListener(){
+    loadPlan.addEventListener("change", (e) => {
         const path = conf._BASE_URL + conf._EXT_SUPA_CWLPLANNER_DATA_GET
         const data = {name: e.target.value}
         databaseRequestWithBody(path, data).then(data => {
-            document.querySelector("#cwl-available-players").innerHTML = ""
-            document.querySelector("#cwl-all-clans").innerHTML = ""
-            document.querySelector("#cwl-total-player-amount").innerHTML = "0"
-            document.querySelector("#cwl-plan-name").value = data.name
+            availablePlayers.innerHTML = ""
+            allClans.innerHTML = ""
+            totalPlayerAmount.innerHTML = "0"
+            planName.value = data.name
             localStorage.setItem("planner_id", data.id)
             conf.setCanAutosave(true)
             const playersWithClan = data.info
