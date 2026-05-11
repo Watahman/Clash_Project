@@ -44,46 +44,6 @@ body {
     background-size: 28px 28px;
 }
 
-/* ── HEADER ── */
-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 1.75rem;
-    height: var(--header-h);
-    background: var(--surface-1);
-    border-bottom: 1px solid var(--border-subtle);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-header .left img {
-    height: 2rem; width: 2rem; object-fit: contain; display: block;
-    opacity: 0.85; transition: opacity 0.2s, transform 0.2s;
-}
-header .left img:hover { opacity: 1; transform: scale(1.06); }
-header nav.center {
-    display: flex; gap: 0.125rem;
-    background: var(--surface-2); border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md); padding: 0.25rem;
-}
-header nav.center a {
-    font-size: 0.78rem; font-weight: 600; letter-spacing: 0.02em;
-    color: var(--text-2); text-decoration: none;
-    padding: 0.3rem 0.9rem; border-radius: var(--radius-sm);
-    transition: color 0.15s, background 0.15s;
-}
-header nav.center a:hover { color: var(--text-1); background: var(--surface-3); }
-header .right { display: flex; gap: 0.4rem; }
-header .right button {
-    font-family: var(--font-ui); font-size: 0.75rem; font-weight: 500;
-    color: var(--text-2); background: transparent;
-    border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
-    padding: 0.3rem 0.75rem; cursor: pointer;
-    transition: color 0.15s, border-color 0.15s, background 0.15s;
-}
-header .right button:hover { color: var(--text-1); border-color: var(--border-mid); background: var(--surface-3); }
-
 /* ── PAGE LAYOUT ── */
 main {
     min-height: calc(100vh - var(--header-h));

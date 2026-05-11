@@ -55,6 +55,11 @@ header {
     top: 0;
     z-index: 100;
 }
+header .left {
+    flex: 1;          /* ← nieuw */
+    display: flex;
+    align-items: center;
+}
 header .left img {
     height: 2rem; width: 2rem; object-fit: contain; display: block;
     opacity: 0.85; transition: opacity 0.2s, transform 0.2s;
@@ -73,7 +78,12 @@ header nav.center a {
 }
 header nav.center a:hover { color: var(--text-1); background: var(--surface-3); }
 header nav.center a[aria-current="page"] { color: var(--text-1); background: var(--surface-4); }
-header .right { display: flex; gap: 0.4rem; }
+header .right {
+    flex: 1;          /* ← nieuw */
+    display: flex;
+    gap: 0.4rem;
+    justify-content: flex-end;   /* ← knoppen rechts uitlijnen */
+}
 header .right button {
     font-family: var(--font-ui); font-size: 0.75rem; font-weight: 500;
     color: var(--text-2); background: transparent;

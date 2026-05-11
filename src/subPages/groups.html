@@ -20,7 +20,6 @@
     </div>
     <nav class="center">
         <a href="./cwl-planner.html">CWL planner</a>
-        <a href="./bracket-generator.html">Bracket generator</a>
         <a href="./groups.html" aria-current="page">Groepen</a>
     </nav>
     <div class="right">
@@ -34,8 +33,6 @@
 </header>
 
 <main id="groups-main">
-
-    <!-- ── Sidebar: groepen van de user ── -->
     <section id="groups-sidebar">
         <div class="groups-sidebar-header">
             <h3>Jouw groepen</h3>
@@ -46,25 +43,20 @@
         </div>
 
         <div id="groups-list">
-            <!-- Gevuld via JS -->
             <p class="groups-empty">Geen groepen</p>
         </div>
     </section>
 
-    <!-- ── Collapse toggle ── -->
     <button id="groups-collapse-btn" aria-label="Sidebar inklappen" title="Inklappen">
         <img src="../assets/css/pictures/next.svg" alt="" id="groups-collapse-icon">
     </button>
 
-    <!-- ── Main: groepdetail ── -->
     <section id="groups-detail">
 
-        <!-- Lege state -->
         <div id="groups-detail-empty">
             <p class="groups-empty">Selecteer een groep</p>
         </div>
 
-        <!-- Groep detail (verborgen tot een groep geselecteerd is) -->
         <div id="groups-detail-content" class="hidden">
 
             <div class="groups-detail-header">
@@ -122,10 +114,8 @@
             <button class="groups-overlay-tab" id="groups-tab-join">Joinen</button>
         </div>
 
-        <!-- Panel: Aanmaken -->
         <div class="groups-overlay-panel" id="groups-panel-create">
 
-            <!-- Sub-tabs: naam of clan -->
             <div class="groups-create-options">
                 <button class="groups-create-option groups-create-option-active" id="groups-create-opt-name">
                     Groepsnaam
@@ -135,12 +125,10 @@
                 </button>
             </div>
 
-            <!-- Optie 1: vrije naam -->
             <div id="groups-create-by-name">
                 <input id="groups-input-name" type="text" placeholder="Groepsnaam">
             </div>
 
-            <!-- Optie 2: clan # -->
             <div id="groups-create-by-clan" class="hidden">
                 <input id="groups-input-clan-tag" type="text" placeholder="Clantag: #ABC123">
                 <p class="groups-clan-hint" id="groups-clan-hint"></p>
@@ -149,7 +137,6 @@
             <button class="btn-groups-accent" id="groups-overlay-create-btn">Aanmaken</button>
         </div>
 
-        <!-- Panel: Joinen -->
         <div class="groups-overlay-panel hidden" id="groups-panel-join">
             <input id="groups-input-join-code" type="text" placeholder="Groepscode: ######">
             <button class="btn-groups-accent" id="groups-overlay-join-btn">Joinen</button>
@@ -160,7 +147,6 @@
 
 <div class="profile-placeholder"></div>
 
-<!-- ── Templates ── -->
 <template id="groups-item-template">
     <div class="groups-item">
         <div class="groups-item-logo">🛡️</div>
@@ -183,7 +169,6 @@
     </div>
 </template>
 
-<!-- ── Leave group confirmation popup ── -->
 <div class="overlay hidden" id="groups-overlay-leave">
     <div class="overlay-container groups-overlay-leave-container">
         <h3 class="groups-leave-title">Groep verlaten?</h3>
