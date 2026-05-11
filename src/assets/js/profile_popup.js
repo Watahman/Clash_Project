@@ -15,6 +15,8 @@ let inputBaseTag, inputBaseToken, inputClanTag
 let controller = new AbortController()
 let poCopyTimer
 let friendListTitle
+let poGroupList
+let clansLoaded = false
 
 export function profileHTML(){
     fetch("/subpages/popup_HTMLs/profile_popup.html")
@@ -55,6 +57,7 @@ function labelInit(){
     inputClanTag      = document.querySelector("#po-input-clan-tag")
     friendListTitle   = document.querySelector("#po-friend-list-title")
     poAddText         = document.querySelector("#po-add-text")
+    poGroupList       = document.querySelector("#po-group-list")
 }
 
 function profileInit(){
@@ -125,6 +128,8 @@ function openProfile(username, code, memberSince) {
 function closeProfile() {
     profile.classList.remove('po-open')
     document.body.style.overflow = ''
+    document.querySelectorAll(".po-card-base, .po-card-friend, .po-card-clan").forEach(el => el.remove())
+    clansLoaded = false
 }
 
 function poBackdrop(e) {
@@ -139,18 +144,21 @@ function poTab(btn) {
     controller.abort()
     controller = new AbortController()
 
-    const isBase = btn.id === 'po-tab-bases'
+    const isBase   = btn.id === 'po-tab-bases'
     const isFriend = btn.id === 'po-tab-friends'
-    const isClan = btn.id === 'po-tab-clans'
+    const isClan   = btn.id === 'po-tab-clans'
+    const isGroup  = btn.id === 'po-tab-groups'
 
     document.querySelectorAll(".po-card-base").forEach(t => t.classList.toggle('hidden', !isBase))
     document.querySelectorAll(".po-card-friend").forEach(t => t.classList.toggle('hidden', !isFriend))
+    document.querySelectorAll(".po-card-clan").forEach(t => t.classList.toggle('hidden', !isClan))
 
     friendRequestBtn.classList.toggle('hidden', !isFriend)
     friendPendingBtn.classList.toggle('hidden', !isFriend)
 
     const baseCards   = document.querySelectorAll(".po-card-base")
     const friendCards = document.querySelectorAll(".po-card-friend")
+    const clanCards   = document.querySelectorAll(".po-card-clan")
 
     if (btn.id === 'po-tab-settings') {
         emptyLabel.classList.add('hidden')
@@ -159,9 +167,9 @@ function poTab(btn) {
         return
     }
 
-    const cards     = isBase ? baseCards : isFriend ? friendCards : null
-    const emptyText = isBase ? "No Bases" : isFriend ? "No Friends" : "No Clans"
-    const addLabel  = isBase ? "ADD BASE"  : isFriend ? "ADD FRIEND"  : "ADD CLAN"
+    const cards     = isBase ? baseCards : isFriend ? friendCards : isClan ? clanCards : null
+    const emptyText = isBase ? "No Bases" : isFriend ? "No Friends" : isClan ? "No Clans" : "No Groups"
+    const addLabel  = isBase ? "ADD BASE"  : isFriend ? "ADD FRIEND" : isClan ? "ADD CLAN" : "ADD GROUP"
 
     if (cards && cards.length > 0) {
         emptyLabel.classList.add('hidden')
@@ -173,9 +181,9 @@ function poTab(btn) {
     poAddText.textContent = addLabel
     addBtn.classList.remove('hidden')
 
-    if (isBase) addBtn.onclick = () => { openAddOverlay(addBase, handleAddBase) }
+    if (isBase)   addBtn.onclick = () => { openAddOverlay(addBase, handleAddBase) }
     if (isFriend) addBtn.onclick = () => { openAddOverlay(addBase, handleAddFriend) }
-    if (isClan) addBtn.onclick = () => { openAddOverlay(addClan, () => { addClan.classList.add('hidden') }) }
+    if (isClan)   addBtn.onclick = () => { openAddOverlay(addClan, handleAddClan) }
 }
 
 function openAddOverlay(overlay, onConfirm) {
@@ -209,6 +217,8 @@ function handleAddFriend() {
         .then(confirm => { console.log(confirm) })
 }
 
+function handleAddClan() {}
+
 function poCopy() {
     navigator.clipboard.writeText(poCode.textContent).catch(() => {})
     poIcoCopy.classList.add('po-hidden')
@@ -238,6 +248,41 @@ function loadFriends(){
         })
 }
 
+function loadClans() {
+    if (clansLoaded) return
+    clansLoaded = true
+
+    const path = conf._BASE_URL + conf._EXT_SUPA_GROUP_MEMBER
+    const body = { id: localStorage.getItem("id") }
+    databaseRequestWithBody(path, body).then(groups => {
+        if (groups.length === 0) return
+        groups.forEach(group => {
+            const path = conf._BASE_URL + conf._EXT_SUPA_GROUP_INFO
+            const body = { id: group.group_id }
+            databaseRequestWithBody(path, body).then(groupInfo => {
+                const clanTemplate = document.querySelector("#po-groups-item-template").content.cloneNode(true)
+                clanTemplate.querySelector(".po-base-name").textContent = groupInfo[0].name
+                clanTemplate.querySelector(".po-base-info").textContent = groupInfo[0].code
+                const badge = clanTemplate.querySelector(".groups-role-badge")
+                if (groupInfo[0].owner_id === localStorage.getItem("id")) {
+                    badge.textContent = "Leader"
+                    badge.classList.add("leader")
+                } else if (groupInfo[0].co_leader_id === localStorage.getItem("id")) {
+                    badge.textContent = "Co-Leader"
+                    badge.classList.add("co-leader")
+                }
+                const item = clanTemplate.querySelector(".po-card-clan")
+                item.classList.add('hidden')
+                document.querySelector(".po-panel-content").appendChild(clanTemplate)
+                if (document.querySelector('#po-tab-clans')?.classList.contains('po-tab-active')) {
+                    item.classList.remove('hidden')
+                    emptyLabel.classList.add('hidden')
+                }
+            })
+        })
+    })
+}
+
 function isUserLoggedIn() {
     if (localStorage.getItem("id") !== null) {
         const data = { id: localStorage.getItem("id") }
@@ -246,6 +291,7 @@ function isUserLoggedIn() {
                 openProfile(res.name, "#" + res.code, res.created_at.split("T")[0])
                 loadBases(res.accounts)
                 loadFriends()
+                loadClans()
             })
     } else {
         window.location.href = "subpages/login.html"

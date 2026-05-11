@@ -85,6 +85,7 @@ export function createGroupCard(groupsInfo){
             const path = conf._BASE_URL + conf._EXT_SUPA_GROUP_MEMBERS
             const data = {id: groupData[0].id}
             databaseRequestWithBody(path, data).then(groupMembers => {
+                console.log(groupCard)
                 groupCard.querySelector(".groups-item-meta").textContent = groupMembers.length + " leden"
                 groupCard.querySelector(".groups-item-name").textContent = groupData[0].name
                 if(localStorage.getItem("id") === groupData[0].owner_id){

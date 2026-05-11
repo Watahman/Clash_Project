@@ -507,3 +507,29 @@ input[type="text"]:focus {
     width: 15px;
     height: 15px;
 }
+
+.groups-role-badge {
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    background: var(--surface-3);
+    color: var(--text-3);
+    border: 1px solid var(--border-subtle);
+}
+
+.groups-role-badge.co-leader {
+    background: var(--green-dim);
+    color: var(--green);
+    border: 1px solid rgba(63,185,122,0.2);
+}
+
+.groups-role-badge.leader {
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid rgba(108,120,240,0.3);
+}
