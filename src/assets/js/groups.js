@@ -54,7 +54,9 @@ function init(){
     initGroups()
     profileHTML()
     copyCodeInit()
-    groupsLeaveBtn.onclick = () => {leaveGroup()}
+    leaveGroup()
+    escPopupClose()
+    overlayBackdropClose()
 }
 
 function newGroupOverlay(){
@@ -169,6 +171,36 @@ function copyCodeInit(){
             }, 1800)
         });
     });
+}
+
+function escPopupClose(){
+    document.addEventListener('keydown', e => {
+        if (e.key !== 'Escape') return
+
+        if (!groupsOverlayNew.classList.contains('hidden')) {
+            groupsOverlayNew.classList.add('hidden')
+            return
+        }
+
+        if (!groupOverlayLeave.classList.contains('hidden')) {
+            groupOverlayLeave.classList.add('hidden')
+            return
+        }
+    })
+}
+
+function overlayBackdropClose(){
+    groupsOverlayNew.onclick = (e) => {
+        if (e.target === groupsOverlayNew) {
+            groupsOverlayNew.classList.add('hidden')
+        }
+    }
+
+    groupOverlayLeave.onclick = (e) => {
+        if (e.target === groupOverlayLeave) {
+            groupOverlayLeave.classList.add('hidden')
+        }
+    }
 }
 
 init()
