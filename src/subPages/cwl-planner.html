@@ -30,22 +30,20 @@
         </button>
     </div>
 </header>
+
 <main>
     <section>
         <article>
             <div>
                 <h3>Players</h3>
-                <button id="cwl-add-clan-players-button">Add clan</button>
-                <button id="cwl-add-player-button">Add player</button>
+                <button id="cwl-add-players-button">Add players</button>
                 <select id="cwl-player-sorting">
                     <option value="townhall">Townhall</option>
                     <option value="name">Name</option>
                 </select>
                 <p id="cwl-total-player-amount">0</p>
             </div>
-            <div id="cwl-available-players">
-
-            </div>
+            <div id="cwl-available-players"></div>
         </article>
     </section>
     <section>
@@ -53,18 +51,58 @@
             <h3>Clans</h3>
             <button id="cwl-add-clan-button">Add Clan</button>
             <input type="text" id="cwl-plan-name" placeholder="Plan naam..." maxlength="40">
-            <select id="cwl-load-plan">
-            </select>
+            <select id="cwl-load-plan"></select>
             <button id="cwl-save-plan-button">Save</button>
         </div>
         <article id="cwl-all-clans"></article>
     </section>
 </main>
+
 <div class="overlay hidden" id="cwl-overlay-add-players">
     <div class="overlay-container" id="cwl-container-add-players">
-        <input id="cwl-input-tag" type="text" placeholder="Tag: #">
-        <br>
-        <button id="cwl-overlay-add-players-button">Confirm</button>
+
+        <div class="modal-header-row">
+            <span class="modal-title">Add players</span>
+        </div>
+
+        <div class="modal-tabs">
+            <button class="modal-tab-btn active" data-tab="tag">By tag</button>
+            <button class="modal-tab-btn" data-tab="accounts">My accounts</button>
+            <button class="modal-tab-btn" data-tab="group">From group</button>
+        </div>
+
+        <!-- Tab 1: by tag -->
+        <div class="modal-tab-panel" id="modal-tab-tag">
+            <p class="modal-field-label">Player or clan tag</p>
+            <input id="cwl-input-tag" type="text" placeholder="#TAG...">
+            <button id="cwl-overlay-confirm-tag-button" class="primary" disabled>Confirm</button>
+        </div>
+
+        <!-- Tab 2: my accounts -->
+        <div class="modal-tab-panel hidden" id="modal-tab-accounts">
+            <div class="modal-search-bar">
+                <span class="modal-search-icon">⌕</span>
+                <input type="text" id="cwl-accounts-search" placeholder="Search...">
+            </div>
+            <div class="modal-segment">
+                <button class="modal-seg-btn active" data-seg="mine">Mine</button>
+                <button class="modal-seg-btn" data-seg="friends">Friends</button>
+            </div>
+            <div class="modal-account-list" id="cwl-account-list"></div>
+            <button id="cwl-overlay-add-selected-button" class="modal-btn-add-selected">Add selected (0)</button>
+        </div>
+
+        <!-- Tab 3: from group -->
+        <div class="modal-tab-panel hidden" id="modal-tab-group">
+            <p class="modal-field-label">Group</p>
+            <select id="cwl-select-group">
+                <option value="">— select a group —</option>
+            </select>
+            <div id="cwl-group-preview" class="modal-empty-state">Select a group to preview members</div>
+            <div class="modal-group-preview-list hidden" id="cwl-group-preview-list"></div>
+            <button id="cwl-overlay-load-group-button" class="primary" disabled>Load all from group</button>
+        </div>
+
     </div>
 </div>
 
@@ -75,13 +113,11 @@
             <option value="15">15v15</option>
             <option value="30">30v30</option>
         </select>
-        <br>
         <button id="cwl-overlay-add-clan-button">Confirm</button>
     </div>
 </div>
 
 <div class="profile-placeholder"></div>
-</body>
 
 <template id="cwl-player-template">
     <article class="cwl-player-article">
@@ -103,9 +139,9 @@
             <img class="cwl-confirm-clan-is-full" src="../assets/css/pictures/checkmark.svg" alt="confirmButton">
             <img class="cwl-delete-clan" src="../assets/css/pictures/bin.svg" alt="deleteButton">
         </div>
-        <div class="cwl-clan-player-list">
-
-        </div>
+        <div class="cwl-clan-player-list"></div>
     </article>
 </template>
+
+</body>
 </html>

@@ -10,11 +10,13 @@ let addClanPlayersBtn, overlayAddPlayersBtn, addPlayerBtn, addClanBtn, overlayAd
 let cwlInputTag, cwlInputClanCode, selectAmountPlayers
 let savePlanBtn, planName, loadPlan
 let availablePlayers, allClans, totalPlayerAmount
+let addPlayersBtn, overlayConfirmTagBtn, accountsSearch, accountList,
+    addSelectedBtn, segBtns, selectGroup, groupPreview,
+    groupPreviewList, loadGroupBtn, modalTabBtn
 
 function labelInit(){
     addClanPlayersBtn      = document.querySelector("#cwl-add-clan-players-button")
     overlayAddPlayersBtn   = document.querySelector("#cwl-overlay-add-players-button")
-    addPlayerBtn           = document.querySelector("#cwl-add-player-button")
     addClanBtn             = document.querySelector("#cwl-add-clan-button")
     overlayAddClanBtn      = document.querySelector("#cwl-overlay-add-clan-button")
     cwlInputTag            = document.querySelector("#cwl-input-tag")
@@ -26,13 +28,25 @@ function labelInit(){
     availablePlayers       = document.querySelector("#cwl-available-players")
     allClans               = document.querySelector("#cwl-all-clans")
     totalPlayerAmount      = document.querySelector("#cwl-total-player-amount")
+    addPlayersBtn          = document.querySelector("#cwl-add-players-button")
+    overlayConfirmTagBtn   = document.querySelector("#cwl-overlay-confirm-tag-button")
+    accountsSearch         = document.querySelector("#cwl-accounts-search")
+    accountList            = document.querySelector("#cwl-account-list")
+    addSelectedBtn         = document.querySelector("#cwl-overlay-add-selected-button")
+    segBtns                = document.querySelectorAll(".modal-seg-btn")
+    modalTabBtn            = document.querySelectorAll(".modal-tab-btn")
+    selectGroup            = document.querySelector("#cwl-select-group")
+    groupPreview           = document.querySelector("#cwl-group-preview")
+    groupPreviewList       = document.querySelector("#cwl-group-preview-list")
+    loadGroupBtn           = document.querySelector("#cwl-overlay-load-group-button")
 }
 
 function init(){
     overlayHide();
     labelInit();
-    addClanPlayersButton();
-    addPlayerButton()
+    addPlayersOverlay()
+    //addClanPlayersButton();
+    //addPlayerButton()
     addClanButton();
     savePlanButton();
     guessCwlSize()
@@ -42,33 +56,32 @@ function init(){
     localStorage.setItem("planner_id", "")
 }
 
-function addClanPlayersButton(){
-    addClanPlayersBtn.addEventListener("click", () => {
-        document.querySelector("#cwl-overlay-add-players").classList.remove("hidden");
-    })
-    overlayAddPlayersBtn.addEventListener("click", () => {
-        const clanTag = cwlInputTag.value;
-        document.querySelectorAll(".overlay").forEach(overlay =>
-            overlay.classList.add("hidden"));
-        if(clanTag !== ""){
-            getClanMembersWithBattleData(clanTag).then(data => createPlayerCard(data));
+function addPlayersOverlay(){
+    addPlayersBtn.onclick = () => {
+        document.querySelector("#cwl-overlay-add-players").classList.toggle("hidden");
+    }
+    modalTabBtn.forEach(tab => {
+        tab.onclick = () => {
+            document.querySelector(".modal-tab-btn.active").classList.toggle("active");
+            tab.classList.toggle("active");
+            if(tab.dataset.tab === "tag"){
+                document.querySelector("#modal-tab-tag").classList.remove("hidden");
+                document.querySelector("#modal-tab-accounts").classList.add("hidden");
+                document.querySelector("#modal-tab-group").classList.add("hidden");
+            }else if(tab.dataset.tab === "accounts"){
+                document.querySelector("#modal-tab-tag").classList.add("hidden");
+                document.querySelector("#modal-tab-accounts").classList.remove("hidden");
+                document.querySelector("#modal-tab-group").classList.add("hidden");
+            }else if(tab.dataset.tab === "group"){
+                document.querySelector("#modal-tab-tag").classList.add("hidden");
+                document.querySelector("#modal-tab-accounts").classList.add("hidden");
+                document.querySelector("#modal-tab-group").classList.remove("hidden");
+            }
         }
-    });
-}
+    })
 
-function addPlayerButton(){
-    addPlayerBtn.addEventListener("click", () => {
-        document.querySelector("#cwl-overlay-add-players").classList.remove("hidden");
-    })
-    overlayAddPlayersBtn.addEventListener("click", () => {
-        const playerTag = cwlInputTag.value;
-        document.querySelectorAll(".overlay").forEach(overlay =>
-            overlay.classList.add("hidden"));
-        if(playerTag !== ""){
-            console.log(playerTag);
-            getPlayerWithBattleData(playerTag).then(data => createPlayerCard(data));
-        }
-    });
+
+
 }
 
 function addClanButton(){
