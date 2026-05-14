@@ -22,7 +22,7 @@ public class API_Clan {
             utils.addCORS(exchange);
 
             if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1); // Preflight response
+                exchange.sendResponseHeaders(204, -1);
                 return;
             }
 
@@ -35,9 +35,19 @@ public class API_Clan {
                     String responseText = utils.getClashApiResponse(clashUrl);
 
                     utils.sendJsonResponse(exchange, responseText, 200);
+                } catch (HttpException e) {
+                    try {
+                        utils.sendJsonResponse(exchange, e.getResponseBody(), e.getStatusCode());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("error\":\"Failed to fetch Clash API\"");
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Failed to fetch Clash API\"}", 500);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         });
@@ -49,7 +59,7 @@ public class API_Clan {
             utils.addCORS(exchange);
 
             if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1); // Preflight response
+                exchange.sendResponseHeaders(204, -1);
                 return;
             }
 
@@ -62,9 +72,19 @@ public class API_Clan {
                     String responseText = utils.getClashApiResponse(clashUrl);
 
                     utils.sendJsonResponse(exchange, responseText, 200);
+                } catch (HttpException e) {
+                    try {
+                        utils.sendJsonResponse(exchange, e.getResponseBody(), e.getStatusCode());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("error\":\"Failed to fetch Clash API\"");
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Failed to fetch Clash API\"}", 500);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         });
@@ -76,7 +96,7 @@ public class API_Clan {
             utils.addCORS(exchange);
 
             if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1); // Preflight response
+                exchange.sendResponseHeaders(204, -1);
                 return;
             }
 
@@ -89,9 +109,19 @@ public class API_Clan {
                     String responseText = utils.getClashApiResponse(clashUrl);
 
                     utils.sendJsonResponse(exchange, responseText, 200);
+                } catch (HttpException e) {
+                    try {
+                        utils.sendJsonResponse(exchange, e.getResponseBody(), e.getStatusCode());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("error\":\"Failed to fetch Clash API\"");
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Failed to fetch Clash API\"}", 500);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         });
@@ -104,7 +134,7 @@ public class API_Clan {
             utils.addCORS(exchange);
 
             if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1); // Preflight response
+                exchange.sendResponseHeaders(204, -1);
                 return;
             }
 
@@ -119,7 +149,11 @@ public class API_Clan {
 //                    utils.sendJsonResponse(exchange, responseText, 200);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("error\":\"Failed to fetch Clash API\"");
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Failed to fetch Clash API\"}", 500);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         });
@@ -131,7 +165,7 @@ public class API_Clan {
             utils.addCORS(exchange);
 
             if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1); // Preflight response
+                exchange.sendResponseHeaders(204, -1);
                 return;
             }
 
@@ -144,9 +178,19 @@ public class API_Clan {
                     String responseText = utils.getClashApiResponse(clashUrl);
 
                     utils.sendJsonResponse(exchange, responseText, 200);
+                } catch (HttpException e) {
+                    try {
+                        utils.sendJsonResponse(exchange, e.getResponseBody(), e.getStatusCode());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("error\":\"Failed to fetch Clash API\"");
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Failed to fetch Clash API\"}", 500);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         });
@@ -158,7 +202,7 @@ public class API_Clan {
             utils.addCORS(exchange);
 
             if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1); // Preflight response
+                exchange.sendResponseHeaders(204, -1);
                 return;
             }
 
@@ -171,9 +215,19 @@ public class API_Clan {
                     String responseText = utils.getClashApiResponse(clashUrl);
 
                     utils.sendJsonResponse(exchange, responseText, 200);
+                } catch (HttpException e) {
+                    try {
+                        utils.sendJsonResponse(exchange, e.getResponseBody(), e.getStatusCode());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("error\":\"Failed to fetch Clash API\"");
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Failed to fetch Clash API\"}", 500);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         });
@@ -185,7 +239,7 @@ public class API_Clan {
             utils.addCORS(exchange);
 
             if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1); // Preflight response
+                exchange.sendResponseHeaders(204, -1);
                 return;
             }
 
@@ -198,9 +252,19 @@ public class API_Clan {
                     String responseText = utils.getClashApiResponse(clashUrl);
 
                     utils.sendJsonResponse(exchange, responseText, 200);
+                } catch (HttpException e) {
+                    try {
+                        utils.sendJsonResponse(exchange, e.getResponseBody(), e.getStatusCode());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("error\":\"Failed to fetch Clash API\"");
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Failed to fetch Clash API\"}", 500);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         });
@@ -212,7 +276,7 @@ public class API_Clan {
             utils.addCORS(exchange);
 
             if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1); // Preflight response
+                exchange.sendResponseHeaders(204, -1);
                 return;
             }
 
@@ -225,12 +289,21 @@ public class API_Clan {
                     String responseText = utils.getClashApiResponse(clashUrl);
 
                     utils.sendJsonResponse(exchange, responseText, 200);
+                } catch (HttpException e) {
+                    try {
+                        utils.sendJsonResponse(exchange, e.getResponseBody(), e.getStatusCode());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("error\":\"Failed to fetch Clash API\"");
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Failed to fetch Clash API\"}", 500);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         });
     }
-
 }

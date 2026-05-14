@@ -45,8 +45,6 @@ function init(){
     overlayHide();
     labelInit();
     addPlayersOverlay()
-    //addClanPlayersButton();
-    //addPlayerButton()
     addClanButton();
     savePlanButton();
     guessCwlSize()
@@ -79,8 +77,21 @@ function addPlayersOverlay(){
             }
         }
     })
-
-
+    overlayConfirmTagBtn.onclick = () => {
+        const tag = cwlInputTag.value
+        getPlayerWithBattleData(tag)
+            .then(data => {
+                createPlayerCard(data)
+            })
+            .catch(() => {
+                getClanMembersWithBattleData(tag).then(data => {
+                    data.forEach(player => {
+                        getPlayerWithBattleData(player.tag) // .tag toevoegen!
+                            .then(data => createPlayerCard(data))
+                    })
+                })
+            })
+    }
 
 }
 

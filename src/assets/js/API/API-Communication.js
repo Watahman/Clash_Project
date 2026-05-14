@@ -1,13 +1,17 @@
-export async function fetchClashAPIRequest(path, body){
-    return fetch(path, {
+export async function fetchClashAPIRequest(path, body) {
+    const response = await fetch(path, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: body
-    })
-        .then(response => response.json())
-        .catch(error => console.log(error));
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+    }
+
+    return response.json();
 }
 
 export async function databaseRequestWithBody(path, body){

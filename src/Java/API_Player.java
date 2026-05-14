@@ -22,7 +22,7 @@ public class API_Player {
             utils.addCORS(exchange);
 
             if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1); // Preflight response
+                exchange.sendResponseHeaders(204, -1);
                 return;
             }
 
@@ -35,9 +35,19 @@ public class API_Player {
                     String responseText = utils.getClashApiResponse(clashUrl);
 
                     utils.sendJsonResponse(exchange, responseText, 200);
+                } catch (HttpException e) {
+                    try {
+                        utils.sendJsonResponse(exchange, e.getResponseBody(), e.getStatusCode());
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("error\":\"Failed to fetch Clash API\"");
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Failed to fetch Clash API\"}", 500);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
             }
         });
@@ -49,7 +59,7 @@ public class API_Player {
             utils.addCORS(exchange);
 
             if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1); // Preflight response
+                exchange.sendResponseHeaders(204, -1);
                 return;
             }
 
@@ -62,9 +72,19 @@ public class API_Player {
                     String responseText = utils.getClashApiResponse(clashUrl);
 
                     utils.sendJsonResponse(exchange, responseText, 200);
+                } catch (HttpException e) {
+                    try {
+                        utils.sendJsonResponse(exchange, e.getResponseBody(), e.getStatusCode());
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("error\":\"Failed to fetch Clash API\"");
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Failed to fetch Clash API\"}", 500);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
             }
         });
@@ -76,7 +96,7 @@ public class API_Player {
             utils.addCORS(exchange);
 
             if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1); // Preflight response
+                exchange.sendResponseHeaders(204, -1);
                 return;
             }
 
@@ -95,9 +115,19 @@ public class API_Player {
                     String responseText = utils.postClashApiResponse(clashUrl, body.toString());
                     System.out.println(responseText);
                     utils.sendJsonResponse(exchange, responseText, 200);
+                } catch (HttpException e) {
+                    try {
+                        utils.sendJsonResponse(exchange, e.getResponseBody(), e.getStatusCode());
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("error\":\"Failed to fetch Clash API\"");
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Failed to fetch Clash API\"}", 500);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
             }
         });
@@ -109,7 +139,7 @@ public class API_Player {
             utils.addCORS(exchange);
 
             if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1); // Preflight response
+                exchange.sendResponseHeaders(204, -1);
                 return;
             }
 
@@ -122,9 +152,19 @@ public class API_Player {
                     String responseText = utils.getClashApiResponse(clashUrl);
 
                     utils.sendJsonResponse(exchange, responseText, 200);
+                } catch (HttpException e) {
+                    try {
+                        utils.sendJsonResponse(exchange, e.getResponseBody(), e.getStatusCode());
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("error\":\"Failed to fetch Clash API\"");
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Failed to fetch Clash API\"}", 500);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
             }
         });

@@ -37,28 +37,43 @@ public class API_Utils {
         conn.setRequestProperty("Authorization", conf._API_KEY_ACTIVE);
         conn.setRequestProperty("Accept", "application/json");
 
-        InputStream is = conn.getInputStream();
-        return new String(is.readAllBytes());
+        int statusCode = conn.getResponseCode();
+
+        if (statusCode != 200) {
+            InputStream errorStream = conn.getErrorStream();
+            String errorBody = errorStream != null
+                    ? new String(errorStream.readAllBytes())
+                    : "{\"error\":\"HTTP " + statusCode + "\"}";
+            throw new HttpException(statusCode, errorBody);
+        }
+
+        return new String(conn.getInputStream().readAllBytes());
     }
 
     public String postClashApiResponse(String urlStr, String jsonBody) throws Exception {
         URL url = new URL(urlStr);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Authorization", conf._API_KEY_ACTIVE);
         conn.setRequestProperty("Accept", "application/json");
         conn.setRequestProperty("Content-Type", "application/json");
-
         conn.setDoOutput(true);
 
         try (OutputStream os = conn.getOutputStream()) {
-            byte[] input = jsonBody.getBytes("utf-8");
-            os.write(input, 0, input.length);
+            os.write(jsonBody.getBytes("utf-8"));
         }
 
-        InputStream is = conn.getInputStream();
-        return new String(is.readAllBytes());
+        int statusCode = conn.getResponseCode();
+
+        if (statusCode != 200) {
+            InputStream errorStream = conn.getErrorStream();
+            String errorBody = errorStream != null
+                    ? new String(errorStream.readAllBytes())
+                    : "{\"error\":\"HTTP " + statusCode + "\"}";
+            throw new HttpException(statusCode, errorBody);
+        }
+
+        return new String(conn.getInputStream().readAllBytes());
     }
 
     public void sendJsonResponse(HttpExchange exchange, String json, int statusCode) throws Exception {

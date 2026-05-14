@@ -18,7 +18,10 @@ export function getClanMembersWithBattleData(clanTag) {
 }
 
 export function getPlayerWithBattleData(playerTag) {
-    return playerAPI.getPlayerInfoRequest(playerTag).then(data => {
+    // playerTag kan een object zijn (van getClanMembers) of een string (directe input)
+    const tag = typeof playerTag === "object" ? playerTag.tag : playerTag;
+
+    return playerAPI.getPlayerInfoRequest(tag).then(data => {
         const player = {
             name: data.name,
             tag: data.tag,
@@ -36,8 +39,12 @@ function processBatch(members, startIndex = 0, results = []) {
 
     return Promise.all(
         batch.map(member => {
-            return playerAPI.getPlayerLeagueHistoryRequest(member.tag).then(data => {
+            const tag = typeof member === "object" ? member.tag : member;
+            return playerAPI.getPlayerLeagueHistoryRequest(tag).then(data => {
                 member.leagueHistory = data;
+                return member;
+            }).catch(() => {
+                member.leagueHistory = null;
                 return member;
             });
         })
