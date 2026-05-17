@@ -29,12 +29,28 @@ public class SUPABASE_CWLPlanner {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 try {
                     String body = new String(exchange.getRequestBody().readAllBytes());
+
+                    if (body == null || body.isBlank()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Request body is leeg\"}", 400);
+                        return;
+                    }
+
                     JsonObject json = JsonParser.parseString(body).getAsJsonObject();
 
-                    String userId = json.get("id").getAsString();
-                    String plannerId = json.get("currentPlanId").getAsString();
-                    String planName = json.get("name").getAsString();
-                    JsonArray clans = json.get("clans").getAsJsonArray();
+                    JsonElement idEl        = json.get("id");
+                    JsonElement planIdEl    = json.get("currentPlanId");
+                    JsonElement nameEl      = json.get("name");
+                    JsonElement clansEl     = json.get("clans");
+
+                    if (idEl == null || nameEl == null || clansEl == null) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Verplichte velden ontbreken: id, name, clans\"}", 400);
+                        return;
+                    }
+
+                    String userId   = idEl.getAsString();
+                    String planName = nameEl.getAsString();
+                    JsonArray clans = clansEl.getAsJsonArray();
+                    String plannerId = (planIdEl != null && !planIdEl.isJsonNull()) ? planIdEl.getAsString() : "";
 
                     JsonObject plan = new JsonObject();
                     plan.addProperty("name", planName);
@@ -42,39 +58,59 @@ public class SUPABASE_CWLPlanner {
                     plan.addProperty("owner_id", userId);
 
                     String planId = "";
-                    if(plannerId != null && !plannerId.isEmpty() && !plannerId.equals("undefined")){
+
+                    if (!plannerId.isEmpty() && !plannerId.equals("undefined")) {
                         String planExists = SUPABASE_Client.getWithBody("plans", "id=eq." + plannerId);
                         JsonElement planExistsElement = JsonParser.parseString(planExists);
 
-                        if(planExistsElement.isJsonArray() || !planExistsElement.getAsJsonArray().isEmpty()){
+                        if (planExistsElement.isJsonArray() && !planExistsElement.getAsJsonArray().isEmpty()) {
                             JsonObject editPlan = new JsonObject();
                             editPlan.add("info", clans);
                             editPlan.addProperty("name", planName);
                             String planResult = SUPABASE_Client.patch("plans", "id=eq." + plannerId, editPlan.toString());
 
                             JsonArray planArray = JsonParser.parseString(planResult).getAsJsonArray();
+                            if (planArray.isEmpty()) {
+                                utils.sendJsonResponse(exchange, "{\"error\":\"Plan updaten mislukt\"}", 500);
+                                return;
+                            }
                             planId = planArray.get(0).getAsJsonObject().get("id").getAsString();
+                        } else {
+                            utils.sendJsonResponse(exchange, "{\"error\":\"Plan niet gevonden met id: " + plannerId + "\"}", 404);
+                            return;
                         }
-                    }else{
+                    } else {
                         String planResult = SUPABASE_Client.post("plans", plan.toString());
-
                         JsonArray planArray = JsonParser.parseString(planResult).getAsJsonArray();
+
+                        if (planArray.isEmpty()) {
+                            utils.sendJsonResponse(exchange, "{\"error\":\"Plan aanmaken mislukt\"}", 500);
+                            return;
+                        }
+
                         planId = planArray.get(0).getAsJsonObject().get("id").getAsString();
 
                         JsonObject link = new JsonObject();
                         link.addProperty("plan_id", planId);
                         link.addProperty("user_id", userId);
-
-                        String linkResult = SUPABASE_Client.post("plan_users", link.toString());
+                        SUPABASE_Client.post("plan_users", link.toString());
                     }
 
                     utils.sendJsonResponse(exchange, "{\"success\":true, \"uuid\": \"" + planId + "\"}", 200);
+
+                } catch (IllegalStateException | ClassCastException e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Ongeldige JSON structuur\"}", 400);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     try {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500);
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Opslaan mislukt\"}", 500);
                     } catch (Exception ex) {
-                        throw new RuntimeException(ex);
+                        ex.printStackTrace();
                     }
                 }
             }
@@ -93,11 +129,22 @@ public class SUPABASE_CWLPlanner {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 try {
                     String body = new String(exchange.getRequestBody().readAllBytes());
+
+                    if (body == null || body.isBlank()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Request body is leeg\"}", 400);
+                        return;
+                    }
+
                     JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+                    JsonElement userEl = json.get("user");
 
-                    String userId = json.get("user").getAsString();
+                    if (userEl == null || userEl.isJsonNull()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Verplicht veld ontbreekt: user\"}", 400);
+                        return;
+                    }
 
-                    String userPlanIds = SUPABASE_Client.getWithBody("plan_users", "select=plan_id&user_id=eq."+ userId);
+                    String userId = userEl.getAsString();
+                    String userPlanIds = SUPABASE_Client.getWithBody("plan_users", "select=plan_id&user_id=eq." + userId);
 
                     JsonArray userPlanIdArray = JsonParser.parseString(userPlanIds).getAsJsonArray();
                     JsonArray planNames = new JsonArray();
@@ -114,12 +161,20 @@ public class SUPABASE_CWLPlanner {
                     }
 
                     utils.sendJsonResponse(exchange, String.valueOf(planNames), 200);
+
+                } catch (IllegalStateException | ClassCastException e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Ongeldige JSON structuur\"}", 400);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     try {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500);
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Ophalen planners mislukt\"}", 500);
                     } catch (Exception ex) {
-                        throw new RuntimeException(ex);
+                        ex.printStackTrace();
                     }
                 }
             }
@@ -138,12 +193,29 @@ public class SUPABASE_CWLPlanner {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 try {
                     String body = new String(exchange.getRequestBody().readAllBytes());
+
+                    if (body == null || body.isBlank()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Request body is leeg\"}", 400);
+                        return;
+                    }
+
                     JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+                    JsonElement nameEl = json.get("name");
 
-                    String name = json.get("name").getAsString();
+                    if (nameEl == null || nameEl.isJsonNull()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Verplicht veld ontbreekt: name\"}", 400);
+                        return;
+                    }
 
+                    String name = nameEl.getAsString();
                     String result = SUPABASE_Client.getWithBody("plans", "name=eq." + name);
                     JsonArray planArray = JsonParser.parseString(result).getAsJsonArray();
+
+                    if (planArray.isEmpty()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Plan niet gevonden: " + name + "\"}", 404);
+                        return;
+                    }
+
                     JsonObject plan = planArray.get(0).getAsJsonObject();
 
                     JsonObject planInfo = new JsonObject();
@@ -152,12 +224,20 @@ public class SUPABASE_CWLPlanner {
                     planInfo.addProperty("id", plan.get("id").getAsString());
 
                     utils.sendJsonResponse(exchange, planInfo.toString(), 200);
+
+                } catch (IllegalStateException | ClassCastException e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Ongeldige JSON structuur\"}", 400);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     try {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500);
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Ophalen planner mislukt\"}", 500);
                     } catch (Exception ex) {
-                        throw new RuntimeException(ex);
+                        ex.printStackTrace();
                     }
                 }
             }

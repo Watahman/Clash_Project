@@ -79,6 +79,7 @@ public class Main {
 
         supaUser.createUser();
         supaUser.getUserInfo();
+        supaUser.getUserBases();
         supaUser.checkUserLogin();
         supaUser.compareUserId();
         supaUser.addAccountToUser();

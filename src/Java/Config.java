@@ -61,6 +61,7 @@ public class Config {
 
     String _EXT_SUPA_USER_MAKE = "/SupabaseUserMake";
     String _EXT_SUPA_USER_INFO = "/SupabaseUserInfo";
+    String _EXT_SUPA_USER_BASES = "/SupabaseUserBases";
     String _EXT_SUPA_USER_CHECK = "/SupabaseUserCheck";
     String _EXT_SUPA_USER_IDCHECK = "/SupabaseUserIdCheck";
     String _EXT_SUPA_USER_ADD_ACCOUNT = "/SupabaseUserAddAccount";

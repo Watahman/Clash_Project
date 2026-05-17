@@ -10,8 +10,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class SUPABASE_Friend {
-    private HttpServer server;
-    private Config conf;
+    private final HttpServer server;
+    private final Config conf;
     private final API_Utils utils;
 
     public SUPABASE_Friend(HttpServer server, Config conf){
@@ -32,34 +32,60 @@ public class SUPABASE_Friend {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 try {
                     String body = new String(exchange.getRequestBody().readAllBytes());
-                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
 
-                    String userId = json.get("userId").getAsString();
-                    String friendCode = json.get("friendCode").getAsString();
+                    if (body.isBlank()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Request body is leeg\"}", 400);
+                        return;
+                    }
+
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+                    JsonElement userIdEl     = json.get("userId");
+                    JsonElement friendCodeEl = json.get("friendCode");
+
+                    if (userIdEl == null || userIdEl.isJsonNull() || friendCodeEl == null || friendCodeEl.isJsonNull()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Verplichte velden ontbreken: userId, friendCode\"}", 400);
+                        return;
+                    }
+
+                    String userId     = userIdEl.getAsString();
+                    String friendCode = friendCodeEl.getAsString();
 
                     String friendResult = SUPABASE_Client.getWithBody("users", "code=eq." + friendCode + "&select=id");
                     JsonArray users = JsonParser.parseString(friendResult).getAsJsonArray();
 
                     if (users.isEmpty()) {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"user not found\"}", 404);
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Gebruiker niet gevonden met code: " + friendCode + "\"}", 404);
                         return;
                     }
 
                     String friendId = users.get(0).getAsJsonObject().get("id").getAsString();
+
+                    if (friendId.equals(userId)) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Je kan jezelf niet toevoegen als vriend\"}", 400);
+                        return;
+                    }
+
                     JsonObject friend = new JsonObject();
                     friend.addProperty("user_a", userId);
                     friend.addProperty("user_b", friendId);
                     friend.addProperty("status", "pending");
 
                     String result = SUPABASE_Client.post("friends", friend.toString());
+                    utils.sendJsonResponse(exchange, result, 200);
 
-                    utils.sendJsonResponse(exchange, String.valueOf(result), 200);
+                } catch (IllegalStateException | ClassCastException e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Ongeldige JSON structuur\"}", 400);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     try {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500);
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Vriend toevoegen mislukt\"}", 500);
                     } catch (Exception ex) {
-                        throw new RuntimeException(ex);
+                        ex.printStackTrace();
                     }
                 }
             }
@@ -69,56 +95,7 @@ public class SUPABASE_Friend {
     public void getPendingRequests(){
         server.createContext(conf._EXT_SUPA_USER_GET_PENDING_FRIENDS, exchange -> {
             utils.addCORS(exchange);
-            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) { exchange.sendResponseHeaders(204, -1); return; }
 
-            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                try {
-                    String body = new String(exchange.getRequestBody().readAllBytes());
-                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
-                    String userId = json.get("userId").getAsString();
-
-                    // ik ben user_a, ik heb de request gestuurd
-                    String result = SUPABASE_Client.getWithBody("friends",
-                            "user_a=eq." + userId + "&status=eq.pending&select=user_b,status");
-
-                    utils.sendJsonResponse(exchange, result, 200);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    try { utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500); }
-                    catch (Exception ex) { throw new RuntimeException(ex); }
-                }
-            }
-        });
-    }
-
-    public void getFriendRequests(){
-        server.createContext(conf._EXT_SUPA_USER_GET_FRIEND_REQUESTS, exchange -> {
-            utils.addCORS(exchange);
-            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) { exchange.sendResponseHeaders(204, -1); return; }
-
-            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                try {
-                    String body = new String(exchange.getRequestBody().readAllBytes());
-                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
-                    String userId = json.get("userId").getAsString();
-
-                    // ik ben user_b, iemand heeft mij gevraagd
-                    String result = SUPABASE_Client.getWithBody("friends",
-                            "user_b=eq." + userId + "&status=eq.pending&select=user_a,status");
-
-                    utils.sendJsonResponse(exchange, result, 200);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    try { utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500); }
-                    catch (Exception ex) { throw new RuntimeException(ex); }
-                }
-            }
-        });
-    }
-
-    public void getFriends(){
-        server.createContext(conf._EXT_SUPA_USER_GET_FRIENDS, exchange -> {
-            utils.addCORS(exchange);
             if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
                 exchange.sendResponseHeaders(204, -1);
                 return;
@@ -127,9 +104,123 @@ public class SUPABASE_Friend {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 try {
                     String body = new String(exchange.getRequestBody().readAllBytes());
-                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
 
-                    String userId = json.get("userId").getAsString();
+                    if (body.isBlank()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Request body is leeg\"}", 400);
+                        return;
+                    }
+
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+                    JsonElement userIdEl = json.get("userId");
+
+                    if (userIdEl == null || userIdEl.isJsonNull()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Verplicht veld ontbreekt: userId\"}", 400);
+                        return;
+                    }
+
+                    String userId = userIdEl.getAsString();
+                    String result = SUPABASE_Client.getWithBody("friends",
+                            "user_a=eq." + userId + "&status=eq.pending&select=user_b,status");
+
+                    utils.sendJsonResponse(exchange, result, 200);
+
+                } catch (IllegalStateException | ClassCastException e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Ongeldige JSON structuur\"}", 400);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Ophalen pending requests mislukt\"}", 500);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    public void getFriendRequests(){
+        server.createContext(conf._EXT_SUPA_USER_GET_FRIEND_REQUESTS, exchange -> {
+            utils.addCORS(exchange);
+
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                try {
+                    String body = new String(exchange.getRequestBody().readAllBytes());
+
+                    if (body.isBlank()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Request body is leeg\"}", 400);
+                        return;
+                    }
+
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+                    JsonElement userIdEl = json.get("userId");
+
+                    if (userIdEl == null || userIdEl.isJsonNull()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Verplicht veld ontbreekt: userId\"}", 400);
+                        return;
+                    }
+
+                    String userId = userIdEl.getAsString();
+                    String result = SUPABASE_Client.getWithBody("friends",
+                            "user_b=eq." + userId + "&status=eq.pending&select=user_a,status");
+
+                    utils.sendJsonResponse(exchange, result, 200);
+
+                } catch (IllegalStateException | ClassCastException e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Ongeldige JSON structuur\"}", 400);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Ophalen vriendverzoeken mislukt\"}", 500);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    public void getFriends(){
+        server.createContext(conf._EXT_SUPA_USER_GET_FRIENDS, exchange -> {
+            utils.addCORS(exchange);
+
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                try {
+                    String body = new String(exchange.getRequestBody().readAllBytes());
+
+                    if (body.isBlank()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Request body is leeg\"}", 400);
+                        return;
+                    }
+
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+                    JsonElement userIdEl = json.get("userId");
+
+                    if (userIdEl == null || userIdEl.isJsonNull()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Verplicht veld ontbreekt: userId\"}", 400);
+                        return;
+                    }
+
+                    String userId = userIdEl.getAsString();
 
                     String checkA = SUPABASE_Client.getWithBody("friends",
                             "user_a=eq." + userId + "&status=eq.accepted&select=user_b,status");
@@ -165,12 +256,20 @@ public class SUPABASE_Friend {
                     }
 
                     utils.sendJsonResponse(exchange, combined.toString(), 200);
+
+                } catch (IllegalStateException | ClassCastException e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Ongeldige JSON structuur\"}", 400);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     try {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500);
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Ophalen vrienden mislukt\"}", 500);
                     } catch (Exception ex) {
-                        throw new RuntimeException(ex);
+                        ex.printStackTrace();
                     }
                 }
             }
@@ -189,10 +288,23 @@ public class SUPABASE_Friend {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 try {
                     String body = new String(exchange.getRequestBody().readAllBytes());
-                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
 
-                    String userId = json.get("userId").getAsString();
-                    String friendId = json.get("friendId").getAsString();
+                    if (body.isBlank()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Request body is leeg\"}", 400);
+                        return;
+                    }
+
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+                    JsonElement userIdEl   = json.get("userId");
+                    JsonElement friendIdEl = json.get("friendId");
+
+                    if (userIdEl == null || userIdEl.isJsonNull() || friendIdEl == null || friendIdEl.isJsonNull()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Verplichte velden ontbreken: userId, friendId\"}", 400);
+                        return;
+                    }
+
+                    String userId   = userIdEl.getAsString();
+                    String friendId = friendIdEl.getAsString();
 
                     String checkA = SUPABASE_Client.getWithBody("friends",
                             "user_a=eq." + userId + "&user_b=eq." + friendId + "&select=user_a");
@@ -209,17 +321,25 @@ public class SUPABASE_Friend {
                         SUPABASE_Client.patch("friends",
                                 "user_a=eq." + friendId + "&user_b=eq." + userId, patch.toString());
                     } else {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"friend request not found\"}", 404);
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Vriendverzoek niet gevonden\"}", 404);
                         return;
                     }
 
                     utils.sendJsonResponse(exchange, "{\"success\":true}", 200);
+
+                } catch (IllegalStateException | ClassCastException e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Ongeldige JSON structuur\"}", 400);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     try {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500);
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Vriend accepteren mislukt\"}", 500);
                     } catch (Exception ex) {
-                        throw new RuntimeException(ex);
+                        ex.printStackTrace();
                     }
                 }
             }
@@ -238,10 +358,23 @@ public class SUPABASE_Friend {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 try {
                     String body = new String(exchange.getRequestBody().readAllBytes());
-                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
 
-                    String userId = json.get("userId").getAsString();
-                    String friendId = json.get("friendId").getAsString();
+                    if (body.isBlank()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Request body is leeg\"}", 400);
+                        return;
+                    }
+
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+                    JsonElement userIdEl   = json.get("userId");
+                    JsonElement friendIdEl = json.get("friendId");
+
+                    if (userIdEl == null || userIdEl.isJsonNull() || friendIdEl == null || friendIdEl.isJsonNull()) {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Verplichte velden ontbreken: userId, friendId\"}", 400);
+                        return;
+                    }
+
+                    String userId   = userIdEl.getAsString();
+                    String friendId = friendIdEl.getAsString();
 
                     String checkA = SUPABASE_Client.getWithBody("friends",
                             "user_a=eq." + userId + "&user_b=eq." + friendId + "&select=user_a");
@@ -255,17 +388,25 @@ public class SUPABASE_Friend {
                         SUPABASE_Client.deleteColumn("friends",
                                 "user_a=eq." + friendId + "&user_b=eq." + userId);
                     } else {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"friend request not found\"}", 404);
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Vriendverzoek niet gevonden\"}", 404);
                         return;
                     }
 
                     utils.sendJsonResponse(exchange, "{\"success\":true}", 200);
+
+                } catch (IllegalStateException | ClassCastException e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Ongeldige JSON structuur\"}", 400);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     try {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500);
+                        utils.sendJsonResponse(exchange, "{\"error\":\"Vriend weigeren mislukt\"}", 500);
                     } catch (Exception ex) {
-                        throw new RuntimeException(ex);
+                        ex.printStackTrace();
                     }
                 }
             }

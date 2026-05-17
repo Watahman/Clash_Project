@@ -51,6 +51,36 @@ public class SUPABASE_User {
         });
     }
 
+    public void getUserBases(){
+        server.createContext(conf._EXT_SUPA_USER_BASES, exchange -> {
+            utils.addCORS(exchange);
+
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                try {
+                    String body = new String(exchange.getRequestBody().readAllBytes());
+                    JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+
+                    String id = json.get("id").getAsString();
+
+                    String result = SUPABASE_Client.getWithBody("users?select=accounts", "id=eq." + id);
+                    utils.sendJsonResponse(exchange, result, 201);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    try {
+                        utils.sendJsonResponse(exchange, "{\"error\":\"failed\"}", 500);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
+    }
+
     public void checkUserLogin(){
         server.createContext(conf._EXT_SUPA_USER_CHECK, exchange -> {
             utils.addCORS(exchange);
