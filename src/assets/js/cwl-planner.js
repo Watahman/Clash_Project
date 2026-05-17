@@ -6,13 +6,13 @@ import * as conf from "./Data/config.js"
 import {canAutosave, isLoading, setLoading} from "./Data/config.js";
 import { profileHTML } from "./profile_popup.js"
 
-let addClanPlayersBtn, overlayAddPlayersBtn, addPlayerBtn, addClanBtn, overlayAddClanBtn
+let addClanPlayersBtn, overlayAddPlayersBtn, addClanBtn, overlayAddClanBtn
 let cwlInputTag, cwlInputClanCode, selectAmountPlayers
-let savePlanBtn, planName, loadPlan
+let savePlanBtn, planName, loadPlan, path, data
 let availablePlayers, allClans, totalPlayerAmount
 let addPlayersBtn, overlayConfirmTagBtn, accountsSearch, accountList,
     addSelectedBtn, segBtns, selectGroup, groupPreview,
-    groupPreviewList, loadGroupBtn, modalTabBtn
+    groupPreviewList, loadGroupBtn, modalTabBtn, modalAccountListEmpty
 
 function labelInit(){
     addClanPlayersBtn      = document.querySelector("#cwl-add-clan-players-button")
@@ -39,6 +39,7 @@ function labelInit(){
     groupPreview           = document.querySelector("#cwl-group-preview")
     groupPreviewList       = document.querySelector("#cwl-group-preview-list")
     loadGroupBtn           = document.querySelector("#cwl-overlay-load-group-button")
+    modalAccountListEmpty  = document.querySelector("#modal-account-list-empty")
 }
 
 function init(){
@@ -86,13 +87,33 @@ function addPlayersOverlay(){
             .catch(() => {
                 getClanMembersWithBattleData(tag).then(data => {
                     data.forEach(player => {
-                        getPlayerWithBattleData(player.tag) // .tag toevoegen!
+                        getPlayerWithBattleData(player.tag)
                             .then(data => createPlayerCard(data))
                     })
                 })
             })
     }
 
+    path = conf._BASE_URL + conf._EXT_SUPA_USER_BASES
+    data = { id: localStorage.getItem("id")}
+    databaseRequestWithBody(path, data).then(data => {
+        console.log(data)
+        createPlayerCard(data[0].accounts, "user")
+    })
+
+    path = conf._BASE_URL + conf._EXT_SUPA_USER_GET_FRIENDS
+    data = { userId: localStorage.getItem("id")}
+    databaseRequestWithBody(path, data).then(data => {
+        console.log(data)
+        data.forEach(friend => {
+            path = conf._BASE_URL + conf._EXT_SUPA_USER_BASES
+            data = {id: friend.user_b}
+        })
+        databaseRequestWithBody(path, data).then(data => {
+            console.log(data)
+            createPlayerCard(data[0].accounts, "friends")
+        })
+    })
 }
 
 function addClanButton(){

@@ -7,8 +7,8 @@ import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 
 public class SUPABASE_CWLPlanner {
-    private HttpServer server;
-    private Config conf;
+    private final HttpServer server;
+    private final Config conf;
     private final API_Utils utils;
 
     public SUPABASE_CWLPlanner(HttpServer server, Config conf){
@@ -30,7 +30,7 @@ public class SUPABASE_CWLPlanner {
                 try {
                     String body = new String(exchange.getRequestBody().readAllBytes());
 
-                    if (body == null || body.isBlank()) {
+                    if (body.isBlank()) {
                         utils.sendJsonResponse(exchange, "{\"error\":\"Request body is leeg\"}", 400);
                         return;
                     }
@@ -130,7 +130,7 @@ public class SUPABASE_CWLPlanner {
                 try {
                     String body = new String(exchange.getRequestBody().readAllBytes());
 
-                    if (body == null || body.isBlank()) {
+                    if (body.isBlank()) {
                         utils.sendJsonResponse(exchange, "{\"error\":\"Request body is leeg\"}", 400);
                         return;
                     }
@@ -194,7 +194,7 @@ public class SUPABASE_CWLPlanner {
                 try {
                     String body = new String(exchange.getRequestBody().readAllBytes());
 
-                    if (body == null || body.isBlank()) {
+                    if (body.isBlank()) {
                         utils.sendJsonResponse(exchange, "{\"error\":\"Request body is leeg\"}", 400);
                         return;
                     }

@@ -80,15 +80,13 @@
 
         <!-- Tab 2: my accounts -->
         <div class="modal-tab-panel hidden" id="modal-tab-accounts">
-            <div class="modal-search-bar">
-                <span class="modal-search-icon">⌕</span>
-                <input type="text" id="cwl-accounts-search" placeholder="Search...">
-            </div>
             <div class="modal-segment">
                 <button class="modal-seg-btn active" data-seg="mine">Mine</button>
                 <button class="modal-seg-btn" data-seg="friends">Friends</button>
             </div>
-            <div class="modal-account-list" id="cwl-account-list"></div>
+            <div class="modal-account-list" id="cwl-account-list">
+                <p id="modal-account-list-empty">No accounts connected</p>
+            </div>
             <button id="cwl-overlay-add-selected-button" class="modal-btn-add-selected">Add selected (0)</button>
         </div>
 

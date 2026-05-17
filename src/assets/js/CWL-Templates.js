@@ -9,20 +9,30 @@ function createPlayerCard(playerInfo, clanuuid){
         playerTemplateClone.querySelector(".cwl-player-townhall-foto").src = `../assets/css/pictures/townhalls/Town_Hall${player.townHallLevel}.png`;
         playerTemplateClone.querySelector(".cwl-player-hashtag").textContent = player.tag;
         playerTemplateClone.querySelector(".cwl-player-name").textContent = player.name;
-        playerTemplateClone.querySelector(".cwl-player-clan").textContent = player.clanName;
+        playerTemplateClone.querySelector(".cwl-player-clan").textContent = player.clanName || "No clan";
 
         const element = playerTemplateClone.querySelector(".cwl-player-article");
         element.originalContainer = document.querySelector("#cwl-available-players");
         makePlayerDraggable(element);
 
         if(clanuuid != null){
-            document.querySelectorAll(".cwl-clan-article").forEach(article => {
-                if(article.id === "cwl-clan-template_" + clanuuid){
-                    article.querySelector(".cwl-clan-player-list").appendChild(playerTemplateClone)
-                    const prevPlayers = article.querySelector(".cwl-amount-of-players-in-clan").textContent.split("/")
-                    article.querySelector(".cwl-amount-of-players-in-clan").textContent = parseInt(prevPlayers[0]) + 1 + "/" + prevPlayers[1]
-                }
-            })
+            if(clanuuid === "user"){
+                element.classList.add("userBase")
+                element.classList.add("hidden")
+                document.querySelector("#cwl-account-list").appendChild(playerTemplateClone)
+            }else if(clanuuid === "friends"){
+                element.classList.add("friendBase")
+                element.classList.add("hidden")
+                document.querySelector("#cwl-account-list").appendChild(playerTemplateClone)
+            }else{
+                document.querySelectorAll(".cwl-clan-article").forEach(article => {
+                    if(article.id === "cwl-clan-template_" + clanuuid){
+                        article.querySelector(".cwl-clan-player-list").appendChild(playerTemplateClone)
+                        const prevPlayers = article.querySelector(".cwl-amount-of-players-in-clan").textContent.split("/")
+                        article.querySelector(".cwl-amount-of-players-in-clan").textContent = parseInt(prevPlayers[0]) + 1 + "/" + prevPlayers[1]
+                    }
+                })
+            }
         }else{
             document.querySelector("#cwl-available-players").appendChild(playerTemplateClone);
             const totalPlayers = document.querySelector("#cwl-total-player-amount");
