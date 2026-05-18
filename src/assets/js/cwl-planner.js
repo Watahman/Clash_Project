@@ -71,6 +71,12 @@ function addPlayersOverlay(){
                 document.querySelector("#modal-tab-tag").classList.add("hidden");
                 document.querySelector("#modal-tab-accounts").classList.remove("hidden");
                 document.querySelector("#modal-tab-group").classList.add("hidden");
+                document.querySelector("#modal-account-list-empty").classList.remove("hidden")
+
+                document.querySelectorAll(".userBase").forEach(userBase => {
+                    userBase.classList.remove("hidden")
+                    document.querySelector("#modal-account-list-empty").classList.add("hidden")
+                })
             }else if(tab.dataset.tab === "group"){
                 document.querySelector("#modal-tab-tag").classList.add("hidden");
                 document.querySelector("#modal-tab-accounts").classList.add("hidden");
@@ -78,6 +84,33 @@ function addPlayersOverlay(){
             }
         }
     })
+
+    segBtns.forEach(tab => {
+        tab.onclick = () => {
+            document.querySelector(".modal-seg-btn.active").classList.remove("active");
+            tab.classList.add("active");
+            if(tab.dataset.seg === "mine"){
+                document.querySelector("#modal-account-list-empty").classList.remove("hidden")
+                document.querySelectorAll(".userBase").forEach(userBase => {
+                    userBase.classList.remove("hidden")
+                    document.querySelector("#modal-account-list-empty").classList.add("hidden")
+                })
+                document.querySelectorAll(".friendBase").forEach(friendBase => {
+                    friendBase.classList.add("hidden")
+                })
+            }else if(tab.dataset.seg === "friends"){
+                document.querySelector("#modal-account-list-empty").classList.remove("hidden")
+                document.querySelectorAll(".userBase").forEach(userBase => {
+                    userBase.classList.add("hidden")
+                })
+                document.querySelectorAll(".friendBase").forEach(friendBase => {
+                    friendBase.classList.remove("hidden")
+                    document.querySelector("#modal-account-list-empty").classList.add("hidden")
+                })
+            }
+        }
+    })
+
     overlayConfirmTagBtn.onclick = () => {
         const tag = cwlInputTag.value
         getPlayerWithBattleData(tag)
