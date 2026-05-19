@@ -13,7 +13,6 @@ function createPlayerCard(playerInfo, clanuuid){
 
         const element = playerTemplateClone.querySelector(".cwl-player-article");
         element.originalContainer = document.querySelector("#cwl-available-players");
-        makePlayerDraggable(element);
 
         if(clanuuid != null){
             if(clanuuid === "user"){
@@ -24,7 +23,12 @@ function createPlayerCard(playerInfo, clanuuid){
                 element.classList.add("friendBase")
                 element.classList.add("hidden")
                 document.querySelector("#cwl-account-list").appendChild(playerTemplateClone)
+            }else if(clanuuid === "group"){
+                element.classList.add("groupBase")
+                element.classList.add("hidden")
+                document.querySelector("#cwl-group-preview-list").appendChild(playerTemplateClone)
             }else{
+                makePlayerDraggable(element);
                 document.querySelectorAll(".cwl-clan-article").forEach(article => {
                     if(article.id === "cwl-clan-template_" + clanuuid){
                         article.querySelector(".cwl-clan-player-list").appendChild(playerTemplateClone)

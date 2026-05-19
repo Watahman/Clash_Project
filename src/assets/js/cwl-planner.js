@@ -111,6 +111,11 @@ function addPlayersOverlay(){
         }
     })
 
+    selectGroup.addEventListener('change', () => {
+        if(selectGroup.value === "") return
+
+    })
+
     overlayConfirmTagBtn.onclick = () => {
         const tag = cwlInputTag.value
         getPlayerWithBattleData(tag)
@@ -130,21 +135,36 @@ function addPlayersOverlay(){
     path = conf._BASE_URL + conf._EXT_SUPA_USER_BASES
     data = { id: localStorage.getItem("id")}
     databaseRequestWithBody(path, data).then(data => {
-        console.log(data)
         createPlayerCard(data[0].accounts, "user")
     })
 
     path = conf._BASE_URL + conf._EXT_SUPA_USER_GET_FRIENDS
     data = { userId: localStorage.getItem("id")}
     databaseRequestWithBody(path, data).then(data => {
-        console.log(data)
         data.forEach(friend => {
             path = conf._BASE_URL + conf._EXT_SUPA_USER_BASES
             data = {id: friend.user_b}
+            databaseRequestWithBody(path, data).then(data => {
+                createPlayerCard(data[0].accounts, "friends")
+            })
         })
-        databaseRequestWithBody(path, data).then(data => {
-            console.log(data)
-            createPlayerCard(data[0].accounts, "friends")
+    })
+
+    path = conf._BASE_URL + conf._EXT_SUPA_GROUP_MEMBER
+    data = { id: localStorage.getItem("id")}
+    databaseRequestWithBody(path, data).then(data => {
+        console.log(data)
+        data.forEach(group => {
+            path = conf._BASE_URL + conf._EXT_SUPA_GROUP_INFO
+            data = {id: group.group_id}
+            databaseRequestWithBody(path, data).then(groupInfo => {
+                console.log(groupInfo)
+                let newOption = document.createElement("option");
+                newOption.value = groupInfo[0].id
+                newOption.textContent = groupInfo[0].name
+                selectGroup.appendChild(newOption)
+                loadPreviewData(groupInfo[0].id)
+            })
         })
     })
 }
@@ -304,6 +324,24 @@ function loadPlanListener(){
                         });
                     })
                 });
+            })
+        })
+    })
+}
+
+function loadPreviewData(groupId){
+    path = conf._BASE_URL + conf._EXT_SUPA_GROUP_MEMBERS
+    data = {id: groupId}
+    databaseRequestWithBody(path, data).then(groupMembers => {
+        groupMembers.forEach(member => {
+            console.log(member)
+            path = conf._BASE_URL + conf._EXT_SUPA_USER_BASES
+            data = {id: member.user_id}
+            console.log(data)
+            databaseRequestWithBody(path, data).then(userBases => {
+                console.log(userBases)
+                if(userBases[0].accounts === null) return
+                 createPlayerCard(userBases[0].accounts, "group");
             })
         })
     })
