@@ -67,11 +67,13 @@ function addPlayersOverlay(){
                 document.querySelector("#modal-tab-tag").classList.remove("hidden");
                 document.querySelector("#modal-tab-accounts").classList.add("hidden");
                 document.querySelector("#modal-tab-group").classList.add("hidden");
+                document.querySelector(".modal-group-preview-list").classList.add("hidden");
             }else if(tab.dataset.tab === "accounts"){
                 document.querySelector("#modal-tab-tag").classList.add("hidden");
                 document.querySelector("#modal-tab-accounts").classList.remove("hidden");
                 document.querySelector("#modal-tab-group").classList.add("hidden");
                 document.querySelector("#modal-account-list-empty").classList.remove("hidden")
+                document.querySelector(".modal-group-preview-list").classList.add("hidden");
 
                 document.querySelectorAll(".userBase").forEach(userBase => {
                     userBase.classList.remove("hidden")
@@ -81,6 +83,7 @@ function addPlayersOverlay(){
                 document.querySelector("#modal-tab-tag").classList.add("hidden");
                 document.querySelector("#modal-tab-accounts").classList.add("hidden");
                 document.querySelector("#modal-tab-group").classList.remove("hidden");
+                document.querySelector(".modal-group-preview-list").classList.remove("hidden");
             }
         }
     })
@@ -112,8 +115,16 @@ function addPlayersOverlay(){
     })
 
     selectGroup.addEventListener('change', () => {
-        if(selectGroup.value === "") return
-
+        const value = selectGroup.value;
+        document.querySelectorAll(".groupBase").forEach(groupBase => {
+            document.querySelector("#cwl-group-preview").classList.remove("hidden")
+            groupBase.classList.add("hidden");
+        });
+        if(value === "") return;
+        document.querySelectorAll(`[data-clanuuid="${value}"]`).forEach(base => {
+            document.querySelector("#cwl-group-preview").classList.add("hidden")
+            base.classList.remove("hidden");
+        });
     })
 
     overlayConfirmTagBtn.onclick = () => {
@@ -163,6 +174,7 @@ function addPlayersOverlay(){
                 newOption.value = groupInfo[0].id
                 newOption.textContent = groupInfo[0].name
                 selectGroup.appendChild(newOption)
+                localStorage.setItem(groupInfo[0].name, groupInfo[0].id)
                 loadPreviewData(groupInfo[0].id)
             })
         })
@@ -341,7 +353,7 @@ function loadPreviewData(groupId){
             databaseRequestWithBody(path, data).then(userBases => {
                 console.log(userBases)
                 if(userBases[0].accounts === null) return
-                 createPlayerCard(userBases[0].accounts, "group");
+                 createPlayerCard(userBases[0].accounts, "group|" + groupId);
             })
         })
     })

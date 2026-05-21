@@ -23,9 +23,10 @@ function createPlayerCard(playerInfo, clanuuid){
                 element.classList.add("friendBase")
                 element.classList.add("hidden")
                 document.querySelector("#cwl-account-list").appendChild(playerTemplateClone)
-            }else if(clanuuid === "group"){
+            }else if(clanuuid.split("|")[0] === "group"){
                 element.classList.add("groupBase")
                 element.classList.add("hidden")
+                element.dataset.clanuuid = clanuuid.split("|")[1]
                 document.querySelector("#cwl-group-preview-list").appendChild(playerTemplateClone)
             }else{
                 makePlayerDraggable(element);
@@ -80,6 +81,7 @@ function makePlayerDraggable(element) {
     let startLeft, startTop;
     let dragging = false;
     element.originalContainer = element.parentElement;
+    element.classList.add("draggable");
 
     element.addEventListener("mousedown", (e) => {
         e.preventDefault();

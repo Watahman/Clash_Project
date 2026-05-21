@@ -251,16 +251,17 @@ select:hover, select:focus {
     border: 1px solid var(--border-subtle);
     border-left: 2px solid var(--green);
     border-radius: var(--radius-md);
-    cursor: grab;
+    cursor: pointer;
     transition: background 0.15s, border-color 0.15s, transform 0.15s;
     user-select: none;
 }
 
-.cwl-player-article:hover {
+.cwl-player-article.draggable:hover {
     background: var(--surface-3);
     border-color: var(--border-mid);
-    border-left-color: var(--accent);
-    transform: translateX(2px);
+    border-left-color: var(--green);
+    transform: translateY(-2px);
+    cursor: grab;
 }
 
 .cwl-player-townhall-foto {
@@ -425,11 +426,6 @@ select:hover, select:focus {
 .cwl-clan-player-list .cwl-player-article {
     width: 100%;
     padding: 0.45rem 0.7rem;
-    border-left-color: var(--border-focus);
-}
-
-.cwl-clan-player-list .cwl-player-article:hover {
-    border-left-color: var(--accent);
 }
 
 .cwl-clan-player-list .cwl-player-townhall-foto {
