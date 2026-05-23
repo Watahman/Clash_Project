@@ -39,7 +39,7 @@ public class SUPABASE_User {
                     }
 
                     JsonObject json = JsonParser.parseString(body).getAsJsonObject();
-                    JsonElement idEl = json.get("id");
+                    JsonElement idEl = json.get("userId");
 
                     if (idEl == null || idEl.isJsonNull()) {
                         utils.sendJsonResponse(exchange, "{\"error\":\"Verplicht veld ontbreekt: id\"}", 400);
@@ -219,7 +219,7 @@ public class SUPABASE_User {
                     }
 
                     JsonObject json = JsonParser.parseString(body).getAsJsonObject();
-                    JsonElement idEl = json.get("id");
+                    JsonElement idEl = json.get("userId");
 
                     if (idEl == null || idEl.isJsonNull()) {
                         utils.sendJsonResponse(exchange, "{\"error\":\"Verplicht veld ontbreekt: id\"}", 400);
@@ -373,7 +373,7 @@ public class SUPABASE_User {
 
                     JsonObject json = JsonParser.parseString(body).getAsJsonObject();
                     JsonElement idEl      = json.get("id");
-                    JsonElement accountEl = json.get("account");
+                    JsonElement accountEl = json.get("base");
 
                     if (idEl == null || idEl.isJsonNull() || accountEl == null || accountEl.isJsonNull()) {
                         utils.sendJsonResponse(exchange, "{\"error\":\"Verplichte velden ontbreken: id, account\"}", 400);

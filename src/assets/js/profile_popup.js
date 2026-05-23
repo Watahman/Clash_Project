@@ -1,5 +1,3 @@
-import { databaseRequestWithBody } from "./API/API-Communication.js";
-import * as conf from "./Data/config.js";
 import { postPlayerVerifyTokenRequest } from "./API/API-Player.js";
 import { getPlayerWithBattleData } from "./API/API-Functions.js";
 import { createBaseCard, createFriendRequestCard, createFriendCard, createFriendPendingCard } from "./Templates.js";

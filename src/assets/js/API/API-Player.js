@@ -1,5 +1,5 @@
 import * as config from "../Data/config.js"
-import {fetchClashAPIRequest} from "./API-Communication.js"
+import {fetchClashAPIRequest} from "./API-Client.js"
 
 export async function getPlayerInfoRequest(playerID){
     const path = config._BASE_URL + config._EXT_PLAYER_INFO;

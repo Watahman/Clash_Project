@@ -1,5 +1,5 @@
 import * as config from "../Data/config.js"
-import {fetchClashAPIRequest} from "./API-Communication.js"
+import {fetchClashAPIRequest} from "./API-Client.js"
 
 export async function getClanCurrentWarLeagueGroupRequest(clanTag) {
     const path = config._BASE_URL + config._EXT_CLAN_CURRENTWAR_LEAGUEGROUP;

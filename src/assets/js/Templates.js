@@ -1,5 +1,5 @@
 import * as conf from './Data/config.js'
-import { databaseRequestWithBody } from "./API/API-Communication.js";
+import { databaseRequestWithBody } from "./API/API-Client.js";
 
 export function createBaseCard(baseInfo){
     const baseTemplate = document.querySelector("#po-base-template");

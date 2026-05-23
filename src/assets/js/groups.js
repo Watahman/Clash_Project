@@ -1,4 +1,4 @@
-import { databaseRequestWithBody} from "./API/API-Communication.js";
+import { databaseRequestWithBody} from "./API/API-Client.js";
 import { getClanInfoRequest } from "./API/API-Clan.js";
 import * as conf from "./Data/config.js"
 import { createGroupCard } from "./Templates.js";

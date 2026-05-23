@@ -1,4 +1,4 @@
-import { databaseRequestWithBody } from "./API/API-Communication.js";
+import { databaseRequestWithBody } from "./API/API-Client.js";
 import * as config from "./Data/config.js";
 
 function init(){
