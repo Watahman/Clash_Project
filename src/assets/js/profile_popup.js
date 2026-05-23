@@ -1,6 +1,9 @@
 import { postPlayerVerifyTokenRequest } from "./API/API-Player.js";
 import { getPlayerWithBattleData } from "./API/API-Functions.js";
 import { createBaseCard, createFriendRequestCard, createFriendCard, createFriendPendingCard } from "./Templates.js";
+import {addFriend, getFriendRequests, getFriends, getPendingFriendRequests} from "./Supabase/Supabase-Friend.js";
+import {addBaseToUser, checkUserId} from "./Supabase/Supabase-User.js";
+import {getGroupInfo, getGroupsOfUser} from "./Supabase/Supabase-Group.js";
 
 let profile, closeProfileBtn, userCode, profileTabs, openProfileBtn, activeTab
 let friendRequestBtn, friendPendingBtn, friendList, emptyFriendRequest
@@ -88,8 +91,7 @@ function profileInit(){
         friendListTitle.textContent = "Friend Requests"
         emptyFriendRequest.textContent = "No requests"
         friendList.classList.remove('hidden')
-        const data = { userId: localStorage.getItem("id") }
-        databaseRequestWithBody(conf._BASE_URL + conf._EXT_SUPA_USER_GET_FRIEND_REQUESTS, data)
+        getFriendRequests(localStorage.getItem("id"))
             .then(res => {
                 friendListContent.querySelectorAll(".po-base-item").forEach(item => item.remove())
                 if (res.length === 0) {
@@ -105,8 +107,7 @@ function profileInit(){
         friendListTitle.textContent = "Pending"
         emptyFriendRequest.textContent = "No pending requests"
         friendList.classList.remove('hidden')
-        const data = { userId: localStorage.getItem("id") }
-        databaseRequestWithBody(conf._BASE_URL + conf._EXT_SUPA_USER_GET_PENDING_FRIENDS, data)
+        getPendingFriendRequests(localStorage.getItem("id"))
             .then(res => {
                 friendListContent.querySelectorAll(".po-base-item").forEach(item => item.remove())
                 if (res.length === 0) {
@@ -143,8 +144,7 @@ function profileInit(){
 
 function preloadProfileData() {
     if (localStorage.getItem("id") === null) return
-    const data = { id: localStorage.getItem("id") }
-    databaseRequestWithBody(conf._BASE_URL + conf._EXT_SUPA_USER_IDCHECK, data)
+    checkUserId(localStorage.getItem("id"))
         .then(res => {
             cachedProfile = res
             loadBases(res.accounts)
@@ -260,8 +260,7 @@ function handleAddBase() {
         if (confirmation.status === "ok") {
             getPlayerWithBattleData(playerId).then(playerData => {
                 createBaseCard(playerData[0])
-                const data = { id: localStorage.getItem("id"), account: playerData[0] }
-                databaseRequestWithBody(conf._BASE_URL + conf._EXT_SUPA_USER_ADD_ACCOUNT, data)
+                addBaseToUser(localStorage.getItem("id"), playerData[0])
                     .then(confirm => { console.log(confirm) })
             })
         }
@@ -270,8 +269,7 @@ function handleAddBase() {
 
 function handleAddFriend() {
     const friendCode = inputClanTag.value.split("#")[1]
-    const data = { userId: localStorage.getItem("id"), friendCode: friendCode }
-    databaseRequestWithBody(conf._BASE_URL + conf._EXT_SUPA_USER_ADD_FRIEND, data)
+    addFriend(localStorage.getItem("id"), friendCode)
         .then(confirm => { console.log(confirm) })
 }
 
@@ -297,8 +295,7 @@ function loadBases(baseArray){
 
 function loadFriends(){
     if (document.querySelectorAll(".po-card-friend").length > 0) return
-    const data = { userId: localStorage.getItem("id") }
-    databaseRequestWithBody(conf._BASE_URL + conf._EXT_SUPA_USER_GET_FRIENDS, data)
+    getFriends(localStorage.getItem("id"))
         .then(res => {
             if (res.length === 0) return
             emptyLabel.classList.add('hidden')
@@ -310,14 +307,10 @@ function loadClans() {
     if (clansLoaded) return
     clansLoaded = true
 
-    const path = conf._BASE_URL + conf._EXT_SUPA_GROUP_MEMBER
-    const body = { id: localStorage.getItem("id") }
-    databaseRequestWithBody(path, body).then(groups => {
+    getGroupsOfUser(localStorage.getItem("id")).then(groups => {
         if (groups.length === 0) return
         groups.forEach(group => {
-            const path = conf._BASE_URL + conf._EXT_SUPA_GROUP_INFO
-            const body = { id: group.group_id }
-            databaseRequestWithBody(path, body).then(groupInfo => {
+            getGroupInfo(group.group_id).then(groupInfo => {
                 const clanTemplate = document.querySelector("#po-groups-item-template").content.cloneNode(true)
                 clanTemplate.querySelector(".po-base-name").textContent = groupInfo[0].name
                 clanTemplate.querySelector(".po-base-info").textContent = groupInfo[0].code
@@ -343,8 +336,7 @@ function loadClans() {
 
 function isUserLoggedIn() {
     if (localStorage.getItem("id") !== null) {
-        const data = { id: localStorage.getItem("id") }
-        databaseRequestWithBody(conf._BASE_URL + conf._EXT_SUPA_USER_IDCHECK, data)
+        checkUserId(localStorage.getItem("id"))
             .then(res => {
                 cachedProfile = res
                 openProfile(res.name, "#" + res.code, res.created_at.split("T")[0])

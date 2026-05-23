@@ -36,7 +36,7 @@ export async function checkUser(email, password) {
     return databaseRequestWithBody(path, data)
 }
 
-export async function checkId(userId) {
+export async function checkUserId(userId) {
     const path = config._BASE_URL + config._EXT_SUPA_USER_IDCHECK
     const data = {
         userId: userId
