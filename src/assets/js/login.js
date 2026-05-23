@@ -1,5 +1,4 @@
-import { databaseRequestWithBody } from "./API/API-Communication.js";
-import * as config from "./Data/config.js";
+import { checkUser } from "./Supabase/Supabase-User.js";
 
 function init(){
     clicklistener()
@@ -10,13 +9,7 @@ function clicklistener(){
         const email = document.querySelector("#email").value
         const password = document.querySelector("#password").value
 
-        const path = config._BASE_URL + config._EXT_SUPA_USER_CHECK
-        const data = {
-            email: email,
-            password: password
-        }
-
-        databaseRequestWithBody(path, data).then(data=>{
+        checkUser(email, password).then(data=>{
             console.log(data);
             if(data.success){
                 localStorage.setItem("id", data.id);
