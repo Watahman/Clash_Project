@@ -141,6 +141,18 @@ public class API_Utils {
         return el.getAsJsonArray();
     }
 
+    // Clash GET shorthand
+    public void clashGet(HttpExchange exchange, String path) throws Exception {
+        String response = getClashApiResponse(conf._BASE_URL_CLASH + path);
+        sendJsonResponse(exchange, response, 200);
+    }
+
+    // Clash POST shorthand
+    public void clashPost(HttpExchange exchange, String path, String body) throws Exception {
+        String response = postClashApiResponse(conf._BASE_URL_CLASH + path, body);
+        sendJsonResponse(exchange, response, 200);
+    }
+
     @FunctionalInterface
     public interface PostHandler {
         void handle(HttpExchange exchange) throws Exception;

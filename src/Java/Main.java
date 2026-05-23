@@ -39,7 +39,6 @@ public class Main {
         apiClan.getClanCurrentWarLeagueGroup();
         apiClan.getClanWarLeagueWar();
         apiClan.getClanWarLog();
-        apiClan.getClan();
         apiClan.getClanCurrentWar();
         apiClan.getClanInfo();
         apiClan.getClanMembers();

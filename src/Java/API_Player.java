@@ -6,167 +6,47 @@ import com.sun.net.httpserver.HttpServer;
 import java.net.URLEncoder;
 
 public class API_Player {
-    private HttpServer server;
-    private Config conf;
-    private API_Utils utils;
+    private final HttpServer server;
+    private final Config conf;
+    private final API_Utils utils;
 
-    public API_Player(HttpServer server, Config conf){
+    public API_Player(HttpServer server, Config conf) {
         this.server = server;
         this.conf = conf;
         utils = new API_Utils(conf);
     }
 
-    // /players/playertag
-    public void getPlayer(){
-        server.createContext(conf._EXT_PLAYER_INFO, exchange -> {
-            utils.addCORS(exchange);
-
-            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1);
-                return;
-            }
-
-            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                try {
-                    JsonObject json = utils.parseRequestBody(exchange);
-                    String playerID = json.get("playerID").getAsString();
-
-                    String clashUrl = conf._BASE_URL_CLASH + "/players/" + URLEncoder.encode(playerID, "UTF-8");
-                    String responseText = utils.getClashApiResponse(clashUrl);
-
-                    utils.sendJsonResponse(exchange, responseText, 200);
-                } catch (HttpException e) {
-                    try {
-                        utils.sendJsonResponse(exchange, e.getResponseBody(), e.getStatusCode());
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    try {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"Failed to fetch Clash API\"}", 500);
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-            }
-        });
+    public void getPlayer() {
+        server.createContext(conf._EXT_PLAYER_INFO, exchange -> utils.handlePost(exchange, ex -> {
+            String playerID = utils.requireString(utils.parseBody(ex), "playerID");
+            utils.clashGet(ex, "/players/" + URLEncoder.encode(playerID, "UTF-8"));
+        }));
     }
 
-    // /players/playertag/battlelog
-    public void getPlayerBattleLog(){
-        server.createContext(conf._EXT_PLAYER_BATTLE_LOG, exchange -> {
-            utils.addCORS(exchange);
-
-            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1);
-                return;
-            }
-
-            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                try {
-                    JsonObject json = utils.parseRequestBody(exchange);
-                    String playerID = json.get("playerID").getAsString();
-
-                    String clashUrl = conf._BASE_URL_CLASH + "/players/" + URLEncoder.encode(playerID, "UTF-8") + "/battlelog";
-                    String responseText = utils.getClashApiResponse(clashUrl);
-
-                    utils.sendJsonResponse(exchange, responseText, 200);
-                } catch (HttpException e) {
-                    try {
-                        utils.sendJsonResponse(exchange, e.getResponseBody(), e.getStatusCode());
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    try {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"Failed to fetch Clash API\"}", 500);
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-            }
-        });
+    public void getPlayerBattleLog() {
+        server.createContext(conf._EXT_PLAYER_BATTLE_LOG, exchange -> utils.handlePost(exchange, ex -> {
+            String playerID = utils.requireString(utils.parseBody(ex), "playerID");
+            utils.clashGet(ex, "/players/" + URLEncoder.encode(playerID, "UTF-8") + "/battlelog");
+        }));
     }
 
-    // /players/playertag/verifytoken
-    public void postPlayerVerifyToken(){
-        server.createContext(conf._EXT_PLAYER_VERIFY_TOKEN, exchange -> {
-            utils.addCORS(exchange);
+    public void postPlayerVerifyToken() {
+        server.createContext(conf._EXT_PLAYER_VERIFY_TOKEN, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject json    = utils.parseBody(ex);
+            String playerTag   = utils.requireString(json, "playerID");
+            String playerToken = utils.requireString(json, "playerToken");
 
-            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1);
-                return;
-            }
+            JsonObject body = new JsonObject();
+            body.addProperty("token", playerToken);
 
-            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                try {
-                    JsonObject json = utils.parseRequestBody(exchange);
-                    System.out.println(json);
-
-                    String playerTag = json.get("playerID").getAsString();
-                    String playerToken = json.get("playerToken").getAsString();
-                    String clashUrl = conf._BASE_URL_CLASH + "/players/" + URLEncoder.encode(playerTag, "UTF-8") + "/verifytoken";
-
-                    JsonObject body = new JsonObject();
-                    body.addProperty("token", playerToken);
-
-                    String responseText = utils.postClashApiResponse(clashUrl, body.toString());
-                    System.out.println(responseText);
-                    utils.sendJsonResponse(exchange, responseText, 200);
-                } catch (HttpException e) {
-                    try {
-                        utils.sendJsonResponse(exchange, e.getResponseBody(), e.getStatusCode());
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    try {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"Failed to fetch Clash API\"}", 500);
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-            }
-        });
+            utils.clashPost(ex, "/players/" + URLEncoder.encode(playerTag, "UTF-8") + "/verifytoken", body.toString());
+        }));
     }
 
-    // /players/playertag/leaguehistory
-    public void getPlayerLeagueHistory(){
-        server.createContext(conf._EXT_PLAYER_LEAGUE_HISTORY, exchange -> {
-            utils.addCORS(exchange);
-
-            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1);
-                return;
-            }
-
-            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                try {
-                    JsonObject json = utils.parseRequestBody(exchange);
-                    String playerID = json.get("playerID").getAsString();
-
-                    String clashUrl = conf._BASE_URL_CLASH + "/players/" + URLEncoder.encode(playerID, "UTF-8") + "/leaguehistory";
-                    String responseText = utils.getClashApiResponse(clashUrl);
-
-                    utils.sendJsonResponse(exchange, responseText, 200);
-                } catch (HttpException e) {
-                    try {
-                        utils.sendJsonResponse(exchange, e.getResponseBody(), e.getStatusCode());
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    try {
-                        utils.sendJsonResponse(exchange, "{\"error\":\"Failed to fetch Clash API\"}", 500);
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-            }
-        });
+    public void getPlayerLeagueHistory() {
+        server.createContext(conf._EXT_PLAYER_LEAGUE_HISTORY, exchange -> utils.handlePost(exchange, ex -> {
+            String playerID = utils.requireString(utils.parseBody(ex), "playerID");
+            utils.clashGet(ex, "/players/" + URLEncoder.encode(playerID, "UTF-8") + "/leaguehistory");
+        }));
     }
 }
