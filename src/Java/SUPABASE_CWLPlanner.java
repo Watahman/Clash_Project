@@ -37,10 +37,10 @@ public class SUPABASE_CWLPlanner {
 
                     JsonObject json = JsonParser.parseString(body).getAsJsonObject();
 
-                    JsonElement idEl        = json.get("id");
-                    JsonElement planIdEl    = json.get("currentPlanId");
+                    JsonElement idEl        = json.get("userId");
+                    JsonElement planIdEl    = json.get("planId");
                     JsonElement nameEl      = json.get("name");
-                    JsonElement clansEl     = json.get("clans");
+                    JsonElement clansEl     = json.get("planInfo");
 
                     if (idEl == null || nameEl == null || clansEl == null) {
                         utils.sendJsonResponse(exchange, "{\"error\":\"Verplichte velden ontbreken: id, name, clans\"}", 400);
@@ -136,7 +136,7 @@ public class SUPABASE_CWLPlanner {
                     }
 
                     JsonObject json = JsonParser.parseString(body).getAsJsonObject();
-                    JsonElement userEl = json.get("user");
+                    JsonElement userEl = json.get("userId");
 
                     if (userEl == null || userEl.isJsonNull()) {
                         utils.sendJsonResponse(exchange, "{\"error\":\"Verplicht veld ontbreekt: user\"}", 400);

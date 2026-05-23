@@ -1,10 +1,13 @@
 import { getClanMembersWithBattleData, getPlayerWithBattleData } from "./API/API-Functions.js"
 import { getClanInfoRequest } from "./API/API-Clan.js"
 import { createPlayerCard, createClanCard } from "./CWL-Templates.js";
-import {databaseRequestWithBody} from "./API/API-Client.js";
-import * as conf from "./Data/config.js"
 import {canAutosave, isLoading, setLoading} from "./Data/config.js";
 import { profileHTML } from "./profile_popup.js"
+import {getUserBases} from "./Supabase/Supabase-User.js";
+import {getFriends} from "./Supabase/Supabase-Friend.js";
+import {getGroupInfo, getGroupMembers, getGroupsOfUser} from "./Supabase/Supabase-Group.js";
+import {getAllPlansFromDatabase, getPlanFromDatabase, setPlanToDatabase} from "./Supabase/Supabase-Plan.js";
+import * as conf from "./Data/config.js";
 
 let addClanPlayersBtn, overlayAddPlayersBtn, addClanBtn, overlayAddClanBtn
 let cwlInputTag, cwlInputClanCode, selectAmountPlayers
@@ -143,32 +146,22 @@ function addPlayersOverlay(){
             })
     }
 
-    path = conf._BASE_URL + conf._EXT_SUPA_USER_BASES
-    data = { id: localStorage.getItem("id")}
-    databaseRequestWithBody(path, data).then(data => {
+    getUserBases(localStorage.getItem("id")).then(data => {
         createPlayerCard(data[0].accounts, "user")
     })
 
-    path = conf._BASE_URL + conf._EXT_SUPA_USER_GET_FRIENDS
-    data = { userId: localStorage.getItem("id")}
-    databaseRequestWithBody(path, data).then(data => {
+    getFriends(localStorage.getItem("id")).then(data => {
         data.forEach(friend => {
-            path = conf._BASE_URL + conf._EXT_SUPA_USER_BASES
-            data = {id: friend.user_b}
-            databaseRequestWithBody(path, data).then(data => {
+            getUserBases(friend.user_b).then(data => {
                 createPlayerCard(data[0].accounts, "friends")
             })
         })
     })
 
-    path = conf._BASE_URL + conf._EXT_SUPA_GROUP_MEMBER
-    data = { id: localStorage.getItem("id")}
-    databaseRequestWithBody(path, data).then(data => {
+    getGroupsOfUser(localStorage.getItem("id")).then(data => {
         console.log(data)
         data.forEach(group => {
-            path = conf._BASE_URL + conf._EXT_SUPA_GROUP_INFO
-            data = {id: group.group_id}
-            databaseRequestWithBody(path, data).then(groupInfo => {
+            getGroupInfo(group.group_id).then(groupInfo => {
                 console.log(groupInfo)
                 let newOption = document.createElement("option");
                 newOption.value = groupInfo[0].id
@@ -274,22 +267,14 @@ export function savePlan(){
     if(name === ""){
         name = "nameless"
     }
-    const data = {
-        id: localStorage.getItem("id"),
-        currentPlanId: localStorage.getItem("planner_id"),
-        name: name,
-        clans: allClansData
-    }
-    const path = conf._BASE_URL + conf._EXT_SUPA_CWLPLANNER_DATA_SET
-    databaseRequestWithBody(path, data).then(data => {
+    setPlanToDatabase(localStorage.getItem("id"), localStorage.getItem("planner_id"), name, allClansData)
+        .then(data => {
         localStorage.setItem("planner_id", data.uuid)
     })
 }
 
 function loadAllPlans(){
-    const path = conf._BASE_URL + conf._EXT_SUPA_CWLPLANNER_DATA_GET_ALL
-    const data = {user: localStorage.getItem("id")}
-    databaseRequestWithBody(path, data).then(data => {
+    getAllPlansFromDatabase(localStorage.getItem("id")).then(data => {
         data.forEach(plan => {
             let newOption = document.createElement("option");
             newOption.value = plan
@@ -302,9 +287,7 @@ function loadAllPlans(){
 
 function loadPlanListener(){
     loadPlan.addEventListener("change", (e) => {
-        const path = conf._BASE_URL + conf._EXT_SUPA_CWLPLANNER_DATA_GET
-        const data = {name: e.target.value}
-        databaseRequestWithBody(path, data).then(data => {
+        getPlanFromDatabase(e.target.value).then(data => {
             availablePlayers.innerHTML = ""
             allClans.innerHTML = ""
             totalPlayerAmount.innerHTML = "0"
@@ -342,15 +325,10 @@ function loadPlanListener(){
 }
 
 function loadPreviewData(groupId){
-    path = conf._BASE_URL + conf._EXT_SUPA_GROUP_MEMBERS
-    data = {id: groupId}
-    databaseRequestWithBody(path, data).then(groupMembers => {
+    getGroupMembers(groupId).then(groupMembers => {
         groupMembers.forEach(member => {
             console.log(member)
-            path = conf._BASE_URL + conf._EXT_SUPA_USER_BASES
-            data = {id: member.user_id}
-            console.log(data)
-            databaseRequestWithBody(path, data).then(userBases => {
+            getUserBases(member.user_id).then(userBases => {
                 console.log(userBases)
                 if(userBases[0].accounts === null) return
                  createPlayerCard(userBases[0].accounts, "group|" + groupId);
