@@ -39,6 +39,16 @@ export function createFriendCard(friendId) {
     });
 }
 
+export function createFriendCardFromData(data) {
+    const friendTemplateCopy = document.querySelector("#po-friend-template").content.cloneNode(true);
+    const activeTab = document.querySelector(".po-tab-active");
+    const item = friendTemplateCopy.querySelector(".po-base-item");
+    friendTemplateCopy.querySelector(".po-base-name").textContent = data.name;
+    friendTemplateCopy.querySelector(".po-base-info").textContent = "#" + data.code;
+    if (activeTab.id !== "po-tab-friends") item.classList.add('hidden');
+    document.querySelector(".po-panel-content").appendChild(friendTemplateCopy);
+}
+
 export function createFriendPendingCard(friendId) {
     const friendPendingTemplateCopy = document.querySelector("#po-friend-pending-template").content.cloneNode(true);
 

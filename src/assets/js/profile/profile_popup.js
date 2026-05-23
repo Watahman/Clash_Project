@@ -1,12 +1,13 @@
 import { checkUserId } from "../Supabase/Supabase-User.js";
-import { getFriendRequests, getPendingFriendRequests } from "../Supabase/Supabase-Friend.js";
+import {getFriendRequests, getFriends, getPendingFriendRequests} from "../Supabase/Supabase-Friend.js";
 import { createFriendRequestCard, createFriendPendingCard } from "../templates/FriendTemplates.js";
 import { loadBases } from "./profile_bases.js";
-import { loadFriends } from "./profile_friends.js";
-import { loadClans, resetClansLoaded } from "./profile_groups.js";
+import {loadFriends, renderFriends} from "./profile_friends.js";
+import {loadClans, renderGroups, resetClansLoaded} from "./profile_groups.js";
 import { poTab } from "./profile_tabs.js";
 import { copyWithFeedback } from "../utils/clipboard.js";
 import { getCurrentUserId } from "../utils/user.js";
+import {getGroupsOfUser} from "../Supabase/Supabase-Group.js";
 
 let profile, closeProfileBtn, userCode, profileTabs, openProfileBtn, activeTab;
 let friendRequestBtn, friendPendingBtn, friendList, emptyFriendRequest;
@@ -31,6 +32,7 @@ export function profileHTML() {
             labelInit();
             profileInit();
             preloadProfileData();
+            clickToCloseOverlays()
         });
 }
 
@@ -150,11 +152,17 @@ function profileInit() {
 
 function preloadProfileData() {
     if (getCurrentUserId() === null) return;
-    checkUserId(getCurrentUserId()).then(res => {
-        cachedProfile = res;
-        loadBases(res.accounts, emptyLabel);
-        loadFriends(emptyLabel);
-        loadClans(emptyLabel);
+    // checkUserId + friends tegelijk starten
+    Promise.all([
+        checkUserId(getCurrentUserId()),
+        getFriends(getCurrentUserId()),
+        getGroupsOfUser(getCurrentUserId())
+    ]).then(([userData, friends, groups]) => {
+        cachedProfile = userData;
+        console.log(userData, friends, groups);
+        loadBases(userData.accounts, emptyLabel);
+        renderFriends(friends, emptyLabel);
+        renderGroups(groups, emptyLabel);
     });
 }
 
@@ -187,7 +195,9 @@ function redirectToLogin() {
 }
 
 function isUserLoggedIn() {
-    if (getCurrentUserId() !== null) {
+    if (getCurrentUserId() === null) {
+        redirectToLogin();
+    } else {
         checkUserId(getCurrentUserId()).then(res => {
             cachedProfile = res;
             openProfile(res.name, "#" + res.code, res.created_at.split("T")[0]);
@@ -195,7 +205,19 @@ function isUserLoggedIn() {
             loadFriends(emptyLabel);
             loadClans(emptyLabel);
         });
-    } else {
-        redirectToLogin();
     }
+}
+
+function clickToCloseOverlays(){
+    addBase.addEventListener('click', (e) => {
+        if (e.target === addBase) addBase.classList.add('hidden')
+    })
+
+    addClan.addEventListener('click', (e) => {
+        if (e.target === addClan) addClan.classList.add('hidden')
+    })
+
+    friendList.addEventListener('click', (e) => {
+        if (e.target === friendList) friendList.classList.add('hidden')
+    })
 }

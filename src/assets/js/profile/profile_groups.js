@@ -7,14 +7,11 @@ export function resetClansLoaded() {
     clansLoaded = false;
 }
 
-export function loadClans(emptyLabel) {
-    if (clansLoaded) return;
-    clansLoaded = true;
-
-    getGroupsOfUser(getCurrentUserId()).then(groups => {
-        if (groups.length === 0) return;
-        groups.forEach(group => {
-            getGroupInfo(group.group_id).then(groupInfo => {
+export function renderGroups(groups, emptyLabel) {
+    if (groups.length === 0) return;
+    Promise.all(groups.map(group => getGroupInfo(group.group_id)))
+        .then(groupInfos => {
+            groupInfos.forEach(groupInfo => {
                 const clanTemplate = document.querySelector("#po-groups-item-template").content.cloneNode(true);
                 clanTemplate.querySelector(".po-base-name").textContent = groupInfo[0].name;
                 clanTemplate.querySelector(".po-base-info").textContent = groupInfo[0].code;
@@ -35,5 +32,10 @@ export function loadClans(emptyLabel) {
                 }
             });
         });
-    });
+}
+
+export function loadClans(emptyLabel) {
+    if (clansLoaded) return;
+    clansLoaded = true;
+    getGroupsOfUser(getCurrentUserId()).then(groups => renderGroups(groups, emptyLabel));
 }

@@ -121,11 +121,20 @@ public class API_Utils {
             }
             if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) return;
 
+            long start = System.currentTimeMillis(); // ← start timer
+            String path = exchange.getHttpContext().getPath();
+
             try {
                 handler.handle(exchange);
+                long duration = System.currentTimeMillis() - start;
+                System.out.printf("[%s] %d ms%n", path, duration); // ← log na succes
             } catch (IllegalArgumentException e) {
+                long duration = System.currentTimeMillis() - start;
+                System.out.printf("[%s] %d ms (400)%n", path, duration);
                 sendJsonResponse(exchange, "{\"error\":\"" + e.getMessage() + "\"}", 400);
             } catch (Exception e) {
+                long duration = System.currentTimeMillis() - start;
+                System.out.printf("[%s] %d ms (500)%n", path, duration);
                 e.printStackTrace();
                 sendJsonResponse(exchange, "{\"error\":\"Interne serverfout\"}", 500);
             }
