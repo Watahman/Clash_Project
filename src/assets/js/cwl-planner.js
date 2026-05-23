@@ -11,7 +11,7 @@ import * as conf from "./Data/config.js";
 
 let addClanPlayersBtn, overlayAddPlayersBtn, addClanBtn, overlayAddClanBtn
 let cwlInputTag, cwlInputClanCode, selectAmountPlayers
-let savePlanBtn, planName, loadPlan, path, data
+let savePlanBtn, planName, loadPlan
 let availablePlayers, allClans, totalPlayerAmount
 let addPlayersBtn, overlayConfirmTagBtn, accountsSearch, accountList,
     addSelectedBtn, segBtns, selectGroup, groupPreview,

@@ -70,14 +70,14 @@ function profileInit(){
     openProfileBtn.onclick = () => {
         if (cachedProfile) {
             openProfile(cachedProfile.name, "#" + cachedProfile.code, cachedProfile.created_at.split("T")[0])
-        } else if (localStorage.getItem("id") !== null) {
-            isUserLoggedIn()
-        } else {
+        } else if (localStorage.getItem("id") === null) {
             if (window.location.pathname.includes("index.html")) {
                 window.location.href = "subpages/login.html"
-            }else{
+            } else {
                 window.location.href = "./login.html"
             }
+        } else {
+            isUserLoggedIn()
         }
     }
 
