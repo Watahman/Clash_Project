@@ -1,5 +1,6 @@
-import * as conf from './Data/config.js'
-import { databaseRequestWithBody } from "./API/API-Client.js";
+import {getUserInfo} from "./Supabase/Supabase-User.js";
+import {acceptFriendRequest, rejectFriendRequest} from "./Supabase/Supabase-Friend.js";
+import {getGroupInfo, getGroupMembers} from "./Supabase/Supabase-Group.js";
 
 export function createBaseCard(baseInfo){
     const baseTemplate = document.querySelector("#po-base-template");
@@ -15,32 +16,18 @@ export function createFriendRequestCard(friendId){
     const friendRequestTemplate = document.querySelector("#po-friend-request-template")
     const friendRequestTemplateCopy = friendRequestTemplate.content.cloneNode(true);
 
-    const path = conf._BASE_URL + conf._EXT_SUPA_USER_INFO
-    const body = {
-        id: friendId
-    }
-    databaseRequestWithBody(path, body).then(data => {
+    getUserInfo(friendId).then(data => {
         friendRequestTemplateCopy.querySelector(".po-base-name").textContent = data[0].name;
         friendRequestTemplateCopy.querySelector(".po-base-info").textContent = data[0].code;
         friendRequestTemplateCopy.querySelector(".po-friend-accept").onclick = () => {
-            const path = conf._BASE_URL + conf._EXT_SUPA_USER_ACCEPT_FRIEND
-            const body = {
-                userId: localStorage.getItem("id"),
-                friendId: data[0].id
-            }
-            databaseRequestWithBody(path, body).then(data => {
+            acceptFriendRequest(localStorage.getItem("id"), data[0].id).then(() => {
                 const card = friendRequestTemplateCopy.querySelector(".po-base-item")
                 card.remove()
                 createFriendCard(friendId)
             })
         };
         friendRequestTemplateCopy.querySelector(".po-friend-reject").onclick = () => {
-            const path = conf._BASE_URL + conf._EXT_SUPA_USER_REJECT_FRIEND
-            const body = {
-                userId: localStorage.getItem("id"),
-                friendId: data[0].id
-            }
-            databaseRequestWithBody(path, body).then(data => {
+            rejectFriendRequest(localStorage.getItem("id"), data[0].id).then(() => {
                 const card = friendRequestTemplateCopy.querySelector(".po-base-item")
                 card.remove()
             })
@@ -53,9 +40,7 @@ export function createFriendCard(friendId){
     const friendTemplateCopy = document.querySelector("#po-friend-template").content.cloneNode(true)
     const activeTab = document.querySelector(".po-tab-active")
 
-    const path = conf._BASE_URL + conf._EXT_SUPA_USER_INFO
-    const body = { id: friendId }
-    databaseRequestWithBody(path, body).then(data => {
+    getUserInfo(friendId).then(data => {
         const item = friendTemplateCopy.querySelector(".po-base-item")
         friendTemplateCopy.querySelector(".po-base-name").textContent = data[0].name
         friendTemplateCopy.querySelector(".po-base-info").textContent = "#" + data[0].code
@@ -67,9 +52,7 @@ export function createFriendCard(friendId){
 export function createFriendPendingCard(friendId){
     const friendPendingTemplateCopy = document.querySelector("#po-friend-pending-template").content.cloneNode(true)
 
-    const path = conf._BASE_URL + conf._EXT_SUPA_USER_INFO
-    const body = { id: friendId }
-    databaseRequestWithBody(path, body).then(data => {
+    getUserInfo(friendId).then(data => {
         friendPendingTemplateCopy.querySelector(".po-base-name").textContent = data[0].name
         friendPendingTemplateCopy.querySelector(".po-base-info").textContent = "#" + data[0].code
         document.querySelector(".po-friend-list-content").appendChild(friendPendingTemplateCopy)
@@ -79,12 +62,8 @@ export function createFriendPendingCard(friendId){
 export function createGroupCard(groupsInfo){
     groupsInfo.forEach((group) => {
         const groupCard = document.querySelector("#groups-item-template").content.cloneNode(true)
-        const path = conf._BASE_URL + conf._EXT_SUPA_GROUP_INFO
-        const data = {id: group.group_id}
-        databaseRequestWithBody(path, data).then(groupData => {
-            const path = conf._BASE_URL + conf._EXT_SUPA_GROUP_MEMBERS
-            const data = {id: groupData[0].id}
-            databaseRequestWithBody(path, data).then(groupMembers => {
+        getGroupInfo(group.group_id).then(groupData => {
+            getGroupMembers(groupData[0].id).then(groupMembers => {
                 console.log(groupCard)
                 groupCard.querySelector(".groups-item-meta").textContent = groupMembers.length + " leden"
                 groupCard.querySelector(".groups-item-name").textContent = groupData[0].name
@@ -129,9 +108,7 @@ function addAllMembers(groupMembers, creatorId){
 
     groupMembers.forEach(member => {
         const groupMemberCard = document.querySelector("#groups-member-template").content.cloneNode(true)
-        const path = conf._BASE_URL + conf._EXT_SUPA_USER_INFO
-        const body = {id: member.user_id}
-        databaseRequestWithBody(path, body).then(userData => {
+        getUserInfo(member.user_id).then(userData => {
             groupMemberCard.querySelector(".groups-member-name").textContent = userData[0].name
             if(userData[0].id === creatorId){
                 groupMemberCard.querySelector(".groups-role-badge").textContent = "Leader"
