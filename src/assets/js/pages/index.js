@@ -1,6 +1,6 @@
-import { profileHTML } from "./profile_popup.js"
+import { profileHTML } from "../profile/profile_popup.js";
 
-function init(){
+function init() {
     document.querySelectorAll('.tool-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             const panelId = 'panel-' + tab.dataset.panel;
@@ -16,7 +16,7 @@ function init(){
             document.getElementById(panelId).classList.add('active');
         });
     });
-    profileHTML()
+    profileHTML();
 }
 
-init()
+init();
