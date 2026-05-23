@@ -9,8 +9,8 @@ import com.sun.net.httpserver.HttpServer;
 import java.util.Objects;
 
 public class SUPABASE_Group {
-    private HttpServer server;
-    private Config conf;
+    private final HttpServer server;
+    private final Config conf;
     private final API_Utils utils;
 
     public SUPABASE_Group(HttpServer server, Config conf){
@@ -32,7 +32,7 @@ public class SUPABASE_Group {
                 try {
                     String body = new String(exchange.getRequestBody().readAllBytes());
 
-                    if (body == null || body.isBlank()) {
+                    if (body.isBlank()) {
                         utils.sendJsonResponse(exchange, "{\"error\":\"Request body is leeg\"}", 400);
                         return;
                     }
@@ -92,7 +92,7 @@ public class SUPABASE_Group {
     }
 
     public void getUserGroups(){
-        server.createContext(conf._EXT_SUPA_GROUP_MEMBER, exchange -> {
+        server.createContext(conf._EXT_SUPA_USER_GROUPS, exchange -> {
             utils.addCORS(exchange);
 
             if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
@@ -104,13 +104,13 @@ public class SUPABASE_Group {
                 try {
                     String body = new String(exchange.getRequestBody().readAllBytes());
 
-                    if (body == null || body.isBlank()) {
+                    if (body.isBlank()) {
                         utils.sendJsonResponse(exchange, "{\"error\":\"Request body is leeg\"}", 400);
                         return;
                     }
 
                     JsonObject json = JsonParser.parseString(body).getAsJsonObject();
-                    JsonElement idEl = json.get("id");
+                    JsonElement idEl = json.get("userId");
 
                     if (idEl == null || idEl.isJsonNull()) {
                         utils.sendJsonResponse(exchange, "{\"error\":\"Verplicht veld ontbreekt: id\"}", 400);
@@ -153,13 +153,13 @@ public class SUPABASE_Group {
                 try {
                     String body = new String(exchange.getRequestBody().readAllBytes());
 
-                    if (body == null || body.isBlank()) {
+                    if (body.isBlank()) {
                         utils.sendJsonResponse(exchange, "{\"error\":\"Request body is leeg\"}", 400);
                         return;
                     }
 
                     JsonObject json = JsonParser.parseString(body).getAsJsonObject();
-                    JsonElement idEl = json.get("id");
+                    JsonElement idEl = json.get("groupId");
 
                     if (idEl == null || idEl.isJsonNull()) {
                         utils.sendJsonResponse(exchange, "{\"error\":\"Verplicht veld ontbreekt: id\"}", 400);
@@ -209,7 +209,7 @@ public class SUPABASE_Group {
                 try {
                     String body = new String(exchange.getRequestBody().readAllBytes());
 
-                    if (body == null || body.isBlank()) {
+                    if (body.isBlank()) {
                         utils.sendJsonResponse(exchange, "{\"error\":\"Request body is leeg\"}", 400);
                         return;
                     }
@@ -258,14 +258,14 @@ public class SUPABASE_Group {
                 try {
                     String body = new String(exchange.getRequestBody().readAllBytes());
 
-                    if (body == null || body.isBlank()) {
+                    if (body.isBlank()) {
                         utils.sendJsonResponse(exchange, "{\"error\":\"Request body is leeg\"}", 400);
                         return;
                     }
 
                     JsonObject json = JsonParser.parseString(body).getAsJsonObject();
-                    JsonElement idEl   = json.get("id");
-                    JsonElement codeEl = json.get("code");
+                    JsonElement idEl   = json.get("userId");
+                    JsonElement codeEl = json.get("groupCode");
 
                     if (idEl == null || idEl.isJsonNull() || codeEl == null || codeEl.isJsonNull()) {
                         utils.sendJsonResponse(exchange, "{\"error\":\"Verplichte velden ontbreken: id, code\"}", 400);
@@ -330,8 +330,8 @@ public class SUPABASE_Group {
                     }
 
                     JsonObject json = JsonParser.parseString(body).getAsJsonObject();
-                    JsonElement idEl   = json.get("id");
-                    JsonElement codeEl = json.get("code");
+                    JsonElement idEl   = json.get("userId");
+                    JsonElement codeEl = json.get("groupCode");
 
                     if (idEl == null || idEl.isJsonNull() || codeEl == null || codeEl.isJsonNull()) {
                         utils.sendJsonResponse(exchange, "{\"error\":\"Verplichte velden ontbreken: id, code\"}", 400);

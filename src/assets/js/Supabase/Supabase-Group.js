@@ -1,0 +1,53 @@
+import * as config from "../Data/config.js";
+import { databaseRequestWithBody } from "./Supabase-Client.js";
+
+export async function createGroup(name, ownerId) {
+    const path = config._BASE_URL + config._EXT_SUPA_GROUP_MAKE
+    const data = {
+        name: name,
+        ownerId: ownerId
+    };
+    return databaseRequestWithBody(path, data)
+}
+
+export async function getGroupsOfUser(userId) {
+    const path = config._BASE_URL + config._EXT_SUPA_USER_GROUPS
+    const data = {
+        userId: userId
+    };
+    return databaseRequestWithBody(path, data)
+}
+
+export async function getGroupInfo(groupId) {
+    const path = config._BASE_URL + config._EXT_SUPA_GROUP_INFO
+    const data = {
+        groupId: groupId
+    };
+    return databaseRequestWithBody(path, data)
+}
+
+export async function getGroupMembers(groupId) {
+    const path = config._BASE_URL + config._EXT_SUPA_GROUP_MEMBERS
+    const data = {
+        groupId: groupId
+    };
+    return databaseRequestWithBody(path, data)
+}
+
+export async function joinGroup(userId, groupCode) {
+    const path = config._BASE_URL + config._EXT_SUPA_GROUP_JOIN
+    const data = {
+        userId: userId,
+        groupCode: groupCode
+    };
+    return databaseRequestWithBody(path, data)
+}
+
+export async function leaveGroup(userId, groupCode) {
+    const path = config._BASE_URL + config._EXT_SUPA_GROUP_LEAVE
+    const data = {
+        userId: userId,
+        groupCode: groupCode
+    };
+    return databaseRequestWithBody(path, data)
+}

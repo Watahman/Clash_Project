@@ -62,6 +62,7 @@ public class Config {
     String _EXT_SUPA_USER_MAKE = "/SupabaseUserMake";
     String _EXT_SUPA_USER_INFO = "/SupabaseUserInfo";
     String _EXT_SUPA_USER_BASES = "/SupabaseUserBases";
+    String _EXT_SUPA_USER_GROUPS = "/SupabaseUserGroups";
     String _EXT_SUPA_USER_CHECK = "/SupabaseUserCheck";
     String _EXT_SUPA_USER_IDCHECK = "/SupabaseUserIdCheck";
     String _EXT_SUPA_USER_ADD_ACCOUNT = "/SupabaseUserAddAccount";
@@ -78,7 +79,6 @@ public class Config {
     String _EXT_SUPA_CWLPLANNER_DATA_GET_ALL = "/SupabaseCwplannerDataGetAll";
 
     String _EXT_SUPA_GROUP_MAKE = "/SupabaseGroupMake";
-    String _EXT_SUPA_GROUP_MEMBER = "/SupabaseGroupMember";
     String _EXT_SUPA_GROUP_MEMBERS = "/SupabaseGroupMembers";
     String _EXT_SUPA_GROUP_INFO = "/SupabaseGroupInfo";
     String _EXT_SUPA_GROUP_JOIN = "/SupabaseGroupJoin";

@@ -55,6 +55,7 @@ export const _EXT_SUPA_CONF = "/SupabaseConfigInfo"
 export const _EXT_SUPA_USER_MAKE = "/SupabaseUserMake"
 export const _EXT_SUPA_USER_INFO = "/SupabaseUserInfo"
 export const _EXT_SUPA_USER_BASES = "/SupabaseUserBases";
+export const _EXT_SUPA_USER_GROUPS = "/SupabaseUserGroups";
 export const _EXT_SUPA_USER_CHECK = "/SupabaseUserCheck";
 export const _EXT_SUPA_USER_IDCHECK = "/SupabaseUserIdCheck"
 export const _EXT_SUPA_USER_ADD_ACCOUNT = "/SupabaseUserAddAccount";
@@ -71,7 +72,6 @@ export const _EXT_SUPA_CWLPLANNER_DATA_GET = "/SupabaseCwplannerDataGet";
 export const _EXT_SUPA_CWLPLANNER_DATA_GET_ALL = "/SupabaseCwplannerDataGetAll";
 
 export const _EXT_SUPA_GROUP_MAKE = "/SupabaseGroupMake";
-export const _EXT_SUPA_GROUP_MEMBER = "/SupabaseGroupMember";
 export const _EXT_SUPA_GROUP_MEMBERS = "/SupabaseGroupMembers";
 export const _EXT_SUPA_GROUP_INFO = "/SupabaseGroupInfo";
 export const _EXT_SUPA_GROUP_JOIN = "/SupabaseGroupJoin";

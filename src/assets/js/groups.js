@@ -1,8 +1,7 @@
-import { databaseRequestWithBody} from "./API/API-Client.js";
 import { getClanInfoRequest } from "./API/API-Clan.js";
-import * as conf from "./Data/config.js"
 import { createGroupCard } from "./Templates.js";
 import { profileHTML } from "./profile_popup.js"
+import {createGroup, getGroupsOfUser, joinGroup, leaveGroup} from "./Supabase/Supabase-Group.js";
 
 const groupsMain         = document.querySelector('#groups-main');
 const groupsSidebar      = document.querySelector('#groups-sidebar');
@@ -54,7 +53,7 @@ function init(){
     initGroups()
     profileHTML()
     copyCodeInit()
-    leaveGroup()
+    leaveGroupFun()
     escPopupClose()
     overlayBackdropClose()
 }
@@ -69,7 +68,7 @@ function newGroupOverlay(){
 
     groupsOverlayJoinBtn.onclick = () => {
         const code = groupsInputJoinCode.value
-        joinGroup(code);
+        joinGroupFun(code);
         groupsOverlayNew.classList.add('hidden');
     }
 
@@ -113,38 +112,30 @@ function newGroupOverlay(){
 }
 
 function initGroups(){
-    const path = conf._BASE_URL + conf._EXT_SUPA_GROUP_MEMBER
-    const data = {id: localStorage.getItem("id")}
-    databaseRequestWithBody(path, data).then(data => {createGroupCard(data)})
+    getGroupsOfUser(localStorage.getItem("id")).then(data => {createGroupCard(data)})
 }
 
 function createNewGroup(value, option){
     if(option === "name"){
-        const data = {name: value, ownerId: localStorage.getItem("id")}
-        databaseRequestWithBody(conf._BASE_URL + conf._EXT_SUPA_GROUP_MAKE, data).then(data => console.log(data))
+        createGroup(value, localStorage.getItem("id")).then(data => console.log(data))
     }else if(option === "clanTag"){
         getClanInfoRequest(value)
             .then(clanInfo => {
-                const data = {name: clanInfo.name, ownerId: localStorage.getItem("id")}
-                databaseRequestWithBody(conf._BASE_URL + conf._EXT_SUPA_GROUP_MAKE, data).then(data => console.log(data))
+                createGroup(clanInfo.name, localStorage.getItem("id")).then(data => console.log(data))
             })
     }
 }
 
-function joinGroup(code){
-    const path = conf._BASE_URL + conf._EXT_SUPA_GROUP_JOIN
-    const data = {id: localStorage.getItem("id"), code: code}
-    databaseRequestWithBody(path, data).then(data => console.log(data))
+function joinGroupFun(code){
+    joinGroup(localStorage.getItem("id"), code).then(data => console.log(data))
 }
 
-function leaveGroup(){
+function leaveGroupFun(){
     groupsLeaveBtn.onclick = () => {groupOverlayLeave.classList.remove('hidden')}
     groupsLeaveCancelBtn.onclick = () => {groupOverlayLeave.classList.add('hidden')}
     groupsLeaveConfirmBtn.onclick = () => {
         groupOverlayLeave.classList.add('hidden')
-        const path = conf._BASE_URL + conf._EXT_SUPA_GROUP_LEAVE
-        const data = {id: localStorage.getItem("id"), code: groupsDetailCode.textContent}
-        databaseRequestWithBody(path, data).then(data => console.log(data))
+        leaveGroup(localStorage.getItem("id"), groupsDetailCode.textContent).then(data => console.log(data))
     }
 }
 
@@ -184,7 +175,6 @@ function escPopupClose(){
 
         if (!groupOverlayLeave.classList.contains('hidden')) {
             groupOverlayLeave.classList.add('hidden')
-            return
         }
     })
 }
