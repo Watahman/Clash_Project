@@ -4,24 +4,23 @@ import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 
 public class Main {
-    private HttpServer server;
-    private Config conf;
-    private API_Clan apiClan;
-    private API_Goldpass apiGoldpass;
-    private API_Labels apiLabels;
-    private API_Leagues apiLeagues;
-    private API_Locations apiLocations;
-    private API_Player apiPlayer;
-    private SUPABASE_User supaUser;
-    private SUPABASE_CWLPlanner supaCWLPlanner;
-    private SUPABASE_Friend supaFriend;
-    private SUPABASE_Group supaGroup;
-
     static void main() throws Exception {
         new Main().run();
     }
 
     private void run() throws Exception {
+        SUPABASE_Group supaGroup;
+        SUPABASE_Friend supaFriend;
+        SUPABASE_CWLPlanner supaCWLPlanner;
+        SUPABASE_User supaUser;
+        API_Player apiPlayer;
+        API_Locations apiLocations;
+        API_Leagues apiLeagues;
+        API_Labels apiLabels;
+        API_Goldpass apiGoldpass;
+        API_Clan apiClan;
+        Config conf;
+        HttpServer server;
         conf = new Config(); // config initialiseren
         server = HttpServer.create(new InetSocketAddress(8080), 0);
 
