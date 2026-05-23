@@ -1,9 +1,12 @@
 package Java;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -11,7 +14,7 @@ import java.net.URL;
 import java.security.SecureRandom;
 
 public class API_Utils {
-    private Config conf;
+    private final Config conf;
 
     public API_Utils(Config conf) {
         this.conf = conf;
@@ -92,5 +95,54 @@ public class API_Utils {
             code.append(chars.charAt(random.nextInt(chars.length())));
         }
         return code.toString();
+    }
+
+    // Leest en parsed de body; gooit een IllegalArgumentException als het mislukt
+    public JsonObject parseBody(HttpExchange exchange) throws Exception {
+        String body = new String(exchange.getRequestBody().readAllBytes());
+        if (body.isBlank()) throw new IllegalArgumentException("Request body is leeg");
+        return JsonParser.parseString(body).getAsJsonObject();
+    }
+
+    // Haalt een verplicht string-veld op uit een JsonObject
+    public String requireString(JsonObject json, String field) throws IllegalArgumentException {
+        JsonElement el = json.get(field);
+        if (el == null || el.isJsonNull()) throw new IllegalArgumentException("Verplicht veld ontbreekt: " + field);
+        return el.getAsString();
+    }
+
+    // Centrale handler-wrapper: vangt CORS, OPTIONS en errors af
+    public void handlePost(HttpExchange exchange, PostHandler handler) {
+        try {
+            addCORS(exchange);
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) return;
+
+            try {
+                handler.handle(exchange);
+            } catch (IllegalArgumentException e) {
+                sendJsonResponse(exchange, "{\"error\":\"" + e.getMessage() + "\"}", 400);
+            } catch (Exception e) {
+                e.printStackTrace();
+                sendJsonResponse(exchange, "{\"error\":\"Interne serverfout\"}", 500);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public JsonArray requireArray(JsonObject json, String field) throws IllegalArgumentException {
+        JsonElement el = json.get(field);
+        if (el == null || el.isJsonNull() || !el.isJsonArray())
+            throw new IllegalArgumentException("Verplicht veld ontbreekt of is geen array: " + field);
+        return el.getAsJsonArray();
+    }
+
+    @FunctionalInterface
+    public interface PostHandler {
+        void handle(HttpExchange exchange) throws Exception;
     }
 }
