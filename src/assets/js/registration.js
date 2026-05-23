@@ -1,5 +1,4 @@
-import { databaseRequestWithBody } from "./API/API-Client.js";
-import * as config from "./Data/config.js";
+import { createUser } from "./Supabase/Supabase-User.js"
 
 function init(){
     clicklistener()
@@ -13,14 +12,7 @@ function clicklistener(){
         const password_confirmation = document.querySelector("#password2").value
 
         if(password === password_confirmation){
-            const path = config._BASE_URL + config._EXT_SUPA_USER_MAKE
-            const data = {
-                name: name,
-                email: email,
-                password: password
-            };
-
-            databaseRequestWithBody(path, data).then(data=>{
+            createUser(name, email, password).then(data=>{
                 console.log(data)
             })
         }
