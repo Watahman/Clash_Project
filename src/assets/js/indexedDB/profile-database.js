@@ -1,4 +1,4 @@
-function openProfileDB() {
+export function openProfileDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open("profileDB", 1);
 
@@ -33,13 +33,8 @@ export async function saveProfileData(key, data) {
             updatedAt: Date.now()
         });
 
-        transaction.oncomplete = () => {
-            resolve();
-        };
-
-        transaction.onerror = event => {
-            reject(event.target.error);
-        };
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = event => reject(event.target.error);
     });
 }
 
@@ -52,12 +47,35 @@ export async function getProfileData(key) {
 
         const request = store.get(key);
 
-        request.onsuccess = () => {
-            resolve(request.result);
-        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = event => reject(event.target.error);
+    });
+}
 
-        request.onerror = event => {
-            reject(event.target.error);
-        };
+export async function deleteProfileData(key) {
+    const db = await openProfileDB();
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction("profileStore", "readwrite");
+        const store = transaction.objectStore("profileStore");
+
+        store.delete(key);
+
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = event => reject(event.target.error);
+    });
+}
+
+export async function clearProfileData() {
+    const db = await openProfileDB();
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction("profileStore", "readwrite");
+        const store = transaction.objectStore("profileStore");
+
+        store.clear();
+
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = event => reject(event.target.error);
     });
 }
