@@ -30,9 +30,13 @@ bin/
 .env
 .env.local
 .env.*
+!.env.example
 
 # Node
 node_modules/
 
 ### Mac OS ###
 .DS_Store
+
+# Java / Maven
+target/

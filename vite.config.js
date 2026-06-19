@@ -14,7 +14,8 @@ export default defineConfig({
                 cwlPlanner: resolve(__dirname, 'src/subPages/cwl-planner.html'),
                 cwlPlannerDrafts: resolve(__dirname, 'src/subPages/cwl-planner-drafts.html'),
                 groups: resolve(__dirname, 'src/subPages/groups.html'),
-                bracketGenerator: resolve(__dirname, 'src/subPages/bracket-generator.html')
+                bracketGenerator: resolve(__dirname, 'src/subPages/bracket-generator.html'),
+                profilePopup: resolve(__dirname, 'src/subPages/popup_HTMLs/profile_popup.html')
             }
         }
     },
