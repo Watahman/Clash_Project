@@ -529,3 +529,69 @@
   .cwl-toolbar, .cwl-plan-actions { align-items: stretch; }
   .cwl-plan-actions > * { width: 100% !important; max-width: none !important; }
 }
+
+/* Operation Board reliability pass */
+.op-phase-badge {
+    min-height: 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 0.42rem 0.72rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.035);
+    color: var(--text-2);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    user-select: text;
+}
+.op-phase-badge[data-state="live"] {
+    color: var(--green);
+    background: var(--green-dim);
+    border-color: rgba(56,217,138,0.26);
+}
+.op-phase-badge[data-state="preparation"],
+.op-phase-badge[data-state="notStarted"] {
+    color: var(--accent);
+    background: var(--accent-dim);
+    border-color: rgba(246,183,60,0.28);
+}
+.op-phase-badge[data-state="completed"] {
+    color: var(--blue);
+    background: var(--blue-dim);
+    border-color: rgba(75,183,255,0.28);
+}
+.operation-help[data-state="error"] { color: var(--red); }
+.op-table-wrap {
+    overflow-x: auto;
+    overflow-y: visible;
+    max-height: none !important;
+}
+.op-roster-panel { overflow: visible; }
+.op-status-pill[data-state="live"] {
+    color: var(--green);
+    background: var(--green-dim);
+    border-color: rgba(56,217,138,0.26);
+}
+.op-status-pill[data-state="completed"] {
+    color: var(--blue);
+    background: var(--blue-dim);
+    border-color: rgba(75,183,255,0.28);
+}
+.op-status-pill[data-state="preparation"],
+.op-status-pill[data-state="notStarted"] {
+    color: var(--accent);
+    background: var(--accent-dim);
+    border-color: rgba(246,183,60,0.28);
+}
+.op-round-notStarted,
+.op-round-notAvailable {
+    opacity: 0.78;
+}
+#op-import-file.hidden { display: none !important; }
+@media (max-width: 62rem) {
+    .operation-actions { width: 100%; }
+    .operation-actions .btn { flex: 1; }
+}
