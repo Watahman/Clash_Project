@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CWL Operation Board · Tools for Clash</title>
+    <link rel="stylesheet" href="../assets/css/Main-css.css">
+    <link rel="stylesheet" href="../assets/css/cwlPlanner.css">
+    <link rel="stylesheet" href="../assets/css/profile-overlay.css">
+    <link rel="icon" type="image/png" href="../assets/css/pictures/shield_with_hamer_logov2.png">
+    <script type="module" src="../assets/js/pages/cwl-operation-board.js"></script>
+</head>
+<body>
+<header>
+    <div class="left">
+        <a href="../index.html" aria-label="Tools for Clash home">
+            <img src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="Tools for Clash logo">
+        </a>
+    </div>
+    <nav class="center" aria-label="Hoofdnavigatie">
+        <a href="./cwl-planner.html" data-i18n="nav.cwl">CWL planner</a>
+        <a href="./cwl-operation-board.html" aria-current="page" data-i18n="nav.operation">Operation board</a>
+        <a href="./groups.html" data-i18n="nav.groups">Groepen</a>
+    </nav>
+    <div class="right">
+        <button type="button" data-language-control data-i18n="header.language">Taal</button>
+        <button id="profile-btn" type="button">
+            <img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt="">
+            <span data-i18n="header.user">Gebruiker</span>
+        </button>
+    </div>
+</header>
+
+<main class="operation-main">
+    <section class="operation-hero">
+        <div>
+            <p class="hero-eyebrow">Clan War League</p>
+            <h1 data-i18n="op.title">CWL Operation Board</h1>
+            <p data-i18n="op.subtitle">Volg 7 war days, attacks, sterren, destruction, rotatie en bonusmedals op.</p>
+        </div>
+        <div class="operation-actions">
+            <button id="op-add-player" data-i18n="op.addPlayer">Speler toevoegen</button>
+            <button id="op-import-planner" data-i18n="op.importPlanner">Importeer planner-spelers</button>
+            <button id="op-export" data-i18n="op.export">Export JSON</button>
+            <label class="btn op-import-label" for="op-import-file" data-i18n="op.import">Import JSON</label>
+            <input id="op-import-file" type="file" accept="application/json" hidden>
+            <button id="op-reset" class="op-danger" data-i18n="op.reset">Reset board</button>
+        </div>
+    </section>
+
+    <section class="operation-grid">
+        <article class="operation-panel op-score-panel">
+            <div class="operation-panel-head">
+                <h2 data-i18n="op.scoreboard">Scoreboard</h2>
+                <span id="op-save-state">saved</span>
+            </div>
+            <div class="op-score-cards">
+                <div class="op-score-card"><span id="op-total-stars">0</span><p data-i18n="op.totalStars">Totaal sterren</p></div>
+                <div class="op-score-card"><span id="op-avg-destruction">0%</span><p data-i18n="op.avgDestruction">Gem. destruction</p></div>
+                <div class="op-score-card"><span id="op-attacks-used">0</span><p data-i18n="op.attacksUsed">Attacks gebruikt</p></div>
+                <div class="op-score-card"><span id="op-missed-attacks">0</span><p data-i18n="op.missed">Gemiste attacks</p></div>
+            </div>
+            <div class="op-th-spread">
+                <h3 data-i18n="op.thSpread">Town Hall verdeling</h3>
+                <div id="op-th-list"></div>
+            </div>
+        </article>
+
+        <article class="operation-panel op-roster-panel">
+            <div class="operation-panel-head">
+                <h2 data-i18n="op.roster">Roster</h2>
+                <span id="op-roster-count">0 spelers</span>
+            </div>
+            <div class="op-table-wrap">
+                <table class="op-table">
+                    <thead><tr><th>War</th><th>Speler</th><th>TH</th><th>Stars</th><th>Dest.</th><th>Att.</th><th>Miss</th><th>Notes</th><th></th></tr></thead>
+                    <tbody id="op-roster-body"></tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="operation-panel op-rounds-panel">
+            <div class="operation-panel-head"><h2 data-i18n="op.rounds">War days</h2></div>
+            <div id="op-rounds-list" class="op-rounds-list"></div>
+        </article>
+
+        <article class="operation-panel op-bonus-panel">
+            <div class="operation-panel-head"><h2 data-i18n="op.bonus">Bonusadvies</h2></div>
+            <ol id="op-bonus-list" class="op-bonus-list"></ol>
+        </article>
+    </section>
+</main>
+
+<div class="profile-placeholder"></div>
+</body>
+</html>

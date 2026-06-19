@@ -15,7 +15,7 @@
                     <line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
             </button>
-            <span class="po-topbar-label">Profiel</span>
+            <span class="po-topbar-label" data-i18n="profile.title">Profiel</span>
         </div>
 
         <div class="po-header">
@@ -41,15 +41,15 @@
         </div>
 
         <div class="po-tabs">
-            <button class="po-tab po-tab-active" id="po-tab-bases">Bases</button>
-            <button class="po-tab" id="po-tab-friends">Friends</button>
-            <button class="po-tab" id="po-tab-clans">Clans</button>
-            <button class="po-tab" id="po-tab-settings">Settings</button>
+            <button class="po-tab po-tab-active" id="po-tab-bases" data-i18n="profile.bases">Bases</button>
+            <button class="po-tab" id="po-tab-friends" data-i18n="profile.friends">Vrienden</button>
+            <button class="po-tab" id="po-tab-clans" data-i18n="profile.clans">Clans</button>
+            <button class="po-tab" id="po-tab-settings" data-i18n="profile.settings">Instellingen</button>
         </div>
 
         <div class="po-panel">
             <div class="po-panel-content">
-                <p class="po-empty">No bases</p>
+                <p class="po-empty" data-i18n="profile.noBases">Geen bases</p>
             </div>
 
             <div class="po-settings hidden">
@@ -59,7 +59,7 @@
                         <polyline points="16 17 21 12 16 7"/>
                         <line x1="21" y1="12" x2="9" y2="12"/>
                     </svg>
-                    Logout
+                    <span data-i18n="profile.logout">Uitloggen</span>
                 </button>
             </div>
 
@@ -69,10 +69,10 @@
                         <line x1="12" y1="5" x2="12" y2="19"/>
                         <line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
-                    <span id="po-add-text">Add Base</span>
+                    <span id="po-add-text" data-i18n="profile.addBase">Base toevoegen</span>
                 </button>
-                <button id="po-friend-requests-btn" class="hidden">Requests</button>
-                <button id="po-friend-pending-btn" class="hidden">Pending</button>
+                <button id="po-friend-requests-btn" class="hidden" data-i18n="profile.requests">Requests</button>
+                <button id="po-friend-pending-btn" class="hidden" data-i18n="profile.pending">Pending</button>
             </div>
         </div>
 
@@ -88,7 +88,7 @@
         <input id="po-input-base-tag" type="text" placeholder="Tag: #">
         <input id="po-input-base-token" type="text" placeholder="Token: ">
         <br>
-        <button id="po-overlay-add-base-button">Confirm</button>
+        <button id="po-overlay-add-base-button" data-i18n="cwl.confirm">Bevestigen</button>
     </div>
 </div>
 
@@ -96,14 +96,14 @@
     <div class="overlay-container" id="po-container-add-clan">
         <input id="po-input-clan-tag" type="text" placeholder="Tag: #">
         <br>
-        <button id="po-overlay-add-clan-button">Confirm</button>
+        <button id="po-overlay-add-clan-button" data-i18n="cwl.confirm">Bevestigen</button>
     </div>
 </div>
 
 <div class="overlay hidden" id="po-friend-list">
     <div class="overlay-container" id="po-container-friend-list">
         <div class="po-friend-list-header">
-            <span id="po-friend-list-title" class="po-friend-list-title">Friend requests</span>
+            <span id="po-friend-list-title" class="po-friend-list-title" data-i18n="profile.requests">Requests</span>
             <button id="po-friend-list-close" class="po-friend-list-close">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <line x1="18" y1="6" x2="6" y2="18"/>
@@ -112,7 +112,7 @@
             </button>
         </div>
         <div id="po-friend-list-content" class="po-friend-list-content">
-            <p id="po-empty-friendrequest" class="po-empty">No requests</p>
+            <p id="po-empty-friendrequest" class="po-empty" data-i18n="profile.requests">Requests</p>
         </div>
     </div>
 </div>

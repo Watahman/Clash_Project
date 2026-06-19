@@ -118,3 +118,49 @@
     .po-header { align-items: flex-start; }
     #po-add-container { flex-direction: column; }
 }
+
+/* Profile dynamic card stability */
+.po-panel-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    min-height: 16rem;
+}
+.po-base-item {
+    min-height: 4.15rem;
+    flex: 0 0 auto;
+}
+.po-base-icon, .po-friend-avatar {
+    width: 2.7rem;
+    height: 2.7rem;
+    border-radius: var(--radius-sm);
+}
+.po-base-icon img, .po-base-chevron {
+    width: 1.55rem;
+    height: 1.55rem;
+    object-fit: contain;
+}
+.po-base-text {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.po-base-name, .po-base-info {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.po-friend-actions {
+    display: flex;
+    gap: 0.4rem;
+    margin-left: auto;
+}
+.po-friend-actions button, .po-friend-clock {
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    padding: 0;
+}
+.po-friend-clock img { width: 1rem; height: 1rem; }

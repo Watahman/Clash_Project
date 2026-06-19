@@ -12,8 +12,8 @@
 <body>
 <header>
     <div class="left"><a href="../index.html"><img src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="Tools for Clash logo"></a></div>
-    <nav class="center"><a href="cwl-planner.html">CWL planner</a><a href="groups.html">Groepen</a></nav>
-    <div class="right"><button type="button">Taal</button></div>
+    <nav class="center"><a href="cwl-planner.html" data-i18n="nav.cwl">CWL planner</a><a href="cwl-operation-board.html" data-i18n="nav.operation">Operation board</a><a href="groups.html" data-i18n="nav.groups">Groepen</a></nav>
+    <div class="right"><button type="button" data-language-control data-i18n="header.language">Taal</button></div>
 </header>
 
 <main class="auth-main">
@@ -33,17 +33,17 @@
         <div class="card">
             <div class="card-head">
                 <img class="card-logo" src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="logo">
-                <h1>Account aanmaken</h1>
-                <p>Al een account? <a href="login.html">Inloggen</a></p>
+                <h1 data-i18n="auth.registerTitle">Account aanmaken</h1>
+                <p><span data-i18n="auth.registerSubtitle">Al een account?</span> <a href="login.html" data-i18n="auth.loginLink">Inloggen</a></p>
             </div>
             <form class="form" onsubmit="return false;">
-                <div class="field"><label for="username">Gebruikersnaam</label><input type="text" id="username" placeholder="ClashLeader99" autocomplete="username" maxlength="24"><span class="field-hint" id="username-hint"></span></div>
-                <div class="field"><label for="email">E-mailadres</label><input type="email" id="email" placeholder="jij@voorbeeld.com" autocomplete="email"><span class="field-hint" id="email-hint"></span></div>
-                <div class="field"><label for="password">Wachtwoord</label><input type="password" id="password" placeholder="••••••••" autocomplete="new-password"><div class="strength-bar"><div class="strength-seg" id="seg1"></div><div class="strength-seg" id="seg2"></div><div class="strength-seg" id="seg3"></div></div><span class="field-hint" id="password-hint"></span></div>
-                <div class="field"><label for="password2">Wachtwoord bevestigen</label><input type="password" id="password2" placeholder="••••••••" autocomplete="new-password"><span class="field-hint" id="password2-hint"></span></div>
-                <button id="submit-button" class="btn-submit" type="submit">Account aanmaken</button>
-                <div class="or-divider"><hr><span>of</span><hr></div>
-                <button class="btn-google" type="button">Doorgaan met Google</button>
+                <div class="field"><label for="username" data-i18n="auth.username">Gebruikersnaam</label><input type="text" id="username" placeholder="ClashLeader99" autocomplete="username" maxlength="24"><span class="field-hint" id="username-hint"></span></div>
+                <div class="field"><label for="email" data-i18n="auth.email">E-mailadres</label><input type="email" id="email" placeholder="jij@voorbeeld.com" autocomplete="email"><span class="field-hint" id="email-hint"></span></div>
+                <div class="field"><label for="password" data-i18n="auth.password">Wachtwoord</label><input type="password" id="password" placeholder="••••••••" autocomplete="new-password"><div class="strength-bar"><div class="strength-seg" id="seg1"></div><div class="strength-seg" id="seg2"></div><div class="strength-seg" id="seg3"></div></div><span class="field-hint" id="password-hint"></span></div>
+                <div class="field"><label for="password2" data-i18n="auth.confirmPassword">Wachtwoord bevestigen</label><input type="password" id="password2" placeholder="••••••••" autocomplete="new-password"><span class="field-hint" id="password2-hint"></span></div>
+                <button id="submit-button" class="btn-submit" type="submit" data-i18n="auth.createAccount">Account aanmaken</button>
+                <div class="or-divider"><hr><span data-i18n="auth.or">of</span><hr></div>
+                <button class="btn-google" type="button" data-i18n="auth.google">Doorgaan met Google</button>
             </form>
         </div>
     </div>

@@ -12,6 +12,7 @@ export default defineConfig({
                 login: resolve(__dirname, 'src/subPages/login.html'),
                 register: resolve(__dirname, 'src/subPages/register.html'),
                 cwlPlanner: resolve(__dirname, 'src/subPages/cwl-planner.html'),
+                cwlOperationBoard: resolve(__dirname, 'src/subPages/cwl-operation-board.html'),
                 cwlPlannerDrafts: resolve(__dirname, 'src/subPages/cwl-planner-drafts.html'),
                 groups: resolve(__dirname, 'src/subPages/groups.html'),
                 bracketGenerator: resolve(__dirname, 'src/subPages/bracket-generator.html'),

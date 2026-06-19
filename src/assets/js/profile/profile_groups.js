@@ -7,12 +7,14 @@ export function resetClansLoaded() {
     clansLoaded = false;
 }
 
-export function renderGroups(groups, emptyLabel) {
-    if (groups.length === 0) return;
+export function renderGroups(groups, emptyLabel, force = false) {
+    if (force) document.querySelectorAll(".po-card-clan").forEach(el => el.remove());
+    if (!Array.isArray(groups) || groups.length === 0) return;
     Promise.all(groups.map(group => getGroupInfo(group.group_id)))
         .then(groupInfos => {
             groupInfos.forEach(groupInfo => {
                 const clanTemplate = document.querySelector("#po-groups-item-template").content.cloneNode(true);
+                if (!Array.isArray(groupInfo) || !groupInfo[0]) return;
                 clanTemplate.querySelector(".po-base-name").textContent = groupInfo[0].name;
                 clanTemplate.querySelector(".po-base-info").textContent = groupInfo[0].code;
                 const badge = clanTemplate.querySelector(".groups-role-badge");
@@ -37,5 +39,7 @@ export function renderGroups(groups, emptyLabel) {
 export function loadClans(emptyLabel) {
     if (clansLoaded) return;
     clansLoaded = true;
-    getGroupsOfUser(getCurrentUserId()).then(groups => renderGroups(groups, emptyLabel));
+    const userId = getCurrentUserId();
+    if (!userId) return;
+    getGroupsOfUser(userId).then(groups => renderGroups(groups, emptyLabel));
 }

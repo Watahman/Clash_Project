@@ -1,3 +1,4 @@
+import { initI18n, t } from '../i18n/i18n.js';
 import { getClanInfoRequest } from "../API/API-Clan.js";
 import { createGroupCard } from "../templates/GroupTemplates.js";
 import { profileHTML } from "../profile/profile_popup.js";
@@ -35,6 +36,7 @@ const groupsLeaveConfirmBtn = document.querySelector('#groups-leave-confirm-btn'
 let timer;
 
 function init() {
+    initI18n();
     sideBarToggle();
     groupsNewBtn.onclick = () => { newGroupOverlay(); };
     reloadGroups();
@@ -49,7 +51,7 @@ function requireLoggedIn() {
     const userId = getCurrentUserId();
     if (userId) return userId;
     resetGroupDetail();
-    groupsList.replaceChildren(emptyGroupMessage('Log in om groepen te gebruiken'));
+    groupsList.replaceChildren(emptyGroupMessage(t('groups.login')));
     return null;
 }
 
@@ -111,18 +113,18 @@ function reloadGroups() {
     const userId = requireLoggedIn();
     if (!userId) return;
 
-    groupsList.replaceChildren(emptyGroupMessage('Groepen laden...'));
+    groupsList.replaceChildren(emptyGroupMessage(t('groups.loading')));
     getGroupsOfUser(userId).then(data => {
         groupsList.replaceChildren();
         if (!Array.isArray(data) || data.length === 0) {
-            groupsList.appendChild(emptyGroupMessage('Geen groepen'));
+            groupsList.appendChild(emptyGroupMessage(t('groups.none')));
             resetGroupDetail();
             return;
         }
         createGroupCard(data);
     }).catch(error => {
         console.error(error);
-        groupsList.replaceChildren(emptyGroupMessage('Groepen laden mislukt'));
+        groupsList.replaceChildren(emptyGroupMessage(t('groups.loadError')));
     });
 }
 

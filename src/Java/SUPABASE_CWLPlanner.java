@@ -89,13 +89,16 @@ public class SUPABASE_CWLPlanner {
             for (JsonElement element : userPlanIds) {
                 String planId   = element.getAsJsonObject().get("plan_id").getAsString();
                 JsonArray plans = JsonParser.parseString(
-                        SUPABASE_Client.getWithBody("plans", "select=id,name&id=" + SUPABASE_Client.eq(planId))).getAsJsonArray();
+                        SUPABASE_Client.getWithBody("plans", "select=id,name,info&id=" + SUPABASE_Client.eq(planId))).getAsJsonArray();
 
                 if (!plans.isEmpty()) {
                     JsonObject plan = plans.get(0).getAsJsonObject();
                     JsonObject option = new JsonObject();
                     option.addProperty("id", plan.get("id").getAsString());
                     option.addProperty("name", plan.get("name").getAsString());
+                    if (plan.has("info") && plan.get("info").isJsonArray()) {
+                        option.add("info", plan.get("info").getAsJsonArray());
+                    }
                     plansResponse.add(option);
                 }
             }

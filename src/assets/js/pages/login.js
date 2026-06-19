@@ -1,6 +1,8 @@
+import { initI18n } from '../i18n/i18n.js';
 import { checkUser } from "../Supabase/Supabase-User.js";
 
 function init() {
+    initI18n();
     clicklistener();
 }
 

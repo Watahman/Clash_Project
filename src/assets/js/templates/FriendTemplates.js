@@ -6,6 +6,10 @@ function normalizeUser(data) {
     return Array.isArray(data) ? data[0] : data;
 }
 
+function friendExists(friendId) {
+    return Array.from(document.querySelectorAll('.po-card-friend')).some(card => card.dataset.friendId === friendId);
+}
+
 export function createFriendRequestCard(friendId) {
     const friendRequestTemplate = document.querySelector("#po-friend-request-template");
     const friendRequestTemplateCopy = friendRequestTemplate.content.cloneNode(true);
@@ -15,16 +19,15 @@ export function createFriendRequestCard(friendId) {
         if (!user || user.error) return;
         friendRequestTemplateCopy.querySelector(".po-base-name").textContent = user.name;
         friendRequestTemplateCopy.querySelector(".po-base-info").textContent = "#" + user.code;
+        const card = friendRequestTemplateCopy.querySelector(".po-base-item");
         friendRequestTemplateCopy.querySelector(".po-friend-accept").onclick = () => {
             acceptFriendRequest(getCurrentUserId(), user.id).then(() => {
-                const card = friendRequestTemplateCopy.querySelector(".po-base-item");
                 card.remove();
                 createFriendCard(friendId);
             });
         };
         friendRequestTemplateCopy.querySelector(".po-friend-reject").onclick = () => {
             rejectFriendRequest(getCurrentUserId(), user.id).then(() => {
-                const card = friendRequestTemplateCopy.querySelector(".po-base-item");
                 card.remove();
             });
         };
@@ -33,6 +36,7 @@ export function createFriendRequestCard(friendId) {
 }
 
 export function createFriendCard(friendId) {
+    if (!friendId || friendExists(friendId)) return;
     const friendTemplateCopy = document.querySelector("#po-friend-template").content.cloneNode(true);
     const activeTab = document.querySelector(".po-tab-active");
 
@@ -40,6 +44,7 @@ export function createFriendCard(friendId) {
         const user = normalizeUser(data);
         if (!user || user.error) return;
         const item = friendTemplateCopy.querySelector(".po-base-item");
+        item.dataset.friendId = friendId;
         friendTemplateCopy.querySelector(".po-base-name").textContent = user.name;
         friendTemplateCopy.querySelector(".po-base-info").textContent = "#" + user.code;
         if (activeTab?.id !== "po-tab-friends") item.classList.add('hidden');

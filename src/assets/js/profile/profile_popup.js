@@ -8,6 +8,7 @@ import { poTab } from "./profile_tabs.js";
 import { copyWithFeedback } from "../utils/clipboard.js";
 import { getCurrentUserId } from "../utils/user.js";
 import {getGroupsOfUser} from "../Supabase/Supabase-Group.js";
+import { applyI18n, t } from "../i18n/i18n.js";
 
 let profile, closeProfileBtn, userCode, profileTabs, openProfileBtn, activeTab;
 let friendRequestBtn, friendPendingBtn, friendList, emptyFriendRequest;
@@ -51,6 +52,7 @@ export function profileHTML() {
         .then(html => {
             placeholder.innerHTML = html;
             normalizeProfileAssetPaths();
+            applyI18n(placeholder);
             labelInit();
             profileInit();
             preloadProfileData();
@@ -105,13 +107,11 @@ function labelInit() {
 
 function profileInit() {
     openProfileBtn.onclick = () => {
-        if (cachedProfile) {
-            openProfile(cachedProfile.name, "#" + cachedProfile.code, cachedProfile.created_at.split("T")[0]);
-        } else if (getCurrentUserId() === null) {
+        if (getCurrentUserId() === null) {
             redirectToLogin();
-        } else {
-            isUserLoggedIn();
+            return;
         }
+        refreshProfileData(true);
     };
 
     profile.onclick = (e) => { poBackdrop(e); };
@@ -123,8 +123,8 @@ function profileInit() {
     friendRequestBtn.onclick = () => {
         const userId = getCurrentUserId();
         if (!userId) { redirectToLogin(); return; }
-        friendListTitle.textContent = "Friend Requests";
-        emptyFriendRequest.textContent = "No requests";
+        friendListTitle.textContent = t('profile.requests');
+        emptyFriendRequest.textContent = t('profile.requests');
         friendList.classList.remove('hidden');
         getFriendRequests(userId).then(res => {
             friendListContent.querySelectorAll(".po-base-item").forEach(item => item.remove());
@@ -140,8 +140,8 @@ function profileInit() {
     friendPendingBtn.onclick = () => {
         const userId = getCurrentUserId();
         if (!userId) { redirectToLogin(); return; }
-        friendListTitle.textContent = "Pending";
-        emptyFriendRequest.textContent = "No pending requests";
+        friendListTitle.textContent = t('profile.pending');
+        emptyFriendRequest.textContent = t('profile.pending');
         friendList.classList.remove('hidden');
         getPendingFriendRequests(userId).then(res => {
             friendListContent.querySelectorAll(".po-base-item").forEach(item => item.remove());
@@ -177,27 +177,49 @@ function profileInit() {
     });
 }
 
+function clearProfileRenderedItems() {
+    document.querySelectorAll(".po-card-base, .po-card-friend, .po-card-clan").forEach(el => el.remove());
+    friendListContent?.querySelectorAll(".po-base-item").forEach(el => el.remove());
+}
+
 function preloadProfileData() {
     const userId = getCurrentUserId();
     if (!userId) return;
+    refreshProfileData(false);
+}
 
-    Promise.all([
+function refreshProfileData(openAfterLoad = false) {
+    const userId = getCurrentUserId();
+    if (!userId) return Promise.resolve(null);
+
+    return Promise.all([
         checkUserId(userId),
         getFriends(userId),
         getGroupsOfUser(userId)
     ]).then(([userData, friends = [], groups = []]) => {
-        if (!userData || userData.error) return;
+        if (!userData || userData.error) return null;
         cachedProfile = userData;
-        loadBases(userData.accounts || [], emptyLabel);
-        renderFriends(Array.isArray(friends) ? friends : [], emptyLabel);
-        renderGroups(Array.isArray(groups) ? groups : [], emptyLabel);
-    }).catch(error => console.error(error));
+        clearProfileRenderedItems();
+        resetClansLoaded();
+        emptyLabel.textContent = t('profile.noBases');
+        emptyLabel.classList.remove('hidden');
+        loadBases(userData.accounts || [], emptyLabel, true);
+        renderFriends(Array.isArray(friends) ? friends : [], emptyLabel, true);
+        renderGroups(Array.isArray(groups) ? groups : [], emptyLabel, true);
+        if (openAfterLoad) {
+            openProfile(userData.name, "#" + userData.code, userData.created_at?.split("T")[0]);
+        }
+        return userData;
+    }).catch(error => {
+        console.error(error);
+        return null;
+    });
 }
 
 function openProfile(username, code, memberSince) {
     poUsername.textContent = username || 'User';
     poCode.textContent = code || '';
-    poMemberSince.textContent = memberSince ? 'Lid sinds ' + memberSince : '/';
+    poMemberSince.textContent = memberSince ? t('profile.memberSince', { date: memberSince }) : '/';
     profile.classList.add('po-open');
     document.body.style.overflow = 'hidden';
     poTab(activeTab, tabRefs);
@@ -206,8 +228,6 @@ function openProfile(username, code, memberSince) {
 function closeProfile() {
     profile.classList.remove('po-open');
     document.body.style.overflow = '';
-    document.querySelectorAll(".po-card-base, .po-card-friend, .po-card-clan").forEach(el => el.remove());
-    resetClansLoaded();
 }
 
 function poBackdrop(e) {
@@ -227,13 +247,7 @@ function isUserLoggedIn() {
     if (getCurrentUserId() === null) {
         redirectToLogin();
     } else {
-        checkUserId(getCurrentUserId()).then(res => {
-            cachedProfile = res;
-            openProfile(res.name, "#" + res.code, res.created_at.split("T")[0]);
-            loadBases(res.accounts, emptyLabel);
-            loadFriends(emptyLabel);
-            loadClans(emptyLabel);
-        });
+        refreshProfileData(true);
     }
 }
 

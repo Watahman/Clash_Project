@@ -2,7 +2,8 @@ import { getFriends, addFriend } from "../Supabase/Supabase-Friend.js";
 import { createFriendCard } from "../templates/FriendTemplates.js";
 import { getCurrentUserId } from "../utils/user.js";
 
-export function renderFriends(friends, emptyLabel) {
+export function renderFriends(friends, emptyLabel, force = false) {
+    if (force) document.querySelectorAll(".po-card-friend").forEach(el => el.remove());
     if (!Array.isArray(friends) || friends.length === 0) return;
     emptyLabel.classList.add('hidden');
     friends.forEach(friend => {

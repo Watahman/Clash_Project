@@ -12,8 +12,8 @@
 <body>
 <header>
     <div class="left"><a href="../index.html"><img src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="Tools for Clash logo"></a></div>
-    <nav class="center"><a href="cwl-planner.html">CWL planner</a><a href="groups.html">Groepen</a></nav>
-    <div class="right"><button type="button">Taal</button></div>
+    <nav class="center"><a href="cwl-planner.html" data-i18n="nav.cwl">CWL planner</a><a href="cwl-operation-board.html" data-i18n="nav.operation">Operation board</a><a href="groups.html" data-i18n="nav.groups">Groepen</a></nav>
+    <div class="right"><button type="button" data-language-control data-i18n="header.language">Taal</button></div>
 </header>
 
 <main class="auth-main">
@@ -33,15 +33,15 @@
         <div class="card">
             <div class="card-head">
                 <img class="card-logo" src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="logo">
-                <h1>Welkom terug</h1>
-                <p>Nog geen account? <a href="register.html">Registreren</a></p>
+                <h1 data-i18n="auth.loginTitle">Welkom terug</h1>
+                <p><span data-i18n="auth.loginSubtitle">Nog geen account?</span> <a href="register.html" data-i18n="auth.registerLink">Registreren</a></p>
             </div>
             <form class="form" onsubmit="return false;">
-                <div class="field"><label for="email">E-mailadres</label><input type="email" id="email" placeholder="jij@voorbeeld.com" autocomplete="email"></div>
-                <div class="field"><div class="field-row"><label for="password">Wachtwoord</label><a href="#">Vergeten?</a></div><input type="password" id="password" placeholder="••••••••" autocomplete="current-password"></div>
-                <button id="submit-button" class="btn-submit" type="submit">Inloggen</button>
-                <div class="or-divider"><hr><span>of</span><hr></div>
-                <button class="btn-google" type="button">Doorgaan met Google</button>
+                <div class="field"><label for="email" data-i18n="auth.email">E-mailadres</label><input type="email" id="email" placeholder="jij@voorbeeld.com" autocomplete="email"></div>
+                <div class="field"><div class="field-row"><label for="password" data-i18n="auth.password">Wachtwoord</label><a href="#" data-i18n="auth.forgot">Vergeten?</a></div><input type="password" id="password" placeholder="••••••••" autocomplete="current-password"></div>
+                <button id="submit-button" class="btn-submit" type="submit" data-i18n="auth.login">Inloggen</button>
+                <div class="or-divider"><hr><span data-i18n="auth.or">of</span><hr></div>
+                <button class="btn-google" type="button" data-i18n="auth.google">Doorgaan met Google</button>
             </form>
         </div>
     </div>

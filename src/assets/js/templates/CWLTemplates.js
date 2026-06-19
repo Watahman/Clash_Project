@@ -1,6 +1,7 @@
 import { savePlan } from '../cwl/cwl-plan-io.js';
 
 function createPlayerCard(playerInfo, clanuuid) {
+    if (!Array.isArray(playerInfo)) playerInfo = [playerInfo];
     const playerTemplate = document.querySelector("#cwl-player-template");
 
     playerInfo.forEach(player => {
@@ -39,12 +40,28 @@ function createPlayerCard(playerInfo, clanuuid) {
                 });
             }
         } else {
+            makePlayerDraggable(element);
             document.querySelector("#cwl-available-players").appendChild(playerTemplateClone);
             const totalPlayers = document.querySelector("#cwl-total-player-amount");
             totalPlayers.textContent = parseInt(totalPlayers.textContent) + 1 + "";
         }
     });
+    rememberPlannerPlayers();
     savePlan();
+}
+
+function rememberPlannerPlayers() {
+    const players = Array.from(document.querySelectorAll('.cwl-player-article')).map(player => {
+        const src = player.querySelector('.cwl-player-townhall-foto')?.getAttribute('src') || '';
+        const match = src.match(/Town_Hall(\d+)\.png/i);
+        return {
+            name: player.querySelector('.cwl-player-name')?.textContent || '',
+            clanName: player.querySelector('.cwl-player-clan')?.textContent || '',
+            tag: player.querySelector('.cwl-player-hashtag')?.textContent || '',
+            townHall: match ? Number(match[1]) : 1
+        };
+    }).filter(player => player.tag);
+    localStorage.setItem('clashtools_last_planner_players', JSON.stringify(players));
 }
 
 function createClanCard(clanInfo, playerAmount, uuid = "") {
@@ -68,6 +85,8 @@ function createClanCard(clanInfo, playerAmount, uuid = "") {
         e.target.closest("article").remove();
         savePlan();
     });
+    const articleBeforeAppend = clanTemplateClone.querySelector("article");
+    articleBeforeAppend.dataset.clanTag = clanInfo.tag || "";
     document.querySelector("#cwl-all-clans").appendChild(clanTemplateClone);
     localStorage.setItem("clanId_" + clanInfo.name, clanInfo.tag);
 

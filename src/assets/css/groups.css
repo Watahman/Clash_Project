@@ -195,3 +195,51 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
     .groups-header-actions > * { flex: 1 1 auto; }
     .groups-action-divider { display: none; }
 }
+
+/* Groups header refinement */
+.groups-sidebar-header h3::before, .groups-panel-title::before { content: none !important; }
+.groups-sidebar-header {
+    min-height: 5rem;
+    justify-content: space-between;
+}
+.groups-sidebar-header h3 {
+    color: var(--text-1);
+    font-size: 1.12rem;
+    line-height: 1;
+}
+#groups-new-btn {
+    min-width: 5.5rem;
+    min-height: 3.05rem;
+    border-radius: var(--radius-md);
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+}
+#groups-new-btn img { width: 1rem; height: 1rem; }
+.groups-detail-header {
+    min-height: 5.5rem;
+    flex-wrap: nowrap;
+}
+.groups-header-actions {
+    margin-left: auto;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+}
+#groups-invite-btn {
+    min-width: 7.8rem;
+    min-height: 3.05rem;
+}
+.groups-detail-meta {
+    min-width: 0;
+}
+.groups-detail-logo { font-size: 1.15rem; }
+.groups-item, .groups-member-item {
+    min-height: 4.2rem;
+    flex: 0 0 auto;
+}
+@media (max-width: 62rem) {
+    .groups-detail-header, .groups-header-actions { flex-wrap: wrap; }
+    .groups-header-actions { width: 100%; margin-left: 0; justify-content: flex-start; }
+}

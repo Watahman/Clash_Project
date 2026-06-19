@@ -19,15 +19,16 @@
     </div>
 
     <nav class="center">
-        <a href="./cwl-planner.html" aria-current="page">CWL planner</a>
-        <a href="./groups.html">Groepen</a>
+        <a href="./cwl-planner.html" aria-current="page" data-i18n="nav.cwl">CWL planner</a>
+        <a href="./cwl-operation-board.html" data-i18n="nav.operation">Operation board</a>
+        <a href="./groups.html" data-i18n="nav.groups">Groepen</a>
     </nav>
 
     <div class="right">
-        <button>Taal</button>
+        <button type="button" data-language-control data-i18n="header.language">Taal</button>
         <button id="profile-btn">
             <img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt="profile">
-            Gebruiker
+            <span data-i18n="header.user">Gebruiker</span>
         </button>
     </div>
 </header>
@@ -35,25 +36,37 @@
 <main class="cwl-main dashboard-main">
     <section class="cwl-sidebar">
         <article>
-            <div class="cwl-toolbar">
-                <h3>Players</h3>
-                <button id="cwl-add-players-button">Add players</button>
-                <select id="cwl-player-sorting">
-                    <option value="townhall">Townhall</option>
-                    <option value="name">Name</option>
-                </select>
-                <p id="cwl-total-player-amount">0</p>
+            <div class="cwl-toolbar cwl-toolbar-players">
+                <div class="cwl-toolbar-title">
+                    <span data-i18n="cwl.playersSub">Vrij roster</span>
+                    <h3 data-i18n="cwl.playersTitle">Spelers</h3>
+                </div>
+                <div class="cwl-toolbar-actions">
+                    <button id="cwl-add-players-button" data-i18n="cwl.addPlayers">Spelers toevoegen</button>
+                    <select id="cwl-player-sorting" aria-label="Sort players">
+                        <option value="townhall" data-i18n="cwl.sortTownhall">Town Hall</option>
+                        <option value="name" data-i18n="cwl.sortName">Naam</option>
+                    </select>
+                    <p id="cwl-total-player-amount">0</p>
+                </div>
             </div>
-            <div id="cwl-available-players"></div>
+            <div id="cwl-available-players" aria-live="polite"></div>
         </article>
     </section>
     <section class="cwl-board">
-        <div class="cwl-toolbar">
-            <h3>Clans</h3>
-            <button id="cwl-add-clan-button">Add Clan</button>
-            <input type="text" id="cwl-plan-name" placeholder="Plan naam..." maxlength="40">
-            <select id="cwl-load-plan"></select>
-            <button id="cwl-save-plan-button">Save</button>
+        <div class="cwl-toolbar cwl-toolbar-board">
+            <div class="cwl-toolbar-title">
+                <span data-i18n="cwl.clansSub">Planning board</span>
+                <h3 data-i18n="cwl.clansTitle">Clans</h3>
+            </div>
+            <div class="cwl-toolbar-actions cwl-plan-actions">
+                <button id="cwl-add-clan-button" data-i18n="cwl.addClan">Clan toevoegen</button>
+                <input type="text" id="cwl-plan-name" data-i18n-placeholder="cwl.planPlaceholder" placeholder="Plan naam..." maxlength="40">
+                <select id="cwl-load-plan" aria-label="Load plan"></select>
+                <span id="cwl-save-status" class="cwl-save-status" data-state="idle" data-i18n="cwl.saved">Opgeslagen</span>
+                <button id="cwl-save-plan-button" data-i18n="cwl.save">Opslaan</button>
+                <a class="btn cwl-operation-link" href="./cwl-operation-board.html" data-i18n="cwl.operation">Operation board</a>
+            </div>
         </div>
         <article id="cwl-all-clans"></article>
     </section>
@@ -63,43 +76,43 @@
     <div class="overlay-container" id="cwl-container-add-players">
 
         <div class="modal-header-row">
-            <span class="modal-title">Add players</span>
+            <span class="modal-title" data-i18n="cwl.addPlayers">Spelers toevoegen</span>
         </div>
 
         <div class="modal-tabs">
-            <button class="modal-tab-btn active" data-tab="tag">By tag</button>
-            <button class="modal-tab-btn" data-tab="accounts">My accounts</button>
-            <button class="modal-tab-btn" data-tab="group">From group</button>
+            <button class="modal-tab-btn active" data-tab="tag" data-i18n="cwl.addByTag">Via tag</button>
+            <button class="modal-tab-btn" data-tab="accounts" data-i18n="cwl.myAccounts">Mijn accounts</button>
+            <button class="modal-tab-btn" data-tab="group" data-i18n="cwl.fromGroup">Uit groep</button>
         </div>
 
         <!-- Tab 1: by tag -->
         <div class="modal-tab-panel" id="modal-tab-tag">
-            <p class="modal-field-label">Player or clan tag</p>
+            <p class="modal-field-label" data-i18n="cwl.tagLabel">Speler- of clantag</p>
             <input id="cwl-input-tag" type="text" placeholder="#TAG...">
-            <button id="cwl-overlay-confirm-tag-button" class="primary">Confirm</button>
+            <button id="cwl-overlay-confirm-tag-button" class="primary" data-i18n="cwl.confirm">Bevestigen</button>
         </div>
 
         <!-- Tab 2: my accounts -->
         <div class="modal-tab-panel hidden" id="modal-tab-accounts">
             <div class="modal-segment">
-                <button class="modal-seg-btn active" data-seg="mine">Mine</button>
-                <button class="modal-seg-btn" data-seg="friends">Friends</button>
+                <button class="modal-seg-btn active" data-seg="mine" data-i18n="cwl.mine">Eigen</button>
+                <button class="modal-seg-btn" data-seg="friends" data-i18n="cwl.friends">Vrienden</button>
             </div>
             <div class="modal-account-list" id="cwl-account-list">
-                <p id="modal-account-list-empty">No accounts connected</p>
+                <p id="modal-account-list-empty" data-i18n="cwl.noAccounts">Geen accounts gekoppeld</p>
             </div>
-            <button id="cwl-overlay-add-selected-button" class="modal-btn-add-selected">Add selected (0)</button>
+            <button id="cwl-overlay-add-selected-button" class="modal-btn-add-selected" data-i18n="cwl.addSelected">Geselecteerde toevoegen (0)</button>
         </div>
 
         <!-- Tab 3: from group -->
         <div class="modal-tab-panel hidden" id="modal-tab-group">
-            <p class="modal-field-label">Group</p>
+            <p class="modal-field-label" data-i18n="cwl.group">Groep</p>
             <select id="cwl-select-group">
-                <option value="">— select a group —</option>
+                <option value="" data-i18n="cwl.selectGroup">— selecteer een groep —</option>
             </select>
-            <div id="cwl-group-preview" class="modal-empty-state">Select a group to preview members</div>
+            <div id="cwl-group-preview" class="modal-empty-state"><span data-i18n="cwl.previewGroup">Selecteer een groep om leden te bekijken</span></div>
             <div class="modal-group-preview-list hidden" id="cwl-group-preview-list"></div>
-            <button id="cwl-overlay-load-group-button" class="primary">Load all from group</button>
+            <button id="cwl-overlay-load-group-button" class="primary" data-i18n="cwl.loadGroup">Alles uit groep laden</button>
         </div>
 
     </div>
@@ -112,7 +125,7 @@
             <option value="15">15v15</option>
             <option value="30">30v30</option>
         </select>
-        <button id="cwl-overlay-add-clan-button">Confirm</button>
+        <button id="cwl-overlay-add-clan-button" data-i18n="cwl.confirm">Bevestigen</button>
     </div>
 </div>
 
@@ -120,7 +133,7 @@
 
 <template id="cwl-player-template">
     <article class="cwl-player-article">
-        <img class="cwl-player-townhall-foto" src="" alt="townhallFoto">
+        <img class="cwl-player-townhall-foto" src="../assets/css/pictures/townhalls/Town_Hall1.png" alt="townhallFoto">
         <div class="cwl-player-info">
             <p class="cwl-player-name"></p>
             <p class="cwl-player-clan"></p>

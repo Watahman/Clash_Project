@@ -4,8 +4,9 @@ import { getPlayerWithBattleData } from "../API/API-Functions.js";
 import { addBaseToUser } from "../Supabase/Supabase-User.js";
 import { getCurrentUserId } from "../utils/user.js";
 
-export function loadBases(baseArray, emptyLabel) {
-    if (document.querySelectorAll(".po-card-base").length > 0) return;
+export function loadBases(baseArray, emptyLabel, force = false) {
+    if (force) document.querySelectorAll(".po-card-base").forEach(el => el.remove());
+    if (!force && document.querySelectorAll(".po-card-base").length > 0) return;
     if (!Array.isArray(baseArray) || baseArray.length === 0) return;
     emptyLabel.classList.add('hidden');
     baseArray.forEach(element => { createBaseCard(element); });

@@ -1,3 +1,4 @@
+import { t } from '../i18n/i18n.js';
 import { handleAddBase } from "./profile_bases.js";
 import { handleAddFriend } from "./profile_friends.js";
 
@@ -48,14 +49,14 @@ export function poTab(btn, refs) {
         isClan   ? clanCards : null;
 
     const emptyText =
-        isBase   ? "No Bases" :
-        isFriend ? "No Friends" :
-        isClan   ? "No Clans" : "Empty";
+        isBase   ? t('profile.noBases') :
+        isFriend ? t('profile.noFriends') :
+        isClan   ? t('profile.noClans') : 'Empty';
 
     const addLabel =
-        isBase   ? "ADD BASE" :
-        isFriend ? "ADD FRIEND" :
-        isClan   ? "ADD CLAN" : "ADD";
+        isBase   ? t('profile.addBase') :
+        isFriend ? t('profile.addFriend') :
+        isClan   ? t('profile.addClan') : 'ADD';
 
     if (cards && cards.length > 0) {
         emptyLabel.classList.add('hidden');
