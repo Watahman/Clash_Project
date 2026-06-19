@@ -5,25 +5,12 @@ import { createGroup, getGroupsOfUser, joinGroup, leaveGroup } from "../Supabase
 import { getCurrentUserId } from "../utils/user.js";
 
 const groupsMain          = document.querySelector('#groups-main');
-const groupsSidebar       = document.querySelector('#groups-sidebar');
 const groupsNewBtn        = document.querySelector('#groups-new-btn');
 const groupsList          = document.querySelector('#groups-list');
 const groupsCollapseBtn   = document.querySelector('#groups-collapse-btn');
-const groupsCollapseIcon  = document.querySelector('#groups-collapse-icon');
 const groupsDetailEmpty   = document.querySelector('#groups-detail-empty');
 const groupsDetailContent = document.querySelector('#groups-detail-content');
-const groupsDetailLogo    = document.querySelector('#groups-detail-logo');
-const groupsDetailName    = document.querySelector('#groups-detail-name');
-const groupsDetailCount   = document.querySelector('#groups-detail-count');
 const groupsDetailCode    = document.querySelector('#groups-detail-code');
-const groupsDetailRole    = document.querySelector('#groups-detail-role');
-const groupsDetailSince   = document.querySelector('#groups-detail-since');
-const groupsPollBtn       = document.querySelector('#groups-poll-btn');
-const groupsInviteBtn     = document.querySelector('#groups-invite-btn');
-const groupsSettingsBtn   = document.querySelector('#groups-settings-btn');
-const groupsLeaveBtn      = document.querySelector('#groups-leave-btn');
-const groupsMembersTitle  = document.querySelector('#groups-members-title');
-const groupsMemberList    = document.querySelector('#groups-member-list');
 const groupsOverlayNew    = document.querySelector('#groups-overlay-new');
 const groupsTabCreate     = document.querySelector('#groups-tab-create');
 const groupsTabJoin       = document.querySelector('#groups-tab-join');
@@ -39,11 +26,10 @@ const groupsClanHint      = document.querySelector('#groups-clan-hint');
 const groupsOverlayCreateBtn = document.querySelector('#groups-overlay-create-btn');
 const groupsInputJoinCode = document.querySelector('#groups-input-join-code');
 const groupsOverlayJoinBtn = document.querySelector('#groups-overlay-join-btn');
-const groupsItemTemplate  = document.querySelector('#groups-item-template');
-const groupsMemberTemplate = document.querySelector('#groups-member-template');
 const groupsDetailCheckmark = document.querySelector("#groups-detail-checkmark");
 const groupsDetailCopy    = document.querySelector("#groups-detail-copy");
 const groupOverlayLeave   = document.querySelector("#groups-overlay-leave");
+const groupsLeaveBtn      = document.querySelector('#groups-leave-btn');
 const groupsLeaveCancelBtn = document.querySelector('#groups-leave-cancel-btn');
 const groupsLeaveConfirmBtn = document.querySelector('#groups-leave-confirm-btn');
 let timer;
@@ -51,7 +37,7 @@ let timer;
 function init() {
     sideBarToggle();
     groupsNewBtn.onclick = () => { newGroupOverlay(); };
-    initGroups();
+    reloadGroups();
     profileHTML();
     copyCodeInit();
     leaveGroupFun();
@@ -59,16 +45,25 @@ function init() {
     overlayBackdropClose();
 }
 
+function requireLoggedIn() {
+    const userId = getCurrentUserId();
+    if (userId) return userId;
+    resetGroupDetail();
+    groupsList.replaceChildren(emptyGroupMessage('Log in om groepen te gebruiken'));
+    return null;
+}
+
 function newGroupOverlay() {
+    if (!requireLoggedIn()) return;
     groupsOverlayNew.classList.remove('hidden');
     groupsOverlayCreateBtn.onclick = () => {
-        const name = groupsInputName.value;
+        const name = groupsInputName.value.trim();
         createNewGroup(name, "name");
         groupsOverlayNew.classList.add('hidden');
     };
 
     groupsOverlayJoinBtn.onclick = () => {
-        const code = groupsInputJoinCode.value;
+        const code = groupsInputJoinCode.value.trim();
         joinGroupFun(code);
         groupsOverlayNew.classList.add('hidden');
     };
@@ -86,7 +81,7 @@ function newGroupOverlay() {
         groupsCreateByName.classList.remove('hidden');
         groupsCreateByClan.classList.add('hidden');
         groupsOverlayCreateBtn.onclick = () => {
-            const name = groupsInputName.value;
+            const name = groupsInputName.value.trim();
             createNewGroup(name, "name");
             groupsOverlayNew.classList.add('hidden');
         };
@@ -98,7 +93,7 @@ function newGroupOverlay() {
         groupsCreateByName.classList.add('hidden');
         groupsCreateByClan.classList.remove('hidden');
         groupsOverlayCreateBtn.onclick = () => {
-            const name = groupsInputClanTag.value;
+            const name = groupsInputClanTag.value.trim();
             createNewGroup(name, "clanTag");
             groupsOverlayNew.classList.add('hidden');
         };
@@ -112,31 +107,84 @@ function newGroupOverlay() {
     };
 }
 
-function initGroups() {
-    getGroupsOfUser(getCurrentUserId()).then(data => { createGroupCard(data); });
+function reloadGroups() {
+    const userId = requireLoggedIn();
+    if (!userId) return;
+
+    groupsList.replaceChildren(emptyGroupMessage('Groepen laden...'));
+    getGroupsOfUser(userId).then(data => {
+        groupsList.replaceChildren();
+        if (!Array.isArray(data) || data.length === 0) {
+            groupsList.appendChild(emptyGroupMessage('Geen groepen'));
+            resetGroupDetail();
+            return;
+        }
+        createGroupCard(data);
+    }).catch(error => {
+        console.error(error);
+        groupsList.replaceChildren(emptyGroupMessage('Groepen laden mislukt'));
+    });
 }
 
 function createNewGroup(value, option) {
+    const userId = requireLoggedIn();
+    if (!userId || !value) return;
+
     if (option === "name") {
-        createGroup(value, getCurrentUserId()).then(data => console.log(data));
+        createGroup(value, userId).then(() => {
+            groupsInputName.value = '';
+            reloadGroups();
+        }).catch(error => console.error(error));
     } else if (option === "clanTag") {
         getClanInfoRequest(value).then(clanInfo => {
-            createGroup(clanInfo.name, getCurrentUserId()).then(data => console.log(data));
+            createGroup(clanInfo.name, userId).then(() => {
+                groupsInputClanTag.value = '';
+                groupsClanHint.textContent = '';
+                reloadGroups();
+            });
+        }).catch(error => {
+            console.error(error);
+            groupsClanHint.textContent = 'Clan niet gevonden';
         });
     }
 }
 
 function joinGroupFun(code) {
-    joinGroup(getCurrentUserId(), code).then(data => console.log(data));
+    const userId = requireLoggedIn();
+    if (!userId || !code) return;
+    joinGroup(userId, code).then(() => {
+        groupsInputJoinCode.value = '';
+        reloadGroups();
+    }).catch(error => console.error(error));
 }
 
 function leaveGroupFun() {
     groupsLeaveBtn.onclick = () => { groupOverlayLeave.classList.remove('hidden'); };
     groupsLeaveCancelBtn.onclick = () => { groupOverlayLeave.classList.add('hidden'); };
     groupsLeaveConfirmBtn.onclick = () => {
+        const userId = requireLoggedIn();
+        const code = document.querySelector('#groups-detail-code-text')?.textContent?.trim();
         groupOverlayLeave.classList.add('hidden');
-        leaveGroup(getCurrentUserId(), groupsDetailCode.textContent).then(data => console.log(data));
+        if (!userId || !code) return;
+        leaveGroup(userId, code).then(() => {
+            resetGroupDetail();
+            reloadGroups();
+        }).catch(error => console.error(error));
     };
+}
+
+function resetGroupDetail() {
+    groupsDetailEmpty.classList.remove('hidden');
+    groupsDetailContent.classList.add('hidden');
+    const memberList = document.querySelector('#groups-member-list');
+    if (memberList) memberList.replaceChildren(emptyGroupMessage('Geen leden'));
+}
+
+function emptyGroupMessage(text) {
+    const p = document.createElement('p');
+    p.className = 'groups-empty';
+    p.textContent = text;
+    return p;
 }
 
 function sideBarToggle() {

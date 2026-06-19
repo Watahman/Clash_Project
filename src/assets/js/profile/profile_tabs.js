@@ -68,7 +68,7 @@ export function poTab(btn, refs) {
     addBtn.classList.remove('hidden');
 
     if (isBase)   addBtn.onclick = () => openAddOverlay(addBase, overlayAddBaseBtn, () => handleAddBase(inputBaseTag, inputBaseToken));
-    if (isFriend) addBtn.onclick = () => openAddOverlay(addBase, overlayAddBaseBtn, () => handleAddFriend(inputClanTag));
+    if (isFriend) addBtn.onclick = () => openAddOverlay(addClan, overlayAddClanBtn, () => handleAddFriend(inputClanTag));
     if (isClan)   addBtn.onclick = () => openAddOverlay(addClan, overlayAddClanBtn, () => {});
 }
 

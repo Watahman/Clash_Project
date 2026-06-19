@@ -6,11 +6,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
 public class API_Utils {
@@ -21,66 +21,57 @@ public class API_Utils {
     }
 
     public void addCORS(HttpExchange exchange) {
-        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
-    }
-
-    public JsonObject parseRequestBody(HttpExchange exchange) throws Exception {
-        InputStream is = exchange.getRequestBody();
-        String body = new String(is.readAllBytes());
-        System.out.println("Frontend stuurde data: " + body);
-        return JsonParser.parseString(body).getAsJsonObject();
+        exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type, Authorization");
     }
 
     public String getClashApiResponse(String urlStr) throws Exception {
         URL url = new URL(urlStr);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
-        conn.setRequestProperty("Authorization", conf._API_KEY_ACTIVE);
+        conn.setRequestProperty("Authorization", conf.getClashApiKey());
         conn.setRequestProperty("Accept", "application/json");
 
         int statusCode = conn.getResponseCode();
-
-        if (statusCode != 200) {
-            InputStream errorStream = conn.getErrorStream();
-            String errorBody = errorStream != null
-                    ? new String(errorStream.readAllBytes())
-                    : "{\"error\":\"HTTP " + statusCode + "\"}";
-            throw new HttpException(statusCode, errorBody);
+        String responseBody = readResponseBody(conn, statusCode);
+        if (statusCode < 200 || statusCode >= 300) {
+            throw new HttpException(statusCode, responseBody);
         }
-
-        return new String(conn.getInputStream().readAllBytes());
+        return responseBody;
     }
 
     public String postClashApiResponse(String urlStr, String jsonBody) throws Exception {
         URL url = new URL(urlStr);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
-        conn.setRequestProperty("Authorization", conf._API_KEY_ACTIVE);
+        conn.setRequestProperty("Authorization", conf.getClashApiKey());
         conn.setRequestProperty("Accept", "application/json");
         conn.setRequestProperty("Content-Type", "application/json");
         conn.setDoOutput(true);
 
         try (OutputStream os = conn.getOutputStream()) {
-            os.write(jsonBody.getBytes("utf-8"));
+            os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
         }
 
         int statusCode = conn.getResponseCode();
-
-        if (statusCode != 200) {
-            InputStream errorStream = conn.getErrorStream();
-            String errorBody = errorStream != null
-                    ? new String(errorStream.readAllBytes())
-                    : "{\"error\":\"HTTP " + statusCode + "\"}";
-            throw new HttpException(statusCode, errorBody);
+        String responseBody = readResponseBody(conn, statusCode);
+        if (statusCode < 200 || statusCode >= 300) {
+            throw new HttpException(statusCode, responseBody);
         }
+        return responseBody;
+    }
 
-        return new String(conn.getInputStream().readAllBytes());
+    private String readResponseBody(HttpURLConnection conn, int statusCode) throws Exception {
+        InputStream stream = (statusCode >= 200 && statusCode < 300) ? conn.getInputStream() : conn.getErrorStream();
+        if (stream == null) return "{\"error\":\"HTTP " + statusCode + "\"}";
+        return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
     }
 
     public void sendJsonResponse(HttpExchange exchange, String json, int statusCode) throws Exception {
-        byte[] bytes = json.getBytes();
+        addCORS(exchange);
+        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
+        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
         exchange.sendResponseHeaders(statusCode, bytes.length);
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(bytes);
@@ -97,21 +88,18 @@ public class API_Utils {
         return code.toString();
     }
 
-    // Leest en parsed de body; gooit een IllegalArgumentException als het mislukt
     public JsonObject parseBody(HttpExchange exchange) throws Exception {
-        String body = new String(exchange.getRequestBody().readAllBytes());
+        String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
         if (body.isBlank()) throw new IllegalArgumentException("Request body is leeg");
         return JsonParser.parseString(body).getAsJsonObject();
     }
 
-    // Haalt een verplicht string-veld op uit een JsonObject
     public String requireString(JsonObject json, String field) throws IllegalArgumentException {
         JsonElement el = json.get(field);
         if (el == null || el.isJsonNull()) throw new IllegalArgumentException("Verplicht veld ontbreekt: " + field);
         return el.getAsString();
     }
 
-    // Centrale handler-wrapper: vangt CORS, OPTIONS en errors af
     public void handlePost(HttpExchange exchange, PostHandler handler) {
         try {
             addCORS(exchange);
@@ -119,19 +107,26 @@ public class API_Utils {
                 exchange.sendResponseHeaders(204, -1);
                 return;
             }
-            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) return;
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendJsonResponse(exchange, "{\"error\":\"Method not allowed\"}", 405);
+                return;
+            }
 
-            long start = System.currentTimeMillis(); // ← start timer
+            long start = System.currentTimeMillis();
             String path = exchange.getHttpContext().getPath();
 
             try {
                 handler.handle(exchange);
                 long duration = System.currentTimeMillis() - start;
-                System.out.printf("[%s] %d ms%n", path, duration); // ← log na succes
+                System.out.printf("[%s] %d ms%n", path, duration);
             } catch (IllegalArgumentException e) {
                 long duration = System.currentTimeMillis() - start;
                 System.out.printf("[%s] %d ms (400)%n", path, duration);
-                sendJsonResponse(exchange, "{\"error\":\"" + e.getMessage() + "\"}", 400);
+                sendJsonResponse(exchange, "{\"error\":\"" + escapeJson(e.getMessage()) + "\"}", 400);
+            } catch (HttpException e) {
+                long duration = System.currentTimeMillis() - start;
+                System.out.printf("[%s] %d ms (%d)%n", path, duration, e.getStatusCode());
+                sendJsonResponse(exchange, e.getResponseBody(), e.getStatusCode());
             } catch (Exception e) {
                 long duration = System.currentTimeMillis() - start;
                 System.out.printf("[%s] %d ms (500)%n", path, duration);
@@ -145,21 +140,25 @@ public class API_Utils {
 
     public JsonArray requireArray(JsonObject json, String field) throws IllegalArgumentException {
         JsonElement el = json.get(field);
-        if (el == null || el.isJsonNull() || !el.isJsonArray())
+        if (el == null || el.isJsonNull() || !el.isJsonArray()) {
             throw new IllegalArgumentException("Verplicht veld ontbreekt of is geen array: " + field);
+        }
         return el.getAsJsonArray();
     }
 
-    // Clash GET shorthand
     public void clashGet(HttpExchange exchange, String path) throws Exception {
-        String response = getClashApiResponse(conf._BASE_URL_CLASH + path);
+        String response = getClashApiResponse(conf.getClashBaseUrl() + path);
         sendJsonResponse(exchange, response, 200);
     }
 
-    // Clash POST shorthand
     public void clashPost(HttpExchange exchange, String path, String body) throws Exception {
-        String response = postClashApiResponse(conf._BASE_URL_CLASH + path, body);
+        String response = postClashApiResponse(conf.getClashBaseUrl() + path, body);
         sendJsonResponse(exchange, response, 200);
+    }
+
+    public static String escapeJson(String value) {
+        if (value == null) return "";
+        return value.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
     }
 
     @FunctionalInterface

@@ -4,18 +4,23 @@ import { createPlayerCard } from "../templates/CWLTemplates.js";
 import { getCurrentUserId } from "../utils/user.js";
 
 export function initGroupOverlay(selectGroup) {
-    getGroupsOfUser(getCurrentUserId()).then(data => {
+    const userId = getCurrentUserId();
+    if (!userId) return;
+
+    getGroupsOfUser(userId).then(data => {
+        if (!Array.isArray(data)) return;
         data.forEach(group => {
             getGroupInfo(group.group_id).then(groupInfo => {
-                let newOption = document.createElement("option");
-                newOption.value = groupInfo[0].id;
-                newOption.textContent = groupInfo[0].name;
-                selectGroup.appendChild(newOption);
+                if (!Array.isArray(groupInfo) || groupInfo.length === 0) return;
+                const option = document.createElement("option");
+                option.value = groupInfo[0].id;
+                option.textContent = groupInfo[0].name;
+                selectGroup.appendChild(option);
                 localStorage.setItem(groupInfo[0].name, groupInfo[0].id);
                 loadPreviewData(groupInfo[0].id);
             });
         });
-    });
+    }).catch(error => console.error(error));
 
     selectGroup.addEventListener('change', () => {
         const value = selectGroup.value;
@@ -33,11 +38,13 @@ export function initGroupOverlay(selectGroup) {
 
 function loadPreviewData(groupId) {
     getGroupMembers(groupId).then(groupMembers => {
+        if (!Array.isArray(groupMembers)) return;
         groupMembers.forEach(member => {
             getUserBases(member.user_id).then(userBases => {
-                if (userBases[0].accounts === null) return;
-                createPlayerCard(userBases[0].accounts, "group|" + groupId);
+                const accounts = userBases?.[0]?.accounts;
+                if (!Array.isArray(accounts) || accounts.length === 0) return;
+                createPlayerCard(accounts, "group|" + groupId);
             });
         });
-    });
+    }).catch(error => console.error(error));
 }

@@ -29,12 +29,12 @@ public class SUPABASE_CWLPlanner {
 
             String planId;
 
-            if (!plannerId.isEmpty() && !plannerId.equals("undefined")) {
+            if (!plannerId.isEmpty() && !plannerId.equals("undefined") && !plannerId.equals("null")) {
                 JsonElement planExistsEl = JsonParser.parseString(
-                        SUPABASE_Client.getWithBody("plans", "id=eq." + plannerId));
+                        SUPABASE_Client.getWithBody("plans", "id=" + SUPABASE_Client.eq(plannerId)));
 
                 if (!planExistsEl.isJsonArray() || planExistsEl.getAsJsonArray().isEmpty()) {
-                    utils.sendJsonResponse(ex, "{\"error\":\"Plan niet gevonden met id: " + plannerId + "\"}", 404);
+                    utils.sendJsonResponse(ex, "{\"error\":\"Plan niet gevonden met id: " + API_Utils.escapeJson(plannerId) + "\"}", 404);
                     return;
                 }
 
@@ -43,7 +43,7 @@ public class SUPABASE_CWLPlanner {
                 editPlan.addProperty("name", planName);
 
                 JsonArray planArray = JsonParser.parseString(
-                        SUPABASE_Client.patch("plans", "id=eq." + plannerId, editPlan.toString())).getAsJsonArray();
+                        SUPABASE_Client.patch("plans", "id=" + SUPABASE_Client.eq(plannerId), editPlan.toString())).getAsJsonArray();
 
                 if (planArray.isEmpty()) {
                     utils.sendJsonResponse(ex, "{\"error\":\"Plan updaten mislukt\"}", 500);
@@ -73,7 +73,7 @@ public class SUPABASE_CWLPlanner {
                 SUPABASE_Client.post("plan_users", link.toString());
             }
 
-            utils.sendJsonResponse(ex, "{\"success\":true, \"uuid\": \"" + planId + "\"}", 200);
+            utils.sendJsonResponse(ex, "{\"success\":true,\"uuid\":\"" + planId + "\"}", 200);
         }));
     }
 
@@ -83,33 +83,48 @@ public class SUPABASE_CWLPlanner {
             String userId   = utils.requireString(json, "userId");
 
             JsonArray userPlanIds = JsonParser.parseString(
-                    SUPABASE_Client.getWithBody("plan_users", "select=plan_id&user_id=eq." + userId)).getAsJsonArray();
+                    SUPABASE_Client.getWithBody("plan_users", "select=plan_id&user_id=" + SUPABASE_Client.eq(userId))).getAsJsonArray();
 
-            JsonArray planNames = new JsonArray();
+            JsonArray plansResponse = new JsonArray();
             for (JsonElement element : userPlanIds) {
                 String planId   = element.getAsJsonObject().get("plan_id").getAsString();
                 JsonArray plans = JsonParser.parseString(
-                        SUPABASE_Client.getWithBody("plans", "select=name&id=eq." + planId)).getAsJsonArray();
+                        SUPABASE_Client.getWithBody("plans", "select=id,name&id=" + SUPABASE_Client.eq(planId))).getAsJsonArray();
 
                 if (!plans.isEmpty()) {
-                    planNames.add(plans.get(0).getAsJsonObject().get("name").getAsString());
+                    JsonObject plan = plans.get(0).getAsJsonObject();
+                    JsonObject option = new JsonObject();
+                    option.addProperty("id", plan.get("id").getAsString());
+                    option.addProperty("name", plan.get("name").getAsString());
+                    plansResponse.add(option);
                 }
             }
 
-            utils.sendJsonResponse(ex, planNames.toString(), 200);
+            utils.sendJsonResponse(ex, plansResponse.toString(), 200);
         }));
     }
 
     public void getPlanner() {
         server.createContext(conf._EXT_SUPA_CWLPLANNER_DATA_GET, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject json = utils.parseBody(ex);
-            String name     = utils.requireString(json, "name");
+            JsonElement planIdEl = json.get("planId");
+            JsonElement nameEl = json.get("name");
 
-            JsonArray planArray = JsonParser.parseString(
-                    SUPABASE_Client.getWithBody("plans", "name=eq." + name)).getAsJsonArray();
+            JsonArray planArray;
+            if (planIdEl != null && !planIdEl.isJsonNull() && !planIdEl.getAsString().isBlank()) {
+                String planId = planIdEl.getAsString();
+                planArray = JsonParser.parseString(
+                        SUPABASE_Client.getWithBody("plans", "id=" + SUPABASE_Client.eq(planId))).getAsJsonArray();
+            } else if (nameEl != null && !nameEl.isJsonNull()) {
+                String name = nameEl.getAsString();
+                planArray = JsonParser.parseString(
+                        SUPABASE_Client.getWithBody("plans", "name=" + SUPABASE_Client.eq(name))).getAsJsonArray();
+            } else {
+                throw new IllegalArgumentException("planId ontbreekt");
+            }
 
             if (planArray.isEmpty()) {
-                utils.sendJsonResponse(ex, "{\"error\":\"Plan niet gevonden: " + name + "\"}", 404);
+                utils.sendJsonResponse(ex, "{\"error\":\"Plan niet gevonden\"}", 404);
                 return;
             }
 

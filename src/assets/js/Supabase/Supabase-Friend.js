@@ -1,11 +1,11 @@
 import * as config from "../Data/config.js";
 import {databaseRequestWithBody} from "./Supabase-Client.js";
 
-export async function addFriend(userId, friendId) {
+export async function addFriend(userId, friendCode) {
     const path = config._BASE_URL + config._EXT_SUPA_USER_ADD_FRIEND
     const data = {
         userId: userId,
-        friendId: friendId
+        friendCode: friendCode
     };
     return databaseRequestWithBody(path, data)
 }

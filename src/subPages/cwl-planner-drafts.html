@@ -1,42 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>CWL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CWL Drafts · Tools for Clash</title>
     <link rel="stylesheet" href="../assets/css/Main-css.css">
+    <link rel="stylesheet" href="../assets/css/drafts-css.css">
+    <link rel="stylesheet" href="../assets/css/profile-overlay.css">
     <link rel="icon" type="image/png" href="../assets/css/pictures/shield_with_hamer_logov2.png">
     <script type="module" src="../assets/js/mainJS.js"></script>
 </head>
 <body>
 <header>
-    <div class="left">
-        <a href="../index.html">
-            <img src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="ToolsforClash_logo">
-        </a>
-    </div>
-
-    <nav class="center">
-        <a href="./cwl-planner-drafts.html">CWL planner</a>
-        <a href="./groups.html">Groepen</a>
-    </nav>
-
-    <div class="right">
-        <button>Taal</button>
-        <button>Instellingen</button>
-        <button id="profile-btn">
-            <img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt="profile">
-            Gebruiker
-        </button>
-    </div>
+    <div class="left"><a href="../index.html"><img src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="Tools for Clash logo"></a></div>
+    <nav class="center"><a href="./cwl-planner.html" aria-current="page">CWL planner</a><a href="./groups.html">Groepen</a></nav>
+    <div class="right"><button type="button">Taal</button><button type="button">Instellingen</button><button id="profile-btn" type="button"><img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt="">Gebruiker</button></div>
 </header>
-<main>
-    <h1>Drafts</h1>
-    <div id="draft-cwl-container">
-        <div id="add-draft-cwl">
-            <a><button> + </button></a>
+<main class="drafts-main">
+    <section class="drafts-shell">
+        <div class="drafts-header">
+            <div><div class="hero-eyebrow">CWL drafts</div><h1>Saved war plans</h1><p>Start een nieuwe CWL draft of laad later je opgeslagen plannen.</p></div>
+            <a class="btn btn-primary" href="./cwl-planner.html">Open planner</a>
         </div>
-    </div>
+        <div id="draft-cwl-container">
+            <div id="add-draft-cwl"><a href="./cwl-planner.html"><button type="button" aria-label="Nieuwe draft">+</button></a></div>
+        </div>
+    </section>
 </main>
 <footer></footer>
+<div class="profile-placeholder"></div>
 </body>
 </html>

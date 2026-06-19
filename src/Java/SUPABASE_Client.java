@@ -1,22 +1,21 @@
 package Java;
 
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 public class SUPABASE_Client {
-    private static final String BASE_URL = System.getenv("_BASE_URL_SUPABASE");
-    private static final String API_KEY  = System.getenv("_API_KEY_SECR_SUPABASE");
+    private static final Config CONF = new Config();
 
-    // één gedeelde client voor alle requests
     private static final HttpClient CLIENT = HttpClient.newBuilder()
-            .version(HttpClient.Version.HTTP_1_1)  // ← forceer HTTP/1.1
+            .version(HttpClient.Version.HTTP_1_1)
             .connectTimeout(Duration.ofSeconds(10))
             .build();
 
-    // GET — data ophalen
     public static String getWithBody(String table) throws Exception {
         return sendRequest("GET", table, null);
     }
@@ -25,17 +24,14 @@ public class SUPABASE_Client {
         return sendRequest("GET", table + "?" + filter, null);
     }
 
-    // POST — data aanmaken
     public static String post(String table, String body) throws Exception {
         return sendRequest("POST", table, body);
     }
 
-    // PATCH — data updaten
     public static String patch(String table, String filter, String body) throws Exception {
         return sendRequest("PATCH", table + "?" + filter, body);
     }
 
-    // DELETE — data verwijderen
     public static String delete(String table) throws Exception {
         return sendRequest("DELETE", table, null);
     }
@@ -44,14 +40,21 @@ public class SUPABASE_Client {
         return sendRequest("DELETE", table + "?" + filter, null);
     }
 
-    // algemene helper
+    public static String eq(String value) {
+        return "eq." + URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
     private static String sendRequest(String method, String table, String body) throws Exception {
+        String baseUrl = CONF.getSupabaseUrl();
+        String apiKey = CONF.getSupabaseServiceKey();
+
         HttpRequest.Builder builder = HttpRequest.newBuilder()
-                .uri(URI.create(BASE_URL + "/rest/v1/" + table))
-                .timeout(Duration.ofSeconds(15)) // request timeout
-                .header("apikey", API_KEY)
-                .header("Authorization", "Bearer " + API_KEY)
+                .uri(URI.create(baseUrl + "/rest/v1/" + table))
+                .timeout(Duration.ofSeconds(15))
+                .header("apikey", apiKey)
+                .header("Authorization", "Bearer " + apiKey)
                 .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
                 .header("Prefer", "return=representation");
 
         if (body != null) {
@@ -60,8 +63,15 @@ public class SUPABASE_Client {
             builder.method(method, HttpRequest.BodyPublishers.noBody());
         }
 
-        HttpResponse<String> response = CLIENT.send(builder.build(),
-                HttpResponse.BodyHandlers.ofString());
-        return response.body();
+        HttpResponse<String> response = CLIENT.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+        int status = response.statusCode();
+        String responseBody = response.body() == null ? "" : response.body();
+
+        if (status < 200 || status >= 300) {
+            if (responseBody.isBlank()) responseBody = "{\"error\":\"Supabase HTTP " + status + "\"}";
+            throw new HttpException(status, responseBody);
+        }
+
+        return responseBody;
     }
 }

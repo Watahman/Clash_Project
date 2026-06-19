@@ -6,21 +6,27 @@ import { getCurrentUserId } from "../utils/user.js";
 
 export function loadBases(baseArray, emptyLabel) {
     if (document.querySelectorAll(".po-card-base").length > 0) return;
-    if (baseArray.length === 0) return;
+    if (!Array.isArray(baseArray) || baseArray.length === 0) return;
     emptyLabel.classList.add('hidden');
     baseArray.forEach(element => { createBaseCard(element); });
 }
 
 export function handleAddBase(inputBaseTag, inputBaseToken) {
-    const playerId = inputBaseTag.value;
-    const playerToken = inputBaseToken.value;
+    const userId = getCurrentUserId();
+    if (!userId) return;
+
+    const playerId = inputBaseTag.value.trim();
+    const playerToken = inputBaseToken.value.trim();
+    if (!playerId || !playerToken) return;
+
     postPlayerVerifyTokenRequest(playerId, playerToken).then(confirmation => {
         if (confirmation.status === "ok") {
             getPlayerWithBattleData(playerId).then(playerData => {
                 createBaseCard(playerData[0]);
-                addBaseToUser(getCurrentUserId(), playerData[0])
-                    .then(confirm => { console.log(confirm); });
+                addBaseToUser(userId, playerData[0])
+                    .then(confirm => { console.log(confirm); })
+                    .catch(error => console.error(error));
             });
         }
-    });
+    }).catch(error => console.error(error));
 }

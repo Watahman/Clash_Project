@@ -1,11 +1,43 @@
-#draft-cwl-container {
-    flex-direction: row;
-    margin-top: 1rem;
-    padding: 1rem;
+/* ============================================================
+   DRAFTS / SIMPLE DASHBOARD PAGES
+   ============================================================ */
+.drafts-main {
+    min-height: calc(100vh - var(--header-h));
+    padding: var(--page-pad);
 }
-
+.drafts-shell {
+    width: min(70rem, 100%);
+    margin: 2rem auto;
+}
+.drafts-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+.drafts-header p { color: var(--text-3); margin-top: 0.45rem; }
+#draft-cwl-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 1rem;
+}
 #add-draft-cwl {
-    width: 5rem;
-    height: 5rem;
-    margin: 0.5rem;
+    min-height: 12rem;
+    display: grid;
+    place-items: center;
+    border: 1px dashed rgba(246,183,60,0.35);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, rgba(18,24,36,0.78), rgba(8,11,16,0.78));
+    box-shadow: var(--inner-line);
+}
+#add-draft-cwl button {
+    width: 4rem;
+    height: 4rem;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 2rem;
+    color: #211302;
+    background: linear-gradient(180deg, var(--accent-2), var(--accent));
+    border-color: rgba(246,183,60,0.55);
 }

@@ -4,7 +4,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 
 public class Main {
-    static void main() throws Exception {
+    public static void main(String[] args) throws Exception {
         new Main().run();
     }
 

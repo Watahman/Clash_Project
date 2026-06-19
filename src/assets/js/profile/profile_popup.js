@@ -21,19 +21,42 @@ let poLogoutBtn, poSettings;
 let friendListTitle, poGroupList;
 let cachedProfile = null;
 
+
+function normalizeProfileAssetPaths() {
+    const prefix = window.location.pathname.includes('/subPages/') ? '../assets/css/pictures/' : 'assets/css/pictures/';
+    document.querySelectorAll('[data-profile-src]').forEach(img => {
+        img.src = prefix + img.dataset.profileSrc;
+    });
+}
+
+function getProfilePopupPath() {
+    const path = window.location.pathname;
+    if (path.includes('/subPages/')) return './popup_HTMLs/profile_popup.html';
+    return './subPages/popup_HTMLs/profile_popup.html';
+}
+
+
 // refs object doorgegeven aan profile_tabs zodat die toegang heeft tot DOM-elementen
 let tabRefs;
 
 export function profileHTML() {
-    fetch("/subpages/popup_HTMLs/profile_popup.html")
-        .then(res => res.text())
+    const placeholder = document.querySelector(".profile-placeholder");
+    if (!placeholder) return;
+
+    fetch(getProfilePopupPath())
+        .then(res => {
+            if (!res.ok) throw new Error("Profile popup kon niet geladen worden");
+            return res.text();
+        })
         .then(html => {
-            document.querySelector(".profile-placeholder").innerHTML = html;
+            placeholder.innerHTML = html;
+            normalizeProfileAssetPaths();
             labelInit();
             profileInit();
             preloadProfileData();
-            clickToCloseOverlays()
-        });
+            clickToCloseOverlays();
+        })
+        .catch(error => console.error(error));
 }
 
 function labelInit() {
@@ -98,25 +121,29 @@ function profileInit() {
     friendListClose.onclick = () => { friendList.classList.add('hidden'); };
 
     friendRequestBtn.onclick = () => {
+        const userId = getCurrentUserId();
+        if (!userId) { redirectToLogin(); return; }
         friendListTitle.textContent = "Friend Requests";
         emptyFriendRequest.textContent = "No requests";
         friendList.classList.remove('hidden');
-        getFriendRequests(getCurrentUserId()).then(res => {
+        getFriendRequests(userId).then(res => {
             friendListContent.querySelectorAll(".po-base-item").forEach(item => item.remove());
             if (res.length === 0) {
                 emptyFriendRequest.classList.remove('hidden');
                 return;
             }
             emptyFriendRequest.classList.add('hidden');
-            res.forEach(friend => { createFriendRequestCard(friend.user_b); });
+            res.forEach(friend => { createFriendRequestCard(friend.user_a); });
         });
     };
 
     friendPendingBtn.onclick = () => {
+        const userId = getCurrentUserId();
+        if (!userId) { redirectToLogin(); return; }
         friendListTitle.textContent = "Pending";
         emptyFriendRequest.textContent = "No pending requests";
         friendList.classList.remove('hidden');
-        getPendingFriendRequests(getCurrentUserId()).then(res => {
+        getPendingFriendRequests(userId).then(res => {
             friendListContent.querySelectorAll(".po-base-item").forEach(item => item.remove());
             if (res.length === 0) {
                 emptyFriendRequest.classList.remove('hidden');
@@ -151,19 +178,20 @@ function profileInit() {
 }
 
 function preloadProfileData() {
-    if (getCurrentUserId() === null) return;
-    // checkUserId + friends tegelijk starten
+    const userId = getCurrentUserId();
+    if (!userId) return;
+
     Promise.all([
-        checkUserId(getCurrentUserId()),
-        getFriends(getCurrentUserId()),
-        getGroupsOfUser(getCurrentUserId())
-    ]).then(([userData, friends, groups]) => {
+        checkUserId(userId),
+        getFriends(userId),
+        getGroupsOfUser(userId)
+    ]).then(([userData, friends = [], groups = []]) => {
+        if (!userData || userData.error) return;
         cachedProfile = userData;
-        console.log(userData, friends, groups);
-        loadBases(userData.accounts, emptyLabel);
-        renderFriends(friends, emptyLabel);
-        renderGroups(groups, emptyLabel);
-    });
+        loadBases(userData.accounts || [], emptyLabel);
+        renderFriends(Array.isArray(friends) ? friends : [], emptyLabel);
+        renderGroups(Array.isArray(groups) ? groups : [], emptyLabel);
+    }).catch(error => console.error(error));
 }
 
 function openProfile(username, code, memberSince) {
@@ -187,10 +215,11 @@ function poBackdrop(e) {
 }
 
 function redirectToLogin() {
-    if (window.location.pathname.includes("index.html")) {
-        window.location.href = "subpages/login.html";
+    const path = window.location.pathname;
+    if (path.includes('/subPages/')) {
+        window.location.href = './login.html';
     } else {
-        window.location.href = "./login.html";
+        window.location.href = './subPages/login.html';
     }
 }
 

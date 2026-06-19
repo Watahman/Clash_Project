@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>CWL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CWL Planner · Tools for Clash</title>
     <link rel="stylesheet" href="../assets/css/Main-css.css">
     <link rel="icon" type="image/png" href="../assets/css/pictures/shield_with_hamer_logov2.png">
     <link rel="stylesheet" href="../assets/css/cwlPlanner.css">
@@ -18,7 +19,7 @@
     </div>
 
     <nav class="center">
-        <a href="#">CWL planner</a>
+        <a href="./cwl-planner.html" aria-current="page">CWL planner</a>
         <a href="./groups.html">Groepen</a>
     </nav>
 
@@ -31,10 +32,10 @@
     </div>
 </header>
 
-<main>
-    <section>
+<main class="cwl-main dashboard-main">
+    <section class="cwl-sidebar">
         <article>
-            <div>
+            <div class="cwl-toolbar">
                 <h3>Players</h3>
                 <button id="cwl-add-players-button">Add players</button>
                 <select id="cwl-player-sorting">
@@ -46,8 +47,8 @@
             <div id="cwl-available-players"></div>
         </article>
     </section>
-    <section>
-        <div>
+    <section class="cwl-board">
+        <div class="cwl-toolbar">
             <h3>Clans</h3>
             <button id="cwl-add-clan-button">Add Clan</button>
             <input type="text" id="cwl-plan-name" placeholder="Plan naam..." maxlength="40">

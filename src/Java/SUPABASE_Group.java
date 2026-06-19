@@ -54,7 +54,7 @@ public class SUPABASE_Group {
         server.createContext(conf._EXT_SUPA_USER_GROUPS, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject json = utils.parseBody(ex);
             String id       = utils.requireString(json, "userId");
-            String result   = SUPABASE_Client.getWithBody("group_members", "user_id=eq." + id);
+            String result   = SUPABASE_Client.getWithBody("group_members", "user_id=" + SUPABASE_Client.eq(id));
             utils.sendJsonResponse(ex, result, 200);
         }));
     }
@@ -63,7 +63,7 @@ public class SUPABASE_Group {
         server.createContext(conf._EXT_SUPA_GROUP_INFO, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject json = utils.parseBody(ex);
             String id       = utils.requireString(json, "groupId");
-            String result   = SUPABASE_Client.getWithBody("groups", "id=eq." + id);
+            String result   = SUPABASE_Client.getWithBody("groups", "id=" + SUPABASE_Client.eq(id));
 
             JsonArray resultArray = JsonParser.parseString(result).getAsJsonArray();
             if (resultArray.isEmpty()) {
@@ -79,7 +79,7 @@ public class SUPABASE_Group {
         server.createContext(conf._EXT_SUPA_GROUP_MEMBERS, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject json = utils.parseBody(ex);
             String id       = utils.requireString(json, "groupId");
-            String result   = SUPABASE_Client.getWithBody("group_members", "group_id=eq." + id);
+            String result   = SUPABASE_Client.getWithBody("group_members", "group_id=" + SUPABASE_Client.eq(id));
             utils.sendJsonResponse(ex, result, 200);
         }));
     }
@@ -91,14 +91,21 @@ public class SUPABASE_Group {
             String code     = utils.requireString(json, "groupCode").trim();
 
             JsonArray groupArray = JsonParser.parseString(
-                    SUPABASE_Client.getWithBody("groups", "code=eq." + code)).getAsJsonArray();
+                    SUPABASE_Client.getWithBody("groups", "code=" + SUPABASE_Client.eq(code))).getAsJsonArray();
 
             if (groupArray.isEmpty()) {
-                utils.sendJsonResponse(ex, "{\"error\":\"Groep niet gevonden met code: " + code + "\"}", 404);
+                utils.sendJsonResponse(ex, "{\"error\":\"Groep niet gevonden met code: " + API_Utils.escapeJson(code) + "\"}", 404);
                 return;
             }
 
             String groupId = groupArray.get(0).getAsJsonObject().get("id").getAsString();
+
+            JsonArray existing = JsonParser.parseString(SUPABASE_Client.getWithBody("group_members",
+                    "group_id=" + SUPABASE_Client.eq(groupId) + "&user_id=" + SUPABASE_Client.eq(userId))).getAsJsonArray();
+            if (!existing.isEmpty()) {
+                utils.sendJsonResponse(ex, "{\"success\":true,\"message\":\"Gebruiker is al lid\"}", 200);
+                return;
+            }
 
             JsonObject member = new JsonObject();
             member.addProperty("user_id",  userId);
@@ -116,10 +123,10 @@ public class SUPABASE_Group {
             String code     = utils.requireString(json, "groupCode").trim();
 
             JsonArray groupArray = JsonParser.parseString(
-                    SUPABASE_Client.getWithBody("groups", "code=eq." + code)).getAsJsonArray();
+                    SUPABASE_Client.getWithBody("groups", "code=" + SUPABASE_Client.eq(code))).getAsJsonArray();
 
             if (groupArray.isEmpty()) {
-                utils.sendJsonResponse(ex, "{\"error\":\"Groep niet gevonden met code: " + code + "\"}", 404);
+                utils.sendJsonResponse(ex, "{\"error\":\"Groep niet gevonden met code: " + API_Utils.escapeJson(code) + "\"}", 404);
                 return;
             }
 
@@ -127,14 +134,14 @@ public class SUPABASE_Group {
             String groupId      = groupObj.get("id").getAsString();
 
             String result = SUPABASE_Client.deleteColumn("group_members",
-                    "group_id=eq." + groupId + "&user_id=eq." + userId);
+                    "group_id=" + SUPABASE_Client.eq(groupId) + "&user_id=" + SUPABASE_Client.eq(userId));
 
             JsonElement ownerEl = groupObj.get("owner_id");
             if (ownerEl != null && Objects.equals(ownerEl.getAsString(), userId)) {
-                SUPABASE_Client.deleteColumn("groups", "id=eq." + groupId);
+                SUPABASE_Client.deleteColumn("groups", "id=" + SUPABASE_Client.eq(groupId));
             }
 
-            utils.sendJsonResponse(ex, result, 200);
+            utils.sendJsonResponse(ex, result.isBlank() ? "{\"success\":true}" : result, 200);
         }));
     }
 }

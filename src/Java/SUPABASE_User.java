@@ -6,9 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 
-import java.security.MessageDigest;
-import java.util.Base64;
-
 public class SUPABASE_User {
     private final HttpServer server;
     private final Config conf;
@@ -21,23 +18,24 @@ public class SUPABASE_User {
     }
 
     public void getUserBases() {
-        server.createContext(conf._EXT_SUPA_USER_BASES, exchange -> {
-            utils.handlePost(exchange, ex -> {
-                JsonObject json = utils.parseBody(ex);
-                String id = utils.requireString(json, "userId");
-                String result = SUPABASE_Client.getWithBody("users", "select=accounts&id=eq." + id);
-                utils.sendJsonResponse(ex, result, 200);
-            });
-        });
+        server.createContext(conf._EXT_SUPA_USER_BASES, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject json = utils.parseBody(ex);
+            String id = utils.requireString(json, "userId");
+            String result = SUPABASE_Client.getWithBody("users", "select=accounts&id=" + SUPABASE_Client.eq(id));
+            utils.sendJsonResponse(ex, result, 200);
+        }));
     }
 
     public void getUserInfo() {
         server.createContext(conf._EXT_SUPA_USER_INFO, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject json = utils.parseBody(ex);
             String id = utils.requireString(json, "userId");
-            String result = SUPABASE_Client.getWithBody("users", "id=eq." + id);
+            String result = SUPABASE_Client.getWithBody("users", "select=id,name,code,accounts,created_at&id=" + SUPABASE_Client.eq(id));
             JsonArray users = JsonParser.parseString(result).getAsJsonArray();
-            if (users.isEmpty()) { utils.sendJsonResponse(ex, "{\"error\":\"Gebruiker niet gevonden\"}", 404); return; }
+            if (users.isEmpty()) {
+                utils.sendJsonResponse(ex, "{\"error\":\"Gebruiker niet gevonden\"}", 404);
+                return;
+            }
             utils.sendJsonResponse(ex, result, 200);
         }));
     }
@@ -48,15 +46,21 @@ public class SUPABASE_User {
             String email    = utils.requireString(json, "email");
             String password = utils.requireString(json, "password");
 
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            String hashedPassword = Base64.getEncoder().encodeToString(md.digest(password.getBytes()));
-
-            JsonArray users = JsonParser.parseString(SUPABASE_Client.getWithBody("users", "email=eq." + email)).getAsJsonArray();
-            if (users.isEmpty()) { utils.sendJsonResponse(ex, "{\"success\":false,\"error\":\"Gebruiker niet gevonden\"}", 404); return; }
+            JsonArray users = JsonParser.parseString(SUPABASE_Client.getWithBody("users", "email=" + SUPABASE_Client.eq(email))).getAsJsonArray();
+            if (users.isEmpty()) {
+                utils.sendJsonResponse(ex, "{\"success\":false,\"error\":\"Gebruiker niet gevonden\"}", 404);
+                return;
+            }
 
             JsonObject user = users.get(0).getAsJsonObject();
-            boolean match = user.get("password").getAsString().equals(hashedPassword);
+            String storedHash = user.get("password").getAsString();
+            boolean match = PasswordUtil.verifyPassword(password, storedHash);
             if (match) {
+                if (PasswordUtil.isLegacyHash(storedHash)) {
+                    JsonObject patch = new JsonObject();
+                    patch.addProperty("password", PasswordUtil.hashPassword(password));
+                    SUPABASE_Client.patch("users", "id=" + SUPABASE_Client.eq(user.get("id").getAsString()), patch.toString());
+                }
                 utils.sendJsonResponse(ex, "{\"success\":true,\"id\":\"" + user.get("id").getAsString() + "\"}", 200);
             } else {
                 utils.sendJsonResponse(ex, "{\"success\":false,\"error\":\"Verkeerd wachtwoord\"}", 401);
@@ -69,11 +73,15 @@ public class SUPABASE_User {
             JsonObject json = utils.parseBody(ex);
             String id = utils.requireString(json, "userId");
 
-            JsonArray userArray = JsonParser.parseString(SUPABASE_Client.getWithBody("users", "id=eq." + id)).getAsJsonArray();
-            if (userArray.isEmpty()) { utils.sendJsonResponse(ex, "{\"error\":\"Gebruiker niet gevonden\"}", 404); return; }
+            JsonArray userArray = JsonParser.parseString(SUPABASE_Client.getWithBody("users", "select=id,name,email,created_at,code,accounts&id=" + SUPABASE_Client.eq(id))).getAsJsonArray();
+            if (userArray.isEmpty()) {
+                utils.sendJsonResponse(ex, "{\"error\":\"Gebruiker niet gevonden\"}", 404);
+                return;
+            }
 
             JsonObject userObj  = userArray.get(0).getAsJsonObject();
             JsonObject userJson = new JsonObject();
+            userJson.addProperty("id",         userObj.get("id").getAsString());
             userJson.addProperty("name",       userObj.get("name").getAsString());
             userJson.addProperty("email",      userObj.get("email").getAsString());
             userJson.addProperty("created_at", userObj.get("created_at").getAsString());
@@ -92,22 +100,23 @@ public class SUPABASE_User {
             String email    = utils.requireString(json, "email");
             String password = utils.requireString(json, "password");
 
-            if (!JsonParser.parseString(SUPABASE_Client.getWithBody("users", "email=eq." + email)).getAsJsonArray().isEmpty()) {
-                utils.sendJsonResponse(ex, "{\"error\":\"Email is al in gebruik\"}", 409); return;
+            if (!JsonParser.parseString(SUPABASE_Client.getWithBody("users", "email=" + SUPABASE_Client.eq(email))).getAsJsonArray().isEmpty()) {
+                utils.sendJsonResponse(ex, "{\"error\":\"Email is al in gebruik\"}", 409);
+                return;
             }
-
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            String hashedPassword = Base64.getEncoder().encodeToString(md.digest(password.getBytes()));
 
             JsonObject user = new JsonObject();
             user.addProperty("name",     naam);
             user.addProperty("email",    email);
-            user.addProperty("password", hashedPassword);
+            user.addProperty("password", PasswordUtil.hashPassword(password));
             user.addProperty("code",     API_Utils.generateCode());
 
             String result = SUPABASE_Client.post("users", user.toString());
             JsonArray resultArray = JsonParser.parseString(result).getAsJsonArray();
-            if (resultArray.isEmpty()) { utils.sendJsonResponse(ex, "{\"error\":\"Gebruiker aanmaken mislukt\"}", 500); return; }
+            if (resultArray.isEmpty()) {
+                utils.sendJsonResponse(ex, "{\"error\":\"Gebruiker aanmaken mislukt\"}", 500);
+                return;
+            }
 
             utils.sendJsonResponse(ex, result, 201);
         }));
@@ -116,15 +125,19 @@ public class SUPABASE_User {
     public void addAccountToUser() {
         server.createContext(conf._EXT_SUPA_USER_ADD_ACCOUNT, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject json = utils.parseBody(ex);
-            String userId     = utils.requireString(json, "id");
+            String userId = utils.requireString(json, "userId");
             JsonElement accountEl = json.get("base");
 
             if (accountEl == null || accountEl.isJsonNull() || !accountEl.isJsonObject()) {
-                utils.sendJsonResponse(ex, "{\"error\":\"Veld 'base' moet een object zijn\"}", 400); return;
+                utils.sendJsonResponse(ex, "{\"error\":\"Veld 'base' moet een object zijn\"}", 400);
+                return;
             }
 
-            JsonArray users = JsonParser.parseString(SUPABASE_Client.getWithBody("users", "id=eq." + userId)).getAsJsonArray();
-            if (users.isEmpty()) { utils.sendJsonResponse(ex, "{\"error\":\"Gebruiker niet gevonden\"}", 404); return; }
+            JsonArray users = JsonParser.parseString(SUPABASE_Client.getWithBody("users", "select=accounts&id=" + SUPABASE_Client.eq(userId))).getAsJsonArray();
+            if (users.isEmpty()) {
+                utils.sendJsonResponse(ex, "{\"error\":\"Gebruiker niet gevonden\"}", 404);
+                return;
+            }
 
             JsonElement accountsEl = users.get(0).getAsJsonObject().get("accounts");
             JsonArray accounts = (accountsEl == null || accountsEl.isJsonNull()) ? new JsonArray() : accountsEl.getAsJsonArray();
@@ -132,9 +145,9 @@ public class SUPABASE_User {
 
             JsonObject patch = new JsonObject();
             patch.add("accounts", accounts);
-            SUPABASE_Client.patch("users", "id=eq." + userId, patch.toString());
+            String result = SUPABASE_Client.patch("users", "id=" + SUPABASE_Client.eq(userId), patch.toString());
 
-            utils.sendJsonResponse(ex, patch.toString(), 200);
+            utils.sendJsonResponse(ex, result, 200);
         }));
     }
 }

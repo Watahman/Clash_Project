@@ -1,862 +1,276 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap');
-
 /* ============================================================
-   CSS CUSTOM PROPERTIES
+   CWL PLANNER — Dashboard / drag-drop war room
    ============================================================ */
-:root {
-    /* Neutrals */
-    --bg:           #111214;
-    --surface-1:    #18191d;
-    --surface-2:    #1e2025;
-    --surface-3:    #252730;
-    --surface-4:    #2c2e3a;
-
-    /* Borders */
-    --border-subtle:#2a2c36;
-    --border-mid:   #353845;
-    --border-focus: #5b5f78;
-
-    /* Accents — muted slate-blue */
-    --accent:       #6c78f0;
-    --accent-dim:   rgba(108,120,240,0.15);
-    --accent-glow:  rgba(108,120,240,0.08);
-
-    /* Status */
-    --green:        #3fb97a;
-    --green-dim:    rgba(63,185,122,0.12);
-    --red:          #e05252;
-
-    /* Text */
-    --text-1:       #e8eaf0;
-    --text-2:       #8b90a8;
-    --text-3:       #4e5268;
-
-    /* Type */
-    --font-ui:      'DM Sans', sans-serif;
-    --font-mono:    'DM Mono', monospace;
-
-    /* Shape */
-    --radius-sm:    0.3rem;
-    --radius-md:    0.5rem;
-    --radius-lg:    0.75rem;
-    --radius-xl:    1rem;
-
-    /* Shadows */
-    --shadow-sm:    0 1px 3px rgba(0,0,0,0.4);
-    --shadow-md:    0 4px 16px rgba(0,0,0,0.5);
-    --shadow-lg:    0 8px 32px rgba(0,0,0,0.6);
-
-    /* Layout */
-    --header-h:     3.5rem;
-    --sidebar-w:    clamp(15rem, 20vw, 20rem);
-}
-
-/* ============================================================
-   RESET & BASE
-   ============================================================ */
-*, *::before, *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-html, body {
-    height: 100%;
-    font-family: var(--font-ui);
-    background: var(--bg);
-    color: var(--text-1);
-    font-size: clamp(13px, 0.9vw + 0.4rem, 15px);
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-}
-
-/* Subtle dot-grid background */
-body {
-    background-image: radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px);
-    background-size: 28px 28px;
-}
-
-/* ============================================================
-   MAIN LAYOUT
-   ============================================================ */
-main {
+.cwl-main {
     display: grid;
-    grid-template-columns: var(--sidebar-w) 1fr;
+    grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
     height: calc(100vh - var(--header-h));
     overflow: hidden;
-}
-
-main > section {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
-}
-
-/* Sidebar */
-main > section:first-child {
-    border-right: 1px solid var(--border-subtle);
-    background: var(--surface-1);
-}
-
-main > section:first-child > article {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-}
-
-/* Main content */
-main > section:last-child {
-    background: var(--bg);
-}
-
-main > section:last-child > div {
-    position: relative;
-}
-
-/* ============================================================
-   SECTION HEADERS
-   ============================================================ */
-main > section > div,
-main > section > article > div:first-child {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 1rem 1.25rem 0.875rem;
-    border-bottom: 1px solid var(--border-subtle);
-    flex-shrink: 0;
-    flex-wrap: wrap;
-}
-
-main > section > div h3,
-main > section > article > div h3 {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-3);
-}
-
-/* ============================================================
-   BUTTONS
-   ============================================================ */
-button {
-    font-family: var(--font-ui);
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    border-radius: var(--radius-sm);
-    padding: 0.3rem 0.75rem;
-    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
-    border: 1px solid var(--border-mid);
-    background: var(--surface-3);
-    color: var(--text-2);
-}
-
-button:hover {
-    background: var(--surface-4);
-    border-color: var(--border-focus);
-    color: var(--text-1);
-}
-
-button:active {
-    transform: scale(0.97);
-}
-
-button.primary {
-    background: var(--accent-dim);
-    border-color: var(--accent);
-    color: var(--accent);
-}
-button.primary:hover {
-    background: rgba(108,120,240,0.25);
-    color: #8891f5;
-}
-
-/* ============================================================
-   SELECT
-   ============================================================ */
-select {
-    font-family: var(--font-ui);
-    font-size: 0.75rem;
-    font-weight: 500;
-    background: var(--surface-2);
-    color: var(--text-2);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    padding: 0.3rem 1.6rem 0.3rem 0.6rem;
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234e5268'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.5rem center;
-    transition: border-color 0.15s, color 0.15s;
-    outline: none;
-}
-select:hover, select:focus {
-    border-color: var(--border-focus);
-    color: var(--text-1);
-}
-
-/* ============================================================
-   PLAYER COUNT BADGE
-   ============================================================ */
-#cwl-total-player-amount {
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    font-weight: 500;
-    background: var(--surface-3);
-    color: var(--text-2);
-    border: 1px solid var(--border-subtle);
-    border-radius: 999px;
-    padding: 0.15rem 0.6rem;
-    min-width: 2rem;
-    text-align: center;
-    letter-spacing: 0.02em;
-}
-
-/* ============================================================
-   AVAILABLE PLAYERS LIST
-   ============================================================ */
-#cwl-available-players {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding: 1rem;
-    overflow-y: auto;
-    flex: 1;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-mid) transparent;
-}
-
-#cwl-available-players::-webkit-scrollbar { width: 0.25rem; }
-#cwl-available-players::-webkit-scrollbar-track { background: transparent; }
-#cwl-available-players::-webkit-scrollbar-thumb {
-    background: var(--border-mid);
-    border-radius: 0.2rem;
-}
-
-/* ============================================================
-   PLAYER CARD
-   ============================================================ */
-.cwl-player-article {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.6rem 0.875rem;
-    background: var(--surface-2);
-    border: 1px solid var(--border-subtle);
-    border-left: 2px solid var(--green);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s, transform 0.15s;
-    user-select: none;
-}
-
-.cwl-player-article.draggable:hover {
-    background: var(--surface-3);
-    border-color: var(--border-mid);
-    border-left-color: var(--green);
-    transform: translateY(-2px);
-    cursor: grab;
-}
-
-.cwl-player-townhall-foto {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: var(--radius-sm);
-    object-fit: cover;
-    flex-shrink: 0;
-    border: 1px solid var(--border-subtle);
-    background: var(--surface-3);
-}
-
-.cwl-player-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-    flex: 1;
-    min-width: 0;
-}
-
-.cwl-player-name {
-    font-weight: 600;
-    font-size: 0.85rem;
-    color: var(--text-1);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.cwl-player-clan {
-    font-size: 0.72rem;
-    color: var(--text-2);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.cwl-player-hashtag {
-    font-size: 0.68rem;
-    color: var(--text-3);
-    font-family: var(--font-mono);
-    letter-spacing: 0.02em;
-}
-
-/* ============================================================
-   ALL CLANS AREA
-   ============================================================ */
-#cwl-all-clans {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
-    gap: 1.25rem;
-    padding: 1.5rem;
-    flex: 1;
-    align-content: start;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-mid) transparent;
-}
-
-#cwl-all-clans::-webkit-scrollbar { width: 0.25rem; }
-#cwl-all-clans::-webkit-scrollbar-thumb {
-    background: var(--border-mid);
-    border-radius: 0.2rem;
-}
-
-/* ============================================================
-   CLAN CARD
-   ============================================================ */
-.cwl-clan-article {
-    display: flex;
-    flex-direction: column;
-    background: var(--surface-1);
-    border: 1px solid var(--border-subtle);
-    height: calc(44vh + 5.75rem);
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.cwl-clan-article:hover {
-    border-color: var(--border-focus);
-    box-shadow: var(--shadow-md);
-}
-
-.cwl-clan-info-card {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 1rem 1.125rem;
-    border-bottom: 1px solid var(--border-subtle);
-    flex-shrink: 0;
-}
-
-.cwl-clan-logo {
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: var(--radius-md);
-    object-fit: cover;
-    border: 1px solid var(--border-mid);
-    flex-shrink: 0;
-    background: var(--surface-3);
-}
-
-.cwl-clan-name {
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: var(--text-1);
-    letter-spacing: 0.01em;
-    flex: 1;
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.cwl-amount-of-players-in-clan {
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    font-weight: 500;
-    color: var(--text-3);
-    background: var(--surface-3);
-    border: 1px solid var(--border-subtle);
-    border-radius: 999px;
-    padding: 0.15rem 0.55rem;
-    white-space: nowrap;
-    letter-spacing: 0.02em;
-}
-
-.cwl-confirm-clan-is-full, .cwl-delete-clan {
-    width: 1.225rem;
-    height: 1.225rem;
-    flex-shrink: 0;
-    opacity: 0.8;
-    transition: opacity 0.2s, filter 0.2s;
-}
-
-.cwl-clan-article.is-full .cwl-confirm-clan-is-full {
-    opacity: 1;
-    filter: brightness(0) saturate(100%) invert(64%) sepia(60%) saturate(400%) hue-rotate(100deg) brightness(100%);
-}
-
-/* Clan player list */
-.cwl-clan-player-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    padding: 0.875rem;
-    height: 44vh;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-subtle) transparent;
-}
-
-.cwl-clan-player-list::-webkit-scrollbar { width: 0.2rem; }
-.cwl-clan-player-list::-webkit-scrollbar-thumb {
-    background: var(--border-subtle);
-    border-radius: 0.125rem;
-}
-
-/* Players inside a clan */
-.cwl-clan-player-list .cwl-player-article {
-    width: 100%;
-    padding: 0.45rem 0.7rem;
-}
-
-.cwl-clan-player-list .cwl-player-townhall-foto {
-    width: 2rem;
-    height: 2rem;
-}
-
-/* Drop zone highlight */
-.cwl-clan-player-list.drag-over {
-    background: var(--accent-glow);
-    border-radius: var(--radius-sm);
-    outline: 1px dashed var(--accent);
-    outline-offset: -4px;
-}
-
-/* ============================================================
-   OVERLAYS
-   ============================================================ */
-.overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    z-index: 9999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.hidden {
-    display: none !important;
-}
-
-.overlay-container {
-    padding: 2rem;
-    background: var(--surface-2);
-    border: 1px solid var(--border-mid);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
-    display: flex;
-    flex-direction: column;
-    gap: 0.875rem;
-    min-width: clamp(16rem, 28vw, 22rem);
-    animation: overlayIn 0.18s ease;
-}
-
-@keyframes overlayIn {
-    from { opacity: 0; transform: scale(0.95) translateY(6px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-/* ============================================================
-   INPUT
-   ============================================================ */
-input[type="text"] {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    background: var(--surface-3);
-    color: var(--text-1);
-    border: 1px solid var(--border-mid);
-    border-radius: var(--radius-md);
-    padding: 0.6rem 0.875rem;
-    width: 100%;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    outline: none;
-}
-
-input[type="text"]::placeholder {
-    color: var(--text-3);
-}
-
-input[type="text"]:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(108,120,240,0.12);
-}
-
-/* ============================================================
-   EMPTY STATE
-   ============================================================ */
-.cwl-empty-hint {
-    text-align: center;
-    padding: 2.5rem 1rem;
-    color: var(--text-3);
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-family: var(--font-mono);
-    border: 1px dashed var(--border-subtle);
-    border-radius: var(--radius-md);
-}
-
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-@media (max-width: 56.25rem) {
-    main {
-        grid-template-columns: 1fr;
-        height: auto;
-        overflow: visible;
-    }
-    main > section:first-child {
-        border-right: none;
-        border-bottom: 1px solid var(--border-subtle);
-    }
-    #cwl-available-players {
-        height: 40vh;
-        flex: none;
-    }
-    #cwl-all-clans {
-        justify-content: center;
-        padding-bottom: 2rem;
-    }
-}
-
-@media (max-width: 37.5rem) {
-    header { padding: 0 1rem; }
-    header nav.center a { font-size: 0.7rem; padding: 0.28rem 0.55rem; }
-    .cwl-clan-article { width: 100%; }
-}
-
-/* ============================================================
-   PLAN NAME INPUT & LOAD DROPDOWN
-   ============================================================ */
-#cwl-plan-name {
-    font-family: var(--font-ui);
-    font-size: 0.82rem;
-    font-weight: 600;
-    background: transparent;
-    color: var(--text-1);
-    border: none;
-    border-bottom: 1px solid var(--border-mid);
-    border-radius: 0;
-    padding: 0.2rem 0.4rem;
-    width: 11rem;
-    outline: none;
-    transition: border-color 0.2s, color 0.2s;
-    box-shadow: none;
-
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-#cwl-plan-name:focus {
-    border-bottom-color: var(--accent);
-    box-shadow: none;
-}
-
-#cwl-plan-name::placeholder {
-    color: var(--text-3);
-    font-weight: 400;
-}
-
-#cwl-load-plan {
-    /* erft de globale select-stijl al — enkel subtiele overrides */
-    font-size: 0.72rem;
-    color: var(--text-3);
-    border-color: var(--border-subtle);
-    max-width: 9rem;
-    margin-left: auto;
-}
-
-#cwl-load-plan:hover,
-#cwl-load-plan:focus {
-    color: var(--text-2);
-    border-color: var(--border-focus);
-}
-
-.cwl-clan-info-card {
-    cursor: grab;
-}
-
-.cwl-clan-article[style*="fixed"] .cwl-clan-info-card {
-    cursor: grabbing;
-}
-
-/* ============================================================
-   ADD PLAYERS MODAL — TABS
-   ============================================================ */
-#cwl-container-add-players {
-    min-width: clamp(16rem, 28vw, 22rem);
-    padding: 1.25rem 1.5rem 1.5rem;
-    gap: 0;
-}
-
-.modal-header-row {
-    margin-bottom: 0.875rem;
-}
-
-.modal-title {
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-3);
-}
-
-.modal-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border-subtle);
-    margin-bottom: 1.25rem;
-    margin-left: -1.5rem;
-    margin-right: -1.5rem;
-    padding: 0 1.5rem;
-}
-
-.modal-tab-btn {
-    font-size: 0.73rem;
-    font-weight: 600;
-    color: var(--text-3);
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    padding: 0.4rem 0.75rem 0.6rem;
-    cursor: pointer;
-    letter-spacing: 0.02em;
-    transition: color 0.15s, border-color 0.15s;
-    border-radius: 0;
-    transform: none;
-}
-
-.modal-tab-btn:hover {
-    background: none;
-    color: var(--text-2);
-    border-color: transparent;
-    border-bottom-color: transparent;
-}
-
-.modal-tab-btn.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-}
-
-.modal-tab-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.modal-tab-panel.hidden {
-    display: none !important;
-}
-
-.modal-field-label {
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-3);
-    margin-bottom: 0.3rem;
-}
-
-.modal-hint {
-    font-size: 0.67rem;
-    color: var(--text-3);
-    font-family: var(--font-mono);
-    letter-spacing: 0.03em;
-    margin-top: -0.25rem;
-}
-
-/* Segment toggle */
-.modal-segment {
-    display: flex;
-    background: var(--surface-3);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-}
-
-.modal-seg-btn {
-    flex: 1;
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--text-3);
-    background: none;
-    border: none;
-    border-radius: 0;
-    padding: 0.35rem 0.5rem;
-    cursor: pointer;
-    letter-spacing: 0.03em;
-    transition: background 0.12s, color 0.12s;
-    transform: none;
-}
-
-.modal-seg-btn.active {
-    background: var(--surface-4);
-    color: var(--text-1);
-}
-
-.modal-seg-btn:hover:not(.active) {
-    background: var(--surface-4);
-    color: var(--text-2);
-}
-
-/* Account list */
-.modal-account-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    max-height: 190px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-mid) transparent;
-}
-
-.modal-account-list::-webkit-scrollbar { width: 0.2rem; }
-.modal-account-list::-webkit-scrollbar-thumb {
-    background: var(--border-mid);
-    border-radius: 0.1rem;
-}
-
-.modal-account-row {
+    background:
+        radial-gradient(circle at 70% 10%, rgba(246,183,60,0.08), transparent 22rem),
+        radial-gradient(circle at 28% 90%, rgba(155,92,255,0.09), transparent 24rem);
+}
+.cwl-main > section { min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.cwl-sidebar { border-right: 1px solid var(--border-subtle); background: rgba(8,11,16,0.44); }
+.cwl-sidebar article { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+.cwl-board { background: rgba(255,255,255,0.012); }
+.cwl-toolbar {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    padding: 0.45rem 0.65rem;
-    background: var(--surface-3);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: background 0.12s, border-color 0.12s;
-    user-select: none;
+    padding: 0.85rem 1rem;
+    min-height: 4.1rem;
+    border-bottom: 1px solid var(--border-subtle);
+    background: rgba(12,17,27,0.72);
+    backdrop-filter: blur(14px);
 }
-
-.modal-account-row:hover { background: var(--surface-4); border-color: var(--border-mid); }
-.modal-account-row.selected { border-color: var(--accent); background: var(--accent-dim); }
-
-.modal-th-badge {
-    width: 1.8rem;
-    height: 1.8rem;
-    border-radius: var(--radius-sm);
-    background: var(--surface-4);
-    border: 1px solid var(--border-mid);
-    flex-shrink: 0;
-    display: flex;
+.cwl-toolbar h3 {
+    color: var(--text-2);
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-right: auto;
+}
+.cwl-toolbar h3::before { content: '// '; color: var(--accent); }
+#cwl-total-player-amount,
+.cwl-amount-of-players-in-clan {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    min-width: 2.35rem;
+    min-height: 1.65rem;
+    padding: 0.2rem 0.65rem;
+    border: 1px solid rgba(246,183,60,0.22);
+    border-radius: 999px;
+    background: var(--accent-dim);
+    color: var(--accent);
     font-family: var(--font-mono);
-    font-size: 0.58rem;
-    font-weight: 500;
-    color: var(--text-3);
+    font-size: 0.72rem;
+    font-weight: 700;
 }
-
-.modal-account-info { flex: 1; min-width: 0; }
-
-.modal-account-name {
-    font-size: 0.8rem;
-    font-weight: 600;
+#cwl-plan-name {
+    width: min(16rem, 35vw);
+    max-width: 100%;
+    min-height: 2.35rem;
+    text-align: center;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+#cwl-load-plan { max-width: 10rem; }
+#cwl-available-players {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 0.9rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(246,183,60,0.28) transparent;
+}
+#cwl-available-players::-webkit-scrollbar,
+#cwl-all-clans::-webkit-scrollbar,
+.cwl-clan-player-list::-webkit-scrollbar,
+.modal-account-list::-webkit-scrollbar,
+.modal-group-preview-list::-webkit-scrollbar { width: 0.35rem; height: 0.35rem; }
+#cwl-available-players::-webkit-scrollbar-thumb,
+#cwl-all-clans::-webkit-scrollbar-thumb,
+.cwl-clan-player-list::-webkit-scrollbar-thumb,
+.modal-account-list::-webkit-scrollbar-thumb,
+.modal-group-preview-list::-webkit-scrollbar-thumb { background: rgba(246,183,60,0.28); border-radius: 999px; }
+.cwl-player-article {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.72rem;
+    padding: 0.68rem 0.78rem;
+    min-height: 4rem;
+    border: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--green);
+    border-radius: var(--radius-md);
+    background: linear-gradient(180deg, rgba(23,31,47,0.95), rgba(13,18,28,0.95));
+    box-shadow: var(--inner-line);
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.14s ease, border-color 0.14s ease, background 0.14s ease, box-shadow 0.14s ease;
+}
+.cwl-player-article::after {
+    content: '';
+    position: absolute;
+    right: 0.6rem;
+    top: 50%;
+    width: 0.38rem;
+    height: 0.38rem;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0.7rem rgba(56,217,138,0.35);
+    transform: translateY(-50%);
+}
+.cwl-player-article.draggable:hover {
+    transform: translateY(-2px);
+    border-color: rgba(56,217,138,0.35);
+    box-shadow: 0 0.9rem 1.8rem rgba(0,0,0,0.24), 0 0 0 3px rgba(56,217,138,0.055);
+    cursor: grab;
+}
+.cwl-player-townhall-foto {
+    width: 2.7rem;
+    height: 2.7rem;
+    object-fit: cover;
+    flex: 0 0 auto;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(246,183,60,0.16);
+    background: rgba(0,0,0,0.3);
+}
+.cwl-player-info { min-width: 0; display: flex; flex-direction: column; gap: 0.04rem; padding-right: 0.8rem; }
+.cwl-player-name { color: var(--text-1); font-family: var(--font-heading); font-size: 1rem; font-weight: 700; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cwl-player-clan { color: var(--text-3); font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cwl-player-hashtag { color: var(--accent); font-family: var(--font-mono); font-size: 0.68rem; }
+#cwl-all-clans {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    gap: 1rem;
+    padding: 1.1rem;
+    align-content: start;
+    overflow-y: auto;
+}
+.cwl-clan-article {
+    position: relative;
+    min-height: 31rem;
+    height: min(42rem, calc(100vh - 8rem));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, rgba(18,24,36,0.96), rgba(9,13,20,0.96));
+    box-shadow: var(--shadow-sm), var(--inner-line);
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+.cwl-clan-article::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--purple));
+    opacity: 0.75;
+}
+.cwl-clan-article:hover { border-color: rgba(246,183,60,0.24); box-shadow: var(--shadow-md); }
+.cwl-clan-info-card {
+    display: flex;
+    align-items: center;
+    gap: 0.72rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+    background: rgba(255,255,255,0.025);
+    cursor: grab;
+}
+.cwl-clan-article[style*="fixed"] .cwl-clan-info-card { cursor: grabbing; }
+.cwl-clan-logo {
+    width: 3rem;
+    height: 3rem;
+    flex: 0 0 auto;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(246,183,60,0.24);
+    background: rgba(0,0,0,0.28);
+}
+.cwl-clan-name {
+    flex: 1;
+    min-width: 0;
     color: var(--text-1);
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
-.modal-account-tag {
-    font-size: 0.65rem;
-    color: var(--text-3);
-    font-family: var(--font-mono);
+.cwl-confirm-clan-is-full, .cwl-delete-clan {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: 0 0 auto;
+    opacity: 0.62;
+    cursor: pointer;
+    transition: opacity 0.16s ease, transform 0.16s ease, filter 0.16s ease;
 }
-
-.modal-check-icon {
-    width: 0.85rem;
-    height: 0.85rem;
-    border-radius: 50%;
-    border: 1.5px solid var(--border-focus);
-    flex-shrink: 0;
-    transition: background 0.12s, border-color 0.12s;
-}
-
-.modal-account-row.selected .modal-check-icon {
-    background: var(--accent);
-    border-color: var(--accent);
-}
-
-.modal-btn-add-selected {
-    align-self: flex-end;
-    font-size: 0.73rem;
-    font-weight: 600;
-}
-
-/* Search bar */
-.modal-search-bar { position: relative; }
-.modal-search-bar input { padding-left: 2rem; }
-.modal-search-icon {
-    position: absolute;
-    left: 0.65rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-3);
-    font-size: 0.85rem;
-    pointer-events: none;
-}
-
-/* Group preview */
-.modal-empty-state {
-    text-align: center;
-    padding: 1.25rem 1rem;
-    color: var(--text-3);
-    font-size: 0.7rem;
-    font-family: var(--font-mono);
-    letter-spacing: 0.06em;
-    border: 1px dashed var(--border-subtle);
-    border-radius: var(--radius-md);
-    text-transform: uppercase;
-}
-
-.modal-group-preview-list {
+.cwl-confirm-clan-is-full:hover, .cwl-delete-clan:hover { opacity: 1; transform: scale(1.08); }
+.cwl-delete-clan { filter: invert(61%) sepia(88%) saturate(2621%) hue-rotate(323deg) brightness(103%); }
+.cwl-clan-article.is-full .cwl-confirm-clan-is-full { opacity: 1; filter: invert(76%) sepia(54%) saturate(749%) hue-rotate(84deg) brightness(95%); }
+.cwl-clan-player-list {
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
-    max-height: 170px;
+    gap: 0.45rem;
+    padding: 0.9rem;
     overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-mid) transparent;
 }
-
-.modal-group-preview-list::-webkit-scrollbar { width: 0.2rem; }
-.modal-group-preview-list::-webkit-scrollbar-thumb {
-    background: var(--border-mid);
-    border-radius: 0.1rem;
+.cwl-clan-player-list .cwl-player-article { min-height: 3.35rem; padding: 0.5rem 0.65rem; }
+.cwl-clan-player-list .cwl-player-townhall-foto { width: 2.15rem; height: 2.15rem; }
+.cwl-clan-player-list.drag-over {
+    outline: 1px dashed var(--accent);
+    outline-offset: -0.45rem;
+    background: var(--accent-dim);
 }
-
-.modal-group-member {
-    display: flex;
-    align-items: center;
-    padding: 0.35rem 0.6rem;
-    background: var(--surface-3);
-    border: 1px solid var(--border-subtle);
+.cwl-empty-hint,
+#modal-account-list-empty,
+.modal-empty-state {
+    text-align: center;
+    color: var(--text-4);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 1.3rem;
+    border: 1px dashed var(--border-subtle);
     border-radius: var(--radius-md);
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--text-1);
+    background: rgba(255,255,255,0.018);
+}
+#cwl-container-add-players { width: min(34rem, 100%); padding: 0; gap: 0; overflow: hidden; }
+.modal-header-row { padding: 1.2rem 1.3rem 0.8rem; border-bottom: 1px solid var(--border-subtle); }
+.modal-tabs {
+    display: flex;
+    gap: 0.3rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+    background: rgba(0,0,0,0.14);
+}
+.modal-tab-btn {
+    flex: 1;
+    border-radius: 999px;
+    background: transparent;
+    border-color: transparent;
+    color: var(--text-3);
+    padding: 0.5rem 0.7rem;
+}
+.modal-tab-btn.active { color: var(--accent); border-color: rgba(246,183,60,0.22); background: var(--accent-dim); }
+.modal-tab-panel { display: flex; flex-direction: column; gap: 0.8rem; padding: 1.15rem 1.3rem 1.3rem; }
+.modal-tab-panel.hidden { display: none !important; }
+.modal-segment { display: flex; padding: 0.25rem; gap: 0.25rem; border: 1px solid var(--border-subtle); border-radius: 999px; background: rgba(0,0,0,0.18); }
+.modal-seg-btn { flex: 1; border-radius: 999px; background: transparent; border-color: transparent; color: var(--text-3); }
+.modal-seg-btn.active { background: var(--purple-dim); border-color: rgba(155,92,255,0.24); color: var(--purple); }
+.modal-account-list, .modal-group-preview-list { display: flex; flex-direction: column; gap: 0.45rem; max-height: 14rem; overflow-y: auto; }
+#cwl-container-add-clan { width: min(24rem, 100%); }
+@media (max-width: 62rem) {
+    .cwl-main { grid-template-columns: 1fr; height: auto; min-height: calc(100vh - var(--header-h)); overflow: visible; }
+    .cwl-sidebar { border-right: none; border-bottom: 1px solid var(--border-subtle); }
+    #cwl-available-players { max-height: 42vh; }
+    #cwl-all-clans { min-height: 60vh; overflow: visible; }
+    .cwl-toolbar { flex-wrap: wrap; }
+    #cwl-plan-name { order: 10; width: 100%; }
+}
+@media (max-width: 42rem) {
+    #cwl-all-clans { grid-template-columns: 1fr; padding: 0.8rem; }
+    .cwl-clan-article { min-height: 28rem; height: auto; }
+    .cwl-toolbar > * { flex: 1 1 auto; }
+    .cwl-toolbar h3 { flex: 1 0 100%; }
 }

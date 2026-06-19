@@ -26,8 +26,8 @@ export function initAddPlayersOverlay(refs) {
 
     modalTabBtn.forEach(tab => {
         tab.onclick = () => {
-            document.querySelector(".modal-tab-btn.active").classList.toggle("active");
-            tab.classList.toggle("active");
+            document.querySelector(".modal-tab-btn.active")?.classList.remove("active");
+            tab.classList.add("active");
             if (tab.dataset.tab === "tag") {
                 document.querySelector("#modal-tab-tag").classList.remove("hidden");
                 document.querySelector("#modal-tab-accounts").classList.add("hidden");
@@ -37,12 +37,9 @@ export function initAddPlayersOverlay(refs) {
                 document.querySelector("#modal-tab-tag").classList.add("hidden");
                 document.querySelector("#modal-tab-accounts").classList.remove("hidden");
                 document.querySelector("#modal-tab-group").classList.add("hidden");
-                document.querySelector("#modal-account-list-empty").classList.remove("hidden");
+                showAccountEmptyState();
                 document.querySelector(".modal-group-preview-list").classList.add("hidden");
-                document.querySelectorAll(".userBase").forEach(userBase => {
-                    userBase.classList.remove("hidden");
-                    document.querySelector("#modal-account-list-empty").classList.add("hidden");
-                });
+                document.querySelectorAll(".userBase:not(.hidden)").forEach(() => hideAccountEmptyState());
             } else if (tab.dataset.tab === "group") {
                 document.querySelector("#modal-tab-tag").classList.add("hidden");
                 document.querySelector("#modal-tab-accounts").classList.add("hidden");
@@ -54,32 +51,28 @@ export function initAddPlayersOverlay(refs) {
 
     segBtns.forEach(tab => {
         tab.onclick = () => {
-            document.querySelector(".modal-seg-btn.active").classList.remove("active");
+            document.querySelector(".modal-seg-btn.active")?.classList.remove("active");
             tab.classList.add("active");
+            showAccountEmptyState();
             if (tab.dataset.seg === "mine") {
-                document.querySelector("#modal-account-list-empty").classList.remove("hidden");
                 document.querySelectorAll(".userBase").forEach(userBase => {
                     userBase.classList.remove("hidden");
-                    document.querySelector("#modal-account-list-empty").classList.add("hidden");
+                    hideAccountEmptyState();
                 });
-                document.querySelectorAll(".friendBase").forEach(friendBase => {
-                    friendBase.classList.add("hidden");
-                });
+                document.querySelectorAll(".friendBase").forEach(friendBase => friendBase.classList.add("hidden"));
             } else if (tab.dataset.seg === "friends") {
-                document.querySelector("#modal-account-list-empty").classList.remove("hidden");
-                document.querySelectorAll(".userBase").forEach(userBase => {
-                    userBase.classList.add("hidden");
-                });
+                document.querySelectorAll(".userBase").forEach(userBase => userBase.classList.add("hidden"));
                 document.querySelectorAll(".friendBase").forEach(friendBase => {
                     friendBase.classList.remove("hidden");
-                    document.querySelector("#modal-account-list-empty").classList.add("hidden");
+                    hideAccountEmptyState();
                 });
             }
         };
     });
 
     overlayConfirmTagBtn.onclick = () => {
-        const tag = cwlInputTag.value;
+        const tag = cwlInputTag.value.trim();
+        if (!tag) return;
         getPlayerWithBattleData(tag)
             .then(data => { createPlayerCard(data); })
             .catch(() => {
@@ -91,19 +84,50 @@ export function initAddPlayersOverlay(refs) {
             });
     };
 
-    getUserBases(getCurrentUserId()).then(data => {
-        createPlayerCard(data[0].accounts, "user");
-    });
-
-    getFriends(getCurrentUserId()).then(data => {
-        data.forEach(friend => {
-            getUserBases(friend.user_b).then(data => {
-                createPlayerCard(data[0].accounts, "friends");
-            });
-        });
-    });
-
+    loadAccountSources();
     initGroupOverlay(selectGroup);
+}
+
+function showAccountEmptyState() {
+    document.querySelector("#modal-account-list-empty")?.classList.remove("hidden");
+}
+
+function hideAccountEmptyState() {
+    document.querySelector("#modal-account-list-empty")?.classList.add("hidden");
+}
+
+function loadAccountSources() {
+    const userId = getCurrentUserId();
+    if (!userId) {
+        showAccountEmptyState();
+        return;
+    }
+
+    getUserBases(userId)
+        .then(data => {
+            const accounts = data?.[0]?.accounts;
+            if (Array.isArray(accounts) && accounts.length > 0) {
+                createPlayerCard(accounts, "user");
+                hideAccountEmptyState();
+            }
+        })
+        .catch(error => console.error(error));
+
+    getFriends(userId)
+        .then(data => {
+            if (!Array.isArray(data)) return;
+            data.forEach(friend => {
+                const friendId = friend.user_b || friend.user_a;
+                if (!friendId) return;
+                getUserBases(friendId).then(data => {
+                    const accounts = data?.[0]?.accounts;
+                    if (Array.isArray(accounts) && accounts.length > 0) {
+                        createPlayerCard(accounts, "friends");
+                    }
+                });
+            });
+        })
+        .catch(error => console.error(error));
 }
 
 export function initAddClanButton(refs) {
@@ -111,17 +135,11 @@ export function initAddClanButton(refs) {
 
     addClanBtn.addEventListener("click", () => {
         document.querySelector("#cwl-overlay-add-clan").classList.remove("hidden");
-        const option = selectAmountPlayers.querySelector("option[value=\"30\"]");
-        if (!option) {
-            let newOption = document.createElement("option");
-            newOption.value = 30;
-            newOption.textContent = "30v30";
-            selectAmountPlayers.appendChild(newOption);
-        }
+        ensureCwlSizeOptions(selectAmountPlayers);
     });
 
     overlayAddClanBtn.addEventListener("click", () => {
-        const clanID = cwlInputClanCode.value;
+        const clanID = cwlInputClanCode.value.trim();
         const playerAmount = selectAmountPlayers.value;
         document.querySelectorAll(".overlay").forEach(overlay => overlay.classList.add("hidden"));
         if (clanID !== "") {
@@ -129,4 +147,28 @@ export function initAddClanButton(refs) {
         }
         cwlInputClanCode.value = "";
     });
+}
+
+export function ensureCwlSizeOptions(selectAmountPlayers) {
+    if (!selectAmountPlayers.querySelector('option[value="15"]')) {
+        const option = document.createElement("option");
+        option.value = "15";
+        option.textContent = "15v15";
+        selectAmountPlayers.appendChild(option);
+    }
+    if (!selectAmountPlayers.querySelector('option[value="30"]')) {
+        const option = document.createElement("option");
+        option.value = "30";
+        option.textContent = "30v30";
+        selectAmountPlayers.appendChild(option);
+    }
+}
+
+export function applyCwlSizeRestriction(selectAmountPlayers, allowThirty) {
+    ensureCwlSizeOptions(selectAmountPlayers);
+    const thirtyOption = selectAmountPlayers.querySelector('option[value="30"]');
+    if (!allowThirty && thirtyOption) {
+        thirtyOption.remove();
+        selectAmountPlayers.value = "15";
+    }
 }

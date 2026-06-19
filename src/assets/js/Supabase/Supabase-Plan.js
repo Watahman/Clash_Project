@@ -12,10 +12,10 @@ export async function setPlanToDatabase(userId, planId, name, planInfo) {
     return databaseRequestWithBody(path, data)
 }
 
-export async function getPlanFromDatabase(name) {
+export async function getPlanFromDatabase(planId) {
     const path = config._BASE_URL + config._EXT_SUPA_CWLPLANNER_DATA_GET
     const data = {
-        name: name
+        planId: planId
     };
     return databaseRequestWithBody(path, data)
 }

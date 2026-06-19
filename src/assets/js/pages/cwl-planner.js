@@ -1,5 +1,5 @@
 import { profileHTML } from "../profile/profile_popup.js";
-import { initOverlayHide, initAddPlayersOverlay, initAddClanButton } from "../cwl/cwl-overlay.js";
+import { initOverlayHide, initAddPlayersOverlay, initAddClanButton, applyCwlSizeRestriction } from "../cwl/cwl-overlay.js";
 import { initPlanIO, savePlan, loadAllPlans, loadPlanListener } from "../cwl/cwl-plan-io.js";
 import { getClanInfoRequest } from "../API/API-Clan.js";
 import * as conf from "../Data/config.js";
@@ -68,16 +68,25 @@ function savePlanButton() {
 }
 
 function guessCwlSize() {
+    let timer;
     cwlInputClanCode.addEventListener("input", (event) => {
-        getClanInfoRequest(event.target.value).then(data => {
-            const league = data.warLeague.name;
-            switch (league) {
-                case "Champion League I":
-                case "Champion League II":
-                case "Champion League III":
-                    selectAmountPlayers.remove(1);
+        clearTimeout(timer);
+        const clanTag = event.target.value.trim();
+        timer = setTimeout(() => {
+            if (!clanTag.startsWith("#") || clanTag.length < 4) {
+                applyCwlSizeRestriction(selectAmountPlayers, true);
+                return;
             }
-        });
+            getClanInfoRequest(clanTag).then(data => {
+                const league = data?.warLeague?.name || "";
+                const championLeague = [
+                    "Champion League I",
+                    "Champion League II",
+                    "Champion League III"
+                ].includes(league);
+                applyCwlSizeRestriction(selectAmountPlayers, !championLeague);
+            }).catch(() => applyCwlSizeRestriction(selectAmountPlayers, true));
+        }, 500);
     });
 }
 
