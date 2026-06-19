@@ -24,7 +24,8 @@ public class API_Clan {
 
     public void getClanWarLeagueWar() {
         server.createContext(conf._EXT_CLAN_WARLEAGUES_WARS, exchange -> utils.handlePost(exchange, ex -> {
-            String warTag = utils.requireString(utils.parseBody(ex), "warTag");
+            var body = utils.parseBody(ex);
+            String warTag = utils.requireString(body, "warTag");
             utils.clashGet(ex, "/clanwarleagues/wars/" + URLEncoder.encode(warTag, "UTF-8"));
         }));
     }

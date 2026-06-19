@@ -487,3 +487,45 @@
     .cwl-toolbar-actions { justify-content: flex-start; width: 100%; }
     #cwl-player-sorting, #cwl-load-plan, #cwl-plan-name { width: 100%; }
 }
+
+
+/* Iteration: compact CWL planner + live operation board */
+.cwl-toolbar-board,.cwl-toolbar-players{min-height:4.25rem}.cwl-toolbar-title span{display:none}.cwl-toolbar-title h3{font-size:1rem;letter-spacing:.08em}#cwl-save-status,.cwl-operation-link{display:none!important}#cwl-load-plan{width:10.8rem;max-width:10.8rem}#cwl-plan-name{width:12.8rem}#cwl-all-clans{grid-auto-rows:minmax(22rem,auto);align-items:start}.cwl-clan-article{min-height:22rem!important;height:auto!important}.cwl-clan-info-card{min-height:4.25rem}.cwl-clan-player-list{max-height:18rem;overflow-y:auto;align-content:start}#cwl-available-players .cwl-player-article,.cwl-clan-player-list .cwl-player-article{display:grid;grid-template-columns:3.1rem minmax(0,1fr);align-items:center;gap:.72rem;min-height:4.5rem;width:100%;padding:.6rem .72rem}#cwl-available-players .cwl-player-townhall-foto,.cwl-clan-player-list .cwl-player-townhall-foto{width:3.05rem;height:3.05rem;object-fit:contain}.cwl-player-info{min-width:0;display:grid;gap:.05rem}.cwl-player-name,.cwl-player-clan,.cwl-player-hashtag{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cwl-player-name{font-size:.98rem!important}.cwl-player-clan,.cwl-player-hashtag{font-size:.68rem}.operation-live-main{padding-top:clamp(1rem,2vw,1.6rem)}.operation-live-hero{align-items:center;margin-bottom:1rem}.operation-control-panel{max-width:96rem;margin:0 auto 1rem}.operation-control-grid{display:grid;grid-template-columns:1.1fr 1fr .75fr;gap:.8rem;padding:1rem}.operation-control-grid label{display:grid;gap:.35rem;color:var(--text-3);font-family:var(--font-mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em}.operation-help{padding:0 1rem 1rem;color:var(--text-3)}.operation-live-grid{grid-template-areas:"score roster" "rounds roster" "bonus roster"}#op-live-state[data-state="error"]{color:var(--red)}.op-roster-filter-row{display:grid;grid-template-columns:minmax(0,1fr) 12rem;gap:.7rem;padding:1rem;border-bottom:1px solid var(--border-subtle)}.op-live-table td:first-child{display:grid;gap:.12rem}.op-live-table td:first-child strong{color:var(--text-1);font-family:var(--font-heading);font-size:.96rem;text-transform:uppercase}.op-live-table td:first-child span{color:var(--accent);font-family:var(--font-mono);font-size:.7rem}.op-badge{display:inline-flex;align-items:center;justify-content:center;padding:.16rem .5rem;border-radius:999px;border:1px solid var(--border-subtle);font-family:var(--font-mono);font-size:.62rem;text-transform:uppercase;white-space:nowrap}.op-badge-ok{color:var(--green);background:var(--green-dim);border-color:rgba(56,217,138,.25)}.op-badge-warn{color:var(--accent);background:var(--accent-dim);border-color:rgba(246,183,60,.3)}.op-badge-info{color:var(--blue);background:var(--blue-dim);border-color:rgba(75,183,255,.28)}.op-badge-muted{color:var(--text-3);background:rgba(255,255,255,.035)}.op-status-unplanned{box-shadow:inset 3px 0 0 var(--accent)}.op-status-plannedOnly{box-shadow:inset 3px 0 0 var(--blue)}.op-status-apiOnly{box-shadow:inset 3px 0 0 var(--text-4)}.op-round-opponent-name{color:var(--text-1);font-family:var(--font-heading);font-size:1rem;text-transform:uppercase;margin:.2rem 0 .65rem}.op-status-pill{color:var(--text-3);border:1px solid var(--border-subtle);border-radius:999px;padding:.12rem .45rem;font-family:var(--font-mono);font-size:.6rem}.op-result-text{color:var(--text-3);font-family:var(--font-mono);text-transform:uppercase;font-size:.68rem}.op-round-stats span{display:grid;gap:.1rem;color:var(--text-3);font-size:.64rem}.op-round-stats strong{color:var(--accent);font-family:var(--font-heading);font-size:1.1rem}@media(max-width:78rem){.operation-control-grid{grid-template-columns:1fr}.operation-live-grid{grid-template-areas:"score" "roster" "rounds" "bonus"}}@media(max-width:62rem){#cwl-load-plan,#cwl-plan-name{width:100%;max-width:none}.op-roster-filter-row{grid-template-columns:1fr}}
+
+
+/* Final approved pass: compact planner, no decorative slashes, stable cards */
+.cwl-toolbar h3::before { content: none !important; }
+.cwl-toolbar-title { min-width: 0; display: grid; gap: .1rem; }
+.cwl-toolbar-title h3 { margin: 0 !important; color: var(--text-1); }
+.cwl-toolbar-actions { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; min-width: 0; }
+.cwl-toolbar-board { justify-content: space-between; }
+.cwl-plan-actions { justify-content: flex-end; flex: 1; }
+#cwl-load-plan { width: 9.25rem !important; max-width: 9.25rem !important; min-width: 8.25rem; }
+#cwl-plan-name { width: 11.25rem !important; min-width: 9rem; }
+#cwl-save-status, .cwl-operation-link { display: none !important; }
+#cwl-available-players { align-content: start; }
+#cwl-available-players .cwl-player-article,
+.cwl-clan-player-list .cwl-player-article {
+    flex: 0 0 auto !important;
+    box-sizing: border-box;
+    display: grid !important;
+    grid-template-columns: 3.05rem minmax(0, 1fr) .42rem !important;
+    min-height: 4.35rem !important;
+    width: 100% !important;
+}
+#cwl-available-players .cwl-player-article::after,
+.cwl-clan-player-list .cwl-player-article::after { grid-column: 3; right: .55rem; }
+#cwl-available-players .cwl-player-townhall-foto,
+.cwl-clan-player-list .cwl-player-townhall-foto { width: 2.9rem !important; height: 2.9rem !important; object-fit: contain !important; }
+.cwl-clan-player-list .cwl-player-article { min-height: 3.85rem !important; padding-block: .45rem !important; }
+.cwl-clan-player-list .cwl-player-townhall-foto { width: 2.45rem !important; height: 2.45rem !important; }
+#cwl-all-clans { grid-template-columns: repeat(auto-fill, minmax(18.25rem, 1fr)); gap: .8rem; }
+.cwl-clan-article { min-height: 18rem !important; height: auto !important; }
+.cwl-clan-info-card { min-height: 3.8rem !important; padding: .68rem .78rem !important; }
+.cwl-clan-logo { width: 2.55rem !important; height: 2.55rem !important; }
+.cwl-clan-player-list { max-height: 15.6rem; padding: .65rem; }
+.operation-help { min-height: 1.4rem; }
+@media (max-width: 62rem) {
+  .cwl-toolbar, .cwl-plan-actions { align-items: stretch; }
+  .cwl-plan-actions > * { width: 100% !important; max-width: none !important; }
+}

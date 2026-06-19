@@ -13,7 +13,7 @@ export async function getClanCurrentWarLeagueGroupRequest(clanTag) {
 export async function getClanWarLeagueWarRequest(warTag) {
     const path = config._BASE_URL + config._EXT_CLAN_WARLEAGUES_WARS;
     const body = JSON.stringify({
-        wartTag: warTag
+        warTag: warTag
     })
 
     return fetchClashAPIRequest(path, body)

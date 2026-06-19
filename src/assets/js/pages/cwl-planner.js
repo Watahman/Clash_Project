@@ -51,12 +51,33 @@ function init() {
     initAddPlayersOverlay({ addPlayersBtn, modalTabBtn, segBtns, selectGroup, overlayConfirmTagBtn, cwlInputTag });
     initAddClanButton({ addClanBtn, overlayAddClanBtn, cwlInputClanCode, selectAmountPlayers });
     savePlanButton();
+    initPlayerSorting();
     guessCwlSize();
     loadAllPlans();
     loadPlanListener();
     profileHTML();
     localStorage.setItem("planner_id", "");
 }
+
+function initPlayerSorting() {
+    const sorting = document.querySelector('#cwl-player-sorting');
+    if (!sorting || !availablePlayers) return;
+    const sortPlayers = () => {
+        const players = Array.from(availablePlayers.querySelectorAll('.cwl-player-article'));
+        players.sort((a, b) => {
+            if (sorting.value === 'name') {
+                return getName(a).localeCompare(getName(b), undefined, { sensitivity: 'base' });
+            }
+            return getTownHall(b) - getTownHall(a) || getName(a).localeCompare(getName(b), undefined, { sensitivity: 'base' });
+        });
+        players.forEach(player => availablePlayers.appendChild(player));
+    };
+    sorting.addEventListener('change', sortPlayers);
+    window.addEventListener('clashtools:cwl-player-added', sortPlayers);
+    window.addEventListener('clashtools:cwl-plan-loaded', sortPlayers);
+}
+function getName(card) { return card.querySelector('.cwl-player-name')?.textContent?.trim().toLowerCase() || ''; }
+function getTownHall(card) { const m=(card.querySelector('.cwl-player-townhall-foto')?.getAttribute('src')||'').match(/Town_Hall(\d+)\.png/i); return m ? Number(m[1]) : 0; }
 
 function savePlanButton() {
     savePlanBtn.addEventListener("click", () => {

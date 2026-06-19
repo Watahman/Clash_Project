@@ -2,6 +2,10 @@ import { t } from '../i18n/i18n.js';
 import { getUserInfo } from "../Supabase/Supabase-User.js";
 import { getGroupInfo, getGroupMembers } from "../Supabase/Supabase-Group.js";
 
+function memberLabel(count) {
+    return count === 1 ? '1 ' + t('groups.memberSingle') : count + ' ' + t('groups.members');
+}
+
 export function createGroupCard(groupsInfo) {
     if (!Array.isArray(groupsInfo)) return;
 
@@ -11,7 +15,7 @@ export function createGroupCard(groupsInfo) {
             if (!Array.isArray(groupData) || groupData.length === 0) return;
             getGroupMembers(groupData[0].id).then(groupMembers => {
                 groupMembers = Array.isArray(groupMembers) ? groupMembers : [];
-                groupCard.querySelector(".groups-item-meta").textContent = groupMembers.length + ' ' + t('groups.members');
+                groupCard.querySelector(".groups-item-meta").textContent = memberLabel(groupMembers.length);
                 groupCard.querySelector(".groups-item-name").textContent = groupData[0].name;
                 if (localStorage.getItem("id") === groupData[0].owner_id) {
                     groupCard.querySelector(".groups-role-badge").textContent = "Leader";
@@ -35,7 +39,7 @@ function openGroup(data, groupMembers) {
     document.querySelector("#groups-detail-empty").classList.add("hidden");
     document.querySelector("#groups-detail-content").classList.remove("hidden");
     document.querySelector("#groups-detail-name").textContent = data.name;
-    document.querySelector("#groups-detail-count").textContent = groupMembers.length + ' ' + t('groups.members');
+    document.querySelector("#groups-detail-count").textContent = memberLabel(groupMembers.length);
     document.querySelector("#groups-detail-code-text").textContent = data.code;
     document.querySelector('#groups-detail-since').textContent = t('groups.since') + ' ' + data.created_at.split('T')[0];
     const roleBadge = document.querySelector("#groups-detail-role");

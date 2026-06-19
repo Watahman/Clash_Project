@@ -1,5 +1,48 @@
 export const translations = {
   nl: {
+    'op.ok': "OK",
+    'op.apiOnly': "Clanlid, niet gepland",
+    'op.plannedOnly': "Gepland, geen war data",
+    'op.unplannedParticipant': "Speelt, niet gepland",
+    'op.notInWar': "Niet in war",
+    'op.inWar': "In war",
+    'op.notPlanned': "Niet gepland",
+    'op.planned': "Gepland",
+    'op.stars': "Sterren",
+    'op.day': "Dag",
+    'op.noRoster': "Nog geen roster",
+    'op.auto': "Automatisch",
+    'op.viewMissed': "Gemiste attacks",
+    'op.viewUnplanned': "Niet gepland",
+    'op.viewPlanned': "Gepland",
+    'op.viewAll': "Alles",
+    'op.filterPlaceholder': "Zoek speler of tag",
+    'op.noLeagueData': "Geen actieve of beschikbare CWL-data gevonden. Je ziet wel planning en clanleden.",
+    'op.liveLoaded': "Live CWL-data geladen.",
+    'op.noLiveWars': "Geen live wars",
+    'op.loadError': "Live data laden mislukt",
+    'op.loadingLive': "Live Clash-data laden...",
+    'op.noClansInPlan': "Deze planning bevat nog geen clans.",
+    'op.loadingClans': "Clans laden...",
+    'op.selectPlanFirst': "Kies eerst een planning",
+    'op.loadingPlans': "Plannen laden...",
+    'op.help': "Selecteer eerst een planning en daarna een clan. De board haalt live data op zodra dat kan.",
+    'op.phase': "CWL status",
+    'op.selectClan': "Clan",
+    'op.selectPlan': "Planning",
+    'op.setup': "Setup",
+    'op.refresh': "Refresh live data",
+    'op.kicker': "Live CWL tracker",
+    'home.ctaOperation': "Volg je CWL zonder handmatige spreadsheet.",
+    'home.operationStep3Desc': "Bekijk wie gepland was, wie effectief meedoet, gemiste attacks, score en bonusadvies.",
+    'home.operationStep3Title': "Controleer aanvallen",
+    'home.operationStep2Desc': "De board haalt clanleden, league rounds en war details op via je Java proxy naar de Clash API.",
+    'home.operationStep2Title': "Haal live CWL-data op",
+    'home.operationStep1Desc': "Selecteer een opgeslagen CWL-planning en kies daarna één clan om live op te volgen.",
+    'home.operationStep1Title': "Kies een planning",
+    'groups.memberSingle': "lid",
+    'cwl.loadingPlans': "Plannen laden...",
+    'language.label': "NL",
     'nav.cwl': 'CWL planner',
     'nav.operation': 'Operation board',
     'nav.groups': 'Groepen',
@@ -129,13 +172,15 @@ export const translations = {
     'op.avgDestruction': 'Gem. destruction',
     'op.attacksUsed': 'Attacks gebruikt',
     'op.missed': 'Gemiste attacks',
-    'op.thSpread': 'Town Hall verdeling'
+    'op.thSpread': 'Town Hall verdeling',
+    'op.players': 'spelers'
   },
   en: {
     'nav.cwl': 'CWL planner',
     'nav.operation': 'Operation board',
     'nav.groups': 'Groups',
     'header.user': 'User',
+    'language.label': 'EN',
     'header.language': 'Language',
     'home.eyebrow': 'Clan command center',
     'home.title': 'Plan war.<br><span>Win CWL.</span>',
@@ -205,6 +250,7 @@ export const translations = {
     'groups.invite': 'Invite',
     'groups.leave': 'Leave',
     'groups.member': 'Member',
+    'groups.memberSingle': 'member',
     'groups.members': 'members',
     'groups.since': 'since',
     'groups.create': 'Create',
@@ -261,6 +307,13 @@ export const translations = {
     'op.avgDestruction': 'Avg. destruction',
     'op.attacksUsed': 'Attacks used',
     'op.missed': 'Missed attacks',
-    'op.thSpread': 'Town Hall spread'
+    'op.thSpread': 'Town Hall spread',
+    'op.players': 'players',
+    'op.noAccounts': 'No accounts'
   }
 };
+
+
+translations.fr = { ...translations.en, 'language.label':'FR', 'nav.groups':'Groupes', 'header.user':'Utilisateur', 'header.language':'Langue', 'groups.title':'Vos groupes', 'groups.new':'Nouveau', 'groups.member':'Membre', 'groups.memberSingle':'membre', 'groups.members':'membres', 'profile.title':'Profil', 'profile.friends':'Amis', 'profile.settings':'Paramètres', 'auth.login':'Connexion', 'auth.createAccount':'Créer un compte', 'op.refresh':'Actualiser les données', 'op.scoreboard':'Tableau de score' };
+translations.de = { ...translations.en, 'language.label':'DE', 'nav.groups':'Gruppen', 'header.user':'Benutzer', 'header.language':'Sprache', 'groups.title':'Deine Gruppen', 'groups.new':'Neu', 'groups.member':'Mitglied', 'groups.memberSingle':'Mitglied', 'groups.members':'Mitglieder', 'profile.title':'Profil', 'profile.friends':'Freunde', 'profile.settings':'Einstellungen', 'auth.login':'Anmelden', 'auth.createAccount':'Konto erstellen', 'op.refresh':'Live-Daten aktualisieren', 'op.scoreboard':'Scoreboard' };
+translations.es = { ...translations.en, 'language.label':'ES', 'nav.groups':'Grupos', 'header.user':'Usuario', 'header.language':'Idioma', 'groups.title':'Tus grupos', 'groups.new':'Nuevo', 'groups.member':'Miembro', 'groups.memberSingle':'miembro', 'groups.members':'miembros', 'profile.title':'Perfil', 'profile.friends':'Amigos', 'profile.settings':'Ajustes', 'auth.login':'Iniciar sesión', 'auth.createAccount':'Crear cuenta', 'op.refresh':'Actualizar datos', 'op.scoreboard':'Marcador' };

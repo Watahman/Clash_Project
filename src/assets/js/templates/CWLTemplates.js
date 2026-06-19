@@ -7,7 +7,7 @@ function createPlayerCard(playerInfo, clanuuid) {
     playerInfo.forEach(player => {
         const playerTemplateClone = playerTemplate.content.cloneNode(true);
 
-        playerTemplateClone.querySelector(".cwl-player-townhall-foto").src = `../assets/css/pictures/townhalls/Town_Hall${player.townHallLevel}.png`;
+        playerTemplateClone.querySelector(".cwl-player-townhall-foto").src = `../assets/css/pictures/townhalls/Town_Hall${player.townHallLevel || player.townHall || 1}.png`;
         playerTemplateClone.querySelector(".cwl-player-hashtag").textContent = player.tag;
         playerTemplateClone.querySelector(".cwl-player-name").textContent = player.name;
         playerTemplateClone.querySelector(".cwl-player-clan").textContent = player.clanName || "No clan";
@@ -47,6 +47,7 @@ function createPlayerCard(playerInfo, clanuuid) {
         }
     });
     rememberPlannerPlayers();
+    window.dispatchEvent(new CustomEvent('clashtools:cwl-player-added'));
     savePlan();
 }
 

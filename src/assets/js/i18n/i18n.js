@@ -59,7 +59,7 @@ export function initLanguageSwitcher() {
         select.className = 'language-select';
         select.setAttribute('aria-label', t('header.language'));
         select.dataset.languageControl = 'true';
-        select.innerHTML = '<option value="nl">NL</option><option value="en">EN</option>';
+        select.innerHTML = Object.keys(translations).map(lang => `<option value="${lang}">${translations[lang]['language.label'] || lang.toUpperCase()}</option>`).join('');
         control.replaceWith(select);
         control = select;
     } else {

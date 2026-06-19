@@ -42,9 +42,9 @@
                 <a href="subPages/cwl-operation-board.html" class="btn btn-secondary" data-i18n="home.openOperation">Open operation board</a>
             </div>
             <div class="hero-stats" aria-label="Tool highlights">
-                <div class="stat-card"><span class="stat-value">Roster</span><span class="stat-label" data-i18n="home.statRoster">Roster planning</span></div>
-                <div class="stat-card"><span class="stat-value">Import</span><span class="stat-label" data-i18n="home.statImport">Player imports</span></div>
-                <div class="stat-card"><span class="stat-value">Sync</span><span class="stat-label" data-i18n="home.statSync">Groups & accounts</span></div>
+                <div class="stat-card"><span class="stat-label" data-i18n="home.statRoster">Roster planning</span></div>
+                <div class="stat-card"><span class="stat-label" data-i18n="home.statImport">Player imports</span></div>
+                <div class="stat-card"><span class="stat-label" data-i18n="home.statSync">Groups & accounts</span></div>
             </div>
         </div>
 
@@ -82,22 +82,34 @@
         <div class="tool-tabs" role="tablist" aria-label="Tools">
             <button class="tool-tab active" role="tab" data-panel="cwl" aria-selected="true"><span class="tab-dot"></span>CWL Planner</button>
             <button class="tool-tab" role="tab" data-panel="groepen" aria-selected="false"><span class="tab-dot"></span>Groepen</button>
+            <button class="tool-tab" role="tab" data-panel="operation" aria-selected="false"><span class="tab-dot"></span>Operation board</button>
         </div>
 
         <div class="tool-panel active" id="panel-cwl" role="tabpanel">
             <div class="steps">
-                <div class="step"><div class="step-left"><div class="step-number">01</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.step1Title">Importeer spelers</div><div class="step-desc" data-i18n="home.step1Desc">Vul een speler- of clantag in en haal namen, tags en Town Hall levels op via je API-flow.</div><span class="step-tag">Import</span></div></div>
-                <div class="step"><div class="step-left"><div class="step-number">02</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.step2Title">Bouw rosters</div><div class="step-desc" data-i18n="home.step2Desc">Sleep spelers naar clans, schuif clan-kaarten en zie direct hoeveel plaatsen nog vrij zijn.</div><span class="step-tag">Drag & drop</span></div></div>
-                <div class="step"><div class="step-left"><div class="step-number">03</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.step3Title">Volg je CWL-week op</div><div class="step-desc" data-i18n="home.step3Desc">Gebruik het operation board voor attacks, scores, rotatie en bonusadvies.</div><span class="step-tag">Save</span></div></div>
+                <div class="step"><div class="step-left"><div class="step-number">01</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.step1Title">Importeer spelers</div><div class="step-desc" data-i18n="home.step1Desc">Vul een speler- of clantag in en haal namen, tags en Town Hall levels op via je API-flow.</div></div></div>
+                <div class="step"><div class="step-left"><div class="step-number">02</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.step2Title">Bouw rosters</div><div class="step-desc" data-i18n="home.step2Desc">Sleep spelers naar clans, schuif clan-kaarten en zie direct hoeveel plaatsen nog vrij zijn.</div></div></div>
+                <div class="step"><div class="step-left"><div class="step-number">03</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.step3Title">Volg je CWL-week op</div><div class="step-desc" data-i18n="home.step3Desc">Gebruik het operation board voor attacks, scores, rotatie en bonusadvies.</div></div></div>
             </div>
             <div class="panel-cta"><span class="panel-cta-label" data-i18n="home.ctaPlanner">Klaar om je CWL te organiseren?</span><a href="subPages/cwl-planner.html" class="btn btn-primary" data-i18n="home.openPlanner">Open planner →</a></div>
         </div>
 
+
+
+        <div class="tool-panel" id="panel-operation" role="tabpanel">
+            <div class="steps">
+                <div class="step"><div class="step-left"><div class="step-number">01</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.operationStep1Title">Kies een planning</div><div class="step-desc" data-i18n="home.operationStep1Desc">Selecteer een opgeslagen CWL-planning en kies daarna één clan om live op te volgen.</div></div></div>
+                <div class="step"><div class="step-left"><div class="step-number">02</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.operationStep2Title">Haal live CWL-data op</div><div class="step-desc" data-i18n="home.operationStep2Desc">De board haalt clanleden, league rounds en war details op via je Java proxy naar de Clash API.</div></div></div>
+                <div class="step"><div class="step-left"><div class="step-number">03</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.operationStep3Title">Controleer aanvallen</div><div class="step-desc" data-i18n="home.operationStep3Desc">Bekijk wie gepland was, wie effectief meedoet, gemiste attacks, score en bonusadvies.</div></div></div>
+            </div>
+            <div class="panel-cta"><span class="panel-cta-label" data-i18n="home.ctaOperation">Volg je CWL zonder handmatige spreadsheet.</span><a href="subPages/cwl-operation-board.html" class="btn btn-primary" data-i18n="home.openOperation">Open operation board →</a></div>
+        </div>
+
         <div class="tool-panel" id="panel-groepen" role="tabpanel">
             <div class="steps">
-                <div class="step"><div class="step-left"><div class="step-number">01</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.groupsStep1Title">Maak groepen</div><div class="step-desc" data-i18n="home.groupsStep1Desc">Bundel leden, vrienden en clans in duidelijke groepen voor planning en uitnodigingen.</div><span class="step-tag">Create</span></div></div>
-                <div class="step"><div class="step-left"><div class="step-number">02</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.groupsStep2Title">Deel codes</div><div class="step-desc" data-i18n="home.groupsStep2Desc">Gebruik groepscodes om snel nieuwe leden te laten aansluiten.</div><span class="step-tag">Invite</span></div></div>
-                <div class="step"><div class="step-left"><div class="step-number">03</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.groupsStep3Title">Gebruik in CWL</div><div class="step-desc" data-i18n="home.groupsStep3Desc">Laad accounts uit groepen direct in de planner wanneer je een roster samenstelt.</div><span class="step-tag">Sync</span></div></div>
+                <div class="step"><div class="step-left"><div class="step-number">01</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.groupsStep1Title">Maak groepen</div><div class="step-desc" data-i18n="home.groupsStep1Desc">Bundel leden, vrienden en clans in duidelijke groepen voor planning en uitnodigingen.</div></div></div>
+                <div class="step"><div class="step-left"><div class="step-number">02</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.groupsStep2Title">Deel codes</div><div class="step-desc" data-i18n="home.groupsStep2Desc">Gebruik groepscodes om snel nieuwe leden te laten aansluiten.</div></div></div>
+                <div class="step"><div class="step-left"><div class="step-number">03</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.groupsStep3Title">Gebruik in CWL</div><div class="step-desc" data-i18n="home.groupsStep3Desc">Laad accounts uit groepen direct in de planner wanneer je een roster samenstelt.</div></div></div>
             </div>
             <div class="panel-cta"><span class="panel-cta-label" data-i18n="home.ctaGroups">Beheer je clan-netwerk.</span><a href="subPages/groups.html" class="btn btn-primary" data-i18n="home.openGroups">Open groepen →</a></div>
         </div>
