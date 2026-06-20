@@ -27,7 +27,7 @@ export function initGroupPolls(emptyMessage) {
     el.answerCancel?.addEventListener('click', closeAnswerOverlay);
     el.answerSave?.addEventListener('click', saveAnswer);
     el.answerOverlay?.addEventListener('click', event => { if (event.target === el.answerOverlay) closeAnswerOverlay(); });
-    el.reminderBtn?.addEventListener('click', () => renderReminderFallback());
+    el.reminderBtn?.addEventListener('click', () => { if (isAdmin()) renderReminderFallback(); });
 
     async function loadPolls() {
         const userId = getCurrentUserId();
@@ -36,10 +36,12 @@ export function initGroupPolls(emptyMessage) {
         withGlobalLoading(() => getGroupPolls(group.id, userId)
             .then(data => {
                 polls = Array.isArray(data) ? data : [];
-                activePoll = polls.find(poll => poll.type === 'cwl_availability' && poll.status === 'open') || null;
+                activePoll = findLatestOpenCwlPoll(polls);
                 renderNotice();
-                renderAdminPolls();
-                renderResults(activePoll || polls[0] || null);
+                if (isAdmin()) {
+                    renderAdminPolls();
+                    renderResults(activePoll || polls[0] || null);
+                }
             })
             .catch(error => console.error(error)), t('groups.loading'));
     }
@@ -56,12 +58,14 @@ export function initGroupPolls(emptyMessage) {
         if (!activePoll || !el.notice) return;
         el.notice.classList.remove('hidden');
         if (el.noticeTitle) el.noticeTitle.textContent = activePoll.title;
-        el.answerBtn.textContent = hasAnswer(activePoll, getCurrentUserId()) ? t('groups.editPollAnswer') : t('groups.answerPoll');
+        if (el.answerBtn) {
+            el.answerBtn.textContent = hasAnswer(activePoll, getCurrentUserId()) ? t('groups.editPollAnswer') : t('groups.answerPoll');
+        }
     }
 
     function renderAdminPolls() {
         el.pollsList?.replaceChildren();
-        if (!isGroupAdmin(currentRole)) return;
+        if (!isAdmin()) return;
         if (!polls.length) return el.pollsList?.appendChild(emptyMessage(t('groups.noPolls')));
         polls.forEach(poll => el.pollsList?.appendChild(pollNode(poll)));
     }
@@ -81,7 +85,7 @@ export function initGroupPolls(emptyMessage) {
     }
 
     function createPoll() {
-        if (!group || !isGroupAdmin(currentRole)) return;
+        if (!group || !isAdmin()) return;
         const title = el.titleInput?.value?.trim() || t('groups.defaultPollTitle');
         const rounds = Math.max(1, Math.min(7, Number(el.roundsInput?.value || 7)));
         withGlobalLoading(() => createGroupPoll(group.id, getCurrentUserId(), title, rounds)
@@ -93,6 +97,7 @@ export function initGroupPolls(emptyMessage) {
     }
 
     function toggleStatus(poll) {
+        if (!isAdmin()) return;
         const status = poll.status === 'open' ? 'closed' : 'open';
         withGlobalLoading(() => setGroupPollStatus(group.id, getCurrentUserId(), poll.id, status)
             .then(loadPolls)
@@ -103,8 +108,8 @@ export function initGroupPolls(emptyMessage) {
         if (!activePoll || !group) return;
         currentUser = await getUserInfo(getCurrentUserId()).then(data => Array.isArray(data) ? data[0] : data).catch(() => null);
         el.answerOverlay?.classList.remove('hidden');
-        el.answerTitle.textContent = activePoll.title;
-        el.answerGroup.textContent = `${t('groups.group')}: ${group.name}`;
+        if (el.answerTitle) el.answerTitle.textContent = activePoll.title;
+        if (el.answerGroup) el.answerGroup.textContent = `${t('groups.group')}: ${group.name}`;
         renderAnswerForm();
     }
 
@@ -114,7 +119,7 @@ export function initGroupPolls(emptyMessage) {
 
     function renderAnswerForm() {
         el.answerBody?.replaceChildren();
-        const accounts = Array.isArray(currentUser?.accounts) ? currentUser.accounts : [];
+        const accounts = Array.isArray(currentUser?.accounts) ? currentUser.accounts : parseAccounts(currentUser?.accounts);
         if (!accounts.length) return el.answerBody?.appendChild(emptyMessage(t('groups.noAccountsForPoll')));
         const previous = activePoll?.answers?.[getCurrentUserId()]?.accounts || [];
         accounts.forEach((account, index) => el.answerBody?.appendChild(accountAnswerNode(account, previousAnswer(account, previous), index)));
@@ -191,6 +196,7 @@ export function initGroupPolls(emptyMessage) {
 
     async function renderResults(poll) {
         el.results?.replaceChildren();
+        if (!isAdmin()) return;
         if (!poll) return el.results?.appendChild(emptyMessage(t('groups.noPollSelected')));
         const users = await Promise.all(members.map(member => getUserInfo(member.user_id).catch(() => null)));
         const answerUserIds = Object.keys(poll.answers || {});
@@ -249,6 +255,26 @@ export function initGroupPolls(emptyMessage) {
 
     function hasAnswer(poll, userId) {
         return Boolean(poll?.answers?.[userId]);
+    }
+
+    function findLatestOpenCwlPoll(allPolls) {
+        return [...allPolls]
+            .filter(poll => poll.type === 'cwl_availability' && poll.status === 'open')
+            .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))[0] || null;
+    }
+
+    function parseAccounts(value) {
+        if (!value || typeof value !== 'string') return [];
+        try {
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    }
+
+    function isAdmin() {
+        return isGroupAdmin(currentRole);
     }
 
     function actionButton(label, onClick, className = 'btn-groups-accent') {

@@ -7,7 +7,11 @@ import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 public class SUPABASE_Group {
@@ -76,7 +80,7 @@ public class SUPABASE_Group {
                 return;
             }
 
-            utils.sendJsonResponse(ex, result, 200);
+            utils.sendJsonResponse(ex, sanitizeGroupInfoForGeneralRead(result), 200);
         }));
     }
 
@@ -138,14 +142,15 @@ public class SUPABASE_Group {
 
             JsonObject groupObj = groupArray.get(0).getAsJsonObject();
             String groupId      = groupObj.get("id").getAsString();
+            JsonElement ownerEl = groupObj.get("owner_id");
+            boolean isOwner = ownerEl != null && Objects.equals(ownerEl.getAsString(), userId);
+            boolean isLeader = Objects.equals(getMemberRole(groupId, userId), "leader");
+            if (isOwner || isLeader) {
+                throw new HttpException(403, "{\"error\":\"Draag eerst leadership over voordat je de groep verlaat\"}");
+            }
 
             String result = SUPABASE_Client.deleteColumn("group_members",
                     "group_id=" + SUPABASE_Client.eq(groupId) + "&user_id=" + SUPABASE_Client.eq(userId));
-
-            JsonElement ownerEl = groupObj.get("owner_id");
-            if (ownerEl != null && Objects.equals(ownerEl.getAsString(), userId)) {
-                SUPABASE_Client.deleteColumn("groups", "id=" + SUPABASE_Client.eq(groupId));
-            }
 
             utils.sendJsonResponse(ex, result.isBlank() ? "{\"success\":true}" : result, 200);
         }));
@@ -229,11 +234,7 @@ public class SUPABASE_Group {
                 throw new HttpException(403, "{\"error\":\"Gebruik leadership transfer om de leader te wijzigen\"}");
             }
 
-            JsonObject update = new JsonObject();
-            update.addProperty("role", targetRole);
-            String result = SUPABASE_Client.patch("group_members",
-                    "group_id=" + SUPABASE_Client.eq(groupId) + "&user_id=" + SUPABASE_Client.eq(targetId),
-                    update.toString());
+            String result = patchMemberRole(groupId, targetId, targetRole);
             utils.sendJsonResponse(ex, result, 200);
         }));
     }
@@ -253,23 +254,22 @@ public class SUPABASE_Group {
                 return;
             }
 
-            JsonObject oldLeaderRole = new JsonObject();
-            oldLeaderRole.addProperty("role", "co_leader");
-            SUPABASE_Client.patch("group_members",
-                    "group_id=" + SUPABASE_Client.eq(groupId) + "&user_id=" + SUPABASE_Client.eq(actorId),
-                    oldLeaderRole.toString());
-
-            JsonObject newLeaderRole = new JsonObject();
-            newLeaderRole.addProperty("role", "leader");
-            SUPABASE_Client.patch("group_members",
-                    "group_id=" + SUPABASE_Client.eq(groupId) + "&user_id=" + SUPABASE_Client.eq(targetId),
-                    newLeaderRole.toString());
-
-            JsonObject groupUpdate = new JsonObject();
-            groupUpdate.addProperty("owner_id", targetId);
-            String result = SUPABASE_Client.patch("groups", "id=" + SUPABASE_Client.eq(group.get("id").getAsString()),
-                    groupUpdate.toString());
-            utils.sendJsonResponse(ex, result, 200);
+            String previousTargetRole = getMemberRole(groupId, targetId);
+            try {
+                patchMemberRole(groupId, actorId, "co_leader");
+                patchMemberRole(groupId, targetId, "leader");
+                String result = patchGroupOwner(groupId, targetId);
+                utils.sendJsonResponse(ex, result, 200);
+            } catch (Exception transferError) {
+                try {
+                    patchMemberRole(groupId, targetId, previousTargetRole);
+                    patchMemberRole(groupId, actorId, "leader");
+                    patchGroupOwner(groupId, actorId);
+                } catch (Exception rollbackError) {
+                    transferError.addSuppressed(rollbackError);
+                }
+                throw transferError;
+            }
         }));
     }
 
@@ -280,7 +280,10 @@ public class SUPABASE_Group {
             String userId   = utils.requireString(json, "userId");
 
             requireGroupMember(groupId, userId);
-            utils.sendJsonResponse(ex, getPolls(groupId).toString(), 200);
+            JsonObject group = getGroup(groupId);
+            JsonArray polls = getPollsFromGroup(group);
+            boolean canSeeAllAnswers = canManageGroup(group, groupId, userId);
+            utils.sendJsonResponse(ex, sanitizePollsForUser(polls, userId, canSeeAllAnswers).toString(), 200);
         }));
     }
 
@@ -297,6 +300,8 @@ public class SUPABASE_Group {
 
             requireGroupAdmin(groupId, userId);
             JsonArray polls = getPolls(groupId);
+            closeOpenCwlPolls(polls);
+
             JsonObject poll = new JsonObject();
             poll.addProperty("id", UUID.randomUUID().toString());
             poll.addProperty("title", title);
@@ -328,10 +333,11 @@ public class SUPABASE_Group {
                 throw new HttpException(403, "{\"error\":\"Poll is gesloten\"}");
             }
 
+            JsonArray validatedAccounts = validatePollAccounts(userId, accounts);
             JsonObject answer = new JsonObject();
             answer.addProperty("user_id", userId);
             answer.addProperty("updated_at", Instant.now().toString());
-            answer.add("accounts", accounts);
+            answer.add("accounts", validatedAccounts);
             if (!poll.has("answers") || !poll.get("answers").isJsonObject()) poll.add("answers", new JsonObject());
             poll.getAsJsonObject("answers").add(userId, answer);
 
@@ -355,7 +361,11 @@ public class SUPABASE_Group {
             requireGroupAdmin(groupId, userId);
             JsonArray polls = getPolls(groupId);
             JsonObject poll = findPoll(polls, pollId);
+            if (Objects.equals(status, "open")) {
+                closeOpenCwlPolls(polls);
+            }
             poll.addProperty("status", status);
+            if (Objects.equals(status, "closed")) poll.addProperty("closed_at", Instant.now().toString());
             savePolls(groupId, polls);
             utils.sendJsonResponse(ex, poll.toString(), 200);
         }));
@@ -378,10 +388,7 @@ public class SUPABASE_Group {
 
     private JsonObject requireGroupAdmin(String groupId, String userId) throws Exception {
         JsonObject group = getGroup(groupId);
-        String role = getMemberRole(groupId, userId);
-        JsonElement ownerEl = group.get("owner_id");
-        boolean ownerFallback = ownerEl != null && Objects.equals(ownerEl.getAsString(), userId);
-        if (!ownerFallback && !Objects.equals(role, "leader") && !Objects.equals(role, "co_leader")) {
+        if (!canManageGroup(group, groupId, userId)) {
             throw new HttpException(403, "{\"error\":\"Alleen leaders en co-leaders mogen dit beheren\"}");
         }
         return group;
@@ -397,6 +404,13 @@ public class SUPABASE_Group {
         }
 
         return group;
+    }
+
+    private boolean canManageGroup(JsonObject group, String groupId, String userId) throws Exception {
+        String role = getMemberRole(groupId, userId);
+        JsonElement ownerEl = group.get("owner_id");
+        boolean ownerFallback = ownerEl != null && Objects.equals(ownerEl.getAsString(), userId);
+        return ownerFallback || Objects.equals(role, "leader") || Objects.equals(role, "co_leader");
     }
 
     private void ensureGroupMember(String groupId, String userId) throws Exception {
@@ -436,8 +450,15 @@ public class SUPABASE_Group {
         return tag;
     }
 
+    private String normalizePlayerTag(String value) {
+        return normalizeClanTag(value);
+    }
+
     private JsonArray getPolls(String groupId) throws Exception {
-        JsonObject group = getGroup(groupId);
+        return getPollsFromGroup(getGroup(groupId));
+    }
+
+    private JsonArray getPollsFromGroup(JsonObject group) {
         JsonElement pollsEl = group.get("polls");
         if (pollsEl == null || pollsEl.isJsonNull()) return new JsonArray();
         if (pollsEl.isJsonArray()) return pollsEl.getAsJsonArray();
@@ -457,6 +478,167 @@ public class SUPABASE_Group {
             if (id != null && Objects.equals(id.getAsString(), pollId)) return poll;
         }
         throw new HttpException(404, "{\"error\":\"Poll niet gevonden\"}");
+    }
+
+    private String sanitizeGroupInfoForGeneralRead(String result) {
+        JsonArray groups = JsonParser.parseString(result).getAsJsonArray();
+        for (JsonElement groupEl : groups) {
+            if (!groupEl.isJsonObject()) continue;
+            JsonObject group = groupEl.getAsJsonObject();
+            group.add("polls", sanitizePollsForPublicMetadata(getPollsFromGroup(group)));
+        }
+        return groups.toString();
+    }
+
+    private JsonArray sanitizePollsForPublicMetadata(JsonArray polls) {
+        JsonArray safePolls = new JsonArray();
+        for (JsonElement element : polls) {
+            if (!element.isJsonObject()) continue;
+            JsonObject poll = element.getAsJsonObject().deepCopy();
+            poll.add("answers", new JsonObject());
+            safePolls.add(poll);
+        }
+        return safePolls;
+    }
+
+    private void closeOpenCwlPolls(JsonArray polls) {
+        for (JsonElement element : polls) {
+            if (!element.isJsonObject()) continue;
+            JsonObject poll = element.getAsJsonObject();
+            if (Objects.equals(readFirstString(poll, "type"), "cwl_availability")
+                    && Objects.equals(readFirstString(poll, "status"), "open")) {
+                poll.addProperty("status", "closed");
+                poll.addProperty("closed_at", Instant.now().toString());
+            }
+        }
+    }
+
+    private JsonArray sanitizePollsForUser(JsonArray polls, String userId, boolean canSeeAllAnswers) {
+        JsonArray safePolls = new JsonArray();
+        for (JsonElement element : polls) {
+            if (!element.isJsonObject()) continue;
+            JsonObject copy = element.getAsJsonObject().deepCopy();
+            if (!canSeeAllAnswers) {
+                JsonObject ownAnswers = new JsonObject();
+                if (copy.has("answers") && copy.get("answers").isJsonObject()) {
+                    JsonObject answers = copy.getAsJsonObject("answers");
+                    JsonElement ownAnswer = answers.get(userId);
+                    if (ownAnswer != null && ownAnswer.isJsonObject()) ownAnswers.add(userId, ownAnswer.deepCopy());
+                }
+                copy.add("answers", ownAnswers);
+            }
+            safePolls.add(copy);
+        }
+        return safePolls;
+    }
+
+    private JsonArray validatePollAccounts(String userId, JsonArray submittedAccounts) throws Exception {
+        Map<String, JsonObject> allowedAccounts = getUserAccountsByTag(userId);
+        JsonArray validated = new JsonArray();
+        Set<String> usedTags = new HashSet<>();
+
+        for (JsonElement element : submittedAccounts) {
+            if (!element.isJsonObject()) throw new IllegalArgumentException("Ongeldig poll account");
+            JsonObject submitted = element.getAsJsonObject();
+            String tag = normalizePlayerTag(readFirstString(submitted, "tag", "playerTag", "accountTag"));
+            if (tag.isBlank() || !allowedAccounts.containsKey(tag)) {
+                throw new HttpException(403, "{\"error\":\"Poll bevat een account dat niet bij deze gebruiker hoort\"}");
+            }
+            if (!usedTags.add(tag)) {
+                throw new IllegalArgumentException("Dubbel account in poll antwoord: " + tag);
+            }
+
+            JsonObject source = allowedAccounts.get(tag);
+            boolean wantsCwl = readBoolean(submitted, "wantsCwl", true);
+            JsonObject safe = new JsonObject();
+            safe.addProperty("name", fallback(readFirstString(source, "name", "playerName", "accountName"), tag));
+            safe.addProperty("tag", tag);
+            String townHall = fallback(readFirstString(source, "townHallLevel", "townHall", "townhall", "th"),
+                    readFirstString(submitted, "townHall", "townHallLevel"));
+            safe.addProperty("townHall", townHall);
+            safe.addProperty("wantsCwl", wantsCwl);
+            safe.add("days", wantsCwl ? sanitizeDays(submitted.get("days")) : new JsonObject());
+            validated.add(safe);
+        }
+
+        return validated;
+    }
+
+    private Map<String, JsonObject> getUserAccountsByTag(String userId) throws Exception {
+        JsonArray users = JsonParser.parseString(
+                SUPABASE_Client.getWithBody("users", "id=" + SUPABASE_Client.eq(userId))).getAsJsonArray();
+        if (users.isEmpty()) throw new HttpException(404, "{\"error\":\"Gebruiker niet gevonden\"}");
+
+        JsonObject user = users.get(0).getAsJsonObject();
+        JsonArray accounts = parseAccounts(user.get("accounts"));
+        Map<String, JsonObject> byTag = new HashMap<>();
+        for (JsonElement accountEl : accounts) {
+            if (!accountEl.isJsonObject()) continue;
+            JsonObject account = accountEl.getAsJsonObject();
+            String tag = normalizePlayerTag(readFirstString(account, "tag", "playerTag", "accountTag"));
+            if (!tag.isBlank()) byTag.put(tag, account);
+        }
+        return byTag;
+    }
+
+    private JsonArray parseAccounts(JsonElement accountsEl) {
+        if (accountsEl == null || accountsEl.isJsonNull()) return new JsonArray();
+        if (accountsEl.isJsonArray()) return accountsEl.getAsJsonArray();
+        if (accountsEl.isJsonPrimitive()) {
+            String value = accountsEl.getAsString();
+            if (value == null || value.isBlank()) return new JsonArray();
+            JsonElement parsed = JsonParser.parseString(value);
+            return parsed.isJsonArray() ? parsed.getAsJsonArray() : new JsonArray();
+        }
+        return new JsonArray();
+    }
+
+    private JsonObject sanitizeDays(JsonElement daysEl) {
+        JsonObject safeDays = new JsonObject();
+        if (daysEl == null || !daysEl.isJsonObject()) return safeDays;
+        JsonObject submittedDays = daysEl.getAsJsonObject();
+        for (int day = 1; day <= 7; day += 1) {
+            String key = String.valueOf(day);
+            if (submittedDays.has(key)) safeDays.addProperty(key, readBoolean(submittedDays, key, false));
+        }
+        return safeDays;
+    }
+
+    private String readFirstString(JsonObject object, String... fields) {
+        if (object == null) return "";
+        for (String field : fields) {
+            JsonElement value = object.get(field);
+            if (value != null && !value.isJsonNull()) return value.getAsString();
+        }
+        return "";
+    }
+
+    private boolean readBoolean(JsonObject object, String field, boolean defaultValue) {
+        if (object == null || !object.has(field) || object.get(field).isJsonNull()) return defaultValue;
+        JsonElement value = object.get(field);
+        if (value.isJsonPrimitive()) {
+            String raw = value.getAsString();
+            if (Objects.equals(raw, "true") || Objects.equals(raw, "false")) return Boolean.parseBoolean(raw);
+        }
+        return defaultValue;
+    }
+
+    private String fallback(String first, String second) {
+        return first == null || first.isBlank() ? (second == null ? "" : second) : first;
+    }
+
+    private String patchMemberRole(String groupId, String userId, String role) throws Exception {
+        JsonObject update = new JsonObject();
+        update.addProperty("role", normalizeGroupRole(role));
+        return SUPABASE_Client.patch("group_members",
+                "group_id=" + SUPABASE_Client.eq(groupId) + "&user_id=" + SUPABASE_Client.eq(userId),
+                update.toString());
+    }
+
+    private String patchGroupOwner(String groupId, String ownerId) throws Exception {
+        JsonObject groupUpdate = new JsonObject();
+        groupUpdate.addProperty("owner_id", ownerId);
+        return SUPABASE_Client.patch("groups", "id=" + SUPABASE_Client.eq(groupId), groupUpdate.toString());
     }
 
     private String normalizeGroupBadge(String value) {
