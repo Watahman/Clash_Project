@@ -295,3 +295,84 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
     .groups-detail-header { grid-template-columns: 3.4rem minmax(0, 1fr) !important; }
     .groups-header-actions { grid-column: 1 / -1; justify-content: flex-start !important; flex-wrap: wrap !important; }
 }
+
+/* Phase 3: stable groups icon/button states */
+#groups-main button,
+#groups-main .groups-code-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .42rem;
+}
+#groups-main button:focus-visible,
+#groups-main .groups-code-pill:focus-visible {
+    outline: 2px solid rgba(246,183,60,.62);
+    outline-offset: 2px;
+}
+#groups-main button img,
+#groups-main .groups-code-pill img {
+    display: block !important;
+    flex: 0 0 auto !important;
+    width: 1rem !important;
+    height: 1rem !important;
+    object-fit: contain !important;
+}
+.btn-groups-icon {
+    flex: 0 0 2.35rem !important;
+    width: 2.35rem !important;
+    min-width: 2.35rem !important;
+    height: 2.35rem !important;
+    min-height: 2.35rem !important;
+}
+.btn-groups-accent,
+.btn-groups-default {
+    min-height: 2.45rem !important;
+}
+.btn-groups-icon:hover,
+.btn-groups-icon:focus-visible,
+.btn-groups-default:hover,
+.btn-groups-default:focus-visible {
+    color: var(--text-1) !important;
+    background: rgba(255,255,255,.06) !important;
+    border-color: rgba(246,183,60,.28) !important;
+}
+.btn-groups-accent:hover,
+.btn-groups-accent:focus-visible {
+    color: #1a1203 !important;
+    background: linear-gradient(135deg, #ffd86a, #f6b73c) !important;
+    border-color: rgba(255,216,106,.65) !important;
+}
+.btn-groups-icon:hover img,
+.btn-groups-icon:focus-visible img,
+.btn-groups-default:hover img,
+.btn-groups-default:focus-visible img {
+    opacity: 1 !important;
+    filter: invert(90%) sepia(28%) saturate(617%) hue-rotate(337deg) brightness(108%) !important;
+}
+.btn-groups-accent:hover img,
+.btn-groups-accent:focus-visible img {
+    opacity: 1 !important;
+    filter: brightness(0) saturate(100%) invert(6%) sepia(18%) saturate(2088%) hue-rotate(2deg) brightness(96%) contrast(98%) !important;
+}
+.groups-danger:hover,
+.groups-danger:focus-visible,
+.btn-groups-danger:hover,
+.btn-groups-danger:focus-visible {
+    color: var(--red) !important;
+    background: var(--red-dim) !important;
+    border-color: rgba(255,91,74,.36) !important;
+}
+.groups-danger:hover img,
+.groups-danger:focus-visible img,
+.btn-groups-danger:hover img,
+.btn-groups-danger:focus-visible img {
+    filter: invert(59%) sepia(84%) saturate(3549%) hue-rotate(326deg) brightness(105%) !important;
+}
+#groups-collapse-btn {
+    display: grid !important;
+    place-items: center !important;
+}
+#groups-collapse-icon {
+    width: .72rem !important;
+    height: .72rem !important;
+}

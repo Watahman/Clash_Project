@@ -138,6 +138,8 @@ function initRefs() {
     refs.exportBtn = document.querySelector('#op-export');
     refs.importBtn = document.querySelector('#op-import-json');
     refs.importFile = document.querySelector('#op-import-file');
+    refs.standaloneInput = document.querySelector('#op-standalone-clan-tag');
+    refs.standaloneLoad = document.querySelector('#op-standalone-load');
     refs.liveState = document.querySelector('#op-live-state');
     refs.phase = document.querySelector('#op-cwl-phase');
     refs.help = document.querySelector('#op-help');
@@ -149,6 +151,9 @@ function initRefs() {
     refs.roundsList = document.querySelector('#op-rounds-list');
     refs.roundState = document.querySelector('#op-round-state');
     refs.roundCount = document.querySelector('#op-round-count');
+    refs.standingsState = document.querySelector('#op-standings-state');
+    refs.standingsList = document.querySelector('#op-standings-list');
+    refs.standingsNote = document.querySelector('#op-standings-note');
     refs.rosterCount = document.querySelector('#op-roster-count');
     refs.rosterBody = document.querySelector('#op-roster-body');
     refs.rosterFilter = document.querySelector('#op-roster-filter');
@@ -178,6 +183,13 @@ function initEvents() {
     refs.exportBtn.onclick = () => exportReport();
     refs.importBtn.onclick = () => refs.importFile.click();
     refs.importFile.onchange = () => importJsonFile(refs.importFile.files?.[0]);
+    refs.standaloneLoad.onclick = () => loadStandaloneClan();
+    refs.standaloneInput.onkeydown = event => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            loadStandaloneClan();
+        }
+    };
 }
 
 function loadPlans() {
@@ -273,10 +285,27 @@ function selectClan(clanTag) {
     if (selectedClan) refreshClanReport(selectedClan);
 }
 
+function loadStandaloneClan() {
+    const clanTag = normalizeTag(refs.standaloneInput.value);
+    if (!clanTag || !looksLikeClashTag(clanTag)) {
+        setHelp(t('op.standaloneInvalid'), true);
+        return;
+    }
+    selectedPlan = null;
+    selectedClan = { tag: clanTag, name: clanTag, players: [], standalone: true };
+    latestReport = null;
+    planSelectToken += 1;
+    refs.planSelect.value = '';
+    refs.clanSelect.disabled = true;
+    refs.clanSelect.replaceChildren(option('', t('op.standaloneMode'), { disabled: true, selected: true }));
+    refreshClanReport(selectedClan);
+}
+
 async function enrichPlannedPlayers(clan, members = []) {
     const memberIndex = new Map(members.map(member => [normalizeTag(member.tag), member]).filter(([tag]) => tag));
     const cacheIndex = readPlannerPlayerCache();
-    const enriched = clan.players.map(player => mergePlayerData(mergePlayerData(player, cacheIndex.get(player.tag) || {}), memberIndex.get(player.tag) || {}));
+    const plannedPlayers = Array.isArray(clan.players) ? clan.players : [];
+    const enriched = plannedPlayers.map(player => mergePlayerData(mergePlayerData(player, cacheIndex.get(player.tag) || {}), memberIndex.get(player.tag) || {}));
     const missing = enriched.filter(player => player.tag && (!player.name || player.name === player.tag || !player.townHall));
     const results = await Promise.allSettled(missing.map(player => getPlayerInfoRequest(player.tag)));
     results.forEach((result, index) => {
@@ -302,17 +331,25 @@ async function refreshClanReport(clan) {
         ]);
         if (token !== requestToken) return;
         const members = membersData.status === 'fulfilled' && Array.isArray(membersData.value?.items) ? membersData.value.items : [];
-        const enrichedClan = await enrichPlannedPlayers(clan, members);
+        const clanInfoValue = clanInfo.status === 'fulfilled' && !clanInfo.value?.error ? clanInfo.value : null;
+        const clanBase = {
+            ...clan,
+            tag: normalizeTag(clanInfoValue?.tag || clan.tag),
+            name: cleanDisplayName(clanInfoValue?.name || clan.name) || clan.tag,
+            players: Array.isArray(clan.players) ? clan.players : []
+        };
+        const enrichedClan = await enrichPlannedPlayers(clanBase, members);
         if (token !== requestToken) return;
         selectedClan = enrichedClan;
 
         const report = {
             plan: selectedPlan,
             clan: enrichedClan,
-            clanInfo: clanInfo.status === 'fulfilled' ? clanInfo.value : null,
+            clanInfo: clanInfoValue,
             members,
             leagueGroup: leagueGroup.status === 'fulfilled' ? leagueGroup.value : null,
             currentWar: currentWar.status === 'fulfilled' ? currentWar.value : null,
+            leagueWars: [],
             wars: [],
             phase: 'unknown'
         };
@@ -326,10 +363,10 @@ async function refreshClanReport(clan) {
                 getClanWarLeagueWarRequest(item.warTag).then(war => ({ ...war, _round: item.round, _warTag: item.warTag }))
             ));
             if (token !== requestToken) return;
-            report.wars = warResults
+            report.leagueWars = warResults
                 .filter(result => result.status === 'fulfilled' && result.value && !result.value.error)
-                .map(result => result.value)
-                .filter(war => getWarSide(war, enrichedClan.tag));
+                .map(result => result.value);
+            report.wars = report.leagueWars.filter(war => getWarSide(war, enrichedClan.tag));
         }
 
         if (report.wars.length === 0 && report.currentWar && !report.currentWar.error && getWarSide(report.currentWar, enrichedClan.tag)) {
@@ -390,6 +427,7 @@ function normalizeLeaguePhase(state) {
 function isAttackCountingState(stateKey) { return stateKey === 'live' || stateKey === 'completed'; }
 function isMissedCountingState(stateKey) { return stateKey === 'completed'; }
 function isResultFinalState(stateKey) { return stateKey === 'completed'; }
+function isRoundCountedForScoreboard(round) { return isAttackCountingState(round?.state); }
 
 function cwlStateText(stateKey) {
     if (stateKey === 'completed') return t('op.stateCompleted');
@@ -431,6 +469,59 @@ function decideResult(stars, destruction, opponentStars, opponentDestruction, st
     if (destruction > opponentDestruction) return 'win';
     if (destruction < opponentDestruction) return 'loss';
     return 'draw';
+}
+
+function addStandingWar(stats, clan, opponent, result) {
+    const tag = normalizeTag(clan?.tag);
+    if (!tag) return;
+    if (!stats.has(tag)) {
+        stats.set(tag, {
+            tag,
+            name: cleanDisplayName(clan?.name) || tag,
+            wars: 0,
+            wins: 0,
+            losses: 0,
+            draws: 0,
+            stars: 0,
+            destructionTotal: 0
+        });
+    }
+    const row = stats.get(tag);
+    row.wars += 1;
+    row.stars += parseNumber(clan?.stars, 0);
+    row.destructionTotal += parseNumber(clan?.destructionPercentage, 0);
+    if (result === 'win') row.wins += 1;
+    else if (result === 'loss') row.losses += 1;
+    else row.draws += 1;
+    row.lastOpponent = cleanDisplayName(opponent?.name) || normalizeTag(opponent?.tag) || '-';
+}
+
+function buildStandings(wars = [], selectedClanTag = '') {
+    const completedWars = wars.filter(war => normalizeWarState(war) === 'completed' && war?.clan && war?.opponent);
+    const stats = new Map();
+    completedWars.forEach(war => {
+        const clanStars = parseNumber(war.clan?.stars, 0);
+        const opponentStars = parseNumber(war.opponent?.stars, 0);
+        const clanDestruction = parseNumber(war.clan?.destructionPercentage, 0);
+        const opponentDestruction = parseNumber(war.opponent?.destructionPercentage, 0);
+        const clanResult = decideResult(clanStars, clanDestruction, opponentStars, opponentDestruction, 'completed');
+        const opponentResult = clanResult === 'win' ? 'loss' : clanResult === 'loss' ? 'win' : 'draw';
+        addStandingWar(stats, war.clan, war.opponent, clanResult);
+        addStandingWar(stats, war.opponent, war.clan, opponentResult);
+    });
+    const rows = Array.from(stats.values())
+        .map(row => ({
+            ...row,
+            destruction: row.wars ? row.destructionTotal / row.wars : 0
+        }))
+        .sort((a, b) => b.stars - a.stars || b.destruction - a.destruction || b.wins - a.wins || a.name.localeCompare(b.name))
+        .map((row, index) => ({ ...row, rank: index + 1 }));
+    const selectedTag = normalizeTag(selectedClanTag);
+    return {
+        rows,
+        selectedIndex: rows.findIndex(row => row.tag === selectedTag),
+        completedWars: completedWars.length
+    };
 }
 
 function buildReport(raw) {
@@ -546,7 +637,8 @@ function buildReport(raw) {
         status: getPlayerStatus(player)
     })).sort((a, b) => Number(b.townHall) - Number(a.townHall) || a.name.localeCompare(b.name));
 
-    return { ...raw, roster, rounds };
+    const standings = buildStandings(raw.leagueWars || raw.wars, raw.clan.tag);
+    return { ...raw, roster, rounds, standings };
 }
 
 function getPlayerStatus(player) {
@@ -558,13 +650,14 @@ function getPlayerStatus(player) {
 
 function renderReport(report) {
     setPhase(report.phase);
-    const knownRounds = report.rounds.filter(round => round.state !== 'notAvailable').length;
-    refs.roundState.textContent = knownRounds ? `${knownRounds} ${t('op.roundsShort')}` : t('op.noLiveWars');
+    const countedRounds = report.rounds.filter(isRoundCountedForScoreboard);
+    refs.roundState.textContent = countedRounds.length ? `${countedRounds.length} ${t('op.roundsShort')}` : t('op.noPlayedRounds');
     refs.roundCount.textContent = `${report.rounds.length} ${t('op.roundsShort')}`;
     setHelp(report.wars.length ? t('op.liveLoaded') : t('op.noLeagueData'));
     renderRosterViewOptions(report);
     renderRounds(report.rounds);
     renderScoreboard(report);
+    renderStandings(report);
     renderRoster();
     renderBonusAdvice(report.roster);
 }
@@ -577,6 +670,9 @@ function clearReport(resetSelectors = true) {
     refs.missed.textContent = '0';
     refs.thList.replaceChildren();
     refs.roundsList.replaceChildren();
+    refs.standingsList.replaceChildren();
+    refs.standingsState.textContent = '-';
+    refs.standingsNote.textContent = '';
     refs.rosterBody.replaceChildren();
     refs.bonusList.replaceChildren();
     refs.rosterCount.textContent = '0 ' + t('op.players');
@@ -625,6 +721,32 @@ function renderScoreboard(report) {
         refs.thList.appendChild(item);
     });
     if (Object.keys(distribution).length === 0) refs.thList.appendChild(chip(t('op.noRoster')));
+}
+
+function renderStandings(report) {
+    refs.standingsList.replaceChildren();
+    refs.standingsNote.textContent = '';
+    const standings = report?.standings;
+    if (!standings?.rows?.length || standings.selectedIndex < 0) {
+        refs.standingsState.textContent = t('op.standingsUnavailable');
+        refs.standingsList.appendChild(chip(t('op.standingsFallback')));
+        return;
+    }
+    const selected = standings.rows[standings.selectedIndex];
+    refs.standingsState.textContent = `#${selected.rank}/${standings.rows.length}`;
+    const start = Math.max(0, standings.selectedIndex - 1);
+    const visibleRows = standings.rows.slice(start, standings.selectedIndex + 2);
+    visibleRows.forEach(row => {
+        const item = document.createElement('div');
+        item.className = `op-standing-row${row.tag === selected.tag ? ' is-selected' : ''}`;
+        item.innerHTML = `
+            <span class="op-standing-rank">#${row.rank}</span>
+            <strong>${escapeHtml(row.name)}</strong>
+            <span>${parseNumber(row.stars, 0)}★</span>
+            <span>${parseNumber(row.destruction, 0).toFixed(1)}%</span>`;
+        refs.standingsList.appendChild(item);
+    });
+    refs.standingsNote.textContent = t('op.standingsNote', { count: standings.completedWars });
 }
 
 function renderRounds(rounds) {
@@ -791,11 +913,14 @@ function importJsonFile(file) {
 function normalizeImportedReport(data) {
     if (!data || typeof data !== 'object') return null;
     if (Array.isArray(data.roster) && Array.isArray(data.rounds)) {
+        const leagueWars = Array.isArray(data.leagueWars) ? data.leagueWars : Array.isArray(data.wars) ? data.wars : [];
         return {
             ...data,
             roster: data.roster.map(player => ({ ...player, tag: normalizeTag(player.tag), name: player.name || normalizeTag(player.tag), townHall: parseNumber(player.townHall || player.townHallLevel, 0), dayStats: player.dayStats || {} })).filter(player => player.tag),
             rounds: data.rounds.map((round, index) => ({ ...createEmptyRound(index + 1), ...round, day: round.day || index + 1, stateText: round.stateText || cwlStateText(round.state || 'unknown') })),
             wars: Array.isArray(data.wars) ? data.wars : [],
+            leagueWars,
+            standings: data.standings || buildStandings(leagueWars, data.clan?.tag || ''),
             phase: data.phase || 'unknown'
         };
     }

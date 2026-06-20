@@ -595,3 +595,76 @@
     .operation-actions { width: 100%; }
     .operation-actions .btn { flex: 1; }
 }
+
+/* Phase 2: standalone clan + compact CWL standings */
+.operation-control-grid {
+    grid-template-columns: 1.1fr 1fr 1.15fr .75fr !important;
+}
+.operation-live-grid {
+    grid-template-areas:
+        "score roster"
+        "standings roster"
+        "rounds roster"
+        "bonus roster" !important;
+}
+.op-standings-panel { grid-area: standings; }
+.op-inline-control {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: .45rem;
+}
+.op-inline-control input { min-width: 0; }
+.op-inline-control button { white-space: nowrap; }
+.op-standings-list {
+    display: grid;
+    gap: .45rem;
+    padding: 1rem 1rem .65rem;
+}
+.op-standing-row {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: .55rem;
+    padding: .55rem .65rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,.025);
+    color: var(--text-3);
+    font-family: var(--font-mono);
+    font-size: .7rem;
+}
+.op-standing-row strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-1);
+    font-family: var(--font-heading);
+    font-size: .9rem;
+    text-transform: uppercase;
+}
+.op-standing-row.is-selected {
+    border-color: rgba(246,183,60,.32);
+    background: var(--accent-dim);
+}
+.op-standing-rank { color: var(--accent); font-weight: 800; }
+.op-standings-note {
+    padding: 0 1rem 1rem;
+    color: var(--text-4);
+    font-family: var(--font-mono);
+    font-size: .68rem;
+}
+@media (max-width: 78rem) {
+    .operation-control-grid { grid-template-columns: 1fr !important; }
+    .operation-live-grid {
+        grid-template-areas:
+            "score"
+            "standings"
+            "roster"
+            "rounds"
+            "bonus" !important;
+    }
+}
+@media (max-width: 62rem) {
+    .op-inline-control { grid-template-columns: 1fr; }
+}
