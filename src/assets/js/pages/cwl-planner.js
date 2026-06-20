@@ -13,7 +13,8 @@ let savePlanBtn, planName, loadPlan;
 let availablePlayers, allClans, totalPlayerAmount;
 let addPlayersBtn, overlayConfirmTagBtn, accountsSearch, accountList,
     addSelectedBtn, segBtns, selectGroup, groupPreview,
-    groupPreviewList, loadGroupBtn, modalTabBtn, modalAccountListEmpty;
+    groupPreviewList, loadGroupBtn, modalTabBtn, modalAccountListEmpty,
+    selectGroupPoll, groupLinkedClans;
 
 function labelInit() {
     addClanPlayersBtn      = document.querySelector("#cwl-add-clan-players-button");
@@ -41,6 +42,8 @@ function labelInit() {
     groupPreviewList       = document.querySelector("#cwl-group-preview-list");
     loadGroupBtn           = document.querySelector("#cwl-overlay-load-group-button");
     modalAccountListEmpty  = document.querySelector("#modal-account-list-empty");
+    selectGroupPoll        = document.querySelector("#cwl-select-group-poll");
+    groupLinkedClans       = document.querySelector("#cwl-group-linked-clans");
 }
 
 function init() {
@@ -48,7 +51,11 @@ function init() {
     labelInit();
     initOverlayHide();
     initPlanIO({ availablePlayers, allClans, totalPlayerAmount, planName, loadPlan });
-    initAddPlayersOverlay({ addPlayersBtn, modalTabBtn, segBtns, selectGroup, overlayConfirmTagBtn, cwlInputTag });
+    initAddPlayersOverlay({
+        addPlayersBtn, modalTabBtn, segBtns, selectGroup, overlayConfirmTagBtn,
+        cwlInputTag, addSelectedBtn, accountList, modalAccountListEmpty,
+        groupPreview, groupPreviewList, loadGroupBtn, selectGroupPoll, groupLinkedClans
+    });
     initAddClanButton({ addClanBtn, overlayAddClanBtn, cwlInputClanCode, selectAmountPlayers });
     savePlanButton();
     initPlayerSorting();
@@ -74,6 +81,7 @@ function initPlayerSorting() {
     };
     sorting.addEventListener('change', sortPlayers);
     window.addEventListener('clashtools:cwl-player-added', sortPlayers);
+    window.addEventListener('clashtools:cwl-player-removed', sortPlayers);
     window.addEventListener('clashtools:cwl-plan-loaded', sortPlayers);
 }
 function getName(card) { return card.querySelector('.cwl-player-name')?.textContent?.trim().toLowerCase() || ''; }

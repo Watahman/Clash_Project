@@ -164,7 +164,7 @@ public class SUPABASE_Group {
             String groupId  = utils.requireString(json, "groupId");
             String userId   = utils.requireString(json, "userId");
 
-            requireGroupAdmin(groupId, userId);
+            requireGroupMember(groupId, userId);
 
             String result = SUPABASE_Client.getWithBody("group_clans",
                     "group_id=" + SUPABASE_Client.eq(groupId) + "&order=created_at.asc");
