@@ -144,4 +144,88 @@ public class SUPABASE_Group {
             utils.sendJsonResponse(ex, result.isBlank() ? "{\"success\":true}" : result, 200);
         }));
     }
+
+    public void getGroupClans() {
+        server.createContext(conf._EXT_SUPA_GROUP_CLANS_GET, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject json = utils.parseBody(ex);
+            String groupId  = utils.requireString(json, "groupId");
+            String userId   = utils.requireString(json, "userId");
+
+            requireGroupOwner(groupId, userId);
+
+            String result = SUPABASE_Client.getWithBody("group_clans",
+                    "group_id=" + SUPABASE_Client.eq(groupId) + "&order=created_at.asc");
+            utils.sendJsonResponse(ex, result, 200);
+        }));
+    }
+
+    public void addGroupClan() {
+        server.createContext(conf._EXT_SUPA_GROUP_CLAN_ADD, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject json = utils.parseBody(ex);
+            String groupId  = utils.requireString(json, "groupId");
+            String userId   = utils.requireString(json, "userId");
+            String clanTag  = normalizeClanTag(utils.requireString(json, "clanTag"));
+            String clanName = utils.requireString(json, "clanName").trim();
+
+            if (clanTag.isBlank()) throw new IllegalArgumentException("Ongeldige clantag");
+            if (clanName.isBlank()) throw new IllegalArgumentException("Clan naam ontbreekt");
+
+            requireGroupOwner(groupId, userId);
+
+            JsonObject row = new JsonObject();
+            row.addProperty("group_id", groupId);
+            row.addProperty("clan_tag", clanTag);
+            row.addProperty("clan_name", clanName);
+            row.addProperty("added_by", userId);
+            JsonElement badgeUrl = json.get("badgeUrl");
+            if (badgeUrl != null && !badgeUrl.isJsonNull() && !badgeUrl.getAsString().isBlank()) {
+                row.addProperty("badge_url", badgeUrl.getAsString());
+            }
+
+            String result = SUPABASE_Client.post("group_clans", row.toString());
+            utils.sendJsonResponse(ex, result, 201);
+        }));
+    }
+
+    public void removeGroupClan() {
+        server.createContext(conf._EXT_SUPA_GROUP_CLAN_REMOVE, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject json = utils.parseBody(ex);
+            String groupId  = utils.requireString(json, "groupId");
+            String userId   = utils.requireString(json, "userId");
+            String clanTag  = normalizeClanTag(utils.requireString(json, "clanTag"));
+
+            if (clanTag.isBlank()) throw new IllegalArgumentException("Ongeldige clantag");
+
+            requireGroupOwner(groupId, userId);
+
+            String result = SUPABASE_Client.deleteColumn("group_clans",
+                    "group_id=" + SUPABASE_Client.eq(groupId) + "&clan_tag=" + SUPABASE_Client.eq(clanTag));
+            utils.sendJsonResponse(ex, result.isBlank() ? "{\"success\":true}" : result, 200);
+        }));
+    }
+
+    private JsonObject requireGroupOwner(String groupId, String userId) throws Exception {
+        JsonArray groupArray = JsonParser.parseString(
+                SUPABASE_Client.getWithBody("groups", "id=" + SUPABASE_Client.eq(groupId))).getAsJsonArray();
+
+        if (groupArray.isEmpty()) {
+            throw new HttpException(404, "{\"error\":\"Groep niet gevonden\"}");
+        }
+
+        JsonObject group = groupArray.get(0).getAsJsonObject();
+        JsonElement ownerEl = group.get("owner_id");
+        if (ownerEl == null || !Objects.equals(ownerEl.getAsString(), userId)) {
+            throw new HttpException(403, "{\"error\":\"Alleen de groepsleider mag gekoppelde clans beheren\"}");
+        }
+
+        return group;
+    }
+
+    private String normalizeClanTag(String value) {
+        if (value == null) return "";
+        String tag = value.trim().toUpperCase();
+        if (tag.isBlank()) return "";
+        if (!tag.startsWith("#")) tag = "#" + tag;
+        return tag;
+    }
 }

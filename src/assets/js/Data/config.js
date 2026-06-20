@@ -76,3 +76,6 @@ export const _EXT_SUPA_GROUP_MEMBERS = "/SupabaseGroupMembers";
 export const _EXT_SUPA_GROUP_INFO = "/SupabaseGroupInfo";
 export const _EXT_SUPA_GROUP_JOIN = "/SupabaseGroupJoin";
 export const _EXT_SUPA_GROUP_LEAVE = "/SupabaseGroupLeave";
+export const _EXT_SUPA_GROUP_CLANS_GET = "/SupabaseGroupClansGet";
+export const _EXT_SUPA_GROUP_CLAN_ADD = "/SupabaseGroupClanAdd";
+export const _EXT_SUPA_GROUP_CLAN_REMOVE = "/SupabaseGroupClanRemove";

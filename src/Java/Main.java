@@ -99,6 +99,9 @@ public class Main {
         supaGroup.getGroupMembers();
         supaGroup.joinGroup();
         supaGroup.leaveGroup();
+        supaGroup.getGroupClans();
+        supaGroup.addGroupClan();
+        supaGroup.removeGroupClan();
 
         server.start();
         System.out.println("Server gestart op http://localhost:8080");

@@ -101,6 +101,51 @@
                 </div>
             </div>
 
+            <section class="groups-admin-panel hidden" id="groups-admin-panel" aria-label="Groepsbeheer">
+                <div class="groups-admin-header">
+                    <div>
+                        <span class="groups-admin-kicker" data-i18n="groups.adminKicker">Leader tools</span>
+                        <h3 id="groups-admin-title" data-i18n="groups.adminTitle">Groepsbeheer</h3>
+                        <p id="groups-admin-subtitle" data-i18n="groups.adminSubtitle">Beheer gekoppelde clans voor deze groep.</p>
+                    </div>
+                </div>
+
+                <div class="groups-admin-grid">
+                    <article class="groups-admin-card">
+                        <h4 data-i18n="groups.linkedClans">Gekoppelde clans</h4>
+                        <div class="groups-admin-form">
+                            <input id="groups-admin-clan-tag" type="text" placeholder="Clantag: #ABC123">
+                            <button class="btn-groups-accent" id="groups-admin-add-clan">
+                                <img src="../assets/css/pictures/add.svg" alt="">
+                                <span data-i18n="groups.addClan">Clan toevoegen</span>
+                            </button>
+                        </div>
+                        <p class="groups-admin-message" id="groups-admin-message"></p>
+                        <div class="groups-linked-clans" id="groups-linked-clans">
+                            <p class="groups-empty" data-i18n="groups.noLinkedClans">Nog geen clans gekoppeld</p>
+                        </div>
+                    </article>
+
+                    <article class="groups-admin-card">
+                        <div class="groups-admin-card-header">
+                            <h4 data-i18n="groups.unlinkedAccounts">Niet-gelinkte accounts</h4>
+                            <button class="btn-groups-default" id="groups-admin-scan-unlinked">
+                                <span data-i18n="groups.scanUnlinked">Scannen</span>
+                            </button>
+                        </div>
+                        <p class="groups-admin-help" data-i18n="groups.unlinkedHelp">Vergelijkt live clanleden met accounts van groepsleden.</p>
+                        <div class="groups-unlinked-accounts" id="groups-unlinked-accounts">
+                            <p class="groups-empty" data-i18n="groups.scanFirst">Start een scan om ontbrekende koppelingen te zien.</p>
+                        </div>
+                    </article>
+
+                    <article class="groups-admin-card groups-admin-card-muted">
+                        <h4 data-i18n="groups.laterTools">Later</h4>
+                        <p data-i18n="groups.laterToolsText">Plaats voorzien voor polls, pollresultaten en reminders.</p>
+                    </article>
+                </div>
+            </section>
+
         </div>
     </section>
 

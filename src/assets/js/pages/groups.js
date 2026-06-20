@@ -1,8 +1,17 @@
 import { initI18n, t } from '../i18n/i18n.js';
-import { getClanInfoRequest } from "../API/API-Clan.js";
+import { getClanInfoRequest, getClanMembersRequest } from "../API/API-Clan.js";
 import { createGroupCard } from "../templates/GroupTemplates.js";
 import { profileHTML } from "../profile/profile_popup.js";
-import { createGroup, getGroupsOfUser, joinGroup, leaveGroup } from "../Supabase/Supabase-Group.js";
+import {
+    addGroupClan,
+    createGroup,
+    getGroupClans,
+    getGroupsOfUser,
+    joinGroup,
+    leaveGroup,
+    removeGroupClan
+} from "../Supabase/Supabase-Group.js";
+import { getUserInfo } from "../Supabase/Supabase-User.js";
 import { getCurrentUserId } from "../utils/user.js";
 import { withGlobalLoading } from "../utils/loading-state.js";
 
@@ -34,7 +43,20 @@ const groupOverlayLeave   = document.querySelector("#groups-overlay-leave");
 const groupsLeaveBtn      = document.querySelector('#groups-leave-btn');
 const groupsLeaveCancelBtn = document.querySelector('#groups-leave-cancel-btn');
 const groupsLeaveConfirmBtn = document.querySelector('#groups-leave-confirm-btn');
+const groupsSettingsBtn   = document.querySelector('#groups-settings-btn');
+const groupsAdminPanel    = document.querySelector('#groups-admin-panel');
+const groupsAdminTitle    = document.querySelector('#groups-admin-title');
+const groupsAdminClanTag  = document.querySelector('#groups-admin-clan-tag');
+const groupsAdminAddClan  = document.querySelector('#groups-admin-add-clan');
+const groupsAdminMessage  = document.querySelector('#groups-admin-message');
+const groupsLinkedClans   = document.querySelector('#groups-linked-clans');
+const groupsAdminScanUnlinked = document.querySelector('#groups-admin-scan-unlinked');
+const groupsUnlinkedAccounts  = document.querySelector('#groups-unlinked-accounts');
 let timer;
+let activeGroup = null;
+let activeGroupMembers = [];
+let activeLinkedClans = [];
+let activeGroupIsLeader = false;
 
 function init() {
     initI18n();
@@ -44,6 +66,7 @@ function init() {
     profileHTML();
     copyCodeInit();
     leaveGroupFun();
+    adminPanelInit();
     escPopupClose();
     overlayBackdropClose();
 }
@@ -179,6 +202,12 @@ function leaveGroupFun() {
 function resetGroupDetail() {
     groupsDetailEmpty.classList.remove('hidden');
     groupsDetailContent.classList.add('hidden');
+    activeGroup = null;
+    activeGroupMembers = [];
+    activeLinkedClans = [];
+    activeGroupIsLeader = false;
+    groupsSettingsBtn?.classList.add('hidden');
+    groupsAdminPanel?.classList.add('hidden');
     const memberList = document.querySelector('#groups-member-list');
     if (memberList) memberList.replaceChildren(emptyGroupMessage('Geen leden'));
 }
@@ -234,6 +263,270 @@ function overlayBackdropClose() {
     groupOverlayLeave.onclick = (e) => {
         if (e.target === groupOverlayLeave) groupOverlayLeave.classList.add('hidden');
     };
+}
+
+function adminPanelInit() {
+    window.addEventListener('clashtools:group-opened', event => {
+        activeGroup = event.detail?.group || null;
+        activeGroupMembers = Array.isArray(event.detail?.members) ? event.detail.members : [];
+        activeGroupIsLeader = Boolean(event.detail?.isLeader);
+        activeLinkedClans = [];
+        groupsAdminPanel?.classList.add('hidden');
+        clearAdminMessage();
+        renderLinkedClans([]);
+        renderUnlinkedPlaceholder(t('groups.scanFirst'));
+
+        if (groupsAdminTitle && activeGroup) {
+            groupsAdminTitle.textContent = `${t('groups.adminTitle')}: ${activeGroup.name}`;
+        }
+
+        if (activeGroupIsLeader) {
+            loadLinkedClans();
+        }
+    });
+
+    groupsSettingsBtn?.addEventListener('click', () => {
+        if (!activeGroupIsLeader) return;
+        groupsAdminPanel?.classList.toggle('hidden');
+        if (!groupsAdminPanel?.classList.contains('hidden')) {
+            loadLinkedClans();
+        }
+    });
+
+    groupsAdminAddClan?.addEventListener('click', () => {
+        addLinkedClan();
+    });
+
+    groupsAdminClanTag?.addEventListener('keydown', event => {
+        if (event.key === 'Enter') addLinkedClan();
+    });
+
+    groupsAdminScanUnlinked?.addEventListener('click', () => {
+        scanUnlinkedAccounts();
+    });
+}
+
+function normalizeClanTag(value) {
+    const tag = String(value || '').trim().toUpperCase();
+    if (!tag) return '';
+    return tag.startsWith('#') ? tag : `#${tag}`;
+}
+
+function getClanBadgeUrl(clanInfo) {
+    return clanInfo?.badgeUrls?.small || clanInfo?.badgeUrls?.medium || clanInfo?.badgeUrls?.large || '';
+}
+
+function clearAdminMessage() {
+    if (!groupsAdminMessage) return;
+    groupsAdminMessage.textContent = '';
+    groupsAdminMessage.classList.remove('error', 'success');
+}
+
+function setAdminMessage(message, type = 'error') {
+    if (!groupsAdminMessage) return;
+    groupsAdminMessage.textContent = message;
+    groupsAdminMessage.classList.toggle('error', type === 'error');
+    groupsAdminMessage.classList.toggle('success', type === 'success');
+}
+
+function ensureLeaderContext() {
+    const userId = requireLoggedIn();
+    if (!userId || !activeGroup || !activeGroupIsLeader) {
+        setAdminMessage(t('groups.ownerOnly'));
+        return null;
+    }
+    return userId;
+}
+
+function loadLinkedClans() {
+    const userId = ensureLeaderContext();
+    if (!userId) return;
+
+    withGlobalLoading(() => getGroupClans(activeGroup.id, userId).then(clans => {
+        activeLinkedClans = Array.isArray(clans) ? clans : [];
+        renderLinkedClans(activeLinkedClans);
+    }).catch(error => {
+        console.error(error);
+        activeLinkedClans = [];
+        renderLinkedClans([]);
+        setAdminMessage(t('groups.linkedClansLoadError'));
+    }), t('groups.loading'));
+}
+
+function addLinkedClan() {
+    const userId = ensureLeaderContext();
+    const tag = normalizeClanTag(groupsAdminClanTag?.value);
+    if (!userId || !tag) {
+        setAdminMessage(t('groups.enterClanTag'));
+        return;
+    }
+
+    if (activeLinkedClans.some(clan => normalizeClanTag(clan.clan_tag) === tag)) {
+        setAdminMessage(t('groups.clanAlreadyLinked'));
+        return;
+    }
+
+    withGlobalLoading(() => getClanInfoRequest(tag).then(clanInfo => {
+        return addGroupClan(activeGroup.id, userId, {
+            tag: normalizeClanTag(clanInfo?.tag || tag),
+            name: clanInfo?.name || tag,
+            badgeUrl: getClanBadgeUrl(clanInfo)
+        });
+    }).then(() => {
+        if (groupsAdminClanTag) groupsAdminClanTag.value = '';
+        setAdminMessage(t('groups.clanLinked'), 'success');
+        loadLinkedClans();
+    }).catch(error => {
+        console.error(error);
+        setAdminMessage(t('groups.clanLinkError'));
+    }), t('groups.loading'));
+}
+
+function removeLinkedClan(clanTag) {
+    const userId = ensureLeaderContext();
+    const tag = normalizeClanTag(clanTag);
+    if (!userId || !tag) return;
+
+    withGlobalLoading(() => removeGroupClan(activeGroup.id, userId, tag).then(() => {
+        activeLinkedClans = activeLinkedClans.filter(clan => normalizeClanTag(clan.clan_tag) !== tag);
+        renderLinkedClans(activeLinkedClans);
+        renderUnlinkedPlaceholder(t('groups.scanFirst'));
+        setAdminMessage(t('groups.clanRemoved'), 'success');
+    }).catch(error => {
+        console.error(error);
+        setAdminMessage(t('groups.clanRemoveError'));
+    }), t('groups.loading'));
+}
+
+function renderLinkedClans(clans) {
+    if (!groupsLinkedClans) return;
+    groupsLinkedClans.replaceChildren();
+
+    if (!Array.isArray(clans) || clans.length === 0) {
+        groupsLinkedClans.appendChild(emptyGroupMessage(t('groups.noLinkedClans')));
+        return;
+    }
+
+    clans.forEach(clan => {
+        const item = document.createElement('div');
+        item.className = 'groups-linked-clan';
+
+        const badge = document.createElement('div');
+        badge.className = 'groups-linked-clan-badge';
+        if (clan.badge_url) {
+            const img = document.createElement('img');
+            img.src = clan.badge_url;
+            img.alt = '';
+            badge.appendChild(img);
+        }
+
+        const text = document.createElement('div');
+        text.className = 'groups-linked-clan-text';
+        const name = document.createElement('strong');
+        name.textContent = clan.clan_name || clan.clan_tag;
+        const tag = document.createElement('span');
+        tag.textContent = normalizeClanTag(clan.clan_tag);
+        text.append(name, tag);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-groups-icon groups-danger';
+        removeBtn.title = t('groups.removeClan');
+        removeBtn.textContent = 'x';
+        removeBtn.addEventListener('click', () => removeLinkedClan(clan.clan_tag));
+
+        item.append(badge, text, removeBtn);
+        groupsLinkedClans.appendChild(item);
+    });
+}
+
+function renderUnlinkedPlaceholder(message) {
+    if (!groupsUnlinkedAccounts) return;
+    groupsUnlinkedAccounts.replaceChildren(emptyGroupMessage(message));
+}
+
+function extractUserAccountTags(user) {
+    const accounts = Array.isArray(user?.accounts) ? user.accounts : [];
+    return accounts
+        .map(account => normalizeClanTag(account?.tag || account?.playerTag || account?.accountTag || account?.clashTag))
+        .filter(Boolean);
+}
+
+function getClanMemberItems(response) {
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response?.items)) return response.items;
+    if (Array.isArray(response?.memberList)) return response.memberList;
+    return [];
+}
+
+function scanUnlinkedAccounts() {
+    const userId = ensureLeaderContext();
+    if (!userId) return;
+    if (!Array.isArray(activeLinkedClans) || activeLinkedClans.length === 0) {
+        renderUnlinkedPlaceholder(t('groups.noLinkedClans'));
+        return;
+    }
+
+    withGlobalLoading(async () => {
+        const groupUsers = await Promise.all(activeGroupMembers.map(member => getUserInfo(member.user_id).catch(() => null)));
+        const linkedTags = new Set();
+        groupUsers.forEach(userData => {
+            const user = Array.isArray(userData) ? userData[0] : userData;
+            extractUserAccountTags(user).forEach(tag => linkedTags.add(tag));
+        });
+
+        const missingAccounts = [];
+        for (const clan of activeLinkedClans) {
+            const clanTag = normalizeClanTag(clan.clan_tag);
+            const liveMembers = getClanMemberItems(await getClanMembersRequest(clanTag));
+            liveMembers.forEach(member => {
+                const memberTag = normalizeClanTag(member?.tag);
+                if (!memberTag || linkedTags.has(memberTag)) return;
+                missingAccounts.push({
+                    name: member?.name || memberTag,
+                    tag: memberTag,
+                    townHall: member?.townHallLevel || member?.townHall || '',
+                    clan: clan.clan_name || clanTag
+                });
+            });
+        }
+
+        renderUnlinkedAccounts(missingAccounts);
+    }, t('groups.loading')).catch(error => {
+        console.error(error);
+        renderUnlinkedPlaceholder(t('groups.scanError'));
+    });
+}
+
+function renderUnlinkedAccounts(accounts) {
+    if (!groupsUnlinkedAccounts) return;
+    groupsUnlinkedAccounts.replaceChildren();
+
+    if (!Array.isArray(accounts) || accounts.length === 0) {
+        groupsUnlinkedAccounts.appendChild(emptyGroupMessage(t('groups.noUnlinkedAccounts')));
+        return;
+    }
+
+    accounts.forEach(account => {
+        const item = document.createElement('div');
+        item.className = 'groups-unlinked-account';
+
+        const main = document.createElement('div');
+        main.className = 'groups-unlinked-account-main';
+        const name = document.createElement('strong');
+        name.textContent = account.name;
+        const meta = document.createElement('span');
+        const thLabel = account.townHall ? `TH${account.townHall} - ` : '';
+        meta.textContent = `${thLabel}${account.tag} - ${account.clan}`;
+        main.append(name, meta);
+
+        const status = document.createElement('span');
+        status.className = 'groups-unlinked-status';
+        status.textContent = t('groups.notLinkedToMember');
+
+        item.append(main, status);
+        groupsUnlinkedAccounts.appendChild(item);
+    });
 }
 
 init();

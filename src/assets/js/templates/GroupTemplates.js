@@ -45,13 +45,22 @@ function openGroup(data, groupMembers) {
     const roleBadge = document.querySelector("#groups-detail-role");
     roleBadge.classList.remove("leader");
 
-    if (localStorage.getItem("id") === data.owner_id) {
+    const isLeader = localStorage.getItem("id") === data.owner_id;
+    const settingsBtn = document.querySelector("#groups-settings-btn");
+    if (settingsBtn) settingsBtn.classList.toggle("hidden", !isLeader);
+    const pollBtn = document.querySelector("#groups-poll-btn");
+    if (pollBtn) pollBtn.classList.add("hidden");
+
+    if (isLeader) {
         roleBadge.textContent = "Leader";
         roleBadge.classList.add("leader");
     } else {
         roleBadge.textContent = t('groups.member');
     }
     addAllMembers(groupMembers, data.owner_id);
+    window.dispatchEvent(new CustomEvent("clashtools:group-opened", {
+        detail: { group: data, members: groupMembers, isLeader }
+    }));
 }
 
 function addAllMembers(groupMembers, creatorId) {
