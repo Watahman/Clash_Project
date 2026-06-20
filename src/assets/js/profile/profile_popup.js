@@ -208,6 +208,7 @@ function refreshProfileData(openAfterLoad = false) {
         loadBases(userData.accounts || [], emptyLabel, true);
         renderFriends(Array.isArray(friends) ? friends : [], emptyLabel, true);
         renderGroups(Array.isArray(groups) ? groups : [], emptyLabel, true);
+        applyActiveProfileTab();
         if (openAfterLoad) {
             openProfile(userData.name, "#" + userData.code, userData.created_at?.split("T")[0]);
         }
@@ -225,6 +226,11 @@ function openProfile(username, code, memberSince) {
     profile.classList.add('po-open');
     document.body.style.overflow = 'hidden';
     poTab(activeTab, tabRefs);
+}
+
+function applyActiveProfileTab() {
+    const currentTab = document.querySelector('.po-tab.po-tab-active') || activeTab;
+    if (currentTab && tabRefs) poTab(currentTab, tabRefs);
 }
 
 function closeProfile() {

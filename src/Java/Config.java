@@ -15,6 +15,8 @@ public class Config {
 
     String _BASE_URL_SUPABASE = firstNonBlank(System.getenv("_BASE_URL_SUPABASE"), System.getenv("SUPABASE_URL"));
     String _BASE_URL_CLASH = firstNonBlank(System.getenv("_BASE_URL_CLASH"), "https://api.clashofclans.com/v1");
+    String _CACHE_ENABLED = firstNonBlank(System.getenv("CACHE_ENABLED"), "true");
+    String _CACHE_MODE = firstNonBlank(System.getenv("CACHE_MODE"), "memory");
 
     String _EXT_CLAN_CURRENTWAR_LEAGUEGROUP = "/ClanCurrentWarLeagueGroup";
     String _EXT_CLAN_WARLEAGUES_WARS = "/ClanWarLeaguesWars";
@@ -124,5 +126,13 @@ public class Config {
 
     String getClashBaseUrl() {
         return _BASE_URL_CLASH;
+    }
+
+    boolean isCacheEnabled() {
+        return !"false".equalsIgnoreCase(_CACHE_ENABLED);
+    }
+
+    String getCacheMode() {
+        return _CACHE_MODE == null || _CACHE_MODE.isBlank() ? "memory" : _CACHE_MODE;
     }
 }

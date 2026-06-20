@@ -1,5 +1,7 @@
 import * as config from "../Data/config.js"
 import {fetchClashAPIRequest} from "./API-Client.js"
+import { cacheKeys } from "../cache/cache-keys.js";
+import { CACHE_STALE, CACHE_TTL } from "../cache/cache-policy.js";
 
 export async function getClanCurrentWarLeagueGroupRequest(clanTag) {
     const path = config._BASE_URL + config._EXT_CLAN_CURRENTWAR_LEAGUEGROUP;
@@ -7,7 +9,11 @@ export async function getClanCurrentWarLeagueGroupRequest(clanTag) {
         clanTag: clanTag
     })
 
-    return fetchClashAPIRequest(path, body)
+    return fetchClashAPIRequest(path, body, {
+        key: cacheKeys.clashClanLeagueGroup(clanTag),
+        ttlMs: CACHE_TTL.CLASH_LEAGUE_GROUP,
+        staleMs: CACHE_STALE.SHORT
+    })
 }
 
 export async function getClanWarLeagueWarRequest(warTag) {
@@ -16,7 +22,11 @@ export async function getClanWarLeagueWarRequest(warTag) {
         warTag: warTag
     })
 
-    return fetchClashAPIRequest(path, body)
+    return fetchClashAPIRequest(path, body, {
+        key: cacheKeys.clashClanWar(warTag),
+        ttlMs: CACHE_TTL.CLASH_WAR_LIVE,
+        staleMs: CACHE_STALE.SHORT
+    })
 }
 
 export async function getClanWarLogRequest(clanTag) {
@@ -25,7 +35,11 @@ export async function getClanWarLogRequest(clanTag) {
         clanTag: clanTag
     })
 
-    return fetchClashAPIRequest(path, body)
+    return fetchClashAPIRequest(path, body, {
+        key: cacheKeys.clashClanWarLog(clanTag),
+        ttlMs: CACHE_TTL.CLASH_WAR_ENDED,
+        staleMs: CACHE_STALE.MEDIUM
+    })
 }
 
 //configure parameters
@@ -35,7 +49,11 @@ export async function getClanSearchRequest() {
         // fill this with all the possible parameters on the clash api website
     })
 
-    return fetchClashAPIRequest(path, body)
+    return fetchClashAPIRequest(path, body, {
+        key: cacheKeys.clashClanCurrentWar(clanTag),
+        ttlMs: CACHE_TTL.CLASH_WAR_LIVE,
+        staleMs: CACHE_STALE.SHORT
+    })
 }
 
 export async function getClanCurrentWarRequest(clanTag) {
@@ -44,7 +62,11 @@ export async function getClanCurrentWarRequest(clanTag) {
         clanTag: clanTag
     })
 
-    return fetchClashAPIRequest(path, body)
+    return fetchClashAPIRequest(path, body, {
+        key: cacheKeys.clashClanInfo(clanTag),
+        ttlMs: CACHE_TTL.CLASH_CLAN_INFO,
+        staleMs: CACHE_STALE.LONG
+    })
 }
 
 // real clan info
@@ -54,7 +76,11 @@ export async function getClanInfoRequest(clanTag) {
         clanTag: clanTag
     })
 
-    return fetchClashAPIRequest(path, body)
+    return fetchClashAPIRequest(path, body, {
+        key: cacheKeys.clashClanMembers(clanTag),
+        ttlMs: CACHE_TTL.CLASH_CLAN_MEMBERS,
+        staleMs: CACHE_STALE.SHORT
+    })
 }
 
 export async function getClanMembersRequest(clanTag) {

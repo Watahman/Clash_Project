@@ -22,7 +22,11 @@ export function loadBases(baseArray, emptyLabel, force = false) {
     if (!force && document.querySelectorAll(".po-card-base").length > 0) return;
     if (!Array.isArray(baseArray) || baseArray.length === 0) return;
     emptyLabel.classList.add('hidden');
-    baseArray.forEach(element => { createBaseCard(element); });
+    const showBases = document.querySelector('#po-tab-bases')?.classList.contains('po-tab-active');
+    baseArray.forEach(element => {
+        createBaseCard(element);
+        document.querySelectorAll('.po-card-base').forEach(card => card.classList.toggle('hidden', !showBases));
+    });
 }
 
 export function handleAddBase(inputBaseTag, inputBaseToken) {

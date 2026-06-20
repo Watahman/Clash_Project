@@ -1,7 +1,8 @@
 import { withGlobalLoading } from "../utils/loading-state.js";
+import { getCachedThenRefresh } from "../cache/local-cache.js";
 
-export async function databaseRequestWithBody(path, body) {
-    return withGlobalLoading(async () => {
+export async function databaseRequestWithBody(path, body, cacheOptions = null) {
+    const request = async () => {
         const response = await fetch(path, {
             method: "POST",
             headers: {
@@ -24,5 +25,14 @@ export async function databaseRequestWithBody(path, body) {
         }
 
         return data;
+    };
+
+    return withGlobalLoading(async () => {
+        if (!cacheOptions?.key) return request();
+        return getCachedThenRefresh(cacheOptions.key, request, {
+            ttlMs: cacheOptions.ttlMs,
+            staleMs: cacheOptions.staleMs,
+            source: 'supabase'
+        });
     }, "Laden...");
 }

@@ -2,6 +2,8 @@ package Java;
 
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpServer;
+import Java.cache.CacheKeys;
+import Java.cache.CachePolicy;
 
 import java.net.URLEncoder;
 
@@ -18,22 +20,22 @@ public class API_Player {
 
     public void getPlayer() {
         server.createContext(conf._EXT_PLAYER_INFO, exchange -> utils.handlePost(exchange, ex -> {
-            String playerID = utils.requireString(utils.parseBody(ex), "playerID");
-            utils.clashGet(ex, "/players/" + URLEncoder.encode(playerID, "UTF-8"));
+            String playerID = CacheKeys.normalizeTag(utils.requireString(utils.parseBody(ex), "playerID"));
+            utils.clashGetCached(ex, "/players/" + URLEncoder.encode(playerID, "UTF-8"), CachePolicy.PLAYER_INFO);
         }));
     }
 
     public void getPlayerBattleLog() {
         server.createContext(conf._EXT_PLAYER_BATTLE_LOG, exchange -> utils.handlePost(exchange, ex -> {
-            String playerID = utils.requireString(utils.parseBody(ex), "playerID");
-            utils.clashGet(ex, "/players/" + URLEncoder.encode(playerID, "UTF-8") + "/battlelog");
+            String playerID = CacheKeys.normalizeTag(utils.requireString(utils.parseBody(ex), "playerID"));
+            utils.clashGetCached(ex, "/players/" + URLEncoder.encode(playerID, "UTF-8") + "/battlelog", CachePolicy.PLAYER_BATTLE_LOG);
         }));
     }
 
     public void postPlayerVerifyToken() {
         server.createContext(conf._EXT_PLAYER_VERIFY_TOKEN, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject json    = utils.parseBody(ex);
-            String playerTag   = utils.requireString(json, "playerID");
+            String playerTag   = CacheKeys.normalizeTag(utils.requireString(json, "playerID"));
             String playerToken = utils.requireString(json, "playerToken");
 
             JsonObject body = new JsonObject();
@@ -45,8 +47,8 @@ public class API_Player {
 
     public void getPlayerLeagueHistory() {
         server.createContext(conf._EXT_PLAYER_LEAGUE_HISTORY, exchange -> utils.handlePost(exchange, ex -> {
-            String playerID = utils.requireString(utils.parseBody(ex), "playerID");
-            utils.clashGet(ex, "/players/" + URLEncoder.encode(playerID, "UTF-8") + "/leaguehistory");
+            String playerID = CacheKeys.normalizeTag(utils.requireString(utils.parseBody(ex), "playerID"));
+            utils.clashGetCached(ex, "/players/" + URLEncoder.encode(playerID, "UTF-8") + "/leaguehistory", CachePolicy.PLAYER_LEAGUE_HISTORY);
         }));
     }
 }

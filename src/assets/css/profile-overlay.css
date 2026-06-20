@@ -221,3 +221,15 @@
 }
 .po-friend-list-content .po-base-item { grid-template-columns: 3rem minmax(0, 1fr) auto !important; }
 .po-friend-actions { justify-self: end; margin-left: 0 !important; }
+
+/* Keep profile tabs honest: card display rules above use !important. */
+#profile-overlay .po-base-item.hidden,
+#profile-overlay .po-settings.hidden,
+#profile-overlay #po-add.hidden,
+#profile-overlay #po-friend-requests-btn.hidden,
+#profile-overlay #po-friend-pending-btn.hidden,
+#po-add-base.hidden,
+#po-add-clan.hidden,
+#po-friend-list.hidden {
+    display: none !important;
+}

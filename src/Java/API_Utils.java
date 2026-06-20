@@ -5,6 +5,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
+import Java.cache.CacheKeys;
+import Java.cache.CacheStore;
+import Java.cache.InMemoryCacheStore;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
 public class API_Utils {
+    private static final CacheStore CACHE = new InMemoryCacheStore();
     private final Config conf;
 
     public API_Utils(Config conf) {
@@ -148,6 +152,24 @@ public class API_Utils {
 
     public void clashGet(HttpExchange exchange, String path) throws Exception {
         String response = getClashApiResponse(conf.getClashBaseUrl() + path);
+        sendJsonResponse(exchange, response, 200);
+    }
+
+    public void clashGetCached(HttpExchange exchange, String path, long ttlMs) throws Exception {
+        if (!conf.isCacheEnabled() || ttlMs <= 0 || !"memory".equalsIgnoreCase(conf.getCacheMode())) {
+            clashGet(exchange, path);
+            return;
+        }
+
+        String key = CacheKeys.clashGet(path);
+        String cached = CACHE.get(key);
+        if (cached != null) {
+            sendJsonResponse(exchange, cached, 200);
+            return;
+        }
+
+        String response = getClashApiResponse(conf.getClashBaseUrl() + path);
+        CACHE.put(key, response, ttlMs);
         sendJsonResponse(exchange, response, 200);
     }
 

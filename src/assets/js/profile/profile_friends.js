@@ -7,9 +7,13 @@ export function renderFriends(friends, emptyLabel, force = false) {
     if (force) document.querySelectorAll(".po-card-friend").forEach(el => el.remove());
     if (!Array.isArray(friends) || friends.length === 0) return;
     emptyLabel.classList.add('hidden');
+    const showFriends = document.querySelector('#po-tab-friends')?.classList.contains('po-tab-active');
     friends.forEach(friend => {
         const friendId = friend.user_b || friend.user_a;
-        if (friendId) createFriendCard(friendId);
+        if (friendId) {
+            createFriendCard(friendId);
+            document.querySelectorAll('.po-card-friend').forEach(card => card.classList.toggle('hidden', !showFriends));
+        }
     });
 }
 
