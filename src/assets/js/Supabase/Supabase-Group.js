@@ -1,11 +1,12 @@
 import * as config from "../Data/config.js";
 import { databaseRequestWithBody } from "./Supabase-Client.js";
 
-export async function createGroup(name, ownerId) {
+export async function createGroup(name, ownerId, badge = 'shield') {
     const path = config._BASE_URL + config._EXT_SUPA_GROUP_MAKE
     const data = {
         name: name,
-        ownerId: ownerId
+        ownerId: ownerId,
+        badge: badge
     };
     return databaseRequestWithBody(path, data)
 }

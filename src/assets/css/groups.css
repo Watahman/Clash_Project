@@ -286,6 +286,45 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
     background: currentColor !important;
     clip-path: polygon(50% 0,88% 16%,88% 50%,70% 82%,50% 100%,30% 82%,12% 50%,12% 16%) !important;
 }
+.groups-detail-logo:has(.groups-badge-svg)::before,
+.groups-item-logo:has(.groups-badge-svg)::before {
+    content: none !important;
+}
+.groups-badge-svg {
+    width: 1.55rem;
+    height: 1.55rem;
+    color: var(--accent);
+    filter: drop-shadow(0 0 .35rem rgba(246,183,60,.18));
+}
+.groups-badge-picker {
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+}
+.groups-badge-picker-title {
+    color: var(--text-2);
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    text-transform: uppercase;
+}
+.groups-badge-options {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .45rem;
+}
+.groups-badge-option {
+    min-height: 2.6rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-2);
+    background: rgba(255,255,255,.035);
+}
+.groups-badge-option.active,
+.groups-badge-option:hover,
+.groups-badge-option:focus-visible {
+    color: var(--accent);
+    border-color: rgba(246,183,60,.38);
+    background: var(--accent-dim);
+}
 .groups-detail-info { min-width: 0 !important; }
 .groups-detail-name { font-size: 1.22rem !important; }
 .groups-header-actions { display: flex !important; align-items: center !important; justify-content: flex-end !important; gap: .42rem !important; flex-wrap: nowrap !important; margin-left: 0 !important; }
@@ -545,6 +584,94 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
     padding: .35rem .6rem !important;
     font-size: .72rem;
 }
+.groups-poll-notice {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .85rem;
+    margin: 1rem 1rem 0;
+    padding: .8rem .9rem;
+    border: 1px solid rgba(246,183,60,.26);
+    border-radius: var(--radius-md);
+    background: var(--accent-dim);
+}
+.groups-poll-notice strong {
+    display: block;
+    color: var(--text-1);
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+}
+.groups-poll-notice p {
+    margin: .2rem 0 0;
+    color: var(--text-3);
+    font-size: .78rem;
+}
+.groups-poll-answer-container {
+    width: min(44rem, calc(100vw - 2rem));
+    max-height: min(46rem, calc(100vh - 2rem));
+    overflow: hidden;
+    padding: 0;
+}
+.groups-poll-answer-body {
+    display: flex;
+    flex-direction: column;
+    gap: .65rem;
+    padding: 1rem;
+    overflow-y: auto;
+}
+.groups-poll-account-card,
+.groups-poll-result-user,
+.groups-poll-summary,
+.groups-poll-day-summary {
+    padding: .65rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background: rgba(255,255,255,.025);
+}
+.groups-poll-account-head {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    color: var(--text-1);
+}
+.groups-poll-account-head span {
+    color: var(--text-3);
+    font-size: .78rem;
+}
+.groups-poll-days,
+.groups-poll-day-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin-top: .55rem;
+}
+.groups-poll-day-toggle,
+.groups-poll-day-summary span {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .26rem .5rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    color: var(--text-2);
+    font-family: var(--font-mono);
+    font-size: .68rem;
+}
+.groups-poll-results {
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+    margin-top: .65rem;
+    max-height: 24rem;
+    overflow-y: auto;
+}
+.groups-poll-result-user {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+}
+.groups-poll-result-user strong { color: var(--text-1); }
+.groups-poll-result-user span { color: var(--text-3); font-size: .76rem; }
 .groups-unlinked-status {
     flex: 0 0 auto;
     padding: .18rem .5rem;
@@ -564,7 +691,8 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
     .groups-admin-form,
     .groups-admin-card-header,
     .groups-unlinked-account,
-    .groups-admin-member { align-items: stretch; flex-direction: column; }
+    .groups-admin-member,
+    .groups-poll-notice { align-items: stretch; flex-direction: column; }
     .groups-unlinked-status { align-self: flex-start; }
     .groups-admin-tabs { flex-wrap: wrap; }
 }

@@ -2,6 +2,7 @@ import { t } from '../i18n/i18n.js';
 import { getUserInfo } from "../Supabase/Supabase-User.js";
 import { getGroupInfo, getGroupMembers } from "../Supabase/Supabase-Group.js";
 import { applyRoleBadge, getCurrentUserRole, getMemberRole, isGroupAdmin } from "../groups/groups-roles.js";
+import { renderBadge } from "../groups/groups-badges.js";
 
 function memberLabel(count) {
     return count === 1 ? '1 ' + t('groups.memberSingle') : count + ' ' + t('groups.members');
@@ -18,6 +19,7 @@ export function createGroupCard(groupsInfo) {
                 groupMembers = Array.isArray(groupMembers) ? groupMembers : [];
                 groupCard.querySelector(".groups-item-meta").textContent = memberLabel(groupMembers.length);
                 groupCard.querySelector(".groups-item-name").textContent = groupData[0].name;
+                renderBadge(groupCard.querySelector(".groups-item-logo"), groupData[0].badge);
                 const currentRole = getCurrentUserRole(groupData[0], groupMembers, localStorage.getItem("id"), group);
                 applyRoleBadge(groupCard.querySelector(".groups-role-badge"), currentRole, t);
                 const item = groupCard.querySelector(".groups-item");
@@ -38,6 +40,7 @@ function openGroup(data, groupMembers) {
     document.querySelector("#groups-detail-empty").classList.add("hidden");
     document.querySelector("#groups-detail-content").classList.remove("hidden");
     document.querySelector("#groups-detail-name").textContent = data.name;
+    renderBadge(document.querySelector("#groups-detail-logo"), data.badge);
     document.querySelector("#groups-detail-count").textContent = memberLabel(groupMembers.length);
     document.querySelector("#groups-detail-code-text").textContent = data.code;
     document.querySelector('#groups-detail-since').textContent = t('groups.since') + ' ' + data.created_at.split('T')[0];

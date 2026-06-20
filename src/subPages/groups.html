@@ -95,6 +95,15 @@
                 </div>
             </div>
 
+            <div class="groups-poll-notice hidden" id="groups-poll-notice">
+                <div>
+                    <span class="groups-admin-kicker" data-i18n="groups.pollActive">Actieve CWL poll</span>
+                    <strong id="groups-poll-notice-title">CWL beschikbaarheid</strong>
+                    <p id="groups-poll-notice-copy" data-i18n="groups.pollNoticeText">Geef per account door of je CWL kan meespelen.</p>
+                </div>
+                <button class="btn-groups-accent" id="groups-poll-answer-btn" type="button" data-i18n="groups.answerPoll">Poll invullen</button>
+            </div>
+
             <div class="groups-members-panel">
                 <div id="groups-member-list">
                     <p class="groups-empty">Geen leden</p>
@@ -122,6 +131,7 @@
         <div class="groups-admin-tabs" role="tablist" aria-label="Groepsbeheer secties">
             <button class="groups-admin-tab groups-admin-tab-active" data-admin-tab="members" type="button" data-i18n="groups.manageMembers">Leden</button>
             <button class="groups-admin-tab" data-admin-tab="clans" type="button" data-i18n="groups.linkedClans">Gekoppelde clans</button>
+            <button class="groups-admin-tab" data-admin-tab="polls" type="button" data-i18n="groups.polls">Polls</button>
             <button class="groups-admin-tab" data-admin-tab="future" type="button" data-i18n="groups.laterTools">Later</button>
         </div>
 
@@ -176,6 +186,33 @@
                 <p data-i18n="groups.laterToolsText">Plaats voorzien voor polls, pollresultaten en reminders.</p>
             </article>
         </div>
+
+        <div class="groups-admin-section hidden" id="groups-admin-section-polls" data-admin-section="polls">
+            <div class="groups-admin-grid">
+                <article class="groups-admin-card">
+                    <h4 data-i18n="groups.createPoll">CWL poll aanmaken</h4>
+                    <div class="groups-admin-form">
+                        <input id="groups-poll-title-input" type="text" data-i18n-placeholder="groups.pollTitlePlaceholder" placeholder="CWL beschikbaarheid">
+                        <input id="groups-poll-rounds-input" type="number" min="1" max="7" value="7" aria-label="CWL dagen">
+                        <button class="btn-groups-accent" id="groups-poll-create-btn" type="button">
+                            <span data-i18n="groups.createPollBtn">Poll maken</span>
+                        </button>
+                    </div>
+                    <p class="groups-admin-help" data-i18n="groups.pollCreateHelp">Standaard vraagt de poll beschikbaarheid voor 7 CWL dagen.</p>
+                    <div class="groups-admin-members" id="groups-admin-polls-list"></div>
+                </article>
+
+                <article class="groups-admin-card">
+                    <div class="groups-admin-card-header">
+                        <h4 data-i18n="groups.pollResults">Pollresultaten</h4>
+                        <button class="btn-groups-default" id="groups-poll-reminder-btn" type="button" data-i18n="groups.sendReminder">Reminder sturen</button>
+                    </div>
+                    <div class="groups-poll-results" id="groups-poll-results">
+                        <p class="groups-empty" data-i18n="groups.noPollSelected">Selecteer of maak een poll.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
     </section>
 </div>
 
@@ -205,6 +242,11 @@
             <div id="groups-create-by-clan" class="hidden">
                 <input id="groups-input-clan-tag" type="text" placeholder="Clantag: #ABC123">
                 <p class="groups-clan-hint" id="groups-clan-hint"></p>
+            </div>
+
+            <div class="groups-badge-picker" id="groups-badge-picker" aria-label="Groepsbadge">
+                <span class="groups-badge-picker-title" data-i18n="groups.chooseBadge">Kies badge</span>
+                <div class="groups-badge-options" id="groups-badge-options"></div>
             </div>
 
             <button class="btn-groups-accent" id="groups-overlay-create-btn" data-i18n="groups.createBtn">Aanmaken</button>
@@ -267,6 +309,26 @@
             <button class="btn-groups-accent" id="groups-role-confirm-accept">
                 <span data-i18n="groups.transferConfirm">Overdragen</span>
             </button>
+        </div>
+    </div>
+</div>
+
+<div class="overlay hidden" id="groups-poll-answer-overlay">
+    <div class="overlay-container groups-poll-answer-container" role="dialog" aria-modal="true" aria-label="CWL poll beantwoorden">
+        <div class="groups-admin-header">
+            <div>
+                <span class="groups-admin-kicker" data-i18n="groups.pollTypeCwl">CWL availability</span>
+                <h3 class="groups-leave-title" id="groups-poll-answer-title">CWL poll</h3>
+                <p class="groups-leave-desc" id="groups-poll-answer-group"></p>
+            </div>
+            <button class="btn-groups-icon" id="groups-poll-answer-close" type="button" data-i18n-title="groups.closeAdmin" data-i18n-aria-label="groups.closeAdmin">
+                <span aria-hidden="true">x</span>
+            </button>
+        </div>
+        <div class="groups-poll-answer-body" id="groups-poll-answer-body"></div>
+        <div class="groups-leave-actions">
+            <button class="btn-groups-default" id="groups-poll-answer-cancel" data-i18n="groups.cancel">Annuleren</button>
+            <button class="btn-groups-accent" id="groups-poll-answer-save" data-i18n="groups.savePollAnswer">Antwoord opslaan</button>
         </div>
     </div>
 </div>

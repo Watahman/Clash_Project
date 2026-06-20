@@ -81,3 +81,7 @@ export const _EXT_SUPA_GROUP_CLAN_ADD = "/SupabaseGroupClanAdd";
 export const _EXT_SUPA_GROUP_CLAN_REMOVE = "/SupabaseGroupClanRemove";
 export const _EXT_SUPA_GROUP_MEMBER_ROLE_SET = "/SupabaseGroupMemberRoleSet";
 export const _EXT_SUPA_GROUP_LEADERSHIP_TRANSFER = "/SupabaseGroupLeadershipTransfer";
+export const _EXT_SUPA_GROUP_POLLS_GET = "/SupabaseGroupPollsGet";
+export const _EXT_SUPA_GROUP_POLL_CREATE = "/SupabaseGroupPollCreate";
+export const _EXT_SUPA_GROUP_POLL_ANSWER = "/SupabaseGroupPollAnswer";
+export const _EXT_SUPA_GROUP_POLL_STATUS = "/SupabaseGroupPollStatus";

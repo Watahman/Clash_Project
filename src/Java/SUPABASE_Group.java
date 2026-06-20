@@ -6,7 +6,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 
+import java.time.Instant;
 import java.util.Objects;
+import java.util.UUID;
 
 public class SUPABASE_Group {
     private final HttpServer server;
@@ -24,12 +26,14 @@ public class SUPABASE_Group {
             JsonObject json  = utils.parseBody(ex);
             String naam      = utils.requireString(json, "name");
             String ownerId   = utils.requireString(json, "ownerId");
+            String badge     = normalizeGroupBadge(json.has("badge") ? json.get("badge").getAsString() : "shield");
             String code      = API_Utils.generateCode();
 
             JsonObject group = new JsonObject();
             group.addProperty("name",     naam);
             group.addProperty("owner_id", ownerId);
             group.addProperty("code",     code);
+            group.addProperty("badge",    badge);
 
             String result = SUPABASE_Client.post("groups", group.toString());
             JsonArray resultArray = JsonParser.parseString(result).getAsJsonArray();
@@ -269,6 +273,94 @@ public class SUPABASE_Group {
         }));
     }
 
+    public void getGroupPolls() {
+        server.createContext(conf._EXT_SUPA_GROUP_POLLS_GET, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject json = utils.parseBody(ex);
+            String groupId  = utils.requireString(json, "groupId");
+            String userId   = utils.requireString(json, "userId");
+
+            requireGroupMember(groupId, userId);
+            utils.sendJsonResponse(ex, getPolls(groupId).toString(), 200);
+        }));
+    }
+
+    public void createGroupPoll() {
+        server.createContext(conf._EXT_SUPA_GROUP_POLL_CREATE, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject json = utils.parseBody(ex);
+            String groupId  = utils.requireString(json, "groupId");
+            String userId   = utils.requireString(json, "userId");
+            String title    = utils.requireString(json, "title").trim();
+            int rounds      = json.has("rounds") ? json.get("rounds").getAsInt() : 7;
+
+            if (title.isBlank()) throw new IllegalArgumentException("Poll titel ontbreekt");
+            if (rounds < 1 || rounds > 7) throw new IllegalArgumentException("Rounds moet tussen 1 en 7 liggen");
+
+            requireGroupAdmin(groupId, userId);
+            JsonArray polls = getPolls(groupId);
+            JsonObject poll = new JsonObject();
+            poll.addProperty("id", UUID.randomUUID().toString());
+            poll.addProperty("title", title);
+            poll.addProperty("type", "cwl_availability");
+            poll.addProperty("creator_id", userId);
+            poll.addProperty("created_at", Instant.now().toString());
+            poll.addProperty("status", "open");
+            poll.addProperty("rounds", rounds);
+            poll.add("answers", new JsonObject());
+            polls.add(poll);
+
+            savePolls(groupId, polls);
+            utils.sendJsonResponse(ex, poll.toString(), 201);
+        }));
+    }
+
+    public void answerGroupPoll() {
+        server.createContext(conf._EXT_SUPA_GROUP_POLL_ANSWER, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject json = utils.parseBody(ex);
+            String groupId  = utils.requireString(json, "groupId");
+            String userId   = utils.requireString(json, "userId");
+            String pollId   = utils.requireString(json, "pollId");
+            JsonArray accounts = utils.requireArray(json, "accounts");
+
+            requireGroupMember(groupId, userId);
+            JsonArray polls = getPolls(groupId);
+            JsonObject poll = findPoll(polls, pollId);
+            if (!Objects.equals(poll.get("status").getAsString(), "open")) {
+                throw new HttpException(403, "{\"error\":\"Poll is gesloten\"}");
+            }
+
+            JsonObject answer = new JsonObject();
+            answer.addProperty("user_id", userId);
+            answer.addProperty("updated_at", Instant.now().toString());
+            answer.add("accounts", accounts);
+            if (!poll.has("answers") || !poll.get("answers").isJsonObject()) poll.add("answers", new JsonObject());
+            poll.getAsJsonObject("answers").add(userId, answer);
+
+            savePolls(groupId, polls);
+            utils.sendJsonResponse(ex, answer.toString(), 200);
+        }));
+    }
+
+    public void setGroupPollStatus() {
+        server.createContext(conf._EXT_SUPA_GROUP_POLL_STATUS, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject json = utils.parseBody(ex);
+            String groupId  = utils.requireString(json, "groupId");
+            String userId   = utils.requireString(json, "userId");
+            String pollId   = utils.requireString(json, "pollId");
+            String status   = utils.requireString(json, "status").trim().toLowerCase();
+
+            if (!Objects.equals(status, "open") && !Objects.equals(status, "closed")) {
+                throw new IllegalArgumentException("Ongeldige poll status");
+            }
+
+            requireGroupAdmin(groupId, userId);
+            JsonArray polls = getPolls(groupId);
+            JsonObject poll = findPoll(polls, pollId);
+            poll.addProperty("status", status);
+            savePolls(groupId, polls);
+            utils.sendJsonResponse(ex, poll.toString(), 200);
+        }));
+    }
+
     private JsonObject getGroup(String groupId) throws Exception {
         JsonArray groupArray = JsonParser.parseString(
                 SUPABASE_Client.getWithBody("groups", "id=" + SUPABASE_Client.eq(groupId))).getAsJsonArray();
@@ -278,6 +370,10 @@ public class SUPABASE_Group {
         }
 
         return groupArray.get(0).getAsJsonObject();
+    }
+
+    private void requireGroupMember(String groupId, String userId) throws Exception {
+        ensureGroupMember(groupId, userId);
     }
 
     private JsonObject requireGroupAdmin(String groupId, String userId) throws Exception {
@@ -338,5 +434,36 @@ public class SUPABASE_Group {
         if (tag.isBlank()) return "";
         if (!tag.startsWith("#")) tag = "#" + tag;
         return tag;
+    }
+
+    private JsonArray getPolls(String groupId) throws Exception {
+        JsonObject group = getGroup(groupId);
+        JsonElement pollsEl = group.get("polls");
+        if (pollsEl == null || pollsEl.isJsonNull()) return new JsonArray();
+        if (pollsEl.isJsonArray()) return pollsEl.getAsJsonArray();
+        return JsonParser.parseString(pollsEl.getAsString()).getAsJsonArray();
+    }
+
+    private void savePolls(String groupId, JsonArray polls) throws Exception {
+        JsonObject update = new JsonObject();
+        update.add("polls", polls);
+        SUPABASE_Client.patch("groups", "id=" + SUPABASE_Client.eq(groupId), update.toString());
+    }
+
+    private JsonObject findPoll(JsonArray polls, String pollId) throws HttpException {
+        for (JsonElement element : polls) {
+            JsonObject poll = element.getAsJsonObject();
+            JsonElement id = poll.get("id");
+            if (id != null && Objects.equals(id.getAsString(), pollId)) return poll;
+        }
+        throw new HttpException(404, "{\"error\":\"Poll niet gevonden\"}");
+    }
+
+    private String normalizeGroupBadge(String value) {
+        String badge = value == null ? "shield" : value.trim().toLowerCase();
+        return switch (badge) {
+            case "swords", "crown", "war_star", "tower", "flame", "banner", "helmet" -> badge;
+            default -> "shield";
+        };
     }
 }
