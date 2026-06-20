@@ -2,7 +2,7 @@ import { initI18n, t } from '../i18n/i18n.js';
 import { getClanInfoRequest } from "../API/API-Clan.js";
 import { createGroupCard } from "../templates/GroupTemplates.js";
 import { profileHTML } from "../profile/profile_popup.js";
-import { createGroup, getGroupsOfUser, joinGroup, leaveGroup } from "../Supabase/Supabase-Group.js";
+import { addGroupClan, createGroup, getGroupsOfUser, joinGroup, leaveGroup } from "../Supabase/Supabase-Group.js";
 import { getCurrentUserId } from "../utils/user.js";
 import { withGlobalLoading } from "../utils/loading-state.js";
 import { initCopyFeedback } from "../utils/copy-feedback.js";
@@ -153,16 +153,42 @@ function createNewGroup(value, option, badge = 'shield') {
         }).catch(error => console.error(error)), t('groups.loading'));
     } else if (option === "clanTag") {
         withGlobalLoading(() => getClanInfoRequest(value).then(clanInfo => {
-            return createGroup(clanInfo.name, userId, badge).then(() => {
+            const clanTag = normalizeClanTag(clanInfo?.tag || value);
+            const clanName = clanInfo?.name || clanTag;
+            const officialBadgeUrl = clanBadgeUrl(clanInfo);
+            return createGroup(clanName, userId, badge, officialBadgeUrl).then(createdGroup => {
+                const groupId = Array.isArray(createdGroup) ? createdGroup[0]?.id : createdGroup?.id;
+                if (!groupId) throw new Error('Groep aangemaakt, maar group id ontbreekt');
+                return addGroupClan(groupId, userId, {
+                    tag: clanTag,
+                    name: clanName,
+                    badgeUrl: officialBadgeUrl
+                }).catch(error => {
+                    console.error(error);
+                    throw new Error('GROUP_CLAN_LINK_FAILED');
+                });
+            }).then(() => {
                 groupsInputClanTag.value = '';
                 groupsClanHint.textContent = '';
                 reloadGroups();
             });
         }).catch(error => {
             console.error(error);
-            groupsClanHint.textContent = t('groups.clanNotFound');
+            groupsClanHint.textContent = error?.message === 'GROUP_CLAN_LINK_FAILED'
+                ? t('groups.clanLinkError')
+                : t('groups.clanNotFound');
         }), t('groups.loading'));
     }
+}
+
+function normalizeClanTag(value) {
+    const tag = String(value || '').trim().toUpperCase();
+    if (!tag) return '';
+    return tag.startsWith('#') ? tag : `#${tag}`;
+}
+
+function clanBadgeUrl(clanInfo) {
+    return clanInfo?.badgeUrls?.medium || clanInfo?.badgeUrls?.small || clanInfo?.badgeUrls?.large || '';
 }
 
 function initBadgePicker() {

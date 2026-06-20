@@ -38,6 +38,8 @@ public class SUPABASE_Group {
             group.addProperty("owner_id", ownerId);
             group.addProperty("code",     code);
             group.addProperty("badge",    badge);
+            String badgeUrl = readFirstString(json, "badgeUrl", "badge_url").trim();
+            if (!badgeUrl.isBlank()) group.addProperty("badge_url", badgeUrl);
 
             String result = SUPABASE_Client.post("groups", group.toString());
             JsonArray resultArray = JsonParser.parseString(result).getAsJsonArray();
@@ -181,7 +183,7 @@ public class SUPABASE_Group {
             if (clanTag.isBlank()) throw new IllegalArgumentException("Ongeldige clantag");
             if (clanName.isBlank()) throw new IllegalArgumentException("Clan naam ontbreekt");
 
-            requireGroupAdmin(groupId, userId);
+            JsonObject group = requireGroupAdmin(groupId, userId);
 
             JsonObject row = new JsonObject();
             row.addProperty("group_id", groupId);
@@ -194,6 +196,9 @@ public class SUPABASE_Group {
             }
 
             String result = SUPABASE_Client.post("group_clans", row.toString());
+            if (badgeUrl != null && !badgeUrl.isJsonNull() && !badgeUrl.getAsString().trim().isBlank()) {
+                patchGroupBadgeUrlIfMissing(groupId, group, badgeUrl.getAsString().trim());
+            }
             utils.sendJsonResponse(ex, result, 201);
         }));
     }
@@ -639,6 +644,15 @@ public class SUPABASE_Group {
         JsonObject groupUpdate = new JsonObject();
         groupUpdate.addProperty("owner_id", ownerId);
         return SUPABASE_Client.patch("groups", "id=" + SUPABASE_Client.eq(groupId), groupUpdate.toString());
+    }
+
+    private void patchGroupBadgeUrlIfMissing(String groupId, JsonObject group, String badgeUrl) throws Exception {
+        String currentBadgeUrl = readFirstString(group, "badge_url", "badgeUrl").trim();
+        if (!currentBadgeUrl.isBlank() || badgeUrl.isBlank()) return;
+
+        JsonObject update = new JsonObject();
+        update.addProperty("badge_url", badgeUrl);
+        SUPABASE_Client.patch("groups", "id=" + SUPABASE_Client.eq(groupId), update.toString());
     }
 
     private String normalizeGroupBadge(String value) {

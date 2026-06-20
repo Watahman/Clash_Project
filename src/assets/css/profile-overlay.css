@@ -201,6 +201,7 @@
     border: 1px solid rgba(246,183,60,.12);
 }
 .po-base-img, .po-base-icon img { width: 2.55rem !important; height: 2.55rem !important; object-fit: contain !important; }
+.po-base-icon .groups-badge-img { width: 85% !important; height: 85% !important; object-fit: contain !important; border-radius: 0 !important; }
 .po-base-text { min-width: 0 !important; display: grid !important; gap: .1rem !important; }
 .po-base-name { font-size: 1.02rem !important; line-height: 1.05 !important; }
 .po-base-info { font-family: var(--font-mono) !important; font-size: .72rem !important; color: var(--text-3) !important; }

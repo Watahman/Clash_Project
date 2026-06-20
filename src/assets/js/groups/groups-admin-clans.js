@@ -3,6 +3,7 @@ import { addGroupClan, getGroupClans, removeGroupClan } from "../Supabase/Supaba
 import { getUserInfo } from "../Supabase/Supabase-User.js";
 import { t } from "../i18n/i18n.js";
 import { withGlobalLoading } from "../utils/loading-state.js";
+import { renderBadge } from "./groups-badges.js";
 
 export function createClanAdmin(elements, getState, setMessage, emptyMessage) {
     let linkedClans = [];
@@ -41,11 +42,19 @@ export function createClanAdmin(elements, getState, setMessage, emptyMessage) {
         if (linkedClans.some(clan => normalizeTag(clan.clan_tag) === tag)) return setMessage(t('groups.clanAlreadyLinked'));
 
         withGlobalLoading(() => getClanInfoRequest(tag)
-            .then(info => addGroupClan(group.id, userId, {
-                tag: normalizeTag(info?.tag || tag),
-                name: info?.name || tag,
-                badgeUrl: badgeUrl(info)
-            }))
+            .then(info => {
+                const officialBadgeUrl = badgeUrl(info);
+                return addGroupClan(group.id, userId, {
+                    tag: normalizeTag(info?.tag || tag),
+                    name: info?.name || tag,
+                    badgeUrl: officialBadgeUrl
+                }).then(() => {
+                    if (!group.badge_url && officialBadgeUrl) {
+                        group.badge_url = officialBadgeUrl;
+                        renderBadge(document.querySelector('#groups-detail-logo'), group.badge, group.badge_url);
+                    }
+                });
+            })
             .then(() => {
                 if (elements.clanTag) elements.clanTag.value = '';
                 setMessage(t('groups.clanLinked'), 'success');

@@ -287,7 +287,9 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
     clip-path: polygon(50% 0,88% 16%,88% 50%,70% 82%,50% 100%,30% 82%,12% 50%,12% 16%) !important;
 }
 .groups-detail-logo:has(.groups-badge-svg)::before,
-.groups-item-logo:has(.groups-badge-svg)::before {
+.groups-item-logo:has(.groups-badge-svg)::before,
+.groups-detail-logo:has(.groups-badge-img)::before,
+.groups-item-logo:has(.groups-badge-img)::before {
     content: none !important;
 }
 .groups-badge-svg {
@@ -295,6 +297,12 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
     height: 1.55rem;
     color: var(--accent);
     filter: drop-shadow(0 0 .35rem rgba(246,183,60,.18));
+}
+.groups-badge-img {
+    width: 85%;
+    height: 85%;
+    object-fit: contain;
+    border-radius: 0;
 }
 .groups-badge-picker {
     display: flex;

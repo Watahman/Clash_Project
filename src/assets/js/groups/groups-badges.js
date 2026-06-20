@@ -19,8 +19,20 @@ export function badgeSvg(badge, className = 'groups-badge-svg') {
     return `<svg class="${className}" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${SVG[normalizeGroupBadge(badge)]}</svg>`;
 }
 
-export function renderBadge(element, badge) {
+export function renderBadge(element, badge, badgeUrl = '') {
     if (!element) return;
+    const officialBadgeUrl = String(badgeUrl || '').trim();
+    if (officialBadgeUrl) {
+        element.innerHTML = '';
+        const image = document.createElement('img');
+        image.className = 'groups-badge-img';
+        image.src = officialBadgeUrl;
+        image.alt = '';
+        image.loading = 'lazy';
+        element.appendChild(image);
+        element.dataset.badge = 'official';
+        return;
+    }
     element.innerHTML = badgeSvg(badge);
     element.dataset.badge = normalizeGroupBadge(badge);
 }

@@ -20,7 +20,7 @@ export function renderGroups(groups, emptyLabel, force = false) {
                 if (!Array.isArray(groupInfo) || !groupInfo[0]) return;
                 clanTemplate.querySelector(".po-base-name").textContent = groupInfo[0].name;
                 clanTemplate.querySelector(".po-base-info").textContent = groupInfoText(groupInfo[0]);
-                renderBadge(clanTemplate.querySelector(".po-base-icon"), groupInfo[0].badge);
+                renderBadge(clanTemplate.querySelector(".po-base-icon"), groupInfo[0].badge, groupInfo[0].badge_url);
                 const badge = clanTemplate.querySelector(".groups-role-badge");
                 applyRoleBadge(badge, getCurrentUserRole(groupInfo[0], [], getCurrentUserId(), groups[index]), t);
                 const item = clanTemplate.querySelector(".po-card-clan");
