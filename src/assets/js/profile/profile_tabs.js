@@ -74,9 +74,46 @@ export function poTab(btn, refs) {
 }
 
 function openAddOverlay(overlay, confirmBtn, onConfirm) {
+    resetPopupMessage(overlay);
+    overlay.querySelectorAll('input').forEach(input => { input.value = ''; });
     overlay.classList.remove('hidden');
+    confirmBtn.disabled = false;
     confirmBtn.onclick = () => {
-        onConfirm();
-        overlay.classList.add('hidden');
+        resetPopupMessage(overlay);
+        confirmBtn.disabled = true;
+        Promise.resolve(onConfirm())
+            .then(() => {
+                overlay.querySelectorAll('input').forEach(input => { input.value = ''; });
+                overlay.classList.add('hidden');
+            })
+            .catch(error => {
+                showPopupMessage(overlay, error?.message || t('groups.loadError'));
+            })
+            .finally(() => {
+                confirmBtn.disabled = false;
+            });
     };
+}
+
+function popupMessageNode(overlay) {
+    let node = overlay.querySelector('.po-popup-message');
+    if (!node) {
+        node = document.createElement('p');
+        node.className = 'po-popup-message';
+        overlay.querySelector('.overlay-container')?.appendChild(node);
+    }
+    return node;
+}
+
+function showPopupMessage(overlay, message) {
+    const node = popupMessageNode(overlay);
+    node.textContent = message;
+    node.classList.remove('hidden');
+}
+
+function resetPopupMessage(overlay) {
+    const node = overlay.querySelector('.po-popup-message');
+    if (!node) return;
+    node.textContent = '';
+    node.classList.add('hidden');
 }

@@ -141,7 +141,22 @@ public class SUPABASE_User {
 
             JsonElement accountsEl = users.get(0).getAsJsonObject().get("accounts");
             JsonArray accounts = (accountsEl == null || accountsEl.isJsonNull()) ? new JsonArray() : accountsEl.getAsJsonArray();
-            accounts.add(accountEl.getAsJsonObject());
+            JsonObject newAccount = accountEl.getAsJsonObject();
+            String newTag = normalizeTag(readFirstString(newAccount, "tag", "playerTag", "accountTag", "clashTag"));
+            if (newTag.isBlank()) {
+                utils.sendJsonResponse(ex, "{\"error\":\"Account tag ontbreekt\"}", 400);
+                return;
+            }
+            for (JsonElement existingEl : accounts) {
+                if (!existingEl.isJsonObject()) continue;
+                String existingTag = normalizeTag(readFirstString(existingEl.getAsJsonObject(), "tag", "playerTag", "accountTag", "clashTag"));
+                if (newTag.equals(existingTag)) {
+                    utils.sendJsonResponse(ex, "{\"error\":\"Account bestaat al\"}", 409);
+                    return;
+                }
+            }
+            newAccount.addProperty("tag", newTag);
+            accounts.add(newAccount);
 
             JsonObject patch = new JsonObject();
             patch.add("accounts", accounts);
@@ -149,5 +164,21 @@ public class SUPABASE_User {
 
             utils.sendJsonResponse(ex, result, 200);
         }));
+    }
+
+    private String normalizeTag(String value) {
+        if (value == null) return "";
+        String tag = value.trim().toUpperCase();
+        if (tag.isBlank()) return "";
+        return tag.startsWith("#") ? tag : "#" + tag;
+    }
+
+    private String readFirstString(JsonObject object, String... fields) {
+        if (object == null) return "";
+        for (String field : fields) {
+            JsonElement value = object.get(field);
+            if (value != null && !value.isJsonNull()) return value.getAsString();
+        }
+        return "";
     }
 }

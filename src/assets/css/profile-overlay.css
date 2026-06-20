@@ -205,6 +205,12 @@
 .po-base-text { min-width: 0 !important; display: grid !important; gap: .1rem !important; }
 .po-base-name { font-size: 1.02rem !important; line-height: 1.05 !important; }
 .po-base-info { font-family: var(--font-mono) !important; font-size: .72rem !important; color: var(--text-3) !important; }
+.po-popup-message {
+    color: var(--red);
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    text-align: center;
+}
 .po-base-chevron { display: none !important; }
 .po-card-base::after, .po-card-friend::after, .po-card-clan::after {
     content: '›';

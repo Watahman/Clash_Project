@@ -170,8 +170,8 @@ function profileInit() {
         if (!addBase.classList.contains('hidden') ||
             !addClan.classList.contains('hidden') ||
             !friendList.classList.contains('hidden')) {
-            addBase.classList.add('hidden');
-            addClan.classList.add('hidden');
+            closeProfileMiniOverlay(addBase);
+            closeProfileMiniOverlay(addClan);
             friendList.classList.add('hidden');
             return;
         }
@@ -255,14 +255,24 @@ function isUserLoggedIn() {
 
 function clickToCloseOverlays(){
     addBase.addEventListener('click', (e) => {
-        if (e.target === addBase) addBase.classList.add('hidden')
+        if (e.target === addBase) closeProfileMiniOverlay(addBase)
     })
 
     addClan.addEventListener('click', (e) => {
-        if (e.target === addClan) addClan.classList.add('hidden')
+        if (e.target === addClan) closeProfileMiniOverlay(addClan)
     })
 
     friendList.addEventListener('click', (e) => {
         if (e.target === friendList) friendList.classList.add('hidden')
     })
+}
+
+function closeProfileMiniOverlay(overlay) {
+    overlay.classList.add('hidden');
+    overlay.querySelectorAll('input').forEach(input => { input.value = ''; });
+    overlay.querySelectorAll('.po-popup-message').forEach(message => {
+        message.textContent = '';
+        message.classList.add('hidden');
+    });
+    overlay.querySelectorAll('button').forEach(button => { button.disabled = false; });
 }

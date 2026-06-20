@@ -2,12 +2,18 @@ function getAssetPrefix() {
     return window.location.pathname.includes('/subPages/') ? '../assets/css/pictures/' : 'assets/css/pictures/';
 }
 
+function normalizeTag(value) {
+    const tag = String(value || '').trim().toUpperCase();
+    if (!tag) return '';
+    return tag.startsWith('#') ? tag : `#${tag}`;
+}
+
 export function createBaseCard(baseInfo) {
     const baseTemplate = document.querySelector("#po-base-template");
     if (!baseTemplate || !baseInfo) return;
 
     const existing = Array.from(document.querySelectorAll('.po-card-base .po-base-info'))
-        .some(info => info.textContent === baseInfo.tag);
+        .some(info => normalizeTag(info.textContent) === normalizeTag(baseInfo.tag));
     if (existing) return;
 
     const baseTemplateCopy = baseTemplate.content.cloneNode(true);

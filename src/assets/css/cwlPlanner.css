@@ -741,3 +741,12 @@
     border-color: rgba(155,92,255,.24);
     font-size: .7rem;
 }
+.cwl-overlay-message {
+    margin: 0 1.3rem 1rem;
+    color: var(--text-3);
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    text-align: center;
+}
+.cwl-overlay-message[data-state="error"] { color: var(--red); }
+.cwl-overlay-message[data-state="warning"] { color: var(--accent); }

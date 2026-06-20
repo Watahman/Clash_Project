@@ -5,6 +5,7 @@ import { createClanCard, createPlayerCard } from "../templates/CWLTemplates.js";
 import { getCurrentUserId } from "../utils/user.js";
 import { clearActiveCwlPoll, setActiveCwlPoll } from "./cwl-availability.js";
 import { normalizeTag, uniquePlayers } from "./cwl-utils.js";
+import { t } from "../i18n/i18n.js";
 
 let refs = {};
 let currentUserId = '';
@@ -93,7 +94,7 @@ async function loadSelectedGroup(groupId, preferredPollId = '') {
         renderPollSelect(groupId, preferredPollId);
     } catch (error) {
         console.error(error);
-        showPreviewMessage('Groep laden mislukt');
+        showPreviewMessage(t('cwl.groupLoadError'));
     }
 }
 
@@ -120,7 +121,7 @@ function renderGroupPreview(groupId) {
     clearGroupPreview();
     const state = groupState.get(groupId);
     if (!state?.players?.length) {
-        showPreviewMessage('Geen geldige accounts gevonden in deze groep');
+        showPreviewMessage(t('cwl.noValidGroupAccounts'));
         return;
     }
     refs.groupPreview?.classList.add('hidden');
@@ -139,7 +140,8 @@ function renderLinkedClans(groupId) {
         button.type = 'button';
         button.className = 'modal-linked-clan-option';
         button.textContent = `${clan.clan_name || clan.clan_tag} ${normalizeTag(clan.clan_tag)}`;
-        button.title = 'Clan toevoegen aan deze planning';
+        button.title = t('cwl.addClanToPlan');
+        button.setAttribute('aria-label', t('cwl.addClanToPlan'));
         button.addEventListener('click', () => createClanCard(toPlannerClan(clan), 15));
         refs.linkedClans.appendChild(button);
     });
@@ -179,6 +181,7 @@ function addSelectedGroupToPlanner() {
     createPlayerCard(state.players);
     state.clans.forEach(clan => createClanCard(toPlannerClan(clan), 15));
     activateSelectedPoll();
+    window.dispatchEvent(new CustomEvent('clashtools:cwl-close-add-player-overlay'));
 }
 
 function toPlannerClan(clan) {
@@ -198,7 +201,7 @@ function normalizePolls(polls) {
 function clearGroupPreview() {
     refs.groupPreviewList?.replaceChildren();
     refs.groupPreviewList?.classList.add('hidden');
-    showPreviewMessage('Selecteer een groep om leden te bekijken');
+    showPreviewMessage(t('cwl.previewGroup'));
 }
 
 function showPreviewMessage(message) {
@@ -208,7 +211,7 @@ function showPreviewMessage(message) {
 }
 
 function resetPollSelect() {
-    refs.pollSelect?.replaceChildren(option('', 'Geen poll geselecteerd'));
+    refs.pollSelect?.replaceChildren(option('', t('cwl.noPollSelected')));
 }
 
 function option(value, text) {

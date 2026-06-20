@@ -1,18 +1,25 @@
 import { savePlan } from '../cwl/cwl-plan-io.js';
 import { applyAvailabilityToCard } from '../cwl/cwl-availability.js';
 import { getCardTag, normalizePlayer, normalizeTag, plannerHasPlayer, uniquePlayers } from '../cwl/cwl-utils.js';
+import { t } from '../i18n/i18n.js';
 
 function createPlayerCard(playerInfo, clanuuid) {
     const players = uniquePlayers(playerInfo);
     let plannerChanged = false;
+    let skipped = 0;
+    let added = 0;
 
     players.forEach(player => {
         const target = getPlayerTarget(clanuuid);
         if (!target?.container) return;
-        if (target.isPlanner && plannerHasPlayer(player.tag)) return;
+        if (target.isPlanner && plannerHasPlayer(player.tag)) {
+            skipped += 1;
+            return;
+        }
 
         const element = buildPlayerElement(player, target);
         target.container.appendChild(element);
+        added += 1;
 
         if (target.isPlanner) {
             makePlayerDraggable(element);
@@ -25,9 +32,13 @@ function createPlayerCard(playerInfo, clanuuid) {
     if (plannerChanged) {
         updateAllPlayerCounters();
         rememberPlannerPlayers();
-        window.dispatchEvent(new CustomEvent('clashtools:cwl-player-added'));
+        window.dispatchEvent(new CustomEvent('clashtools:cwl-player-added', { detail: { added, skipped } }));
         savePlan();
     }
+    if (skipped > 0) {
+        window.dispatchEvent(new CustomEvent('clashtools:cwl-player-duplicate', { detail: { skipped } }));
+    }
+    return { added, skipped };
 }
 
 function getPlayerTarget(clanuuid) {
@@ -84,7 +95,8 @@ function attachDeleteButton(element) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'cwl-delete-player';
-    button.title = 'Speler verwijderen';
+    button.title = t('cwl.removePlayer');
+    button.setAttribute('aria-label', t('cwl.removePlayer'));
     button.innerHTML = '<img src="../assets/css/pictures/bin.svg" alt="">';
     button.addEventListener('mousedown', event => {
         event.preventDefault();
@@ -118,7 +130,6 @@ function rememberPlannerPlayers() {
 
 function createClanCard(clanInfo, playerAmount, uuid = '') {
     const clanTag = normalizeTag(clanInfo?.tag);
-    if (clanTag && document.querySelector(`.cwl-clan-article[data-clan-tag="${CSS.escape(clanTag)}"]`)) return;
 
     const clanTemplate = document.querySelector('#cwl-clan-template');
     const clanTemplateClone = clanTemplate.content.cloneNode(true);

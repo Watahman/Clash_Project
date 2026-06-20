@@ -1,6 +1,7 @@
 import { getFriends, addFriend } from "../Supabase/Supabase-Friend.js";
 import { createFriendCard } from "../templates/FriendTemplates.js";
 import { getCurrentUserId } from "../utils/user.js";
+import { t } from "../i18n/i18n.js";
 
 export function renderFriends(friends, emptyLabel, force = false) {
     if (force) document.querySelectorAll(".po-card-friend").forEach(el => el.remove());
@@ -21,10 +22,12 @@ export function loadFriends(emptyLabel) {
 
 export function handleAddFriend(inputFriendCode) {
     const userId = getCurrentUserId();
-    if (!userId) return;
+    if (!userId) return Promise.reject(new Error(t('auth.login')));
     const friendCode = inputFriendCode.value.trim().replace(/^#/, "");
-    if (!friendCode) return;
-    addFriend(userId, friendCode)
-        .then(confirm => { console.log(confirm); })
-        .catch(error => console.error(error));
+    if (!friendCode) return Promise.reject(new Error(t('profile.friendCodeMissing')));
+    const ownCode = document.querySelector('#po-code')?.textContent?.trim().replace(/^#/, "");
+    if (ownCode && ownCode.toUpperCase() === friendCode.toUpperCase()) {
+        return Promise.reject(new Error(t('profile.cannotAddSelf')));
+    }
+    return addFriend(userId, friendCode);
 }
