@@ -10,6 +10,7 @@ import {
     getClanWarLeagueWarRequest
 } from '../API/API-Clan.js';
 import { getPlayerInfoRequest } from '../API/API-Player.js';
+import { startGlobalLoading, stopGlobalLoading } from '../utils/loading-state.js';
 
 const refs = {};
 const planCache = new Map();
@@ -322,6 +323,7 @@ async function refreshClanReport(clan) {
     setState('loading');
     setHelp(t('op.loadingLive'));
     clearReport(false);
+    startGlobalLoading(t('op.loadingLive'));
     try {
         const [clanInfo, membersData, leagueGroup, currentWar] = await Promise.allSettled([
             getClanInfoRequest(clan.tag),
@@ -381,6 +383,8 @@ async function refreshClanReport(clan) {
         console.error(error);
         setState('error', true);
         setHelp(t('op.loadError'), true);
+    } finally {
+        stopGlobalLoading();
     }
 }
 

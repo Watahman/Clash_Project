@@ -9,6 +9,7 @@ import { copyWithFeedback } from "../utils/clipboard.js";
 import { getCurrentUserId } from "../utils/user.js";
 import {getGroupsOfUser} from "../Supabase/Supabase-Group.js";
 import { applyI18n, t } from "../i18n/i18n.js";
+import { withGlobalLoading } from "../utils/loading-state.js";
 
 let profile, closeProfileBtn, userCode, profileTabs, openProfileBtn, activeTab;
 let friendRequestBtn, friendPendingBtn, friendList, emptyFriendRequest;
@@ -44,7 +45,7 @@ export function profileHTML() {
     const placeholder = document.querySelector(".profile-placeholder");
     if (!placeholder) return;
 
-    fetch(getProfilePopupPath())
+    withGlobalLoading(() => fetch(getProfilePopupPath())
         .then(res => {
             if (!res.ok) throw new Error("Profile popup kon niet geladen worden");
             return res.text();
@@ -58,7 +59,7 @@ export function profileHTML() {
             preloadProfileData();
             clickToCloseOverlays();
         })
-        .catch(error => console.error(error));
+        .catch(error => console.error(error)), 'Laden...');
 }
 
 function labelInit() {
@@ -192,7 +193,7 @@ function refreshProfileData(openAfterLoad = false) {
     const userId = getCurrentUserId();
     if (!userId) return Promise.resolve(null);
 
-    return Promise.all([
+    return withGlobalLoading(() => Promise.all([
         checkUserId(userId),
         getFriends(userId),
         getGroupsOfUser(userId)
@@ -213,7 +214,7 @@ function refreshProfileData(openAfterLoad = false) {
     }).catch(error => {
         console.error(error);
         return null;
-    });
+    }), 'Laden...');
 }
 
 function openProfile(username, code, memberSince) {

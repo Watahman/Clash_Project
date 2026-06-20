@@ -4,6 +4,7 @@ import { createGroupCard } from "../templates/GroupTemplates.js";
 import { profileHTML } from "../profile/profile_popup.js";
 import { createGroup, getGroupsOfUser, joinGroup, leaveGroup } from "../Supabase/Supabase-Group.js";
 import { getCurrentUserId } from "../utils/user.js";
+import { withGlobalLoading } from "../utils/loading-state.js";
 
 const groupsMain          = document.querySelector('#groups-main');
 const groupsNewBtn        = document.querySelector('#groups-new-btn');
@@ -114,7 +115,7 @@ function reloadGroups() {
     if (!userId) return;
 
     groupsList.replaceChildren(emptyGroupMessage(t('groups.loading')));
-    getGroupsOfUser(userId).then(data => {
+    withGlobalLoading(() => getGroupsOfUser(userId).then(data => {
         groupsList.replaceChildren();
         if (!Array.isArray(data) || data.length === 0) {
             groupsList.appendChild(emptyGroupMessage(t('groups.none')));
@@ -125,7 +126,7 @@ function reloadGroups() {
     }).catch(error => {
         console.error(error);
         groupsList.replaceChildren(emptyGroupMessage(t('groups.loadError')));
-    });
+    }), t('groups.loading'));
 }
 
 function createNewGroup(value, option) {
@@ -133,13 +134,13 @@ function createNewGroup(value, option) {
     if (!userId || !value) return;
 
     if (option === "name") {
-        createGroup(value, userId).then(() => {
+        withGlobalLoading(() => createGroup(value, userId).then(() => {
             groupsInputName.value = '';
             reloadGroups();
-        }).catch(error => console.error(error));
+        }).catch(error => console.error(error)), t('groups.loading'));
     } else if (option === "clanTag") {
-        getClanInfoRequest(value).then(clanInfo => {
-            createGroup(clanInfo.name, userId).then(() => {
+        withGlobalLoading(() => getClanInfoRequest(value).then(clanInfo => {
+            return createGroup(clanInfo.name, userId).then(() => {
                 groupsInputClanTag.value = '';
                 groupsClanHint.textContent = '';
                 reloadGroups();
@@ -147,17 +148,17 @@ function createNewGroup(value, option) {
         }).catch(error => {
             console.error(error);
             groupsClanHint.textContent = 'Clan niet gevonden';
-        });
+        }), t('groups.loading'));
     }
 }
 
 function joinGroupFun(code) {
     const userId = requireLoggedIn();
     if (!userId || !code) return;
-    joinGroup(userId, code).then(() => {
+    withGlobalLoading(() => joinGroup(userId, code).then(() => {
         groupsInputJoinCode.value = '';
         reloadGroups();
-    }).catch(error => console.error(error));
+    }).catch(error => console.error(error)), t('groups.loading'));
 }
 
 function leaveGroupFun() {
@@ -168,10 +169,10 @@ function leaveGroupFun() {
         const code = document.querySelector('#groups-detail-code-text')?.textContent?.trim();
         groupOverlayLeave.classList.add('hidden');
         if (!userId || !code) return;
-        leaveGroup(userId, code).then(() => {
+        withGlobalLoading(() => leaveGroup(userId, code).then(() => {
             resetGroupDetail();
             reloadGroups();
-        }).catch(error => console.error(error));
+        }).catch(error => console.error(error)), t('groups.loading'));
     };
 }
 
