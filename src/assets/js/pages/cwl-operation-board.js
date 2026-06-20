@@ -33,6 +33,16 @@ function looksLikeClashTag(value = '') {
     const raw = String(value || '').trim().toUpperCase().replace(/^#/, '');
     return raw.length >= 3 && raw.length <= 15 && /^[0289PYLQGRJCUV]+$/.test(raw);
 }
+function looksLikeTechnicalId(value = '') {
+    const text = String(value || '').trim();
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(text)
+        || /^[0-9a-f]{24,}$/i.test(text)
+        || lower(text).startsWith('clanid');
+}
+function cleanDisplayName(name = '') {
+    const text = String(name || '').trim();
+    return looksLikeTechnicalId(text) || normalizeTag(text) === text ? '' : text;
+}
 function option(value, text, config = {}) {
     const opt = document.createElement('option');
     opt.value = value;
@@ -68,7 +78,7 @@ function normalizePlayerRef(ref, fallbackClanName = '') {
     if (!tag) return null;
     return {
         tag,
-        name: ref.name || ref.playerName || ref.player_name || '',
+        name: cleanDisplayName(ref.name || ref.playerName || ref.player_name || ''),
         townHall: parseNumber(ref.townHallLevel || ref.townHall || ref.th || ref.townhall, 0),
         clanName: ref.clanName || ref.clan_name || fallbackClanName || '',
         clanTag: normalizeTag(ref.clanTag || ref.clantag || ref.clan_id || '')
@@ -79,7 +89,7 @@ function mergePlayerData(base = {}, incoming = {}) {
     return {
         ...base,
         tag: normalizeTag(incoming.tag || base.tag),
-        name: incoming.name || incoming.playerName || base.name || '',
+        name: cleanDisplayName(incoming.name || incoming.playerName || base.name || ''),
         townHall: parseNumber(incoming.townHallLevel || incoming.townHall || incoming.th || base.townHall, parseNumber(base.townHall, 0)),
         clanName: incoming.clanName || incoming.clan?.name || base.clanName || '',
         clanTag: normalizeTag(incoming.clanTag || incoming.clantag || incoming.clan?.tag || base.clanTag || '')
@@ -240,7 +250,7 @@ function renderClanSelector(plan, token = planSelectToken) {
     refs.clanSelect.replaceChildren(option('', t('op.selectClanPlaceholder'), { disabled: true, selected: true }));
     const clans = getPlanClans(plan);
     clans.forEach(clan => {
-        const opt = option(clan.tag, hasUsefulClanName(clan) ? clan.name : clan.tag);
+        const opt = option(clan.tag, hasUsefulClanName(clan) ? clan.name : t('op.loadingClanName'));
         refs.clanSelect.appendChild(opt);
         if (!hasUsefulClanName(clan)) {
             getClanInfoRequest(clan.tag).then(clanInfo => {
@@ -369,7 +379,6 @@ function normalizeWarState(war) {
     const end = parseClashTime(war?.endTime)?.getTime();
     if (start && now < start) return 'preparation';
     if (start && end && now >= start && now < end) return 'live';
-    if (end && now >= end) return 'completed';
     return 'unknown';
 }
 
@@ -379,6 +388,7 @@ function normalizeLeaguePhase(state) {
 }
 
 function isAttackCountingState(stateKey) { return stateKey === 'live' || stateKey === 'completed'; }
+function isMissedCountingState(stateKey) { return stateKey === 'completed'; }
 function isResultFinalState(stateKey) { return stateKey === 'completed'; }
 
 function cwlStateText(stateKey) {
@@ -473,6 +483,7 @@ function buildReport(raw) {
         rounds[day - 1] = round;
         const stateKey = normalizeWarState(war);
         const counting = isAttackCountingState(stateKey);
+        const missedCounting = isMissedCountingState(stateKey);
         const members = Array.isArray(side.self?.members) ? side.self.members : [];
         const attacksPerMember = Math.max(1, parseNumber(war.attacksPerMember, 1));
         const attacksUsed = counting ? parseNumber(side.self?.attacks, 0) : 0;
@@ -485,7 +496,7 @@ function buildReport(raw) {
         round.destruction = counting ? parseNumber(side.self?.destructionPercentage, 0) : 0;
         round.attacksUsed = attacksUsed;
         round.availableAttacks = availableAttacks;
-        round.missed = counting ? Math.max(0, availableAttacks - attacksUsed) : 0;
+        round.missed = missedCounting ? Math.max(0, availableAttacks - attacksUsed) : 0;
         round.result = decideResult(round.stars, round.destruction, parseNumber(side.opponent?.stars, 0), parseNumber(side.opponent?.destructionPercentage, 0), stateKey);
 
         members.forEach(member => {
@@ -504,13 +515,13 @@ function buildReport(raw) {
                 stars: 0,
                 destructionTotal: 0,
                 destructionHits: 0,
-                missed: counting ? Math.max(0, attacksPerMember - attacks.length) : 0,
+                missed: missedCounting ? Math.max(0, attacksPerMember - attacks.length) : 0,
                 result: round.result
             };
 
             if (counting) {
                 player.availableAttacks += attacksPerMember;
-                if (attacks.length === 0) player.missed += attacksPerMember;
+                if (missedCounting) player.missed += Math.max(0, attacksPerMember - attacks.length);
                 attacks.forEach(attack => {
                     const stars = parseNumber(attack.stars, 0);
                     const destruction = parseNumber(attack.destructionPercentage, 0);
@@ -530,7 +541,7 @@ function buildReport(raw) {
 
     const roster = Array.from(players.values()).map(player => ({
         ...player,
-        name: player.name || player.tag,
+        name: cleanDisplayName(player.name) || player.tag,
         destruction: player.destructionHits ? player.destructionTotal / player.destructionHits : 0,
         status: getPlayerStatus(player)
     })).sort((a, b) => Number(b.townHall) - Number(a.townHall) || a.name.localeCompare(b.name));
