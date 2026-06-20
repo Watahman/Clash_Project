@@ -5,7 +5,7 @@ import { loadBases } from "./profile_bases.js";
 import {loadFriends, renderFriends} from "./profile_friends.js";
 import {loadClans, renderGroups, resetClansLoaded} from "./profile_groups.js";
 import { poTab } from "./profile_tabs.js";
-import { copyWithFeedback } from "../utils/clipboard.js";
+import { copyWithFeedback, resetCopyFeedback } from "../utils/clipboard.js";
 import { getCurrentUserId } from "../utils/user.js";
 import {getGroupsOfUser} from "../Supabase/Supabase-Group.js";
 import { applyI18n, t } from "../i18n/i18n.js";
@@ -94,6 +94,7 @@ function labelInit() {
     poGroupList        = document.querySelector("#po-group-list");
     poLogoutBtn        = document.querySelector("#po-logout-btn");
     poSettings         = document.querySelector(".po-settings");
+    resetCopyFeedback(poIcoCopy, poIcoCheck);
 
     tabRefs = {
         profileTabs, emptyLabel, addBtn, poAddText, poSettings,

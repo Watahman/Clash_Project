@@ -1,5 +1,7 @@
 import { getGroupsOfUser, getGroupInfo } from "../Supabase/Supabase-Group.js";
 import { getCurrentUserId } from "../utils/user.js";
+import { applyRoleBadge, getCurrentUserRole } from "../groups/groups-roles.js";
+import { t } from "../i18n/i18n.js";
 
 let clansLoaded = false;
 
@@ -12,19 +14,13 @@ export function renderGroups(groups, emptyLabel, force = false) {
     if (!Array.isArray(groups) || groups.length === 0) return;
     Promise.all(groups.map(group => getGroupInfo(group.group_id)))
         .then(groupInfos => {
-            groupInfos.forEach(groupInfo => {
+            groupInfos.forEach((groupInfo, index) => {
                 const clanTemplate = document.querySelector("#po-groups-item-template").content.cloneNode(true);
                 if (!Array.isArray(groupInfo) || !groupInfo[0]) return;
                 clanTemplate.querySelector(".po-base-name").textContent = groupInfo[0].name;
                 clanTemplate.querySelector(".po-base-info").textContent = groupInfo[0].code;
                 const badge = clanTemplate.querySelector(".groups-role-badge");
-                if (groupInfo[0].owner_id === getCurrentUserId()) {
-                    badge.textContent = "Leader";
-                    badge.classList.add("leader");
-                } else if (groupInfo[0].co_leader_id === getCurrentUserId()) {
-                    badge.textContent = "Co-Leader";
-                    badge.classList.add("co-leader");
-                }
+                applyRoleBadge(badge, getCurrentUserRole(groupInfo[0], [], getCurrentUserId(), groups[index]), t);
                 const item = clanTemplate.querySelector(".po-card-clan");
                 item.classList.add('hidden');
                 document.querySelector(".po-panel-content").appendChild(clanTemplate);

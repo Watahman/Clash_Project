@@ -79,3 +79,5 @@ export const _EXT_SUPA_GROUP_LEAVE = "/SupabaseGroupLeave";
 export const _EXT_SUPA_GROUP_CLANS_GET = "/SupabaseGroupClansGet";
 export const _EXT_SUPA_GROUP_CLAN_ADD = "/SupabaseGroupClanAdd";
 export const _EXT_SUPA_GROUP_CLAN_REMOVE = "/SupabaseGroupClanRemove";
+export const _EXT_SUPA_GROUP_MEMBER_ROLE_SET = "/SupabaseGroupMemberRoleSet";
+export const _EXT_SUPA_GROUP_LEADERSHIP_TRANSFER = "/SupabaseGroupLeadershipTransfer";

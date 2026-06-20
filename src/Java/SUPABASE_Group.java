@@ -44,6 +44,7 @@ public class SUPABASE_Group {
             JsonObject groupMember = new JsonObject();
             groupMember.addProperty("group_id", id);
             groupMember.addProperty("user_id",  ownerId);
+            groupMember.addProperty("role", "leader");
             SUPABASE_Client.post("group_members", groupMember.toString());
 
             utils.sendJsonResponse(ex, result, 201);
@@ -110,6 +111,7 @@ public class SUPABASE_Group {
             JsonObject member = new JsonObject();
             member.addProperty("user_id",  userId);
             member.addProperty("group_id", groupId);
+            member.addProperty("role", "member");
 
             String result = SUPABASE_Client.post("group_members", member.toString());
             utils.sendJsonResponse(ex, result, 201);
@@ -151,7 +153,7 @@ public class SUPABASE_Group {
             String groupId  = utils.requireString(json, "groupId");
             String userId   = utils.requireString(json, "userId");
 
-            requireGroupOwner(groupId, userId);
+            requireGroupAdmin(groupId, userId);
 
             String result = SUPABASE_Client.getWithBody("group_clans",
                     "group_id=" + SUPABASE_Client.eq(groupId) + "&order=created_at.asc");
@@ -170,7 +172,7 @@ public class SUPABASE_Group {
             if (clanTag.isBlank()) throw new IllegalArgumentException("Ongeldige clantag");
             if (clanName.isBlank()) throw new IllegalArgumentException("Clan naam ontbreekt");
 
-            requireGroupOwner(groupId, userId);
+            requireGroupAdmin(groupId, userId);
 
             JsonObject row = new JsonObject();
             row.addProperty("group_id", groupId);
@@ -196,7 +198,7 @@ public class SUPABASE_Group {
 
             if (clanTag.isBlank()) throw new IllegalArgumentException("Ongeldige clantag");
 
-            requireGroupOwner(groupId, userId);
+            requireGroupAdmin(groupId, userId);
 
             String result = SUPABASE_Client.deleteColumn("group_clans",
                     "group_id=" + SUPABASE_Client.eq(groupId) + "&clan_tag=" + SUPABASE_Client.eq(clanTag));
@@ -204,7 +206,70 @@ public class SUPABASE_Group {
         }));
     }
 
-    private JsonObject requireGroupOwner(String groupId, String userId) throws Exception {
+    public void setGroupMemberRole() {
+        server.createContext(conf._EXT_SUPA_GROUP_MEMBER_ROLE_SET, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject json  = utils.parseBody(ex);
+            String groupId   = utils.requireString(json, "groupId");
+            String actorId   = utils.requireString(json, "actorId");
+            String targetId  = utils.requireString(json, "targetUserId");
+            String targetRole = normalizeGroupRole(utils.requireString(json, "role"));
+
+            if (!Objects.equals(targetRole, "member") && !Objects.equals(targetRole, "co_leader")) {
+                throw new IllegalArgumentException("Gebruik leadership transfer om een leader te wijzigen");
+            }
+
+            requireGroupLeader(groupId, actorId);
+            ensureGroupMember(groupId, targetId);
+            String currentTargetRole = getMemberRole(groupId, targetId);
+            if (Objects.equals(currentTargetRole, "leader")) {
+                throw new HttpException(403, "{\"error\":\"Gebruik leadership transfer om de leader te wijzigen\"}");
+            }
+
+            JsonObject update = new JsonObject();
+            update.addProperty("role", targetRole);
+            String result = SUPABASE_Client.patch("group_members",
+                    "group_id=" + SUPABASE_Client.eq(groupId) + "&user_id=" + SUPABASE_Client.eq(targetId),
+                    update.toString());
+            utils.sendJsonResponse(ex, result, 200);
+        }));
+    }
+
+    public void transferGroupLeadership() {
+        server.createContext(conf._EXT_SUPA_GROUP_LEADERSHIP_TRANSFER, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject json = utils.parseBody(ex);
+            String groupId  = utils.requireString(json, "groupId");
+            String actorId  = utils.requireString(json, "actorId");
+            String targetId = utils.requireString(json, "targetUserId");
+
+            JsonObject group = requireGroupLeader(groupId, actorId);
+            ensureGroupMember(groupId, targetId);
+
+            if (Objects.equals(actorId, targetId)) {
+                utils.sendJsonResponse(ex, "{\"success\":true,\"message\":\"Leader blijft ongewijzigd\"}", 200);
+                return;
+            }
+
+            JsonObject oldLeaderRole = new JsonObject();
+            oldLeaderRole.addProperty("role", "co_leader");
+            SUPABASE_Client.patch("group_members",
+                    "group_id=" + SUPABASE_Client.eq(groupId) + "&user_id=" + SUPABASE_Client.eq(actorId),
+                    oldLeaderRole.toString());
+
+            JsonObject newLeaderRole = new JsonObject();
+            newLeaderRole.addProperty("role", "leader");
+            SUPABASE_Client.patch("group_members",
+                    "group_id=" + SUPABASE_Client.eq(groupId) + "&user_id=" + SUPABASE_Client.eq(targetId),
+                    newLeaderRole.toString());
+
+            JsonObject groupUpdate = new JsonObject();
+            groupUpdate.addProperty("owner_id", targetId);
+            String result = SUPABASE_Client.patch("groups", "id=" + SUPABASE_Client.eq(group.get("id").getAsString()),
+                    groupUpdate.toString());
+            utils.sendJsonResponse(ex, result, 200);
+        }));
+    }
+
+    private JsonObject getGroup(String groupId) throws Exception {
         JsonArray groupArray = JsonParser.parseString(
                 SUPABASE_Client.getWithBody("groups", "id=" + SUPABASE_Client.eq(groupId))).getAsJsonArray();
 
@@ -212,13 +277,59 @@ public class SUPABASE_Group {
             throw new HttpException(404, "{\"error\":\"Groep niet gevonden\"}");
         }
 
-        JsonObject group = groupArray.get(0).getAsJsonObject();
+        return groupArray.get(0).getAsJsonObject();
+    }
+
+    private JsonObject requireGroupAdmin(String groupId, String userId) throws Exception {
+        JsonObject group = getGroup(groupId);
+        String role = getMemberRole(groupId, userId);
         JsonElement ownerEl = group.get("owner_id");
-        if (ownerEl == null || !Objects.equals(ownerEl.getAsString(), userId)) {
-            throw new HttpException(403, "{\"error\":\"Alleen de groepsleider mag gekoppelde clans beheren\"}");
+        boolean ownerFallback = ownerEl != null && Objects.equals(ownerEl.getAsString(), userId);
+        if (!ownerFallback && !Objects.equals(role, "leader") && !Objects.equals(role, "co_leader")) {
+            throw new HttpException(403, "{\"error\":\"Alleen leaders en co-leaders mogen dit beheren\"}");
+        }
+        return group;
+    }
+
+    private JsonObject requireGroupLeader(String groupId, String userId) throws Exception {
+        JsonObject group = getGroup(groupId);
+        String role = getMemberRole(groupId, userId);
+        JsonElement ownerEl = group.get("owner_id");
+        boolean ownerFallback = ownerEl != null && Objects.equals(ownerEl.getAsString(), userId);
+        if (!ownerFallback && !Objects.equals(role, "leader")) {
+            throw new HttpException(403, "{\"error\":\"Alleen de groepsleider mag rollen beheren\"}");
         }
 
         return group;
+    }
+
+    private void ensureGroupMember(String groupId, String userId) throws Exception {
+        JsonArray members = JsonParser.parseString(SUPABASE_Client.getWithBody("group_members",
+                "group_id=" + SUPABASE_Client.eq(groupId) + "&user_id=" + SUPABASE_Client.eq(userId))).getAsJsonArray();
+        if (members.isEmpty()) {
+            throw new HttpException(404, "{\"error\":\"Groepslid niet gevonden\"}");
+        }
+    }
+
+    private String getMemberRole(String groupId, String userId) throws Exception {
+        JsonArray members = JsonParser.parseString(SUPABASE_Client.getWithBody("group_members",
+                "group_id=" + SUPABASE_Client.eq(groupId) + "&user_id=" + SUPABASE_Client.eq(userId))).getAsJsonArray();
+        if (members.isEmpty()) return "";
+
+        JsonObject member = members.get(0).getAsJsonObject();
+        JsonElement roleEl = member.get("role");
+        if (roleEl == null || roleEl.isJsonNull()) return "member";
+        return normalizeGroupRole(roleEl.getAsString());
+    }
+
+    private String normalizeGroupRole(String value) {
+        if (value == null) return "member";
+        String role = value.trim().toLowerCase();
+        if (Objects.equals(role, "co-leader")) role = "co_leader";
+        if (Objects.equals(role, "leader") || Objects.equals(role, "co_leader") || Objects.equals(role, "member")) {
+            return role;
+        }
+        throw new IllegalArgumentException("Ongeldige rol: " + value);
     }
 
     private String normalizeClanTag(String value) {

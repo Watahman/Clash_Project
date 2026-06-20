@@ -8,3 +8,9 @@ export function copyWithFeedback(text, iconCopy, iconCheck, durationMs = 1800) {
         iconCheck.classList.add('po-hidden');
     }, durationMs);
 }
+
+export function resetCopyFeedback(iconCopy, iconCheck) {
+    if (!iconCopy || !iconCheck) return;
+    iconCopy.classList.remove('po-hidden');
+    iconCheck.classList.add('po-hidden');
+}

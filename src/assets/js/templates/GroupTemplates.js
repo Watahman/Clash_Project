@@ -1,6 +1,7 @@
 import { t } from '../i18n/i18n.js';
 import { getUserInfo } from "../Supabase/Supabase-User.js";
 import { getGroupInfo, getGroupMembers } from "../Supabase/Supabase-Group.js";
+import { applyRoleBadge, getCurrentUserRole, getMemberRole, isGroupAdmin } from "../groups/groups-roles.js";
 
 function memberLabel(count) {
     return count === 1 ? '1 ' + t('groups.memberSingle') : count + ' ' + t('groups.members');
@@ -17,10 +18,8 @@ export function createGroupCard(groupsInfo) {
                 groupMembers = Array.isArray(groupMembers) ? groupMembers : [];
                 groupCard.querySelector(".groups-item-meta").textContent = memberLabel(groupMembers.length);
                 groupCard.querySelector(".groups-item-name").textContent = groupData[0].name;
-                if (localStorage.getItem("id") === groupData[0].owner_id) {
-                    groupCard.querySelector(".groups-role-badge").textContent = "Leader";
-                    groupCard.querySelector(".groups-role-badge").classList.add("leader");
-                }
+                const currentRole = getCurrentUserRole(groupData[0], groupMembers, localStorage.getItem("id"), group);
+                applyRoleBadge(groupCard.querySelector(".groups-role-badge"), currentRole, t);
                 const item = groupCard.querySelector(".groups-item");
                 item.onclick = () => {
                     document.querySelectorAll(".groups-item.active").forEach(activeItem => activeItem.classList.remove("active"));
@@ -43,23 +42,19 @@ function openGroup(data, groupMembers) {
     document.querySelector("#groups-detail-code-text").textContent = data.code;
     document.querySelector('#groups-detail-since').textContent = t('groups.since') + ' ' + data.created_at.split('T')[0];
     const roleBadge = document.querySelector("#groups-detail-role");
-    roleBadge.classList.remove("leader");
-
-    const isLeader = localStorage.getItem("id") === data.owner_id;
+    roleBadge.classList.remove("leader", "co-leader");
+    const currentUserId = localStorage.getItem("id");
+    const currentRole = getCurrentUserRole(data, groupMembers, currentUserId);
+    const canAdmin = isGroupAdmin(currentRole);
     const settingsBtn = document.querySelector("#groups-settings-btn");
-    if (settingsBtn) settingsBtn.classList.toggle("hidden", !isLeader);
+    if (settingsBtn) settingsBtn.classList.toggle("hidden", !canAdmin);
     const pollBtn = document.querySelector("#groups-poll-btn");
     if (pollBtn) pollBtn.classList.add("hidden");
 
-    if (isLeader) {
-        roleBadge.textContent = "Leader";
-        roleBadge.classList.add("leader");
-    } else {
-        roleBadge.textContent = t('groups.member');
-    }
+    applyRoleBadge(roleBadge, currentRole, t);
     addAllMembers(groupMembers, data.owner_id);
     window.dispatchEvent(new CustomEvent("clashtools:group-opened", {
-        detail: { group: data, members: groupMembers, isLeader }
+        detail: { group: data, members: groupMembers, currentRole, canAdmin }
     }));
 }
 
@@ -79,10 +74,7 @@ function addAllMembers(groupMembers, creatorId) {
             const user = Array.isArray(userData) ? userData[0] : userData;
             if (!user || user.error) return;
             groupMemberCard.querySelector(".groups-member-name").textContent = user.name;
-            if (user.id === creatorId || user.id === localStorage.getItem("id") && creatorId === user.id) {
-                groupMemberCard.querySelector(".groups-role-badge").textContent = "Leader";
-                groupMemberCard.querySelector(".groups-role-badge").classList.add("leader");
-            }
+            applyRoleBadge(groupMemberCard.querySelector(".groups-role-badge"), getMemberRole(member, { owner_id: creatorId }, user.id), t);
             memberList.appendChild(groupMemberCard);
         }).catch(error => console.error(error));
     });

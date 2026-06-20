@@ -102,6 +102,8 @@ public class Main {
         supaGroup.getGroupClans();
         supaGroup.addGroupClan();
         supaGroup.removeGroupClan();
+        supaGroup.setGroupMemberRole();
+        supaGroup.transferGroupLeadership();
 
         server.start();
         System.out.println("Server gestart op http://localhost:8080");

@@ -379,8 +379,11 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
 
 /* Phase 4/5: owner admin panel */
 .groups-admin-panel {
-    flex: 0 0 auto;
-    margin: 0 1rem 1rem;
+    width: min(72rem, calc(100vw - 2rem));
+    max-height: min(48rem, calc(100vh - 2rem));
+    display: flex;
+    flex-direction: column;
+    padding: 0;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     background: rgba(12,17,27,.72);
@@ -388,6 +391,10 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
     overflow: hidden;
 }
 .groups-admin-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
     padding: .85rem 1rem;
     border-bottom: 1px solid var(--border-subtle);
 }
@@ -419,8 +426,28 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
 }
 .groups-admin-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(14rem, .7fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: .75rem;
+}
+.groups-admin-tabs {
+    display: flex;
+    gap: .35rem;
+    padding: .75rem .85rem 0;
+}
+.groups-admin-tab {
+    border-radius: 999px;
+    border-color: transparent;
+    background: transparent;
+    color: var(--text-3);
+}
+.groups-admin-tab-active {
+    color: var(--accent);
+    border-color: rgba(246,183,60,.28);
+    background: var(--accent-dim);
+}
+.groups-admin-section {
+    min-height: 0;
+    overflow-y: auto;
     padding: .85rem;
 }
 .groups-admin-card {
@@ -434,7 +461,8 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
 .groups-admin-card-header,
 .groups-admin-form,
 .groups-linked-clan,
-.groups-unlinked-account {
+.groups-unlinked-account,
+.groups-admin-member {
     display: flex;
     align-items: center;
     gap: .55rem;
@@ -451,7 +479,8 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
 .groups-admin-message.error { color: var(--red); }
 .groups-admin-message.success { color: var(--green); }
 .groups-linked-clans,
-.groups-unlinked-accounts {
+.groups-unlinked-accounts,
+.groups-admin-members {
     display: flex;
     flex-direction: column;
     gap: .45rem;
@@ -460,7 +489,8 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
     overflow-y: auto;
 }
 .groups-linked-clan,
-.groups-unlinked-account {
+.groups-unlinked-account,
+.groups-admin-member {
     justify-content: space-between;
     padding: .58rem .62rem;
     border: 1px solid var(--border-subtle);
@@ -480,7 +510,8 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
     object-fit: contain;
 }
 .groups-linked-clan-text,
-.groups-unlinked-account-main {
+.groups-unlinked-account-main,
+.groups-admin-member-info {
     min-width: 0;
     flex: 1;
     display: flex;
@@ -488,17 +519,31 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
     gap: .1rem;
 }
 .groups-linked-clan-text strong,
-.groups-unlinked-account-main strong {
+.groups-unlinked-account-main strong,
+.groups-admin-member-info strong {
     color: var(--text-1);
     font-family: var(--font-heading);
     font-size: .86rem;
     text-transform: uppercase;
 }
 .groups-linked-clan-text span,
-.groups-unlinked-account-main span {
+.groups-unlinked-account-main span,
+.groups-admin-member-info span {
     color: var(--text-3);
     font-family: var(--font-mono);
     font-size: .68rem;
+}
+.groups-admin-member-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .4rem;
+    flex-wrap: wrap;
+}
+.groups-admin-member-actions button {
+    min-height: 2rem !important;
+    padding: .35rem .6rem !important;
+    font-size: .72rem;
 }
 .groups-unlinked-status {
     flex: 0 0 auto;
@@ -513,11 +558,13 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
 }
 @media (max-width: 68rem) {
     .groups-admin-grid { grid-template-columns: 1fr; }
-    .groups-admin-panel { margin: 0 .75rem .75rem; }
+    .groups-admin-panel { width: min(42rem, calc(100vw - 1rem)); }
 }
 @media (max-width: 42rem) {
     .groups-admin-form,
     .groups-admin-card-header,
-    .groups-unlinked-account { align-items: stretch; flex-direction: column; }
+    .groups-unlinked-account,
+    .groups-admin-member { align-items: stretch; flex-direction: column; }
     .groups-unlinked-status { align-self: flex-start; }
+    .groups-admin-tabs { flex-wrap: wrap; }
 }

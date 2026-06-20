@@ -86,6 +86,8 @@ public class Config {
     String _EXT_SUPA_GROUP_CLANS_GET = "/SupabaseGroupClansGet";
     String _EXT_SUPA_GROUP_CLAN_ADD = "/SupabaseGroupClanAdd";
     String _EXT_SUPA_GROUP_CLAN_REMOVE = "/SupabaseGroupClanRemove";
+    String _EXT_SUPA_GROUP_MEMBER_ROLE_SET = "/SupabaseGroupMemberRoleSet";
+    String _EXT_SUPA_GROUP_LEADERSHIP_TRANSFER = "/SupabaseGroupLeadershipTransfer";
 
     static String firstNonBlank(String... values) {
         if (values == null) return "";

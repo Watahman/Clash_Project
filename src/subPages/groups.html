@@ -47,7 +47,7 @@
         </div>
     </section>
 
-    <button id="groups-collapse-btn" aria-label="Sidebar inklappen" title="Inklappen">
+    <button id="groups-collapse-btn" aria-label="" title="" data-i18n-title="groups.collapseSidebar" data-i18n-aria-label="groups.collapseSidebar">
         <img src="../assets/css/pictures/next.svg" alt="" id="groups-collapse-icon">
     </button>
 
@@ -65,7 +65,7 @@
                     <span class="groups-detail-name" id="groups-detail-name">Groepsnaam</span>
                     <div class="groups-detail-meta">
                         <span id="groups-detail-count">0 leden</span>
-                        <button class="groups-code-pill" id="groups-detail-code" title="Kopieer code">
+                        <button class="groups-code-pill" id="groups-detail-code" title="" data-i18n-title="groups.copyCode">
                             <img src="../assets/css/pictures/checkmark_blank.svg" id="groups-detail-checkmark" class="hidden" alt="">
                             <img src="../assets/css/pictures/copy.svg" id="groups-detail-copy" alt="kopieer">
                             <span id="groups-detail-code-text">------</span>
@@ -86,10 +86,10 @@
                     </button>
                     <div class="groups-action-divider"></div>
                     <!-- Enkel zichtbaar voor (co-)leiders -->
-                    <button class="btn-groups-icon groups-leader-only hidden" id="groups-settings-btn" title="Beheren">
+                    <button class="btn-groups-icon groups-leader-only hidden" id="groups-settings-btn" title="" data-i18n-title="groups.manageGroup" data-i18n-aria-label="groups.manageGroup">
                         <img src="../assets/css/pictures/settings.svg" alt="Instellingen">
                     </button>
-                    <button class="btn-groups-icon groups-danger" id="groups-leave-btn" title="Groep verlaten">
+                    <button class="btn-groups-icon groups-danger" id="groups-leave-btn" title="" data-i18n-title="groups.leaveGroup" data-i18n-aria-label="groups.leaveGroup">
                         <img src="../assets/css/pictures/leaving-door.svg" alt="Verlaten">
                     </button>
                 </div>
@@ -101,55 +101,83 @@
                 </div>
             </div>
 
-            <section class="groups-admin-panel hidden" id="groups-admin-panel" aria-label="Groepsbeheer">
-                <div class="groups-admin-header">
-                    <div>
-                        <span class="groups-admin-kicker" data-i18n="groups.adminKicker">Leader tools</span>
-                        <h3 id="groups-admin-title" data-i18n="groups.adminTitle">Groepsbeheer</h3>
-                        <p id="groups-admin-subtitle" data-i18n="groups.adminSubtitle">Beheer gekoppelde clans voor deze groep.</p>
-                    </div>
-                </div>
-
-                <div class="groups-admin-grid">
-                    <article class="groups-admin-card">
-                        <h4 data-i18n="groups.linkedClans">Gekoppelde clans</h4>
-                        <div class="groups-admin-form">
-                            <input id="groups-admin-clan-tag" type="text" placeholder="Clantag: #ABC123">
-                            <button class="btn-groups-accent" id="groups-admin-add-clan">
-                                <img src="../assets/css/pictures/add.svg" alt="">
-                                <span data-i18n="groups.addClan">Clan toevoegen</span>
-                            </button>
-                        </div>
-                        <p class="groups-admin-message" id="groups-admin-message"></p>
-                        <div class="groups-linked-clans" id="groups-linked-clans">
-                            <p class="groups-empty" data-i18n="groups.noLinkedClans">Nog geen clans gekoppeld</p>
-                        </div>
-                    </article>
-
-                    <article class="groups-admin-card">
-                        <div class="groups-admin-card-header">
-                            <h4 data-i18n="groups.unlinkedAccounts">Niet-gelinkte accounts</h4>
-                            <button class="btn-groups-default" id="groups-admin-scan-unlinked">
-                                <span data-i18n="groups.scanUnlinked">Scannen</span>
-                            </button>
-                        </div>
-                        <p class="groups-admin-help" data-i18n="groups.unlinkedHelp">Vergelijkt live clanleden met accounts van groepsleden.</p>
-                        <div class="groups-unlinked-accounts" id="groups-unlinked-accounts">
-                            <p class="groups-empty" data-i18n="groups.scanFirst">Start een scan om ontbrekende koppelingen te zien.</p>
-                        </div>
-                    </article>
-
-                    <article class="groups-admin-card groups-admin-card-muted">
-                        <h4 data-i18n="groups.laterTools">Later</h4>
-                        <p data-i18n="groups.laterToolsText">Plaats voorzien voor polls, pollresultaten en reminders.</p>
-                    </article>
-                </div>
-            </section>
-
         </div>
     </section>
 
 </main>
+
+<div class="overlay hidden" id="groups-admin-overlay">
+    <section class="overlay-container groups-admin-panel" id="groups-admin-panel" aria-label="Groepsbeheer" role="dialog" aria-modal="true">
+        <div class="groups-admin-header">
+            <div>
+                <span class="groups-admin-kicker" data-i18n="groups.adminKicker">Leader tools</span>
+                <h3 id="groups-admin-title" data-i18n="groups.adminTitle">Groepsbeheer</h3>
+                <p id="groups-admin-subtitle" data-i18n="groups.adminSubtitle">Beheer deze groep.</p>
+            </div>
+            <button class="btn-groups-icon" id="groups-admin-close" type="button" data-i18n-title="groups.closeAdmin" data-i18n-aria-label="groups.closeAdmin">
+                <span aria-hidden="true">x</span>
+            </button>
+        </div>
+
+        <div class="groups-admin-tabs" role="tablist" aria-label="Groepsbeheer secties">
+            <button class="groups-admin-tab groups-admin-tab-active" data-admin-tab="members" type="button" data-i18n="groups.manageMembers">Leden</button>
+            <button class="groups-admin-tab" data-admin-tab="clans" type="button" data-i18n="groups.linkedClans">Gekoppelde clans</button>
+            <button class="groups-admin-tab" data-admin-tab="future" type="button" data-i18n="groups.laterTools">Later</button>
+        </div>
+
+        <p class="groups-admin-message" id="groups-admin-message"></p>
+
+        <div class="groups-admin-section" id="groups-admin-section-members" data-admin-section="members">
+            <article class="groups-admin-card">
+                <div class="groups-admin-card-header">
+                    <h4 data-i18n="groups.manageMembers">Leden beheren</h4>
+                    <p class="groups-admin-help" id="groups-admin-role-help"></p>
+                </div>
+                <div class="groups-admin-members" id="groups-admin-members">
+                    <p class="groups-empty" data-i18n="groups.loading">Groepen laden...</p>
+                </div>
+            </article>
+        </div>
+
+        <div class="groups-admin-section hidden" id="groups-admin-section-clans" data-admin-section="clans">
+            <div class="groups-admin-grid">
+                <article class="groups-admin-card">
+                    <h4 data-i18n="groups.linkedClans">Gekoppelde clans</h4>
+                    <div class="groups-admin-form">
+                        <input id="groups-admin-clan-tag" type="text" placeholder="Clantag: #ABC123" data-i18n-placeholder="groups.clanTagPlaceholder">
+                        <button class="btn-groups-accent" id="groups-admin-add-clan">
+                            <img src="../assets/css/pictures/add.svg" alt="">
+                            <span data-i18n="groups.addClan">Clan toevoegen</span>
+                        </button>
+                    </div>
+                    <div class="groups-linked-clans" id="groups-linked-clans">
+                        <p class="groups-empty" data-i18n="groups.noLinkedClans">Nog geen clans gekoppeld</p>
+                    </div>
+                </article>
+
+                <article class="groups-admin-card">
+                    <div class="groups-admin-card-header">
+                        <h4 data-i18n="groups.unlinkedAccounts">Niet-gelinkte accounts</h4>
+                        <button class="btn-groups-default" id="groups-admin-scan-unlinked">
+                            <span data-i18n="groups.scanUnlinked">Scannen</span>
+                        </button>
+                    </div>
+                    <p class="groups-admin-help" data-i18n="groups.unlinkedHelp">Vergelijkt live clanleden met accounts van groepsleden.</p>
+                    <div class="groups-unlinked-accounts" id="groups-unlinked-accounts">
+                        <p class="groups-empty" data-i18n="groups.scanFirst">Start een scan om ontbrekende koppelingen te zien.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <div class="groups-admin-section hidden" id="groups-admin-section-future" data-admin-section="future">
+            <article class="groups-admin-card groups-admin-card-muted">
+                <h4 data-i18n="groups.laterTools">Later</h4>
+                <p data-i18n="groups.laterToolsText">Plaats voorzien voor polls, pollresultaten en reminders.</p>
+            </article>
+        </div>
+    </section>
+</div>
 
 <div class="overlay hidden" id="groups-overlay-new">
     <div class="overlay-container groups-overlay-tabbed">
@@ -225,6 +253,19 @@
             <button class="btn-groups-icon btn-groups-danger groups-leave-confirm-btn" id="groups-leave-confirm-btn">
                 <img src="../assets/css/pictures/leaving-door.svg" alt="">
                 <span data-i18n="groups.leave">Verlaten</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="overlay hidden" id="groups-role-confirm-overlay">
+    <div class="overlay-container groups-overlay-leave-container" role="dialog" aria-modal="true" aria-label="Leadership overdragen">
+        <h3 class="groups-leave-title" data-i18n="groups.transferTitle">Leadership overdragen?</h3>
+        <p class="groups-leave-desc" id="groups-role-confirm-text"></p>
+        <div class="groups-leave-actions">
+            <button class="btn-groups-default" id="groups-role-confirm-cancel" data-i18n="groups.cancel">Annuleren</button>
+            <button class="btn-groups-accent" id="groups-role-confirm-accept">
+                <span data-i18n="groups.transferConfirm">Overdragen</span>
             </button>
         </div>
     </div>
