@@ -1,0 +1,27 @@
+export const CACHE_VERSION = 1;
+
+export const CACHE_TTL = Object.freeze({
+    USER_INFO: 5 * 60 * 1000,
+    USER_ACCOUNTS: 5 * 60 * 1000,
+    FRIENDS: 60 * 1000,
+    FRIEND_REQUESTS: 45 * 1000,
+    GROUPS: 90 * 1000,
+    GROUP_INFO: 5 * 60 * 1000,
+    GROUP_MEMBERS: 90 * 1000,
+    GROUP_CLANS: 5 * 60 * 1000,
+    GROUP_POLLS: 45 * 1000,
+    PLANS: 20 * 1000,
+    CLASH_PLAYER: 5 * 60 * 1000,
+    CLASH_PLAYER_SLOW: 6 * 60 * 60 * 1000,
+    CLASH_CLAN_INFO: 6 * 60 * 60 * 1000,
+    CLASH_CLAN_MEMBERS: 2 * 60 * 1000,
+    CLASH_WAR_LIVE: 60 * 1000,
+    CLASH_WAR_ENDED: 15 * 60 * 1000,
+    CLASH_LEAGUE_GROUP: 2 * 60 * 1000
+});
+
+export const CACHE_STALE = Object.freeze({
+    SHORT: 15 * 1000,
+    MEDIUM: 60 * 1000,
+    LONG: 10 * 60 * 1000
+});
