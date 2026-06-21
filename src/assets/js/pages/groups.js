@@ -44,6 +44,7 @@ const groupsSettingsBtn   = document.querySelector('#groups-settings-btn');
 const groupsAdminOverlay = document.querySelector('#groups-admin-overlay');
 let adminPanel;
 let selectedBadge = 'shield';
+const OPEN_GROUP_STORAGE_KEY = 'clashtoolsOpenGroupId';
 
 function init() {
     initI18n();
@@ -135,7 +136,13 @@ function reloadGroups() {
             resetGroupDetail();
             return;
         }
-        createGroupCard(data);
+        const requestedGroupId = sessionStorage.getItem(OPEN_GROUP_STORAGE_KEY);
+        return createGroupCard(data, { autoOpenGroupId: requestedGroupId }).then(opened => {
+            if (requestedGroupId) {
+                sessionStorage.removeItem(OPEN_GROUP_STORAGE_KEY);
+                if (!opened) resetGroupDetail();
+            }
+        });
     }).catch(error => {
         console.error(error);
         groupsList.replaceChildren(emptyGroupMessage(t('groups.loadError')));

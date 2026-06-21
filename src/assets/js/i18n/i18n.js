@@ -1,3 +1,4 @@
+import '../theme/theme-manager.js';
 import { translations } from './translations.js';
 
 const STORAGE_KEY = 'clashtools_language';

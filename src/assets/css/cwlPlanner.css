@@ -750,3 +750,103 @@
 }
 .cwl-overlay-message[data-state="error"] { color: var(--red); }
 .cwl-overlay-message[data-state="warning"] { color: var(--accent); }
+
+/* Global light-mode pass: CWL planner + Operation Board */
+:root[data-theme="light"] .cwl-main,
+:root[data-theme="light"] .operation-main {
+    background:
+        radial-gradient(circle at 70% 10%, rgba(184,109,18,0.10), transparent 23rem),
+        radial-gradient(circle at 22% 90%, rgba(111,70,216,0.09), transparent 26rem);
+}
+:root[data-theme="light"] .cwl-sidebar {
+    background: rgba(255,255,255,0.78);
+    border-color: var(--border-visible);
+}
+:root[data-theme="light"] .cwl-sidebar .cwl-toolbar {
+    background: rgba(255,255,255,0.88);
+    border-color: var(--border-visible);
+}
+:root[data-theme="light"] .cwl-sidebar .cwl-toolbar-title h3,
+:root[data-theme="light"] .cwl-sidebar .cwl-player-name,
+:root[data-theme="light"] .cwl-sidebar .cwl-player-hashtag {
+    color: var(--text-1) !important;
+}
+:root[data-theme="light"] .cwl-sidebar .cwl-player-clan,
+:root[data-theme="light"] .cwl-sidebar .cwl-toolbar-title span {
+    color: var(--text-3) !important;
+}
+:root[data-theme="light"] .cwl-board,
+:root[data-theme="light"] #groups-detail {
+    background: rgba(255,255,255,0.36);
+}
+:root[data-theme="light"] .cwl-board .cwl-toolbar,
+:root[data-theme="light"] .operation-panel-head,
+:root[data-theme="light"] .modal-header-row,
+:root[data-theme="light"] .modal-tabs {
+    background: rgba(255,255,255,0.82);
+    border-color: var(--border-visible);
+}
+:root[data-theme="light"] .cwl-player-article {
+    background: var(--surface-card);
+    border-color: var(--border-visible);
+    box-shadow: var(--shadow-sm), var(--inner-line);
+}
+:root[data-theme="light"] .cwl-sidebar .cwl-player-article {
+    background: var(--surface-card);
+    border-color: var(--border-visible);
+    box-shadow: var(--shadow-sm), var(--inner-line);
+}
+:root[data-theme="light"] .cwl-sidebar .cwl-player-article:hover {
+    background: var(--surface-elevated);
+    border-color: var(--border-focus);
+}
+:root[data-theme="light"] .cwl-player-townhall-foto,
+:root[data-theme="light"] .cwl-clan-logo {
+    background: rgba(255,255,255,0.78);
+    border-color: var(--border-visible);
+}
+:root[data-theme="light"] .cwl-clan-article,
+:root[data-theme="light"] .operation-panel {
+    background: var(--surface-card);
+    border-color: var(--border-visible);
+    box-shadow: var(--card-shadow), var(--inner-line);
+}
+:root[data-theme="light"] .cwl-clan-info-card,
+:root[data-theme="light"] .op-score-card,
+:root[data-theme="light"] .op-round-card,
+:root[data-theme="light"] .op-bonus-list li,
+:root[data-theme="light"] .op-standing-row,
+:root[data-theme="light"] .cwl-save-status {
+    background: var(--surface-2);
+    border-color: var(--border-visible);
+}
+:root[data-theme="light"] .cwl-empty-hint,
+:root[data-theme="light"] #modal-account-list-empty,
+:root[data-theme="light"] .modal-empty-state {
+    background: var(--surface-2);
+    border-color: var(--border-visible);
+    color: var(--text-3);
+}
+:root[data-theme="light"] .modal-segment,
+:root[data-theme="light"] .modal-tabs {
+    background: var(--surface-2);
+    border-color: var(--border-visible);
+}
+:root[data-theme="light"] .op-table th,
+:root[data-theme="light"] .op-table td {
+    border-color: var(--border-visible);
+}
+:root[data-theme="light"] .op-table tbody tr:hover {
+    background: rgba(184,109,18,0.045);
+}
+:root[data-theme="light"] .op-badge-muted,
+:root[data-theme="light"] .cwl-availability-unknown,
+:root[data-theme="light"] .op-phase-badge {
+    color: var(--text-3);
+    background: var(--surface-3);
+    border-color: var(--border-visible);
+}
+:root[data-theme="light"] .modal-linked-clan-option,
+:root[data-theme="light"] .cwl-operation-link {
+    color: var(--purple);
+}

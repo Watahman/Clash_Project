@@ -8,14 +8,15 @@ function memberLabel(count) {
     return count === 1 ? '1 ' + t('groups.memberSingle') : count + ' ' + t('groups.members');
 }
 
-export function createGroupCard(groupsInfo) {
-    if (!Array.isArray(groupsInfo)) return;
+export function createGroupCard(groupsInfo, options = {}) {
+    if (!Array.isArray(groupsInfo)) return Promise.resolve(false);
 
-    groupsInfo.forEach((group) => {
+    const autoOpenGroupId = options.autoOpenGroupId || '';
+    const groupPromises = groupsInfo.map((group) => {
         const groupCard = document.querySelector("#groups-item-template").content.cloneNode(true);
-        getGroupInfo(group.group_id).then(groupData => {
-            if (!Array.isArray(groupData) || groupData.length === 0) return;
-            getGroupMembers(groupData[0].id).then(groupMembers => {
+        return getGroupInfo(group.group_id).then(groupData => {
+            if (!Array.isArray(groupData) || groupData.length === 0) return false;
+            return getGroupMembers(groupData[0].id).then(groupMembers => {
                 groupMembers = Array.isArray(groupMembers) ? groupMembers : [];
                 groupCard.querySelector(".groups-item-meta").textContent = memberLabel(groupMembers.length);
                 groupCard.querySelector(".groups-item-name").textContent = groupData[0].name;
@@ -23,6 +24,7 @@ export function createGroupCard(groupsInfo) {
                 const currentRole = getCurrentUserRole(groupData[0], groupMembers, localStorage.getItem("id"), group);
                 applyRoleBadge(groupCard.querySelector(".groups-role-badge"), currentRole, t);
                 const item = groupCard.querySelector(".groups-item");
+                item.dataset.groupId = groupData[0].id;
                 item.onclick = () => {
                     document.querySelectorAll(".groups-item.active").forEach(activeItem => activeItem.classList.remove("active"));
                     item.classList.add("active");
@@ -31,9 +33,16 @@ export function createGroupCard(groupsInfo) {
                 };
                 document.querySelector("#groups-list").appendChild(groupCard);
                 document.querySelector("#groups-list .groups-empty")?.classList.add("hidden");
+                if (autoOpenGroupId && groupData[0].id === autoOpenGroupId) {
+                    item.click();
+                    return true;
+                }
+                return false;
             });
         }).catch(error => console.error(error));
     });
+
+    return Promise.all(groupPromises).then(results => results.some(Boolean));
 }
 
 function openGroup(data, groupMembers) {

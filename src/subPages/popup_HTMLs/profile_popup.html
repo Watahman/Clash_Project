@@ -53,14 +53,63 @@
             </div>
 
             <div class="po-settings hidden">
-                <button id="po-logout-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                        <polyline points="16 17 21 12 16 7"/>
-                        <line x1="21" y1="12" x2="9" y2="12"/>
-                    </svg>
-                    <span data-i18n="profile.logout">Uitloggen</span>
-                </button>
+                <section class="po-settings-card">
+                    <div class="po-settings-heading">
+                        <span data-i18n="settings.appearance">Weergave</span>
+                        <small data-i18n="settings.appearanceHelp">Kies hoe Tools for Clash eruitziet.</small>
+                    </div>
+                    <div class="po-theme-options" role="group" aria-label="Theme" data-i18n-aria-label="settings.appearance">
+                        <button type="button" class="po-theme-option" data-theme-choice="dark" data-i18n="settings.darkMode">Donker</button>
+                        <button type="button" class="po-theme-option" data-theme-choice="light" data-i18n="settings.lightMode">Licht</button>
+                        <button type="button" class="po-theme-option" data-theme-choice="system" data-i18n="settings.systemMode">Systeem</button>
+                    </div>
+                </section>
+
+                <section class="po-settings-card">
+                    <div class="po-settings-heading">
+                        <span data-i18n="settings.account">Account</span>
+                        <small id="po-settings-email">-</small>
+                    </div>
+                    <label class="po-field-label" for="po-settings-name" data-i18n="settings.displayName">Naam</label>
+                    <div class="po-settings-inline">
+                        <input id="po-settings-name" type="text" autocomplete="name" maxlength="32">
+                        <button id="po-save-name" type="button" data-i18n="settings.save">Opslaan</button>
+                    </div>
+                </section>
+
+                <section class="po-settings-card">
+                    <div class="po-settings-heading">
+                        <span data-i18n="settings.changePassword">Wachtwoord wijzigen</span>
+                        <small data-i18n="settings.passwordRules">Min. 8 tekens met hoofdletter, kleine letter, cijfer en symbool.</small>
+                    </div>
+                    <div class="po-password-grid">
+                        <input id="po-current-password" type="password" autocomplete="current-password" data-i18n-placeholder="settings.currentPassword" placeholder="Huidig wachtwoord">
+                        <input id="po-new-password" type="password" autocomplete="new-password" data-i18n-placeholder="settings.newPassword" placeholder="Nieuw wachtwoord">
+                        <input id="po-confirm-password" type="password" autocomplete="new-password" data-i18n-placeholder="settings.confirmPassword" placeholder="Bevestig wachtwoord">
+                    </div>
+                    <button id="po-save-password" type="button" data-i18n="settings.changePassword">Wachtwoord wijzigen</button>
+                </section>
+
+                <section class="po-settings-card">
+                    <div class="po-settings-heading">
+                        <span data-i18n="settings.session">Sessie</span>
+                        <small data-i18n="settings.sessionHelp">Beheer deze browser.</small>
+                    </div>
+                    <div class="po-settings-actions">
+                        <button id="po-refresh-profile" type="button" data-i18n="settings.refreshProfile">Profiel vernieuwen</button>
+                        <button id="po-clear-cache" type="button" data-i18n="settings.clearCache">Cache wissen</button>
+                        <button id="po-logout-btn" type="button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                <polyline points="16 17 21 12 16 7"/>
+                                <line x1="21" y1="12" x2="9" y2="12"/>
+                            </svg>
+                            <span data-i18n="profile.logout">Uitloggen</span>
+                        </button>
+                    </div>
+                </section>
+
+                <p id="po-settings-message" class="po-settings-message hidden" aria-live="polite"></p>
             </div>
 
             <div id="po-add-container">
@@ -198,8 +247,12 @@
         <div class="po-base-text">
             <span class="po-base-name">Naam</span>
             <span class="po-base-info">code</span>
+            <span class="po-group-poll hidden" data-i18n="groups.pollActive">Actieve CWL poll</span>
         </div>
-        <span class="groups-role-badge">Lid</span>
+        <div class="po-group-card-actions">
+            <span class="groups-role-badge">Lid</span>
+            <span class="po-group-chevron" aria-hidden="true">›</span>
+        </div>
     </div>
 </template>
 </body>

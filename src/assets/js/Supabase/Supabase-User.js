@@ -72,3 +72,19 @@ export async function addBaseToUser(userId, base) {
         return result;
     })
 }
+
+export async function updateUserName(userId, name) {
+    const path = config._BASE_URL + config._EXT_SUPA_USER_UPDATE_NAME;
+    const data = { userId, name };
+    return databaseRequestWithBody(path, data).then(result => {
+        removeCached(cacheKeys.userInfo(userId));
+        removeCached(cacheKeys.userCheck(userId));
+        return result;
+    });
+}
+
+export async function changeUserPassword(userId, currentPassword, newPassword) {
+    const path = config._BASE_URL + config._EXT_SUPA_USER_CHANGE_PASSWORD;
+    const data = { userId, currentPassword, newPassword };
+    return databaseRequestWithBody(path, data);
+}

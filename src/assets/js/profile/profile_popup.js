@@ -10,6 +10,7 @@ import { getCurrentUserId } from "../utils/user.js";
 import {getGroupsOfUser} from "../Supabase/Supabase-Group.js";
 import { applyI18n, t } from "../i18n/i18n.js";
 import { withGlobalLoading } from "../utils/loading-state.js";
+import { initProfileSettings, resetProfileSettings, syncProfileSettings } from "./profile_settings.js";
 
 let profile, closeProfileBtn, userCode, profileTabs, openProfileBtn, activeTab;
 let friendRequestBtn, friendPendingBtn, friendList, emptyFriendRequest;
@@ -157,7 +158,11 @@ function profileInit() {
     };
 
     poLogoutBtn.onclick = () => {
+        const language = localStorage.getItem('clashtools_language');
+        const theme = localStorage.getItem('clashtools_theme');
         localStorage.clear();
+        if (language) localStorage.setItem('clashtools_language', language);
+        if (theme) localStorage.setItem('clashtools_theme', theme);
         if (window.location.pathname.includes("index.html")) {
             window.location.reload();
         } else {
@@ -176,6 +181,13 @@ function profileInit() {
             return;
         }
         closeProfile();
+    });
+
+    initProfileSettings({
+        onRefreshProfile: () => refreshProfileData(false),
+        onProfileUpdated: (profileData) => {
+            cachedProfile = { ...cachedProfile, ...profileData };
+        }
     });
 }
 
@@ -201,6 +213,7 @@ function refreshProfileData(openAfterLoad = false) {
     ]).then(([userData, friends = [], groups = []]) => {
         if (!userData || userData.error) return null;
         cachedProfile = userData;
+        syncProfileSettings(userData);
         clearProfileRenderedItems();
         resetClansLoaded();
         emptyLabel.textContent = t('profile.noBases');
@@ -223,6 +236,8 @@ function openProfile(username, code, memberSince) {
     poUsername.textContent = username || 'User';
     poCode.textContent = code || '';
     poMemberSince.textContent = memberSince ? t('profile.memberSince', { date: memberSince }) : '/';
+    syncProfileSettings(cachedProfile);
+    resetProfileSettings();
     profile.classList.add('po-open');
     document.body.style.overflow = 'hidden';
     poTab(activeTab, tabRefs);
@@ -236,6 +251,7 @@ function applyActiveProfileTab() {
 function closeProfile() {
     profile.classList.remove('po-open');
     document.body.style.overflow = '';
+    resetProfileSettings();
 }
 
 function poBackdrop(e) {

@@ -25,6 +25,21 @@ public class PasswordUtil {
         return storedHash != null && !storedHash.startsWith("$2a$") && !storedHash.startsWith("$2b$") && !storedHash.startsWith("$2y$");
     }
 
+    public static boolean isStrongPassword(String password) {
+        if (password == null || password.length() < 8) return false;
+        boolean hasLower = false;
+        boolean hasUpper = false;
+        boolean hasDigit = false;
+        boolean hasSpecial = false;
+        for (char ch : password.toCharArray()) {
+            if (Character.isLowerCase(ch)) hasLower = true;
+            else if (Character.isUpperCase(ch)) hasUpper = true;
+            else if (Character.isDigit(ch)) hasDigit = true;
+            else hasSpecial = true;
+        }
+        return hasLower && hasUpper && hasDigit && hasSpecial;
+    }
+
     private static String legacySha256(String password) throws Exception {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         return Base64.getEncoder().encodeToString(md.digest(password.getBytes(StandardCharsets.UTF_8)));

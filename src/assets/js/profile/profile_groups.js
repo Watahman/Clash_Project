@@ -5,6 +5,7 @@ import { renderBadge } from "../groups/groups-badges.js";
 import { t } from "../i18n/i18n.js";
 
 let clansLoaded = false;
+const OPEN_GROUP_STORAGE_KEY = 'clashtoolsOpenGroupId';
 
 export function resetClansLoaded() {
     clansLoaded = false;
@@ -18,12 +19,29 @@ export function renderGroups(groups, emptyLabel, force = false) {
             groupInfos.forEach((groupInfo, index) => {
                 const clanTemplate = document.querySelector("#po-groups-item-template").content.cloneNode(true);
                 if (!Array.isArray(groupInfo) || !groupInfo[0]) return;
-                clanTemplate.querySelector(".po-base-name").textContent = groupInfo[0].name;
-                clanTemplate.querySelector(".po-base-info").textContent = groupInfoText(groupInfo[0]);
-                renderBadge(clanTemplate.querySelector(".po-base-icon"), groupInfo[0].badge, groupInfo[0].badge_url);
+                const group = groupInfo[0];
+                const hasActivePoll = groupHasActivePoll(group);
+                clanTemplate.querySelector(".po-base-name").textContent = group.name;
+                clanTemplate.querySelector(".po-base-info").textContent = group.code;
+                clanTemplate.querySelector(".po-group-poll")?.classList.toggle('hidden', !hasActivePoll);
+                renderBadge(clanTemplate.querySelector(".po-base-icon"), group.badge, group.badge_url);
                 const badge = clanTemplate.querySelector(".groups-role-badge");
-                applyRoleBadge(badge, getCurrentUserRole(groupInfo[0], [], getCurrentUserId(), groups[index]), t);
+                applyRoleBadge(badge, getCurrentUserRole(group, [], getCurrentUserId(), groups[index]), t);
                 const item = clanTemplate.querySelector(".po-card-clan");
+                item.dataset.groupId = group.id;
+                item.setAttribute('role', 'button');
+                item.tabIndex = 0;
+                item.title = t('groups.openGroup');
+                item.setAttribute('aria-label', `${t('groups.openGroup')}: ${group.name}`);
+                item.addEventListener('click', event => {
+                    if (event.target.closest('button, a, input, select, textarea')) return;
+                    openGroupPage(group.id);
+                });
+                item.addEventListener('keydown', event => {
+                    if (event.key !== 'Enter' && event.key !== ' ') return;
+                    event.preventDefault();
+                    openGroupPage(group.id);
+                });
                 item.classList.add('hidden');
                 document.querySelector(".po-panel-content").appendChild(clanTemplate);
                 if (document.querySelector('#po-tab-clans')?.classList.contains('po-tab-active')) {
@@ -34,10 +52,24 @@ export function renderGroups(groups, emptyLabel, force = false) {
         });
 }
 
-function groupInfoText(group) {
+function groupHasActivePoll(group) {
     const polls = parsePolls(group.polls);
-    const hasActivePoll = polls.some(poll => poll.type === 'cwl_availability' && poll.status === 'open');
-    return hasActivePoll ? `${group.code} - ${t('groups.pollActive')}` : group.code;
+    return polls.some(poll => poll.type === 'cwl_availability' && poll.status === 'open');
+}
+
+function openGroupPage(groupId) {
+    if (!groupId) return;
+    sessionStorage.setItem(OPEN_GROUP_STORAGE_KEY, groupId);
+    document.querySelector('#profile-overlay')?.classList.remove('po-open');
+    document.body.style.overflow = '';
+    window.location.href = getGroupsPagePath();
+}
+
+function getGroupsPagePath() {
+    const path = window.location.pathname;
+    if (path.endsWith('/groups.html') || path.endsWith('\\groups.html')) return window.location.href;
+    if (path.includes('/subPages/')) return './groups.html';
+    return './subPages/groups.html';
 }
 
 function parsePolls(value) {

@@ -28,6 +28,7 @@ export function poTab(btn, refs) {
     document.querySelectorAll(".po-card-friend").forEach(t => t.classList.toggle('hidden', !isFriend));
     document.querySelectorAll(".po-card-clan").forEach(t => t.classList.toggle('hidden', !isClan));
 
+    document.querySelector(".po-panel-content")?.classList.toggle('hidden', isSettings);
     poSettings.classList.toggle('hidden', !isSettings);
     friendRequestBtn.classList.toggle('hidden', !isFriend);
     friendPendingBtn.classList.toggle('hidden', !isFriend);
@@ -51,7 +52,7 @@ export function poTab(btn, refs) {
     const emptyText =
         isBase   ? t('profile.noBases') :
         isFriend ? t('profile.noFriends') :
-        isClan   ? t('profile.noClans') : 'Empty';
+        isClan   ? t('profile.noGroups') : 'Empty';
 
     const addLabel =
         isBase   ? t('profile.addBase') :

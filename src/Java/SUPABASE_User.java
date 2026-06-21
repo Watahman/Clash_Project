@@ -166,6 +166,67 @@ public class SUPABASE_User {
         }));
     }
 
+    public void updateUserName() {
+        server.createContext(conf._EXT_SUPA_USER_UPDATE_NAME, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject json = utils.parseBody(ex);
+            String userId = utils.requireString(json, "userId");
+            String name = utils.requireString(json, "name").trim();
+
+            if (name.length() < 2 || name.length() > 32) {
+                utils.sendJsonResponse(ex, "{\"error\":\"Ongeldige naam\"}", 400);
+                return;
+            }
+
+            JsonArray users = JsonParser.parseString(SUPABASE_Client.getWithBody("users", "select=id&id=" + SUPABASE_Client.eq(userId))).getAsJsonArray();
+            if (users.isEmpty()) {
+                utils.sendJsonResponse(ex, "{\"error\":\"Gebruiker niet gevonden\"}", 404);
+                return;
+            }
+
+            JsonObject patch = new JsonObject();
+            patch.addProperty("name", name);
+            SUPABASE_Client.patch("users", "id=" + SUPABASE_Client.eq(userId), patch.toString());
+
+            JsonObject response = new JsonObject();
+            response.addProperty("success", true);
+            response.addProperty("name", name);
+            utils.sendJsonResponse(ex, response.toString(), 200);
+        }));
+    }
+
+    public void changePassword() {
+        server.createContext(conf._EXT_SUPA_USER_CHANGE_PASSWORD, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject json = utils.parseBody(ex);
+            String userId = utils.requireString(json, "userId");
+            String currentPassword = utils.requireString(json, "currentPassword");
+            String newPassword = utils.requireString(json, "newPassword");
+
+            if (!PasswordUtil.isStrongPassword(newPassword)) {
+                utils.sendJsonResponse(ex, "{\"error\":\"Ongeldig wachtwoord\",\"errorKey\":\"settings.passwordInvalid\"}", 400);
+                return;
+            }
+
+            JsonArray users = JsonParser.parseString(SUPABASE_Client.getWithBody("users", "select=password&id=" + SUPABASE_Client.eq(userId))).getAsJsonArray();
+            if (users.isEmpty()) {
+                utils.sendJsonResponse(ex, "{\"error\":\"Gebruiker niet gevonden\"}", 404);
+                return;
+            }
+
+            JsonObject user = users.get(0).getAsJsonObject();
+            String storedHash = user.get("password").getAsString();
+            if (!PasswordUtil.verifyPassword(currentPassword, storedHash)) {
+                utils.sendJsonResponse(ex, "{\"success\":false,\"error\":\"Verkeerd wachtwoord\",\"errorKey\":\"settings.wrongPassword\"}", 401);
+                return;
+            }
+
+            JsonObject patch = new JsonObject();
+            patch.addProperty("password", PasswordUtil.hashPassword(newPassword));
+            SUPABASE_Client.patch("users", "id=" + SUPABASE_Client.eq(userId), patch.toString());
+
+            utils.sendJsonResponse(ex, "{\"success\":true}", 200);
+        }));
+    }
+
     private String normalizeTag(String value) {
         if (value == null) return "";
         String tag = value.trim().toUpperCase();

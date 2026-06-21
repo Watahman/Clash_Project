@@ -68,6 +68,8 @@ public class Config {
     String _EXT_SUPA_USER_CHECK = "/SupabaseUserCheck";
     String _EXT_SUPA_USER_IDCHECK = "/SupabaseUserIdCheck";
     String _EXT_SUPA_USER_ADD_ACCOUNT = "/SupabaseUserAddAccount";
+    String _EXT_SUPA_USER_UPDATE_NAME = "/SupabaseUserUpdateName";
+    String _EXT_SUPA_USER_CHANGE_PASSWORD = "/SupabaseUserChangePassword";
 
     String _EXT_SUPA_USER_ADD_FRIEND = "/SupabaseUserAddFriend";
     String _EXT_SUPA_USER_GET_PENDING_FRIENDS = "/SupabaseUserGetPendingFriends";

@@ -704,3 +704,104 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
     .groups-unlinked-status { align-self: flex-start; }
     .groups-admin-tabs { flex-wrap: wrap; }
 }
+
+/* Global light-mode pass: readable sidebar + visible cards */
+:root[data-theme="light"] main#groups-main {
+    background:
+        radial-gradient(circle at 82% 12%, rgba(184,109,18,0.10), transparent 24rem),
+        radial-gradient(circle at 22% 88%, rgba(111,70,216,0.09), transparent 24rem);
+}
+:root[data-theme="light"] #groups-sidebar,
+:root[data-theme="light"] #groups-collapse-btn {
+    background: rgba(255,255,255,0.78);
+    border-color: var(--border-visible);
+}
+:root[data-theme="light"] .groups-sidebar-header {
+    background: rgba(255,255,255,0.88);
+    border-color: var(--border-visible);
+}
+:root[data-theme="light"] .groups-sidebar-header h3,
+:root[data-theme="light"] #groups-sidebar .groups-item-name {
+    color: var(--text-1) !important;
+}
+:root[data-theme="light"] #groups-sidebar .groups-item-meta,
+:root[data-theme="light"] #groups-collapse-btn {
+    color: var(--text-3);
+}
+:root[data-theme="light"] #groups-sidebar .groups-item {
+    color: var(--text-1);
+    background: var(--surface-card);
+    border-color: var(--border-visible);
+    box-shadow: var(--shadow-sm), var(--inner-line);
+}
+:root[data-theme="light"] #groups-sidebar .groups-item:hover {
+    background: var(--surface-elevated);
+    border-color: var(--border-focus);
+}
+:root[data-theme="light"] #groups-sidebar .groups-item.active {
+    background: var(--accent-dim);
+    border-color: var(--border-focus);
+}
+:root[data-theme="light"] #groups-sidebar .groups-role-badge {
+    color: var(--text-2);
+    background: var(--surface-3);
+    border-color: var(--border-visible);
+}
+:root[data-theme="light"] #groups-sidebar .groups-role-badge.leader {
+    color: #ffe3a3;
+    background: rgba(184,109,18,0.25);
+    border-color: rgba(255,227,163,0.28);
+}
+:root[data-theme="light"] #groups-sidebar .groups-role-badge.co-leader {
+    color: #bff3d7;
+    background: rgba(22,136,90,0.22);
+    border-color: rgba(191,243,215,0.25);
+}
+:root[data-theme="light"] #groups-detail {
+    background: rgba(255,255,255,0.44);
+}
+:root[data-theme="light"] .groups-detail-header {
+    background: rgba(255,255,255,0.82);
+    border-color: var(--border-visible) !important;
+}
+:root[data-theme="light"] .groups-member-item,
+:root[data-theme="light"] .groups-admin-card,
+:root[data-theme="light"] .groups-linked-clan,
+:root[data-theme="light"] .groups-unlinked-account,
+:root[data-theme="light"] .groups-admin-member,
+:root[data-theme="light"] .groups-poll-account-card,
+:root[data-theme="light"] .groups-poll-result-user,
+:root[data-theme="light"] .groups-poll-summary,
+:root[data-theme="light"] .groups-poll-day-summary {
+    background: var(--surface-card);
+    border-color: var(--border-visible);
+    box-shadow: var(--shadow-sm), var(--inner-line);
+}
+:root[data-theme="light"] .groups-empty,
+:root[data-theme="light"] .po-empty {
+    background: var(--surface-2);
+    border-color: var(--border-visible);
+    color: var(--text-3);
+}
+:root[data-theme="light"] .groups-code-pill,
+:root[data-theme="light"] .groups-create-option.groups-create-option-active {
+    color: var(--purple);
+}
+:root[data-theme="light"] .btn-groups-icon:hover,
+:root[data-theme="light"] .btn-groups-icon:focus-visible,
+:root[data-theme="light"] .btn-groups-default:hover,
+:root[data-theme="light"] .btn-groups-default:focus-visible {
+    color: var(--text-1) !important;
+    background: var(--button-hover-bg) !important;
+    border-color: var(--border-focus) !important;
+}
+:root[data-theme="light"] .groups-admin-panel {
+    background: var(--surface-elevated);
+    border-color: var(--border-visible);
+}
+:root[data-theme="light"] .groups-linked-clan-text strong,
+:root[data-theme="light"] .groups-unlinked-account-main strong,
+:root[data-theme="light"] .groups-admin-member-info strong,
+:root[data-theme="light"] .groups-poll-result-user strong {
+    color: var(--text-1);
+}

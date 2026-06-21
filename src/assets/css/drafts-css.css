@@ -41,3 +41,9 @@
     background: linear-gradient(180deg, var(--accent-2), var(--accent));
     border-color: rgba(246,183,60,0.55);
 }
+
+:root[data-theme="light"] #add-draft-cwl {
+    background: var(--surface-card);
+    border-color: var(--border-visible);
+    box-shadow: var(--card-shadow), var(--inner-line);
+}
