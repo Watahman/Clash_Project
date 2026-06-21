@@ -194,7 +194,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.cwl-confirm-clan-is-full, .cwl-delete-clan {
+.cwl-delete-clan {
     width: 1.25rem;
     height: 1.25rem;
     flex: 0 0 auto;
@@ -202,9 +202,8 @@
     cursor: pointer;
     transition: opacity 0.16s ease, transform 0.16s ease, filter 0.16s ease;
 }
-.cwl-confirm-clan-is-full:hover, .cwl-delete-clan:hover { opacity: 1; transform: scale(1.08); }
+.cwl-delete-clan:hover { opacity: 1; transform: scale(1.08); }
 .cwl-delete-clan { filter: invert(61%) sepia(88%) saturate(2621%) hue-rotate(323deg) brightness(103%); }
-.cwl-clan-article.is-full .cwl-confirm-clan-is-full { opacity: 1; filter: invert(76%) sepia(54%) saturate(749%) hue-rotate(84deg) brightness(95%); }
 .cwl-clan-player-list {
     flex: 1;
     min-height: 0;

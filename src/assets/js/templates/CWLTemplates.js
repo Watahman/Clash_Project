@@ -242,7 +242,6 @@ function makeClanDraggable(clanArticle) {
 
     handle.addEventListener('mousedown', event => {
         if (event.target.closest('.cwl-delete-clan') ||
-            event.target.closest('.cwl-confirm-clan-is-full') ||
             event.target.closest('.cwl-player-article')) return;
 
         event.preventDefault();
