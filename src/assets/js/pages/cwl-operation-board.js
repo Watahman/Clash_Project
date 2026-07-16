@@ -1,5 +1,12 @@
 import { profileHTML } from '../profile/profile_popup.js';
 import { syncAuthSession } from '../auth/auth-client.js';
+import { normalizePlanDocument } from '../cwl/cwl-plan-schema.js';
+import {
+    decideWarResult,
+    isAttackCountingState,
+    isMissedCountingState,
+    normalizeWarState
+} from '../cwl/cwl-war-state.js';
 import { initI18n, t } from '../i18n/i18n.js';
 import { getCurrentUserId } from '../utils/user.js';
 import { getAllPlansFromDatabase, getPlanFromDatabase } from '../Supabase/Supabase-Plan.js';
@@ -11,7 +18,6 @@ import {
     getClanWarLeagueWarRequest
 } from '../API/API-Clan.js';
 import { getPlayerInfoRequest } from '../API/API-Player.js';
-import { startGlobalLoading, stopGlobalLoading } from '../utils/loading-state.js';
 
 const refs = {};
 const planCache = new Map();
@@ -20,6 +26,7 @@ let selectedClan = null;
 let latestReport = null;
 let requestToken = 0;
 let planSelectToken = 0;
+let reportController;
 
 function normalizeTag(tag = '') {
     const source = typeof tag === 'object' && tag !== null
@@ -107,15 +114,19 @@ function normalizePlan(plan) {
         ...plan,
         id,
         name: plan.name || plan.plan_name || 'Naamloos plan',
-        info: Array.isArray(plan.info) ? plan.info : Array.isArray(plan.planInfo) ? plan.planInfo : null
+        info: plan.info != null
+            ? normalizePlanDocument(plan.info)
+            : plan.planInfo != null
+                ? normalizePlanDocument(plan.planInfo)
+                : null
     };
 }
 
 function getPlanClans(plan) {
-    const info = Array.isArray(plan?.info) ? plan.info : [];
+    const info = normalizePlanDocument(plan?.info);
     const playerCache = readPlannerPlayerCache();
-    return info.slice(1).map((clan, index) => {
-        const tag = normalizeTag(clan.clantag || clan.clanTag || clan.tag);
+    return info.clans.map((clan, index) => {
+        const tag = normalizeTag(clan.tag);
         const fallbackName = clan.name || clan.clanName || '';
         const players = (Array.isArray(clan.players) ? clan.players : [])
             .map(player => normalizePlayerRef(player, fallbackName))
@@ -128,7 +139,7 @@ function getPlanClans(plan) {
             name: fallbackName || tag || `Clan ${index + 1}`,
             tag,
             players,
-            amountOfPlayers: parseNumber(clan.amountOfPlayers || clan.maxPlayers || 15, 15)
+            amountOfPlayers: parseNumber(clan.capacity || clan.amountOfPlayers || clan.maxPlayers || 15, 15)
         };
     }).filter(clan => clan.tag);
 }
@@ -303,13 +314,13 @@ function loadStandaloneClan() {
     refreshClanReport(selectedClan);
 }
 
-async function enrichPlannedPlayers(clan, members = []) {
+async function enrichPlannedPlayers(clan, members = [], signal) {
     const memberIndex = new Map(members.map(member => [normalizeTag(member.tag), member]).filter(([tag]) => tag));
     const cacheIndex = readPlannerPlayerCache();
     const plannedPlayers = Array.isArray(clan.players) ? clan.players : [];
     const enriched = plannedPlayers.map(player => mergePlayerData(mergePlayerData(player, cacheIndex.get(player.tag) || {}), memberIndex.get(player.tag) || {}));
     const missing = enriched.filter(player => player.tag && (!player.name || player.name === player.tag || !player.townHall));
-    const results = await Promise.allSettled(missing.map(player => getPlayerInfoRequest(player.tag)));
+    const results = await Promise.allSettled(missing.map(player => getPlayerInfoRequest(player.tag, { signal })));
     results.forEach((result, index) => {
         if (result.status !== 'fulfilled' || !result.value || result.value.error) return;
         const fetched = mergePlayerData(missing[index], result.value);
@@ -321,16 +332,18 @@ async function enrichPlannedPlayers(clan, members = []) {
 
 async function refreshClanReport(clan) {
     const token = ++requestToken;
+    reportController?.abort();
+    reportController = new AbortController();
+    const { signal } = reportController;
     setState('loading');
     setHelp(t('op.loadingLive'));
     clearReport(false);
-    startGlobalLoading(t('op.loadingLive'));
     try {
         const [clanInfo, membersData, leagueGroup, currentWar] = await Promise.allSettled([
-            getClanInfoRequest(clan.tag),
-            getClanMembersRequest(clan.tag),
-            getClanCurrentWarLeagueGroupRequest(clan.tag),
-            getClanCurrentWarRequest(clan.tag)
+            getClanInfoRequest(clan.tag, { signal }),
+            getClanMembersRequest(clan.tag, { signal }),
+            getClanCurrentWarLeagueGroupRequest(clan.tag, { signal }),
+            getClanCurrentWarRequest(clan.tag, { signal })
         ]);
         if (token !== requestToken) return;
         const members = membersData.status === 'fulfilled' && Array.isArray(membersData.value?.items) ? membersData.value.items : [];
@@ -341,7 +354,7 @@ async function refreshClanReport(clan) {
             name: cleanDisplayName(clanInfoValue?.name || clan.name) || clan.tag,
             players: Array.isArray(clan.players) ? clan.players : []
         };
-        const enrichedClan = await enrichPlannedPlayers(clanBase, members);
+        const enrichedClan = await enrichPlannedPlayers(clanBase, members, signal);
         if (token !== requestToken) return;
         selectedClan = enrichedClan;
 
@@ -363,7 +376,7 @@ async function refreshClanReport(clan) {
                 .flatMap((round, roundIndex) => (round.warTags || []).map(warTag => ({ warTag, round: roundIndex + 1 })))
                 .filter(item => normalizeTag(item.warTag));
             const warResults = await Promise.allSettled(warTags.map(item =>
-                getClanWarLeagueWarRequest(item.warTag).then(war => ({ ...war, _round: item.round, _warTag: item.warTag }))
+                getClanWarLeagueWarRequest(item.warTag, { signal }).then(war => ({ ...war, _round: item.round, _warTag: item.warTag }))
             ));
             if (token !== requestToken) return;
             report.leagueWars = warResults
@@ -381,11 +394,9 @@ async function refreshClanReport(clan) {
         renderReport(latestReport);
         setState('ready');
     } catch (error) {
-        console.error(error);
+        if (error?.name === 'AbortError') return;
         setState('error', true);
         setHelp(t('op.loadError'), true);
-    } finally {
-        stopGlobalLoading();
     }
 }
 
@@ -398,40 +409,11 @@ function getWarSide(war, clanTag) {
     return null;
 }
 
-function parseClashTime(value) {
-    if (!value) return null;
-    const text = String(value).replace(/(\d{8})T(\d{6})\.000Z/, '$1T$2Z');
-    const compact = text.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/);
-    const date = compact
-        ? new Date(Date.UTC(Number(compact[1]), Number(compact[2]) - 1, Number(compact[3]), Number(compact[4]), Number(compact[5]), Number(compact[6])))
-        : new Date(text);
-    return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function normalizeWarState(war) {
-    const apiState = String(war?.state || '').trim();
-    const state = lower(apiState);
-    if (state === 'warended') return 'completed';
-    if (state === 'inwar') return 'live';
-    if (state === 'preparation') return 'preparation';
-    if (state === 'notinwar') return 'notStarted';
-
-    const now = Date.now();
-    const start = parseClashTime(war?.startTime)?.getTime();
-    const end = parseClashTime(war?.endTime)?.getTime();
-    if (start && now < start) return 'preparation';
-    if (start && end && now >= start && now < end) return 'live';
-    return 'unknown';
-}
-
 function normalizeLeaguePhase(state) {
     const normalized = normalizeWarState({ state });
     return normalized === 'completed' ? 'completed' : normalized === 'live' ? 'live' : normalized === 'preparation' ? 'preparation' : normalized === 'notStarted' ? 'notStarted' : 'unknown';
 }
 
-function isAttackCountingState(stateKey) { return stateKey === 'live' || stateKey === 'completed'; }
-function isMissedCountingState(stateKey) { return stateKey === 'completed'; }
-function isResultFinalState(stateKey) { return stateKey === 'completed'; }
 function isRoundCountedForScoreboard(round) { return isAttackCountingState(round?.state); }
 
 function cwlStateText(stateKey) {
@@ -468,12 +450,7 @@ function createEmptyRound(day) {
 }
 
 function decideResult(stars, destruction, opponentStars, opponentDestruction, stateKey) {
-    if (!isResultFinalState(stateKey)) return stateKey === 'live' ? 'pending' : stateKey === 'preparation' || stateKey === 'notStarted' ? 'notStarted' : 'notAvailable';
-    if (stars > opponentStars) return 'win';
-    if (stars < opponentStars) return 'loss';
-    if (destruction > opponentDestruction) return 'win';
-    if (destruction < opponentDestruction) return 'loss';
-    return 'draw';
+    return decideWarResult(stars, destruction, opponentStars, opponentDestruction, stateKey);
 }
 
 function addStandingWar(stats, clan, opponent, result) {

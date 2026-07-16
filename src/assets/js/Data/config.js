@@ -73,6 +73,9 @@ export const _EXT_SUPA_USER_GET_FRIENDS = "/SupabaseUserGetFriends";
 export const _EXT_SUPA_CWLPLANNER_DATA_SET = "/SupabaseCwplannerDataSet";
 export const _EXT_SUPA_CWLPLANNER_DATA_GET = "/SupabaseCwplannerDataGet";
 export const _EXT_SUPA_CWLPLANNER_DATA_GET_ALL = "/SupabaseCwplannerDataGetAll";
+export const _EXT_SUPA_CWLPLANNER_RENAME = "/SupabaseCwplannerRename";
+export const _EXT_SUPA_CWLPLANNER_COPY = "/SupabaseCwplannerCopy";
+export const _EXT_SUPA_CWLPLANNER_DELETE = "/SupabaseCwplannerDelete";
 
 export const _EXT_SUPA_GROUP_MAKE = "/SupabaseGroupMake";
 export const _EXT_SUPA_GROUP_MEMBERS = "/SupabaseGroupMembers";
@@ -88,3 +91,6 @@ export const _EXT_SUPA_GROUP_POLLS_GET = "/SupabaseGroupPollsGet";
 export const _EXT_SUPA_GROUP_POLL_CREATE = "/SupabaseGroupPollCreate";
 export const _EXT_SUPA_GROUP_POLL_ANSWER = "/SupabaseGroupPollAnswer";
 export const _EXT_SUPA_GROUP_POLL_STATUS = "/SupabaseGroupPollStatus";
+export const _EXT_SUPA_GROUP_POLL_REMIND = "/SupabaseGroupPollRemind";
+export const _EXT_SUPA_NOTIFICATIONS_GET = "/SupabaseNotificationsGet";
+export const _EXT_SUPA_NOTIFICATION_READ = "/SupabaseNotificationRead";

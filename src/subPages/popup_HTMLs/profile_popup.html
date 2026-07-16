@@ -16,7 +16,19 @@
                 </svg>
             </button>
             <span class="po-topbar-label" data-i18n="profile.title">Profiel</span>
+            <button id="po-notifications-btn" class="po-notifications-btn" type="button" data-i18n-aria-label="notifications.title" aria-label="Notificaties">
+                <span aria-hidden="true">🔔</span>
+                <span id="po-notifications-count" class="po-notifications-count hidden">0</span>
+            </button>
         </div>
+
+        <section id="po-notifications-panel" class="po-notifications-panel hidden" aria-live="polite">
+            <div class="po-notifications-heading">
+                <strong data-i18n="notifications.title">Notificaties</strong>
+                <button id="po-notifications-close" type="button" data-i18n-aria-label="common.close" aria-label="Sluiten">×</button>
+            </div>
+            <div id="po-notifications-list"></div>
+        </section>
 
         <div class="po-header">
             <div class="po-avatar">

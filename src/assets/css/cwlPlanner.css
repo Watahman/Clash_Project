@@ -678,10 +678,10 @@
 }
 #cwl-available-players .cwl-player-article,
 .cwl-clan-player-list .cwl-player-article {
-    grid-template-columns: 3.05rem minmax(0, 1fr) auto auto !important;
+    grid-template-columns: 3.05rem minmax(0, 1fr) auto minmax(5rem, 7rem) auto !important;
 }
 .cwl-clan-player-list .cwl-player-article {
-    grid-template-columns: 2.45rem minmax(0, 1fr) auto auto !important;
+    grid-template-columns: 2.45rem minmax(0, 1fr) auto minmax(5rem, 7rem) auto !important;
 }
 .cwl-availability-indicator {
     display: inline-flex;
@@ -716,6 +716,22 @@
     height: .88rem;
     object-fit: contain;
     filter: invert(61%) sepia(88%) saturate(2621%) hue-rotate(323deg) brightness(103%);
+}
+.cwl-move-player {
+    width: 100%;
+    min-height: 1.9rem;
+    padding: .25rem 1.5rem .25rem .45rem;
+    font-size: .65rem;
+}
+@media (max-width: 48rem) {
+    #cwl-available-players .cwl-player-article,
+    .cwl-clan-player-list .cwl-player-article {
+        grid-template-columns: 2.7rem minmax(0, 1fr) auto auto !important;
+    }
+    .cwl-move-player {
+        grid-column: 2 / -1;
+        grid-row: 2;
+    }
 }
 .modal-account-list .cwl-player-article,
 .modal-group-preview-list .cwl-player-article {

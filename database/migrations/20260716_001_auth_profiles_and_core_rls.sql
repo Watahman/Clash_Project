@@ -127,7 +127,39 @@ create table if not exists public.plan_users (
   created_at timestamptz not null default now(),
   primary key (plan_id, user_id)
 );
+alter table public.plan_users add column if not exists created_at timestamptz not null default now();
 create index if not exists plan_users_user_idx on public.plan_users(user_id);
+
+-- Legacy plans did not have an explicit owner. Use their oldest linked user,
+-- then stop rather than silently deleting any orphan that still needs review.
+update public.plans plan
+set owner_id = (
+  select link.user_id
+  from public.plan_users link
+  where link.plan_id = plan.id
+  order by link.created_at, link.user_id
+  limit 1
+)
+where plan.owner_id is null;
+
+do $$
+begin
+  if exists (select 1 from public.plans where owner_id is null) then
+    raise exception 'orphan plans require an owner before migration can continue';
+  end if;
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'plans_owner_id_fkey'
+      and conrelid = 'public.plans'::regclass
+  ) then
+    alter table public.plans
+      add constraint plans_owner_id_fkey
+      foreign key (owner_id) references public.users(id) on delete cascade
+      not valid;
+  end if;
+end $$;
+alter table public.plans alter column owner_id set not null;
+alter table public.plans validate constraint plans_owner_id_fkey;
 
 create table if not exists public.friends (
   id uuid primary key default gen_random_uuid(),
@@ -271,4 +303,3 @@ create policy group_members_self_leave on public.group_members for delete to aut
 revoke all on public.users, public.plans, public.plan_users, public.friends, public.groups, public.group_members from anon;
 grant select, update on public.users to authenticated;
 grant select, insert, update, delete on public.plans, public.plan_users, public.friends, public.groups, public.group_members to authenticated;
-

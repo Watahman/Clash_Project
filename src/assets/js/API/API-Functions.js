@@ -50,9 +50,9 @@ export function getClanMembersBasicData(clanTag) {
     });
 }
 
-export function getPlayerBasicData(playerTag) {
+export function getPlayerBasicData(playerTag, requestOptions = {}) {
     const tag = typeof playerTag === "object" ? playerTag.tag : playerTag;
-    return playerAPI.getPlayerInfoRequest(tag).then(data => ({
+    return playerAPI.getPlayerInfoRequest(tag, requestOptions).then(data => ({
         name: data.name,
         tag: data.tag,
         townHallLevel: data.townHallLevel,
@@ -62,8 +62,10 @@ export function getPlayerBasicData(playerTag) {
     }));
 }
 
+const PLAYER_DETAIL_CONCURRENCY = 6;
+
 function processBatch(members, startIndex = 0, results = []) {
-    const batch = members.slice(startIndex, startIndex + 50);
+    const batch = members.slice(startIndex, startIndex + PLAYER_DETAIL_CONCURRENCY);
 
     return Promise.all(
         batch.map(member => {
@@ -78,8 +80,8 @@ function processBatch(members, startIndex = 0, results = []) {
         })
     ).then(batchResults => {
         results.push(...batchResults);
-        if (startIndex + 50 < members.length) {
-            return processBatch(members, startIndex + 50, results);
+        if (startIndex + PLAYER_DETAIL_CONCURRENCY < members.length) {
+            return processBatch(members, startIndex + PLAYER_DETAIL_CONCURRENCY, results);
         }
         return results;
     });

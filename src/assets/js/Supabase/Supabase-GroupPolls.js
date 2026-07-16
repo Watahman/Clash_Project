@@ -42,3 +42,8 @@ export async function setGroupPollStatus(groupId, userId, pollId, status) {
         return result;
     });
 }
+
+export async function sendGroupPollReminder(groupId, pollId) {
+    const path = config._BASE_URL + config._EXT_SUPA_GROUP_POLL_REMIND;
+    return databaseRequestWithBody(path, { groupId, pollId });
+}

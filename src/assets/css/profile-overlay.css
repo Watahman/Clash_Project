@@ -15,6 +15,7 @@
 }
 #profile-overlay.po-open { display: flex; }
 .po-card {
+    position: relative;
     width: min(37rem, 100%);
     height: min(85vh, 46rem);
     display: flex;
@@ -533,3 +534,57 @@
     background: var(--input-bg);
     border-color: var(--border-visible);
 }
+.po-notifications-btn {
+    position: relative;
+    margin-left: auto;
+    min-width: 2rem;
+    min-height: 2rem;
+    padding: .35rem;
+}
+.po-notifications-count {
+    position: absolute;
+    top: -.2rem;
+    right: -.25rem;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    padding: 0 .2rem;
+    border-radius: 999px;
+    color: #fff;
+    background: var(--red);
+    font-size: .65rem;
+    line-height: 1.15rem;
+    text-align: center;
+}
+.po-notifications-panel {
+    position: absolute;
+    z-index: 8;
+    top: 3.25rem;
+    right: 1rem;
+    width: min(22rem, calc(100% - 2rem));
+    max-height: 22rem;
+    overflow: auto;
+    padding: .75rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    box-shadow: var(--shadow-lg);
+}
+.po-notifications-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .5rem;
+}
+.po-notification-item {
+    display: grid;
+    width: 100%;
+    gap: .2rem;
+    padding: .65rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-2);
+    background: transparent;
+    text-align: left;
+}
+.po-notification-item.unread { background: var(--accent-dim); }
+.po-notification-item strong { color: var(--text-1); }
+.po-notification-item span, .po-notifications-empty { font-size: .78rem; }

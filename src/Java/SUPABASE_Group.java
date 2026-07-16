@@ -94,8 +94,11 @@ public class SUPABASE_Group {
             JsonObject json = utils.parseBody(ex);
             String id       = utils.requireString(json, "groupId");
             requireGroupMember(id, userId);
-            String result   = SUPABASE_Client.getWithBody("group_members", "group_id=" + SUPABASE_Client.eq(id));
-            utils.sendJsonResponse(ex, result, 200);
+            JsonArray members = JsonParser.parseString(SUPABASE_Client.getWithBody(
+                    "group_members",
+                    "group_id=" + SUPABASE_Client.eq(id)
+            )).getAsJsonArray();
+            utils.sendJsonResponse(ex, hydrateMemberProfiles(members).toString(), 200);
         }));
     }
 
@@ -588,6 +591,30 @@ public class SUPABASE_Group {
             if (!tag.isBlank()) byTag.put(tag, account);
         }
         return byTag;
+    }
+
+    private JsonArray hydrateMemberProfiles(JsonArray members) throws Exception {
+        Set<String> userIds = new HashSet<>();
+        for (JsonElement element : members) {
+            JsonElement userId = element.getAsJsonObject().get("user_id");
+            if (userId != null && !userId.isJsonNull()) userIds.add(userId.getAsString());
+        }
+        if (userIds.isEmpty()) return members;
+        JsonArray profiles = JsonParser.parseString(SUPABASE_Client.getWithBody(
+                "users",
+                "select=id,name,code,accounts&id=" + SUPABASE_Client.in(userIds)
+        )).getAsJsonArray();
+        Map<String, JsonObject> byId = new HashMap<>();
+        for (JsonElement element : profiles) {
+            JsonObject profile = element.getAsJsonObject();
+            byId.put(profile.get("id").getAsString(), profile);
+        }
+        for (JsonElement element : members) {
+            JsonObject member = element.getAsJsonObject();
+            JsonObject profile = byId.get(member.get("user_id").getAsString());
+            if (profile != null) member.add("profile", profile.deepCopy());
+        }
+        return members;
     }
 
     private JsonArray parseAccounts(JsonElement accountsEl) {

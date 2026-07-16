@@ -1,4 +1,3 @@
-import { getUserInfo } from "../Supabase/Supabase-User.js";
 import { setGroupMemberRole, transferGroupLeadership } from "../Supabase/Supabase-GroupRoles.js";
 import { t } from "../i18n/i18n.js";
 import { withGlobalLoading } from "../utils/loading-state.js";
@@ -20,8 +19,7 @@ export function createMemberRoleAdmin(elements, getState, setMessage, emptyMessa
         setRoleHelp(currentRole);
         if (!members?.length) return elements.members?.appendChild(emptyMessage(t('groups.noMembers')));
 
-        const users = await Promise.all(members.map(member => getUserInfo(member.user_id).catch(() => null)));
-        members.forEach((member, index) => elements.members?.appendChild(memberNode(member, users[index])));
+        members.forEach(member => elements.members?.appendChild(memberNode(member, member.profile)));
     }
 
     function setRoleHelp(role) {

@@ -116,12 +116,32 @@ public class SUPABASE_User {
                     return;
                 }
             }
+            JsonArray tagOwners = JsonParser.parseString(SUPABASE_Client.getWithBody(
+                    "user_accounts",
+                    "select=user_id&player_tag=" + SUPABASE_Client.eq(newTag) + "&limit=1"
+            )).getAsJsonArray();
+            if (!tagOwners.isEmpty()
+                    && !userId.equals(tagOwners.get(0).getAsJsonObject().get("user_id").getAsString())) {
+                throw new HttpException(409, "{\"error\":\"Dit Clash-account is al gekoppeld\"}");
+            }
             newAccount.addProperty("tag", newTag);
             accounts.add(newAccount);
 
             JsonObject patch = new JsonObject();
             patch.add("accounts", accounts);
             String result = SUPABASE_Client.patch("users", "id=" + SUPABASE_Client.eq(userId), patch.toString());
+
+            JsonObject accountRow = new JsonObject();
+            accountRow.addProperty("user_id", userId);
+            accountRow.addProperty("player_tag", newTag);
+            String playerName = readFirstString(newAccount, "name", "playerName");
+            if (!playerName.isBlank()) accountRow.addProperty("player_name", playerName);
+            JsonElement townHall = newAccount.get("townHallLevel");
+            if (townHall == null || townHall.isJsonNull()) townHall = newAccount.get("townHall");
+            if (townHall != null && !townHall.isJsonNull()) accountRow.addProperty("town_hall_level", townHall.getAsInt());
+            accountRow.add("snapshot", newAccount.deepCopy());
+            accountRow.addProperty("updated_at", java.time.Instant.now().toString());
+            SUPABASE_Client.upsert("user_accounts", "user_id,player_tag", accountRow.toString());
 
             utils.sendJsonResponse(ex, result, 200);
         }));

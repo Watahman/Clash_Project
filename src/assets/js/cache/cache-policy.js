@@ -1,4 +1,4 @@
-export const CACHE_VERSION = 1;
+export const CACHE_VERSION = 2;
 
 export const CACHE_TTL = Object.freeze({
     USER_INFO: 5 * 60 * 1000,
@@ -11,6 +11,7 @@ export const CACHE_TTL = Object.freeze({
     GROUP_CLANS: 5 * 60 * 1000,
     GROUP_POLLS: 45 * 1000,
     PLANS: 20 * 1000,
+    NOTIFICATIONS: 15 * 1000,
     CLASH_PLAYER: 5 * 60 * 1000,
     CLASH_PLAYER_SLOW: 6 * 60 * 60 * 1000,
     CLASH_CLAN_INFO: 6 * 60 * 60 * 1000,
@@ -19,7 +20,10 @@ export const CACHE_TTL = Object.freeze({
     CLASH_WAR_ENDED: 15 * 60 * 1000,
     CLASH_LEAGUE_GROUP: 2 * 60 * 1000,
     CLASH_RAID_SEASONS: 30 * 60 * 1000,
-    CLASH_CLAN_SEARCH: 5 * 60 * 1000
+    CLASH_CLAN_SEARCH: 5 * 60 * 1000,
+    CLASH_REFERENCE: 24 * 60 * 60 * 1000,
+    CLASH_RANKINGS: 5 * 60 * 1000,
+    CLASH_GOLD_PASS: 60 * 60 * 1000
 });
 
 export const CACHE_STALE = Object.freeze({

@@ -1,5 +1,8 @@
 package Java;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Config {
     String _API_KEY_SUPABASE = System.getenv("_API_KEY_SUPABASE");
     String _API_KEY_SECR_SUPABASE = firstNonBlank(
@@ -23,6 +26,9 @@ public class Config {
     );
     String _SERVER_PORT = firstNonBlank(System.getenv("PORT"), System.getenv("SERVER_PORT"), "8080");
     String _MAX_REQUEST_BODY_BYTES = firstNonBlank(System.getenv("MAX_REQUEST_BODY_BYTES"), "1048576");
+    String _PUBLIC_RATE_LIMIT = firstNonBlank(System.getenv("PUBLIC_RATE_LIMIT_PER_MINUTE"), "90");
+    String _SENSITIVE_RATE_LIMIT = firstNonBlank(System.getenv("SENSITIVE_RATE_LIMIT_PER_MINUTE"), "10");
+    String _DATA_RATE_LIMIT = firstNonBlank(System.getenv("DATA_RATE_LIMIT_PER_MINUTE"), "180");
 
     String _EXT_CLAN_CURRENTWAR_LEAGUEGROUP = "/ClanCurrentWarLeagueGroup";
     String _EXT_CLAN_WARLEAGUES_WARS = "/ClanWarLeaguesWars";
@@ -87,6 +93,9 @@ public class Config {
     String _EXT_SUPA_CWLPLANNER_DATA_SET = "/SupabaseCwplannerDataSet";
     String _EXT_SUPA_CWLPLANNER_DATA_GET = "/SupabaseCwplannerDataGet";
     String _EXT_SUPA_CWLPLANNER_DATA_GET_ALL = "/SupabaseCwplannerDataGetAll";
+    String _EXT_SUPA_CWLPLANNER_RENAME = "/SupabaseCwplannerRename";
+    String _EXT_SUPA_CWLPLANNER_COPY = "/SupabaseCwplannerCopy";
+    String _EXT_SUPA_CWLPLANNER_DELETE = "/SupabaseCwplannerDelete";
 
     String _EXT_SUPA_GROUP_MAKE = "/SupabaseGroupMake";
     String _EXT_SUPA_GROUP_MEMBERS = "/SupabaseGroupMembers";
@@ -102,6 +111,9 @@ public class Config {
     String _EXT_SUPA_GROUP_POLL_CREATE = "/SupabaseGroupPollCreate";
     String _EXT_SUPA_GROUP_POLL_ANSWER = "/SupabaseGroupPollAnswer";
     String _EXT_SUPA_GROUP_POLL_STATUS = "/SupabaseGroupPollStatus";
+    String _EXT_SUPA_GROUP_POLL_REMIND = "/SupabaseGroupPollRemind";
+    String _EXT_SUPA_NOTIFICATIONS_GET = "/SupabaseNotificationsGet";
+    String _EXT_SUPA_NOTIFICATION_READ = "/SupabaseNotificationRead";
 
     static String firstNonBlank(String... values) {
         if (values == null) return "";
@@ -170,11 +182,45 @@ public class Config {
         }
     }
 
+    int getRateLimitForPath(String path) {
+        if (_EXT_PLAYER_VERIFY_TOKEN.equals(path)
+                || _EXT_SUPA_USER_MAKE.equals(path)
+                || _EXT_SUPA_USER_CHECK.equals(path)) {
+            return positiveInt(_SENSITIVE_RATE_LIMIT, 10);
+        }
+        if (path != null && (path.startsWith("/Clan")
+                || path.startsWith("/Player")
+                || path.startsWith("/League")
+                || path.startsWith("/Locations")
+                || path.startsWith("/Labels")
+                || path.startsWith("/GoldPass"))) {
+            return positiveInt(_PUBLIC_RATE_LIMIT, 90);
+        }
+        return positiveInt(_DATA_RATE_LIMIT, 180);
+    }
+
+    private int positiveInt(String value, int fallback) {
+        try {
+            return Math.max(1, Math.min(Integer.parseInt(value), 10_000));
+        } catch (NumberFormatException invalidValue) {
+            return fallback;
+        }
+    }
+
     boolean isOriginAllowed(String origin) {
         if (origin == null || origin.isBlank()) return true;
         for (String allowed : _ALLOWED_ORIGINS.split(",")) {
             if (origin.equalsIgnoreCase(allowed.trim())) return true;
         }
         return false;
+    }
+
+    List<String> missingRequiredConfiguration() {
+        List<String> missing = new ArrayList<>();
+        if (_BASE_URL_SUPABASE == null || _BASE_URL_SUPABASE.isBlank()) missing.add("SUPABASE_URL");
+        if (_API_KEY_SUPABASE == null || _API_KEY_SUPABASE.isBlank()) missing.add("SUPABASE_PUBLISHABLE_KEY");
+        if (_API_KEY_SECR_SUPABASE == null || _API_KEY_SECR_SUPABASE.isBlank()) missing.add("SUPABASE_SERVICE_ROLE_KEY");
+        if (_API_KEY_ACTIVE == null || _API_KEY_ACTIVE.isBlank()) missing.add("CLASH_API_KEY");
+        return List.copyOf(missing);
     }
 }

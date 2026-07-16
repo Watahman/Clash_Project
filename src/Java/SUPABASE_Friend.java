@@ -7,6 +7,8 @@ import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 
 import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class SUPABASE_Friend {
@@ -62,9 +64,9 @@ public class SUPABASE_Friend {
         server.createContext(conf._EXT_SUPA_USER_GET_PENDING_FRIENDS, exchange -> utils.handlePost(exchange, ex -> {
             String userId = utils.requireAuthenticatedUser(ex);
             utils.parseBody(ex);
-            String result   = SUPABASE_Client.getWithBody("friends",
-                    "user_a=" + SUPABASE_Client.eq(userId) + "&status=eq.pending&select=user_b,status");
-            utils.sendJsonResponse(ex, result, 200);
+            JsonArray rows = JsonParser.parseString(SUPABASE_Client.getWithBody("friends",
+                    "user_a=" + SUPABASE_Client.eq(userId) + "&status=eq.pending&select=user_b,status")).getAsJsonArray();
+            utils.sendJsonResponse(ex, hydrateProfiles(rows, "user_b").toString(), 200);
         }));
     }
 
@@ -72,9 +74,9 @@ public class SUPABASE_Friend {
         server.createContext(conf._EXT_SUPA_USER_GET_FRIEND_REQUESTS, exchange -> utils.handlePost(exchange, ex -> {
             String userId = utils.requireAuthenticatedUser(ex);
             utils.parseBody(ex);
-            String result   = SUPABASE_Client.getWithBody("friends",
-                    "user_b=" + SUPABASE_Client.eq(userId) + "&status=eq.pending&select=user_a,status");
-            utils.sendJsonResponse(ex, result, 200);
+            JsonArray rows = JsonParser.parseString(SUPABASE_Client.getWithBody("friends",
+                    "user_b=" + SUPABASE_Client.eq(userId) + "&status=eq.pending&select=user_a,status")).getAsJsonArray();
+            utils.sendJsonResponse(ex, hydrateProfiles(rows, "user_a").toString(), 200);
         }));
     }
 
@@ -113,7 +115,7 @@ public class SUPABASE_Friend {
                 }
             }
 
-            utils.sendJsonResponse(ex, combined.toString(), 200);
+            utils.sendJsonResponse(ex, hydrateProfiles(combined, "user_b").toString(), 200);
         }));
     }
 
@@ -167,5 +169,30 @@ public class SUPABASE_Friend {
 
             utils.sendJsonResponse(ex, "{\"success\":true}", 200);
         }));
+    }
+
+    private JsonArray hydrateProfiles(JsonArray rows, String userIdField) throws Exception {
+        Set<String> userIds = new HashSet<>();
+        for (JsonElement element : rows) {
+            JsonElement id = element.getAsJsonObject().get(userIdField);
+            if (id != null && !id.isJsonNull()) userIds.add(id.getAsString());
+        }
+        if (userIds.isEmpty()) return rows;
+
+        JsonArray profiles = JsonParser.parseString(SUPABASE_Client.getWithBody(
+                "users",
+                "select=id,name,code&id=" + SUPABASE_Client.in(userIds)
+        )).getAsJsonArray();
+        Map<String, JsonObject> byId = new HashMap<>();
+        for (JsonElement element : profiles) {
+            JsonObject profile = element.getAsJsonObject();
+            byId.put(profile.get("id").getAsString(), profile);
+        }
+        for (JsonElement element : rows) {
+            JsonObject row = element.getAsJsonObject();
+            JsonObject profile = byId.get(row.get(userIdField).getAsString());
+            if (profile != null) row.add("profile", profile.deepCopy());
+        }
+        return rows;
     }
 }

@@ -1,0 +1,93 @@
+import { normalizeTag } from './cwl-utils.js';
+
+export const CWL_PLAN_SCHEMA_VERSION = 2;
+
+export function normalizePlayerSnapshot(player, fallbackClanName = '') {
+    if (typeof player === 'string') {
+        const tag = normalizeTag(player);
+        return tag ? { tag, name: tag, townHallLevel: 1, clanName: fallbackClanName } : null;
+    }
+    if (!player || typeof player !== 'object') return null;
+    const tag = normalizeTag(player.tag || player.playerTag || player.accountTag || player.clashTag);
+    if (!tag) return null;
+    return {
+        tag,
+        name: String(player.name || player.playerName || tag).trim(),
+        townHallLevel: Math.max(1, Number(player.townHallLevel || player.townHall || player.th || 1)),
+        clanName: String(player.clanName || player.clan?.name || fallbackClanName || '').trim(),
+        clanTag: normalizeTag(player.clanTag || player.clantag || player.clan?.tag || '')
+    };
+}
+
+function uniquePlayerSnapshots(players, fallbackClanName = '') {
+    const byTag = new Map();
+    (Array.isArray(players) ? players : []).forEach(player => {
+        const normalized = normalizePlayerSnapshot(player, fallbackClanName);
+        if (normalized && !byTag.has(normalized.tag)) byTag.set(normalized.tag, normalized);
+    });
+    return [...byTag.values()];
+}
+
+function normalizeClan(clan, index) {
+    const tag = normalizeTag(clan?.tag || clan?.clanTag || clan?.clantag);
+    if (!tag) return null;
+    const name = String(clan?.name || clan?.clanName || tag).trim();
+    return {
+        id: String(clan?.id || clan?.uuid || `legacy-${index}`),
+        tag,
+        name,
+        capacity: [15, 30].includes(Number(clan?.capacity || clan?.amountOfPlayers || clan?.maxPlayers))
+            ? Number(clan?.capacity || clan?.amountOfPlayers || clan?.maxPlayers)
+            : 15,
+        badgeUrl: String(clan?.badgeUrl || clan?.badge_url || '').trim(),
+        players: uniquePlayerSnapshots(clan?.players, name)
+    };
+}
+
+export function normalizePlanDocument(input) {
+    if (input && !Array.isArray(input) && typeof input === 'object') {
+        const clans = (Array.isArray(input.clans) ? input.clans : [])
+            .map(normalizeClan)
+            .filter(Boolean);
+        return {
+            schemaVersion: CWL_PLAN_SCHEMA_VERSION,
+            freePlayers: uniquePlayerSnapshots(input.freePlayers),
+            clans,
+            pollMeta: {
+                groupId: String(input.pollMeta?.groupId || '').trim(),
+                pollId: String(input.pollMeta?.pollId || '').trim()
+            }
+        };
+    }
+
+    const legacy = Array.isArray(input) ? input : [];
+    const first = legacy[0];
+    const hasSyntheticFreePlayers = String(first?.clanTag || first?.clantag || '').toLowerCase() === 'none';
+    const clanRows = hasSyntheticFreePlayers ? legacy.slice(1) : legacy;
+    return {
+        schemaVersion: CWL_PLAN_SCHEMA_VERSION,
+        freePlayers: uniquePlayerSnapshots(hasSyntheticFreePlayers ? first?.players : []),
+        clans: clanRows.map(normalizeClan).filter(Boolean),
+        pollMeta: {
+            groupId: String(hasSyntheticFreePlayers ? first?.groupId || '' : '').trim(),
+            pollId: String(hasSyntheticFreePlayers ? first?.pollId || '' : '').trim()
+        }
+    };
+}
+
+export function validatePlanDocument(input) {
+    const document = normalizePlanDocument(input);
+    const allTags = [
+        ...document.freePlayers.map(player => player.tag),
+        ...document.clans.flatMap(clan => clan.players.map(player => player.tag))
+    ];
+    if (new Set(allTags).size !== allTags.length) {
+        throw new Error('Een speler kan maar één keer in een plan voorkomen.');
+    }
+    document.clans.forEach(clan => {
+        if (clan.players.length > clan.capacity) {
+            throw new Error(`Clan ${clan.name} bevat meer dan ${clan.capacity} spelers.`);
+        }
+    });
+    return document;
+}

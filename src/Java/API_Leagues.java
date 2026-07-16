@@ -1,5 +1,6 @@
 package Java;
 
+import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpServer;
 
 import java.net.URLEncoder;
@@ -37,8 +38,9 @@ public class API_Leagues {
 
     public void getLeagueSeasonInfo() {
         server.createContext(conf._EXT_LEAGUE_LEAGUE_SEASON_INFO, exchange -> utils.handlePost(exchange, ex -> {
-            String leagueID = utils.requireString(utils.parseBody(ex), "leagueID");
-            String seasonID  = utils.requireString(utils.parseBody(ex), "seasonID");
+            JsonObject json = utils.parseBody(ex);
+            String leagueID = utils.requireString(json, "leagueID");
+            String seasonID  = utils.requireString(json, "seasonID");
             utils.clashGet(ex, "/leagues/" + URLEncoder.encode(leagueID, "UTF-8") + "/seasons/" + URLEncoder.encode(seasonID, "UTF-8"));
         }));
     }
@@ -97,8 +99,9 @@ public class API_Leagues {
 
     public void getLeagueGroupInfo() {
         server.createContext(conf._EXT_LEAGUE_LEAGUEGROUP_INFO, exchange -> utils.handlePost(exchange, ex -> {
-            String leagueGroupTag = utils.requireString(utils.parseBody(ex), "leagueGroupTag");
-            String leagueSeasonID = utils.requireString(utils.parseBody(ex), "leagueSeasonID");
+            JsonObject json = utils.parseBody(ex);
+            String leagueGroupTag = utils.requireString(json, "leagueGroupTag");
+            String leagueSeasonID = utils.requireString(json, "leagueSeasonID");
             utils.clashGet(ex, "/leaguegroup/" + URLEncoder.encode(leagueGroupTag, "UTF-8") + "/" + URLEncoder.encode(leagueSeasonID, "UTF-8"));
         }));
     }

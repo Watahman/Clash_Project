@@ -14,6 +14,9 @@ export async function fetchClashAPIRequest(path, body, cacheOptions = null, requ
         ttlMs: cacheOptions.ttlMs,
         staleMs: cacheOptions.staleMs,
         maxFallbackAgeMs: cacheOptions.maxFallbackAgeMs,
+        forceRefresh: requestOptions.forceRefresh === true,
+        onRefresh: requestOptions.onRefresh,
+        onRefreshError: requestOptions.onRefreshError,
         source: 'clash'
     });
 }

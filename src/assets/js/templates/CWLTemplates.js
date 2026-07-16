@@ -24,6 +24,7 @@ function createPlayerCard(playerInfo, clanuuid) {
         if (target.isPlanner) {
             makePlayerDraggable(element);
             attachDeleteButton(element);
+            attachMoveControl(element);
             applyAvailabilityToCard(element);
             plannerChanged = true;
         }
@@ -68,7 +69,13 @@ function buildPlayerElement(player, target) {
     const template = document.querySelector('#cwl-player-template').content.cloneNode(true);
     const element = template.querySelector('.cwl-player-article');
     const normalized = normalizePlayer(player);
-    element.querySelector('.cwl-player-townhall-foto').src = `../assets/css/pictures/townhalls/Town_Hall${normalized.townHallLevel}.png`;
+    const townHallImage = element.querySelector('.cwl-player-townhall-foto');
+    townHallImage.src = `../assets/css/pictures/townhalls/Town_Hall${normalized.townHallLevel}.png`;
+    townHallImage.addEventListener('error', () => {
+        if (!townHallImage.src.endsWith('/Town_Hall1.png')) {
+            townHallImage.src = '../assets/css/pictures/townhalls/Town_Hall1.png';
+        }
+    }, { once: true });
     element.querySelector('.cwl-player-hashtag').textContent = normalized.tag;
     element.querySelector('.cwl-player-name').textContent = normalized.name;
     element.querySelector('.cwl-player-clan').textContent = normalized.clanName || 'No clan';
@@ -108,6 +115,49 @@ function attachDeleteButton(element) {
         removePlayerCard(element);
     });
     element.appendChild(button);
+}
+
+function attachMoveControl(element) {
+    if (element.querySelector('.cwl-move-player')) return;
+    const select = document.createElement('select');
+    select.className = 'cwl-move-player';
+    select.setAttribute('aria-label', t('cwl.movePlayer'));
+    select.title = t('cwl.movePlayer');
+
+    const refreshOptions = () => {
+        const currentContainer = element.parentElement;
+        select.replaceChildren();
+        const free = document.createElement('option');
+        free.value = 'free';
+        free.textContent = t('cwl.moveToAvailable');
+        select.appendChild(free);
+        document.querySelectorAll('.cwl-clan-article').forEach(clan => {
+            const option = document.createElement('option');
+            option.value = clan.id;
+            option.textContent = clan.dataset.clanName
+                || clan.querySelector('.cwl-clan-name')?.textContent
+                || t('cwl.clan');
+            select.appendChild(option);
+        });
+        const currentClan = currentContainer?.closest('.cwl-clan-article');
+        select.value = currentClan?.id || 'free';
+    };
+    select.addEventListener('focus', refreshOptions);
+    select.addEventListener('pointerdown', event => event.stopPropagation());
+    select.addEventListener('mousedown', event => event.stopPropagation());
+    select.addEventListener('change', () => {
+        const target = select.value === 'free'
+            ? document.querySelector('#cwl-available-players')
+            : document.querySelector(`#${CSS.escape(select.value)} .cwl-clan-player-list`);
+        if (!target || target === element.parentElement) return;
+        target.appendChild(element);
+        updateAllPlayerCounters();
+        rememberPlannerPlayers();
+        window.dispatchEvent(new CustomEvent('clashtools:cwl-player-added'));
+        savePlan();
+    });
+    refreshOptions();
+    element.appendChild(select);
 }
 
 function removePlayerCard(element) {

@@ -1,0 +1,56 @@
+.bracket-main {
+    display: grid;
+    grid-template-columns: minmax(17rem, 23rem) minmax(0, 1fr);
+    min-height: calc(100vh - var(--header-h));
+    gap: 1rem;
+    padding: var(--page-pad);
+}
+.bracket-controls {
+    display: grid;
+    align-content: start;
+    gap: .65rem;
+    padding: 1rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background: var(--surface-card);
+}
+.bracket-controls textarea { resize: vertical; }
+.bracket-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.bracket-actions button { flex: 1 1 9rem; }
+.bracket-status { min-height: 1.25rem; color: var(--text-3); }
+.bracket-status[data-state="error"] { color: var(--red); }
+.bracket-status[data-state="success"] { color: var(--green); }
+.bracket-board {
+    display: flex;
+    align-items: stretch;
+    gap: 1rem;
+    min-width: 0;
+    overflow: auto;
+    padding: 1rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background: var(--surface-1);
+}
+.bracket-round {
+    display: flex;
+    flex: 0 0 14rem;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 1rem;
+}
+.bracket-round h2 { color: var(--text-3); font-size: .85rem; text-align: center; }
+.bracket-match {
+    display: grid;
+    gap: .25rem;
+    padding: .4rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+}
+.bracket-match button { width: 100%; justify-content: flex-start; overflow: hidden; text-overflow: ellipsis; }
+.bracket-match button.winner { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.bracket-empty { margin: auto; color: var(--text-3); }
+@media (max-width: 52rem) {
+    .bracket-main { grid-template-columns: 1fr; }
+    .bracket-board { min-height: 28rem; }
+}

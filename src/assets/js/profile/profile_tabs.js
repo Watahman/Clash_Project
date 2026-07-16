@@ -71,7 +71,13 @@ export function poTab(btn, refs) {
 
     if (isBase)   addBtn.onclick = () => openAddOverlay(addBase, overlayAddBaseBtn, () => handleAddBase(inputBaseTag, inputBaseToken));
     if (isFriend) addBtn.onclick = () => openAddOverlay(addClan, overlayAddClanBtn, () => handleAddFriend(inputClanTag));
-    if (isClan)   addBtn.onclick = () => openAddOverlay(addClan, overlayAddClanBtn, () => {});
+    if (isClan) {
+        addBtn.onclick = () => {
+            window.location.href = window.location.pathname.includes('/subPages/')
+                ? './groups.html'
+                : './subPages/groups.html';
+        };
+    }
 }
 
 function openAddOverlay(overlay, confirmBtn, onConfirm) {

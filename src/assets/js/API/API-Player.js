@@ -3,7 +3,7 @@ import {fetchClashAPIRequest} from "./API-Client.js"
 import { cacheKeys } from "../cache/cache-keys.js";
 import { CACHE_STALE, CACHE_TTL } from "../cache/cache-policy.js";
 
-export async function getPlayerInfoRequest(playerID){
+export async function getPlayerInfoRequest(playerID, requestOptions = {}){
     const path = config._BASE_URL + config._EXT_PLAYER_INFO;
     const body = JSON.stringify({
         playerID: playerID
@@ -13,14 +13,14 @@ export async function getPlayerInfoRequest(playerID){
         key: cacheKeys.clashPlayer(playerID),
         ttlMs: CACHE_TTL.CLASH_PLAYER,
         staleMs: CACHE_STALE.MEDIUM
-    })
+    }, requestOptions)
 }
 
-export async function getPlayerBattleLogRequest(playerID) {
+export async function getPlayerBattleLogRequest(playerID, requestOptions = {}) {
     const path = config._BASE_URL + config._EXT_PLAYER_BATTLE_LOG;
     const body = JSON.stringify({
         playerID: playerID
-    })
+    }, requestOptions)
 
     return fetchClashAPIRequest(path, body, {
         key: cacheKeys.clashPlayerBattleLog(playerID),
@@ -29,20 +29,20 @@ export async function getPlayerBattleLogRequest(playerID) {
     })
 }
 
-export async function postPlayerVerifyTokenRequest(playerID, playerToken){
+export async function postPlayerVerifyTokenRequest(playerID, playerToken, requestOptions = {}){
     const path = config._BASE_URL + config._EXT_PLAYER_VERIFY_TOKEN;
     const body = JSON.stringify({
         playerID: playerID,
         playerToken: playerToken
     })
-    return fetchClashAPIRequest(path, body)
+    return fetchClashAPIRequest(path, body, null, requestOptions)
 }
 
-export async function getPlayerLeagueHistoryRequest(playerID){
+export async function getPlayerLeagueHistoryRequest(playerID, requestOptions = {}){
     const path = config._BASE_URL + config._EXT_PLAYER_LEAGUE_HISTORY;
     const body = JSON.stringify({
         playerID: playerID
-    })
+    }, requestOptions)
 
     return fetchClashAPIRequest(path, body, {
         key: cacheKeys.clashPlayerLeagueHistory(playerID),

@@ -1,5 +1,4 @@
 import { t } from '../i18n/i18n.js';
-import { getUserInfo } from "../Supabase/Supabase-User.js";
 import { getGroupInfo, getGroupMembers } from "../Supabase/Supabase-Group.js";
 import { applyRoleBadge, getCurrentUserRole, getMemberRole, isGroupAdmin } from "../groups/groups-roles.js";
 import { renderBadge } from "../groups/groups-badges.js";
@@ -75,19 +74,16 @@ function addAllMembers(groupMembers, creatorId) {
     if (!Array.isArray(groupMembers) || groupMembers.length === 0) {
         const p = document.createElement("p");
         p.className = "groups-empty";
-        p.textContent = 'Geen leden';
+        p.textContent = t('groups.noMembers');
         memberList.appendChild(p);
         return;
     }
 
     groupMembers.forEach(member => {
         const groupMemberCard = document.querySelector("#groups-member-template").content.cloneNode(true);
-        getUserInfo(member.user_id).then(userData => {
-            const user = Array.isArray(userData) ? userData[0] : userData;
-            if (!user || user.error) return;
-            groupMemberCard.querySelector(".groups-member-name").textContent = user.name;
-            applyRoleBadge(groupMemberCard.querySelector(".groups-role-badge"), getMemberRole(member, { owner_id: creatorId }, user.id), t);
-            memberList.appendChild(groupMemberCard);
-        }).catch(error => console.error(error));
+        const user = member.profile || { id: member.user_id, name: member.user_id };
+        groupMemberCard.querySelector(".groups-member-name").textContent = user.name || member.user_id;
+        applyRoleBadge(groupMemberCard.querySelector(".groups-role-badge"), getMemberRole(member, { owner_id: creatorId }, user.id), t);
+        memberList.appendChild(groupMemberCard);
     });
 }

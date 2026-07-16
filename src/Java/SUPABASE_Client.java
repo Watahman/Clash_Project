@@ -7,6 +7,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class SUPABASE_Client {
     private static final Config CONF = new Config();
@@ -35,6 +37,17 @@ public class SUPABASE_Client {
                 body,
                 "resolution=merge-duplicates,return=minimal"
         );
+    }
+
+    public static String rpc(String function, String body) throws Exception {
+        return sendRequest("POST", "rpc/" + function, body);
+    }
+
+    public static String in(Collection<String> values) {
+        return "in.(" + values.stream()
+                .map(String::trim)
+                .filter(value -> !value.isBlank())
+                .collect(Collectors.joining(",")) + ")";
     }
 
     public static String patch(String table, String filter, String body) throws Exception {

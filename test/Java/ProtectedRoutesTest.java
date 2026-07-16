@@ -3,6 +3,8 @@ package Java;
 import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -45,5 +47,34 @@ class ProtectedRoutesTest {
 
         assertEquals(401, response.statusCode());
         assertFalse(response.body().contains("00000000-0000-0000-0000-000000000001"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "/SupabaseCwplannerRename",
+            "/SupabaseCwplannerCopy",
+            "/SupabaseCwplannerDelete"
+    })
+    void draftMutationsRequireAnAuthenticatedSession(String path) throws Exception {
+        Config config = new Config();
+        server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        SUPABASE_CWLPlanner planner = new SUPABASE_CWLPlanner(server, config);
+        planner.renamePlanner();
+        planner.copyPlanner();
+        planner.deletePlanner();
+        server.start();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://127.0.0.1:" + server.getAddress().getPort() + path))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(
+                        "{\"userId\":\"spoofed\",\"planId\":\"spoofed\",\"name\":\"spoofed\"}",
+                        StandardCharsets.UTF_8
+                ))
+                .build();
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(401, response.statusCode());
+        assertFalse(response.body().contains("spoofed"));
     }
 }

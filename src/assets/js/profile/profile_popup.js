@@ -12,6 +12,7 @@ import { applyI18n, t } from "../i18n/i18n.js";
 import { initProfileSettings, resetProfileSettings, syncProfileSettings } from "./profile_settings.js";
 import { signOut } from "../auth/auth-client.js";
 import { invalidateUserCache } from "../cache/local-cache.js";
+import { getNotifications, markNotificationRead } from "../Supabase/Supabase-Notifications.js";
 
 let profile, closeProfileBtn, userCode, profileTabs, openProfileBtn, activeTab;
 let friendRequestBtn, friendPendingBtn, friendList, emptyFriendRequest;
@@ -23,6 +24,7 @@ let overlayAddBaseBtn, overlayAddClanBtn;
 let inputBaseTag, inputBaseToken, inputClanTag;
 let poLogoutBtn, poSettings;
 let friendListTitle, poGroupList;
+let notificationsBtn, notificationsCount, notificationsPanel, notificationsClose, notificationsList;
 let cachedProfile = null;
 
 
@@ -102,6 +104,11 @@ function labelInit() {
     poGroupList        = document.querySelector("#po-group-list");
     poLogoutBtn        = document.querySelector("#po-logout-btn");
     poSettings         = document.querySelector(".po-settings");
+    notificationsBtn   = document.querySelector('#po-notifications-btn');
+    notificationsCount = document.querySelector('#po-notifications-count');
+    notificationsPanel = document.querySelector('#po-notifications-panel');
+    notificationsClose = document.querySelector('#po-notifications-close');
+    notificationsList  = document.querySelector('#po-notifications-list');
     resetCopyFeedback(poIcoCopy, poIcoCheck);
 
     tabRefs = {
@@ -129,6 +136,8 @@ function profileInit() {
     userCode.onclick = () => { copyWithFeedback(poCode.textContent, poIcoCopy, poIcoCheck); };
     profileTabs.forEach(tab => { tab.onclick = (e) => { poTab(e.target, tabRefs); }; });
     friendListClose.onclick = () => { friendList.classList.add('hidden'); };
+    notificationsBtn.onclick = () => notificationsPanel.classList.toggle('hidden');
+    notificationsClose.onclick = () => notificationsPanel.classList.add('hidden');
 
     friendRequestBtn.onclick = () => {
         const userId = getCurrentUserId();
@@ -143,7 +152,7 @@ function profileInit() {
                 return;
             }
             emptyFriendRequest.classList.add('hidden');
-            res.forEach(friend => { createFriendRequestCard(friend.user_a); });
+            res.forEach(friend => { createFriendRequestCard(friend); });
         });
     };
 
@@ -160,7 +169,7 @@ function profileInit() {
                 return;
             }
             emptyFriendRequest.classList.add('hidden');
-            res.forEach(friend => { createFriendPendingCard(friend.user_b); });
+            res.forEach(friend => { createFriendPendingCard(friend); });
         });
     };
 
@@ -235,8 +244,9 @@ function refreshProfileData(openAfterLoad = false) {
     return Promise.all([
         checkUserId(userId),
         getFriends(userId),
-        getGroupsOfUser(userId)
-    ]).then(([userData, friends = [], groups = []]) => {
+        getGroupsOfUser(userId),
+        getNotifications(userId).catch(() => ({ unread: 0, items: [] }))
+    ]).then(([userData, friends = [], groups = [], notifications]) => {
         if (!userData || userData.error) return null;
         cachedProfile = userData;
         syncProfileSettings(userData);
@@ -247,6 +257,7 @@ function refreshProfileData(openAfterLoad = false) {
         loadBases(userData.accounts || [], emptyLabel, true);
         renderFriends(Array.isArray(friends) ? friends : [], emptyLabel, true);
         renderGroups(Array.isArray(groups) ? groups : [], emptyLabel, true);
+        renderNotifications(notifications);
         applyActiveProfileTab();
         if (openAfterLoad) {
             openProfile(userData.name, "#" + userData.code, userData.created_at?.split("T")[0]);
@@ -257,6 +268,52 @@ function refreshProfileData(openAfterLoad = false) {
         profile.removeAttribute('aria-busy');
         if (openAfterLoad && poUsername) poUsername.textContent = t('profile.loadError');
         return null;
+    });
+}
+
+function renderNotifications(data) {
+    if (!notificationsList || !notificationsCount) return;
+    const items = Array.isArray(data?.items) ? data.items : [];
+    const unread = Number(data?.unread || items.filter(item => !item.read_at).length);
+    notificationsCount.textContent = String(unread);
+    notificationsCount.classList.toggle('hidden', unread === 0);
+    notificationsList.replaceChildren();
+    if (!items.length) {
+        const empty = document.createElement('p');
+        empty.className = 'po-notifications-empty';
+        empty.textContent = t('notifications.empty');
+        notificationsList.appendChild(empty);
+        return;
+    }
+    items.forEach(notification => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'po-notification-item';
+        button.classList.toggle('unread', !notification.read_at);
+        const title = document.createElement('strong');
+        title.textContent = notification.title || t('notifications.title');
+        const body = document.createElement('span');
+        body.textContent = notification.type === 'poll_reminder'
+            ? t('notifications.pollReminderBody')
+            : notification.body || '';
+        button.append(title, body);
+        button.addEventListener('click', async () => {
+            if (!notification.read_at) {
+                await markNotificationRead(getCurrentUserId(), notification.id).catch(() => null);
+                notification.read_at = new Date().toISOString();
+                button.classList.remove('unread');
+                const nextUnread = Math.max(0, Number(notificationsCount.textContent || 0) - 1);
+                notificationsCount.textContent = String(nextUnread);
+                notificationsCount.classList.toggle('hidden', nextUnread === 0);
+            }
+            if (notification.related_group_id) {
+                sessionStorage.setItem('clashtoolsOpenGroupId', notification.related_group_id);
+                window.location.href = window.location.pathname.includes('/subPages/')
+                    ? './groups.html'
+                    : './subPages/groups.html';
+            }
+        });
+        notificationsList.appendChild(button);
     });
 }
 

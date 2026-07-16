@@ -1,5 +1,5 @@
-import { answerGroupPoll, createGroupPoll, getGroupPolls, setGroupPollStatus } from "../Supabase/Supabase-GroupPolls.js";
-import { getUserInfo } from "../Supabase/Supabase-User.js";
+import { answerGroupPoll, createGroupPoll, getGroupPolls, setGroupPollStatus, sendGroupPollReminder } from "../Supabase/Supabase-GroupPolls.js";
+import { checkUserId } from "../Supabase/Supabase-User.js";
 import { t } from "../i18n/i18n.js";
 import { getCurrentUserId } from "../utils/user.js";
 import { withGlobalLoading } from "../utils/loading-state.js";
@@ -12,6 +12,7 @@ export function initGroupPolls(emptyMessage) {
     let polls = [];
     let currentRole = 'member';
     let activePoll = null;
+    let selectedResultPoll = null;
     let currentUser = null;
 
     window.addEventListener('clashtools:group-opened', event => {
@@ -27,13 +28,13 @@ export function initGroupPolls(emptyMessage) {
     el.answerCancel?.addEventListener('click', closeAnswerOverlay);
     el.answerSave?.addEventListener('click', saveAnswer);
     el.answerOverlay?.addEventListener('click', event => { if (event.target === el.answerOverlay) closeAnswerOverlay(); });
-    el.reminderBtn?.addEventListener('click', () => { if (isAdmin()) renderReminderFallback(); });
+    el.reminderBtn?.addEventListener('click', sendReminder);
 
     async function loadPolls() {
         const userId = getCurrentUserId();
         resetView();
         if (!group || !userId) return;
-        withGlobalLoading(() => getGroupPolls(group.id, userId)
+        getGroupPolls(group.id, userId)
             .then(data => {
                 polls = Array.isArray(data) ? data : [];
                 activePoll = findLatestOpenCwlPoll(polls);
@@ -43,12 +44,15 @@ export function initGroupPolls(emptyMessage) {
                     renderResults(activePoll || polls[0] || null);
                 }
             })
-            .catch(error => console.error(error)), t('groups.loading'));
+            .catch(() => {
+                el.results?.replaceChildren(emptyMessage(t('groups.pollLoadError')));
+            });
     }
 
     function resetView() {
         polls = [];
         activePoll = null;
+        selectedResultPoll = null;
         el.notice?.classList.add('hidden');
         el.pollsList?.replaceChildren(emptyMessage(t('groups.noPolls')));
         el.results?.replaceChildren(emptyMessage(t('groups.noPollSelected')));
@@ -106,7 +110,7 @@ export function initGroupPolls(emptyMessage) {
 
     async function openAnswerOverlay() {
         if (!activePoll || !group) return;
-        currentUser = await getUserInfo(getCurrentUserId()).then(data => Array.isArray(data) ? data[0] : data).catch(() => null);
+        currentUser = await checkUserId(getCurrentUserId()).then(data => Array.isArray(data) ? data[0] : data).catch(() => null);
         el.answerOverlay?.classList.remove('hidden');
         if (el.answerTitle) el.answerTitle.textContent = activePoll.title;
         if (el.answerGroup) el.answerGroup.textContent = `${t('groups.group')}: ${group.name}`;
@@ -198,11 +202,12 @@ export function initGroupPolls(emptyMessage) {
         el.results?.replaceChildren();
         if (!isAdmin()) return;
         if (!poll) return el.results?.appendChild(emptyMessage(t('groups.noPollSelected')));
-        const users = await Promise.all(members.map(member => getUserInfo(member.user_id).catch(() => null)));
+        selectedResultPoll = poll;
+        const resultMembers = Array.isArray(poll.members) ? poll.members : members;
         const answerUserIds = Object.keys(poll.answers || {});
-        el.results.appendChild(summaryNode(members.length, answerUserIds.length));
+        el.results.appendChild(summaryNode(resultMembers.length, answerUserIds.length));
         el.results.appendChild(daySummaryNode(poll));
-        members.forEach((member, index) => el.results.appendChild(userResultNode(member, users[index], poll)));
+        resultMembers.forEach(member => el.results.appendChild(userResultNode(member, poll)));
     }
 
     function summaryNode(total, answered) {
@@ -227,12 +232,11 @@ export function initGroupPolls(emptyMessage) {
         return node;
     }
 
-    function userResultNode(member, userData, poll) {
-        const user = Array.isArray(userData) ? userData[0] : userData;
+    function userResultNode(member, poll) {
         const answer = poll.answers?.[member.user_id];
         const node = document.createElement('div');
         node.className = 'groups-poll-result-user';
-        node.appendChild(textNode('strong', user?.name || member.user_id));
+        node.appendChild(textNode('strong', member.name || member.user_id));
         if (!answer) {
             node.appendChild(textNode('span', t('groups.notAnswered')));
             return node;
@@ -246,11 +250,31 @@ export function initGroupPolls(emptyMessage) {
         return `${account.name || account.tag} (${account.tag || '-'}) - ${account.wantsCwl ? t('groups.yesCwl') : t('groups.noCwl')} - ${days || '-'}`;
     }
 
-    function renderReminderFallback() {
-        el.results?.prepend(Object.assign(document.createElement('p'), {
-            className: 'groups-admin-help',
-            textContent: t('groups.reminderFallback')
-        }));
+    function sendReminder() {
+        const poll = selectedResultPoll || activePoll;
+        if (!isAdmin() || !group || !poll) return;
+        el.reminderBtn.disabled = true;
+        sendGroupPollReminder(group.id, poll.id)
+            .then(result => {
+                const message = t('groups.reminderResult', {
+                    created: result?.created || 0,
+                    skipped: result?.skipped || 0,
+                    answered: result?.answered || 0
+                });
+                el.results?.prepend(Object.assign(document.createElement('p'), {
+                    className: 'groups-admin-help',
+                    textContent: message
+                }));
+            })
+            .catch(() => {
+                el.results?.prepend(Object.assign(document.createElement('p'), {
+                    className: 'groups-admin-help',
+                    textContent: t('groups.reminderError')
+                }));
+            })
+            .finally(() => {
+                el.reminderBtn.disabled = false;
+            });
     }
 
     function hasAnswer(poll, userId) {

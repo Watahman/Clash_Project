@@ -1,6 +1,5 @@
 import { getClanInfoRequest, getClanMembersRequest } from "../API/API-Clan.js";
 import { addGroupClan, getGroupClans, removeGroupClan } from "../Supabase/Supabase-Group.js";
-import { getUserInfo } from "../Supabase/Supabase-User.js";
 import { t } from "../i18n/i18n.js";
 import { withGlobalLoading } from "../utils/loading-state.js";
 import { renderBadge } from "./groups-badges.js";
@@ -140,9 +139,8 @@ export function createClanAdmin(elements, getState, setMessage, emptyMessage) {
     }
 
     async function getLinkedAccountTags(members) {
-        const users = await Promise.all((members || []).map(member => getUserInfo(member.user_id).catch(() => null)));
         const tags = new Set();
-        users.forEach(userData => accountTags(Array.isArray(userData) ? userData[0] : userData).forEach(tag => tags.add(tag)));
+        (members || []).forEach(member => accountTags(member.profile).forEach(tag => tags.add(tag)));
         return tags;
     }
 

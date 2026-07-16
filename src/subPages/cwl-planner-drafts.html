@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../assets/css/drafts-css.css">
     <link rel="stylesheet" href="../assets/css/profile-overlay.css">
     <link rel="icon" type="image/png" href="../assets/css/pictures/shield_with_hamer_logov2.png">
-    <script type="module" src="../assets/js/mainJS.js"></script>
+    <script type="module" src="../assets/js/pages/cwl-planner-drafts.js"></script>
 </head>
 <body>
 <header>
@@ -19,11 +19,19 @@
 <main class="drafts-main">
     <section class="drafts-shell">
         <div class="drafts-header">
-            <div><div class="hero-eyebrow">CWL drafts</div><h1>Saved war plans</h1><p>Start een nieuwe CWL draft of laad later je opgeslagen plannen.</p></div>
-            <a class="btn btn-primary" href="./cwl-planner.html">Open planner</a>
+            <div>
+                <div class="hero-eyebrow" data-i18n="drafts.eyebrow">CWL drafts</div>
+                <h1 data-i18n="drafts.title">Opgeslagen oorlogsplannen</h1>
+                <p data-i18n="drafts.subtitle">Open, hernoem, kopieer of verwijder je CWL-plannen.</p>
+            </div>
+            <a class="btn btn-primary" href="./cwl-planner.html" data-i18n="drafts.openPlanner">Open planner</a>
         </div>
-        <div id="draft-cwl-container">
-            <div id="add-draft-cwl"><a href="./cwl-planner.html"><button type="button" aria-label="Nieuwe draft">+</button></a></div>
+        <p id="drafts-status" class="drafts-status" role="status" aria-live="polite" data-i18n="drafts.loading">Plannen laden...</p>
+        <div id="draft-cwl-container" aria-live="polite">
+            <a id="add-draft-cwl" href="./cwl-planner.html" data-i18n-aria-label="drafts.new">
+                <span aria-hidden="true">+</span>
+                <strong data-i18n="drafts.new">Nieuw plan</strong>
+            </a>
         </div>
     </section>
 </main>

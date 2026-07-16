@@ -1,8 +1,8 @@
-import { initI18n } from '../i18n/i18n.js';
+import { initI18n, t } from '../i18n/i18n.js';
 import { profileHTML } from "../profile/profile_popup.js";
 import { syncAuthSession } from "../auth/auth-client.js";
 import { initOverlayHide, initAddPlayersOverlay, initAddClanButton, applyCwlSizeRestriction } from "../cwl/cwl-overlay.js";
-import { initPlanIO, savePlan, loadAllPlans, loadPlanListener } from "../cwl/cwl-plan-io.js";
+import { initPlanIO, savePlan, loadAllPlans, loadPlanListener, startNewPlan } from "../cwl/cwl-plan-io.js";
 import { getClanInfoRequest } from "../API/API-Clan.js";
 import * as conf from "../Data/config.js";
 
@@ -10,7 +10,7 @@ export { savePlan };
 
 let addClanPlayersBtn, overlayAddPlayersBtn, addClanBtn, overlayAddClanBtn;
 let cwlInputTag, cwlInputClanCode, selectAmountPlayers;
-let savePlanBtn, planName, loadPlan;
+let savePlanBtn, newPlanBtn, planName, loadPlan;
 let availablePlayers, allClans, totalPlayerAmount;
 let addPlayersBtn, overlayConfirmTagBtn, accountsSearch, accountList,
     addSelectedBtn, segBtns, selectGroup, groupPreview,
@@ -26,6 +26,7 @@ function labelInit() {
     cwlInputClanCode       = document.querySelector("#cwl-input-clan-clancode");
     selectAmountPlayers    = document.querySelector("#cwl-overlay-select-amount-players-in-clan");
     savePlanBtn            = document.querySelector("#cwl-save-plan-button");
+    newPlanBtn             = document.querySelector("#cwl-new-plan-button");
     planName               = document.querySelector("#cwl-plan-name");
     loadPlan               = document.querySelector("#cwl-load-plan");
     availablePlayers       = document.querySelector("#cwl-available-players");
@@ -60,12 +61,13 @@ async function init() {
     });
     initAddClanButton({ addClanBtn, overlayAddClanBtn, cwlInputClanCode, selectAmountPlayers });
     savePlanButton();
+    initSaveButtonState();
+    newPlanBtn?.addEventListener('click', startNewPlan);
     initPlayerSorting();
     guessCwlSize();
     loadAllPlans();
     loadPlanListener();
     profileHTML();
-    localStorage.setItem("planner_id", "");
 }
 
 function initPlayerSorting() {
@@ -91,13 +93,33 @@ function getTownHall(card) { const m=(card.querySelector('.cwl-player-townhall-f
 
 function savePlanButton() {
     savePlanBtn.addEventListener("click", () => {
-        if (planName.value === "") {
-            // make indicator
-        } else {
-            conf.setCanAutosave(true);
-            savePlan();
-        }
+        updateSaveButtonState();
+        if (savePlanBtn.disabled) return;
+        conf.setCanAutosave(true);
+        savePlan({ immediate: true });
     });
+}
+
+function initSaveButtonState() {
+    if (!savePlanBtn || !planName) return;
+    updateSaveButtonState();
+    planName.addEventListener('input', updateSaveButtonState);
+    window.addEventListener('clashtools:cwl-player-added', updateSaveButtonState);
+    window.addEventListener('clashtools:cwl-player-removed', updateSaveButtonState);
+    window.addEventListener('clashtools:cwl-plan-loaded', updateSaveButtonState);
+    const observer = new MutationObserver(updateSaveButtonState);
+    if (availablePlayers) observer.observe(availablePlayers, { childList: true, subtree: true });
+    if (allClans) observer.observe(allClans, { childList: true, subtree: true });
+}
+
+function updateSaveButtonState() {
+    if (!savePlanBtn || !planName) return;
+    const hasName = planName.value.trim().length > 0;
+    const hasPlayers = Boolean(availablePlayers?.querySelector('.cwl-player-article'));
+    const hasClans = Boolean(allClans?.querySelector('.cwl-clan-article'));
+    const canSave = hasName && (hasPlayers || hasClans);
+    savePlanBtn.disabled = !canSave;
+    savePlanBtn.title = canSave ? t('cwl.save') : t('cwl.saveDisabledReason');
 }
 
 function guessCwlSize() {

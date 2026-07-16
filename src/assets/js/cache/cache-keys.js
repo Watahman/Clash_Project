@@ -21,6 +21,7 @@ export const cacheKeys = Object.freeze({
     groupClans: groupId => `groups.clans:${normalizeKeyPart(groupId)}`,
     groupPolls: (groupId, userId = 'user') => `groups.polls:${normalizeKeyPart(groupId)}:${normalizeKeyPart(userId)}`,
     plansOfUser: userId => `plans.ofUser:${normalizeKeyPart(userId)}`,
+    notifications: userId => `notifications:${normalizeKeyPart(userId)}`,
     plan: planId => `plans.detail:${normalizeKeyPart(planId)}`,
     clashPlayer: tag => `clash.player:${normalizeKeyPart(normalizeTag(tag))}`,
     clashPlayerBattleLog: tag => `clash.playerBattleLog:${normalizeKeyPart(normalizeTag(tag))}`,
@@ -39,5 +40,8 @@ export const cacheKeys = Object.freeze({
             .map(([key, value]) => `${normalizeKeyPart(key)}=${normalizeKeyPart(value)}`)
             .join('&');
         return `clash.clanSearch:${normalized}`;
-    }
+    },
+    clashResource: (resource, ...parts) => `clash.resource:${normalizeKeyPart(resource)}:${
+        parts.map(normalizeKeyPart).join(':')
+    }`
 });

@@ -27,6 +27,7 @@ public class API_Utils {
     private static final CacheStore L1_CACHE = new InMemoryCacheStore();
     private static final CacheStore L2_CACHE = new PersistentCacheStore();
     private static final ConcurrentHashMap<String, CompletableFuture<CacheEntry>> IN_FLIGHT = new ConcurrentHashMap<>();
+    private static final RateLimiter RATE_LIMITER = new RateLimiter();
     private static final ExecutorService CACHE_EXECUTOR = Executors.newFixedThreadPool(4, runnable -> {
         Thread thread = new Thread(runnable, "clashtools-cache-refresh");
         thread.setDaemon(true);
@@ -166,6 +167,19 @@ public class API_Utils {
 
             long start = System.currentTimeMillis();
             String path = exchange.getHttpContext().getPath();
+            int rateLimit = conf.getRateLimitForPath(path);
+            RateLimiter.Result rate = RATE_LIMITER.check(clientRateLimitKey(exchange, path), rateLimit, start);
+            exchange.getResponseHeaders().set("RateLimit-Limit", Integer.toString(rateLimit));
+            exchange.getResponseHeaders().set("RateLimit-Remaining", Integer.toString(rate.remaining()));
+            if (!rate.allowed()) {
+                exchange.getResponseHeaders().set("Retry-After", Integer.toString(rate.retryAfterSeconds()));
+                sendJsonResponse(
+                        exchange,
+                        "{\"error\":\"Te veel aanvragen. Probeer later opnieuw.\",\"code\":\"RATE_LIMITED\"}",
+                        429
+                );
+                return;
+            }
 
             try {
                 handler.handle(exchange);
@@ -237,6 +251,13 @@ public class API_Utils {
             if (cause instanceof Exception exception) throw exception;
             throw wrapped;
         }
+    }
+
+    private String clientRateLimitKey(HttpExchange exchange, String path) {
+        String address = exchange.getRemoteAddress() == null
+                ? "unknown"
+                : exchange.getRemoteAddress().getAddress().getHostAddress();
+        return address + "|" + path;
     }
 
     private CompletableFuture<CacheEntry> refreshSingleFlight(String key, String path, long ttlMs) {

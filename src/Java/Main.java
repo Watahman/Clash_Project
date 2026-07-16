@@ -13,6 +13,8 @@ public class Main {
 
     private void run() throws Exception {
         SUPABASE_Group supaGroup;
+        SUPABASE_GroupPolls supaGroupPolls;
+        SUPABASE_Notifications supaNotifications;
         SUPABASE_Friend supaFriend;
         SUPABASE_CWLPlanner supaCWLPlanner;
         SUPABASE_User supaUser;
@@ -40,6 +42,8 @@ public class Main {
         supaCWLPlanner = new SUPABASE_CWLPlanner(server, conf);
         supaFriend = new SUPABASE_Friend(server, conf);
         supaGroup = new SUPABASE_Group(server, conf);
+        supaGroupPolls = new SUPABASE_GroupPolls(server, conf);
+        supaNotifications = new SUPABASE_Notifications(server, conf);
 
         apiClan.getClanCurrentWarLeagueGroup();
         apiClan.searchClans();
@@ -94,6 +98,9 @@ public class Main {
         supaCWLPlanner.saveCWLPlanner();
         supaCWLPlanner.getAllPlanners();
         supaCWLPlanner.getPlanner();
+        supaCWLPlanner.renamePlanner();
+        supaCWLPlanner.copyPlanner();
+        supaCWLPlanner.deletePlanner();
 
         supaFriend.addFriend();
         supaFriend.getPendingRequests();
@@ -113,16 +120,33 @@ public class Main {
         supaGroup.removeGroupClan();
         supaGroup.setGroupMemberRole();
         supaGroup.transferGroupLeadership();
-        supaGroup.getGroupPolls();
-        supaGroup.createGroupPoll();
-        supaGroup.answerGroupPoll();
-        supaGroup.setGroupPollStatus();
+        supaGroupPolls.getGroupPolls();
+        supaGroupPolls.createGroupPoll();
+        supaGroupPolls.answerGroupPoll();
+        supaGroupPolls.setGroupPollStatus();
+        supaGroupPolls.sendPollReminders();
+        supaNotifications.getNotifications();
+        supaNotifications.markNotificationRead();
 
         server.createContext("/health", exchange -> {
             byte[] response = "{\"status\":\"ok\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8);
             exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
             exchange.getResponseHeaders().set("X-Content-Type-Options", "nosniff");
             exchange.sendResponseHeaders(200, response.length);
+            try (var output = exchange.getResponseBody()) {
+                output.write(response);
+            }
+        });
+        server.createContext("/ready", exchange -> {
+            var missing = conf.missingRequiredConfiguration();
+            boolean ready = missing.isEmpty();
+            String body = ready
+                    ? "{\"status\":\"ready\"}"
+                    : "{\"status\":\"not_ready\",\"missing\":" + new com.google.gson.Gson().toJson(missing) + "}";
+            byte[] response = body.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
+            exchange.getResponseHeaders().set("X-Content-Type-Options", "nosniff");
+            exchange.sendResponseHeaders(ready ? 200 : 503, response.length);
             try (var output = exchange.getResponseBody()) {
                 output.write(response);
             }
