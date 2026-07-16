@@ -1,10 +1,14 @@
 package Java;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpServer;
 import Java.cache.CacheKeys;
 import Java.cache.CachePolicy;
 
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class API_Clan {
     private final HttpServer server;
@@ -67,5 +71,28 @@ public class API_Clan {
         }));
     }
 
-    // TODO: getClan (conf._EXT_CLAN_SEARCH) nog implementeren
+    public void searchClans() {
+        server.createContext(conf._EXT_CLAN_SEARCH, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject body = utils.parseBody(ex);
+            List<String> allowed = List.of(
+                    "name", "warFrequency", "locationId", "minMembers", "maxMembers",
+                    "minClanPoints", "minClanLevel", "labelIds", "limit", "after", "before"
+            );
+            StringBuilder query = new StringBuilder();
+            for (String field : allowed) {
+                JsonElement value = body.get(field);
+                if (value == null || value.isJsonNull()) continue;
+                String stringValue = value.getAsString().trim();
+                if (stringValue.isBlank()) continue;
+                if (query.length() > 0) query.append('&');
+                query.append(URLEncoder.encode(field, StandardCharsets.UTF_8))
+                        .append('=')
+                        .append(URLEncoder.encode(stringValue, StandardCharsets.UTF_8));
+            }
+            if (query.isEmpty()) {
+                throw new IllegalArgumentException("Geef minstens één zoekfilter op");
+            }
+            utils.clashGetCached(ex, "/clans?" + query, CachePolicy.CLAN_SEARCH);
+        }));
+    }
 }

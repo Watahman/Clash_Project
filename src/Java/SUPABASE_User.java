@@ -19,8 +19,8 @@ public class SUPABASE_User {
 
     public void getUserBases() {
         server.createContext(conf._EXT_SUPA_USER_BASES, exchange -> utils.handlePost(exchange, ex -> {
-            JsonObject json = utils.parseBody(ex);
-            String id = utils.requireString(json, "userId");
+            utils.parseBody(ex);
+            String id = utils.requireAuthenticatedUser(ex);
             String result = SUPABASE_Client.getWithBody("users", "select=accounts&id=" + SUPABASE_Client.eq(id));
             utils.sendJsonResponse(ex, result, 200);
         }));
@@ -29,8 +29,10 @@ public class SUPABASE_User {
     public void getUserInfo() {
         server.createContext(conf._EXT_SUPA_USER_INFO, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject json = utils.parseBody(ex);
+            String actorId = utils.requireAuthenticatedUser(ex);
             String id = utils.requireString(json, "userId");
-            String result = SUPABASE_Client.getWithBody("users", "select=id,name,code,accounts,created_at&id=" + SUPABASE_Client.eq(id));
+            String select = actorId.equals(id) ? "id,name,code,accounts,created_at" : "id,name,code,created_at";
+            String result = SUPABASE_Client.getWithBody("users", "select=" + select + "&id=" + SUPABASE_Client.eq(id));
             JsonArray users = JsonParser.parseString(result).getAsJsonArray();
             if (users.isEmpty()) {
                 utils.sendJsonResponse(ex, "{\"error\":\"Gebruiker niet gevonden\"}", 404);
@@ -42,36 +44,16 @@ public class SUPABASE_User {
 
     public void checkUserLogin() {
         server.createContext(conf._EXT_SUPA_USER_CHECK, exchange -> utils.handlePost(exchange, ex -> {
-            JsonObject json = utils.parseBody(ex);
-            String email    = utils.requireString(json, "email");
-            String password = utils.requireString(json, "password");
-
-            JsonArray users = JsonParser.parseString(SUPABASE_Client.getWithBody("users", "email=" + SUPABASE_Client.eq(email))).getAsJsonArray();
-            if (users.isEmpty()) {
-                utils.sendJsonResponse(ex, "{\"success\":false,\"error\":\"Gebruiker niet gevonden\"}", 404);
-                return;
-            }
-
-            JsonObject user = users.get(0).getAsJsonObject();
-            String storedHash = user.get("password").getAsString();
-            boolean match = PasswordUtil.verifyPassword(password, storedHash);
-            if (match) {
-                if (PasswordUtil.isLegacyHash(storedHash)) {
-                    JsonObject patch = new JsonObject();
-                    patch.addProperty("password", PasswordUtil.hashPassword(password));
-                    SUPABASE_Client.patch("users", "id=" + SUPABASE_Client.eq(user.get("id").getAsString()), patch.toString());
-                }
-                utils.sendJsonResponse(ex, "{\"success\":true,\"id\":\"" + user.get("id").getAsString() + "\"}", 200);
-            } else {
-                utils.sendJsonResponse(ex, "{\"success\":false,\"error\":\"Verkeerd wachtwoord\"}", 401);
-            }
+            utils.sendJsonResponse(ex,
+                    "{\"error\":\"Gebruik Supabase Auth\",\"code\":\"LEGACY_AUTH_DISABLED\"}",
+                    410);
         }));
     }
 
     public void compareUserId() {
         server.createContext(conf._EXT_SUPA_USER_IDCHECK, exchange -> utils.handlePost(exchange, ex -> {
-            JsonObject json = utils.parseBody(ex);
-            String id = utils.requireString(json, "userId");
+            utils.parseBody(ex);
+            String id = utils.requireAuthenticatedUser(ex);
 
             JsonArray userArray = JsonParser.parseString(SUPABASE_Client.getWithBody("users", "select=id,name,email,created_at,code,accounts&id=" + SUPABASE_Client.eq(id))).getAsJsonArray();
             if (userArray.isEmpty()) {
@@ -95,37 +77,16 @@ public class SUPABASE_User {
 
     public void createUser() {
         server.createContext(conf._EXT_SUPA_USER_MAKE, exchange -> utils.handlePost(exchange, ex -> {
-            JsonObject json = utils.parseBody(ex);
-            String naam     = utils.requireString(json, "name");
-            String email    = utils.requireString(json, "email");
-            String password = utils.requireString(json, "password");
-
-            if (!JsonParser.parseString(SUPABASE_Client.getWithBody("users", "email=" + SUPABASE_Client.eq(email))).getAsJsonArray().isEmpty()) {
-                utils.sendJsonResponse(ex, "{\"error\":\"Email is al in gebruik\"}", 409);
-                return;
-            }
-
-            JsonObject user = new JsonObject();
-            user.addProperty("name",     naam);
-            user.addProperty("email",    email);
-            user.addProperty("password", PasswordUtil.hashPassword(password));
-            user.addProperty("code",     API_Utils.generateCode());
-
-            String result = SUPABASE_Client.post("users", user.toString());
-            JsonArray resultArray = JsonParser.parseString(result).getAsJsonArray();
-            if (resultArray.isEmpty()) {
-                utils.sendJsonResponse(ex, "{\"error\":\"Gebruiker aanmaken mislukt\"}", 500);
-                return;
-            }
-
-            utils.sendJsonResponse(ex, result, 201);
+            utils.sendJsonResponse(ex,
+                    "{\"error\":\"Gebruik Supabase Auth\",\"code\":\"LEGACY_AUTH_DISABLED\"}",
+                    410);
         }));
     }
 
     public void addAccountToUser() {
         server.createContext(conf._EXT_SUPA_USER_ADD_ACCOUNT, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject json = utils.parseBody(ex);
-            String userId = utils.requireString(json, "userId");
+            String userId = utils.requireAuthenticatedUser(ex);
             JsonElement accountEl = json.get("base");
 
             if (accountEl == null || accountEl.isJsonNull() || !accountEl.isJsonObject()) {
@@ -169,7 +130,7 @@ public class SUPABASE_User {
     public void updateUserName() {
         server.createContext(conf._EXT_SUPA_USER_UPDATE_NAME, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject json = utils.parseBody(ex);
-            String userId = utils.requireString(json, "userId");
+            String userId = utils.requireAuthenticatedUser(ex);
             String name = utils.requireString(json, "name").trim();
 
             if (name.length() < 2 || name.length() > 32) {
@@ -196,34 +157,10 @@ public class SUPABASE_User {
 
     public void changePassword() {
         server.createContext(conf._EXT_SUPA_USER_CHANGE_PASSWORD, exchange -> utils.handlePost(exchange, ex -> {
-            JsonObject json = utils.parseBody(ex);
-            String userId = utils.requireString(json, "userId");
-            String currentPassword = utils.requireString(json, "currentPassword");
-            String newPassword = utils.requireString(json, "newPassword");
-
-            if (!PasswordUtil.isStrongPassword(newPassword)) {
-                utils.sendJsonResponse(ex, "{\"error\":\"Ongeldig wachtwoord\",\"errorKey\":\"settings.passwordInvalid\"}", 400);
-                return;
-            }
-
-            JsonArray users = JsonParser.parseString(SUPABASE_Client.getWithBody("users", "select=password&id=" + SUPABASE_Client.eq(userId))).getAsJsonArray();
-            if (users.isEmpty()) {
-                utils.sendJsonResponse(ex, "{\"error\":\"Gebruiker niet gevonden\"}", 404);
-                return;
-            }
-
-            JsonObject user = users.get(0).getAsJsonObject();
-            String storedHash = user.get("password").getAsString();
-            if (!PasswordUtil.verifyPassword(currentPassword, storedHash)) {
-                utils.sendJsonResponse(ex, "{\"success\":false,\"error\":\"Verkeerd wachtwoord\",\"errorKey\":\"settings.wrongPassword\"}", 401);
-                return;
-            }
-
-            JsonObject patch = new JsonObject();
-            patch.addProperty("password", PasswordUtil.hashPassword(newPassword));
-            SUPABASE_Client.patch("users", "id=" + SUPABASE_Client.eq(userId), patch.toString());
-
-            utils.sendJsonResponse(ex, "{\"success\":true}", 200);
+            utils.requireAuthenticatedUser(ex);
+            utils.sendJsonResponse(ex,
+                    "{\"error\":\"Wijzig het wachtwoord via Supabase Auth\",\"code\":\"LEGACY_PASSWORD_DISABLED\"}",
+                    410);
         }));
     }
 

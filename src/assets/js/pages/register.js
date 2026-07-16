@@ -1,24 +1,105 @@
-import { initI18n } from '../i18n/i18n.js';
-import { createUser } from "../Supabase/Supabase-User.js";
+import { initI18n, t } from '../i18n/i18n.js';
+import {
+    AuthConfigurationError,
+    signInWithGoogle,
+    signUpWithPassword,
+    syncAuthSession
+} from '../auth/auth-client.js';
+
+const form = document.querySelector('#auth-form');
+const nameInput = document.querySelector('#username');
+const emailInput = document.querySelector('#email');
+const passwordInput = document.querySelector('#password');
+const confirmationInput = document.querySelector('#password2');
+const submitButton = document.querySelector('#submit-button');
+const googleButton = document.querySelector('#google-login');
+const status = document.querySelector('#auth-status');
+const strengthSegments = [1, 2, 3].map(index => document.querySelector(`#seg${index}`));
+
+function setStatus(message = '', state = '') {
+    status.textContent = message;
+    status.dataset.state = state;
+}
+
+function setBusy(busy) {
+    submitButton.disabled = busy;
+    googleButton.disabled = busy;
+    form.setAttribute('aria-busy', String(busy));
+}
+
+function passwordStrength(password) {
+    let score = 0;
+    if (password.length >= 8) score += 1;
+    if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score += 1;
+    if (/\d/.test(password) && /[^A-Za-z0-9]/.test(password)) score += 1;
+    return score;
+}
+
+function updatePasswordHints() {
+    const score = passwordStrength(passwordInput.value);
+    strengthSegments.forEach((segment, index) => segment.classList.toggle('active', index < score));
+    confirmationInput.setCustomValidity(
+        confirmationInput.value && confirmationInput.value !== passwordInput.value
+            ? t('auth.passwordMismatch')
+            : ''
+    );
+}
+
+async function submitRegistration(event) {
+    event.preventDefault();
+    updatePasswordHints();
+    if (!form.reportValidity()) return;
+    if (passwordStrength(passwordInput.value) < 2) {
+        setStatus(t('auth.passwordRequirements'), 'error');
+        passwordInput.focus();
+        return;
+    }
+
+    setBusy(true);
+    setStatus(t('auth.creatingAccount'), 'loading');
+    try {
+        const data = await signUpWithPassword(nameInput.value, emailInput.value, passwordInput.value);
+        if (data.session) {
+            window.location.href = '../index.html';
+            return;
+        }
+        form.reset();
+        updatePasswordHints();
+        setStatus(t('auth.confirmEmail'), 'success');
+    } catch (error) {
+        const message = error instanceof AuthConfigurationError
+            ? t('auth.notConfigured')
+            : error?.status === 429
+                ? t('auth.tooManyRequests')
+                : t('auth.registrationError');
+        setStatus(message, 'error');
+    } finally {
+        setBusy(false);
+    }
+}
+
+async function registerWithGoogle() {
+    setBusy(true);
+    setStatus(t('auth.redirecting'), 'loading');
+    try {
+        await signInWithGoogle();
+    } catch (error) {
+        setStatus(error instanceof AuthConfigurationError ? t('auth.notConfigured') : t('auth.oauthUnavailable'), 'error');
+        setBusy(false);
+    }
+}
 
 function init() {
     initI18n();
-    clicklistener();
-}
-
-function clicklistener() {
-    document.querySelector("#submit-button").addEventListener("click", () => {
-        const name                 = document.querySelector("#username").value;
-        const email                = document.querySelector("#email").value;
-        const password             = document.querySelector("#password").value;
-        const password_confirmation = document.querySelector("#password2").value;
-
-        if (password === password_confirmation) {
-            createUser(name, email, password).then(data => {
-                console.log(data);
-            });
-        }
-    });
+    form.addEventListener('submit', submitRegistration);
+    passwordInput.addEventListener('input', updatePasswordHints);
+    confirmationInput.addEventListener('input', updatePasswordHints);
+    googleButton.addEventListener('click', registerWithGoogle);
+    syncAuthSession()
+        .then(session => {
+            if (session) window.location.href = '../index.html';
+        })
+        .catch(() => {});
 }
 
 init();

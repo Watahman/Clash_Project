@@ -10,6 +10,7 @@ import { initGroupsAdminPanel } from "../groups/groups-admin-panel.js";
 import { initGroupsTooltips, updateCollapseTooltip } from "../groups/groups-tooltips.js";
 import { badgeLabelKey, badgeSvg, GROUP_BADGES } from "../groups/groups-badges.js";
 import { initGroupPolls } from "../groups/groups-polls.js";
+import { syncAuthSession } from "../auth/auth-client.js";
 
 const groupsMain          = document.querySelector('#groups-main');
 const groupsNewBtn        = document.querySelector('#groups-new-btn');
@@ -46,8 +47,9 @@ let adminPanel;
 let selectedBadge = 'shield';
 const OPEN_GROUP_STORAGE_KEY = 'clashtoolsOpenGroupId';
 
-function init() {
+async function init() {
     initI18n();
+    await syncAuthSession().catch(() => null);
     sideBarToggle();
     initBadgePicker();
     groupsNewBtn.onclick = () => { newGroupOverlay(); };
@@ -300,4 +302,4 @@ function overlayBackdropClose() {
     };
 }
 
-init();
+void init();

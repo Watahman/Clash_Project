@@ -7,7 +7,8 @@ export function setLoading(value) {
     isLoading = value;
 }
 
-export const _BASE_URL = "http://localhost:8080";
+const configuredBaseUrl = String(import.meta.env.VITE_API_BASE_URL || '').trim();
+export const _BASE_URL = (configuredBaseUrl || '/api').replace(/\/+$/, '');
 
 export const _EXT_CLAN_CURRENTWAR_LEAGUEGROUP = "/ClanCurrentWarLeagueGroup";
 export const _EXT_CLAN_WARLEAGUES_WARS = "/ClanWarLeaguesWars";

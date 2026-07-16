@@ -3,6 +3,13 @@ import { resolve } from 'node:path';
 
 export default defineConfig({
     root: 'src',
+    test: {
+        root: '.',
+        environment: 'jsdom',
+        include: ['test/frontend/**/*.test.js'],
+        restoreMocks: true,
+        clearMocks: true
+    },
     build: {
         outDir: '../dist',
         emptyOutDir: true,
@@ -22,6 +29,13 @@ export default defineConfig({
     },
     server: {
         port: 5173,
-        open: '/index.html'
+        open: '/index.html',
+        proxy: {
+            '/api': {
+                target: process.env.VITE_DEV_API_TARGET || 'http://localhost:8080',
+                changeOrigin: true,
+                rewrite: path => path.replace(/^\/api/, '')
+            }
+        }
     }
 });

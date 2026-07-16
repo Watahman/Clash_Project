@@ -1,8 +1,10 @@
 import { initI18n } from '../i18n/i18n.js';
 import { profileHTML } from "../profile/profile_popup.js";
+import { syncAuthSession } from "../auth/auth-client.js";
 
-function init() {
+async function init() {
     initI18n();
+    await syncAuthSession().catch(() => null);
     document.querySelectorAll('.tool-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             const panelId = 'panel-' + tab.dataset.panel;
@@ -21,4 +23,4 @@ function init() {
     profileHTML();
 }
 
-init();
+void init();

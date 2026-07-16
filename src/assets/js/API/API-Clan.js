@@ -42,17 +42,14 @@ export async function getClanWarLogRequest(clanTag) {
     })
 }
 
-//configure parameters
-export async function getClanSearchRequest() {
+export async function getClanSearchRequest(filters = {}) {
     const path = config._BASE_URL + config._EXT_CLAN_SEARCH;
-    const body = JSON.stringify({
-        // fill this with all the possible parameters on the clash api website
-    })
+    const body = JSON.stringify(filters);
 
     return fetchClashAPIRequest(path, body, {
-        key: cacheKeys.clashClanCurrentWar(clanTag),
-        ttlMs: CACHE_TTL.CLASH_WAR_LIVE,
-        staleMs: CACHE_STALE.SHORT
+        key: cacheKeys.clashClanSearch(filters),
+        ttlMs: CACHE_TTL.CLASH_CLAN_SEARCH,
+        staleMs: CACHE_STALE.MEDIUM
     })
 }
 
@@ -63,9 +60,9 @@ export async function getClanCurrentWarRequest(clanTag) {
     })
 
     return fetchClashAPIRequest(path, body, {
-        key: cacheKeys.clashClanInfo(clanTag),
-        ttlMs: CACHE_TTL.CLASH_CLAN_INFO,
-        staleMs: CACHE_STALE.LONG
+        key: cacheKeys.clashClanCurrentWar(clanTag),
+        ttlMs: CACHE_TTL.CLASH_WAR_LIVE,
+        staleMs: CACHE_STALE.SHORT
     })
 }
 
@@ -77,9 +74,9 @@ export async function getClanInfoRequest(clanTag) {
     })
 
     return fetchClashAPIRequest(path, body, {
-        key: cacheKeys.clashClanMembers(clanTag),
-        ttlMs: CACHE_TTL.CLASH_CLAN_MEMBERS,
-        staleMs: CACHE_STALE.SHORT
+        key: cacheKeys.clashClanInfo(clanTag),
+        ttlMs: CACHE_TTL.CLASH_CLAN_INFO,
+        staleMs: CACHE_STALE.LONG
     })
 }
 
@@ -89,7 +86,11 @@ export async function getClanMembersRequest(clanTag) {
         clanTag: clanTag
     })
 
-    return fetchClashAPIRequest(path, body)
+    return fetchClashAPIRequest(path, body, {
+        key: cacheKeys.clashClanMembers(clanTag),
+        ttlMs: CACHE_TTL.CLASH_CLAN_MEMBERS,
+        staleMs: CACHE_STALE.SHORT
+    })
 }
 
 export async function getClanCapitalRaidSeasonsRequest(clanTag) {
@@ -98,5 +99,9 @@ export async function getClanCapitalRaidSeasonsRequest(clanTag) {
         clanTag: clanTag
     })
 
-    return fetchClashAPIRequest(path, body)
+    return fetchClashAPIRequest(path, body, {
+        key: cacheKeys.clashClanRaidSeasons(clanTag),
+        ttlMs: CACHE_TTL.CLASH_RAID_SEASONS,
+        staleMs: CACHE_STALE.MEDIUM
+    })
 }

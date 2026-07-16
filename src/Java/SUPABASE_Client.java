@@ -28,6 +28,15 @@ public class SUPABASE_Client {
         return sendRequest("POST", table, body);
     }
 
+    public static String upsert(String table, String conflictColumn, String body) throws Exception {
+        return sendRequest(
+                "POST",
+                table + "?on_conflict=" + URLEncoder.encode(conflictColumn, StandardCharsets.UTF_8),
+                body,
+                "resolution=merge-duplicates,return=minimal"
+        );
+    }
+
     public static String patch(String table, String filter, String body) throws Exception {
         return sendRequest("PATCH", table + "?" + filter, body);
     }
@@ -45,6 +54,10 @@ public class SUPABASE_Client {
     }
 
     private static String sendRequest(String method, String table, String body) throws Exception {
+        return sendRequest(method, table, body, "return=representation");
+    }
+
+    private static String sendRequest(String method, String table, String body, String prefer) throws Exception {
         String baseUrl = CONF.getSupabaseUrl();
         String apiKey = CONF.getSupabaseServiceKey();
 
@@ -55,7 +68,7 @@ public class SUPABASE_Client {
                 .header("Authorization", "Bearer " + apiKey)
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
-                .header("Prefer", "return=representation");
+                .header("Prefer", prefer);
 
         if (body != null) {
             builder.method(method, HttpRequest.BodyPublishers.ofString(body));

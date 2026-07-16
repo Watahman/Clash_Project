@@ -13,6 +13,7 @@ public final class CachePolicy {
     public static final long CLAN_LEAGUE_WAR = seconds(60);
     public static final long CLAN_WAR_LOG = minutes(15);
     public static final long CLAN_RAID_SEASONS = minutes(30);
+    public static final long CLAN_SEARCH = minutes(5);
 
     private static long seconds(long value) {
         return value * 1000;

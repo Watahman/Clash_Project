@@ -9,8 +9,9 @@ import { copyWithFeedback, resetCopyFeedback } from "../utils/clipboard.js";
 import { getCurrentUserId } from "../utils/user.js";
 import {getGroupsOfUser} from "../Supabase/Supabase-Group.js";
 import { applyI18n, t } from "../i18n/i18n.js";
-import { withGlobalLoading } from "../utils/loading-state.js";
 import { initProfileSettings, resetProfileSettings, syncProfileSettings } from "./profile_settings.js";
+import { signOut } from "../auth/auth-client.js";
+import { invalidateUserCache } from "../cache/local-cache.js";
 
 let profile, closeProfileBtn, userCode, profileTabs, openProfileBtn, activeTab;
 let friendRequestBtn, friendPendingBtn, friendList, emptyFriendRequest;
@@ -46,7 +47,7 @@ export function profileHTML() {
     const placeholder = document.querySelector(".profile-placeholder");
     if (!placeholder) return;
 
-    withGlobalLoading(() => fetch(getProfilePopupPath())
+    fetch(getProfilePopupPath())
         .then(res => {
             if (!res.ok) throw new Error("Profile popup kon niet geladen worden");
             return res.text();
@@ -60,7 +61,13 @@ export function profileHTML() {
             preloadProfileData();
             clickToCloseOverlays();
         })
-        .catch(error => console.error(error)), 'Laden...');
+        .catch(() => {
+            const message = document.createElement('p');
+            message.className = 'profile-load-error';
+            message.setAttribute('role', 'status');
+            message.textContent = t('profile.loadError');
+            placeholder.replaceChildren(message);
+        });
 }
 
 function labelInit() {
@@ -157,16 +164,24 @@ function profileInit() {
         });
     };
 
-    poLogoutBtn.onclick = () => {
-        const language = localStorage.getItem('clashtools_language');
-        const theme = localStorage.getItem('clashtools_theme');
-        localStorage.clear();
-        if (language) localStorage.setItem('clashtools_language', language);
-        if (theme) localStorage.setItem('clashtools_theme', theme);
-        if (window.location.pathname.includes("index.html")) {
-            window.location.reload();
-        } else {
-            window.location.href = "../index.html";
+    poLogoutBtn.onclick = async () => {
+        const userId = getCurrentUserId();
+        poLogoutBtn.disabled = true;
+        try {
+            await signOut();
+        } finally {
+            await invalidateUserCache(userId);
+            [
+                'planner_id',
+                'clashtools_planner_cache',
+                'clashtoolsOpenGroupId'
+            ].forEach(key => {
+                localStorage.removeItem(key);
+                sessionStorage.removeItem(key);
+            });
+            window.location.href = window.location.pathname.includes('/subPages/')
+                ? '../index.html'
+                : './index.html';
         }
     };
 
@@ -199,14 +214,25 @@ function clearProfileRenderedItems() {
 function preloadProfileData() {
     const userId = getCurrentUserId();
     if (!userId) return;
-    refreshProfileData(false);
+    refreshProfileData(false).catch(() => {});
 }
 
 function refreshProfileData(openAfterLoad = false) {
     const userId = getCurrentUserId();
     if (!userId) return Promise.resolve(null);
 
-    return withGlobalLoading(() => Promise.all([
+    if (openAfterLoad && cachedProfile) {
+        openProfile(
+            cachedProfile.name,
+            cachedProfile.code ? `#${cachedProfile.code}` : '',
+            cachedProfile.created_at?.split("T")[0]
+        );
+    } else if (openAfterLoad) {
+        openProfile(t('profile.loading'), '', '');
+        profile.setAttribute('aria-busy', 'true');
+    }
+
+    return Promise.all([
         checkUserId(userId),
         getFriends(userId),
         getGroupsOfUser(userId)
@@ -225,11 +251,13 @@ function refreshProfileData(openAfterLoad = false) {
         if (openAfterLoad) {
             openProfile(userData.name, "#" + userData.code, userData.created_at?.split("T")[0]);
         }
+        profile.removeAttribute('aria-busy');
         return userData;
     }).catch(error => {
-        console.error(error);
+        profile.removeAttribute('aria-busy');
+        if (openAfterLoad && poUsername) poUsername.textContent = t('profile.loadError');
         return null;
-    }), 'Laden...');
+    });
 }
 
 function openProfile(username, code, memberSince) {

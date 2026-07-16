@@ -27,9 +27,9 @@ public class SUPABASE_Group {
 
     public void createGroup() {
         server.createContext(conf._EXT_SUPA_GROUP_MAKE, exchange -> utils.handlePost(exchange, ex -> {
+            String ownerId   = utils.requireAuthenticatedUser(ex);
             JsonObject json  = utils.parseBody(ex);
             String naam      = utils.requireString(json, "name");
-            String ownerId   = utils.requireString(json, "ownerId");
             String badge     = normalizeGroupBadge(json.has("badge") ? json.get("badge").getAsString() : "shield");
             String code      = API_Utils.generateCode();
 
@@ -63,8 +63,8 @@ public class SUPABASE_Group {
 
     public void getUserGroups() {
         server.createContext(conf._EXT_SUPA_USER_GROUPS, exchange -> utils.handlePost(exchange, ex -> {
-            JsonObject json = utils.parseBody(ex);
-            String id       = utils.requireString(json, "userId");
+            String id = utils.requireAuthenticatedUser(ex);
+            utils.parseBody(ex);
             String result   = SUPABASE_Client.getWithBody("group_members", "user_id=" + SUPABASE_Client.eq(id));
             utils.sendJsonResponse(ex, result, 200);
         }));
@@ -72,8 +72,10 @@ public class SUPABASE_Group {
 
     public void getGroupInfo() {
         server.createContext(conf._EXT_SUPA_GROUP_INFO, exchange -> utils.handlePost(exchange, ex -> {
+            String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
             String id       = utils.requireString(json, "groupId");
+            requireGroupMember(id, userId);
             String result   = SUPABASE_Client.getWithBody("groups", "id=" + SUPABASE_Client.eq(id));
 
             JsonArray resultArray = JsonParser.parseString(result).getAsJsonArray();
@@ -88,8 +90,10 @@ public class SUPABASE_Group {
 
     public void getGroupMembers() {
         server.createContext(conf._EXT_SUPA_GROUP_MEMBERS, exchange -> utils.handlePost(exchange, ex -> {
+            String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
             String id       = utils.requireString(json, "groupId");
+            requireGroupMember(id, userId);
             String result   = SUPABASE_Client.getWithBody("group_members", "group_id=" + SUPABASE_Client.eq(id));
             utils.sendJsonResponse(ex, result, 200);
         }));
@@ -97,8 +101,8 @@ public class SUPABASE_Group {
 
     public void joinGroup() {
         server.createContext(conf._EXT_SUPA_GROUP_JOIN, exchange -> utils.handlePost(exchange, ex -> {
+            String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
-            String userId   = utils.requireString(json, "userId");
             String code     = utils.requireString(json, "groupCode").trim();
 
             JsonArray groupArray = JsonParser.parseString(
@@ -130,8 +134,8 @@ public class SUPABASE_Group {
 
     public void leaveGroup() {
         server.createContext(conf._EXT_SUPA_GROUP_LEAVE, exchange -> utils.handlePost(exchange, ex -> {
+            String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
-            String userId   = utils.requireString(json, "userId");
             String code     = utils.requireString(json, "groupCode").trim();
 
             JsonArray groupArray = JsonParser.parseString(
@@ -160,9 +164,9 @@ public class SUPABASE_Group {
 
     public void getGroupClans() {
         server.createContext(conf._EXT_SUPA_GROUP_CLANS_GET, exchange -> utils.handlePost(exchange, ex -> {
+            String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
             String groupId  = utils.requireString(json, "groupId");
-            String userId   = utils.requireString(json, "userId");
 
             requireGroupMember(groupId, userId);
 
@@ -174,9 +178,9 @@ public class SUPABASE_Group {
 
     public void addGroupClan() {
         server.createContext(conf._EXT_SUPA_GROUP_CLAN_ADD, exchange -> utils.handlePost(exchange, ex -> {
+            String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
             String groupId  = utils.requireString(json, "groupId");
-            String userId   = utils.requireString(json, "userId");
             String clanTag  = normalizeClanTag(utils.requireString(json, "clanTag"));
             String clanName = utils.requireString(json, "clanName").trim();
 
@@ -205,9 +209,9 @@ public class SUPABASE_Group {
 
     public void removeGroupClan() {
         server.createContext(conf._EXT_SUPA_GROUP_CLAN_REMOVE, exchange -> utils.handlePost(exchange, ex -> {
+            String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
             String groupId  = utils.requireString(json, "groupId");
-            String userId   = utils.requireString(json, "userId");
             String clanTag  = normalizeClanTag(utils.requireString(json, "clanTag"));
 
             if (clanTag.isBlank()) throw new IllegalArgumentException("Ongeldige clantag");
@@ -222,9 +226,9 @@ public class SUPABASE_Group {
 
     public void setGroupMemberRole() {
         server.createContext(conf._EXT_SUPA_GROUP_MEMBER_ROLE_SET, exchange -> utils.handlePost(exchange, ex -> {
+            String actorId = utils.requireAuthenticatedUser(ex);
             JsonObject json  = utils.parseBody(ex);
             String groupId   = utils.requireString(json, "groupId");
-            String actorId   = utils.requireString(json, "actorId");
             String targetId  = utils.requireString(json, "targetUserId");
             String targetRole = normalizeGroupRole(utils.requireString(json, "role"));
 
@@ -246,9 +250,9 @@ public class SUPABASE_Group {
 
     public void transferGroupLeadership() {
         server.createContext(conf._EXT_SUPA_GROUP_LEADERSHIP_TRANSFER, exchange -> utils.handlePost(exchange, ex -> {
+            String actorId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
             String groupId  = utils.requireString(json, "groupId");
-            String actorId  = utils.requireString(json, "actorId");
             String targetId = utils.requireString(json, "targetUserId");
 
             JsonObject group = requireGroupLeader(groupId, actorId);
@@ -280,9 +284,9 @@ public class SUPABASE_Group {
 
     public void getGroupPolls() {
         server.createContext(conf._EXT_SUPA_GROUP_POLLS_GET, exchange -> utils.handlePost(exchange, ex -> {
+            String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
             String groupId  = utils.requireString(json, "groupId");
-            String userId   = utils.requireString(json, "userId");
 
             requireGroupMember(groupId, userId);
             JsonObject group = getGroup(groupId);
@@ -294,9 +298,9 @@ public class SUPABASE_Group {
 
     public void createGroupPoll() {
         server.createContext(conf._EXT_SUPA_GROUP_POLL_CREATE, exchange -> utils.handlePost(exchange, ex -> {
+            String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
             String groupId  = utils.requireString(json, "groupId");
-            String userId   = utils.requireString(json, "userId");
             String title    = utils.requireString(json, "title").trim();
             int rounds      = json.has("rounds") ? json.get("rounds").getAsInt() : 7;
 
@@ -325,9 +329,9 @@ public class SUPABASE_Group {
 
     public void answerGroupPoll() {
         server.createContext(conf._EXT_SUPA_GROUP_POLL_ANSWER, exchange -> utils.handlePost(exchange, ex -> {
+            String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
             String groupId  = utils.requireString(json, "groupId");
-            String userId   = utils.requireString(json, "userId");
             String pollId   = utils.requireString(json, "pollId");
             JsonArray accounts = utils.requireArray(json, "accounts");
 
@@ -353,9 +357,9 @@ public class SUPABASE_Group {
 
     public void setGroupPollStatus() {
         server.createContext(conf._EXT_SUPA_GROUP_POLL_STATUS, exchange -> utils.handlePost(exchange, ex -> {
+            String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
             String groupId  = utils.requireString(json, "groupId");
-            String userId   = utils.requireString(json, "userId");
             String pollId   = utils.requireString(json, "pollId");
             String status   = utils.requireString(json, "status").trim().toLowerCase();
 

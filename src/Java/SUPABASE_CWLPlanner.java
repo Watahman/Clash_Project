@@ -19,10 +19,14 @@ public class SUPABASE_CWLPlanner {
 
     public void saveCWLPlanner() {
         server.createContext(conf._EXT_SUPA_CWLPLANNER_DATA_SET, exchange -> utils.handlePost(exchange, ex -> {
+            String userId    = utils.requireAuthenticatedUser(ex);
             JsonObject json  = utils.parseBody(ex);
-            String userId    = utils.requireString(json, "userId");
             String planName  = utils.requireString(json, "name");
             JsonArray clans  = utils.requireArray(json, "planInfo");
+            planName = planName.trim();
+            if (planName.isBlank() || planName.length() > 40) {
+                throw new IllegalArgumentException("Plan naam moet tussen 1 en 40 tekens bevatten");
+            }
 
             JsonElement planIdEl = json.get("planId");
             String plannerId     = (planIdEl != null && !planIdEl.isJsonNull()) ? planIdEl.getAsString() : "";
@@ -30,13 +34,7 @@ public class SUPABASE_CWLPlanner {
             String planId;
 
             if (!plannerId.isEmpty() && !plannerId.equals("undefined") && !plannerId.equals("null")) {
-                JsonElement planExistsEl = JsonParser.parseString(
-                        SUPABASE_Client.getWithBody("plans", "id=" + SUPABASE_Client.eq(plannerId)));
-
-                if (!planExistsEl.isJsonArray() || planExistsEl.getAsJsonArray().isEmpty()) {
-                    utils.sendJsonResponse(ex, "{\"error\":\"Plan niet gevonden met id: " + API_Utils.escapeJson(plannerId) + "\"}", 404);
-                    return;
-                }
+                requirePlanAccess(plannerId, userId);
 
                 JsonObject editPlan = new JsonObject();
                 editPlan.add("info", clans);
@@ -79,8 +77,8 @@ public class SUPABASE_CWLPlanner {
 
     public void getAllPlanners() {
         server.createContext(conf._EXT_SUPA_CWLPLANNER_DATA_GET_ALL, exchange -> utils.handlePost(exchange, ex -> {
-            JsonObject json = utils.parseBody(ex);
-            String userId   = utils.requireString(json, "userId");
+            String userId = utils.requireAuthenticatedUser(ex);
+            utils.parseBody(ex);
 
             JsonArray userPlanIds = JsonParser.parseString(
                     SUPABASE_Client.getWithBody("plan_users", "select=plan_id&user_id=" + SUPABASE_Client.eq(userId))).getAsJsonArray();
@@ -109,6 +107,7 @@ public class SUPABASE_CWLPlanner {
 
     public void getPlanner() {
         server.createContext(conf._EXT_SUPA_CWLPLANNER_DATA_GET, exchange -> utils.handlePost(exchange, ex -> {
+            String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
             JsonElement planIdEl = json.get("planId");
             JsonElement nameEl = json.get("name");
@@ -116,12 +115,14 @@ public class SUPABASE_CWLPlanner {
             JsonArray planArray;
             if (planIdEl != null && !planIdEl.isJsonNull() && !planIdEl.getAsString().isBlank()) {
                 String planId = planIdEl.getAsString();
+                requirePlanAccess(planId, userId);
                 planArray = JsonParser.parseString(
                         SUPABASE_Client.getWithBody("plans", "id=" + SUPABASE_Client.eq(planId))).getAsJsonArray();
             } else if (nameEl != null && !nameEl.isJsonNull()) {
                 String name = nameEl.getAsString();
                 planArray = JsonParser.parseString(
-                        SUPABASE_Client.getWithBody("plans", "name=" + SUPABASE_Client.eq(name))).getAsJsonArray();
+                        SUPABASE_Client.getWithBody("plans",
+                                "name=" + SUPABASE_Client.eq(name) + "&owner_id=" + SUPABASE_Client.eq(userId))).getAsJsonArray();
             } else {
                 throw new IllegalArgumentException("planId ontbreekt");
             }
@@ -139,5 +140,25 @@ public class SUPABASE_CWLPlanner {
 
             utils.sendJsonResponse(ex, planInfo.toString(), 200);
         }));
+    }
+
+    private void requirePlanAccess(String planId, String userId) throws Exception {
+        JsonArray plans = JsonParser.parseString(SUPABASE_Client.getWithBody(
+                "plans",
+                "select=id,owner_id&id=" + SUPABASE_Client.eq(planId)
+        )).getAsJsonArray();
+        if (plans.isEmpty()) {
+            throw new HttpException(404, "{\"error\":\"Plan niet gevonden\"}");
+        }
+        JsonElement owner = plans.get(0).getAsJsonObject().get("owner_id");
+        if (owner != null && !owner.isJsonNull() && userId.equals(owner.getAsString())) return;
+
+        JsonArray membership = JsonParser.parseString(SUPABASE_Client.getWithBody(
+                "plan_users",
+                "select=plan_id&plan_id=" + SUPABASE_Client.eq(planId) + "&user_id=" + SUPABASE_Client.eq(userId)
+        )).getAsJsonArray();
+        if (membership.isEmpty()) {
+            throw new HttpException(403, "{\"error\":\"Geen toegang tot dit plan\"}");
+        }
     }
 }

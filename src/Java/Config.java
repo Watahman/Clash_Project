@@ -16,7 +16,13 @@ public class Config {
     String _BASE_URL_SUPABASE = firstNonBlank(System.getenv("_BASE_URL_SUPABASE"), System.getenv("SUPABASE_URL"));
     String _BASE_URL_CLASH = firstNonBlank(System.getenv("_BASE_URL_CLASH"), "https://api.clashofclans.com/v1");
     String _CACHE_ENABLED = firstNonBlank(System.getenv("CACHE_ENABLED"), "true");
-    String _CACHE_MODE = firstNonBlank(System.getenv("CACHE_MODE"), "memory");
+    String _CACHE_MODE = firstNonBlank(System.getenv("CACHE_MODE"), "layered");
+    String _ALLOWED_ORIGINS = firstNonBlank(
+            System.getenv("ALLOWED_ORIGINS"),
+            "http://localhost:5173,http://127.0.0.1:5173"
+    );
+    String _SERVER_PORT = firstNonBlank(System.getenv("PORT"), System.getenv("SERVER_PORT"), "8080");
+    String _MAX_REQUEST_BODY_BYTES = firstNonBlank(System.getenv("MAX_REQUEST_BODY_BYTES"), "1048576");
 
     String _EXT_CLAN_CURRENTWAR_LEAGUEGROUP = "/ClanCurrentWarLeagueGroup";
     String _EXT_CLAN_WARLEAGUES_WARS = "/ClanWarLeaguesWars";
@@ -119,6 +125,13 @@ public class Config {
         return _API_KEY_SECR_SUPABASE;
     }
 
+    String getSupabasePublishableKey() {
+        if (_API_KEY_SUPABASE == null || _API_KEY_SUPABASE.isBlank()) {
+            throw new IllegalStateException("Ontbrekende env var: _API_KEY_SUPABASE");
+        }
+        return _API_KEY_SUPABASE;
+    }
+
     String getClashApiKey() {
         if (_API_KEY_ACTIVE == null || _API_KEY_ACTIVE.isBlank()) {
             throw new IllegalStateException("Ontbrekende Clash API key env var, bv. _API_KEY_ALL");
@@ -135,6 +148,33 @@ public class Config {
     }
 
     String getCacheMode() {
-        return _CACHE_MODE == null || _CACHE_MODE.isBlank() ? "memory" : _CACHE_MODE;
+        return _CACHE_MODE == null || _CACHE_MODE.isBlank() ? "layered" : _CACHE_MODE;
+    }
+
+    int getServerPort() {
+        try {
+            int port = Integer.parseInt(_SERVER_PORT);
+            if (port < 1 || port > 65535) throw new NumberFormatException();
+            return port;
+        } catch (NumberFormatException invalidPort) {
+            throw new IllegalStateException("Ongeldige SERVER_PORT/PORT");
+        }
+    }
+
+    int getMaxRequestBodyBytes() {
+        try {
+            int value = Integer.parseInt(_MAX_REQUEST_BODY_BYTES);
+            return Math.max(1024, Math.min(value, 10 * 1024 * 1024));
+        } catch (NumberFormatException invalidLimit) {
+            return 1024 * 1024;
+        }
+    }
+
+    boolean isOriginAllowed(String origin) {
+        if (origin == null || origin.isBlank()) return true;
+        for (String allowed : _ALLOWED_ORIGINS.split(",")) {
+            if (origin.equalsIgnoreCase(allowed.trim())) return true;
+        }
+        return false;
     }
 }

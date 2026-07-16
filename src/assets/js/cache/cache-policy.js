@@ -17,7 +17,9 @@ export const CACHE_TTL = Object.freeze({
     CLASH_CLAN_MEMBERS: 2 * 60 * 1000,
     CLASH_WAR_LIVE: 60 * 1000,
     CLASH_WAR_ENDED: 15 * 60 * 1000,
-    CLASH_LEAGUE_GROUP: 2 * 60 * 1000
+    CLASH_LEAGUE_GROUP: 2 * 60 * 1000,
+    CLASH_RAID_SEASONS: 30 * 60 * 1000,
+    CLASH_CLAN_SEARCH: 5 * 60 * 1000
 });
 
 export const CACHE_STALE = Object.freeze({

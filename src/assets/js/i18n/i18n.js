@@ -26,16 +26,18 @@ export function t(key, params = {}) {
     return value;
 }
 
-function setContent(element, value) {
-    if (value.includes('<')) element.innerHTML = value;
-    else element.textContent = value;
-}
+const SAFE_HTML_KEYS = new Set(['home.title']);
 
 export function applyI18n(root = document) {
     document.documentElement.lang = getLanguage();
 
     root.querySelectorAll('[data-i18n]').forEach(element => {
-        setContent(element, t(element.dataset.i18n));
+        element.textContent = t(element.dataset.i18n);
+    });
+    root.querySelectorAll('[data-i18n-html]').forEach(element => {
+        const key = element.dataset.i18nHtml;
+        if (SAFE_HTML_KEYS.has(key)) element.innerHTML = t(key);
+        else element.textContent = t(key);
     });
     root.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
         element.setAttribute('placeholder', t(element.dataset.i18nPlaceholder));

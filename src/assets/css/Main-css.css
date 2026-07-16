@@ -693,6 +693,26 @@ select {
 .field-hint { min-height: 1em; color: var(--text-4); font-family: var(--font-mono); font-size: 0.7rem; }
 .field-hint.ok { color: var(--green); }
 .field-hint.err { color: var(--red); }
+.auth-link {
+    min-height: auto;
+    padding: 0;
+    border: 0;
+    color: var(--accent);
+    background: transparent;
+    font: inherit;
+    font-size: .78rem;
+    box-shadow: none;
+}
+.auth-link:hover { color: var(--accent-2); background: transparent; transform: none; }
+.auth-status {
+    min-height: 1.25rem;
+    color: var(--text-3);
+    font-size: .82rem;
+    text-align: center;
+}
+.auth-status[data-state="error"] { color: var(--red); }
+.auth-status[data-state="success"] { color: var(--green); }
+.strength-seg.active { background: var(--green); }
 .strength-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.28rem; margin-top: 0.35rem; }
 .strength-seg { height: 0.25rem; border-radius: 999px; background: rgba(255,255,255,0.09); }
 .strength-seg.weak { background: var(--red); }

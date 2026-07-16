@@ -1,57 +1,139 @@
 import { CACHE_VERSION } from './cache-policy.js';
 export { normalizeTag } from './cache-keys.js';
 
-const STORAGE_PREFIX = 'clashtools.cache:';
-const MAX_ENTRIES = 250;
+const DATABASE_NAME = 'clashtools-cache';
+const DATABASE_VERSION = 1;
+const STORE_NAME = 'responses';
+const LEGACY_STORAGE_PREFIX = 'clashtools.cache:';
+const MIGRATION_MARKER = 'clashtools.cache.idb-migrated';
+const MAX_ENTRIES = 500;
 const refreshes = new Map();
-
-function storageKey(key) {
-    return `${STORAGE_PREFIX}${key}`;
-}
+const memoryFallback = new Map();
+let databasePromise;
 
 function now() {
     return Date.now();
 }
 
-function safeParse(raw) {
-    if (!raw) return null;
+function requestResult(request) {
+    return new Promise((resolve, reject) => {
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+function transactionComplete(transaction) {
+    return new Promise((resolve, reject) => {
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+        transaction.onabort = () => reject(transaction.error || new Error('IndexedDB transaction afgebroken'));
+    });
+}
+
+function isValidEntry(entry) {
+    return Boolean(
+        entry
+        && entry.version === CACHE_VERSION
+        && typeof entry.key === 'string'
+        && Number.isFinite(entry.fetchedAt)
+        && Number.isFinite(entry.staleAt)
+        && Number.isFinite(entry.expiresAt)
+    );
+}
+
+async function openDatabase() {
+    if (!globalThis.indexedDB) return null;
+    if (databasePromise) return databasePromise;
+
+    databasePromise = new Promise((resolve, reject) => {
+        const request = indexedDB.open(DATABASE_NAME, DATABASE_VERSION);
+        request.onupgradeneeded = () => {
+            const database = request.result;
+            const store = database.createObjectStore(STORE_NAME, { keyPath: 'key' });
+            store.createIndex('fetchedAt', 'fetchedAt');
+            store.createIndex('expiresAt', 'expiresAt');
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+        request.onblocked = () => reject(new Error('IndexedDB upgrade is geblokkeerd'));
+    }).catch(() => null);
+
+    const database = await databasePromise;
+    if (database) void migrateLegacyCache(database);
+    return database;
+}
+
+async function migrateLegacyCache(database) {
     try {
-        const entry = JSON.parse(raw);
-        if (entry?.version !== CACHE_VERSION) return null;
+        if (localStorage.getItem(MIGRATION_MARKER) === '1') return;
+        const entries = Object.keys(localStorage)
+            .filter(key => key.startsWith(LEGACY_STORAGE_PREFIX))
+            .map(key => {
+                try {
+                    return [key, JSON.parse(localStorage.getItem(key))];
+                } catch {
+                    return [key, null];
+                }
+            })
+            .filter(([, entry]) => isValidEntry(entry));
+
+        if (entries.length) {
+            const transaction = database.transaction(STORE_NAME, 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            entries.forEach(([, entry]) => store.put(entry));
+            await transactionComplete(transaction);
+        }
+        entries.forEach(([key]) => localStorage.removeItem(key));
+        localStorage.setItem(MIGRATION_MARKER, '1');
+    } catch {
+        // Migration is best effort; cache failure must never block application data.
+    }
+}
+
+async function readEntry(key) {
+    const database = await openDatabase();
+    if (!database) return memoryFallback.get(key) || null;
+    try {
+        const transaction = database.transaction(STORE_NAME, 'readonly');
+        return await requestResult(transaction.objectStore(STORE_NAME).get(key)) || null;
+    } catch {
+        return memoryFallback.get(key) || null;
+    }
+}
+
+async function writeEntry(entry, retry = true) {
+    const database = await openDatabase();
+    if (!database) {
+        memoryFallback.set(entry.key, entry);
         return entry;
-    } catch {
-        return null;
     }
-}
-
-function readEntry(key) {
     try {
-        return safeParse(localStorage.getItem(storageKey(key)));
-    } catch {
-        return null;
+        const transaction = database.transaction(STORE_NAME, 'readwrite');
+        transaction.objectStore(STORE_NAME).put(entry);
+        await transactionComplete(transaction);
+        await cleanupCache(database);
+        return entry;
+    } catch (error) {
+        if (retry && (error?.name === 'QuotaExceededError' || error?.name === 'UnknownError')) {
+            await cleanupCache(database, true);
+            return writeEntry(entry, false);
+        }
+        memoryFallback.set(entry.key, entry);
+        return entry;
     }
 }
 
-function writeEntry(entry) {
-    try {
-        localStorage.setItem(storageKey(entry.key), JSON.stringify(entry));
-        cleanupCache();
-    } catch {
-        cleanupCache(true);
-    }
-}
-
-export function getCached(key, { allowExpired = false } = {}) {
-    const entry = readEntry(key);
-    if (!entry) return null;
+export async function getCached(key, { allowExpired = false } = {}) {
+    const entry = await readEntry(key);
+    if (!isValidEntry(entry)) return null;
     if (!allowExpired && entry.expiresAt <= now()) {
-        removeCached(key);
+        await removeCached(key);
         return null;
     }
     return entry;
 }
 
-export function setCached(key, data, ttlMs, staleMs = ttlMs, source = 'backend') {
+export async function setCached(key, data, ttlMs, staleMs = ttlMs, source = 'backend') {
     if (!key || ttlMs <= 0) return null;
     const fetchedAt = now();
     const entry = {
@@ -63,38 +145,57 @@ export function setCached(key, data, ttlMs, staleMs = ttlMs, source = 'backend')
         source,
         version: CACHE_VERSION
     };
-    writeEntry(entry);
-    return entry;
+    return writeEntry(entry);
 }
 
-export function removeCached(key) {
+export async function removeCached(key) {
+    memoryFallback.delete(key);
+    const database = await openDatabase();
+    if (!database) return;
     try {
-        localStorage.removeItem(storageKey(key));
+        const transaction = database.transaction(STORE_NAME, 'readwrite');
+        transaction.objectStore(STORE_NAME).delete(key);
+        await transactionComplete(transaction);
     } catch {
-        // Cache failures should never block the app.
+        // Cache invalidation failure must not block the requested mutation.
     }
 }
 
-export function clearCachePrefix(prefix) {
+export async function clearCachePrefix(prefix) {
+    for (const key of memoryFallback.keys()) {
+        if (key.startsWith(prefix)) memoryFallback.delete(key);
+    }
+    const database = await openDatabase();
+    if (!database) return;
     try {
-        Object.keys(localStorage)
-            .filter(key => key.startsWith(STORAGE_PREFIX + prefix))
-            .forEach(key => localStorage.removeItem(key));
+        const transaction = database.transaction(STORE_NAME, 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        const cursorRequest = store.openCursor();
+        cursorRequest.onsuccess = () => {
+            const cursor = cursorRequest.result;
+            if (!cursor) return;
+            if (String(cursor.key).startsWith(prefix)) cursor.delete();
+            cursor.continue();
+        };
+        await transactionComplete(transaction);
     } catch {
-        // Cache failures should never block the app.
+        // Cache invalidation failure must not block the requested mutation.
     }
 }
 
 export function invalidateUserCache(userId) {
-    if (!userId) return;
-    clearCachePrefix(`users.info:${encodeURIComponent(userId)}`);
-    clearCachePrefix(`users.check:${encodeURIComponent(userId)}`);
-    clearCachePrefix(`users.accounts:${encodeURIComponent(userId)}`);
-    clearCachePrefix(`friends.list:${encodeURIComponent(userId)}`);
-    clearCachePrefix(`friends.pending:${encodeURIComponent(userId)}`);
-    clearCachePrefix(`friends.requests:${encodeURIComponent(userId)}`);
-    clearCachePrefix(`groups.ofUser:${encodeURIComponent(userId)}`);
-    clearCachePrefix(`plans.ofUser:${encodeURIComponent(userId)}`);
+    if (!userId) return Promise.resolve();
+    const encoded = encodeURIComponent(userId);
+    return Promise.all([
+        `users.info:${encoded}`,
+        `users.check:${encoded}`,
+        `users.accounts:${encoded}`,
+        `friends.list:${encoded}`,
+        `friends.pending:${encoded}`,
+        `friends.requests:${encoded}`,
+        `groups.ofUser:${encoded}`,
+        `plans.ofUser:${encoded}`
+    ].map(clearCachePrefix));
 }
 
 export async function getCachedThenRefresh(key, fetchFn, options = {}) {
@@ -103,25 +204,39 @@ export async function getCachedThenRefresh(key, fetchFn, options = {}) {
         staleMs = ttlMs,
         source = 'backend',
         forceRefresh = false,
+        maxFallbackAgeMs = Math.min(
+            30 * 24 * 60 * 60 * 1000,
+            Math.max(5 * 60 * 1000, Number(ttlMs || 0) * 4)
+        ),
         onRefresh,
+        onRefreshError,
         emitEvent = true
     } = options;
-    const cached = getCached(key, { allowExpired: true });
-    const isFresh = cached && cached.expiresAt > now() && cached.staleAt > now();
-    const isStaleUsable = cached && cached.expiresAt > now();
+    const cached = await getCached(key, { allowExpired: true });
+    const currentTime = now();
+    const isFresh = cached && cached.expiresAt > currentTime && cached.staleAt > currentTime;
+    const isStaleUsable = cached && cached.expiresAt > currentTime;
+    const isFallbackUsable = cached && currentTime - cached.fetchedAt <= maxFallbackAgeMs;
 
     if (!forceRefresh && isFresh) return cached.data;
 
-    const refresh = () => refreshCache(key, fetchFn, { ttlMs, staleMs, source, onRefresh, emitEvent, cached });
+    const refresh = () => refreshCache(key, fetchFn, {
+        ttlMs,
+        staleMs,
+        source,
+        onRefresh,
+        emitEvent,
+        cached
+    });
     if (!forceRefresh && isStaleUsable) {
-        refresh();
+        refresh().catch(error => onRefreshError?.(error));
         return cached.data;
     }
 
     try {
         return await refresh();
     } catch (error) {
-        if (cached) return cached.data;
+        if (isFallbackUsable) return cached.data;
         throw error;
     }
 }
@@ -131,13 +246,15 @@ function refreshCache(key, fetchFn, options) {
     const startedAt = now();
     const promise = Promise.resolve()
         .then(fetchFn)
-        .then(data => {
-            const latest = readEntry(key);
+        .then(async data => {
+            const latest = await readEntry(key);
             if (latest?.fetchedAt > startedAt) return latest.data;
-            const entry = setCached(key, data, options.ttlMs, options.staleMs, options.source);
+            const entry = await setCached(key, data, options.ttlMs, options.staleMs, options.source);
             if (options.onRefresh && hasChanged(options.cached?.data, data)) options.onRefresh(data, entry);
-            if (options.emitEvent && hasChanged(options.cached?.data, data)) {
-                window.dispatchEvent(new CustomEvent('clashtools:cache-refreshed', { detail: { key, data, source: options.source } }));
+            if (options.emitEvent && hasChanged(options.cached?.data, data) && globalThis.window) {
+                window.dispatchEvent(new CustomEvent('clashtools:cache-refreshed', {
+                    detail: { key, data, source: options.source }
+                }));
             }
             return data;
         })
@@ -155,24 +272,34 @@ function hasChanged(previous, next) {
     }
 }
 
-function cleanupCache(force = false) {
+async function cleanupCache(database, force = false) {
+    const entries = [];
     try {
-        const entries = Object.keys(localStorage)
-            .filter(key => key.startsWith(STORAGE_PREFIX))
-            .map(key => [key, safeParse(localStorage.getItem(key))])
-            .filter(([, entry]) => entry);
-        const current = now();
-        entries
-            .filter(([, entry]) => force || entry.expiresAt <= current)
-            .forEach(([key]) => localStorage.removeItem(key));
-        const remaining = entries
-            .filter(([, entry]) => entry.expiresAt > current)
-            .sort((a, b) => a[1].fetchedAt - b[1].fetchedAt);
-        while (remaining.length > MAX_ENTRIES) {
-            const [key] = remaining.shift();
-            localStorage.removeItem(key);
-        }
+        const readTransaction = database.transaction(STORE_NAME, 'readonly');
+        const request = readTransaction.objectStore(STORE_NAME).openCursor();
+        request.onsuccess = () => {
+            const cursor = request.result;
+            if (!cursor) return;
+            entries.push(cursor.value);
+            cursor.continue();
+        };
+        await transactionComplete(readTransaction);
+
+        const currentTime = now();
+        const keysToDelete = entries
+            .filter(entry => force || !isValidEntry(entry) || entry.expiresAt <= currentTime)
+            .map(entry => entry.key);
+        const retained = entries
+            .filter(entry => isValidEntry(entry) && entry.expiresAt > currentTime)
+            .sort((a, b) => b.fetchedAt - a.fetchedAt);
+        retained.slice(MAX_ENTRIES).forEach(entry => keysToDelete.push(entry.key));
+        if (!keysToDelete.length) return;
+
+        const writeTransaction = database.transaction(STORE_NAME, 'readwrite');
+        const store = writeTransaction.objectStore(STORE_NAME);
+        [...new Set(keysToDelete)].forEach(key => store.delete(key));
+        await transactionComplete(writeTransaction);
     } catch {
-        // Cache failures should never block the app.
+        // Cleanup is best effort.
     }
 }

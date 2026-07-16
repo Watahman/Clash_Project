@@ -1,4 +1,5 @@
 import { profileHTML } from '../profile/profile_popup.js';
+import { syncAuthSession } from '../auth/auth-client.js';
 import { initI18n, t } from '../i18n/i18n.js';
 import { getCurrentUserId } from '../utils/user.js';
 import { getAllPlansFromDatabase, getPlanFromDatabase } from '../Supabase/Supabase-Plan.js';
@@ -969,13 +970,14 @@ function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 }
 
-function init() {
+async function init() {
     initRefs();
     initI18n();
+    await syncAuthSession().catch(() => null);
     profileHTML();
     initEvents();
     loadPlans();
     setPhase('unknown');
 }
 
-init();
+void init();

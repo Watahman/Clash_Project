@@ -2,6 +2,8 @@ let loadingCounter = 0;
 let overlay;
 let messageNode;
 let keyLockInstalled = false;
+let showTimer;
+const SHOW_DELAY_MS = 180;
 
 function blockKeysWhileLoading(event) {
     if (loadingCounter <= 0) return;
@@ -10,7 +12,9 @@ function blockKeysWhileLoading(event) {
 }
 
 function ensureOverlay() {
-    if (overlay) return overlay;
+    if (overlay?.isConnected) return overlay;
+    overlay = null;
+    messageNode = null;
 
     overlay = document.createElement('div');
     overlay.id = 'global-loading-overlay';
@@ -41,15 +45,24 @@ function setInteractionLock(active) {
 
 export function startGlobalLoading(message = 'Laden...') {
     loadingCounter += 1;
-    ensureOverlay();
+    const currentOverlay = ensureOverlay();
     messageNode.textContent = message || 'Laden...';
-    overlay.classList.remove('hidden');
-    setInteractionLock(true);
+    if (showTimer || !currentOverlay.classList.contains('hidden')) return;
+    showTimer = window.setTimeout(() => {
+        showTimer = null;
+        if (loadingCounter <= 0) return;
+        currentOverlay.classList.remove('hidden');
+        setInteractionLock(true);
+    }, SHOW_DELAY_MS);
 }
 
 export function stopGlobalLoading() {
     loadingCounter = Math.max(0, loadingCounter - 1);
     if (loadingCounter > 0) return;
+    if (showTimer) {
+        window.clearTimeout(showTimer);
+        showTimer = null;
+    }
     ensureOverlay();
     overlay.classList.add('hidden');
     setInteractionLock(false);

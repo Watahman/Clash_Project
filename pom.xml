@@ -8,8 +8,7 @@
     <version>1.0.0</version>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -24,10 +23,17 @@
             <artifactId>bcrypt</artifactId>
             <version>0.10.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.12.2</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <sourceDirectory>src</sourceDirectory>
+        <testSourceDirectory>test</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

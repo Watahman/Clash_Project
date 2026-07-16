@@ -1,38 +1,20 @@
-import { withGlobalLoading } from "../utils/loading-state.js";
 import { getCachedThenRefresh } from "../cache/local-cache.js";
+import { requestJson } from "../utils/request-json.js";
 
-export async function databaseRequestWithBody(path, body, cacheOptions = null) {
-    const request = async () => {
-        const response = await fetch(path, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body)
-        });
+export async function databaseRequestWithBody(path, body, cacheOptions = null, requestOptions = {}) {
+    const request = () => requestJson(path, {
+        body,
+        auth: requestOptions.auth !== false,
+        signal: requestOptions.signal,
+        loading: requestOptions.loading || 'background',
+        loadingMessage: requestOptions.loadingMessage
+    });
 
-        const text = await response.text();
-        let data = null;
-        try {
-            data = text ? JSON.parse(text) : null;
-        } catch {
-            data = { error: text || "Ongeldig JSON-antwoord" };
-        }
-
-        if (!response.ok) {
-            const message = data?.error || `Request mislukt (${response.status})`;
-            throw new Error(message);
-        }
-
-        return data;
-    };
-
-    return withGlobalLoading(async () => {
-        if (!cacheOptions?.key) return request();
-        return getCachedThenRefresh(cacheOptions.key, request, {
-            ttlMs: cacheOptions.ttlMs,
-            staleMs: cacheOptions.staleMs,
-            source: 'supabase'
-        });
-    }, "Laden...");
+    if (!cacheOptions?.key) return request();
+    return getCachedThenRefresh(cacheOptions.key, request, {
+        ttlMs: cacheOptions.ttlMs,
+        staleMs: cacheOptions.staleMs,
+        maxFallbackAgeMs: cacheOptions.maxFallbackAgeMs,
+        source: 'supabase'
+    });
 }

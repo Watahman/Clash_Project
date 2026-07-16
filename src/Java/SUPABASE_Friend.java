@@ -22,8 +22,8 @@ public class SUPABASE_Friend {
 
     public void addFriend() {
         server.createContext(conf._EXT_SUPA_USER_ADD_FRIEND, exchange -> utils.handlePost(exchange, ex -> {
+            String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json   = utils.parseBody(ex);
-            String userId     = utils.requireString(json, "userId");
             String friendCode = utils.requireString(json, "friendCode").replace("#", "").trim();
 
             JsonArray users = JsonParser.parseString(
@@ -60,8 +60,8 @@ public class SUPABASE_Friend {
 
     public void getPendingRequests() {
         server.createContext(conf._EXT_SUPA_USER_GET_PENDING_FRIENDS, exchange -> utils.handlePost(exchange, ex -> {
-            JsonObject json = utils.parseBody(ex);
-            String userId   = utils.requireString(json, "userId");
+            String userId = utils.requireAuthenticatedUser(ex);
+            utils.parseBody(ex);
             String result   = SUPABASE_Client.getWithBody("friends",
                     "user_a=" + SUPABASE_Client.eq(userId) + "&status=eq.pending&select=user_b,status");
             utils.sendJsonResponse(ex, result, 200);
@@ -70,8 +70,8 @@ public class SUPABASE_Friend {
 
     public void getFriendRequests() {
         server.createContext(conf._EXT_SUPA_USER_GET_FRIEND_REQUESTS, exchange -> utils.handlePost(exchange, ex -> {
-            JsonObject json = utils.parseBody(ex);
-            String userId   = utils.requireString(json, "userId");
+            String userId = utils.requireAuthenticatedUser(ex);
+            utils.parseBody(ex);
             String result   = SUPABASE_Client.getWithBody("friends",
                     "user_b=" + SUPABASE_Client.eq(userId) + "&status=eq.pending&select=user_a,status");
             utils.sendJsonResponse(ex, result, 200);
@@ -80,8 +80,8 @@ public class SUPABASE_Friend {
 
     public void getFriends() {
         server.createContext(conf._EXT_SUPA_USER_GET_FRIENDS, exchange -> utils.handlePost(exchange, ex -> {
-            JsonObject json = utils.parseBody(ex);
-            String userId   = utils.requireString(json, "userId");
+            String userId = utils.requireAuthenticatedUser(ex);
+            utils.parseBody(ex);
 
             JsonArray resultsA = JsonParser.parseString(SUPABASE_Client.getWithBody("friends",
                     "user_a=" + SUPABASE_Client.eq(userId) + "&status=eq.accepted&select=user_b,status")).getAsJsonArray();
@@ -119,26 +119,27 @@ public class SUPABASE_Friend {
 
     public void acceptFriend() {
         server.createContext(conf._EXT_SUPA_USER_ACCEPT_FRIEND, exchange -> utils.handlePost(exchange, ex -> {
+            String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
-            String userId   = utils.requireString(json, "userId");
             String friendId = utils.requireString(json, "friendId");
 
             JsonObject patch = new JsonObject();
             patch.addProperty("status", "accepted");
 
-            boolean foundA = !JsonParser.parseString(SUPABASE_Client.getWithBody("friends",
-                    "user_a=" + SUPABASE_Client.eq(userId) + "&user_b=" + SUPABASE_Client.eq(friendId) + "&select=user_a")).getAsJsonArray().isEmpty();
-            boolean foundB = !JsonParser.parseString(SUPABASE_Client.getWithBody("friends",
-                    "user_a=" + SUPABASE_Client.eq(friendId) + "&user_b=" + SUPABASE_Client.eq(userId) + "&select=user_a")).getAsJsonArray().isEmpty();
+            boolean addressedToActor = !JsonParser.parseString(SUPABASE_Client.getWithBody("friends",
+                    "user_a=" + SUPABASE_Client.eq(friendId)
+                            + "&user_b=" + SUPABASE_Client.eq(userId)
+                            + "&status=eq.pending&select=user_a")).getAsJsonArray().isEmpty();
 
-            if (foundA) {
-                SUPABASE_Client.patch("friends", "user_a=" + SUPABASE_Client.eq(userId) + "&user_b=" + SUPABASE_Client.eq(friendId), patch.toString());
-            } else if (foundB) {
-                SUPABASE_Client.patch("friends", "user_a=" + SUPABASE_Client.eq(friendId) + "&user_b=" + SUPABASE_Client.eq(userId), patch.toString());
-            } else {
+            if (!addressedToActor) {
                 utils.sendJsonResponse(ex, "{\"error\":\"Vriendverzoek niet gevonden\"}", 404);
                 return;
             }
+            SUPABASE_Client.patch("friends",
+                    "user_a=" + SUPABASE_Client.eq(friendId)
+                            + "&user_b=" + SUPABASE_Client.eq(userId)
+                            + "&status=eq.pending",
+                    patch.toString());
 
             utils.sendJsonResponse(ex, "{\"success\":true}", 200);
         }));
@@ -146,23 +147,23 @@ public class SUPABASE_Friend {
 
     public void rejectFriend() {
         server.createContext(conf._EXT_SUPA_USER_REJECT_FRIEND, exchange -> utils.handlePost(exchange, ex -> {
+            String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
-            String userId   = utils.requireString(json, "userId");
             String friendId = utils.requireString(json, "friendId");
 
-            boolean foundA = !JsonParser.parseString(SUPABASE_Client.getWithBody("friends",
-                    "user_a=" + SUPABASE_Client.eq(userId) + "&user_b=" + SUPABASE_Client.eq(friendId) + "&select=user_a")).getAsJsonArray().isEmpty();
-            boolean foundB = !JsonParser.parseString(SUPABASE_Client.getWithBody("friends",
-                    "user_a=" + SUPABASE_Client.eq(friendId) + "&user_b=" + SUPABASE_Client.eq(userId) + "&select=user_a")).getAsJsonArray().isEmpty();
+            boolean addressedToActor = !JsonParser.parseString(SUPABASE_Client.getWithBody("friends",
+                    "user_a=" + SUPABASE_Client.eq(friendId)
+                            + "&user_b=" + SUPABASE_Client.eq(userId)
+                            + "&status=eq.pending&select=user_a")).getAsJsonArray().isEmpty();
 
-            if (foundA) {
-                SUPABASE_Client.deleteColumn("friends", "user_a=" + SUPABASE_Client.eq(userId) + "&user_b=" + SUPABASE_Client.eq(friendId));
-            } else if (foundB) {
-                SUPABASE_Client.deleteColumn("friends", "user_a=" + SUPABASE_Client.eq(friendId) + "&user_b=" + SUPABASE_Client.eq(userId));
-            } else {
+            if (!addressedToActor) {
                 utils.sendJsonResponse(ex, "{\"error\":\"Vriendverzoek niet gevonden\"}", 404);
                 return;
             }
+            SUPABASE_Client.deleteColumn("friends",
+                    "user_a=" + SUPABASE_Client.eq(friendId)
+                            + "&user_b=" + SUPABASE_Client.eq(userId)
+                            + "&status=eq.pending");
 
             utils.sendJsonResponse(ex, "{\"success\":true}", 200);
         }));

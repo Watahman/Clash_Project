@@ -1,9 +1,9 @@
-import { changeUserPassword, updateUserName } from "../Supabase/Supabase-User.js";
+import { updateUserName } from "../Supabase/Supabase-User.js";
 import { t } from "../i18n/i18n.js";
 import { clearCachePrefix, invalidateUserCache } from "../cache/local-cache.js";
 import { getCurrentUserId } from "../utils/user.js";
-import { withGlobalLoading } from "../utils/loading-state.js";
 import { getThemePreference, setThemePreference } from "../theme/theme-manager.js";
+import { changeAuthenticatedPassword } from "../auth/auth-client.js";
 
 let initialized = false;
 let currentProfile = null;
@@ -69,7 +69,7 @@ async function saveName() {
 
     setButtonLoading(refs.saveNameBtn, true);
     try {
-        const result = await withGlobalLoading(() => updateUserName(userId, name), t('settings.saving'));
+        const result = await updateUserName(userId, name);
         if (result?.error) {
             setMessage('settings.nameChangeError', 'error');
             return;
@@ -108,14 +108,7 @@ async function savePassword() {
 
     setButtonLoading(refs.savePasswordBtn, true);
     try {
-        const result = await withGlobalLoading(
-            () => changeUserPassword(userId, currentPassword, newPassword),
-            t('settings.saving')
-        );
-        if (result?.success === false || result?.error) {
-            setMessage(result?.errorKey || 'settings.wrongPassword', 'error');
-            return;
-        }
+        await changeAuthenticatedPassword(currentPassword, newPassword);
         clearPasswordFields();
         setMessage('settings.passwordChanged');
     } catch (error) {

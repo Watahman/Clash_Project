@@ -30,5 +30,14 @@ export const cacheKeys = Object.freeze({
     clashClanCurrentWar: tag => `clash.currentWar:${normalizeKeyPart(normalizeTag(tag))}`,
     clashClanLeagueGroup: tag => `clash.leagueGroup:${normalizeKeyPart(normalizeTag(tag))}`,
     clashClanWar: tag => `clash.leagueWar:${normalizeKeyPart(normalizeTag(tag))}`,
-    clashClanWarLog: tag => `clash.warLog:${normalizeKeyPart(normalizeTag(tag))}`
+    clashClanWarLog: tag => `clash.warLog:${normalizeKeyPart(normalizeTag(tag))}`,
+    clashClanRaidSeasons: tag => `clash.raidSeasons:${normalizeKeyPart(normalizeTag(tag))}`,
+    clashClanSearch: filters => {
+        const normalized = Object.entries(filters || {})
+            .filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== '')
+            .sort(([left], [right]) => left.localeCompare(right))
+            .map(([key, value]) => `${normalizeKeyPart(key)}=${normalizeKeyPart(value)}`)
+            .join('&');
+        return `clash.clanSearch:${normalized}`;
+    }
 });

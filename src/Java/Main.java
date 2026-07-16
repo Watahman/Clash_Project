@@ -2,6 +2,9 @@ package Java;
 
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -22,7 +25,10 @@ public class Main {
         Config conf;
         HttpServer server;
         conf = new Config(); // config initialiseren
-        server = HttpServer.create(new InetSocketAddress(8080), 0);
+        server = HttpServer.create(new InetSocketAddress(conf.getServerPort()), 0);
+        int workerCount = Math.max(4, Math.min(32, Runtime.getRuntime().availableProcessors() * 2));
+        ExecutorService executor = Executors.newFixedThreadPool(workerCount);
+        server.setExecutor(executor);
 
         apiClan = new API_Clan(server, conf);
         apiGoldpass = new API_Goldpass(server, conf);
@@ -36,6 +42,7 @@ public class Main {
         supaGroup = new SUPABASE_Group(server, conf);
 
         apiClan.getClanCurrentWarLeagueGroup();
+        apiClan.searchClans();
         apiClan.getClanWarLeagueWar();
         apiClan.getClanWarLog();
         apiClan.getClanCurrentWar();
@@ -111,7 +118,28 @@ public class Main {
         supaGroup.answerGroupPoll();
         supaGroup.setGroupPollStatus();
 
+        server.createContext("/health", exchange -> {
+            byte[] response = "{\"status\":\"ok\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
+            exchange.getResponseHeaders().set("X-Content-Type-Options", "nosniff");
+            exchange.sendResponseHeaders(200, response.length);
+            try (var output = exchange.getResponseBody()) {
+                output.write(response);
+            }
+        });
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            server.stop(2);
+            executor.shutdown();
+            try {
+                if (!executor.awaitTermination(5, TimeUnit.SECONDS)) executor.shutdownNow();
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                executor.shutdownNow();
+            }
+        }, "clashtools-shutdown"));
+
         server.start();
-        System.out.println("Server gestart op http://localhost:8080");
+        System.out.println("Server gestart op poort " + conf.getServerPort());
     }
 }

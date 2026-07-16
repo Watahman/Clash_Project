@@ -1,5 +1,6 @@
 import { initI18n } from '../i18n/i18n.js';
 import { profileHTML } from "../profile/profile_popup.js";
+import { syncAuthSession } from "../auth/auth-client.js";
 import { initOverlayHide, initAddPlayersOverlay, initAddClanButton, applyCwlSizeRestriction } from "../cwl/cwl-overlay.js";
 import { initPlanIO, savePlan, loadAllPlans, loadPlanListener } from "../cwl/cwl-plan-io.js";
 import { getClanInfoRequest } from "../API/API-Clan.js";
@@ -46,8 +47,9 @@ function labelInit() {
     groupLinkedClans       = document.querySelector("#cwl-group-linked-clans");
 }
 
-function init() {
+async function init() {
     initI18n();
+    await syncAuthSession().catch(() => null);
     labelInit();
     initOverlayHide();
     initPlanIO({ availablePlayers, allClans, totalPlayerAmount, planName, loadPlan });
@@ -121,4 +123,4 @@ function guessCwlSize() {
     });
 }
 
-init();
+void init();
