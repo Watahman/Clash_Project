@@ -31,7 +31,7 @@ cross join lateral (
            account ->> 'accountTag',
            account ->> 'clashTag'
          )) as tag
-  from jsonb_array_elements(coalesce(profile.accounts, '[]'::jsonb)) account
+  from jsonb_array_elements(coalesce(profile.accounts::jsonb, '[]'::jsonb)) account
 ) raw
 where raw.tag <> ''
 on conflict (user_id, player_tag) do update
@@ -204,4 +204,3 @@ grant select, insert, update, delete on public.user_accounts, public.group_polls
   public.group_poll_answers, public.group_poll_account_answers,
   public.group_poll_day_answers, public.notifications,
   public.poll_reminder_deliveries to authenticated;
-
