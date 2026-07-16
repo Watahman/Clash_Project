@@ -1,4 +1,6 @@
 ### IntelliJ IDEA ###
+.idea/
+*.iml
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
@@ -40,3 +42,9 @@ node_modules/
 
 # Java / Maven
 target/
+
+# Generated builds, logs and discarded starter projects
+dist/
+test-output/
+TEST_REPORT_*.md
+vite-project/

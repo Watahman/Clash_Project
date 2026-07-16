@@ -1,21 +1,22 @@
 {
   "name": "clashtools",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "CWL planning, operation tracking, groups, polls and tournament tools for Clash of Clans.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "check:migrations": "node scripts/check-migrations.mjs",
+    "check:endpoints": "node scripts/check-endpoints.mjs",
+    "check": "npm run check:migrations && npm run check:endpoints && npm test && npm run build"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Watahman/Clash_Project.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["clash-of-clans", "cwl", "planner"],
+  "license": "MIT",
   "type": "module",
   "bugs": {
     "url": "https://github.com/Watahman/Clash_Project/issues"
