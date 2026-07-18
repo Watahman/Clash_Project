@@ -718,10 +718,83 @@ const part5 = Object.freeze({
     }
 });
 
+const part6 = Object.freeze({
+    nl: {
+        "bracket.workspaceIntro": "Maak een seeded of willekeurig knock-outschema en kies per match de winnaar.",
+        "bracket.setupStep": "Stap 1",
+        "bracket.setupTitle": "Toernooi instellen",
+        "bracket.onePerLine": "Eén deelnemer per regel",
+        "bracket.resultStep": "Stap 2",
+        "bracket.resultHelp": "Kies een winnaar per match. De volgende ronde wordt automatisch bijgewerkt.",
+        "bracket.participantsShort": "deelnemers",
+        "bracket.championLabel": "Kampioen",
+        "profile.profileAccounts": "Profiel & accounts",
+        "profile.accounts": "Accounts",
+        "settings.language": "Taal",
+        "settings.languageHelp": "Kies de taal van de volledige werkruimte."
+    },
+    en: {
+        "bracket.workspaceIntro": "Create a seeded or shuffled knockout bracket and choose each match winner.",
+        "bracket.setupStep": "Step 1",
+        "bracket.setupTitle": "Set up tournament",
+        "bracket.onePerLine": "One participant per line",
+        "bracket.resultStep": "Step 2",
+        "bracket.resultHelp": "Choose a winner for each match. The next round updates automatically.",
+        "bracket.participantsShort": "participants",
+        "bracket.championLabel": "Champion",
+        "profile.profileAccounts": "Profile & accounts",
+        "profile.accounts": "Accounts",
+        "settings.language": "Language",
+        "settings.languageHelp": "Choose the language for the entire workspace."
+    },
+    fr: {
+        "bracket.workspaceIntro": "Créez un tableau à élimination directe, avec têtes de série ou mélangé, puis choisissez chaque vainqueur.",
+        "bracket.setupStep": "Étape 1",
+        "bracket.setupTitle": "Configurer le tournoi",
+        "bracket.onePerLine": "Un participant par ligne",
+        "bracket.resultStep": "Étape 2",
+        "bracket.resultHelp": "Choisissez le vainqueur de chaque match. Le tour suivant se met à jour automatiquement.",
+        "bracket.participantsShort": "participants",
+        "bracket.championLabel": "Champion",
+        "profile.profileAccounts": "Profil et comptes",
+        "profile.accounts": "Comptes",
+        "settings.language": "Langue",
+        "settings.languageHelp": "Choisissez la langue de tout l’espace de travail."
+    },
+    de: {
+        "bracket.workspaceIntro": "Erstelle einen gesetzten oder gemischten K.-o.-Baum und wähle jeden Matchsieger.",
+        "bracket.setupStep": "Schritt 1",
+        "bracket.setupTitle": "Turnier einrichten",
+        "bracket.onePerLine": "Ein Teilnehmer pro Zeile",
+        "bracket.resultStep": "Schritt 2",
+        "bracket.resultHelp": "Wähle den Sieger jedes Matches. Die nächste Runde wird automatisch aktualisiert.",
+        "bracket.participantsShort": "Teilnehmer",
+        "bracket.championLabel": "Champion",
+        "profile.profileAccounts": "Profil & Konten",
+        "profile.accounts": "Konten",
+        "settings.language": "Sprache",
+        "settings.languageHelp": "Wähle die Sprache für den gesamten Arbeitsbereich."
+    },
+    es: {
+        "bracket.workspaceIntro": "Crea un cuadro eliminatorio ordenado o mezclado y elige el ganador de cada partida.",
+        "bracket.setupStep": "Paso 1",
+        "bracket.setupTitle": "Configurar torneo",
+        "bracket.onePerLine": "Un participante por línea",
+        "bracket.resultStep": "Paso 2",
+        "bracket.resultHelp": "Elige el ganador de cada partida. La siguiente ronda se actualiza automáticamente.",
+        "bracket.participantsShort": "participantes",
+        "bracket.championLabel": "Campeón",
+        "profile.profileAccounts": "Perfil y cuentas",
+        "profile.accounts": "Cuentas",
+        "settings.language": "Idioma",
+        "settings.languageHelp": "Elige el idioma de todo el espacio de trabajo."
+    }
+});
+
 export const workspaceLocales = Object.freeze({
-    nl: Object.freeze({ ...nl, ...part2.nl, ...part3.nl, ...part4.nl, ...part5.nl }),
-    en: Object.freeze({ ...en, ...part2.en, ...part3.en, ...part4.en, ...part5.en }),
-    fr: Object.freeze({ ...fr, ...part2.fr, ...part3.fr, ...part4.fr, ...part5.fr }),
-    de: Object.freeze({ ...de, ...part2.de, ...part3.de, ...part4.de, ...part5.de }),
-    es: Object.freeze({ ...es, ...part2.es, ...part3.es, ...part4.es, ...part5.es })
+    nl: Object.freeze({ ...nl, ...part2.nl, ...part3.nl, ...part4.nl, ...part5.nl, ...part6.nl }),
+    en: Object.freeze({ ...en, ...part2.en, ...part3.en, ...part4.en, ...part5.en, ...part6.en }),
+    fr: Object.freeze({ ...fr, ...part2.fr, ...part3.fr, ...part4.fr, ...part5.fr, ...part6.fr }),
+    de: Object.freeze({ ...de, ...part2.de, ...part3.de, ...part4.de, ...part5.de, ...part6.de }),
+    es: Object.freeze({ ...es, ...part2.es, ...part3.es, ...part4.es, ...part5.es, ...part6.es })
 });

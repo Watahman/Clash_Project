@@ -84,6 +84,7 @@ function openAddOverlay(overlay, confirmBtn, onConfirm) {
     resetPopupMessage(overlay);
     overlay.querySelectorAll('input').forEach(input => { input.value = ''; });
     overlay.classList.remove('hidden');
+    window.requestAnimationFrame(() => overlay.querySelector('input, button')?.focus());
     confirmBtn.disabled = false;
     confirmBtn.onclick = () => {
         resetPopupMessage(overlay);

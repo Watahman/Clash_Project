@@ -9,6 +9,7 @@
     <link rel="icon" type="image/png" href="../assets/css/pictures/shield_with_hamer_logov2.png">
     <link rel="stylesheet" href="../assets/css/bracket.css">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
+    <link rel="stylesheet" href="../assets/css/bracket-workspace-v1.css">
     <script type="module" src="../assets/js/shell/workspace-shell.js"></script>
     <script type="module" src="../assets/js/pages/bracket-generator.js"></script>
 </head>
@@ -16,27 +17,27 @@
 <header>
     <div class="left"><a href="../index.html"><img src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="Tools for Clash logo"></a></div>
     <nav class="center"><a href="./cwl-planner.html">CWL planner</a><a href="./cwl-operation-board.html" data-i18n="nav.operation">Operation board</a><a href="./bracket-generator.html" aria-current="page">Bracket generator</a><a href="./groups.html" data-i18n="nav.groups">Groepen</a></nav>
-    <div class="right"><button type="button" data-language-control data-i18n="header.language">Taal</button><button type="button">Instellingen</button><button id="profile-btn" type="button"><img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt=""><span data-i18n="header.user">Gebruiker</span></button></div>
+    <div class="right"><button type="button" data-language-control data-i18n="header.language">Taal</button><button id="profile-btn" type="button"><img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt=""><span data-i18n="header.user">Gebruiker</span></button></div>
 </header>
-<main class="bracket-main">
-    <section class="bracket-controls">
-        <div class="hero-eyebrow" data-i18n="bracket.eyebrow">Tournament tools</div>
-        <h1 data-i18n="bracket.title">Bracket generator</h1>
-        <label for="bracket-name" data-i18n="bracket.name">Naam</label>
-        <input id="bracket-name" type="text" maxlength="60" value="Clash tournament">
-        <label for="bracket-participants" data-i18n="bracket.participants">Deelnemers of clans</label>
-        <textarea id="bracket-participants" rows="10" data-i18n-placeholder="bracket.participantsPlaceholder" placeholder="Eén deelnemer per regel"></textarea>
-        <div class="bracket-actions">
-            <button id="bracket-generate-seeded" type="button" class="btn btn-primary" data-i18n="bracket.seeded">Seeded genereren</button>
-            <button id="bracket-generate-shuffled" type="button" class="btn btn-secondary" data-i18n="bracket.shuffle">Shuffle</button>
-            <button id="bracket-export" type="button" data-i18n="bracket.export">JSON exporteren</button>
-            <button id="bracket-import" type="button" data-i18n="bracket.import">JSON importeren</button>
-            <button id="bracket-reset" type="button" data-i18n="bracket.reset">Wissen</button>
-            <input id="bracket-import-file" class="hidden" type="file" accept="application/json">
-        </div>
-        <p id="bracket-status" class="bracket-status" role="status" aria-live="polite"></p>
-    </section>
-    <section id="bracket-board" class="bracket-board" aria-live="polite"></section>
+
+<main class="bracket-workspace-page">
+    <header class="bracket-page-header"><div><p class="bracket-page-kicker" data-i18n="bracket.eyebrow">Tournament tools</p><h1 data-i18n="bracket.title">Bracket generator</h1><p data-i18n="bracket.workspaceIntro">Maak een seeded of willekeurig knock-outschema en kies per match de winnaar.</p></div></header>
+    <div class="bracket-layout">
+        <section class="bracket-setup" aria-labelledby="bracket-setup-title">
+            <div class="bracket-section-heading"><div><span data-i18n="bracket.setupStep">Setup</span><h2 id="bracket-setup-title" data-i18n="bracket.setupTitle">Toernooi instellen</h2></div><strong id="bracket-participant-count">0</strong></div>
+            <div class="bracket-fields">
+                <label for="bracket-name"><span data-i18n="bracket.name">Naam</span><input id="bracket-name" type="text" maxlength="60" value="Clash tournament"></label>
+                <label for="bracket-participants"><span data-i18n="bracket.participants">Deelnemers of clans</span><small data-i18n="bracket.onePerLine">Eén deelnemer per regel</small><textarea id="bracket-participants" rows="12" data-i18n-placeholder="bracket.participantsPlaceholder" placeholder="Eén deelnemer per regel"></textarea></label>
+            </div>
+            <div class="bracket-primary-actions"><button id="bracket-generate-seeded" type="button" class="button button-primary" data-i18n="bracket.seeded">Seeded genereren</button><button id="bracket-generate-shuffled" type="button" class="button button-secondary" data-i18n="bracket.shuffle">Shuffle</button></div>
+            <div class="bracket-file-actions"><button id="bracket-import" type="button" data-i18n="bracket.import">JSON importeren</button><button id="bracket-export" type="button" data-i18n="bracket.export">JSON exporteren</button><button id="bracket-reset" type="button" data-i18n="bracket.reset">Wissen</button><input id="bracket-import-file" class="hidden" type="file" accept="application/json"></div>
+            <p id="bracket-status" class="bracket-status" role="status" aria-live="polite"></p>
+        </section>
+        <section class="bracket-result" aria-labelledby="bracket-result-title">
+            <header class="bracket-result-header"><div><span data-i18n="bracket.resultStep">Bracket</span><h2 id="bracket-result-title">Clash tournament</h2><p data-i18n="bracket.resultHelp">Selecteer een speler om de winnaar automatisch naar de volgende ronde te sturen.</p></div><div class="bracket-result-meta"><span><small data-i18n="bracket.participantsShort">Deelnemers</small><strong id="bracket-result-count">0</strong></span><span><small data-i18n="bracket.championLabel">Winnaar</small><strong id="bracket-result-champion">—</strong></span></div></header>
+            <section id="bracket-board" class="bracket-board" aria-live="polite"></section>
+        </section>
+    </div>
 </main>
 <div class="profile-placeholder"></div>
 </body>

@@ -1,5 +1,5 @@
 import { updateUserName } from "../Supabase/Supabase-User.js";
-import { t } from "../i18n/i18n.js";
+import { getLanguage, setLanguage, t } from "../i18n/i18n.js";
 import { clearCachePrefix, invalidateUserCache } from "../cache/local-cache.js";
 import { getCurrentUserId } from "../utils/user.js";
 import { getThemePreference, setThemePreference } from "../theme/theme-manager.js";
@@ -41,6 +41,10 @@ function syncThemeButtons() {
         button.classList.toggle('po-theme-active', active);
         button.setAttribute('aria-pressed', String(active));
     });
+}
+
+function syncLanguageControl() {
+    if (refs.languageSelect) refs.languageSelect.value = getLanguage();
 }
 
 function isStrongPassword(password) {
@@ -136,7 +140,8 @@ function clearAppCache() {
 async function refreshProfile() {
     clearMessage();
     try {
-        await onRefreshProfile?.();
+        const profile = await onRefreshProfile?.();
+        if (profile === null) throw new Error('Profile refresh failed');
         setMessage('settings.profileRefreshed');
     } catch {
         setMessage('settings.profileRefreshError', 'error');
@@ -155,6 +160,7 @@ function bindRefs() {
         clearCacheBtn: q('#po-clear-cache'),
         refreshBtn: q('#po-refresh-profile'),
         message: q('#po-settings-message'),
+        languageSelect: q('#po-settings-language'),
         themeOptions: document.querySelectorAll('.po-theme-option')
     };
 }
@@ -178,6 +184,11 @@ export function initProfileSettings(options = {}) {
         }, 'Theme');
     });
     bindOnce(refs.saveNameBtn, 'click', saveName, 'SaveName');
+    bindOnce(refs.languageSelect, 'change', () => {
+        setLanguage(refs.languageSelect.value);
+        syncLanguageControl();
+        setMessage('settings.saved');
+    }, 'Language');
     bindOnce(refs.nameInput, 'keydown', event => {
         if (event.key === 'Enter') saveName();
     }, 'NameEnter');
@@ -187,10 +198,12 @@ export function initProfileSettings(options = {}) {
 
     if (!initialized) {
         window.addEventListener('clashtools:theme-changed', syncThemeButtons);
+        window.addEventListener('clashtools:language-changed', syncLanguageControl);
         initialized = true;
     }
 
     syncThemeButtons();
+    syncLanguageControl();
 }
 
 export function syncProfileSettings(profile) {
@@ -199,10 +212,12 @@ export function syncProfileSettings(profile) {
     if (refs.nameInput) refs.nameInput.value = currentProfile?.name || '';
     if (refs.email) refs.email.textContent = currentProfile?.email || '-';
     syncThemeButtons();
+    syncLanguageControl();
 }
 
 export function resetProfileSettings() {
     clearMessage();
     clearPasswordFields();
     syncThemeButtons();
+    syncLanguageControl();
 }

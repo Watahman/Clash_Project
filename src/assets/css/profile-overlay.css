@@ -588,3 +588,313 @@
 .po-notification-item.unread { background: var(--accent-dim); }
 .po-notification-item strong { color: var(--text-1); }
 .po-notification-item span, .po-notifications-empty { font-size: .78rem; }
+
+/* Part 6 — approved profile and settings modal */
+#profile-overlay {
+    z-index: var(--z-backdrop, 60);
+    align-items: center;
+    padding: 1rem;
+    background: rgba(3, 6, 9, 0.72);
+    backdrop-filter: blur(0.45rem);
+    -webkit-backdrop-filter: blur(0.45rem);
+}
+
+#profile-overlay .po-card {
+    width: min(100%, 42rem);
+    height: auto;
+    max-height: min(47rem, calc(100vh - 2rem));
+    border: 0.0625rem solid var(--border-strong, var(--border-visible));
+    border-radius: 0.75rem;
+    background: var(--surface, var(--surface-1));
+    box-shadow: 0 0.5rem 0.5rem rgba(0, 0, 0, 0.18);
+}
+
+#profile-overlay .po-topbar {
+    display: grid;
+    min-height: 3.25rem;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 0.0625rem solid var(--border, var(--border-subtle));
+    padding: 0 1rem;
+    background: transparent;
+}
+
+#profile-overlay .po-topbar-label,
+#profile-overlay .po-footer-label {
+    color: var(--text-muted, var(--text-3));
+    font-family: inherit;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+#profile-overlay #po-close,
+#profile-overlay .po-notifications-btn {
+    display: grid;
+    width: 2.2rem;
+    height: 2.2rem;
+    min-width: 0;
+    min-height: 0;
+    place-items: center;
+    border: 0.0625rem solid var(--border, var(--border-subtle));
+    border-radius: var(--radius-small, 0.45rem);
+    background: transparent;
+    padding: 0;
+    color: var(--text-muted, var(--text-3));
+}
+
+#profile-overlay .po-notifications-btn { margin-left: 0; }
+#profile-overlay #po-close:hover,
+#profile-overlay .po-notifications-btn:hover { background: var(--surface-raised, var(--surface-3)); color: var(--text, var(--text-1)); }
+
+#profile-overlay .po-header {
+    display: grid;
+    min-height: 6.4rem;
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.9rem;
+    border-bottom: 0.0625rem solid var(--border, var(--border-subtle));
+    background: transparent;
+    padding: 1rem 1.2rem;
+}
+
+#profile-overlay .po-avatar {
+    width: 3.5rem;
+    height: 3.5rem;
+    border: 0.0625rem solid var(--border-strong, var(--border-visible));
+    border-radius: 50%;
+    background: var(--surface-raised, var(--surface-3));
+    color: var(--accent-strong, var(--accent));
+    box-shadow: none;
+}
+
+#profile-overlay .po-avatar svg { width: 1.7rem; height: 1.7rem; }
+#profile-overlay .po-user-info { max-width: 100%; gap: 0.35rem; }
+#profile-overlay #po-username {
+    color: var(--text, var(--text-1));
+    font-family: Manrope, Inter, "Segoe UI", sans-serif;
+    font-size: 1.35rem;
+    font-weight: 750;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    text-transform: none;
+}
+
+#profile-overlay #po-code-btn {
+    min-height: auto;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+    color: var(--accent-strong, var(--accent));
+    font-family: inherit;
+    font-size: 0.68rem;
+    font-weight: 750;
+}
+
+#profile-overlay .po-tabs {
+    display: flex;
+    min-height: 3rem;
+    gap: 1.25rem;
+    overflow-x: auto;
+    border-bottom: 0.0625rem solid var(--border, var(--border-subtle));
+    background: transparent;
+    padding: 0 1rem;
+}
+
+#profile-overlay .po-tab {
+    position: relative;
+    min-width: max-content;
+    min-height: 3rem;
+    flex: 0 0 auto;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+    color: var(--text-muted, var(--text-3));
+    font-size: 0.7rem;
+    font-weight: 750;
+}
+
+#profile-overlay .po-tab:hover { border: 0; background: transparent; color: var(--text, var(--text-1)); }
+#profile-overlay .po-tab.po-tab-active { border: 0; background: transparent; color: var(--text, var(--text-1)); }
+#profile-overlay .po-tab.po-tab-active::after { content: ""; position: absolute; right: 0; bottom: 0; left: 0; height: 0.125rem; background: var(--accent, #d7ad55); }
+
+#profile-overlay .po-panel {
+    position: relative;
+    display: flex;
+    min-height: 20rem;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.75rem;
+    overflow: hidden;
+    padding: 1rem;
+}
+
+#profile-overlay .po-loading-state {
+    position: absolute;
+    z-index: 2;
+    inset: 1rem;
+    display: grid;
+    align-content: start;
+    gap: 0.65rem;
+    background: var(--surface, var(--surface-1));
+    padding: 1rem 0.25rem;
+}
+
+#profile-overlay .po-loading-state.hidden { display: none; }
+#profile-overlay .po-loading-line {
+    display: block;
+    width: 100%;
+    height: 3.7rem;
+    border-bottom: 0.0625rem solid var(--border, var(--border-subtle));
+    background: linear-gradient(90deg, transparent, var(--surface-raised, var(--surface-3)), transparent);
+    background-size: 200% 100%;
+    animation: po-loading-sweep 1.2s linear infinite;
+}
+#profile-overlay .po-loading-state p { margin: 0.4rem 0 0; color: var(--text-muted, var(--text-3)); font-size: 0.7rem; }
+
+@keyframes po-loading-sweep { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { #profile-overlay .po-loading-line { animation: none; } }
+
+#profile-overlay #po-friend-list,
+#profile-overlay #po-add-base,
+#profile-overlay #po-add-clan { z-index: var(--z-modal, 70); }
+
+#profile-overlay .po-panel-content { gap: 0 !important; min-height: 16rem; padding-right: 0; }
+#profile-overlay .po-base-item {
+    display: grid !important;
+    width: 100% !important;
+    min-height: 4.5rem !important;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    border: 0 !important;
+    border-bottom: 0.0625rem solid var(--border, var(--border-subtle)) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 0.7rem 0.25rem !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+#profile-overlay .po-base-item:hover { border-color: var(--border, var(--border-subtle)) !important; background: var(--surface-raised, var(--surface-3)) !important; transform: none; }
+#profile-overlay .po-base-icon,
+#profile-overlay .po-friend-avatar,
+#profile-overlay .po-shield-icon {
+    display: grid !important;
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    place-items: center !important;
+    border: 0 !important;
+    border-radius: var(--radius-small, 0.45rem) !important;
+    background: var(--surface-raised, var(--surface-3)) !important;
+}
+
+#profile-overlay .po-base-img,
+#profile-overlay .po-base-icon img { width: 2rem !important; height: 2rem !important; }
+#profile-overlay .po-base-name { color: var(--text, var(--text-1)); font-family: inherit; font-size: 0.78rem !important; font-weight: 750; letter-spacing: 0; line-height: 1.2 !important; text-transform: none; }
+#profile-overlay .po-base-info { color: var(--text-muted, var(--text-3)) !important; font-family: inherit !important; font-size: 0.64rem !important; }
+#profile-overlay .po-card-base::after,
+#profile-overlay .po-card-friend::after { color: var(--text-subtle, var(--text-4)); font-size: 1.1rem; }
+
+#profile-overlay .po-empty {
+    display: grid;
+    min-height: 12rem;
+    place-content: center;
+    border: 0;
+    border-bottom: 0.0625rem solid var(--border, var(--border-subtle));
+    border-radius: 0;
+    background: transparent;
+    padding: 2rem 1rem;
+    color: var(--text-muted, var(--text-3));
+    box-shadow: none;
+    font-size: 0.75rem;
+}
+
+#profile-overlay #po-add-container { gap: 0.55rem; }
+#profile-overlay #po-add,
+#profile-overlay #po-friend-requests-btn,
+#profile-overlay #po-friend-pending-btn {
+    min-height: 2.4rem;
+    border: 0.0625rem solid var(--border-strong, var(--border-visible));
+    border-radius: var(--radius-small, 0.45rem);
+    background: transparent;
+    color: var(--text-muted, var(--text-3));
+    font-size: 0.68rem;
+}
+
+#profile-overlay #po-add:hover,
+#profile-overlay #po-friend-requests-btn:hover,
+#profile-overlay #po-friend-pending-btn:hover { background: var(--surface-raised, var(--surface-3)); color: var(--text, var(--text-1)); }
+
+#profile-overlay .po-footer { border-top: 0.0625rem solid var(--border, var(--border-subtle)); background: transparent; padding: 0.8rem 1rem; }
+
+#profile-overlay .po-settings { gap: 0; margin-top: 0; padding: 0; }
+#profile-overlay .po-settings-card {
+    display: grid;
+    gap: 0.7rem;
+    border: 0;
+    border-bottom: 0.0625rem solid var(--border, var(--border-subtle));
+    border-radius: 0;
+    background: transparent;
+    padding: 1rem 0.25rem;
+    box-shadow: none;
+}
+
+#profile-overlay .po-settings-heading span { color: var(--text, var(--text-1)); font-family: inherit; font-size: 0.82rem; font-weight: 750; letter-spacing: 0; text-transform: none; }
+#profile-overlay .po-settings-heading small,
+#profile-overlay #po-settings-email { color: var(--text-muted, var(--text-3)); font-size: 0.68rem; }
+#profile-overlay .po-field-label { color: var(--text-muted, var(--text-3)); font-family: inherit; font-size: 0.65rem; letter-spacing: 0; text-transform: none; }
+#profile-overlay .po-settings-card input,
+#profile-overlay .po-settings-card select {
+    min-height: 2.45rem;
+    border: 0.0625rem solid var(--border, var(--border-visible));
+    border-radius: var(--radius-small, 0.45rem);
+    background: var(--surface-subtle, var(--input-bg));
+    padding: 0.5rem 0.65rem;
+    color: var(--text, var(--text-1));
+    font: inherit;
+    font-size: 0.72rem;
+}
+
+#profile-overlay .po-settings-card input::placeholder { color: var(--text-muted, var(--text-3)); opacity: 1; }
+#profile-overlay .po-theme-option,
+#profile-overlay .po-settings-card button {
+    min-height: 2.35rem;
+    border: 0.0625rem solid var(--border, var(--border-visible));
+    border-radius: var(--radius-small, 0.45rem);
+    background: transparent;
+    color: var(--text-muted, var(--text-3));
+    font-size: 0.68rem;
+}
+
+#profile-overlay .po-theme-option.po-theme-active { border-color: var(--accent, var(--border-focus)); background: var(--accent-soft, var(--accent-dim)); color: var(--accent-strong, var(--accent)); }
+#profile-overlay #po-logout-btn { color: var(--danger, var(--red)); background: var(--danger-soft, var(--red-dim)); }
+#profile-overlay .po-settings-message { position: sticky; bottom: 0; border-radius: var(--radius-small, 0.45rem); }
+
+#profile-overlay .po-notifications-panel {
+    z-index: var(--z-dropdown, 30);
+    top: 3rem;
+    right: 1rem;
+    border: 0.0625rem solid var(--border-strong, var(--border-visible));
+    border-radius: var(--radius-medium, 0.7rem);
+    background: var(--surface-raised, var(--surface-2));
+    box-shadow: 0 0.35rem 0.5rem rgba(0, 0, 0, 0.18);
+}
+
+#profile-overlay .po-notification-item { border-radius: var(--radius-small, 0.45rem); }
+#profile-overlay .po-notification-item.unread { background: var(--accent-soft, var(--accent-dim)); }
+
+@media (max-width: 42rem) {
+    #profile-overlay { align-items: flex-end; padding: 0.5rem; }
+    #profile-overlay .po-card { width: 100%; max-height: calc(100vh - 1rem); border-radius: 0.75rem 0.75rem 0 0; }
+    #profile-overlay .po-tabs { gap: 1rem; }
+    #profile-overlay .po-tab { min-width: max-content; }
+    #profile-overlay .po-header { min-height: 5.5rem; }
+    #profile-overlay .po-panel { min-height: 0; }
+    #profile-overlay .po-password-grid { grid-template-columns: 1fr; }
+    #profile-overlay .po-settings-inline { flex-direction: column; }
+}

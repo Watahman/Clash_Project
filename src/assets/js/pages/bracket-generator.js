@@ -24,6 +24,10 @@ function initRefs() {
     refs.importButton = document.querySelector('#bracket-import');
     refs.importFile = document.querySelector('#bracket-import-file');
     refs.reset = document.querySelector('#bracket-reset');
+    refs.participantCount = document.querySelector('#bracket-participant-count');
+    refs.resultTitle = document.querySelector('#bracket-result-title');
+    refs.resultCount = document.querySelector('#bracket-result-count');
+    refs.resultChampion = document.querySelector('#bracket-result-champion');
 }
 
 function participants() {
@@ -33,6 +37,13 @@ function participants() {
 function setStatus(message = '', state = '') {
     refs.status.textContent = message;
     refs.status.dataset.state = state;
+}
+
+function updateSetupSummary() {
+    const count = participants().length;
+    if (refs.participantCount) refs.participantCount.textContent = String(count);
+    if (!bracket && refs.resultCount) refs.resultCount.textContent = String(count);
+    if (!bracket && refs.resultTitle) refs.resultTitle.textContent = refs.name.value.trim() || t('bracket.title');
 }
 
 function generate(shuffle) {
@@ -75,9 +86,13 @@ function restore() {
 function render() {
     refs.board.replaceChildren();
     if (!bracket) {
+        if (refs.resultChampion) refs.resultChampion.textContent = '—';
+        updateSetupSummary();
         refs.board.appendChild(message(t('bracket.empty')));
         return;
     }
+    if (refs.resultTitle) refs.resultTitle.textContent = bracket.name;
+    if (refs.resultCount) refs.resultCount.textContent = String(bracket.participants.length);
     bracket.rounds.forEach((round, roundIndex) => {
         const column = document.createElement('section');
         column.className = 'bracket-round';
@@ -90,6 +105,7 @@ function render() {
         refs.board.appendChild(column);
     });
     const champion = bracketChampion(bracket);
+    if (refs.resultChampion) refs.resultChampion.textContent = champion || '—';
     if (champion) setStatus(t('bracket.champion', { name: champion }), 'success');
 }
 
@@ -102,6 +118,7 @@ function renderMatch(match) {
         button.disabled = !player;
         button.textContent = player || t('bracket.bye');
         button.classList.toggle('winner', player && match.winner === player);
+        button.setAttribute('aria-pressed', String(Boolean(player && match.winner === player)));
         button.addEventListener('click', () => {
             setMatchWinner(bracket, match.id, player);
             save();
@@ -162,8 +179,12 @@ async function init() {
         render();
         setStatus('');
     });
+    refs.name.addEventListener('input', updateSetupSummary);
+    refs.participants.addEventListener('input', updateSetupSummary);
+    window.addEventListener('clashtools:language-changed', render);
     restore();
     render();
+    updateSetupSummary();
     profileHTML();
 }
 

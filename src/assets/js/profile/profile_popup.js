@@ -17,7 +17,7 @@ import { getNotifications, markNotificationRead } from "../Supabase/Supabase-Not
 let profile, closeProfileBtn, userCode, profileTabs, openProfileBtn, activeTab;
 let friendRequestBtn, friendPendingBtn, friendList, emptyFriendRequest;
 let addBase, addClan, addBtn, emptyLabel;
-let poUsername, poCode, poMemberSince;
+let poUsername, poCode, poMemberSince, profileLoadingState;
 let poIcoCopy, poIcoCheck, poAddText;
 let friendListContent, friendListClose;
 let overlayAddBaseBtn, overlayAddClanBtn;
@@ -26,6 +26,12 @@ let poLogoutBtn, poSettings;
 let friendListTitle, poGroupList;
 let notificationsBtn, notificationsCount, notificationsPanel, notificationsClose, notificationsList;
 let cachedProfile = null;
+let profileMarkupPromise = null;
+let profileRefreshPromise = null;
+let profileKeyboardBound = false;
+let lastFocusedElement = null;
+let friendListRequestId = 0;
+let friendListTrigger = null;
 
 
 function normalizeProfileAssetPaths() {
@@ -47,9 +53,11 @@ let tabRefs;
 
 export function profileHTML(options = {}) {
     const placeholder = document.querySelector(".profile-placeholder");
-    if (!placeholder) return;
+    if (!placeholder) return Promise.resolve(false);
+    if (placeholder.dataset.profileReady === 'true') return Promise.resolve(true);
+    if (profileMarkupPromise) return profileMarkupPromise;
 
-    fetch(getProfilePopupPath())
+    profileMarkupPromise = fetch(getProfilePopupPath())
         .then(res => {
             if (!res.ok) throw new Error("Profile popup kon niet geladen worden");
             return res.text();
@@ -62,6 +70,8 @@ export function profileHTML(options = {}) {
             profileInit();
             if (options.preload !== false) preloadProfileData();
             clickToCloseOverlays();
+            placeholder.dataset.profileReady = 'true';
+            return true;
         })
         .catch(() => {
             const message = document.createElement('p');
@@ -69,7 +79,10 @@ export function profileHTML(options = {}) {
             message.setAttribute('role', 'status');
             message.textContent = t('profile.loadError');
             placeholder.replaceChildren(message);
+            profileMarkupPromise = null;
+            return false;
         });
+    return profileMarkupPromise;
 }
 
 function labelInit() {
@@ -90,6 +103,7 @@ function labelInit() {
     poUsername         = document.querySelector("#po-username");
     poCode             = document.querySelector("#po-code");
     poMemberSince      = document.querySelector("#po-member-since");
+    profileLoadingState = document.querySelector("#po-loading-state");
     poIcoCopy          = document.querySelector("#po-ico-copy");
     poIcoCheck         = document.querySelector("#po-ico-check");
     friendListContent  = document.querySelector("#po-friend-list-content");
@@ -134,43 +148,32 @@ function profileInit() {
     profile.onclick = (e) => { poBackdrop(e); };
     closeProfileBtn.onclick = () => { closeProfile(); };
     userCode.onclick = () => { copyWithFeedback(poCode.textContent, poIcoCopy, poIcoCheck); };
-    profileTabs.forEach(tab => { tab.onclick = (e) => { poTab(e.target, tabRefs); }; });
-    friendListClose.onclick = () => { friendList.classList.add('hidden'); };
-    notificationsBtn.onclick = () => notificationsPanel.classList.toggle('hidden');
-    notificationsClose.onclick = () => notificationsPanel.classList.add('hidden');
+    profileTabs.forEach(tab => { tab.onclick = () => { poTab(tab, tabRefs); }; });
+    friendListClose.onclick = () => {
+        friendListRequestId += 1;
+        friendList.classList.add('hidden');
+        friendListTrigger?.focus();
+    };
+    notificationsBtn.onclick = () => {
+        const isOpening = notificationsPanel.classList.contains('hidden');
+        notificationsPanel.classList.toggle('hidden');
+        if (isOpening) window.requestAnimationFrame(() => notificationsClose.focus());
+    };
+    notificationsClose.onclick = () => {
+        notificationsPanel.classList.add('hidden');
+        notificationsBtn.focus();
+    };
 
     friendRequestBtn.onclick = () => {
         const userId = getCurrentUserId();
         if (!userId) { redirectToLogin(); return; }
-        friendListTitle.textContent = t('profile.requests');
-        emptyFriendRequest.textContent = t('profile.requests');
-        friendList.classList.remove('hidden');
-        getFriendRequests(userId).then(res => {
-            friendListContent.querySelectorAll(".po-base-item").forEach(item => item.remove());
-            if (res.length === 0) {
-                emptyFriendRequest.classList.remove('hidden');
-                return;
-            }
-            emptyFriendRequest.classList.add('hidden');
-            res.forEach(friend => { createFriendRequestCard(friend); });
-        });
+        openFriendList('profile.requests', () => getFriendRequests(userId), createFriendRequestCard, friendRequestBtn);
     };
 
     friendPendingBtn.onclick = () => {
         const userId = getCurrentUserId();
         if (!userId) { redirectToLogin(); return; }
-        friendListTitle.textContent = t('profile.pending');
-        emptyFriendRequest.textContent = t('profile.pending');
-        friendList.classList.remove('hidden');
-        getPendingFriendRequests(userId).then(res => {
-            friendListContent.querySelectorAll(".po-base-item").forEach(item => item.remove());
-            if (res.length === 0) {
-                emptyFriendRequest.classList.remove('hidden');
-                return;
-            }
-            emptyFriendRequest.classList.add('hidden');
-            res.forEach(friend => { createFriendPendingCard(friend); });
-        });
+        openFriendList('profile.pending', () => getPendingFriendRequests(userId), createFriendPendingCard, friendPendingBtn);
     };
 
     poLogoutBtn.onclick = async () => {
@@ -194,18 +197,7 @@ function profileInit() {
         }
     };
 
-    document.addEventListener('keydown', e => {
-        if (e.key !== 'Escape') return;
-        if (!addBase.classList.contains('hidden') ||
-            !addClan.classList.contains('hidden') ||
-            !friendList.classList.contains('hidden')) {
-            closeProfileMiniOverlay(addBase);
-            closeProfileMiniOverlay(addClan);
-            friendList.classList.add('hidden');
-            return;
-        }
-        closeProfile();
-    });
+    bindProfileKeyboardOnce();
 
     initProfileSettings({
         onRefreshProfile: () => refreshProfileData(false),
@@ -218,6 +210,35 @@ function profileInit() {
 function clearProfileRenderedItems() {
     document.querySelectorAll(".po-card-base, .po-card-friend, .po-card-clan").forEach(el => el.remove());
     friendListContent?.querySelectorAll(".po-base-item").forEach(el => el.remove());
+}
+
+function openFriendList(titleKey, loader, renderItem, trigger) {
+    const requestId = ++friendListRequestId;
+    friendListTrigger = trigger;
+    friendListTitle.textContent = t(titleKey);
+    friendListContent.querySelectorAll(".po-base-item").forEach(item => item.remove());
+    emptyFriendRequest.textContent = t('profile.loading');
+    emptyFriendRequest.classList.remove('hidden');
+    friendList.classList.remove('hidden');
+    friendList.setAttribute('aria-busy', 'true');
+    friendListClose.focus();
+
+    Promise.resolve(loader())
+        .then(result => {
+            if (requestId !== friendListRequestId) return;
+            const items = Array.isArray(result) ? result : [];
+            emptyFriendRequest.textContent = t(titleKey);
+            emptyFriendRequest.classList.toggle('hidden', items.length > 0);
+            items.forEach(renderItem);
+        })
+        .catch(() => {
+            if (requestId !== friendListRequestId) return;
+            emptyFriendRequest.textContent = t('profile.loadError');
+            emptyFriendRequest.classList.remove('hidden');
+        })
+        .finally(() => {
+            if (requestId === friendListRequestId) friendList.removeAttribute('aria-busy');
+        });
 }
 
 function preloadProfileData() {
@@ -239,15 +260,30 @@ function refreshProfileData(openAfterLoad = false) {
     } else if (openAfterLoad) {
         openProfile(t('profile.loading'), '', '');
         profile.setAttribute('aria-busy', 'true');
+        profileLoadingState?.classList.remove('hidden');
     }
 
-    return Promise.all([
+    if (profileRefreshPromise) {
+        return profileRefreshPromise.then(userData => {
+            if (openAfterLoad && userData) openProfile(userData.name, `#${userData.code}`, userData.created_at?.split("T")[0]);
+            if (openAfterLoad && !userData && poUsername) poUsername.textContent = t('profile.loadError');
+            profileLoadingState?.classList.add('hidden');
+            return userData;
+        });
+    }
+
+    profileRefreshPromise = Promise.all([
         checkUserId(userId),
         getFriends(userId),
         getGroupsOfUser(userId),
         getNotifications(userId).catch(() => ({ unread: 0, items: [] }))
     ]).then(([userData, friends = [], groups = [], notifications]) => {
-        if (!userData || userData.error) return null;
+        if (!userData || userData.error) {
+            profile.removeAttribute('aria-busy');
+            profileLoadingState?.classList.add('hidden');
+            if (openAfterLoad && poUsername) poUsername.textContent = t('profile.loadError');
+            return null;
+        }
         cachedProfile = userData;
         syncProfileSettings(userData);
         clearProfileRenderedItems();
@@ -259,15 +295,21 @@ function refreshProfileData(openAfterLoad = false) {
         renderGroups(Array.isArray(groups) ? groups : [], emptyLabel, true);
         renderNotifications(notifications);
         applyActiveProfileTab();
-        if (openAfterLoad) {
-            openProfile(userData.name, "#" + userData.code, userData.created_at?.split("T")[0]);
-        }
         profile.removeAttribute('aria-busy');
+        profileLoadingState?.classList.add('hidden');
         return userData;
     }).catch(error => {
         profile.removeAttribute('aria-busy');
+        profileLoadingState?.classList.add('hidden');
         if (openAfterLoad && poUsername) poUsername.textContent = t('profile.loadError');
         return null;
+    }).finally(() => {
+        profileRefreshPromise = null;
+    });
+
+    return profileRefreshPromise.then(userData => {
+        if (openAfterLoad && userData) openProfile(userData.name, `#${userData.code}`, userData.created_at?.split("T")[0]);
+        return userData;
     });
 }
 
@@ -318,6 +360,7 @@ function renderNotifications(data) {
 }
 
 function openProfile(username, code, memberSince) {
+    if (!profile.classList.contains('po-open')) lastFocusedElement = document.activeElement;
     poUsername.textContent = username || 'User';
     poCode.textContent = code || '';
     poMemberSince.textContent = memberSince ? t('profile.memberSince', { date: memberSince }) : '/';
@@ -326,6 +369,7 @@ function openProfile(username, code, memberSince) {
     profile.classList.add('po-open');
     document.body.style.overflow = 'hidden';
     poTab(activeTab, tabRefs);
+    window.requestAnimationFrame(() => closeProfileBtn?.focus());
 }
 
 function applyActiveProfileTab() {
@@ -334,9 +378,63 @@ function applyActiveProfileTab() {
 }
 
 function closeProfile() {
+    if (!profile?.classList.contains('po-open')) return;
     profile.classList.remove('po-open');
     document.body.style.overflow = '';
+    notificationsPanel?.classList.add('hidden');
+    profileLoadingState?.classList.add('hidden');
+    profile.removeAttribute('aria-busy');
     resetProfileSettings();
+    if (lastFocusedElement?.isConnected) lastFocusedElement.focus();
+    lastFocusedElement = null;
+}
+
+function bindProfileKeyboardOnce() {
+    if (profileKeyboardBound) return;
+    document.addEventListener('keydown', handleProfileKeyboard);
+    profileKeyboardBound = true;
+}
+
+function handleProfileKeyboard(event) {
+    if (!profile?.classList.contains('po-open')) return;
+    if (event.key === 'Escape') {
+        if (!addBase.classList.contains('hidden') || !addClan.classList.contains('hidden') || !friendList.classList.contains('hidden')) {
+            const friendListWasOpen = !friendList.classList.contains('hidden');
+            closeProfileMiniOverlay(addBase);
+            closeProfileMiniOverlay(addClan);
+            friendList.classList.add('hidden');
+            if (friendListWasOpen) {
+                friendListRequestId += 1;
+                friendListTrigger?.focus();
+            }
+            return;
+        }
+        if (!notificationsPanel.classList.contains('hidden')) {
+            notificationsPanel.classList.add('hidden');
+            notificationsBtn.focus();
+            return;
+        }
+        closeProfile();
+        return;
+    }
+    if (event.key === 'Tab') trapProfileFocus(event);
+}
+
+function trapProfileFocus(event) {
+    const activeMiniOverlay = [addBase, addClan, friendList].find(overlay => overlay && !overlay.classList.contains('hidden'));
+    const focusRoot = activeMiniOverlay || profile;
+    const focusable = Array.from(focusRoot.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'))
+        .filter(element => !element.closest('.hidden'));
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable.at(-1);
+    if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+    }
 }
 
 function poBackdrop(e) {
