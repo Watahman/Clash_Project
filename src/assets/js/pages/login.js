@@ -15,6 +15,18 @@ const forgotButton = document.querySelector('#forgot-password');
 const googleButton = document.querySelector('#google-login');
 const status = document.querySelector('#auth-status');
 
+function destinationAfterLogin() {
+    const requested = new URLSearchParams(window.location.search).get('next');
+    if (!requested) return './dashboard.html';
+    try {
+        const destination = new URL(requested, window.location.origin);
+        if (destination.origin !== window.location.origin || !destination.pathname.includes('/subPages/')) return './dashboard.html';
+        return `${destination.pathname}${destination.search}${destination.hash}`;
+    } catch {
+        return './dashboard.html';
+    }
+}
+
 function setStatus(message = '', state = '') {
     status.textContent = message;
     status.dataset.state = state;
@@ -40,7 +52,7 @@ async function submitLogin(event) {
     setStatus(t('auth.signingIn'), 'loading');
     try {
         await signInWithPassword(emailInput.value, passwordInput.value);
-        window.location.href = '../index.html';
+        window.location.href = destinationAfterLogin();
     } catch (error) {
         setStatus(authErrorMessage(error), 'error');
     } finally {
@@ -70,7 +82,7 @@ async function loginWithGoogle() {
     setBusy(true);
     setStatus(t('auth.redirecting'), 'loading');
     try {
-        await signInWithGoogle();
+        await signInWithGoogle(new URL(destinationAfterLogin(), window.location.href).href);
     } catch (error) {
         setStatus(error instanceof AuthConfigurationError ? t('auth.notConfigured') : t('auth.oauthUnavailable'), 'error');
         setBusy(false);
@@ -84,7 +96,7 @@ function init() {
     googleButton.addEventListener('click', loginWithGoogle);
     syncAuthSession()
         .then(session => {
-            if (session) window.location.href = '../index.html';
+            if (session) window.location.href = destinationAfterLogin();
         })
         .catch(() => {
             // A missing/expired session is the normal state on this page.

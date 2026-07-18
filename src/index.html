@@ -1,126 +1,108 @@
-<!DOCTYPE html>
-<html lang="nl">
+<!doctype html>
+<html lang="nl" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tools for Clash · Clan Command Center</title>
-    <link rel="stylesheet" href="assets/css/Main-css.css">
-    <link rel="stylesheet" href="assets/css/profile-overlay.css">
-    <link rel="icon" type="image/png" href="assets/css/pictures/shield_with_hamer_logov2.png">
-    <script type="module" src="assets/js/pages/index.js"></script>
+    <meta name="description" content="ClashTools brengt CWL-beschikbaarheid, planning en live opvolging samen.">
+    <title>ClashTools · CWL-planning zonder spreadsheets</title>
+    <link rel="icon" type="image/png" href="assets/css/pictures/clashtools-logo.png">
+    <link rel="stylesheet" href="assets/css/workspace-system.css">
+    <script type="module" src="assets/js/pages/public-site.js"></script>
 </head>
-<body>
-<header>
-    <div class="left">
-        <a href="index.html" aria-label="Tools for Clash home">
-            <img src="assets/css/pictures/shield_with_hamer_logov2.png" alt="Tools for Clash logo">
-        </a>
-    </div>
-    <nav class="center" aria-label="Hoofdnavigatie">
-        <a href="subPages/cwl-planner.html" data-i18n="nav.cwl">CWL planner</a>
-        <a href="subPages/cwl-operation-board.html" data-i18n="nav.operation">Operation board</a>
-        <a href="subPages/groups.html" data-i18n="nav.groups">Groepen</a>
+<body class="public-site">
+<a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Ga naar inhoud</a>
+
+<header class="public-header">
+    <a class="public-brand" href="index.html" aria-label="ClashTools home">
+        <img src="assets/css/pictures/clashtools-logo.png" alt="">
+        <span>ClashTools</span>
+    </a>
+    <nav class="public-nav" id="public-nav" aria-label="Publieke navigatie" data-i18n-aria-label="public.navigation">
+        <a href="#workflow" data-i18n="home.how">Hoe het werkt</a>
+        <a href="#features" data-i18n="public.features">Functies</a>
+        <a href="#preview" data-i18n="public.preview">Preview</a>
     </nav>
-    <div class="right">
+    <div class="public-actions">
         <button type="button" data-language-control data-i18n="header.language">Taal</button>
-        <button id="profile-btn" type="button">
-            <img class="profile-svg-header" src="assets/css/pictures/profile.svg" alt="">
-            <span data-i18n="header.user">Gebruiker</span>
-        </button>
+        <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Thema wisselen"><span aria-hidden="true">◐</span></button>
+        <a class="link-button" href="subPages/login.html" data-i18n="auth.login">Inloggen</a>
+        <a class="button button-primary" href="subPages/register.html" data-i18n="public.startFree">Gratis starten</a>
     </div>
+    <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" data-i18n-aria-label="public.openMenu" aria-label="Menu openen">
+        <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+    </button>
 </header>
 
-<main class="home-main">
-    <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-copy">
-            <div class="hero-eyebrow" data-i18n="home.eyebrow">Clan command center</div>
-            <h1 id="hero-title" data-i18n-html="home.title">Plan war.<br><span>Win CWL.</span></h1>
-            <p data-i18n="home.desc">Een tactisch dashboard voor Clash of Clans clans: verdeel spelers, beheer groepen en bereid elke CWL-opstelling voor zonder rommelige spreadsheets.</p>
+<main id="main-content">
+    <section class="landing-hero">
+        <div class="landing-copy">
+            <p class="eyebrow" data-i18n="home.eyebrow">CWL-planning zonder spreadsheets</p>
+            <h1 data-i18n="home.title">Van beschikbaarheid naar een duidelijke CWL-week.</h1>
+            <p class="hero-lead" data-i18n="home.desc">Verzamel accounts, bouw één plan met meerdere clans en volg elke clan live op. Zonder dat belangrijke informatie verdrinkt in losse kaartjes.</p>
             <div class="hero-actions">
-                <a href="subPages/cwl-planner.html" class="btn btn-primary" data-i18n="home.openPlanner">Open CWL planner</a>
-                <a href="subPages/groups.html" class="btn btn-secondary" data-i18n="home.openGroups">Beheer groepen</a>
-                <a href="subPages/cwl-operation-board.html" class="btn btn-secondary" data-i18n="home.openOperation">Open operation board</a>
+                <a class="button button-primary button-large" href="subPages/register.html" data-i18n="public.createAccount">Maak gratis een account</a>
+                <a class="button button-secondary button-large" href="subPages/login.html" data-i18n="public.haveAccount">Ik heb al een account</a>
             </div>
-            <div class="hero-stats" aria-label="Tool highlights">
-                <div class="stat-card"><span class="stat-label" data-i18n="home.statRoster">Roster planning</span></div>
-                <div class="stat-card"><span class="stat-label" data-i18n="home.statImport">Player imports</span></div>
-                <div class="stat-card"><span class="stat-label" data-i18n="home.statSync">Groups & accounts</span></div>
-            </div>
+            <p class="hero-footnote" data-i18n="public.freeNote">Gratis te gebruiken · geen betaalgegevens nodig</p>
         </div>
 
-        <div class="war-panel" aria-label="Command center preview">
-            <div class="war-panel-top">
-                <span class="war-panel-title" data-i18n="home.boardTitle">CWL Operation Board</span>
-                <span class="war-status" data-i18n="home.ready">Klaar</span>
+        <div class="product-window" id="preview" aria-label="Voorbeeld van CWL Planner" data-i18n-aria-label="public.previewLabel">
+            <div class="window-top"><span></span><span></span><span></span><strong>CWL Planner</strong></div>
+            <div class="preview-shell">
+                <aside class="preview-sidebar">
+                    <b data-i18n="cwl.playersSub">Vrij roster</b>
+                    <div><i class="th-mini">16</i><span><strong>Nova</strong><small>#9UY8LCQ2</small></span></div>
+                    <div><i class="th-mini">15</i><span><strong>Axel</strong><small>#Y0J2C8PL</small></span></div>
+                    <div><i class="th-mini">14</i><span><strong>Milo</strong><small>#J28QP0RY</small></span></div>
+                </aside>
+                <section class="preview-board">
+                    <header><span><small data-i18n="public.samplePlan">Hoofdplanning juli</small><strong data-i18n="public.sampleSummary">2 clans · 3 spelers vrij</strong></span><span class="preview-save" data-i18n="public.saved">Opgeslagen</span></header>
+                    <article class="preview-clan">
+                        <div class="preview-clan-head"><span class="clan-shield">BW</span><span><strong>Belgian Warriors</strong><small>Crystal I · 15v15</small></span><b>13/15</b></div>
+                        <div class="preview-row"><span>01</span><strong>Emile</strong><small>TH16</small><em data-i18n="public.available">Beschikbaar</em></div>
+                        <div class="preview-row"><span>02</span><strong>Valkyrie</strong><small>TH16</small><em data-i18n="public.rotation">Rotatie</em></div>
+                        <div class="preview-row"><span>03</span><strong>Luna</strong><small>TH15</small><em data-i18n="public.core">Kern</em></div>
+                    </article>
+                    <article class="preview-clan preview-clan-muted">
+                        <div class="preview-clan-head"><span class="clan-shield">BA</span><span><strong>Belgian Academy</strong><small>Gold I · 30v30</small></span><b>24/30</b></div>
+                    </article>
+                </section>
             </div>
-            <div class="war-map">
-                <article class="preview-card large">
-                    <h3 data-i18n="home.rosterStrength">Roster strength</h3>
-                    <p data-i18n="home.rosterDesc">Town Hall spread, clan slots en bevestiging in één overzicht.</p>
-                    <div class="preview-meter"><span style="--value:82%"></span></div>
-                </article>
-                <article class="preview-card">
-                    <h3>Alpha</h3>
-                    <p>14/15 assigned</p>
-                    <div class="preview-grid">
-                        <span class="preview-tile is-active"></span><span class="preview-tile is-active"></span><span class="preview-tile is-active"></span><span class="preview-tile"></span><span class="preview-tile is-active"></span>
-                    </div>
-                </article>
-                <article class="preview-card">
-                    <h3>Bravo</h3>
-                    <p>29/30 assigned</p>
-                    <div class="preview-grid">
-                        <span class="preview-tile is-active"></span><span class="preview-tile is-active"></span><span class="preview-tile"></span><span class="preview-tile is-active"></span><span class="preview-tile is-active"></span>
-                    </div>
-                </article>
-            </div>
+            <span class="prototype-mark" data-i18n="public.sampleData">Voorbeelddata</span>
         </div>
     </section>
 
-    <section class="how-section">
-        <div class="section-divider"><hr><span data-i18n="home.how">Hoe het werkt</span><hr></div>
-        <div class="tool-tabs" role="tablist" aria-label="Tools">
-            <button class="tool-tab active" role="tab" data-panel="cwl" aria-selected="true"><span class="tab-dot"></span>CWL Planner</button>
-            <button class="tool-tab" role="tab" data-panel="groepen" aria-selected="false"><span class="tab-dot"></span>Groepen</button>
-            <button class="tool-tab" role="tab" data-panel="operation" aria-selected="false"><span class="tab-dot"></span>Operation board</button>
-        </div>
+    <section class="trust-line" aria-label="Voor wie ClashTools bedoeld is" data-i18n-aria-label="public.audienceLabel">
+        <span data-i18n="public.forLeaders">Voor clanleiders</span><span data-i18n="public.forCoLeaders">Voor co-leiders</span><span data-i18n="public.forOrganizers">Voor CWL-organisatoren</span><span data-i18n="public.forMultipleClans">Voor meerdere clans in één plan</span>
+    </section>
 
-        <div class="tool-panel active" id="panel-cwl" role="tabpanel">
-            <div class="steps">
-                <div class="step"><div class="step-left"><div class="step-number">01</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.step1Title">Importeer spelers</div><div class="step-desc" data-i18n="home.step1Desc">Vul een speler- of clantag in en haal namen, tags en Town Hall levels op via je API-flow.</div></div></div>
-                <div class="step"><div class="step-left"><div class="step-number">02</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.step2Title">Bouw rosters</div><div class="step-desc" data-i18n="home.step2Desc">Sleep spelers naar clans, schuif clan-kaarten en zie direct hoeveel plaatsen nog vrij zijn.</div></div></div>
-                <div class="step"><div class="step-left"><div class="step-number">03</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.step3Title">Volg je CWL-week op</div><div class="step-desc" data-i18n="home.step3Desc">Gebruik het operation board voor attacks, scores, rotatie en bonusadvies.</div></div></div>
-            </div>
-            <div class="panel-cta"><span class="panel-cta-label" data-i18n="home.ctaPlanner">Klaar om je CWL te organiseren?</span><a href="subPages/cwl-planner.html" class="btn btn-primary" data-i18n="home.openPlanner">Open planner →</a></div>
-        </div>
+    <section class="workflow" id="workflow">
+        <header class="section-intro"><p class="eyebrow" data-i18n="public.oneWorkflow">Eén doorlopende workflow</p><h2 data-i18n="public.threeSteps">Drie stappen, zonder dubbel beheer.</h2></header>
+        <ol class="workflow-list">
+            <li><span>01</span><div><h3 data-i18n="home.step1Title">Verzamel accounts en beschikbaarheid</h3><p data-i18n="home.step1Desc">Voeg spelers toe via tags, eigen accounts, vrienden of een groep met pollresultaten.</p></div></li>
+            <li><span>02</span><div><h3 data-i18n="home.step2Title">Bouw één plan met meerdere clans</h3><p data-i18n="home.step2Desc">Elke clan behoudt haar eigen league en rosterformaat. Spelers blijven verplaatsbaar tussen clans.</p></div></li>
+            <li><span>03</span><div><h3 data-i18n="home.step3Title">Volg elke clan live op</h3><p data-i18n="home.step3Desc">Bekijk sterren, aanvallen, stand, war days, rotatie en bonusadvies in Operation Board.</p></div></li>
+        </ol>
+    </section>
 
+    <section class="feature-ledger" id="features">
+        <header class="section-intro"><p class="eyebrow" data-i18n="public.coreFeatures">Kernfuncties</p><h2 data-i18n="public.realWork">Gemaakt voor het echte organisatiewerk.</h2></header>
+        <div class="feature-row"><span>01</span><div><h3>CWL Planner</h3><p data-i18n="public.plannerDesc">Vrij roster, meerdere clans, pollbeschikbaarheid, drag-and-drop en veilige autosave.</p></div><a href="subPages/login.html" data-i18n="public.viewAfterLogin">Bekijk na inloggen →</a></div>
+        <div class="feature-row"><span>02</span><div><h3>Operation Board</h3><p data-i18n="public.operationDesc">Live scores, war days, stand, rosterdetails en bonusadvies.</p></div><a href="subPages/login.html" data-i18n="public.viewAfterLogin">Bekijk na inloggen →</a></div>
+        <div class="feature-row"><span>03</span><div><h3 data-i18n="public.groupsPolls">Groepen en polls</h3><p data-i18n="public.groupsDesc">Beheer leden, rollen, gekoppelde clans en beschikbaarheid per account.</p></div><a href="subPages/login.html" data-i18n="public.viewAfterLogin">Bekijk na inloggen →</a></div>
+        <div class="feature-row"><span>04</span><div><h3 data-i18n="nav.bracket">Bracket generator</h3><p data-i18n="public.bracketDesc">Maak seeded of willekeurige brackets en bewaar ze als JSON.</p></div><a href="subPages/login.html" data-i18n="public.viewAfterLogin">Bekijk na inloggen →</a></div>
+    </section>
 
-
-        <div class="tool-panel" id="panel-operation" role="tabpanel">
-            <div class="steps">
-                <div class="step"><div class="step-left"><div class="step-number">01</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.operationStep1Title">Kies een planning</div><div class="step-desc" data-i18n="home.operationStep1Desc">Selecteer een opgeslagen CWL-planning en kies daarna één clan om live op te volgen.</div></div></div>
-                <div class="step"><div class="step-left"><div class="step-number">02</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.operationStep2Title">Haal live CWL-data op</div><div class="step-desc" data-i18n="home.operationStep2Desc">De board haalt clanleden, league rounds en war details op via je Java proxy naar de Clash API.</div></div></div>
-                <div class="step"><div class="step-left"><div class="step-number">03</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.operationStep3Title">Controleer aanvallen</div><div class="step-desc" data-i18n="home.operationStep3Desc">Bekijk wie gepland was, wie effectief meedoet, gemiste attacks, score en bonusadvies.</div></div></div>
-            </div>
-            <div class="panel-cta"><span class="panel-cta-label" data-i18n="home.ctaOperation">Volg je CWL zonder handmatige spreadsheet.</span><a href="subPages/cwl-operation-board.html" class="btn btn-primary" data-i18n="home.openOperation">Open operation board →</a></div>
-        </div>
-
-        <div class="tool-panel" id="panel-groepen" role="tabpanel">
-            <div class="steps">
-                <div class="step"><div class="step-left"><div class="step-number">01</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.groupsStep1Title">Maak groepen</div><div class="step-desc" data-i18n="home.groupsStep1Desc">Bundel leden, vrienden en clans in duidelijke groepen voor planning en uitnodigingen.</div></div></div>
-                <div class="step"><div class="step-left"><div class="step-number">02</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.groupsStep2Title">Deel codes</div><div class="step-desc" data-i18n="home.groupsStep2Desc">Gebruik groepscodes om snel nieuwe leden te laten aansluiten.</div></div></div>
-                <div class="step"><div class="step-left"><div class="step-number">03</div><div class="step-line"></div></div><div class="step-body"><div class="step-title" data-i18n="home.groupsStep3Title">Gebruik in CWL</div><div class="step-desc" data-i18n="home.groupsStep3Desc">Laad accounts uit groepen direct in de planner wanneer je een roster samenstelt.</div></div></div>
-            </div>
-            <div class="panel-cta"><span class="panel-cta-label" data-i18n="home.ctaGroups">Beheer je clan-netwerk.</span><a href="subPages/groups.html" class="btn btn-primary" data-i18n="home.openGroups">Open groepen →</a></div>
-        </div>
+    <section class="landing-cta">
+        <div><p class="eyebrow" data-i18n="public.readyForCwl">Klaar voor je volgende CWL?</p><h2 data-i18n="public.startWithPlan">Begin met één plan. Voeg clans toe wanneer je ze nodig hebt.</h2></div>
+        <a class="button button-primary button-large" href="subPages/register.html" data-i18n="public.startFree">Gratis starten</a>
     </section>
 </main>
 
-<footer>
-    <div class="footer-left" data-i18n="home.footer">© 2026 Tools for Clash · Niet gelieerd aan Supercell</div>
-    <nav class="footer-links"><a href="#">Over</a><a href="#">Contact</a><a href="#">Privacy</a></nav>
+<footer class="public-footer">
+    <a class="public-brand" href="index.html"><img src="assets/css/pictures/clashtools-logo.png" alt=""><span>ClashTools</span></a>
+    <p data-i18n="home.footer">© 2026 ClashTools · Niet gelieerd aan Supercell</p>
+    <nav aria-label="Voetnavigatie" data-i18n-aria-label="public.footerNav"><a href="#features" data-i18n="public.features">Functies</a><a href="subPages/login.html" data-i18n="auth.login">Inloggen</a><a href="subPages/register.html" data-i18n="auth.registerLink">Registreren</a></nav>
 </footer>
-
-<div class="profile-placeholder"></div>
 </body>
 </html>

@@ -60,7 +60,7 @@ async function submitRegistration(event) {
     try {
         const data = await signUpWithPassword(nameInput.value, emailInput.value, passwordInput.value);
         if (data.session) {
-            window.location.href = '../index.html';
+            window.location.href = './dashboard.html';
             return;
         }
         form.reset();
@@ -82,7 +82,7 @@ async function registerWithGoogle() {
     setBusy(true);
     setStatus(t('auth.redirecting'), 'loading');
     try {
-        await signInWithGoogle();
+        await signInWithGoogle(new URL('./dashboard.html', window.location.href).href);
     } catch (error) {
         setStatus(error instanceof AuthConfigurationError ? t('auth.notConfigured') : t('auth.oauthUnavailable'), 'error');
         setBusy(false);
@@ -97,7 +97,7 @@ function init() {
     googleButton.addEventListener('click', registerWithGoogle);
     syncAuthSession()
         .then(session => {
-            if (session) window.location.href = '../index.html';
+            if (session) window.location.href = './dashboard.html';
         })
         .catch(() => {});
 }

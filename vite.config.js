@@ -19,6 +19,7 @@ export default defineConfig({
                 main: resolve(__dirname, 'src/index.html'),
                 login: resolve(__dirname, 'src/subPages/login.html'),
                 register: resolve(__dirname, 'src/subPages/register.html'),
+                dashboard: resolve(__dirname, 'src/subPages/dashboard.html'),
                 cwlPlanner: resolve(__dirname, 'src/subPages/cwl-planner.html'),
                 cwlOperationBoard: resolve(__dirname, 'src/subPages/cwl-operation-board.html'),
                 cwlPlannerDrafts: resolve(__dirname, 'src/subPages/cwl-planner-drafts.html'),

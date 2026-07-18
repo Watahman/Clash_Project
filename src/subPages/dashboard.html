@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="nl" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard · ClashTools</title>
+    <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
+    <link rel="stylesheet" href="../assets/css/profile-overlay.css">
+    <link rel="stylesheet" href="../assets/css/workspace-system.css">
+    <script type="module" src="../assets/js/shell/workspace-shell.js"></script>
+    <script type="module" src="../assets/js/pages/dashboard.js"></script>
+</head>
+<body class="workspace-app" data-workspace-page="dashboard">
+<main class="workspace-dashboard" id="main-content">
+    <p class="page-kicker" data-i18n="nav.dashboard">Dashboard</p>
+    <h1 data-i18n="dashboard.welcome">Welkom terug.</h1>
+    <p data-i18n="dashboard.intro">Open een tool via de navigatie. Recente plannen, groepen en gekoppelde accounts worden in het volgende onderdeel met echte data verbonden.</p>
+    <section class="workspace-gateway" aria-labelledby="gateway-title">
+        <h2 id="gateway-title" data-i18n="dashboard.chooseTool">Kies waar je verder wilt werken</h2>
+        <p data-i18n="dashboard.noFakeData">Deze ingang toont bewust nog geen voorbeeldstatistieken of verzonnen taken.</p>
+        <div class="workspace-gateway-links">
+            <a href="./cwl-planner.html" data-i18n="home.openPlanner">Open CWL planner</a>
+            <a href="./cwl-operation-board.html" data-i18n="home.openOperation">Open Operation Board</a>
+            <a href="./groups.html" data-i18n="home.openGroups">Open Groepen</a>
+            <a href="./bracket-generator.html" data-i18n="nav.bracket">Bracket generator</a>
+        </div>
+    </section>
+</main>
+<div class="profile-placeholder"></div>
+</body>
+</html>

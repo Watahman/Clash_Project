@@ -1,51 +1,43 @@
-<!DOCTYPE html>
-<html lang="nl">
+<!doctype html>
+<html lang="nl" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inloggen · Tools for Clash</title>
-    <link rel="stylesheet" href="../assets/css/Main-css.css">
-    <link rel="stylesheet" href="../assets/css/login-css.css">
-    <link rel="icon" type="image/png" href="../assets/css/pictures/shield_with_hamer_logov2.png">
+    <title>Inloggen · ClashTools</title>
+    <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
+    <link rel="stylesheet" href="../assets/css/workspace-system.css">
+    <script type="module" src="../assets/js/pages/public-site.js"></script>
     <script type="module" src="../assets/js/pages/login.js"></script>
 </head>
-<body>
-<header>
-    <div class="left"><a href="../index.html"><img src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="Tools for Clash logo"></a></div>
-    <nav class="center"><a href="cwl-planner.html" data-i18n="nav.cwl">CWL planner</a><a href="cwl-operation-board.html" data-i18n="nav.operation">Operation board</a><a href="groups.html" data-i18n="nav.groups">Groepen</a></nav>
-    <div class="right"><button type="button" data-language-control data-i18n="header.language">Taal</button></div>
-</header>
-
-<main class="auth-main">
-    <div class="auth-shell">
-        <aside class="auth-brand-panel">
-            <div>
-                <div class="hero-eyebrow">Secure clan access</div>
-                <h2>Back to the war room.</h2>
-                <p>Log in om je CWL-plannen, groepen, accounts en vrienden opnieuw te laden.</p>
-            </div>
-            <div class="auth-mini-grid">
-                <div class="auth-mini-card"><strong>CWL</strong><span>Saved rosters</span></div>
-                <div class="auth-mini-card"><strong>Groups</strong><span>Clan network</span></div>
-            </div>
-        </aside>
-
-        <div class="card">
-            <div class="card-head">
-                <img class="card-logo" src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="logo">
-                <h1 data-i18n="auth.loginTitle">Welkom terug</h1>
-                <p><span data-i18n="auth.loginSubtitle">Nog geen account?</span> <a href="register.html" data-i18n="auth.registerLink">Registreren</a></p>
-            </div>
-            <form class="form" id="auth-form">
-                <div class="field"><label for="email" data-i18n="auth.email">E-mailadres</label><input type="email" id="email" placeholder="jij@voorbeeld.com" autocomplete="email" required></div>
-                <div class="field"><div class="field-row"><label for="password" data-i18n="auth.password">Wachtwoord</label><button id="forgot-password" class="auth-link" type="button" data-i18n="auth.forgot">Vergeten?</button></div><input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required></div>
-                <button id="submit-button" class="btn-submit" type="submit" data-i18n="auth.login">Inloggen</button>
-                <p id="auth-status" class="auth-status" role="status" aria-live="polite"></p>
-                <div class="or-divider"><hr><span data-i18n="auth.or">of</span><hr></div>
-                <button id="google-login" class="btn-google" type="button" data-i18n="auth.google">Doorgaan met Google</button>
-            </form>
-        </div>
+<body class="auth-page">
+<a class="skip-link" href="#auth-form" data-i18n="a11y.skipForm">Ga naar formulier</a>
+<header class="auth-header">
+    <a class="public-brand" href="../index.html"><img src="../assets/css/pictures/clashtools-logo.png" alt=""><span>ClashTools</span></a>
+    <div class="auth-header-actions">
+        <button type="button" data-language-control data-i18n="header.language">Taal</button>
+        <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Thema wisselen"><span aria-hidden="true">◐</span></button>
+        <a class="link-button" href="../index.html" data-i18n="auth.backHome">← Terug naar home</a>
     </div>
+</header>
+<main class="auth-layout">
+    <section class="auth-context" aria-labelledby="auth-context-title">
+        <p class="eyebrow" data-i18n="auth.welcomeBack">Welkom terug</p>
+        <h1 id="auth-context-title" data-i18n="auth.plansReady">Je plannen staan klaar.</h1>
+        <p data-i18n="auth.loginContext">Log in om verder te werken in Planner, Operation Board en Groepen.</p>
+        <div class="auth-proof"><span aria-hidden="true">✓</span><p><strong data-i18n="auth.noNewWorkflow">Geen nieuwe workflow leren</strong><small data-i18n="auth.dashboardDirect">Je komt rechtstreeks op je persoonlijke dashboard.</small></p></div>
+        <div class="auth-proof"><span aria-hidden="true">✓</span><p><strong data-i18n="auth.saveVisible">Opslagstatus blijft zichtbaar</strong><small data-i18n="auth.saveVisibleDesc">Je weet altijd welk plan geladen en opgeslagen is.</small></p></div>
+    </section>
+    <section class="auth-form-wrap">
+        <form class="auth-form" id="auth-form">
+            <header><p class="eyebrow" data-i18n="auth.account">Account</p><h2 data-i18n="auth.login">Inloggen</h2><p><span data-i18n="auth.loginSubtitle">Nog geen account?</span> <a href="register.html" data-i18n="auth.registerLink">Registreer gratis</a></p></header>
+            <label><span><span data-i18n="auth.email">E-mailadres</span></span><input type="email" id="email" data-i18n-placeholder="auth.emailPlaceholder" placeholder="jij@voorbeeld.com" autocomplete="email" required></label>
+            <label><span><span data-i18n="auth.password">Wachtwoord</span><button id="forgot-password" type="button" data-i18n="auth.forgot">Vergeten?</button></span><input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required></label>
+            <button id="submit-button" class="button button-primary button-full" type="submit" data-i18n="auth.login">Inloggen</button>
+            <p id="auth-status" class="auth-status" role="status" aria-live="polite"></p>
+            <div class="auth-divider"><span data-i18n="auth.or">of</span></div>
+            <button id="google-login" class="button button-google button-full" type="button"><b aria-hidden="true">G</b><span data-i18n="auth.google">Verder met Google</span></button>
+        </form>
+    </section>
 </main>
 </body>
 </html>

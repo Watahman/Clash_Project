@@ -1,53 +1,45 @@
-<!DOCTYPE html>
-<html lang="nl">
+<!doctype html>
+<html lang="nl" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registreren · Tools for Clash</title>
-    <link rel="stylesheet" href="../assets/css/Main-css.css">
-    <link rel="stylesheet" href="../assets/css/register-css.css">
-    <link rel="icon" type="image/png" href="../assets/css/pictures/shield_with_hamer_logov2.png">
+    <title>Registreren · ClashTools</title>
+    <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
+    <link rel="stylesheet" href="../assets/css/workspace-system.css">
+    <script type="module" src="../assets/js/pages/public-site.js"></script>
     <script type="module" src="../assets/js/pages/register.js"></script>
 </head>
-<body>
-<header>
-    <div class="left"><a href="../index.html"><img src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="Tools for Clash logo"></a></div>
-    <nav class="center"><a href="cwl-planner.html" data-i18n="nav.cwl">CWL planner</a><a href="cwl-operation-board.html" data-i18n="nav.operation">Operation board</a><a href="groups.html" data-i18n="nav.groups">Groepen</a></nav>
-    <div class="right"><button type="button" data-language-control data-i18n="header.language">Taal</button></div>
-</header>
-
-<main class="auth-main">
-    <div class="auth-shell">
-        <aside class="auth-brand-panel">
-            <div>
-                <div class="hero-eyebrow">Join the clan tools</div>
-                <h2>Build your command profile.</h2>
-                <p>Maak een account om spelers, clans, groepen en CWL-plannen samen te beheren.</p>
-            </div>
-            <div class="auth-mini-grid">
-                <div class="auth-mini-card"><strong>Tags</strong><span>Base & clan links</span></div>
-                <div class="auth-mini-card"><strong>Plans</strong><span>Save your CWL</span></div>
-            </div>
-        </aside>
-
-        <div class="card">
-            <div class="card-head">
-                <img class="card-logo" src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="logo">
-                <h1 data-i18n="auth.registerTitle">Account aanmaken</h1>
-                <p><span data-i18n="auth.registerSubtitle">Al een account?</span> <a href="login.html" data-i18n="auth.loginLink">Inloggen</a></p>
-            </div>
-            <form class="form" id="auth-form">
-                <div class="field"><label for="username" data-i18n="auth.username">Gebruikersnaam</label><input type="text" id="username" placeholder="ClashLeader99" autocomplete="username" minlength="2" maxlength="24" required><span class="field-hint" id="username-hint"></span></div>
-                <div class="field"><label for="email" data-i18n="auth.email">E-mailadres</label><input type="email" id="email" placeholder="jij@voorbeeld.com" autocomplete="email" required><span class="field-hint" id="email-hint"></span></div>
-                <div class="field"><label for="password" data-i18n="auth.password">Wachtwoord</label><input type="password" id="password" placeholder="••••••••" autocomplete="new-password" minlength="8" required><div class="strength-bar"><div class="strength-seg" id="seg1"></div><div class="strength-seg" id="seg2"></div><div class="strength-seg" id="seg3"></div></div><span class="field-hint" id="password-hint"></span></div>
-                <div class="field"><label for="password2" data-i18n="auth.confirmPassword">Wachtwoord bevestigen</label><input type="password" id="password2" placeholder="••••••••" autocomplete="new-password" minlength="8" required><span class="field-hint" id="password2-hint"></span></div>
-                <button id="submit-button" class="btn-submit" type="submit" data-i18n="auth.createAccount">Account aanmaken</button>
-                <p id="auth-status" class="auth-status" role="status" aria-live="polite"></p>
-                <div class="or-divider"><hr><span data-i18n="auth.or">of</span><hr></div>
-                <button id="google-login" class="btn-google" type="button" data-i18n="auth.google">Doorgaan met Google</button>
-            </form>
-        </div>
+<body class="auth-page">
+<a class="skip-link" href="#auth-form" data-i18n="a11y.skipForm">Ga naar formulier</a>
+<header class="auth-header">
+    <a class="public-brand" href="../index.html"><img src="../assets/css/pictures/clashtools-logo.png" alt=""><span>ClashTools</span></a>
+    <div class="auth-header-actions">
+        <button type="button" data-language-control data-i18n="header.language">Taal</button>
+        <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Thema wisselen"><span aria-hidden="true">◐</span></button>
+        <a class="link-button" href="../index.html" data-i18n="auth.backHome">← Terug naar home</a>
     </div>
+</header>
+<main class="auth-layout">
+    <section class="auth-context" aria-labelledby="auth-context-title">
+        <p class="eyebrow" data-i18n="auth.startFree">Gratis starten</p>
+        <h1 id="auth-context-title" data-i18n="auth.firstPlan">Maak je eerste CWL-plan.</h1>
+        <p data-i18n="auth.registerContext">Je kunt accounts later koppelen. Registreren verplicht je niet om eerst een clan of groep in te stellen.</p>
+        <div class="auth-proof"><span aria-hidden="true">01</span><p><strong data-i18n="auth.createStep">Account maken</strong><small data-i18n="auth.createStepDesc">Alleen de basisgegevens.</small></p></div>
+        <div class="auth-proof"><span aria-hidden="true">02</span><p><strong data-i18n="auth.optionalAccounts">Optioneel accounts koppelen</strong><small data-i18n="auth.optionalAccountsDesc">Of onmiddellijk doorgaan naar Planner.</small></p></div>
+    </section>
+    <section class="auth-form-wrap">
+        <form class="auth-form" id="auth-form">
+            <header><p class="eyebrow" data-i18n="auth.newAccount">Nieuw account</p><h2 data-i18n="auth.registerLink">Registreren</h2><p><span data-i18n="auth.registerSubtitle">Al een account?</span> <a href="login.html" data-i18n="auth.loginLink">Log in</a></p></header>
+            <label><span><span data-i18n="auth.username">Gebruikersnaam</span></span><input type="text" id="username" data-i18n-placeholder="auth.usernamePlaceholder" placeholder="ClashLeader99" autocomplete="username" minlength="2" maxlength="24" required><small class="field-hint" id="username-hint"></small></label>
+            <label><span><span data-i18n="auth.email">E-mailadres</span></span><input type="email" id="email" data-i18n-placeholder="auth.emailPlaceholder" placeholder="jij@voorbeeld.com" autocomplete="email" required><small class="field-hint" id="email-hint"></small></label>
+            <label><span><span data-i18n="auth.password">Wachtwoord</span></span><input type="password" id="password" placeholder="••••••••" autocomplete="new-password" minlength="8" required><span class="strength-bar" aria-hidden="true"><i id="seg1"></i><i id="seg2"></i><i id="seg3"></i></span><small class="field-hint" id="password-hint" data-i18n="auth.passwordHelp">Minstens 8 tekens met hoofdletter, kleine letter, cijfer en symbool.</small></label>
+            <label><span><span data-i18n="auth.confirmPassword">Wachtwoord bevestigen</span></span><input type="password" id="password2" placeholder="••••••••" autocomplete="new-password" minlength="8" required><small class="field-hint" id="password2-hint"></small></label>
+            <button id="submit-button" class="button button-primary button-full" type="submit" data-i18n="auth.createAccount">Account aanmaken</button>
+            <p id="auth-status" class="auth-status" role="status" aria-live="polite"></p>
+            <div class="auth-divider"><span data-i18n="auth.or">of</span></div>
+            <button id="google-login" class="button button-google button-full" type="button"><b aria-hidden="true">G</b><span data-i18n="auth.googleRegister">Registreren met Google</span></button>
+        </form>
+    </section>
 </main>
 </body>
 </html>

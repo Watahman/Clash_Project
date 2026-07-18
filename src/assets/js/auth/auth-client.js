@@ -88,8 +88,8 @@ export async function requestPasswordReset(email) {
     return data;
 }
 
-export async function signInWithGoogle() {
-    const redirectTo = new URL('../index.html', window.location.href).href;
+export async function signInWithGoogle(redirectUrl) {
+    const redirectTo = redirectUrl || new URL('./dashboard.html', window.location.href).href;
     const { data, error } = await getAuthClient().auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo }

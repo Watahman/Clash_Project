@@ -48,3 +48,6 @@ dist/
 test-output/
 TEST_REPORT_*.md
 vite-project/
+
+# Local visual reference material
+.reference/
