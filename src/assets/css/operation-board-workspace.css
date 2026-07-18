@@ -67,7 +67,7 @@
 .op-title-row h1 {
     color: var(--text);
     font-family: Manrope, Inter, "Segoe UI", sans-serif;
-    font-size: 2.2rem;
+    font-size: 3rem;
     line-height: 1.12;
     letter-spacing: -0.035em;
     text-wrap: balance;
@@ -295,7 +295,7 @@
 
 .operation-workspace-page .op-rounds-list {
     display: grid;
-    grid-template-columns: repeat(7, minmax(9rem, 1fr));
+    grid-template-columns: repeat(7, minmax(7.25rem, 1fr));
     gap: 0;
     padding: 0;
     overflow-x: auto;
@@ -374,7 +374,7 @@
 }
 
 .operation-workspace-page .op-table-wrap { max-height: none !important; overflow: auto; }
-.operation-workspace-page .op-table { width: 100%; min-width: 58rem; border-collapse: collapse; }
+.operation-workspace-page .op-table { width: 100%; min-width: 50rem; border-collapse: collapse; }
 .operation-workspace-page .op-table th,
 .operation-workspace-page .op-table td { padding: 0.65rem; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
 .operation-workspace-page .op-table th { color: var(--text-muted); font-size: 0.65rem; letter-spacing: 0.04em; text-transform: uppercase; }
@@ -457,7 +457,7 @@
 @media (max-width: 46rem) {
     .operation-workspace-page { padding: var(--space-4); }
     .op-title-row { align-items: flex-start; flex-direction: column; }
-    .op-title-row h1 { font-size: 1.85rem; }
+    .op-title-row h1 { font-size: 2.25rem; }
     .operation-actions { display: grid; width: 100%; grid-template-columns: 1fr 1fr; }
     .operation-actions #op-refresh { grid-column: 1 / -1; grid-row: 1; }
     .op-context-toolbar { align-items: stretch; flex-direction: column; }

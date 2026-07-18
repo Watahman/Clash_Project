@@ -8,6 +8,17 @@ Werkbranch: `redesign/exact-workspace-from-functional`
 
 Dit document is een parkeerplaats, geen implementatieplan. Tijdens Onderdeel 1 tot en met 7 worden uitsluitend bestaande functies opnieuw gekoppeld aan het goedgekeurde prototype. Een functie in deze lijst mag pas na volledige redesigngoedkeuring én afzonderlijke toestemming worden gebouwd.
 
+## Finale status na Onderdeel 7
+
+De redesign is op 18 juli 2026 volledig visueel en functioneel gecontroleerd. Geen van de onderstaande nieuwe of optionele functies is tijdens Onderdeel 1 tot en met 7 gebouwd. De auditstatussen, databronvoorwaarden en goedkeuringsvereisten blijven ongewijzigd.
+
+- Onderdeel 8 is niet gestart.
+- Er zijn geen nieuwe databasevelden, tabellen of migraties voor deze functies toegevoegd.
+- Er is geen fake live data of grafiekdata gebruikt om ontbrekende functies te simuleren.
+- De Operation Board-grafieken blijven afwezig totdat historische datavolledigheid is bewezen.
+- Mobiele bracketnavigatie, rosterzoeken, plannen zoeken/sorteren en Groups-ledenfilters blijven `NEW_NOT_IMPLEMENTED`.
+- Onboarding, het aandachtfilter en historische snapshotopslag blijven `OPTIONAL_NOT_APPROVED`.
+
 ## Vastgestelde nieuwe functies
 
 | Functie | Auditstatus | Huidige lacune | Benodigde echte databron | Goedkeuring | Vroegste fase |
