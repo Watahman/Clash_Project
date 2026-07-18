@@ -2,6 +2,7 @@ import { getLanguage, initI18n, t } from '../i18n/i18n.js';
 import { profileHTML } from '../profile/profile_popup.js';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { getCurrentUserId } from '../utils/user.js';
+import { summarizePlan } from '../cwl/cwl-plan-summary.js';
 import {
     copyPlan,
     deletePlan,
@@ -16,21 +17,25 @@ let activeController;
 
 function initRefs() {
     refs.container = document.querySelector('#draft-cwl-container');
-    refs.newPlan = document.querySelector('#add-draft-cwl');
     refs.status = document.querySelector('#drafts-status');
 }
 
 function setStatus(message = '', state = '') {
     refs.status.textContent = message;
     refs.status.dataset.state = state;
+    refs.status.hidden = !message;
 }
 
-function openPlan(planId) {
-    localStorage.setItem('planner_id', planId);
-    window.location.assign('./cwl-planner.html');
+function openPlanLink(planId) {
+    const link = document.createElement('a');
+    link.href = './cwl-planner.html';
+    link.className = 'button button-small button-primary';
+    link.textContent = t('drafts.open');
+    link.addEventListener('click', () => localStorage.setItem('planner_id', planId));
+    return link;
 }
 
-function button(label, className, handler) {
+function actionButton(label, className, handler) {
     const element = document.createElement('button');
     element.type = 'button';
     element.className = className;
@@ -39,67 +44,105 @@ function button(label, className, handler) {
     return element;
 }
 
+function formatUpdatedAt(value) {
+    if (!value) return t('plans.unknownDate');
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return t('plans.unknownDate');
+    return new Intl.DateTimeFormat(getLanguage(), {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+    }).format(date);
+}
+
+function emptyRow(messageKey, actionKey = '', actionHref = '') {
+    const row = document.createElement('tr');
+    row.className = 'workspace-empty-row';
+    const cell = document.createElement('td');
+    cell.colSpan = 5;
+    const message = document.createElement('p');
+    message.textContent = t(messageKey);
+    cell.appendChild(message);
+    if (actionKey && actionHref) {
+        const action = document.createElement('a');
+        action.href = actionHref;
+        action.textContent = t(actionKey);
+        cell.appendChild(action);
+    }
+    row.appendChild(cell);
+    return row;
+}
+
 function render() {
-    refs.container.replaceChildren(refs.newPlan);
+    refs.container.replaceChildren();
+    if (!userId) {
+        refs.container.appendChild(emptyRow('drafts.loginRequired', 'auth.login', './login.html'));
+        return;
+    }
     if (!plans.length) {
-        const empty = document.createElement('p');
-        empty.className = 'draft-empty';
-        empty.textContent = t('drafts.empty');
-        refs.container.appendChild(empty);
+        refs.container.appendChild(emptyRow('drafts.empty', 'dashboard.createFirstPlan', './cwl-planner.html'));
         return;
     }
     plans.forEach(plan => refs.container.appendChild(renderPlan(plan)));
 }
 
-function renderPlan(plan) {
-    const card = document.createElement('article');
-    card.className = 'draft-card';
-    card.dataset.planId = plan.id;
-
-    const heading = document.createElement('h2');
-    heading.textContent = plan.name;
-    card.appendChild(heading);
-
-    const meta = document.createElement('p');
-    meta.className = 'draft-meta';
-    const updated = plan.updatedAt
-        ? new Intl.DateTimeFormat(getLanguage(), { dateStyle: 'medium', timeStyle: 'short' })
-            .format(new Date(plan.updatedAt))
-        : '';
-    meta.textContent = updated
-        ? t('drafts.updated', { date: updated })
-        : t(plan.isOwner ? 'drafts.owner' : 'drafts.shared');
-    card.appendChild(meta);
-
-    const actions = document.createElement('div');
-    actions.className = 'draft-actions';
-    actions.appendChild(button(t('drafts.open'), 'btn btn-primary', () => openPlan(plan.id)));
-    if (plan.isOwner) {
-        actions.appendChild(button(t('drafts.rename'), 'btn', () => showRename(card, plan)));
-    }
-    actions.appendChild(button(t('drafts.copy'), 'btn', () => void copyExistingPlan(plan)));
-    if (plan.isOwner) {
-        actions.appendChild(button(t('drafts.delete'), 'btn draft-delete', () => void removePlan(plan)));
-    }
-    card.appendChild(actions);
-    return card;
+function cell(label, value) {
+    const element = document.createElement('td');
+    element.dataset.label = t(label);
+    element.textContent = value;
+    return element;
 }
 
-function showRename(card, plan) {
+function renderPlan(plan) {
+    const row = document.createElement('tr');
+    row.dataset.planId = plan.id;
+
+    const name = cell('plans.name', '');
+    const heading = document.createElement('strong');
+    heading.textContent = plan.name || t('plans.unnamed');
+    const access = document.createElement('small');
+    access.textContent = t(plan.isOwner ? 'drafts.owner' : 'drafts.shared');
+    name.append(heading, access);
+
+    const actions = document.createElement('td');
+    actions.className = 'draft-actions workspace-row-actions';
+    actions.appendChild(openPlanLink(plan.id));
+    if (plan.isOwner) {
+        actions.appendChild(actionButton(t('drafts.rename'), 'button button-small', () => showRename(row, plan)));
+    }
+    actions.appendChild(actionButton(t('drafts.copy'), 'button button-small', () => void copyExistingPlan(plan)));
+    if (plan.isOwner) {
+        actions.appendChild(actionButton(t('drafts.delete'), 'button button-small draft-delete', () => void removePlan(plan)));
+    }
+
+    row.append(
+        name,
+        cell('plans.clans', String(plan.clanCount)),
+        cell('plans.freeRoster', String(plan.freePlayerCount)),
+        cell('plans.updated', formatUpdatedAt(plan.updatedAt)),
+        actions
+    );
+    return row;
+}
+
+function showRename(row, plan) {
+    const cell = document.createElement('td');
+    cell.colSpan = 5;
     const form = document.createElement('form');
     form.className = 'draft-rename-form';
+    const label = document.createElement('label');
+    label.textContent = t('drafts.name');
     const input = document.createElement('input');
     input.value = plan.name;
     input.maxLength = 40;
     input.required = true;
-    input.setAttribute('aria-label', t('drafts.name'));
+    label.appendChild(input);
     const actions = document.createElement('div');
     actions.className = 'draft-actions';
-    const save = button(t('drafts.save'), 'btn btn-primary', () => {});
+    const save = actionButton(t('drafts.save'), 'button button-small button-primary', () => {});
     save.type = 'submit';
-    const cancel = button(t('drafts.cancel'), 'btn', render);
+    const cancel = actionButton(t('drafts.cancel'), 'button button-small', render);
     actions.append(save, cancel);
-    form.append(input, actions);
+    form.append(label, actions);
     form.addEventListener('submit', async event => {
         event.preventDefault();
         const name = input.value.trim();
@@ -115,7 +158,8 @@ function showRename(card, plan) {
             setBusy(form, false);
         }
     });
-    card.replaceChildren(form);
+    cell.appendChild(form);
+    row.replaceChildren(cell);
     input.focus();
     input.select();
 }
@@ -156,11 +200,11 @@ async function loadPlans() {
     activeController?.abort();
     activeController = new AbortController();
     setStatus(t('drafts.loading'));
-    plans = await getAllPlansFromDatabase(userId, {
+    const result = await getAllPlansFromDatabase(userId, {
         signal: activeController.signal,
         forceRefresh: true
     });
-    if (!Array.isArray(plans)) plans = [];
+    plans = Array.isArray(result) ? result.map(summarizePlan) : [];
     render();
     setStatus('');
 }
@@ -169,19 +213,20 @@ async function init() {
     initI18n();
     await syncAuthSession().catch(() => null);
     initRefs();
+    profileHTML({ preload: false });
+    window.addEventListener('clashtools:language-changed', render);
     userId = getCurrentUserId();
     if (!userId) {
         setStatus(t('drafts.loginRequired'), 'error');
-        refs.container.replaceChildren(refs.newPlan);
-        profileHTML();
+        render();
         return;
     }
     try {
         await loadPlans();
     } catch (error) {
         if (error?.name !== 'AbortError') setStatus(t('drafts.loadError'), 'error');
+        render();
     }
-    profileHTML();
 }
 
 void init();

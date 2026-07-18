@@ -45,7 +45,7 @@ function getProfilePopupPath() {
 // refs object doorgegeven aan profile_tabs zodat die toegang heeft tot DOM-elementen
 let tabRefs;
 
-export function profileHTML() {
+export function profileHTML(options = {}) {
     const placeholder = document.querySelector(".profile-placeholder");
     if (!placeholder) return;
 
@@ -60,7 +60,7 @@ export function profileHTML() {
             applyI18n(placeholder);
             labelInit();
             profileInit();
-            preloadProfileData();
+            if (options.preload !== false) preloadProfileData();
             clickToCloseOverlays();
         })
         .catch(() => {

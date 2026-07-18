@@ -1,112 +1,40 @@
-/* ============================================================
-   DRAFTS / SIMPLE DASHBOARD PAGES
-   ============================================================ */
 .drafts-main {
-    min-height: calc(100vh - var(--header-h));
-    padding: var(--page-pad);
+    min-height: calc(100vh - var(--topbar-height));
+    padding: clamp(2rem, 4vw, 4rem);
 }
+
 .drafts-shell {
-    width: min(70rem, 100%);
-    margin: 2rem auto;
+    width: min(100%, var(--content-max-width));
+    margin: 0 auto;
 }
-.drafts-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
+
+.drafts-header .hero-eyebrow {
+    margin-bottom: 0.7rem;
+    color: var(--accent-strong);
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
 }
-.drafts-header p { color: var(--text-3); margin-top: 0.45rem; }
-#draft-cwl-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-    gap: 1rem;
-}
-#add-draft-cwl {
-    min-height: 12rem;
-    display: grid;
-    place-items: center;
-    align-content: center;
-    gap: 0.6rem;
-    border: 1px dashed rgba(246,183,60,0.35);
-    border-radius: var(--radius-lg);
-    background: linear-gradient(180deg, rgba(18,24,36,0.78), rgba(8,11,16,0.78));
-    box-shadow: var(--inner-line);
-    color: var(--text-2);
-    text-decoration: none;
-}
-#add-draft-cwl span {
-    width: 4rem;
-    height: 4rem;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    font-size: 2rem;
-    color: #211302;
-    background: linear-gradient(180deg, var(--accent-2), var(--accent));
-    border: 1px solid rgba(246,183,60,0.55);
-}
+
 .drafts-status {
     min-height: 1.5rem;
-    margin-bottom: 1rem;
-    color: var(--text-3);
+    margin: 0 0 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.78rem;
 }
+
+.drafts-status[hidden] { display: block; visibility: hidden; }
 .drafts-status[data-state="error"] { color: var(--danger); }
 .drafts-status[data-state="success"] { color: var(--success); }
-.draft-card {
-    min-height: 12rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-    padding: 1rem;
-    border: 1px solid var(--border-visible);
-    border-radius: var(--radius-lg);
-    background: var(--surface-card);
-    box-shadow: var(--card-shadow), var(--inner-line);
-}
-.draft-card h2 {
-    overflow-wrap: anywhere;
-    font-size: 1.05rem;
-}
-.draft-meta {
-    margin: 0;
-    color: var(--text-3);
-    font-size: 0.84rem;
-}
-.draft-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: auto;
-}
-.draft-actions button,
-.draft-actions a {
-    min-height: 2.5rem;
-    padding: 0.55rem 0.75rem;
-    font-size: 0.86rem;
-}
+.draft-actions { flex-wrap: wrap; }
 .draft-actions .draft-delete { color: var(--danger); }
-.draft-rename-form {
-    display: grid;
-    gap: 0.6rem;
-}
-.draft-rename-form input {
-    width: 100%;
-    min-height: 2.75rem;
-}
-.draft-rename-form .draft-actions { margin-top: 0; }
-.draft-empty {
-    grid-column: 1 / -1;
-    color: var(--text-3);
-}
+.draft-rename-form { display: flex; align-items: flex-end; gap: 0.75rem; }
+.draft-rename-form label { display: grid; min-width: min(24rem, 100%); gap: 0.4rem; color: var(--text-muted); font-size: 0.68rem; }
+.draft-rename-form input { min-height: 2.5rem; border: 0.0625rem solid var(--border-strong); border-radius: var(--radius-small); background: var(--surface-raised); padding: 0.55rem 0.7rem; color: var(--text); font: inherit; }
+.draft-rename-form .draft-actions { display: flex; gap: 0.45rem; }
 
-@media (max-width: 42rem) {
-    .drafts-header { align-items: stretch; flex-direction: column; }
-    .drafts-header .btn { width: 100%; }
-}
-
-:root[data-theme="light"] #add-draft-cwl {
-    background: var(--surface-card);
-    border-color: var(--border-visible);
-    box-shadow: var(--card-shadow), var(--inner-line);
+@media (max-width: 46rem) {
+    .drafts-main { padding: 1.5rem 1rem 3rem; }
+    .draft-rename-form { align-items: stretch; flex-direction: column; }
 }

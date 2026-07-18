@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CWL Drafts · Tools for Clash</title>
-    <link rel="stylesheet" href="../assets/css/Main-css.css">
     <link rel="stylesheet" href="../assets/css/drafts-css.css">
     <link rel="stylesheet" href="../assets/css/profile-overlay.css">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
-    <link rel="icon" type="image/png" href="../assets/css/pictures/shield_with_hamer_logov2.png">
+    <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
     <script type="module" src="../assets/js/shell/workspace-shell.js"></script>
     <script type="module" src="../assets/js/pages/cwl-planner-drafts.js"></script>
 </head>
@@ -18,23 +17,26 @@
     <nav class="center"><a href="./cwl-planner.html" aria-current="page" data-i18n="nav.cwl">CWL planner</a><a href="./cwl-operation-board.html" data-i18n="nav.operation">Operation board</a><a href="./groups.html" data-i18n="nav.groups">Groepen</a></nav>
     <div class="right"><button type="button" data-language-control data-i18n="header.language">Taal</button><button type="button">Instellingen</button><button id="profile-btn" type="button"><img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt=""><span data-i18n="header.user">Gebruiker</span></button></div>
 </header>
-<main class="drafts-main">
+<main class="drafts-main" id="main-content">
     <section class="drafts-shell">
-        <div class="drafts-header">
+        <div class="drafts-header workspace-page-header-row">
             <div>
                 <div class="hero-eyebrow" data-i18n="drafts.eyebrow">CWL drafts</div>
                 <h1 data-i18n="drafts.title">Opgeslagen oorlogsplannen</h1>
                 <p data-i18n="drafts.subtitle">Open, hernoem, kopieer of verwijder je CWL-plannen.</p>
             </div>
-            <a class="btn btn-primary" href="./cwl-planner.html" data-i18n="drafts.openPlanner">Open planner</a>
+            <a class="button button-primary" href="./cwl-planner.html" data-i18n="drafts.new">Nieuw plan</a>
         </div>
         <p id="drafts-status" class="drafts-status" role="status" aria-live="polite" data-i18n="drafts.loading">Plannen laden...</p>
-        <div id="draft-cwl-container" aria-live="polite">
-            <a id="add-draft-cwl" href="./cwl-planner.html" data-i18n-aria-label="drafts.new">
-                <span aria-hidden="true">+</span>
-                <strong data-i18n="drafts.new">Nieuw plan</strong>
-            </a>
-        </div>
+        <section class="workspace-section-block drafts-table-block" aria-labelledby="drafts-table-title">
+            <h2 id="drafts-table-title" class="sr-only" data-i18n="drafts.title">Opgeslagen oorlogsplannen</h2>
+            <div class="workspace-table-wrap">
+                <table class="workspace-data-table drafts-table">
+                    <thead><tr><th data-i18n="plans.name">Naam</th><th data-i18n="plans.clans">Clans</th><th data-i18n="plans.freeRoster">Vrij roster</th><th data-i18n="plans.updated">Bijgewerkt</th><th><span class="sr-only" data-i18n="plans.actions">Acties</span></th></tr></thead>
+                    <tbody id="draft-cwl-container" aria-live="polite"></tbody>
+                </table>
+            </div>
+        </section>
     </section>
 </main>
 <footer></footer>

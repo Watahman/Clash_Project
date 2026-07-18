@@ -11,20 +11,48 @@
     <script type="module" src="../assets/js/pages/dashboard.js"></script>
 </head>
 <body class="workspace-app" data-workspace-page="dashboard">
-<main class="workspace-dashboard" id="main-content">
-    <p class="page-kicker" data-i18n="nav.dashboard">Dashboard</p>
-    <h1 data-i18n="dashboard.welcome">Welkom terug.</h1>
-    <p data-i18n="dashboard.intro">Open een tool via de navigatie. Recente plannen, groepen en gekoppelde accounts worden in het volgende onderdeel met echte data verbonden.</p>
-    <section class="workspace-gateway" aria-labelledby="gateway-title">
-        <h2 id="gateway-title" data-i18n="dashboard.chooseTool">Kies waar je verder wilt werken</h2>
-        <p data-i18n="dashboard.noFakeData">Deze ingang toont bewust nog geen voorbeeldstatistieken of verzonnen taken.</p>
-        <div class="workspace-gateway-links">
-            <a href="./cwl-planner.html" data-i18n="home.openPlanner">Open CWL planner</a>
-            <a href="./cwl-operation-board.html" data-i18n="home.openOperation">Open Operation Board</a>
-            <a href="./groups.html" data-i18n="home.openGroups">Open Groepen</a>
-            <a href="./bracket-generator.html" data-i18n="nav.bracket">Bracket generator</a>
-        </div>
-    </section>
+<main class="workspace-dashboard workspace-dashboard-overview" id="main-content">
+    <header class="workspace-page-header">
+        <p class="page-kicker" data-i18n="nav.dashboard">Dashboard</p>
+        <h1 id="dashboard-welcome" data-i18n="dashboard.welcome">Welkom terug.</h1>
+        <p data-i18n="dashboard.intro">Open een recent plan of ga rechtstreeks naar een tool.</p>
+    </header>
+
+    <nav class="workspace-launch-list" aria-label="Kernfuncties" data-i18n-aria-label="dashboard.coreFunctions">
+        <a href="./cwl-planner.html"><span>01</span><span><strong>CWL Planner</strong><small data-i18n="dashboard.plannerDesc">Maak of wijzig een plan met meerdere clans.</small></span><b data-i18n="dashboard.open">Open →</b></a>
+        <a href="./cwl-operation-board.html"><span>02</span><span><strong>Operation Board</strong><small data-i18n="dashboard.operationDesc">Volg één geselecteerde clan live op.</small></span><b data-i18n="dashboard.open">Open →</b></a>
+        <a href="./groups.html"><span>03</span><span><strong data-i18n="nav.groups">Groepen</strong><small data-i18n="dashboard.groupsDesc">Beheer leden, polls en gekoppelde clans.</small></span><b data-i18n="dashboard.open">Open →</b></a>
+        <a href="./bracket-generator.html"><span>04</span><span><strong data-i18n="nav.bracket">Bracket generator</strong><small data-i18n="dashboard.bracketDesc">Maak een lokaal toernooischema.</small></span><b data-i18n="dashboard.open">Open →</b></a>
+    </nav>
+
+    <div class="workspace-dashboard-split">
+        <section class="workspace-section-block" aria-labelledby="recent-plans-title">
+            <div class="workspace-section-heading">
+                <div><p class="page-kicker" data-i18n="dashboard.recent">Recent</p><h2 id="recent-plans-title" data-i18n="nav.savedPlans">Opgeslagen plannen</h2></div>
+                <a href="./cwl-planner-drafts.html" data-i18n="dashboard.allPlans">Alle plannen →</a>
+            </div>
+            <p id="dashboard-plan-status" class="workspace-inline-status" role="status" aria-live="polite" data-i18n="dashboard.loadingPlans">Plannen laden…</p>
+            <div class="workspace-table-wrap">
+                <table class="workspace-data-table workspace-recent-plans">
+                    <thead><tr><th data-i18n="plans.name">Plan</th><th data-i18n="plans.clans">Clans</th><th data-i18n="plans.freeRoster">Vrij roster</th><th data-i18n="plans.updated">Bijgewerkt</th><th><span class="sr-only" data-i18n="plans.actions">Acties</span></th></tr></thead>
+                    <tbody id="dashboard-plan-list"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <aside class="workspace-section-block workspace-groups-summary" aria-labelledby="recent-groups-title">
+            <div class="workspace-section-heading">
+                <div><p class="page-kicker" data-i18n="dashboard.recent">Recent</p><h2 id="recent-groups-title" data-i18n="nav.groups">Groepen</h2></div>
+                <a href="./groups.html" data-i18n="dashboard.manageGroups">Beheer →</a>
+            </div>
+            <p id="dashboard-group-status" class="workspace-inline-status" role="status" aria-live="polite" data-i18n="dashboard.loadingGroups">Groepen laden…</p>
+            <div id="dashboard-group-list"></div>
+            <button id="dashboard-account-line" class="workspace-account-line" type="button" hidden>
+                <span><strong id="dashboard-account-count">0</strong><small data-i18n="dashboard.linkedAccounts">gekoppelde accounts</small></span>
+                <span data-i18n="dashboard.openProfile">Profiel openen →</span>
+            </button>
+        </aside>
+    </div>
 </main>
 <div class="profile-placeholder"></div>
 </body>
