@@ -15,14 +15,19 @@ De redesign is op 18 juli 2026 volledig visueel en functioneel gecontroleerd. Ge
 - Onderdeel 8 is gestart op branch `feature/post-redesign-functions`.
 - Er zijn geen nieuwe databasevelden, tabellen of migraties voor deze functies toegevoegd.
 - Er is geen fake live data of grafiekdata gebruikt om ontbrekende functies te simuleren.
-- De Operation Board-grafieken blijven afwezig totdat historische datavolledigheid is bewezen.
+- De grafiek voor klassementspositie per dag blijft afwezig totdat historische datavolledigheid is bewezen.
 - Vrij-roster zoeken is als eerste afzonderlijk goedgekeurde functie van Onderdeel 8 geïmplementeerd en gecontroleerd.
+- Sterren per war day is als tweede afzonderlijk goedgekeurde functie gebouwd op de reeds geladen echte rondedata.
 - Mobiele bracketnavigatie, plannen zoeken/sorteren en Groups-ledenfilters blijven `NEW_NOT_IMPLEMENTED`.
 - Onboarding, het aandachtfilter en historische snapshotopslag blijven `OPTIONAL_NOT_APPROVED`.
 
 ## Onderdeel 8 — functie 1
 
 Vrij-roster zoeken op spelersnaam of tag is op 18 juli 2026 afzonderlijk goedgekeurd. De implementatie filtert uitsluitend de reeds gerenderde spelerskaarten in de browser, voert geen API-call per toetsaanslag uit en wijzigt geen plandata. Het gerichte rapport staat in [`post-redesign/01-free-roster-search.md`](post-redesign/01-free-roster-search.md).
+
+## Onderdeel 8 — functie 2
+
+De gebruiker gaf toestemming om de volgende meest cruciale of moeilijke functie te kiezen. Sterren per war day is gekozen omdat dit de grootste nog zichtbare Operation Board-lacune oplost met data die al betrouwbaar per geladen ronde aanwezig is. Alleen live en afgeronde dagen worden getekend; toekomstige of ontbrekende dagen blijven leeg. Het gerichte rapport staat in [`post-redesign/02-stars-per-war-day.md`](post-redesign/02-stars-per-war-day.md).
 
 ## Vastgestelde nieuwe functies
 
@@ -31,7 +36,7 @@ Vrij-roster zoeken op spelersnaam of tag is op 18 juli 2026 afzonderlijk goedgek
 | Vrij roster zoeken op spelersnaam of tag | `IMPLEMENTED_PART8` | Zichtbaar zoekveld met naam-/tagfilter, live resultaatteller en afzonderlijke geen-resultatenstatus | Reeds geladen `freePlayers`; volledig client-side, geen API-call per toetsaanslag | Goedgekeurd op 18 juli 2026 | Onderdeel 8, functie 1 |
 | Plannen zoeken en sorteren | `NEW_NOT_IMPLEMENTED` | Draftspagina heeft geen zoekveld of sorteerbesturing | Reeds geladen planmetadata: naam en `updated_at` | Nog niet goedgekeurd | Onderdeel 8 |
 | Plan exporteren vanuit Opgeslagen plannen | `NEW_NOT_IMPLEMENTED` | Drafts ondersteunt openen, hernoemen, kopiëren en verwijderen, maar geen export | Volledig bestaand plandocument via planservice | Nog niet goedgekeurd | Onderdeel 8 of afzonderlijk besluit na Onderdeel 2 |
-| Sterren per war day als lijngrafiek | `NEW_NOT_IMPLEMENTED` | Geen grafiekcomponent of tijdreeksmodel aanwezig | Echte sterren/destruction/tegenstander per dag uit reeds geladen CWL-rondes; eerst bewijzen dat verleden en toekomstige dagen correct te onderscheiden zijn | Nog niet goedgekeurd | Onderdeel 8 |
+| Sterren per war day als lijngrafiek | `IMPLEMENTED_PART8` | Toegankelijke responsieve grafiek met dag 1–7, echte datapunten, lege toekomstige dagen en detailtooltip | Reeds geladen rondedata met status, sterren, destruction en tegenstander; geen nieuwe opslag | Goedgekeurd via keuze voor de meest cruciale/moeilijke volgende functie op 18 juli 2026 | Onderdeel 8, functie 2 |
 | Klassementspositie per war day als lijngrafiek | `NEW_NOT_IMPLEMENTED` | Alleen actuele/berekende stand aanwezig; geen betrouwbare snapshot per afgeronde dag | Historische standings per dag, reconstrueerbaar uit complete war-data of na apart goedgekeurd snapshotmodel | Nog niet goedgekeurd | Onderdeel 8, na dataonderzoek |
 | Mobiele bracketnavigatie per ronde | `NEW_NOT_IMPLEMENTED` | Bracket rendert alle rondekolommen zonder mobiele rondepijlen/tabs | Bestaand client-side bracketmodel; geen nieuwe backenddata nodig | Nog niet goedgekeurd | Onderdeel 8 |
 | Leden zoeken/filteren in Groups | `NEW_NOT_IMPLEMENTED` | Geen zoek- of filterlogica gevonden in de functionele Groups-pagina | Reeds geladen leden en accounts; client-side | Alleen bouwen indien goedgekeurd prototype dit functioneel vereist en gebruiker toestemt | Onderdeel 8 |

@@ -19,6 +19,15 @@ vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
         'op.viewUnplanned': 'Niet gepland',
         'op.viewMissed': 'Gemist',
         'op.day': 'Dag',
+        'op.dayShort': 'D',
+        'op.starsChartLabel': 'Sterren per dag',
+        'op.chartDaysAvailable': `${values.count || 0}/${values.total || 7} dagen`,
+        'op.starsChartPoint': `Dag ${values.day}: ${values.stars} sterren tegen ${values.opponent}`,
+        'op.destruction': 'destruction',
+        'op.chartOpponent': `Tegen ${values.opponent}`,
+        'op.starsChartEmpty': 'Geen rondes',
+        'op.chartDayEmpty': `Dag ${values.day}: geen data`,
+        'op.chartDayValue': `Dag ${values.day}: ${values.stars} sterren`,
         'op.standingsNote': `${values.count || 0} wars`,
         'op.planned': 'Gepland',
         'op.notPlanned': 'Niet gepland',
@@ -45,6 +54,7 @@ describe('CWL Operation Board', () => {
             <strong id="op-total-stars"></strong><strong id="op-avg-destruction"></strong>
             <strong id="op-attacks-used"></strong><strong id="op-missed-attacks"></strong><strong id="op-current-position"></strong>
             <div id="op-th-list"></div><div id="op-rounds-list"></div><span id="op-round-state"></span><span id="op-round-count"></span>
+            <div id="op-stars-chart"></div><span id="op-stars-chart-state"></span>
             <span id="op-standings-state"></span><div id="op-standings-list"></div><p id="op-standings-note"></p>
             <span id="op-roster-count"></span><table><tbody id="op-roster-body"></tbody></table><input id="op-roster-filter"><select id="op-roster-view"></select>
             <ol id="op-bonus-list"></ol><div class="profile-placeholder"></div>`;
@@ -79,6 +89,8 @@ describe('CWL Operation Board', () => {
         expect(document.querySelector('#op-standings-list .is-selected strong').textContent).toBe('Belgian Warriors');
         expect(document.querySelector('#op-current-position').textContent).toBe('#2');
         expect(document.querySelector('#op-total-stars').textContent).toBe('33');
+        expect(document.querySelectorAll('#op-stars-chart .op-stars-point')).toHaveLength(1);
+        expect(document.querySelectorAll('#op-stars-chart .op-stars-x-axis > span')).toHaveLength(7);
         expect(document.querySelectorAll('#op-roster-body tr')).toHaveLength(2);
         expect(document.querySelectorAll('#op-bonus-list li')).toHaveLength(2);
         expect(document.querySelector('#op-live-state').dataset.state).toBe('imported');

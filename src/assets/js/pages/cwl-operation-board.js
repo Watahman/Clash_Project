@@ -1,6 +1,7 @@
 import { profileHTML } from '../profile/profile_popup.js';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { normalizePlanDocument } from '../cwl/cwl-plan-schema.js';
+import { renderStarsPerDayChart } from '../cwl/cwl-stars-chart.js';
 import {
     decideWarResult,
     isAttackCountingState,
@@ -164,6 +165,8 @@ function initRefs() {
     refs.missed = document.querySelector('#op-missed-attacks');
     refs.currentPosition = document.querySelector('#op-current-position');
     refs.thList = document.querySelector('#op-th-list');
+    refs.starsChart = document.querySelector('#op-stars-chart');
+    refs.starsChartState = document.querySelector('#op-stars-chart-state');
     refs.roundsList = document.querySelector('#op-rounds-list');
     refs.roundState = document.querySelector('#op-round-state');
     refs.roundCount = document.querySelector('#op-round-count');
@@ -233,6 +236,7 @@ function refreshOperationLabels() {
     if (latestReport) renderReport(latestReport);
     else {
         setPhase('unknown');
+        renderStarsPerDayChart(refs.starsChart, [], refs.starsChartState);
         renderEmptyRoster();
     }
 }
@@ -674,6 +678,7 @@ function renderReport(report) {
     setHelp(report.wars.length ? t('op.liveLoaded') : t('op.noLeagueData'));
     renderRosterViewOptions(report);
     renderRounds(report.rounds);
+    renderStarsPerDayChart(refs.starsChart, report.rounds, refs.starsChartState);
     renderScoreboard(report);
     renderStandings(report);
     renderRoster();
@@ -688,6 +693,7 @@ function clearReport(resetSelectors = true) {
     refs.missed.textContent = '0';
     refs.currentPosition.textContent = '-';
     refs.thList.replaceChildren();
+    renderStarsPerDayChart(refs.starsChart, [], refs.starsChartState);
     refs.roundsList.replaceChildren();
     refs.standingsList.replaceChildren();
     refs.standingsState.textContent = '-';
