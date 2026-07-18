@@ -78,7 +78,7 @@ function buildPlayerElement(player, target) {
     }, { once: true });
     element.querySelector('.cwl-player-hashtag').textContent = normalized.tag;
     element.querySelector('.cwl-player-name').textContent = normalized.name;
-    element.querySelector('.cwl-player-clan').textContent = normalized.clanName || 'No clan';
+    element.querySelector('.cwl-player-clan').textContent = normalized.clanName || t('cwl.noClan');
     element.dataset.playerTag = normalized.tag;
     element.dataset.townHall = String(normalized.townHallLevel);
     element.dataset.source = target.source;
@@ -180,21 +180,43 @@ function rememberPlannerPlayers() {
 
 function createClanCard(clanInfo, playerAmount, uuid = '') {
     const clanTag = normalizeTag(clanInfo?.tag);
+    const capacity = [15, 30].includes(Number(playerAmount)) ? Number(playerAmount) : 15;
+    const clanName = clanInfo?.name || clanTag || t('cwl.clan');
+    const leagueName = clanInfo?.warLeague?.name || '';
 
     const clanTemplate = document.querySelector('#cwl-clan-template');
     const clanTemplateClone = clanTemplate.content.cloneNode(true);
     const article = clanTemplateClone.querySelector('article');
     const clanUuid = uuid || crypto.randomUUID();
 
-    clanTemplateClone.querySelector('.cwl-clan-logo').src = clanInfo?.badgeUrls?.small || '../assets/css/pictures/default-clan-banner.png';
-    clanTemplateClone.querySelector('.cwl-clan-name').textContent = clanInfo?.name || clanTag || 'Clan';
-    clanTemplateClone.querySelector('.cwl-amount-of-players-in-clan').textContent = `0/${playerAmount || 15}`;
+    const logo = clanTemplateClone.querySelector('.cwl-clan-logo');
+    logo.src = clanInfo?.badgeUrls?.small || '../assets/css/pictures/default-clan-banner.png';
+    logo.alt = clanName;
+    clanTemplateClone.querySelector('.cwl-clan-name').textContent = clanName;
+    clanTemplateClone.querySelector('.cwl-clan-tag').textContent = clanTag;
+    clanTemplateClone.querySelector('.cwl-clan-league').textContent = leagueName ? ` · ${leagueName}` : '';
+    clanTemplateClone.querySelector('.cwl-amount-of-players-in-clan').textContent = `0/${capacity}`;
     clanTemplateClone.querySelector('.cwl-amount-of-players-in-clan').id = 'cwl-clan-playeramount-template-' + (document.querySelector('#cwl-all-clans').children.length + 1);
+    const capacitySelect = clanTemplateClone.querySelector('.cwl-clan-capacity');
+    clanTemplateClone.querySelector('.cwl-clan-format > span').textContent = t('planner.format');
+    capacitySelect.value = String(capacity);
+    capacitySelect.setAttribute('aria-label', t('planner.format'));
+    capacitySelect.addEventListener('change', () => {
+        const counter = article.querySelector('.cwl-amount-of-players-in-clan');
+        const count = article.querySelectorAll('.cwl-clan-player-list .cwl-player-article[data-planner-card="true"]').length;
+        counter.textContent = `${count}/${capacitySelect.value}`;
+        article.dataset.clanCapacity = capacitySelect.value;
+        savePlan();
+    });
+    const deleteClan = clanTemplateClone.querySelector('.cwl-delete-clan');
+    deleteClan.title = t('cwl.deleteClan');
+    deleteClan.setAttribute('aria-label', t('cwl.deleteClan'));
     article.id = 'cwl-clan-template_' + clanUuid;
     article.dataset.clanTag = clanTag;
-    article.dataset.clanName = clanInfo?.name || '';
+    article.dataset.clanName = clanName;
+    article.dataset.clanCapacity = String(capacity);
 
-    clanTemplateClone.querySelector('.cwl-delete-clan').addEventListener('click', event => {
+    deleteClan.addEventListener('click', event => {
         const currentArticle = event.target.closest('article');
         currentArticle.querySelectorAll('.cwl-player-article[data-planner-card="true"]').forEach(player => {
             document.querySelector('#cwl-available-players').appendChild(player);
@@ -291,7 +313,7 @@ function makeClanDraggable(clanArticle) {
     let offsetX, offsetY;
 
     handle.addEventListener('mousedown', event => {
-        if (event.target.closest('.cwl-delete-clan') ||
+        if (event.target.closest('.cwl-delete-clan, .cwl-clan-capacity') ||
             event.target.closest('.cwl-player-article')) return;
 
         event.preventDefault();

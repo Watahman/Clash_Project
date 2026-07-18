@@ -345,7 +345,7 @@ async function enrichPlayer(tag, token, signal) {
             .find(element => getCardTag(element) === normalizeTag(tag));
         if (!card) return;
         card.querySelector('.cwl-player-name').textContent = data.name || tag;
-        card.querySelector('.cwl-player-clan').textContent = data.clanName || 'No clan';
+        card.querySelector('.cwl-player-clan').textContent = data.clanName || t('cwl.noClan');
         card.dataset.townHall = String(data.townHallLevel || 1);
         const image = card.querySelector('.cwl-player-townhall-foto');
         if (image) image.src = `../assets/css/pictures/townhalls/Town_Hall${data.townHallLevel || 1}.png`;
@@ -360,10 +360,18 @@ async function enrichClan(clan, token, signal) {
         if (token !== activeLoadToken) return;
         const card = document.querySelector(`#cwl-clan-template_${CSS.escape(clan.id)}`);
         if (!card) return;
-        card.dataset.clanName = data.name || clan.name;
-        card.querySelector('.cwl-clan-name').textContent = data.name || clan.name;
+        const clanName = data.name || clan.name || clan.tag || t('cwl.clan');
+        const clanTag = normalizeTag(data.tag || clan.tag);
+        const leagueName = data?.warLeague?.name || '';
+        card.dataset.clanName = clanName;
+        card.dataset.clanTag = clanTag;
+        card.querySelector('.cwl-clan-name').textContent = clanName;
+        card.querySelector('.cwl-clan-tag').textContent = clanTag;
+        card.querySelector('.cwl-clan-league').textContent = leagueName ? ` · ${leagueName}` : '';
         const badge = data?.badgeUrls?.small;
-        if (badge) card.querySelector('.cwl-clan-logo').src = badge;
+        const logo = card.querySelector('.cwl-clan-logo');
+        if (badge) logo.src = badge;
+        logo.alt = clanName;
     } catch (error) {
         if (error?.name !== 'AbortError') return;
     }

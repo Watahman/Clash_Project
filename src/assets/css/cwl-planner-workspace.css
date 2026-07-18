@@ -1,0 +1,443 @@
+.workspace-planner {
+    display: block !important;
+    width: min(100%, var(--content-max-width));
+    min-height: calc(100vh - var(--topbar-height));
+    height: auto !important;
+    margin: 0 auto;
+    padding: clamp(1.25rem, 3vw, 2.5rem);
+    overflow: visible !important;
+    background: var(--bg) !important;
+    color: var(--text);
+}
+
+.workspace-planner h1,
+.workspace-planner h2,
+.workspace-planner h3,
+.workspace-planner p { margin: 0; }
+
+.workspace-planner button,
+.workspace-planner input,
+.workspace-planner select {
+    min-height: 2.5rem;
+    font: inherit;
+    color: var(--text);
+}
+
+.workspace-planner input,
+.workspace-planner select {
+    width: 100%;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-small);
+    background: var(--surface-subtle);
+}
+
+.workspace-planner input:focus-visible,
+.workspace-planner select:focus-visible,
+.workspace-planner button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.cwl-page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-5);
+    width: 100%;
+    height: auto !important;
+    min-height: 0;
+    margin-bottom: var(--space-5);
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+
+.cwl-page-kicker,
+.cwl-panel-heading p,
+.cwl-board-heading p {
+    margin-bottom: var(--space-2) !important;
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.cwl-title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-width: 0;
+}
+
+.cwl-title-row h1 {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text);
+    font-family: Manrope, Inter, "Segoe UI", sans-serif;
+    font-size: clamp(1.8rem, 4vw, 2.35rem);
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cwl-page-header > div:first-child > p:last-child {
+    max-width: 46rem;
+    margin-top: var(--space-3) !important;
+    color: var(--text-muted);
+    line-height: 1.55;
+}
+
+.cwl-plan-state,
+.workspace-planner #cwl-save-status {
+    display: inline-flex !important;
+    align-items: center;
+    min-height: 1.7rem;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-small);
+    color: var(--text-muted);
+    background: var(--surface-subtle);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    white-space: nowrap;
+}
+
+.workspace-planner #cwl-save-status[data-state="saved"] {
+    border-color: color-mix(in srgb, var(--success) 40%, transparent);
+    color: var(--success);
+    background: var(--success-soft);
+}
+
+.workspace-planner #cwl-save-status[data-state="error"] {
+    border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+    color: var(--danger);
+    background: var(--danger-soft);
+}
+
+.cwl-header-actions {
+    display: flex;
+    gap: var(--space-2);
+    flex: 0 0 auto;
+}
+
+.workspace-planner .button,
+.workspace-planner .cwl-add-player-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--border-strong) !important;
+    border-radius: var(--radius-small);
+    background: var(--surface);
+    color: var(--text);
+    font-weight: 700;
+}
+
+.workspace-planner .button:hover,
+.workspace-planner .cwl-add-player-button:hover { background: var(--surface-hover); }
+
+.workspace-planner .button-primary {
+    border-color: var(--accent) !important;
+    background: var(--accent);
+    color: #17130b;
+}
+
+.workspace-planner .button-primary:hover { background: var(--accent-strong); }
+
+.workspace-planner > .cwl-context-toolbar {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: var(--space-3);
+    min-height: 0;
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-bottom: 0;
+    overflow: visible;
+    background: var(--surface-subtle);
+}
+
+.cwl-context-toolbar label,
+.cwl-roster-tools label {
+    display: grid;
+    gap: 0.35rem;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.cwl-context-toolbar label { width: 12rem; flex: 0 1 12rem; }
+.cwl-context-toolbar .cwl-plan-name-field { width: auto; min-width: 12rem; flex: 1 1 18rem; }
+.workspace-planner #cwl-load-plan,
+.workspace-planner #cwl-plan-name { width: 100% !important; max-width: none !important; text-align: left; text-transform: none; letter-spacing: normal; }
+.cwl-toolbar-spacer { display: none; }
+
+.cwl-planner-layout {
+    display: grid;
+    grid-template-columns: 18rem minmax(0, 1fr);
+    min-height: 34rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.workspace-planner .cwl-sidebar,
+.workspace-planner .cwl-board {
+    min-height: 0;
+    overflow: visible;
+    background: var(--surface) !important;
+}
+
+.workspace-planner .cwl-sidebar {
+    border-right: 1px solid var(--border);
+}
+
+.cwl-panel-heading,
+.cwl-board-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    min-height: 4.5rem;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--border);
+}
+
+.cwl-panel-heading h2,
+.cwl-board-heading h2 {
+    color: var(--text);
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+}
+
+.workspace-planner #cwl-total-player-amount,
+.workspace-planner .cwl-amount-of-players-in-clan {
+    border-color: var(--border-strong);
+    border-radius: var(--radius-small);
+    background: var(--surface-subtle);
+    color: var(--text-muted);
+}
+
+.cwl-roster-tools { padding: var(--space-4) var(--space-4) 0; }
+.cwl-add-player-button { width: calc(100% - 2rem); margin: var(--space-3) var(--space-4) 0; border-style: dashed !important; }
+
+.workspace-planner #cwl-available-players {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-height: 10rem;
+    padding: var(--space-3) var(--space-4) var(--space-4);
+    overflow: visible;
+}
+
+.workspace-planner #cwl-available-players:empty::before,
+.workspace-planner #cwl-all-clans:empty::before {
+    content: attr(data-empty-label);
+    display: block;
+    padding: var(--space-5) var(--space-4);
+    color: var(--text-subtle);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.workspace-planner #cwl-all-clans {
+    display: block !important;
+    min-height: 24rem;
+    padding: var(--space-4);
+    overflow: visible;
+}
+
+.workspace-planner .cwl-clan-article {
+    display: flex;
+    height: auto !important;
+    min-height: 7rem !important;
+    margin: 0 0 var(--space-4);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    background: var(--surface) !important;
+    box-shadow: none !important;
+    transition: border-color 120ms ease;
+}
+
+.workspace-planner .cwl-clan-article::before { content: none; }
+.workspace-planner .cwl-clan-article:hover { border-color: var(--border-strong); box-shadow: none; }
+
+.workspace-planner .cwl-clan-info-card {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(10rem, 1fr) auto auto 2.5rem;
+    min-height: 4.25rem !important;
+    gap: var(--space-3);
+    padding: 0.7rem var(--space-4) !important;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-subtle);
+}
+
+.workspace-planner .cwl-clan-logo {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    border: 0;
+    border-radius: 0;
+    object-fit: contain;
+    background: transparent;
+}
+
+.cwl-clan-title { min-width: 0; }
+.workspace-planner .cwl-clan-name {
+    margin: 0;
+    overflow: hidden;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 750;
+    letter-spacing: 0;
+    text-overflow: ellipsis;
+    text-transform: none;
+    white-space: nowrap;
+}
+
+.cwl-clan-title p {
+    margin-top: 0.15rem;
+    overflow: hidden;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cwl-clan-format {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text-muted);
+    font-size: 0.72rem;
+}
+
+.workspace-planner .cwl-clan-capacity { width: 5.2rem; min-height: 2.2rem; }
+
+.workspace-planner .cwl-delete-clan {
+    display: grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-small);
+    background: transparent;
+    filter: none;
+    opacity: 0.7;
+}
+
+.workspace-planner .cwl-delete-clan img {
+    width: 1rem;
+    height: 1rem;
+    filter: invert(63%) sepia(45%) saturate(812%) hue-rotate(309deg) brightness(95%);
+}
+
+.workspace-planner .cwl-delete-clan:hover { background: var(--danger-soft); opacity: 1; transform: none; }
+
+.workspace-planner .cwl-clan-player-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-height: 2.75rem;
+    max-height: none;
+    padding: 0;
+    overflow: visible;
+}
+
+.workspace-planner .cwl-player-article,
+.workspace-planner #cwl-available-players .cwl-player-article,
+.workspace-planner .cwl-clan-player-list .cwl-player-article {
+    display: grid !important;
+    grid-template-columns: 2.35rem minmax(0, 1fr) auto minmax(6.25rem, 8rem) 2.25rem !important;
+    gap: var(--space-3);
+    width: 100% !important;
+    min-height: 3.6rem !important;
+    padding: 0.5rem var(--space-3) !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0;
+    background: transparent !important;
+    box-shadow: none;
+    transform: none !important;
+}
+
+.workspace-planner #cwl-available-players .cwl-player-article:first-child { border-top: 1px solid var(--border) !important; }
+.workspace-planner .cwl-player-article::after { content: none !important; }
+
+.workspace-planner .cwl-player-townhall-foto,
+.workspace-planner #cwl-available-players .cwl-player-townhall-foto,
+.workspace-planner .cwl-clan-player-list .cwl-player-townhall-foto {
+    width: 2.35rem !important;
+    height: 2.35rem !important;
+    border: 0;
+    border-radius: 0;
+    object-fit: contain !important;
+    background: transparent;
+}
+
+.workspace-planner .cwl-player-info { min-width: 0; padding: 0; }
+.workspace-planner .cwl-player-name { color: var(--text) !important; font-size: 0.86rem !important; font-weight: 700; text-transform: none; }
+.workspace-planner .cwl-player-clan,
+.workspace-planner .cwl-player-hashtag { color: var(--text-muted) !important; font-size: 0.68rem; }
+
+.workspace-planner .cwl-availability-indicator {
+    border-radius: var(--radius-small);
+    background: var(--surface-subtle);
+}
+
+.workspace-planner .cwl-move-player { min-height: 2rem; font-size: 0.72rem; }
+
+.workspace-planner .cwl-player-delete {
+    min-height: 2rem;
+    border-radius: var(--radius-small);
+    background: transparent;
+}
+
+.workspace-planner .cwl-clan-player-list.drag-over {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    background: var(--accent-soft);
+}
+
+@media (max-width: 76rem) {
+    .cwl-planner-layout { grid-template-columns: 16rem minmax(0, 1fr); }
+    .workspace-planner .cwl-clan-info-card { grid-template-columns: 2.5rem minmax(8rem, 1fr) auto auto 2.5rem; }
+    .cwl-clan-format > span { display: none; }
+}
+
+@media (max-width: 46rem) {
+    .workspace-planner { padding: var(--space-4); }
+    .cwl-page-header { align-items: stretch; flex-direction: column; }
+    .cwl-title-row { align-items: flex-start; flex-direction: column; gap: var(--space-2); }
+    .cwl-title-row h1 { white-space: normal; }
+    .cwl-header-actions { display: grid; grid-template-columns: 1fr 1fr; }
+    .workspace-planner > .cwl-context-toolbar { align-items: stretch; flex-direction: column; border-bottom: 1px solid var(--border); }
+    .cwl-context-toolbar label,
+    .cwl-context-toolbar .cwl-plan-name-field { width: 100%; min-width: 0; flex: none; }
+    .workspace-planner #cwl-save-status { align-self: flex-start; }
+    .cwl-toolbar-spacer { display: none; }
+    .cwl-planner-layout { display: block; margin-top: var(--space-4); border: 0; }
+    .workspace-planner .cwl-sidebar { margin-bottom: var(--space-4); border: 1px solid var(--border); }
+    .workspace-planner .cwl-board { border: 1px solid var(--border); }
+    .workspace-planner #cwl-all-clans { padding: var(--space-3); }
+    .workspace-planner .cwl-clan-info-card { grid-template-columns: 2.5rem minmax(0, 1fr) auto 2.5rem; }
+    .cwl-clan-format { grid-column: 2 / 3; grid-row: 2; }
+    .workspace-planner .cwl-amount-of-players-in-clan { grid-column: 3; }
+    .workspace-planner .cwl-delete-clan { grid-column: 4; grid-row: 1; }
+    .workspace-planner .cwl-player-article,
+    .workspace-planner #cwl-available-players .cwl-player-article,
+    .workspace-planner .cwl-clan-player-list .cwl-player-article {
+        grid-template-columns: 2.35rem minmax(0, 1fr) auto 2.25rem !important;
+    }
+    .workspace-planner .cwl-move-player { grid-column: 2 / -1; grid-row: 2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .workspace-planner * { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+}

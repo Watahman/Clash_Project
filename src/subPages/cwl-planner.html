@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../assets/css/cwlPlanner.css">
     <link rel="stylesheet" href="../assets/css/profile-overlay.css">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
+    <link rel="stylesheet" href="../assets/css/cwl-planner-workspace.css">
     <script type="module" src="../assets/js/shell/workspace-shell.js"></script>
     <script type="module" src="../assets/js/pages/cwl-planner.js"></script>
 </head>
@@ -35,42 +36,50 @@
     </div>
 </header>
 
-<main class="cwl-main dashboard-main">
-    <section class="cwl-sidebar">
-        <article>
-            <div class="cwl-toolbar cwl-toolbar-players">
-                <div class="cwl-toolbar-title">
-                    <span data-i18n="cwl.playersSub">Vrij roster</span>
-                    <h3 data-i18n="cwl.playersTitle">Spelers</h3>
-                </div>
-                <div class="cwl-toolbar-actions">
-                    <button id="cwl-add-players-button" data-i18n="cwl.addPlayers">Spelers toevoegen</button>
-                    <select id="cwl-player-sorting" aria-label="Sort players" data-i18n-aria-label="cwl.sortPlayers">
-                        <option value="townhall" data-i18n="cwl.sortTownhall">Town Hall</option>
-                        <option value="name" data-i18n="cwl.sortName">Naam</option>
-                    </select>
-                    <p id="cwl-total-player-amount">0</p>
-                </div>
+<main class="cwl-main workspace-planner" id="main-content">
+    <header class="cwl-page-header">
+        <div>
+            <p class="cwl-page-kicker" data-i18n="planner.kicker">CWL Planner</p>
+            <div class="cwl-title-row">
+                <h1 id="cwl-page-title" data-i18n="cwl.unnamedPlan">Naamloos plan</h1>
+                <span class="cwl-plan-state" data-i18n="planner.draft">Concept</span>
             </div>
-            <div id="cwl-available-players" aria-live="polite"></div>
-        </article>
-    </section>
-    <section class="cwl-board">
-        <div class="cwl-toolbar cwl-toolbar-board">
-            <div class="cwl-toolbar-title">
-                <span data-i18n="cwl.clansSub">Planning board</span>
-                <h3 data-i18n="cwl.clansTitle">Clans</h3>
-            </div>
-            <div class="cwl-toolbar-actions cwl-plan-actions">
-                <button id="cwl-add-clan-button" data-i18n="cwl.addClan">Clan toevoegen</button>
-                <button id="cwl-new-plan-button" type="button" data-i18n="cwl.newPlan">Nieuw plan</button>
-                <input type="text" id="cwl-plan-name" data-i18n-placeholder="cwl.planPlaceholder" placeholder="Plan naam..." maxlength="40">
-                <select id="cwl-load-plan" aria-label="Load plan" data-i18n-aria-label="cwl.loadPlan"></select>
-                <button id="cwl-save-plan-button" data-i18n="cwl.save">Opslaan</button>
-            </div>
+            <p data-i18n="planner.description">Deze planning kan meerdere clans bevatten. Rosterformaat en limiet worden per clan ingesteld.</p>
         </div>
-        <article id="cwl-all-clans"></article>
+        <div class="cwl-header-actions">
+            <button class="button button-secondary" id="cwl-new-plan-button" type="button" data-i18n="cwl.newPlan">Nieuw plan</button>
+            <button class="button button-primary" id="cwl-save-plan-button" type="button" data-i18n="cwl.save">Opslaan</button>
+        </div>
+    </header>
+
+    <section class="cwl-context-toolbar" aria-label="Planinstellingen" data-i18n-aria-label="planner.settings">
+        <label><span data-i18n="planner.plan">Plan</span><select id="cwl-load-plan" data-i18n-aria-label="cwl.loadPlan" aria-label="Plan laden"></select></label>
+        <label class="cwl-plan-name-field"><span data-i18n="planner.name">Naam</span><input type="text" id="cwl-plan-name" data-i18n-placeholder="cwl.planPlaceholder" placeholder="Plan naam..." maxlength="40"></label>
+        <button class="button button-secondary" id="cwl-add-clan-button" type="button"><span aria-hidden="true">+</span><span data-i18n="cwl.addClan">Clan toevoegen</span></button>
+        <span class="cwl-toolbar-spacer"></span>
+        <span class="cwl-save-status" id="cwl-save-status" role="status" aria-live="polite" data-state="idle" data-i18n="cwl.saved">Opgeslagen</span>
     </section>
+
+    <div class="cwl-planner-layout">
+        <aside class="cwl-sidebar cwl-roster-panel" aria-labelledby="cwl-free-roster-title">
+            <div class="cwl-panel-heading">
+                <div><p data-i18n="planner.source">Planbron</p><h2 id="cwl-free-roster-title" data-i18n="cwl.playersSub">Vrij roster</h2></div>
+                <span id="cwl-total-player-amount">0</span>
+            </div>
+            <div class="cwl-roster-tools">
+                <label><span data-i18n="cwl.sortPlayers">Spelers sorteren</span><select id="cwl-player-sorting" data-i18n-aria-label="cwl.sortPlayers" aria-label="Spelers sorteren"><option value="townhall" data-i18n="cwl.sortTownhall">Town Hall</option><option value="name" data-i18n="cwl.sortName">Naam</option></select></label>
+            </div>
+            <button class="cwl-add-player-button" id="cwl-add-players-button" type="button"><span aria-hidden="true">+</span><span data-i18n="cwl.addPlayers">Spelers toevoegen</span></button>
+            <div id="cwl-available-players" aria-live="polite"></div>
+        </aside>
+
+        <section class="cwl-board cwl-clan-board" aria-labelledby="cwl-clans-title">
+            <div class="cwl-board-heading">
+                <div><p data-i18n="cwl.clansSub">Planning board</p><h2 id="cwl-clans-title" data-i18n="cwl.clansTitle">Clans</h2></div>
+            </div>
+            <article id="cwl-all-clans" aria-live="polite"></article>
+        </section>
+    </div>
 </main>
 
 <div class="overlay hidden" id="cwl-overlay-add-players">
@@ -151,10 +160,11 @@
 <template id="cwl-clan-template">
     <article class="cwl-clan-article">
         <div class="cwl-clan-info-card">
-            <img src="../assets/css/pictures/default-clan-banner.png" alt="clanLogo" class="cwl-clan-logo">
-            <p class="cwl-clan-name">Clan name</p>
+            <img src="../assets/css/pictures/default-clan-banner.png" alt="" class="cwl-clan-logo">
+            <div class="cwl-clan-title"><h3 class="cwl-clan-name">Clan name</h3><p><span class="cwl-clan-tag"></span><span class="cwl-clan-league"></span></p></div>
+            <label class="cwl-clan-format"><span data-i18n="planner.format">Formaat</span><select class="cwl-clan-capacity" aria-label="Rosterformaat"><option value="15">15v15</option><option value="30">30v30</option></select></label>
             <p class="cwl-amount-of-players-in-clan">0/30</p>
-            <img class="cwl-delete-clan" src="../assets/css/pictures/bin.svg" alt="deleteButton">
+            <button class="cwl-delete-clan" type="button"><img src="../assets/css/pictures/bin.svg" alt=""></button>
         </div>
         <div class="cwl-clan-player-list"></div>
     </article>

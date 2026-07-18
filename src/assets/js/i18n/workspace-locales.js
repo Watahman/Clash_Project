@@ -409,10 +409,83 @@ const part2 = Object.freeze({
     }
 });
 
+const part3 = Object.freeze({
+    nl: {
+        "planner.kicker": "CWL Planner",
+        "planner.draft": "Concept",
+        "planner.description": "Deze planning kan meerdere clans bevatten. Rosterformaat en limiet worden per clan ingesteld.",
+        "planner.settings": "Planinstellingen",
+        "planner.plan": "Plan",
+        "planner.name": "Naam",
+        "planner.source": "Planbron",
+        "planner.format": "Formaat",
+        "planner.emptyRoster": "Nog geen spelers in het vrije roster.",
+        "planner.emptyClans": "Voeg een clan toe om de planning te beginnen.",
+        "cwl.deleteClan": "Clan verwijderen",
+        "cwl.noClan": "Geen clan"
+    },
+    en: {
+        "planner.kicker": "CWL Planner",
+        "planner.draft": "Draft",
+        "planner.description": "This plan can contain multiple clans. Roster format and limit are set per clan.",
+        "planner.settings": "Plan settings",
+        "planner.plan": "Plan",
+        "planner.name": "Name",
+        "planner.source": "Plan source",
+        "planner.format": "Format",
+        "planner.emptyRoster": "No players in the free roster yet.",
+        "planner.emptyClans": "Add a clan to start planning.",
+        "cwl.deleteClan": "Delete clan",
+        "cwl.noClan": "No clan"
+    },
+    fr: {
+        "planner.kicker": "Planificateur CWL",
+        "planner.draft": "Brouillon",
+        "planner.description": "Ce plan peut contenir plusieurs clans. Le format et la limite du roster sont définis par clan.",
+        "planner.settings": "Paramètres du plan",
+        "planner.plan": "Plan",
+        "planner.name": "Nom",
+        "planner.source": "Source du plan",
+        "planner.format": "Format",
+        "planner.emptyRoster": "Aucun joueur dans le roster libre.",
+        "planner.emptyClans": "Ajoutez un clan pour commencer la planification.",
+        "cwl.deleteClan": "Supprimer le clan",
+        "cwl.noClan": "Aucun clan"
+    },
+    de: {
+        "planner.kicker": "CWL-Planer",
+        "planner.draft": "Entwurf",
+        "planner.description": "Dieser Plan kann mehrere Clans enthalten. Rosterformat und Limit werden pro Clan festgelegt.",
+        "planner.settings": "Planeinstellungen",
+        "planner.plan": "Plan",
+        "planner.name": "Name",
+        "planner.source": "Planquelle",
+        "planner.format": "Format",
+        "planner.emptyRoster": "Noch keine Spieler im freien Roster.",
+        "planner.emptyClans": "Füge einen Clan hinzu, um mit der Planung zu beginnen.",
+        "cwl.deleteClan": "Clan löschen",
+        "cwl.noClan": "Kein Clan"
+    },
+    es: {
+        "planner.kicker": "Planificador CWL",
+        "planner.draft": "Borrador",
+        "planner.description": "Este plan puede contener varios clanes. El formato y el límite del roster se definen por clan.",
+        "planner.settings": "Ajustes del plan",
+        "planner.plan": "Plan",
+        "planner.name": "Nombre",
+        "planner.source": "Fuente del plan",
+        "planner.format": "Formato",
+        "planner.emptyRoster": "Aún no hay jugadores en el roster libre.",
+        "planner.emptyClans": "Añade un clan para empezar a planificar.",
+        "cwl.deleteClan": "Eliminar clan",
+        "cwl.noClan": "Sin clan"
+    }
+});
+
 export const workspaceLocales = Object.freeze({
-    nl: Object.freeze({ ...nl, ...part2.nl }),
-    en: Object.freeze({ ...en, ...part2.en }),
-    fr: Object.freeze({ ...fr, ...part2.fr }),
-    de: Object.freeze({ ...de, ...part2.de }),
-    es: Object.freeze({ ...es, ...part2.es })
+    nl: Object.freeze({ ...nl, ...part2.nl, ...part3.nl }),
+    en: Object.freeze({ ...en, ...part2.en, ...part3.en }),
+    fr: Object.freeze({ ...fr, ...part2.fr, ...part3.fr }),
+    de: Object.freeze({ ...de, ...part2.de, ...part3.de }),
+    es: Object.freeze({ ...es, ...part2.es, ...part3.es })
 });

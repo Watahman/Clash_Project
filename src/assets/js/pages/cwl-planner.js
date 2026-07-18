@@ -12,6 +12,7 @@ let addClanPlayersBtn, overlayAddPlayersBtn, addClanBtn, overlayAddClanBtn;
 let cwlInputTag, cwlInputClanCode, selectAmountPlayers;
 let savePlanBtn, newPlanBtn, planName, loadPlan;
 let availablePlayers, allClans, totalPlayerAmount;
+let pageTitle;
 let addPlayersBtn, overlayConfirmTagBtn, accountsSearch, accountList,
     addSelectedBtn, segBtns, selectGroup, groupPreview,
     groupPreviewList, loadGroupBtn, modalTabBtn, modalAccountListEmpty,
@@ -32,6 +33,7 @@ function labelInit() {
     availablePlayers       = document.querySelector("#cwl-available-players");
     allClans               = document.querySelector("#cwl-all-clans");
     totalPlayerAmount      = document.querySelector("#cwl-total-player-amount");
+    pageTitle              = document.querySelector("#cwl-page-title");
     addPlayersBtn          = document.querySelector("#cwl-add-players-button");
     overlayConfirmTagBtn   = document.querySelector("#cwl-overlay-confirm-tag-button");
     accountsSearch         = document.querySelector("#cwl-accounts-search");
@@ -64,10 +66,47 @@ async function init() {
     initSaveButtonState();
     newPlanBtn?.addEventListener('click', startNewPlan);
     initPlayerSorting();
+    initPlanNameSync();
     guessCwlSize();
-    loadAllPlans();
+    void loadAllPlans();
     loadPlanListener();
-    profileHTML();
+    profileHTML({ preload: false });
+}
+
+function initPlanNameSync() {
+    if (!planName) return;
+    planName.addEventListener('input', () => {
+        syncPlanTitle();
+        savePlan();
+    });
+    window.addEventListener('clashtools:cwl-plan-loaded', () => {
+        syncPlanTitle();
+        updateSaveButtonState();
+    });
+    window.addEventListener('clashtools:language-changed', refreshPlannerLabels);
+    refreshPlannerLabels();
+    syncPlanTitle();
+}
+
+function refreshPlannerLabels() {
+    availablePlayers.dataset.emptyLabel = t('planner.emptyRoster');
+    allClans.dataset.emptyLabel = t('planner.emptyClans');
+    document.querySelectorAll('.cwl-clan-format > span').forEach(label => {
+        label.textContent = t('planner.format');
+    });
+    document.querySelectorAll('.cwl-clan-capacity').forEach(select => {
+        select.setAttribute('aria-label', t('planner.format'));
+    });
+    document.querySelectorAll('.cwl-delete-clan').forEach(button => {
+        button.title = t('cwl.deleteClan');
+        button.setAttribute('aria-label', t('cwl.deleteClan'));
+    });
+    syncPlanTitle();
+}
+
+function syncPlanTitle() {
+    if (!pageTitle) return;
+    pageTitle.textContent = planName?.value.trim() || t('cwl.unnamedPlan');
 }
 
 function initPlayerSorting() {
