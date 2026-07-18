@@ -1,6 +1,7 @@
 import { profileHTML } from '../profile/profile_popup.js';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { normalizePlanDocument } from '../cwl/cwl-plan-schema.js';
+import { buildRankingHistory, renderRankingHistoryChart } from '../cwl/cwl-ranking-history.js';
 import { renderStarsPerDayChart } from '../cwl/cwl-stars-chart.js';
 import {
     decideWarResult,
@@ -167,6 +168,8 @@ function initRefs() {
     refs.thList = document.querySelector('#op-th-list');
     refs.starsChart = document.querySelector('#op-stars-chart');
     refs.starsChartState = document.querySelector('#op-stars-chart-state');
+    refs.positionChart = document.querySelector('#op-position-chart');
+    refs.positionChartState = document.querySelector('#op-position-chart-state');
     refs.roundsList = document.querySelector('#op-rounds-list');
     refs.roundState = document.querySelector('#op-round-state');
     refs.roundCount = document.querySelector('#op-round-count');
@@ -237,6 +240,7 @@ function refreshOperationLabels() {
     else {
         setPhase('unknown');
         renderStarsPerDayChart(refs.starsChart, [], refs.starsChartState);
+        renderRankingHistoryChart(refs.positionChart, [], refs.positionChartState);
         renderEmptyRoster();
     }
 }
@@ -660,7 +664,13 @@ function buildReport(raw) {
     })).sort((a, b) => Number(b.townHall) - Number(a.townHall) || a.name.localeCompare(b.name));
 
     const standings = buildStandings(raw.leagueWars || raw.wars, raw.clan.tag);
-    return { ...raw, roster, rounds, standings };
+    const rankingHistory = buildRankingHistory({
+        leagueGroup: raw.leagueGroup,
+        leagueWars: raw.leagueWars,
+        selectedClanTag: raw.clan.tag,
+        buildStandings
+    });
+    return { ...raw, roster, rounds, standings, rankingHistory };
 }
 
 function getPlayerStatus(player) {
@@ -679,6 +689,7 @@ function renderReport(report) {
     renderRosterViewOptions(report);
     renderRounds(report.rounds);
     renderStarsPerDayChart(refs.starsChart, report.rounds, refs.starsChartState);
+    renderRankingHistoryChart(refs.positionChart, report.rankingHistory, refs.positionChartState);
     renderScoreboard(report);
     renderStandings(report);
     renderRoster();
@@ -694,6 +705,7 @@ function clearReport(resetSelectors = true) {
     refs.currentPosition.textContent = '-';
     refs.thList.replaceChildren();
     renderStarsPerDayChart(refs.starsChart, [], refs.starsChartState);
+    renderRankingHistoryChart(refs.positionChart, [], refs.positionChartState);
     refs.roundsList.replaceChildren();
     refs.standingsList.replaceChildren();
     refs.standingsState.textContent = '-';
@@ -955,13 +967,21 @@ function normalizeImportedReport(data) {
     if (!data || typeof data !== 'object') return null;
     if (Array.isArray(data.roster) && Array.isArray(data.rounds)) {
         const leagueWars = Array.isArray(data.leagueWars) ? data.leagueWars : Array.isArray(data.wars) ? data.wars : [];
+        const standings = data.standings || buildStandings(leagueWars, data.clan?.tag || '');
+        const rankingHistory = buildRankingHistory({
+            leagueGroup: data.leagueGroup,
+            leagueWars,
+            selectedClanTag: data.clan?.tag || '',
+            buildStandings
+        });
         return {
             ...data,
             roster: data.roster.map(player => ({ ...player, tag: normalizeTag(player.tag), name: player.name || normalizeTag(player.tag), townHall: parseNumber(player.townHall || player.townHallLevel, 0), dayStats: player.dayStats || {} })).filter(player => player.tag),
             rounds: data.rounds.map((round, index) => ({ ...createEmptyRound(index + 1), ...round, day: round.day || index + 1, stateText: round.stateText || cwlStateText(round.state || 'unknown') })),
             wars: Array.isArray(data.wars) ? data.wars : [],
             leagueWars,
-            standings: data.standings || buildStandings(leagueWars, data.clan?.tag || ''),
+            standings,
+            rankingHistory,
             phase: data.phase || 'unknown'
         };
     }

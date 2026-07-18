@@ -28,6 +28,12 @@ vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
         'op.starsChartEmpty': 'Geen rondes',
         'op.chartDayEmpty': `Dag ${values.day}: geen data`,
         'op.chartDayValue': `Dag ${values.day}: ${values.stars} sterren`,
+        'op.positionChartLabel': 'Positie per dag',
+        'op.positionChartPoint': `Dag ${values.day}: positie ${values.rank}/${values.total}`,
+        'op.chartCumulativeStars': `${values.stars} sterren cumulatief`,
+        'op.positionChartEmpty': 'Geen complete dagstanden',
+        'op.positionDayEmpty': `Dag ${values.day}: geen complete stand`,
+        'op.positionDayValue': `Dag ${values.day}: positie ${values.rank}/${values.total}`,
         'op.standingsNote': `${values.count || 0} wars`,
         'op.planned': 'Gepland',
         'op.notPlanned': 'Niet gepland',
@@ -55,6 +61,7 @@ describe('CWL Operation Board', () => {
             <strong id="op-attacks-used"></strong><strong id="op-missed-attacks"></strong><strong id="op-current-position"></strong>
             <div id="op-th-list"></div><div id="op-rounds-list"></div><span id="op-round-state"></span><span id="op-round-count"></span>
             <div id="op-stars-chart"></div><span id="op-stars-chart-state"></span>
+            <div id="op-position-chart"></div><span id="op-position-chart-state"></span>
             <span id="op-standings-state"></span><div id="op-standings-list"></div><p id="op-standings-note"></p>
             <span id="op-roster-count"></span><table><tbody id="op-roster-body"></tbody></table><input id="op-roster-filter"><select id="op-roster-view"></select>
             <ol id="op-bonus-list"></ol><div class="profile-placeholder"></div>`;
@@ -69,6 +76,14 @@ describe('CWL Operation Board', () => {
             phase: 'live',
             wars: [{ id: 'war-1' }],
             rounds: [{ day: 1, state: 'completed', stateText: 'Afgerond', opponent: 'Northern Kings', stars: 33, destruction: 91.2, attacksUsed: 15, availableAttacks: 15, result: 'win' }],
+            leagueGroup: {
+                clans: [{ tag: '#PQL' }, { tag: '#AAA' }, { tag: '#BBB' }, { tag: '#CCC' }],
+                rounds: [{ warTags: ['#WAR1', '#WAR2'] }, ...Array.from({ length: 6 }, () => ({ warTags: ['#0', '#0'] }))]
+            },
+            leagueWars: [
+                { _round: 1, _warTag: '#WAR1', state: 'warEnded', clan: { tag: '#PQL', name: 'Belgian Warriors', stars: 31, destructionPercentage: 91.2 }, opponent: { tag: '#AAA', name: 'Northern Kings', stars: 30, destructionPercentage: 90.1 } },
+                { _round: 1, _warTag: '#WAR2', state: 'warEnded', clan: { tag: '#BBB', name: 'Les Titans', stars: 33, destructionPercentage: 92.1 }, opponent: { tag: '#CCC', name: 'Nordic Force', stars: 27, destructionPercentage: 86.4 } }
+            ],
             roster: [
                 { tag: '#P001', name: 'Emile', townHall: 17, planned: true, warParticipant: true, attacksUsed: 2, availableAttacks: 2, stars: 6, destruction: 100, missed: 0, status: 'ok' },
                 { tag: '#P002', name: 'Luna', townHall: 16, planned: true, warParticipant: false, attacksUsed: 0, availableAttacks: 0, stars: 0, destruction: 0, missed: 0, status: 'plannedOnly' }
@@ -91,6 +106,8 @@ describe('CWL Operation Board', () => {
         expect(document.querySelector('#op-total-stars').textContent).toBe('33');
         expect(document.querySelectorAll('#op-stars-chart .op-stars-point')).toHaveLength(1);
         expect(document.querySelectorAll('#op-stars-chart .op-stars-x-axis > span')).toHaveLength(7);
+        expect(document.querySelectorAll('#op-position-chart .op-ranking-point')).toHaveLength(1);
+        expect(document.querySelector('#op-position-chart-state').textContent).toBe('1/7 dagen');
         expect(document.querySelectorAll('#op-roster-body tr')).toHaveLength(2);
         expect(document.querySelectorAll('#op-bonus-list li')).toHaveLength(2);
         expect(document.querySelector('#op-live-state').dataset.state).toBe('imported');

@@ -15,9 +15,10 @@ De redesign is op 18 juli 2026 volledig visueel en functioneel gecontroleerd. Ge
 - Onderdeel 8 is gestart op branch `feature/post-redesign-functions`.
 - Er zijn geen nieuwe databasevelden, tabellen of migraties voor deze functies toegevoegd.
 - Er is geen fake live data of grafiekdata gebruikt om ontbrekende functies te simuleren.
-- De grafiek voor klassementspositie per dag blijft afwezig totdat historische datavolledigheid is bewezen.
+- De grafiek voor klassementspositie per dag is als derde functie gebouwd met een strikte volledigheidscontrole op de actuele leaguegroepdata.
 - Vrij-roster zoeken is als eerste afzonderlijk goedgekeurde functie van Onderdeel 8 geïmplementeerd en gecontroleerd.
 - Sterren per war day is als tweede afzonderlijk goedgekeurde functie gebouwd op de reeds geladen echte rondedata.
+- Klassementspositie per war day is als derde functie gebouwd zonder snapshotopslag of migratie; een dag verschijnt alleen bij een complete, afgeronde groepsronde.
 - Mobiele bracketnavigatie, plannen zoeken/sorteren en Groups-ledenfilters blijven `NEW_NOT_IMPLEMENTED`.
 - Onboarding, het aandachtfilter en historische snapshotopslag blijven `OPTIONAL_NOT_APPROVED`.
 
@@ -29,6 +30,10 @@ Vrij-roster zoeken op spelersnaam of tag is op 18 juli 2026 afzonderlijk goedgek
 
 De gebruiker gaf toestemming om de volgende meest cruciale of moeilijke functie te kiezen. Sterren per war day is gekozen omdat dit de grootste nog zichtbare Operation Board-lacune oplost met data die al betrouwbaar per geladen ronde aanwezig is. Alleen live en afgeronde dagen worden getekend; toekomstige of ontbrekende dagen blijven leeg. Het gerichte rapport staat in [`post-redesign/02-stars-per-war-day.md`](post-redesign/02-stars-per-war-day.md).
 
+## Onderdeel 8 — functie 3
+
+Na toestemming om verder te gaan is de technisch moeilijkere klassementspositie per war day onderzocht en gebouwd. De bestaande standberekening wordt per cumulatieve, volledig geladen en afgeronde ronde hergebruikt. Bij een ontbrekende war, onvolledige clandekking of eerdere datakloof blijft die dag en elke latere dag leeg. Het gerichte rapport staat in [`post-redesign/03-position-per-war-day.md`](post-redesign/03-position-per-war-day.md).
+
 ## Vastgestelde nieuwe functies
 
 | Functie | Auditstatus | Huidige lacune | Benodigde echte databron | Goedkeuring | Vroegste fase |
@@ -37,7 +42,7 @@ De gebruiker gaf toestemming om de volgende meest cruciale of moeilijke functie 
 | Plannen zoeken en sorteren | `NEW_NOT_IMPLEMENTED` | Draftspagina heeft geen zoekveld of sorteerbesturing | Reeds geladen planmetadata: naam en `updated_at` | Nog niet goedgekeurd | Onderdeel 8 |
 | Plan exporteren vanuit Opgeslagen plannen | `NEW_NOT_IMPLEMENTED` | Drafts ondersteunt openen, hernoemen, kopiëren en verwijderen, maar geen export | Volledig bestaand plandocument via planservice | Nog niet goedgekeurd | Onderdeel 8 of afzonderlijk besluit na Onderdeel 2 |
 | Sterren per war day als lijngrafiek | `IMPLEMENTED_PART8` | Toegankelijke responsieve grafiek met dag 1–7, echte datapunten, lege toekomstige dagen en detailtooltip | Reeds geladen rondedata met status, sterren, destruction en tegenstander; geen nieuwe opslag | Goedgekeurd via keuze voor de meest cruciale/moeilijke volgende functie op 18 juli 2026 | Onderdeel 8, functie 2 |
-| Klassementspositie per war day als lijngrafiek | `NEW_NOT_IMPLEMENTED` | Alleen actuele/berekende stand aanwezig; geen betrouwbare snapshot per afgeronde dag | Historische standings per dag, reconstrueerbaar uit complete war-data of na apart goedgekeurd snapshotmodel | Nog niet goedgekeurd | Onderdeel 8, na dataonderzoek |
+| Klassementspositie per war day als lijngrafiek | `IMPLEMENTED_PART8` | Toegankelijke cumulatieve positiecurve met strikte volledigheidscontrole en lege dagen na een datakloof | Bestaande leaguegroep, round war-tags en volledig geladen afgeronde wars; bestaande standberekening, geen nieuwe opslag | Goedgekeurd op 18 juli 2026 | Onderdeel 8, functie 3 |
 | Mobiele bracketnavigatie per ronde | `NEW_NOT_IMPLEMENTED` | Bracket rendert alle rondekolommen zonder mobiele rondepijlen/tabs | Bestaand client-side bracketmodel; geen nieuwe backenddata nodig | Nog niet goedgekeurd | Onderdeel 8 |
 | Leden zoeken/filteren in Groups | `NEW_NOT_IMPLEMENTED` | Geen zoek- of filterlogica gevonden in de functionele Groups-pagina | Reeds geladen leden en accounts; client-side | Alleen bouwen indien goedgekeurd prototype dit functioneel vereist en gebruiker toestemt | Onderdeel 8 |
 
@@ -47,7 +52,7 @@ De gebruiker gaf toestemming om de volgende meest cruciale of moeilijke functie 
 |---|---|---|---|---|
 | Onboarding na registratie | `OPTIONAL_NOT_APPROVED` | Er is geen bestaand onboardingmodel of goedgekeurde flow | Productbesluit over stappen, overslaan, opslag en eindbestemming | Onderdeel 8, aparte toestemming |
 | Aandachtfilter in Operation Board | `OPTIONAL_NOT_APPROVED` | Er is geen bestaande detectielogica; fake problemen of waarschuwingen zijn verboden | Expliciete lijst van bestaande, objectief berekenbare signalen | Onderdeel 8, aparte toestemming |
-| Historische standingssnapshots opslaan | `OPTIONAL_NOT_APPROVED` | Alleen nodig als positie per dag niet betrouwbaar uit bestaande API-responses kan worden gereconstrueerd | Datamodel, retentie, migratie, RLS en expliciete toestemming voor databasewijziging | Onderdeel 8, pas na dataonderzoek |
+| Historische standingssnapshots opslaan | `OPTIONAL_NOT_APPROVED` | Niet nodig voor betrouwbare reconstructie binnen een complete actuele leaguegroeprespons; alleen relevant voor langdurige historische bewaring buiten die respons | Datamodel, retentie, migratie, RLS en expliciete toestemming voor databasewijziging | Alleen na apart retentiebesluit |
 
 ## Gecontroleerd en niet nieuw
 
@@ -92,3 +97,11 @@ Geen grafiek wordt getoond met nullen die eigenlijk “nog niet gespeeld” bete
 - **Sterren per war day:** de huidige Operation Board haalt de war-tags uit alle beschikbare CWL-rondes op en bewaart per geladen war de ronde, sterren, destruction en tegenstander. Dat lijkt voldoende om een sterrenlijn voor de op dat moment volledig beschikbare leaguegroep te berekenen, maar er is nog geen bewezen garantie dat de Clash API alle reeds gespeelde wars gedurende de volledige gewenste bewaartermijn blijft teruggeven. Daarom is nog geen grafiek gebouwd.
 - **Positie per war day:** de huidige code berekent alleen de actuele stand uit alle afgeronde wars die in de huidige API-respons aanwezig zijn. Voor een betrouwbare historische positie moet de stand na iedere afzonderlijke dag opnieuw worden opgebouwd uit een aantoonbaar complete set wars, inclusief dezelfde tiebreakregels. Die volledigheid is nog niet bewezen en er bestaat geen snapshotopslag. Daarom is ook deze grafiek niet gebouwd.
 - **Benodigde vervolgstap:** voeg eerst gerichte fixtures/tests toe voor complete en onvolledige leaguegroepen en beslis daarna of reconstructie volstaat of dat een apart, goedgekeurd snapshotmodel nodig is.
+
+### Uitkomst dataonderzoek tijdens Onderdeel 8
+
+- De verwachte war-tags per ronde staan in `leagueGroup.rounds`; geladen wars behouden hun ronde en war-tag.
+- Een dagstand wordt alleen gepubliceerd wanneer het verwachte aantal unieke war-tags aanwezig is, elke verwachte war geladen en afgerond is, en iedere clan uit de groep precies door de dagwars wordt gedekt.
+- De bestaande `buildStandings`-berekening wordt cumulatief hergebruikt, zodat geen nieuwe of afwijkende tiebreaklogica is geïntroduceerd.
+- Zodra een dag onvolledig is, blijven die dag en alle latere dagen leeg. Daarmee wordt geen latere positie op een onvolledige voorgeschiedenis gebaseerd.
+- Deze aanpak is betrouwbaar voor de complete actuele of geïmporteerde leaguegroeprespons en vereist geen databasewijziging. Langdurige historische retentie wordt niet geclaimd en blijft een apart, niet-goedgekeurd snapshotvraagstuk.

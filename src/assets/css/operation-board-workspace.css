@@ -325,6 +325,12 @@
     vector-effect: non-scaling-stroke;
 }
 
+.op-ranking-line { stroke: var(--success); }
+.op-ranking-point .op-stars-point-dot { background: var(--success); outline-color: var(--success); }
+.operation-workspace-page .op-ranking-point:hover .op-stars-point-dot,
+.operation-workspace-page .op-ranking-point:focus-visible .op-stars-point-dot,
+.operation-workspace-page .op-ranking-point.is-open .op-stars-point-dot { background: var(--success); }
+
 .operation-workspace-page .op-stars-point {
     position: absolute;
     top: var(--point-y);
