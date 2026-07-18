@@ -17,19 +17,29 @@ export function createClanAdmin(elements, getState, setMessage, emptyMessage) {
         return clanInfo?.badgeUrls?.small || clanInfo?.badgeUrls?.medium || clanInfo?.badgeUrls?.large || '';
     }
 
-    function setLinkedClans(clans) {
+    function setLinkedClans(clans, groupId = getState().group?.id) {
         linkedClans = Array.isArray(clans) ? clans : [];
         renderLinkedClans();
+        if (groupId) {
+            window.dispatchEvent(new CustomEvent('clashtools:group-clans-updated', {
+                detail: { groupId, count: linkedClans.length }
+            }));
+        }
     }
 
     function load() {
         const { group, userId, canAdmin } = getState();
         if (!group || !userId || !canAdmin) return;
+        const requestedGroupId = group.id;
         withGlobalLoading(() => getGroupClans(group.id, userId)
-            .then(setLinkedClans)
+            .then(data => {
+                if (getState().group?.id !== requestedGroupId) return;
+                setLinkedClans(data, requestedGroupId);
+            })
             .catch(error => {
+                if (getState().group?.id !== requestedGroupId) return;
                 console.error(error);
-                setLinkedClans([]);
+                setLinkedClans([], requestedGroupId);
                 setMessage(t('groups.linkedClansLoadError'));
             }), t('groups.loading'));
     }
@@ -74,6 +84,9 @@ export function createClanAdmin(elements, getState, setMessage, emptyMessage) {
             .then(() => {
                 linkedClans = linkedClans.filter(clan => normalizeTag(clan.clan_tag) !== tag);
                 renderLinkedClans();
+                window.dispatchEvent(new CustomEvent('clashtools:group-clans-updated', {
+                    detail: { groupId: group.id, count: linkedClans.length }
+                }));
                 renderScanPlaceholder(t('groups.scanFirst'));
                 setMessage(t('groups.clanRemoved'), 'success');
             })

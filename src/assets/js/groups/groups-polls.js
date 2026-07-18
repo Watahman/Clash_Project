@@ -34,8 +34,10 @@ export function initGroupPolls(emptyMessage) {
         const userId = getCurrentUserId();
         resetView();
         if (!group || !userId) return;
-        getGroupPolls(group.id, userId)
+        const requestedGroupId = group.id;
+        getGroupPolls(requestedGroupId, userId)
             .then(data => {
+                if (group?.id !== requestedGroupId) return;
                 polls = Array.isArray(data) ? data : [];
                 activePoll = findLatestOpenCwlPoll(polls);
                 renderNotice();
@@ -45,6 +47,7 @@ export function initGroupPolls(emptyMessage) {
                 }
             })
             .catch(() => {
+                if (group?.id !== requestedGroupId) return;
                 el.results?.replaceChildren(emptyMessage(t('groups.pollLoadError')));
             });
     }
@@ -54,6 +57,7 @@ export function initGroupPolls(emptyMessage) {
         activePoll = null;
         selectedResultPoll = null;
         el.notice?.classList.add('hidden');
+        el.availabilityEmpty?.classList.remove('hidden');
         el.pollsList?.replaceChildren(emptyMessage(t('groups.noPolls')));
         el.results?.replaceChildren(emptyMessage(t('groups.noPollSelected')));
     }
@@ -61,6 +65,7 @@ export function initGroupPolls(emptyMessage) {
     function renderNotice() {
         if (!activePoll || !el.notice) return;
         el.notice.classList.remove('hidden');
+        el.availabilityEmpty?.classList.add('hidden');
         if (el.noticeTitle) el.noticeTitle.textContent = activePoll.title;
         if (el.answerBtn) {
             el.answerBtn.textContent = hasAnswer(activePoll, getCurrentUserId()) ? t('groups.editPollAnswer') : t('groups.answerPoll');
@@ -82,7 +87,7 @@ export function initGroupPolls(emptyMessage) {
         info.append(textNode('strong', poll.title), textNode('span', `${poll.status} - ${poll.rounds || 7} ${t('op.roundsShort')}`));
         const actions = document.createElement('div');
         actions.className = 'groups-admin-member-actions';
-        actions.append(actionButton(t('groups.viewResults'), () => renderResults(poll), 'btn-groups-default'));
+        actions.append(actionButton(t('groups.viewResults'), () => openResults(poll), 'btn-groups-default'));
         actions.append(actionButton(poll.status === 'open' ? t('groups.closePoll') : t('groups.openPoll'), () => toggleStatus(poll)));
         item.append(info, actions);
         return item;
@@ -210,6 +215,11 @@ export function initGroupPolls(emptyMessage) {
         resultMembers.forEach(member => el.results.appendChild(userResultNode(member, poll)));
     }
 
+    function openResults(poll) {
+        renderResults(poll);
+        window.dispatchEvent(new CustomEvent('clashtools:group-tab-requested', { detail: { tab: 'availability' } }));
+    }
+
     function summaryNode(total, answered) {
         const node = document.createElement('div');
         node.className = 'groups-poll-summary';
@@ -236,7 +246,8 @@ export function initGroupPolls(emptyMessage) {
         const answer = poll.answers?.[member.user_id];
         const node = document.createElement('div');
         node.className = 'groups-poll-result-user';
-        node.appendChild(textNode('strong', member.name || member.user_id));
+        const profile = Array.isArray(member.profile) ? member.profile[0] : member.profile;
+        node.appendChild(textNode('strong', profile?.name || member.name || member.user_id));
         if (!answer) {
             node.appendChild(textNode('span', t('groups.notAnswered')));
             return node;
@@ -320,6 +331,7 @@ export function initGroupPolls(emptyMessage) {
 function query() {
     return {
         notice: document.querySelector('#groups-poll-notice'),
+        availabilityEmpty: document.querySelector('#groups-availability-empty'),
         noticeTitle: document.querySelector('#groups-poll-notice-title'),
         answerBtn: document.querySelector('#groups-poll-answer-btn'),
         createBtn: document.querySelector('#groups-poll-create-btn'),

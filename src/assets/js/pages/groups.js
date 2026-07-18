@@ -1,193 +1,234 @@
 import { initI18n, t } from '../i18n/i18n.js';
-import { getClanInfoRequest } from "../API/API-Clan.js";
-import { createGroupCard } from "../templates/GroupTemplates.js";
-import { profileHTML } from "../profile/profile_popup.js";
-import { addGroupClan, createGroup, getGroupsOfUser, joinGroup, leaveGroup } from "../Supabase/Supabase-Group.js";
-import { getCurrentUserId } from "../utils/user.js";
-import { withGlobalLoading } from "../utils/loading-state.js";
-import { initCopyFeedback } from "../utils/copy-feedback.js";
-import { initGroupsAdminPanel } from "../groups/groups-admin-panel.js";
-import { initGroupsTooltips, updateCollapseTooltip } from "../groups/groups-tooltips.js";
-import { badgeLabelKey, badgeSvg, GROUP_BADGES } from "../groups/groups-badges.js";
-import { initGroupPolls } from "../groups/groups-polls.js";
-import { syncAuthSession } from "../auth/auth-client.js";
+import { getClanInfoRequest } from '../API/API-Clan.js';
+import { createGroupCard } from '../templates/GroupTemplates.js';
+import { profileHTML } from '../profile/profile_popup.js';
+import { addGroupClan, createGroup, getGroupsOfUser, joinGroup, leaveGroup } from '../Supabase/Supabase-Group.js';
+import { getCurrentUserId } from '../utils/user.js';
+import { withGlobalLoading } from '../utils/loading-state.js';
+import { initCopyFeedback } from '../utils/copy-feedback.js';
+import { initGroupsAdminPanel } from '../groups/groups-admin-panel.js';
+import { badgeLabelKey, badgeSvg, GROUP_BADGES } from '../groups/groups-badges.js';
+import { initGroupPolls } from '../groups/groups-polls.js';
+import { activateGroupTab, bindGroupTabs } from '../groups/groups-tabs.js';
+import { syncAuthSession } from '../auth/auth-client.js';
 
-const groupsMain          = document.querySelector('#groups-main');
-const groupsNewBtn        = document.querySelector('#groups-new-btn');
-const groupsList          = document.querySelector('#groups-list');
-const groupsCollapseBtn   = document.querySelector('#groups-collapse-btn');
-const groupsDetailEmpty   = document.querySelector('#groups-detail-empty');
+const groupsNewBtn = document.querySelector('#groups-new-btn');
+const groupsNewRail = document.querySelector('#groups-new-rail');
+const groupsJoinShortcut = document.querySelector('#groups-join-shortcut');
+const groupsList = document.querySelector('#groups-list');
+const groupsListCount = document.querySelector('#groups-list-count');
+const groupsDetailEmpty = document.querySelector('#groups-detail-empty');
 const groupsDetailContent = document.querySelector('#groups-detail-content');
-const groupsDetailCode    = document.querySelector('#groups-detail-code');
-const groupsOverlayNew    = document.querySelector('#groups-overlay-new');
-const groupsTabCreate     = document.querySelector('#groups-tab-create');
-const groupsTabJoin       = document.querySelector('#groups-tab-join');
-const groupsPanelCreate   = document.querySelector('#groups-panel-create');
-const groupsPanelJoin     = document.querySelector('#groups-panel-join');
+const groupsDetailCode = document.querySelector('#groups-detail-code');
+const groupsOverlayNew = document.querySelector('#groups-overlay-new');
+const groupsTabCreate = document.querySelector('#groups-tab-create');
+const groupsTabJoin = document.querySelector('#groups-tab-join');
+const groupsPanelCreate = document.querySelector('#groups-panel-create');
+const groupsPanelJoin = document.querySelector('#groups-panel-join');
 const groupsCreateOptName = document.querySelector('#groups-create-opt-name');
 const groupsCreateOptClan = document.querySelector('#groups-create-opt-clan');
-const groupsCreateByName  = document.querySelector('#groups-create-by-name');
-const groupsCreateByClan  = document.querySelector('#groups-create-by-clan');
-const groupsInputName     = document.querySelector('#groups-input-name');
-const groupsInputClanTag  = document.querySelector('#groups-input-clan-tag');
-const groupsClanHint      = document.querySelector('#groups-clan-hint');
+const groupsCreateByName = document.querySelector('#groups-create-by-name');
+const groupsCreateByClan = document.querySelector('#groups-create-by-clan');
+const groupsInputName = document.querySelector('#groups-input-name');
+const groupsInputClanTag = document.querySelector('#groups-input-clan-tag');
+const groupsClanHint = document.querySelector('#groups-clan-hint');
 const groupsOverlayCreateBtn = document.querySelector('#groups-overlay-create-btn');
 const groupsInputJoinCode = document.querySelector('#groups-input-join-code');
 const groupsOverlayJoinBtn = document.querySelector('#groups-overlay-join-btn');
 const groupsBadgeOptions = document.querySelector('#groups-badge-options');
-const groupsDetailCheckmark = document.querySelector("#groups-detail-checkmark");
-const groupsDetailCopy    = document.querySelector("#groups-detail-copy");
-const groupOverlayLeave   = document.querySelector("#groups-overlay-leave");
-const groupsLeaveBtn      = document.querySelector('#groups-leave-btn');
+const groupsDetailCheckmark = document.querySelector('#groups-detail-checkmark');
+const groupsDetailCopy = document.querySelector('#groups-detail-copy');
+const groupOverlayLeave = document.querySelector('#groups-overlay-leave');
+const groupsLeaveBtn = document.querySelector('#groups-leave-btn');
 const groupsLeaveCancelBtn = document.querySelector('#groups-leave-cancel-btn');
 const groupsLeaveConfirmBtn = document.querySelector('#groups-leave-confirm-btn');
-const groupsSettingsBtn   = document.querySelector('#groups-settings-btn');
+const groupsSettingsBtn = document.querySelector('#groups-settings-btn');
 const groupsAdminOverlay = document.querySelector('#groups-admin-overlay');
+
+const OPEN_GROUP_STORAGE_KEY = 'clashtoolsOpenGroupId';
+const SELECTED_GROUP_STORAGE_KEY = 'clashtoolsSelectedGroupId';
+const GROUP_TAB_STORAGE_PREFIX = 'clashtoolsGroupTab:';
 let adminPanel;
 let selectedBadge = 'shield';
-const OPEN_GROUP_STORAGE_KEY = 'clashtoolsOpenGroupId';
+let createMode = 'name';
+let currentGroupId = '';
+let reloadSequence = 0;
 
 async function init() {
     initI18n();
     await syncAuthSession().catch(() => null);
-    sideBarToggle();
     initBadgePicker();
-    groupsNewBtn.onclick = () => { newGroupOverlay(); };
-    reloadGroups();
-    profileHTML();
+    initCreateJoinOverlay();
+    initDetailTabs();
+    initStaticActions();
     copyCodeInit();
     leaveGroupFun();
     adminPanel = initGroupsAdminPanel(emptyGroupMessage);
     initGroupPolls(emptyGroupMessage);
-    initGroupsTooltips({ collapseBtn: groupsCollapseBtn, main: groupsMain });
     escPopupClose();
     overlayBackdropClose();
+    profileHTML();
+    await reloadGroups();
+}
+
+function initStaticActions() {
+    groupsNewBtn?.addEventListener('click', () => openNewGroupOverlay('create'));
+    groupsNewRail?.addEventListener('click', () => openNewGroupOverlay('create'));
+    groupsJoinShortcut?.addEventListener('click', () => openNewGroupOverlay('join'));
+    document.querySelector('#groups-inspector-roles')?.addEventListener('click', () => groupsSettingsBtn?.click());
+    document.querySelector('#groups-inspector-code')?.addEventListener('click', () => groupsDetailCode?.click());
+    document.querySelector('#groups-inspector-leave')?.addEventListener('click', () => groupsLeaveBtn?.click());
+
+    window.addEventListener('clashtools:group-opened', event => {
+        currentGroupId = event.detail?.group?.id || '';
+        const storedTab = currentGroupId ? localStorage.getItem(`${GROUP_TAB_STORAGE_PREFIX}${currentGroupId}`) : '';
+        showGroupTab(storedTab || 'members', false);
+    });
+    window.addEventListener('clashtools:group-tab-requested', event => showGroupTab(event.detail?.tab || 'members'));
+    window.addEventListener('clashtools:group-clans-updated', event => {
+        if (!currentGroupId || event.detail?.groupId !== currentGroupId) return;
+        setText('#groups-detail-tab-clan-count', String(event.detail?.count || 0));
+        setText('#groups-inspector-clans', String(event.detail?.count || 0));
+    });
 }
 
 function requireLoggedIn() {
     const userId = getCurrentUserId();
     if (userId) return userId;
     resetGroupDetail();
-    groupsList.replaceChildren(emptyGroupMessage(t('groups.login')));
+    groupsList?.replaceChildren(emptyGroupMessage(t('groups.login')));
     return null;
 }
 
-function newGroupOverlay() {
-    if (!requireLoggedIn()) return;
-    groupsOverlayNew.classList.remove('hidden');
-    groupsOverlayCreateBtn.onclick = () => {
-        const name = groupsInputName.value.trim();
-        createNewGroup(name, "name", selectedBadge);
-        groupsOverlayNew.classList.add('hidden');
-    };
-
-    groupsOverlayJoinBtn.onclick = () => {
-        const code = groupsInputJoinCode.value.trim();
-        joinGroupFun(code);
-        groupsOverlayNew.classList.add('hidden');
-    };
-
-    groupsTabCreate.onclick = () => {
-        groupsPanelCreate.classList.remove('hidden');
-        groupsPanelJoin.classList.add('hidden');
-        groupsTabJoin.classList.remove('groups-overlay-tab-active');
-        groupsTabCreate.classList.add('groups-overlay-tab-active');
-    };
-
-    groupsCreateOptName.onclick = () => {
-        groupsCreateOptName.classList.add('groups-create-option-active');
-        groupsCreateOptClan.classList.remove('groups-create-option-active');
-        groupsCreateByName.classList.remove('hidden');
-        groupsCreateByClan.classList.add('hidden');
-        groupsOverlayCreateBtn.onclick = () => {
-            const name = groupsInputName.value.trim();
-            createNewGroup(name, "name", selectedBadge);
-            groupsOverlayNew.classList.add('hidden');
-        };
-    };
-
-    groupsCreateOptClan.onclick = () => {
-        groupsCreateOptClan.classList.add('groups-create-option-active');
-        groupsCreateOptName.classList.remove('groups-create-option-active');
-        groupsCreateByName.classList.add('hidden');
-        groupsCreateByClan.classList.remove('hidden');
-        groupsOverlayCreateBtn.onclick = () => {
-            const name = groupsInputClanTag.value.trim();
-            createNewGroup(name, "clanTag", selectedBadge);
-            groupsOverlayNew.classList.add('hidden');
-        };
-    };
-
-    groupsTabJoin.onclick = () => {
-        groupsPanelCreate.classList.add('hidden');
-        groupsPanelJoin.classList.remove('hidden');
-        groupsTabJoin.classList.add('groups-overlay-tab-active');
-        groupsTabCreate.classList.remove('groups-overlay-tab-active');
-    };
+function initCreateJoinOverlay() {
+    groupsTabCreate?.addEventListener('click', () => selectOverlayTab('create'));
+    groupsTabJoin?.addEventListener('click', () => selectOverlayTab('join'));
+    groupsCreateOptName?.addEventListener('click', () => selectCreateMode('name'));
+    groupsCreateOptClan?.addEventListener('click', () => selectCreateMode('clanTag'));
+    groupsOverlayCreateBtn?.addEventListener('click', async () => {
+        const value = createMode === 'clanTag' ? groupsInputClanTag?.value.trim() : groupsInputName?.value.trim();
+        if (!value) return;
+        groupsOverlayNew?.classList.add('hidden');
+        await createNewGroup(value, createMode, selectedBadge);
+    });
+    groupsOverlayJoinBtn?.addEventListener('click', async () => {
+        const code = groupsInputJoinCode?.value.trim();
+        if (!code) return;
+        groupsOverlayNew?.classList.add('hidden');
+        await joinGroupFun(code);
+    });
+    selectOverlayTab('create');
+    selectCreateMode('name');
 }
 
-function reloadGroups() {
+function openNewGroupOverlay(tab = 'create') {
+    if (!requireLoggedIn()) return;
+    selectOverlayTab(tab);
+    groupsOverlayNew?.classList.remove('hidden');
+    window.setTimeout(() => (tab === 'join' ? groupsInputJoinCode : groupsInputName)?.focus(), 0);
+}
+
+function selectOverlayTab(tab) {
+    const join = tab === 'join';
+    groupsPanelCreate?.classList.toggle('hidden', join);
+    groupsPanelJoin?.classList.toggle('hidden', !join);
+    groupsTabJoin?.classList.toggle('groups-overlay-tab-active', join);
+    groupsTabCreate?.classList.toggle('groups-overlay-tab-active', !join);
+}
+
+function selectCreateMode(mode) {
+    createMode = mode === 'clanTag' ? 'clanTag' : 'name';
+    const byClan = createMode === 'clanTag';
+    groupsCreateOptName?.classList.toggle('groups-create-option-active', !byClan);
+    groupsCreateOptClan?.classList.toggle('groups-create-option-active', byClan);
+    groupsCreateByName?.classList.toggle('hidden', byClan);
+    groupsCreateByClan?.classList.toggle('hidden', !byClan);
+}
+
+function initDetailTabs() {
+    bindGroupTabs(document, tabName => showGroupTab(tabName));
+}
+
+function showGroupTab(tabName, persist = true) {
+    const safeTab = activateGroupTab(document, tabName);
+    if (persist && currentGroupId) localStorage.setItem(`${GROUP_TAB_STORAGE_PREFIX}${currentGroupId}`, safeTab);
+}
+
+async function reloadGroups() {
     const userId = requireLoggedIn();
     if (!userId) return;
+    const sequence = ++reloadSequence;
+    groupsList?.replaceChildren(emptyGroupMessage(t('groups.loading')));
+    if (groupsListCount) groupsListCount.textContent = '0';
 
-    groupsList.replaceChildren(emptyGroupMessage(t('groups.loading')));
-    withGlobalLoading(() => getGroupsOfUser(userId).then(data => {
-        groupsList.replaceChildren();
+    try {
+        const data = await withGlobalLoading(() => getGroupsOfUser(userId), t('groups.loading'));
+        if (sequence !== reloadSequence) return;
+        groupsList?.replaceChildren();
         if (!Array.isArray(data) || data.length === 0) {
-            groupsList.appendChild(emptyGroupMessage(t('groups.none')));
+            groupsList?.appendChild(emptyGroupMessage(t('groups.none')));
             resetGroupDetail();
             return;
         }
-        const requestedGroupId = sessionStorage.getItem(OPEN_GROUP_STORAGE_KEY);
-        return createGroupCard(data, { autoOpenGroupId: requestedGroupId }).then(opened => {
-            if (requestedGroupId) {
-                sessionStorage.removeItem(OPEN_GROUP_STORAGE_KEY);
-                if (!opened) resetGroupDetail();
-            }
+        if (groupsListCount) groupsListCount.textContent = String(data.length);
+        const requestedGroupId = sessionStorage.getItem(OPEN_GROUP_STORAGE_KEY) || localStorage.getItem(SELECTED_GROUP_STORAGE_KEY) || '';
+        const opened = await createGroupCard(data, {
+            autoOpenGroupId: requestedGroupId,
+            autoOpenFirst: true,
+            onSelect: groupId => localStorage.setItem(SELECTED_GROUP_STORAGE_KEY, groupId)
         });
-    }).catch(error => {
+        sessionStorage.removeItem(OPEN_GROUP_STORAGE_KEY);
+        if (!opened) {
+            groupsList?.appendChild(emptyGroupMessage(t('groups.loadError')));
+            resetGroupDetail();
+        }
+    } catch (error) {
+        if (sequence !== reloadSequence) return;
         console.error(error);
-        groupsList.replaceChildren(emptyGroupMessage(t('groups.loadError')));
-    }), t('groups.loading'));
+        groupsList?.replaceChildren(emptyGroupMessage(t('groups.loadError')));
+        resetGroupDetail();
+    }
 }
 
-function createNewGroup(value, option, badge = 'shield') {
+async function createNewGroup(value, option, badge = 'shield') {
     const userId = requireLoggedIn();
     if (!userId || !value) return;
 
-    if (option === "name") {
-        withGlobalLoading(() => createGroup(value, userId, badge).then(() => {
-            groupsInputName.value = '';
-            reloadGroups();
-        }).catch(error => console.error(error)), t('groups.loading'));
-    } else if (option === "clanTag") {
-        withGlobalLoading(() => getClanInfoRequest(value).then(clanInfo => {
+    if (option === 'name') {
+        await withGlobalLoading(async () => {
+            const created = await createGroup(value, userId, badge);
+            const groupId = Array.isArray(created) ? created[0]?.id : created?.id;
+            if (groupId) localStorage.setItem(SELECTED_GROUP_STORAGE_KEY, groupId);
+            if (groupsInputName) groupsInputName.value = '';
+            await reloadGroups();
+        }, t('groups.loading')).catch(console.error);
+        return;
+    }
+
+    await withGlobalLoading(async () => {
+        try {
+            const clanInfo = await getClanInfoRequest(value);
             const clanTag = normalizeClanTag(clanInfo?.tag || value);
             const clanName = clanInfo?.name || clanTag;
             const officialBadgeUrl = clanBadgeUrl(clanInfo);
-            return createGroup(clanName, userId, badge, officialBadgeUrl).then(createdGroup => {
-                const groupId = Array.isArray(createdGroup) ? createdGroup[0]?.id : createdGroup?.id;
-                if (!groupId) throw new Error('Groep aangemaakt, maar group id ontbreekt');
-                return addGroupClan(groupId, userId, {
-                    tag: clanTag,
-                    name: clanName,
-                    badgeUrl: officialBadgeUrl
-                }).catch(error => {
+            const createdGroup = await createGroup(clanName, userId, badge, officialBadgeUrl);
+            const groupId = Array.isArray(createdGroup) ? createdGroup[0]?.id : createdGroup?.id;
+            if (!groupId) throw new Error('GROUP_ID_MISSING');
+            await addGroupClan(groupId, userId, { tag: clanTag, name: clanName, badgeUrl: officialBadgeUrl })
+                .catch(error => {
                     console.error(error);
                     throw new Error('GROUP_CLAN_LINK_FAILED');
                 });
-            }).then(() => {
-                groupsInputClanTag.value = '';
-                groupsClanHint.textContent = '';
-                reloadGroups();
-            });
-        }).catch(error => {
+            localStorage.setItem(SELECTED_GROUP_STORAGE_KEY, groupId);
+            if (groupsInputClanTag) groupsInputClanTag.value = '';
+            if (groupsClanHint) groupsClanHint.textContent = '';
+            await reloadGroups();
+        } catch (error) {
             console.error(error);
-            groupsClanHint.textContent = error?.message === 'GROUP_CLAN_LINK_FAILED'
-                ? t('groups.clanLinkError')
-                : t('groups.clanNotFound');
-        }), t('groups.loading'));
-    }
+            const linkFailed = ['GROUP_ID_MISSING', 'GROUP_CLAN_LINK_FAILED'].includes(error?.message);
+            if (groupsClanHint) groupsClanHint.textContent = linkFailed ? t('groups.clanLinkError') : t('groups.clanNotFound');
+        }
+    }, t('groups.loading'));
 }
 
 function normalizeClanTag(value) {
@@ -218,41 +259,53 @@ function initBadgePicker() {
 
 function selectBadge(badge) {
     selectedBadge = badge;
-    groupsBadgeOptions?.querySelectorAll('.groups-badge-option')
-        .forEach(button => button.classList.toggle('active', button.dataset.badge === selectedBadge));
+    groupsBadgeOptions?.querySelectorAll('.groups-badge-option').forEach(button => button.classList.toggle('active', button.dataset.badge === selectedBadge));
 }
 
-function joinGroupFun(code) {
+async function joinGroupFun(code) {
     const userId = requireLoggedIn();
     if (!userId || !code) return;
-    withGlobalLoading(() => joinGroup(userId, code).then(() => {
-        groupsInputJoinCode.value = '';
-        reloadGroups();
-    }).catch(error => console.error(error)), t('groups.loading'));
+    await withGlobalLoading(async () => {
+        await joinGroup(userId, code);
+        if (groupsInputJoinCode) groupsInputJoinCode.value = '';
+        await reloadGroups();
+    }, t('groups.loading')).catch(console.error);
 }
 
 function leaveGroupFun() {
-    groupsLeaveBtn.onclick = () => { groupOverlayLeave.classList.remove('hidden'); };
-    groupsLeaveCancelBtn.onclick = () => { groupOverlayLeave.classList.add('hidden'); };
-    groupsLeaveConfirmBtn.onclick = () => {
+    groupsLeaveBtn?.addEventListener('click', () => groupOverlayLeave?.classList.remove('hidden'));
+    groupsLeaveCancelBtn?.addEventListener('click', () => groupOverlayLeave?.classList.add('hidden'));
+    groupsLeaveConfirmBtn?.addEventListener('click', async () => {
         const userId = requireLoggedIn();
         const code = document.querySelector('#groups-detail-code-text')?.textContent?.trim();
-        groupOverlayLeave.classList.add('hidden');
+        groupOverlayLeave?.classList.add('hidden');
         if (!userId || !code) return;
-        withGlobalLoading(() => leaveGroup(userId, code).then(() => {
+        await withGlobalLoading(async () => {
+            await leaveGroup(userId, code);
+            localStorage.removeItem(SELECTED_GROUP_STORAGE_KEY);
             resetGroupDetail();
-            reloadGroups();
-        }).catch(error => console.error(error)), t('groups.loading'));
-    };
+            await reloadGroups();
+        }, t('groups.loading')).catch(console.error);
+    });
 }
 
 function resetGroupDetail() {
-    groupsDetailEmpty.classList.remove('hidden');
-    groupsDetailContent.classList.add('hidden');
+    currentGroupId = '';
+    groupsDetailEmpty?.classList.remove('hidden');
+    groupsDetailContent?.classList.add('hidden');
     groupsSettingsBtn?.classList.add('hidden');
     groupsAdminOverlay?.classList.add('hidden');
-    const memberList = document.querySelector('#groups-member-list');
-    if (memberList) memberList.replaceChildren(emptyGroupMessage(t('groups.noMembers')));
+    document.querySelector('#groups-inspector-management')?.classList.add('hidden');
+    document.querySelectorAll('.groups-item.active').forEach(item => {
+        item.classList.remove('active');
+        item.setAttribute('aria-selected', 'false');
+    });
+    document.querySelector('#groups-member-list')?.replaceChildren(emptyGroupMessage(t('groups.noMembers')));
+    setText('#groups-inspector-name', '—');
+    setText('#groups-inspector-members', '—');
+    setText('#groups-inspector-accounts', '—');
+    setText('#groups-inspector-leaders', '—');
+    setText('#groups-inspector-clans', '—');
 }
 
 function emptyGroupMessage(text) {
@@ -262,44 +315,28 @@ function emptyGroupMessage(text) {
     return p;
 }
 
-function sideBarToggle() {
-    groupsCollapseBtn.addEventListener('click', () => {
-        groupsMain.classList.toggle('sidebar-collapsed');
-        updateCollapseTooltip(groupsCollapseBtn, groupsMain);
-    });
-}
-
 function copyCodeInit() {
-    initCopyFeedback({
-        trigger: groupsDetailCode,
-        copyIcon: groupsDetailCopy,
-        checkIcon: groupsDetailCheckmark,
-        getText: () => groupsDetailCode.querySelector('span')?.textContent?.trim()
-    });
+    initCopyFeedback({ trigger: groupsDetailCode, copyIcon: groupsDetailCopy, checkIcon: groupsDetailCheckmark, getText: () => document.querySelector('#groups-detail-code-text')?.textContent?.trim() });
 }
 
 function escPopupClose() {
-    document.addEventListener('keydown', e => {
-        if (e.key !== 'Escape') return;
-        if (!groupsOverlayNew.classList.contains('hidden')) {
-            groupsOverlayNew.classList.add('hidden');
-            return;
-        }
-        if (!groupOverlayLeave.classList.contains('hidden')) {
-            groupOverlayLeave.classList.add('hidden');
-            return;
-        }
+    document.addEventListener('keydown', event => {
+        if (event.key !== 'Escape') return;
+        if (!groupsOverlayNew?.classList.contains('hidden')) return groupsOverlayNew.classList.add('hidden');
+        if (!groupOverlayLeave?.classList.contains('hidden')) return groupOverlayLeave.classList.add('hidden');
+        if (!document.querySelector('#groups-poll-answer-overlay')?.classList.contains('hidden')) return document.querySelector('#groups-poll-answer-close')?.click();
         adminPanel?.closeAll();
     });
 }
 
 function overlayBackdropClose() {
-    groupsOverlayNew.onclick = (e) => {
-        if (e.target === groupsOverlayNew) groupsOverlayNew.classList.add('hidden');
-    };
-    groupOverlayLeave.onclick = (e) => {
-        if (e.target === groupOverlayLeave) groupOverlayLeave.classList.add('hidden');
-    };
+    groupsOverlayNew?.addEventListener('click', event => { if (event.target === groupsOverlayNew) groupsOverlayNew.classList.add('hidden'); });
+    groupOverlayLeave?.addEventListener('click', event => { if (event.target === groupOverlayLeave) groupOverlayLeave.classList.add('hidden'); });
+}
+
+function setText(selector, value) {
+    const element = document.querySelector(selector);
+    if (element) element.textContent = value;
 }
 
 void init();

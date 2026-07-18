@@ -9,331 +9,139 @@
     <link rel="stylesheet" href="../assets/css/profile-overlay.css">
     <link rel="stylesheet" href="../assets/css/groups.css">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
+    <link rel="stylesheet" href="../assets/css/groups-workspace-v1.css">
     <link rel="icon" type="image/png" href="../assets/css/pictures/shield_with_hamer_logov2.png">
     <script type="module" src="../assets/js/shell/workspace-shell.js"></script>
     <script type="module" src="../assets/js/pages/groups.js"></script>
 </head>
 <body class="workspace-app" data-workspace-page="groups">
 <header>
-    <div class="left">
-        <a href="../index.html">
-            <img src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="ToolsforClash_logo">
-        </a>
-    </div>
-    <nav class="center">
-        <a href="./cwl-planner.html" data-i18n="nav.cwl">CWL planner</a>
-        <a href="./cwl-operation-board.html" data-i18n="nav.operation">Operation board</a>
-        <a href="./groups.html" aria-current="page" data-i18n="nav.groups">Groepen</a>
-    </nav>
-    <div class="right">
-        <button type="button" data-language-control data-i18n="header.language">Taal</button>
-        <button id="profile-btn">
-            <img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt="profile">
-            <span data-i18n="header.user">Gebruiker</span>
-        </button>
-    </div>
+    <div class="left"><a href="../index.html"><img src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="Tools for Clash logo"></a></div>
+    <nav class="center"><a href="./cwl-planner.html" data-i18n="nav.cwl">CWL planner</a><a href="./cwl-operation-board.html" data-i18n="nav.operation">Operation board</a><a href="./groups.html" aria-current="page" data-i18n="nav.groups">Groepen</a></nav>
+    <div class="right"><button type="button" data-language-control data-i18n="header.language">Taal</button><button id="profile-btn"><img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt=""><span data-i18n="header.user">Gebruiker</span></button></div>
 </header>
 
-<main id="groups-main" class="dashboard-main">
-    <section id="groups-sidebar">
-        <div class="groups-sidebar-header">
-            <h3 data-i18n="groups.title">Jouw groepen</h3>
-            <button id="groups-new-btn" class="btn-groups-accent">
-                <img src="../assets/css/pictures/add.svg" alt="">
-                <span data-i18n="groups.new">Nieuw</span>
-            </button>
+<main id="groups-main" class="groups-page">
+    <header class="groups-page-header">
+        <div>
+            <p class="groups-page-kicker" data-i18n="groups.workspaceKicker">Clan network</p>
+            <h1 data-i18n="groups.workspaceTitle">Groepen</h1>
+            <p data-i18n="groups.workspaceIntro">Leden, accounts, polls en clans in één master-detailwerkruimte.</p>
         </div>
-
-        <div id="groups-list">
-            <p class="groups-empty" data-i18n="groups.none">Geen groepen</p>
+        <div class="groups-page-actions">
+            <button class="button button-secondary" id="groups-join-shortcut" type="button" data-i18n="groups.joinWithCode">Join met code</button>
+            <button class="button button-primary" id="groups-new-btn" type="button" data-i18n="groups.newGroup">Nieuwe groep</button>
         </div>
-    </section>
+    </header>
 
-    <button id="groups-collapse-btn" aria-label="" title="" data-i18n-title="groups.collapseSidebar" data-i18n-aria-label="groups.collapseSidebar">
-        <img src="../assets/css/pictures/next.svg" alt="" id="groups-collapse-icon">
-    </button>
+    <div class="groups-workspace">
+        <aside id="groups-sidebar" class="group-index" aria-labelledby="groups-index-title">
+            <div class="group-index-heading">
+                <div><p class="groups-section-kicker" data-i18n="groups.yourNetwork">Jouw netwerk</p><h2 id="groups-index-title" data-i18n="groups.title">Jouw groepen</h2></div>
+                <span id="groups-list-count">0</span>
+            </div>
+            <div id="groups-list" class="group-list" role="listbox" aria-label="Jouw groepen" data-i18n-aria-label="groups.title">
+                <p class="groups-empty" data-i18n="groups.none">Geen groepen</p>
+            </div>
+            <button class="group-index-add" id="groups-new-rail" type="button"><span aria-hidden="true">+</span><span data-i18n="groups.newGroup">Nieuwe groep</span></button>
+        </aside>
 
-    <section id="groups-detail">
+        <section id="groups-detail" class="group-detail" aria-live="polite">
+            <div id="groups-detail-empty" class="groups-detail-empty">
+                <span aria-hidden="true">◇</span><h2 data-i18n="groups.select">Selecteer een groep</h2><p data-i18n="groups.selectHelp">Kies links een groep om leden, beschikbaarheid en beheer te openen.</p>
+            </div>
 
-        <div id="groups-detail-empty">
-            <p class="groups-empty" data-i18n="groups.select">Selecteer een groep</p>
-        </div>
+            <div id="groups-detail-content" class="hidden">
+                <header class="group-detail-header">
+                    <div class="groups-detail-logo group-avatar-large" id="groups-detail-logo" aria-hidden="true">CT</div>
+                    <div class="groups-detail-info">
+                        <h2 class="groups-detail-name" id="groups-detail-name">Groepsnaam</h2>
+                        <div class="groups-detail-meta">
+                            <span id="groups-detail-count">0 leden</span><span aria-hidden="true">·</span><span data-i18n="groups.code">code</span>
+                            <button class="groups-code-pill" id="groups-detail-code" title="" data-i18n-title="groups.copyCode" type="button"><img src="../assets/css/pictures/checkmark_blank.svg" id="groups-detail-checkmark" class="hidden" alt=""><img src="../assets/css/pictures/copy.svg" id="groups-detail-copy" alt=""><span id="groups-detail-code-text">------</span></button>
+                            <span aria-hidden="true">·</span><span class="groups-role-badge" id="groups-detail-role">Lid</span><span class="groups-since" id="groups-detail-since">sinds —</span>
+                        </div>
+                    </div>
+                    <div class="groups-header-actions">
+                        <button class="button button-secondary button-small groups-admin-only hidden" id="groups-settings-btn" type="button" data-i18n="groups.rolesPermissions">Rollen en rechten</button>
+                        <button class="groups-icon-button groups-danger" id="groups-leave-btn" type="button" title="" data-i18n-title="groups.leaveGroup" data-i18n-aria-label="groups.leaveGroup"><img src="../assets/css/pictures/leaving-door.svg" alt=""></button>
+                    </div>
+                </header>
 
-        <div id="groups-detail-content" class="hidden">
+                <nav class="groups-detail-tabs" aria-label="Groepssecties" data-i18n-aria-label="groups.sections">
+                    <button class="is-active" data-group-tab="members" type="button"><span data-i18n="groups.membersTab">Leden</span><b id="groups-detail-tab-member-count">0</b></button>
+                    <button data-group-tab="availability" type="button"><span data-i18n="groups.availability">Beschikbaarheid</span></button>
+                    <button data-group-tab="polls" type="button"><span data-i18n="groups.polls">Polls</span></button>
+                    <button data-group-tab="clans" type="button"><span data-i18n="groups.linkedClans">Gekoppelde clans</span><b id="groups-detail-tab-clan-count">0</b></button>
+                </nav>
 
-            <div class="groups-detail-header">
-                <div class="groups-detail-logo" id="groups-detail-logo">🛡️</div>
-                <div class="groups-detail-info">
-                    <span class="groups-detail-name" id="groups-detail-name">Groepsnaam</span>
-                    <div class="groups-detail-meta">
-                        <span id="groups-detail-count">0 leden</span>
-                        <button class="groups-code-pill" id="groups-detail-code" title="" data-i18n-title="groups.copyCode">
-                            <img src="../assets/css/pictures/checkmark_blank.svg" id="groups-detail-checkmark" class="hidden" alt="">
-                            <img src="../assets/css/pictures/copy.svg" id="groups-detail-copy" alt="kopieer">
-                            <span id="groups-detail-code-text">------</span>
-                        </button>
-                        <span class="groups-role-badge" id="groups-detail-role">Lid</span>
-                        <span class="groups-since" id="groups-detail-since">sinds —</span>
+                <div class="groups-tab-panel is-visible" data-group-panel="members">
+                    <div class="groups-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.memberList">Ledenlijst</p><h2 data-i18n="groups.allMembers">Alle leden</h2></div><span id="groups-members-summary">0 leden</span></div>
+                    <div id="groups-member-list" class="groups-member-list"><p class="groups-empty" data-i18n="groups.noMembers">Geen leden</p></div>
+                </div>
+
+                <div class="groups-tab-panel" data-group-panel="availability">
+                    <div class="groups-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.pollActive">Actieve CWL poll</p><h2 data-i18n="groups.availability">Beschikbaarheid</h2></div></div>
+                    <div class="groups-detail-empty groups-panel-empty" id="groups-availability-empty"><span aria-hidden="true">○</span><h3 data-i18n="groups.noActivePoll">Geen actieve poll</h3><p data-i18n="groups.noActivePollHelp">Zodra een leider een CWL-poll opent, kan elk lid hier per account antwoorden.</p></div>
+                    <div class="groups-poll-notice hidden" id="groups-poll-notice"><div><span class="groups-admin-kicker" data-i18n="groups.pollActive">Actieve CWL poll</span><strong id="groups-poll-notice-title">CWL beschikbaarheid</strong><p id="groups-poll-notice-copy" data-i18n="groups.pollNoticeText">Geef per account door of je CWL kan meespelen.</p></div><button class="button button-primary" id="groups-poll-answer-btn" type="button" data-i18n="groups.answerPoll">Poll invullen</button></div>
+                    <section class="groups-admin-only hidden groups-results-section" aria-labelledby="groups-results-title">
+                        <div class="groups-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.pollResults">Pollresultaten</p><h2 id="groups-results-title" data-i18n="groups.availabilityPerAccount">Per account en CWL-dag</h2></div><button class="button button-secondary button-small" id="groups-poll-reminder-btn" type="button" data-i18n="groups.sendReminder">Reminder sturen</button></div>
+                        <div class="groups-poll-results" id="groups-poll-results"><p class="groups-empty" data-i18n="groups.noPollSelected">Selecteer of maak een poll.</p></div>
+                    </section>
+                </div>
+
+                <div class="groups-tab-panel" data-group-panel="polls">
+                    <div class="groups-member-only groups-permission-message"><strong data-i18n="groups.polls">Polls</strong><span data-i18n="groups.pollMemberHelp">Actieve polls beantwoord je onder Beschikbaarheid. Alleen leiders beheren polls en resultaten.</span></div>
+                    <div class="groups-admin-only hidden groups-management-grid">
+                        <section class="groups-management-section"><div class="groups-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.polls">Polls</p><h2 data-i18n="groups.createPoll">CWL poll aanmaken</h2></div></div><div class="groups-inline-form"><input id="groups-poll-title-input" type="text" data-i18n-placeholder="groups.pollTitlePlaceholder" placeholder="CWL beschikbaarheid"><input id="groups-poll-rounds-input" type="number" min="1" max="7" value="7" aria-label="CWL dagen"><button class="button button-primary" id="groups-poll-create-btn" type="button" data-i18n="groups.createPollBtn">Poll maken</button></div><p class="groups-admin-help" data-i18n="groups.pollCreateHelp">Standaard vraagt de poll beschikbaarheid voor 7 CWL dagen.</p></section>
+                        <section class="groups-management-section"><div class="groups-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.pollOverview">Polloverzicht</p><h2 data-i18n="groups.openAndClosedPolls">Open en gesloten polls</h2></div></div><div class="groups-admin-members" id="groups-admin-polls-list"></div></section>
                     </div>
                 </div>
-                <div class="groups-header-actions">
-                    <!-- Enkel zichtbaar voor (co-)leiders -->
-                    <button class="btn-groups-accent groups-leader-only hidden" id="groups-poll-btn">
-                        <img src="../assets/css/pictures/add.svg" alt="">
-                        Poll
-                    </button>
-                    <button class="btn-groups-default" id="groups-invite-btn">
-                        <img src="../assets/css/pictures/userAdd.svg" alt="">
-                        <span data-i18n="groups.invite">Uitnodigen</span>
-                    </button>
-                    <div class="groups-action-divider"></div>
-                    <!-- Enkel zichtbaar voor (co-)leiders -->
-                    <button class="btn-groups-icon groups-leader-only hidden" id="groups-settings-btn" title="" data-i18n-title="groups.manageGroup" data-i18n-aria-label="groups.manageGroup">
-                        <img src="../assets/css/pictures/settings.svg" alt="Instellingen">
-                    </button>
-                    <button class="btn-groups-icon groups-danger" id="groups-leave-btn" title="" data-i18n-title="groups.leaveGroup" data-i18n-aria-label="groups.leaveGroup">
-                        <img src="../assets/css/pictures/leaving-door.svg" alt="Verlaten">
-                    </button>
+
+                <div class="groups-tab-panel" data-group-panel="clans">
+                    <div class="groups-member-only groups-permission-message"><strong data-i18n="groups.linkedClans">Gekoppelde clans</strong><span data-i18n="groups.clansMemberHelp">Clanbeheer en accountscans zijn beschikbaar voor leiders en co-leiders.</span></div>
+                    <div class="groups-admin-only hidden groups-management-grid">
+                        <section class="groups-management-section"><div class="groups-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.clanNetwork">Clan network</p><h2 data-i18n="groups.linkedClans">Gekoppelde clans</h2></div></div><div class="groups-inline-form"><input id="groups-admin-clan-tag" type="text" placeholder="Clantag: #ABC123" data-i18n-placeholder="groups.clanTagPlaceholder"><button class="button button-primary" id="groups-admin-add-clan" type="button" data-i18n="groups.addClan">Clan toevoegen</button></div><div class="groups-linked-clans" id="groups-linked-clans"><p class="groups-empty" data-i18n="groups.noLinkedClans">Nog geen clans gekoppeld</p></div></section>
+                        <section class="groups-management-section"><div class="groups-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.accountAudit">Accountcontrole</p><h2 data-i18n="groups.unlinkedAccounts">Niet-gelinkte accounts</h2></div><button class="button button-secondary button-small" id="groups-admin-scan-unlinked" type="button" data-i18n="groups.scanUnlinked">Scannen</button></div><p class="groups-admin-help" data-i18n="groups.unlinkedHelp">Vergelijkt live clanleden met accounts van groepsleden.</p><div class="groups-unlinked-accounts" id="groups-unlinked-accounts"><p class="groups-empty" data-i18n="groups.scanFirst">Start een scan om ontbrekende koppelingen te zien.</p></div></section>
+                    </div>
                 </div>
             </div>
+        </section>
 
-            <div class="groups-poll-notice hidden" id="groups-poll-notice">
-                <div>
-                    <span class="groups-admin-kicker" data-i18n="groups.pollActive">Actieve CWL poll</span>
-                    <strong id="groups-poll-notice-title">CWL beschikbaarheid</strong>
-                    <p id="groups-poll-notice-copy" data-i18n="groups.pollNoticeText">Geef per account door of je CWL kan meespelen.</p>
-                </div>
-                <button class="btn-groups-accent" id="groups-poll-answer-btn" type="button" data-i18n="groups.answerPoll">Poll invullen</button>
-            </div>
-
-            <div class="groups-members-panel">
-                <div id="groups-member-list">
-                    <p class="groups-empty">Geen leden</p>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
+        <aside class="group-inspector" id="groups-inspector" aria-labelledby="groups-inspector-title">
+            <p class="groups-section-kicker" data-i18n="groups.groupInfo">Groepsinfo</p><h2 id="groups-inspector-title"><span id="groups-inspector-name">—</span></h2><p class="group-description" id="groups-inspector-description" data-i18n="groups.inspectorEmpty">Selecteer een groep om de kerngegevens te bekijken.</p>
+            <dl class="groups-inspector-stats"><div><dt data-i18n="groups.membersTab">Leden</dt><dd id="groups-inspector-members">—</dd></div><div><dt data-i18n="groups.accounts">Accounts</dt><dd id="groups-inspector-accounts">—</dd></div><div><dt data-i18n="groups.leaders">Leiders</dt><dd id="groups-inspector-leaders">—</dd></div><div><dt data-i18n="groups.linkedClans">Clans</dt><dd id="groups-inspector-clans">—</dd></div></dl>
+            <div id="groups-inspector-management" class="hidden"><hr><p class="groups-section-kicker" data-i18n="groups.management">Beheer</p><button class="groups-inspector-link groups-admin-only hidden" id="groups-inspector-roles" type="button"><span data-i18n="groups.rolesPermissions">Rollen en rechten</span><span aria-hidden="true">→</span></button><button class="groups-inspector-link" id="groups-inspector-code" type="button"><span data-i18n="groups.inviteCode">Uitnodigingscode</span><span aria-hidden="true">→</span></button><button class="groups-inspector-link groups-danger-text" id="groups-inspector-leave" type="button"><span data-i18n="groups.leaveGroup">Groep verlaten</span><span aria-hidden="true">→</span></button></div>
+        </aside>
+    </div>
 </main>
 
 <div class="overlay hidden" id="groups-admin-overlay">
     <section class="overlay-container groups-admin-panel" id="groups-admin-panel" aria-label="Groepsbeheer" role="dialog" aria-modal="true">
-        <div class="groups-admin-header">
-            <div>
-                <span class="groups-admin-kicker" data-i18n="groups.adminKicker">Leader tools</span>
-                <h3 id="groups-admin-title" data-i18n="groups.adminTitle">Groepsbeheer</h3>
-                <p id="groups-admin-subtitle" data-i18n="groups.adminSubtitle">Beheer deze groep.</p>
-            </div>
-            <button class="btn-groups-icon" id="groups-admin-close" type="button" data-i18n-title="groups.closeAdmin" data-i18n-aria-label="groups.closeAdmin">
-                <span aria-hidden="true">x</span>
-            </button>
-        </div>
-
-        <div class="groups-admin-tabs" role="tablist" aria-label="Groepsbeheer secties">
-            <button class="groups-admin-tab groups-admin-tab-active" data-admin-tab="members" type="button" data-i18n="groups.manageMembers">Leden</button>
-            <button class="groups-admin-tab" data-admin-tab="clans" type="button" data-i18n="groups.linkedClans">Gekoppelde clans</button>
-            <button class="groups-admin-tab" data-admin-tab="polls" type="button" data-i18n="groups.polls">Polls</button>
-            <button class="groups-admin-tab" data-admin-tab="future" type="button" data-i18n="groups.laterTools">Later</button>
-        </div>
-
+        <div class="groups-admin-header"><div><span class="groups-admin-kicker" data-i18n="groups.adminKicker">Leader tools</span><h3 id="groups-admin-title" data-i18n="groups.adminTitle">Groepsbeheer</h3><p id="groups-admin-subtitle" data-i18n="groups.adminSubtitle">Beheer deze groep.</p></div><button class="groups-icon-button" id="groups-admin-close" type="button" data-i18n-title="groups.closeAdmin" data-i18n-aria-label="groups.closeAdmin"><span aria-hidden="true">×</span></button></div>
         <p class="groups-admin-message" id="groups-admin-message"></p>
-
-        <div class="groups-admin-section" id="groups-admin-section-members" data-admin-section="members">
-            <article class="groups-admin-card">
-                <div class="groups-admin-card-header">
-                    <h4 data-i18n="groups.manageMembers">Leden beheren</h4>
-                    <p class="groups-admin-help" id="groups-admin-role-help"></p>
-                </div>
-                <div class="groups-admin-members" id="groups-admin-members">
-                    <p class="groups-empty" data-i18n="groups.loading">Groepen laden...</p>
-                </div>
-            </article>
-        </div>
-
-        <div class="groups-admin-section hidden" id="groups-admin-section-clans" data-admin-section="clans">
-            <div class="groups-admin-grid">
-                <article class="groups-admin-card">
-                    <h4 data-i18n="groups.linkedClans">Gekoppelde clans</h4>
-                    <div class="groups-admin-form">
-                        <input id="groups-admin-clan-tag" type="text" placeholder="Clantag: #ABC123" data-i18n-placeholder="groups.clanTagPlaceholder">
-                        <button class="btn-groups-accent" id="groups-admin-add-clan">
-                            <img src="../assets/css/pictures/add.svg" alt="">
-                            <span data-i18n="groups.addClan">Clan toevoegen</span>
-                        </button>
-                    </div>
-                    <div class="groups-linked-clans" id="groups-linked-clans">
-                        <p class="groups-empty" data-i18n="groups.noLinkedClans">Nog geen clans gekoppeld</p>
-                    </div>
-                </article>
-
-                <article class="groups-admin-card">
-                    <div class="groups-admin-card-header">
-                        <h4 data-i18n="groups.unlinkedAccounts">Niet-gelinkte accounts</h4>
-                        <button class="btn-groups-default" id="groups-admin-scan-unlinked">
-                            <span data-i18n="groups.scanUnlinked">Scannen</span>
-                        </button>
-                    </div>
-                    <p class="groups-admin-help" data-i18n="groups.unlinkedHelp">Vergelijkt live clanleden met accounts van groepsleden.</p>
-                    <div class="groups-unlinked-accounts" id="groups-unlinked-accounts">
-                        <p class="groups-empty" data-i18n="groups.scanFirst">Start een scan om ontbrekende koppelingen te zien.</p>
-                    </div>
-                </article>
-            </div>
-        </div>
-
-        <div class="groups-admin-section hidden" id="groups-admin-section-future" data-admin-section="future">
-            <article class="groups-admin-card groups-admin-card-muted">
-                <h4 data-i18n="groups.laterTools">Later</h4>
-                <p data-i18n="groups.laterToolsText">Plaats voorzien voor polls, pollresultaten en reminders.</p>
-            </article>
-        </div>
-
-        <div class="groups-admin-section hidden" id="groups-admin-section-polls" data-admin-section="polls">
-            <div class="groups-admin-grid">
-                <article class="groups-admin-card">
-                    <h4 data-i18n="groups.createPoll">CWL poll aanmaken</h4>
-                    <div class="groups-admin-form">
-                        <input id="groups-poll-title-input" type="text" data-i18n-placeholder="groups.pollTitlePlaceholder" placeholder="CWL beschikbaarheid">
-                        <input id="groups-poll-rounds-input" type="number" min="1" max="7" value="7" aria-label="CWL dagen">
-                        <button class="btn-groups-accent" id="groups-poll-create-btn" type="button">
-                            <span data-i18n="groups.createPollBtn">Poll maken</span>
-                        </button>
-                    </div>
-                    <p class="groups-admin-help" data-i18n="groups.pollCreateHelp">Standaard vraagt de poll beschikbaarheid voor 7 CWL dagen.</p>
-                    <div class="groups-admin-members" id="groups-admin-polls-list"></div>
-                </article>
-
-                <article class="groups-admin-card">
-                    <div class="groups-admin-card-header">
-                        <h4 data-i18n="groups.pollResults">Pollresultaten</h4>
-                        <button class="btn-groups-default" id="groups-poll-reminder-btn" type="button" data-i18n="groups.sendReminder">Reminder sturen</button>
-                    </div>
-                    <div class="groups-poll-results" id="groups-poll-results">
-                        <p class="groups-empty" data-i18n="groups.noPollSelected">Selecteer of maak een poll.</p>
-                    </div>
-                </article>
-            </div>
-        </div>
+        <div class="groups-admin-section" id="groups-admin-section-members" data-admin-section="members"><article class="groups-admin-card"><div class="groups-admin-card-header"><h4 data-i18n="groups.manageMembers">Leden beheren</h4><p class="groups-admin-help" id="groups-admin-role-help"></p></div><div class="groups-admin-members" id="groups-admin-members"><p class="groups-empty" data-i18n="groups.loading">Groepen laden...</p></div></article></div>
     </section>
 </div>
 
 <div class="overlay hidden" id="groups-overlay-new">
-    <div class="overlay-container groups-overlay-tabbed">
-
-        <div class="groups-overlay-tabs">
-            <button class="groups-overlay-tab groups-overlay-tab-active" id="groups-tab-create" data-i18n="groups.create">Aanmaken</button>
-            <button class="groups-overlay-tab" id="groups-tab-join" data-i18n="groups.join">Joinen</button>
-        </div>
-
-        <div class="groups-overlay-panel" id="groups-panel-create">
-
-            <div class="groups-create-options">
-                <button class="groups-create-option groups-create-option-active" id="groups-create-opt-name">
-                    <span data-i18n="groups.groupName">Groepsnaam</span>
-                </button>
-                <button class="groups-create-option" id="groups-create-opt-clan">
-                    <span data-i18n="groups.clan">Clash of Clans clan</span>
-                </button>
-            </div>
-
-            <div id="groups-create-by-name">
-                <input id="groups-input-name" type="text" placeholder="Groepsnaam">
-            </div>
-
-            <div id="groups-create-by-clan" class="hidden">
-                <input id="groups-input-clan-tag" type="text" placeholder="Clantag: #ABC123">
-                <p class="groups-clan-hint" id="groups-clan-hint"></p>
-            </div>
-
-            <div class="groups-badge-picker" id="groups-badge-picker" aria-label="Groepsbadge">
-                <span class="groups-badge-picker-title" data-i18n="groups.chooseBadge">Kies badge</span>
-                <div class="groups-badge-options" id="groups-badge-options"></div>
-            </div>
-
-            <button class="btn-groups-accent" id="groups-overlay-create-btn" data-i18n="groups.createBtn">Aanmaken</button>
-        </div>
-
-        <div class="groups-overlay-panel hidden" id="groups-panel-join">
-            <input id="groups-input-join-code" type="text" placeholder="Groepscode: ######">
-            <button class="btn-groups-accent" id="groups-overlay-join-btn" data-i18n="groups.joinBtn">Joinen</button>
-        </div>
-
+    <div class="overlay-container groups-overlay-tabbed" role="dialog" aria-modal="true" aria-label="Groep aanmaken of joinen">
+        <div class="groups-overlay-tabs" role="tablist"><button class="groups-overlay-tab groups-overlay-tab-active" id="groups-tab-create" type="button" data-i18n="groups.create">Aanmaken</button><button class="groups-overlay-tab" id="groups-tab-join" type="button" data-i18n="groups.join">Joinen</button></div>
+        <div class="groups-overlay-panel" id="groups-panel-create"><div class="groups-create-options"><button class="groups-create-option groups-create-option-active" id="groups-create-opt-name" type="button"><span data-i18n="groups.groupName">Groepsnaam</span></button><button class="groups-create-option" id="groups-create-opt-clan" type="button"><span data-i18n="groups.clan">Clash of Clans clan</span></button></div><div id="groups-create-by-name"><input id="groups-input-name" type="text" placeholder="Groepsnaam"></div><div id="groups-create-by-clan" class="hidden"><input id="groups-input-clan-tag" type="text" placeholder="Clantag: #ABC123"><p class="groups-clan-hint" id="groups-clan-hint"></p></div><div class="groups-badge-picker" id="groups-badge-picker" aria-label="Groepsbadge"><span class="groups-badge-picker-title" data-i18n="groups.chooseBadge">Kies badge</span><div class="groups-badge-options" id="groups-badge-options"></div></div><button class="button button-primary button-full" id="groups-overlay-create-btn" type="button" data-i18n="groups.createBtn">Aanmaken</button></div>
+        <div class="groups-overlay-panel hidden" id="groups-panel-join"><input id="groups-input-join-code" type="text" placeholder="Groepscode: ######"><button class="button button-primary button-full" id="groups-overlay-join-btn" type="button" data-i18n="groups.joinBtn">Joinen</button></div>
     </div>
 </div>
 
 <div class="profile-placeholder"></div>
 
-<template id="groups-item-template">
-    <div class="groups-item">
-        <div class="groups-item-logo">🛡️</div>
-        <div class="groups-item-info">
-            <span class="groups-item-name">Naam</span>
-            <span class="groups-item-meta">0 leden</span>
-        </div>
-        <span class="groups-role-badge">Lid</span>
-    </div>
-</template>
+<template id="groups-item-template"><button class="groups-item group-index-row" type="button" role="option" aria-selected="false"><div class="groups-item-logo group-avatar">CT</div><div class="groups-item-info"><span class="groups-item-name">Naam</span><span class="groups-item-meta">0 leden</span></div><span class="groups-role-badge">Lid</span></button></template>
 
-<template id="groups-member-template">
-    <div class="groups-member-item">
-        <div class="groups-member-avatar">
-            <img src="../assets/css/pictures/profile.svg" alt="">
-        </div>
-        <span class="groups-member-name">Username</span>
-        <span class="groups-member-clan">Clan</span>
-        <span class="groups-role-badge">Lid</span>
-    </div>
-</template>
+<template id="groups-member-template"><article class="groups-member-item"><div class="groups-member-avatar" aria-hidden="true"><img src="../assets/css/pictures/profile.svg" alt=""></div><div class="groups-member-identity"><strong class="groups-member-name">Username</strong><span class="groups-member-code">—</span></div><span class="groups-role-badge">Lid</span><div class="groups-member-accounts"></div></article></template>
 
-<div class="overlay hidden" id="groups-overlay-leave">
-    <div class="overlay-container groups-overlay-leave-container">
-        <h3 class="groups-leave-title" data-i18n="groups.leaveTitle">Groep verlaten?</h3>
-        <p class="groups-leave-desc">
-<span data-i18n="groups.leaveDesc">Ben je zeker dat je deze groep wilt verlaten? Je kan opnieuw joinen met de groepscode.</span>
-        </p>
-        <div class="groups-leave-actions">
-            <button class="btn-groups-default" id="groups-leave-cancel-btn" data-i18n="groups.cancel">Annuleren</button>
-            <button class="btn-groups-icon btn-groups-danger groups-leave-confirm-btn" id="groups-leave-confirm-btn">
-                <img src="../assets/css/pictures/leaving-door.svg" alt="">
-                <span data-i18n="groups.leave">Verlaten</span>
-            </button>
-        </div>
-    </div>
-</div>
+<div class="overlay hidden" id="groups-overlay-leave"><div class="overlay-container groups-overlay-leave-container" role="dialog" aria-modal="true"><h3 class="groups-leave-title" data-i18n="groups.leaveTitle">Groep verlaten?</h3><p class="groups-leave-desc" data-i18n="groups.leaveDesc">Ben je zeker dat je deze groep wilt verlaten? Je kan opnieuw joinen met de groepscode.</p><div class="groups-leave-actions"><button class="button button-secondary" id="groups-leave-cancel-btn" type="button" data-i18n="groups.cancel">Annuleren</button><button class="button groups-leave-confirm-btn" id="groups-leave-confirm-btn" type="button"><span data-i18n="groups.leave">Verlaten</span></button></div></div></div>
 
-<div class="overlay hidden" id="groups-role-confirm-overlay">
-    <div class="overlay-container groups-overlay-leave-container" role="dialog" aria-modal="true" aria-label="Leadership overdragen">
-        <h3 class="groups-leave-title" data-i18n="groups.transferTitle">Leadership overdragen?</h3>
-        <p class="groups-leave-desc" id="groups-role-confirm-text"></p>
-        <div class="groups-leave-actions">
-            <button class="btn-groups-default" id="groups-role-confirm-cancel" data-i18n="groups.cancel">Annuleren</button>
-            <button class="btn-groups-accent" id="groups-role-confirm-accept">
-                <span data-i18n="groups.transferConfirm">Overdragen</span>
-            </button>
-        </div>
-    </div>
-</div>
+<div class="overlay hidden" id="groups-role-confirm-overlay"><div class="overlay-container groups-overlay-leave-container" role="dialog" aria-modal="true" aria-label="Leadership overdragen"><h3 class="groups-leave-title" data-i18n="groups.transferTitle">Leadership overdragen?</h3><p class="groups-leave-desc" id="groups-role-confirm-text"></p><div class="groups-leave-actions"><button class="button button-secondary" id="groups-role-confirm-cancel" type="button" data-i18n="groups.cancel">Annuleren</button><button class="button button-primary" id="groups-role-confirm-accept" type="button"><span data-i18n="groups.transferConfirm">Overdragen</span></button></div></div></div>
 
-<div class="overlay hidden" id="groups-poll-answer-overlay">
-    <div class="overlay-container groups-poll-answer-container" role="dialog" aria-modal="true" aria-label="CWL poll beantwoorden">
-        <div class="groups-admin-header">
-            <div>
-                <span class="groups-admin-kicker" data-i18n="groups.pollTypeCwl">CWL availability</span>
-                <h3 class="groups-leave-title" id="groups-poll-answer-title">CWL poll</h3>
-                <p class="groups-leave-desc" id="groups-poll-answer-group"></p>
-            </div>
-            <button class="btn-groups-icon" id="groups-poll-answer-close" type="button" data-i18n-title="groups.closeAdmin" data-i18n-aria-label="groups.closeAdmin">
-                <span aria-hidden="true">x</span>
-            </button>
-        </div>
-        <div class="groups-poll-answer-body" id="groups-poll-answer-body"></div>
-        <div class="groups-leave-actions">
-            <button class="btn-groups-default" id="groups-poll-answer-cancel" data-i18n="groups.cancel">Annuleren</button>
-            <button class="btn-groups-accent" id="groups-poll-answer-save" data-i18n="groups.savePollAnswer">Antwoord opslaan</button>
-        </div>
-    </div>
-</div>
-
+<div class="overlay hidden" id="groups-poll-answer-overlay"><div class="overlay-container groups-poll-answer-container" role="dialog" aria-modal="true" aria-label="CWL poll beantwoorden"><div class="groups-admin-header"><div><span class="groups-admin-kicker" data-i18n="groups.pollTypeCwl">CWL availability</span><h3 class="groups-leave-title" id="groups-poll-answer-title">CWL poll</h3><p class="groups-leave-desc" id="groups-poll-answer-group"></p></div><button class="groups-icon-button" id="groups-poll-answer-close" type="button" data-i18n-title="groups.closeAdmin" data-i18n-aria-label="groups.closeAdmin"><span aria-hidden="true">×</span></button></div><div class="groups-poll-answer-body" id="groups-poll-answer-body"></div><div class="groups-leave-actions"><button class="button button-secondary" id="groups-poll-answer-cancel" type="button" data-i18n="groups.cancel">Annuleren</button><button class="button button-primary" id="groups-poll-answer-save" type="button" data-i18n="groups.savePollAnswer">Antwoord opslaan</button></div></div></div>
 </body>
 </html>

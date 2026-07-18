@@ -39,7 +39,6 @@ export function initGroupsAdminPanel(emptyMessage) {
         if (!isGroupAdmin(currentRole)) return;
         elements.overlay?.classList.remove('hidden');
         showTab('members');
-        preloadAdminData();
     }
 
     function close() {

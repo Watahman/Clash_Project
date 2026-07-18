@@ -1,89 +1,189 @@
 import { t } from '../i18n/i18n.js';
-import { getGroupInfo, getGroupMembers } from "../Supabase/Supabase-Group.js";
-import { applyRoleBadge, getCurrentUserRole, getMemberRole, isGroupAdmin } from "../groups/groups-roles.js";
-import { renderBadge } from "../groups/groups-badges.js";
+import { getGroupInfo, getGroupMembers } from '../Supabase/Supabase-Group.js';
+import { applyRoleBadge, getCurrentUserRole, getMemberRole, isGroupAdmin } from '../groups/groups-roles.js';
+import { renderBadge } from '../groups/groups-badges.js';
 
 function memberLabel(count) {
-    return count === 1 ? '1 ' + t('groups.memberSingle') : count + ' ' + t('groups.members');
+    return count === 1 ? `1 ${t('groups.memberSingle')}` : `${count} ${t('groups.members')}`;
 }
 
-export function createGroupCard(groupsInfo, options = {}) {
-    if (!Array.isArray(groupsInfo)) return Promise.resolve(false);
+export function memberAccounts(member) {
+    const profile = profileOf(member);
+    const value = profile?.accounts;
+    if (Array.isArray(value)) return value;
+    if (typeof value !== 'string' || !value.trim()) return [];
+    try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+}
 
-    const autoOpenGroupId = options.autoOpenGroupId || '';
-    const groupPromises = groupsInfo.map((group) => {
-        const groupCard = document.querySelector("#groups-item-template").content.cloneNode(true);
-        return getGroupInfo(group.group_id).then(groupData => {
-            if (!Array.isArray(groupData) || groupData.length === 0) return false;
-            return getGroupMembers(groupData[0].id).then(groupMembers => {
-                groupMembers = Array.isArray(groupMembers) ? groupMembers : [];
-                groupCard.querySelector(".groups-item-meta").textContent = memberLabel(groupMembers.length);
-                groupCard.querySelector(".groups-item-name").textContent = groupData[0].name;
-                renderBadge(groupCard.querySelector(".groups-item-logo"), groupData[0].badge, groupData[0].badge_url);
-                const currentRole = getCurrentUserRole(groupData[0], groupMembers, localStorage.getItem("id"), group);
-                applyRoleBadge(groupCard.querySelector(".groups-role-badge"), currentRole, t);
-                const item = groupCard.querySelector(".groups-item");
-                item.dataset.groupId = groupData[0].id;
-                item.onclick = () => {
-                    document.querySelectorAll(".groups-item.active").forEach(activeItem => activeItem.classList.remove("active"));
-                    item.classList.add("active");
-                    document.querySelector("#groups-member-list").replaceChildren();
-                    openGroup(groupData[0], groupMembers);
-                };
-                document.querySelector("#groups-list").appendChild(groupCard);
-                document.querySelector("#groups-list .groups-empty")?.classList.add("hidden");
-                if (autoOpenGroupId && groupData[0].id === autoOpenGroupId) {
-                    item.click();
-                    return true;
-                }
-                return false;
+export function groupMemberSummary(members) {
+    const safeMembers = Array.isArray(members) ? members : [];
+    return {
+        members: safeMembers.length,
+        accounts: safeMembers.reduce((total, member) => total + memberAccounts(member).length, 0),
+        leaders: safeMembers.filter(member => ['leader', 'co_leader', 'co-leader'].includes(member?.role)).length
+    };
+}
+
+export async function createGroupCard(groupsInfo, options = {}) {
+    if (!Array.isArray(groupsInfo)) return false;
+
+    const hydrated = await Promise.all(groupsInfo.map(async membership => {
+        try {
+            const groupData = await getGroupInfo(membership.group_id);
+            const group = Array.isArray(groupData) ? groupData[0] : groupData;
+            if (!group?.id) return null;
+            const membersData = await getGroupMembers(group.id);
+            return { membership, group, members: Array.isArray(membersData) ? membersData : [] };
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    }));
+
+    const groups = hydrated.filter(Boolean);
+    const list = document.querySelector('#groups-list');
+    const cards = [];
+    groups.forEach(entry => {
+        const fragment = document.querySelector('#groups-item-template').content.cloneNode(true);
+        const item = fragment.querySelector('.groups-item');
+        item.dataset.groupId = entry.group.id;
+        fragment.querySelector('.groups-item-name').textContent = entry.group.name;
+        fragment.querySelector('.groups-item-meta').textContent = memberLabel(entry.members.length);
+        renderBadge(fragment.querySelector('.groups-item-logo'), entry.group.badge, entry.group.badge_url);
+        const currentRole = getCurrentUserRole(entry.group, entry.members, localStorage.getItem('id'), entry.membership);
+        applyRoleBadge(fragment.querySelector('.groups-role-badge'), currentRole, t);
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.groups-item.active').forEach(activeItem => {
+                activeItem.classList.remove('active');
+                activeItem.setAttribute('aria-selected', 'false');
             });
-        }).catch(error => console.error(error));
+            item.classList.add('active');
+            item.setAttribute('aria-selected', 'true');
+            openGroup(entry.group, entry.members);
+            options.onSelect?.(entry.group.id);
+        });
+        list?.appendChild(fragment);
+        cards.push({ item, groupId: entry.group.id });
     });
 
-    return Promise.all(groupPromises).then(results => results.some(Boolean));
+    const requested = cards.find(card => card.groupId === options.autoOpenGroupId);
+    const target = requested || (options.autoOpenFirst ? cards[0] : null);
+    target?.item.click();
+    return Boolean(target);
 }
 
-function openGroup(data, groupMembers) {
-    document.querySelector("#groups-detail-empty").classList.add("hidden");
-    document.querySelector("#groups-detail-content").classList.remove("hidden");
-    document.querySelector("#groups-detail-name").textContent = data.name;
-    renderBadge(document.querySelector("#groups-detail-logo"), data.badge, data.badge_url);
-    document.querySelector("#groups-detail-count").textContent = memberLabel(groupMembers.length);
-    document.querySelector("#groups-detail-code-text").textContent = data.code;
-    document.querySelector('#groups-detail-since').textContent = t('groups.since') + ' ' + data.created_at.split('T')[0];
-    const roleBadge = document.querySelector("#groups-detail-role");
-    roleBadge.classList.remove("leader", "co-leader");
-    const currentUserId = localStorage.getItem("id");
-    const currentRole = getCurrentUserRole(data, groupMembers, currentUserId);
+function openGroup(group, members) {
+    renderGroupView(group, members, true);
+}
+
+function renderGroupView(group, members, dispatch) {
+    const safeMembers = Array.isArray(members) ? members : [];
+    document.querySelector('#groups-detail-empty')?.classList.add('hidden');
+    document.querySelector('#groups-detail-content')?.classList.remove('hidden');
+    setText('#groups-detail-name', group.name);
+    renderBadge(document.querySelector('#groups-detail-logo'), group.badge, group.badge_url);
+
+    const summary = groupMemberSummary(safeMembers);
+    const memberText = memberLabel(summary.members);
+    setText('#groups-detail-count', memberText);
+    setText('#groups-detail-tab-member-count', String(summary.members));
+    setText('#groups-members-summary', memberText);
+    setText('#groups-detail-code-text', group.code || '------');
+    setText('#groups-detail-since', `${t('groups.since')} ${formatDate(group.created_at)}`);
+    setText('#groups-inspector-name', group.name);
+    setText('#groups-inspector-description', t('groups.inspectorDescription', { name: group.name }));
+    setText('#groups-inspector-members', String(summary.members));
+    setText('#groups-inspector-accounts', String(summary.accounts));
+    setText('#groups-inspector-leaders', String(summary.leaders));
+    setText('#groups-inspector-clans', '—');
+    document.querySelector('#groups-inspector-management')?.classList.remove('hidden');
+
+    const currentRole = getCurrentUserRole(group, safeMembers, localStorage.getItem('id'));
     const canAdmin = isGroupAdmin(currentRole);
-    const settingsBtn = document.querySelector("#groups-settings-btn");
-    if (settingsBtn) settingsBtn.classList.toggle("hidden", !canAdmin);
-    const pollBtn = document.querySelector("#groups-poll-btn");
-    if (pollBtn) pollBtn.classList.add("hidden");
+    applyRoleBadge(document.querySelector('#groups-detail-role'), currentRole, t);
+    document.querySelectorAll('.groups-admin-only').forEach(element => element.classList.toggle('hidden', !canAdmin));
+    document.querySelectorAll('.groups-member-only').forEach(element => element.classList.toggle('hidden', canAdmin));
+    addAllMembers(safeMembers, group.owner_id);
 
-    applyRoleBadge(roleBadge, currentRole, t);
-    addAllMembers(groupMembers, data.owner_id);
-    window.dispatchEvent(new CustomEvent("clashtools:group-opened", {
-        detail: { group: data, members: groupMembers, currentRole, canAdmin }
-    }));
+    if (dispatch) {
+        window.dispatchEvent(new CustomEvent('clashtools:group-opened', { detail: { group, members: safeMembers, currentRole, canAdmin } }));
+    }
 }
 
-function addAllMembers(groupMembers, creatorId) {
-    const memberList = document.querySelector("#groups-member-list");
-    if (!Array.isArray(groupMembers) || groupMembers.length === 0) {
-        const p = document.createElement("p");
-        p.className = "groups-empty";
-        p.textContent = t('groups.noMembers');
-        memberList.appendChild(p);
+function addAllMembers(members, creatorId) {
+    const memberList = document.querySelector('#groups-member-list');
+    memberList?.replaceChildren();
+    if (!members.length) {
+        const empty = document.createElement('p');
+        empty.className = 'groups-empty';
+        empty.textContent = t('groups.noMembers');
+        memberList?.appendChild(empty);
         return;
     }
 
-    groupMembers.forEach(member => {
-        const groupMemberCard = document.querySelector("#groups-member-template").content.cloneNode(true);
-        const user = member.profile || { id: member.user_id, name: member.user_id };
-        groupMemberCard.querySelector(".groups-member-name").textContent = user.name || member.user_id;
-        applyRoleBadge(groupMemberCard.querySelector(".groups-role-badge"), getMemberRole(member, { owner_id: creatorId }, user.id), t);
-        memberList.appendChild(groupMemberCard);
+    members.forEach(member => {
+        const fragment = document.querySelector('#groups-member-template').content.cloneNode(true);
+        const user = profileOf(member) || { id: member.user_id, name: member.user_id };
+        fragment.querySelector('.groups-member-name').textContent = user.name || member.user_id;
+        fragment.querySelector('.groups-member-code').textContent = user.code || member.user_id;
+        applyRoleBadge(fragment.querySelector('.groups-role-badge'), getMemberRole(member, { owner_id: creatorId }, user.id || member.user_id), t);
+        renderAccounts(fragment.querySelector('.groups-member-accounts'), memberAccounts(member));
+        memberList?.appendChild(fragment);
     });
 }
+
+function renderAccounts(container, accounts) {
+    container?.replaceChildren();
+    if (!accounts.length) {
+        const empty = document.createElement('span');
+        empty.className = 'groups-no-accounts';
+        empty.textContent = t('groups.noLinkedAccounts');
+        container?.appendChild(empty);
+        return;
+    }
+    accounts.forEach((account, index) => {
+        const chip = document.createElement('span');
+        chip.className = 'groups-account-chip';
+        const name = account?.name || account?.playerName || account?.tag || account?.playerTag || `${t('groups.account')} ${index + 1}`;
+        const tag = account?.tag || account?.playerTag || account?.accountTag || '';
+        const townHall = account?.townHallLevel || account?.townHall || '';
+        if (townHall) chip.appendChild(textNode('em', `TH${townHall}`));
+        chip.appendChild(textNode('strong', name));
+        if (tag) chip.appendChild(textNode('span', tag));
+        container?.appendChild(chip);
+    });
+}
+
+function profileOf(member) {
+    return Array.isArray(member?.profile) ? member.profile[0] : member?.profile;
+}
+
+function formatDate(value) {
+    if (!value) return '—';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value).split('T')[0] || '—';
+    return new Intl.DateTimeFormat(document.documentElement.lang || 'nl', { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
+}
+
+function textNode(tagName, text) {
+    const node = document.createElement(tagName);
+    node.textContent = text;
+    return node;
+}
+
+function setText(selector, value) {
+    const element = document.querySelector(selector);
+    if (element) element.textContent = value;
+}
+
+window.addEventListener('clashtools:group-roles-updated', event => {
+    const group = event.detail?.group;
+    const activeGroupId = document.querySelector('.groups-item.active')?.dataset.groupId;
+    if (!group?.id || activeGroupId !== group.id) return;
+    renderGroupView(group, event.detail?.members || [], false);
+});
