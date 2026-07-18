@@ -222,7 +222,19 @@
     color: var(--text-muted);
 }
 
-.cwl-roster-tools { padding: var(--space-4) var(--space-4) 0; }
+.cwl-roster-tools {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-4) 0;
+}
+
+.cwl-roster-filter-status {
+    min-height: 1rem;
+    margin: calc(var(--space-1) * -1) 0 0;
+    color: var(--text-subtle);
+    font-size: 0.72rem;
+    line-height: 1.35;
+}
 .cwl-add-player-button { width: calc(100% - 2rem); margin: var(--space-3) var(--space-4) 0; border-style: dashed !important; }
 
 .workspace-planner #cwl-available-players {
@@ -237,6 +249,16 @@
 .workspace-planner #cwl-available-players:empty::before,
 .workspace-planner #cwl-all-clans:empty::before {
     content: attr(data-empty-label);
+    display: block;
+    padding: var(--space-5) var(--space-4);
+    color: var(--text-subtle);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.workspace-planner #cwl-available-players[data-filter-empty="true"]::after {
+    content: attr(data-filter-empty-label);
     display: block;
     padding: var(--space-5) var(--space-4);
     color: var(--text-subtle);

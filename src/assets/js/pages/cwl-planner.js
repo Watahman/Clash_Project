@@ -3,6 +3,7 @@ import { profileHTML } from "../profile/profile_popup.js";
 import { syncAuthSession } from "../auth/auth-client.js";
 import { initOverlayHide, initAddPlayersOverlay, initAddClanButton, applyCwlSizeRestriction } from "../cwl/cwl-overlay.js";
 import { initPlanIO, savePlan, loadAllPlans, loadPlanListener, startNewPlan } from "../cwl/cwl-plan-io.js";
+import { initFreeRosterFilter } from "../cwl/cwl-roster-filter.js";
 import { getClanInfoRequest } from "../API/API-Clan.js";
 import * as conf from "../Data/config.js";
 
@@ -65,6 +66,11 @@ async function init() {
     savePlanButton();
     initSaveButtonState();
     newPlanBtn?.addEventListener('click', startNewPlan);
+    initFreeRosterFilter({
+        container: availablePlayers,
+        input: document.querySelector('#cwl-roster-search'),
+        status: document.querySelector('#cwl-roster-filter-status')
+    });
     initPlayerSorting();
     initPlanNameSync();
     guessCwlSize();

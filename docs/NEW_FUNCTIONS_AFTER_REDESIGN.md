@@ -8,22 +8,27 @@ Werkbranch: `redesign/exact-workspace-from-functional`
 
 Dit document is een parkeerplaats, geen implementatieplan. Tijdens Onderdeel 1 tot en met 7 worden uitsluitend bestaande functies opnieuw gekoppeld aan het goedgekeurde prototype. Een functie in deze lijst mag pas na volledige redesigngoedkeuring én afzonderlijke toestemming worden gebouwd.
 
-## Finale status na Onderdeel 7
+## Status na Onderdeel 7
 
 De redesign is op 18 juli 2026 volledig visueel en functioneel gecontroleerd. Geen van de onderstaande nieuwe of optionele functies is tijdens Onderdeel 1 tot en met 7 gebouwd. De auditstatussen, databronvoorwaarden en goedkeuringsvereisten blijven ongewijzigd.
 
-- Onderdeel 8 is niet gestart.
+- Onderdeel 8 is gestart op branch `feature/post-redesign-functions`.
 - Er zijn geen nieuwe databasevelden, tabellen of migraties voor deze functies toegevoegd.
 - Er is geen fake live data of grafiekdata gebruikt om ontbrekende functies te simuleren.
 - De Operation Board-grafieken blijven afwezig totdat historische datavolledigheid is bewezen.
-- Mobiele bracketnavigatie, rosterzoeken, plannen zoeken/sorteren en Groups-ledenfilters blijven `NEW_NOT_IMPLEMENTED`.
+- Vrij-roster zoeken is als eerste afzonderlijk goedgekeurde functie van Onderdeel 8 geïmplementeerd en gecontroleerd.
+- Mobiele bracketnavigatie, plannen zoeken/sorteren en Groups-ledenfilters blijven `NEW_NOT_IMPLEMENTED`.
 - Onboarding, het aandachtfilter en historische snapshotopslag blijven `OPTIONAL_NOT_APPROVED`.
+
+## Onderdeel 8 — functie 1
+
+Vrij-roster zoeken op spelersnaam of tag is op 18 juli 2026 afzonderlijk goedgekeurd. De implementatie filtert uitsluitend de reeds gerenderde spelerskaarten in de browser, voert geen API-call per toetsaanslag uit en wijzigt geen plandata. Het gerichte rapport staat in [`post-redesign/01-free-roster-search.md`](post-redesign/01-free-roster-search.md).
 
 ## Vastgestelde nieuwe functies
 
 | Functie | Auditstatus | Huidige lacune | Benodigde echte databron | Goedkeuring | Vroegste fase |
 |---|---|---|---|---|---|
-| Vrij roster zoeken op spelersnaam of tag | `NEW_NOT_IMPLEMENTED` | Alleen de accountselectie-overlay heeft een zoekveld; het geladen vrije roster heeft geen filter | Reeds geladen `freePlayers`; client-side, geen API-call per toetsaanslag | Nog niet goedgekeurd | Onderdeel 8 |
+| Vrij roster zoeken op spelersnaam of tag | `IMPLEMENTED_PART8` | Zichtbaar zoekveld met naam-/tagfilter, live resultaatteller en afzonderlijke geen-resultatenstatus | Reeds geladen `freePlayers`; volledig client-side, geen API-call per toetsaanslag | Goedgekeurd op 18 juli 2026 | Onderdeel 8, functie 1 |
 | Plannen zoeken en sorteren | `NEW_NOT_IMPLEMENTED` | Draftspagina heeft geen zoekveld of sorteerbesturing | Reeds geladen planmetadata: naam en `updated_at` | Nog niet goedgekeurd | Onderdeel 8 |
 | Plan exporteren vanuit Opgeslagen plannen | `NEW_NOT_IMPLEMENTED` | Drafts ondersteunt openen, hernoemen, kopiëren en verwijderen, maar geen export | Volledig bestaand plandocument via planservice | Nog niet goedgekeurd | Onderdeel 8 of afzonderlijk besluit na Onderdeel 2 |
 | Sterren per war day als lijngrafiek | `NEW_NOT_IMPLEMENTED` | Geen grafiekcomponent of tijdreeksmodel aanwezig | Echte sterren/destruction/tegenstander per dag uit reeds geladen CWL-rondes; eerst bewijzen dat verleden en toekomstige dagen correct te onderscheiden zijn | Nog niet goedgekeurd | Onderdeel 8 |
