@@ -27,6 +27,8 @@ let latestReport = null;
 let requestToken = 0;
 let planSelectToken = 0;
 let reportController;
+let syncState = 'idle';
+let lastSyncAt = null;
 
 function normalizeTag(tag = '') {
     const source = typeof tag === 'object' && tag !== null
@@ -160,6 +162,7 @@ function initRefs() {
     refs.avgDestruction = document.querySelector('#op-avg-destruction');
     refs.attacksUsed = document.querySelector('#op-attacks-used');
     refs.missed = document.querySelector('#op-missed-attacks');
+    refs.currentPosition = document.querySelector('#op-current-position');
     refs.thList = document.querySelector('#op-th-list');
     refs.roundsList = document.querySelector('#op-rounds-list');
     refs.roundState = document.querySelector('#op-round-state');
@@ -174,9 +177,25 @@ function initRefs() {
     refs.bonusList = document.querySelector('#op-bonus-list');
 }
 
-function setState(text, isError = false) {
-    refs.liveState.textContent = text;
-    refs.liveState.dataset.state = isError ? 'error' : text;
+function setState(state, isError = false) {
+    syncState = isError ? 'error' : state;
+    if (syncState === 'ready' || syncState === 'imported') lastSyncAt = new Date();
+    refs.liveState.dataset.state = syncState;
+    refs.refresh.disabled = syncState === 'loading';
+    refs.refresh.setAttribute('aria-busy', String(syncState === 'loading'));
+    renderSyncState();
+}
+function renderSyncState() {
+    if (syncState === 'loading') refs.liveState.textContent = t('op.syncing');
+    else if (syncState === 'error') refs.liveState.textContent = t('op.syncError');
+    else if (syncState === 'imported') refs.liveState.textContent = t('op.importedState');
+    else if (syncState === 'ready' && lastSyncAt) {
+        const time = new Intl.DateTimeFormat(document.documentElement.lang || undefined, {
+            hour: '2-digit',
+            minute: '2-digit'
+        }).format(lastSyncAt);
+        refs.liveState.textContent = t('op.syncedAt', { time });
+    } else refs.liveState.textContent = t('op.syncIdle');
 }
 function setHelp(text, isError = false) {
     refs.help.textContent = text;
@@ -203,6 +222,19 @@ function initEvents() {
             loadStandaloneClan();
         }
     };
+    window.addEventListener('clashtools:language-changed', refreshOperationLabels);
+}
+
+function refreshOperationLabels() {
+    refs.roundsList.dataset.emptyLabel = t('op.noPlayedRounds');
+    refs.standingsList.dataset.emptyLabel = t('op.standingsFallback');
+    refs.bonusList.dataset.emptyLabel = t('op.noRoster');
+    renderSyncState();
+    if (latestReport) renderReport(latestReport);
+    else {
+        setPhase('unknown');
+        renderEmptyRoster();
+    }
 }
 
 function loadPlans() {
@@ -346,6 +378,10 @@ async function refreshClanReport(clan) {
             getClanCurrentWarRequest(clan.tag, { signal })
         ]);
         if (token !== requestToken) return;
+        const hasCoreData = [clanInfo, membersData, leagueGroup, currentWar].some(result =>
+            result.status === 'fulfilled' && result.value && !result.value.error
+        );
+        if (!hasCoreData) throw new Error('No live clan data available');
         const members = membersData.status === 'fulfilled' && Array.isArray(membersData.value?.items) ? membersData.value.items : [];
         const clanInfoValue = clanInfo.status === 'fulfilled' && !clanInfo.value?.error ? clanInfo.value : null;
         const clanBase = {
@@ -650,12 +686,14 @@ function clearReport(resetSelectors = true) {
     refs.avgDestruction.textContent = '0%';
     refs.attacksUsed.textContent = '0/0';
     refs.missed.textContent = '0';
+    refs.currentPosition.textContent = '-';
     refs.thList.replaceChildren();
     refs.roundsList.replaceChildren();
     refs.standingsList.replaceChildren();
     refs.standingsState.textContent = '-';
     refs.standingsNote.textContent = '';
     refs.rosterBody.replaceChildren();
+    renderEmptyRoster();
     refs.bonusList.replaceChildren();
     refs.rosterCount.textContent = '0 ' + t('op.players');
     renderRosterViewOptions(null);
@@ -711,14 +749,14 @@ function renderStandings(report) {
     const standings = report?.standings;
     if (!standings?.rows?.length || standings.selectedIndex < 0) {
         refs.standingsState.textContent = t('op.standingsUnavailable');
+        refs.currentPosition.textContent = '-';
         refs.standingsList.appendChild(chip(t('op.standingsFallback')));
         return;
     }
     const selected = standings.rows[standings.selectedIndex];
     refs.standingsState.textContent = `#${selected.rank}/${standings.rows.length}`;
-    const start = Math.max(0, standings.selectedIndex - 1);
-    const visibleRows = standings.rows.slice(start, standings.selectedIndex + 2);
-    visibleRows.forEach(row => {
+    refs.currentPosition.textContent = `#${selected.rank}`;
+    standings.rows.forEach(row => {
         const item = document.createElement('div');
         item.className = `op-standing-row${row.tag === selected.tag ? ' is-selected' : ''}`;
         item.innerHTML = `
@@ -801,6 +839,10 @@ function renderRoster() {
     });
 
     refs.rosterCount.textContent = `${roster.length} ${t('op.players')}`;
+    if (roster.length === 0) {
+        renderEmptyRoster();
+        return;
+    }
     roster.forEach(player => {
         const display = isDayView ? getPlayerDayDisplay(player, day, round) : {
             warText: player.warParticipant ? t('op.inAnyWar') : t('op.notInWar'),
@@ -825,6 +867,17 @@ function renderRoster() {
             <td>${badge(display.statusText, display.statusKind)}</td>`;
         refs.rosterBody.appendChild(row);
     });
+}
+
+function renderEmptyRoster() {
+    if (refs.rosterBody.children.length) return;
+    const row = document.createElement('tr');
+    row.className = 'op-table-empty';
+    const cell = document.createElement('td');
+    cell.colSpan = 8;
+    cell.textContent = t('op.noRoster');
+    row.appendChild(cell);
+    refs.rosterBody.appendChild(row);
 }
 
 function renderBonusAdvice(roster) {
@@ -909,7 +962,7 @@ function normalizeImportedReport(data) {
     return null;
 }
 
-function applyImportedJson(data) {
+export function applyImportedJson(data) {
     const directReport = normalizeImportedReport(data);
     if (directReport) {
         latestReport = directReport;
@@ -953,8 +1006,11 @@ async function init() {
     await syncAuthSession().catch(() => null);
     profileHTML();
     initEvents();
+    clearReport(false);
+    refreshOperationLabels();
     loadPlans();
     setPhase('unknown');
+    setState('idle');
 }
 
 void init();

@@ -65,3 +65,9 @@ Deze punten worden niet in Onderdeel 8 gebouwd tenzij de productregels later uit
 ## Dataregel voor de twee grafieken
 
 Geen grafiek wordt getoond met nullen die eigenlijk “nog niet gespeeld” betekenen. Toekomstige dagen moeten leeg blijven. Voor positie per war day moet eerst aantoonbaar zijn dat alle standen volgens de bestaande Clash-data en tiebreakregels betrouwbaar kunnen worden gereconstrueerd. Als dat niet kan, volgt eerst een voorstel voor een snapshotmodel en afzonderlijke toestemming; pas daarna mag een migratie worden gemaakt.
+
+### Datacontrole tijdens Onderdeel 4
+
+- **Sterren per war day:** de huidige Operation Board haalt de war-tags uit alle beschikbare CWL-rondes op en bewaart per geladen war de ronde, sterren, destruction en tegenstander. Dat lijkt voldoende om een sterrenlijn voor de op dat moment volledig beschikbare leaguegroep te berekenen, maar er is nog geen bewezen garantie dat de Clash API alle reeds gespeelde wars gedurende de volledige gewenste bewaartermijn blijft teruggeven. Daarom is nog geen grafiek gebouwd.
+- **Positie per war day:** de huidige code berekent alleen de actuele stand uit alle afgeronde wars die in de huidige API-respons aanwezig zijn. Voor een betrouwbare historische positie moet de stand na iedere afzonderlijke dag opnieuw worden opgebouwd uit een aantoonbaar complete set wars, inclusief dezelfde tiebreakregels. Die volledigheid is nog niet bewezen en er bestaat geen snapshotopslag. Daarom is ook deze grafiek niet gebouwd.
+- **Benodigde vervolgstap:** voeg eerst gerichte fixtures/tests toe voor complete en onvolledige leaguegroepen en beslis daarna of reconstructie volstaat of dat een apart, goedgekeurd snapshotmodel nodig is.

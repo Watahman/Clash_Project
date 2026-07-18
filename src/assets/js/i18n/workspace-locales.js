@@ -482,10 +482,73 @@ const part3 = Object.freeze({
     }
 });
 
+const part4 = Object.freeze({
+    nl: {
+        "op.syncIdle": "Nog niet gesynchroniseerd",
+        "op.syncing": "Live data wordt vernieuwd",
+        "op.syncedAt": "Gesynchroniseerd om {time}",
+        "op.syncError": "Synchronisatie mislukt",
+        "op.importedState": "JSON geïmporteerd",
+        "op.currentPosition": "Huidige positie",
+        "op.dayOverview": "Dagoverzicht",
+        "op.fullStandings": "Volledige stand",
+        "op.bonusMedals": "Bonusmedals",
+        "op.adviceOnly": "Advies wordt niet automatisch toegepast."
+    },
+    en: {
+        "op.syncIdle": "Not synchronized yet",
+        "op.syncing": "Refreshing live data",
+        "op.syncedAt": "Synchronized at {time}",
+        "op.syncError": "Synchronization failed",
+        "op.importedState": "JSON imported",
+        "op.currentPosition": "Current position",
+        "op.dayOverview": "Day overview",
+        "op.fullStandings": "Full standings",
+        "op.bonusMedals": "Bonus medals",
+        "op.adviceOnly": "Advice is not applied automatically."
+    },
+    fr: {
+        "op.syncIdle": "Pas encore synchronisé",
+        "op.syncing": "Actualisation des données en direct",
+        "op.syncedAt": "Synchronisé à {time}",
+        "op.syncError": "Échec de la synchronisation",
+        "op.importedState": "JSON importé",
+        "op.currentPosition": "Position actuelle",
+        "op.dayOverview": "Vue par journée",
+        "op.fullStandings": "Classement complet",
+        "op.bonusMedals": "Médailles bonus",
+        "op.adviceOnly": "Le conseil n’est pas appliqué automatiquement."
+    },
+    de: {
+        "op.syncIdle": "Noch nicht synchronisiert",
+        "op.syncing": "Live-Daten werden aktualisiert",
+        "op.syncedAt": "Synchronisiert um {time}",
+        "op.syncError": "Synchronisierung fehlgeschlagen",
+        "op.importedState": "JSON importiert",
+        "op.currentPosition": "Aktuelle Position",
+        "op.dayOverview": "Tagesübersicht",
+        "op.fullStandings": "Vollständige Tabelle",
+        "op.bonusMedals": "Bonusmedaillen",
+        "op.adviceOnly": "Die Empfehlung wird nicht automatisch angewendet."
+    },
+    es: {
+        "op.syncIdle": "Aún no sincronizado",
+        "op.syncing": "Actualizando datos en directo",
+        "op.syncedAt": "Sincronizado a las {time}",
+        "op.syncError": "Error de sincronización",
+        "op.importedState": "JSON importado",
+        "op.currentPosition": "Posición actual",
+        "op.dayOverview": "Resumen por día",
+        "op.fullStandings": "Clasificación completa",
+        "op.bonusMedals": "Medallas de bonificación",
+        "op.adviceOnly": "El consejo no se aplica automáticamente."
+    }
+});
+
 export const workspaceLocales = Object.freeze({
-    nl: Object.freeze({ ...nl, ...part2.nl, ...part3.nl }),
-    en: Object.freeze({ ...en, ...part2.en, ...part3.en }),
-    fr: Object.freeze({ ...fr, ...part2.fr, ...part3.fr }),
-    de: Object.freeze({ ...de, ...part2.de, ...part3.de }),
-    es: Object.freeze({ ...es, ...part2.es, ...part3.es })
+    nl: Object.freeze({ ...nl, ...part2.nl, ...part3.nl, ...part4.nl }),
+    en: Object.freeze({ ...en, ...part2.en, ...part3.en, ...part4.en }),
+    fr: Object.freeze({ ...fr, ...part2.fr, ...part3.fr, ...part4.fr }),
+    de: Object.freeze({ ...de, ...part2.de, ...part3.de, ...part4.de }),
+    es: Object.freeze({ ...es, ...part2.es, ...part3.es, ...part4.es })
 });
