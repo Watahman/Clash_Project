@@ -2,33 +2,54 @@ package Java;
 
 import java.util.ArrayList;
 import java.util.List;
+import io.github.cdimascio.dotenv.Dotenv;
 
 public class Config {
-    String _API_KEY_SUPABASE = System.getenv("_API_KEY_SUPABASE");
+    String _API_KEY_SUPABASE = env("_API_KEY_SUPABASE");
     String _API_KEY_SECR_SUPABASE = firstNonBlank(
-            System.getenv("_API_KEY_SECR_SUPABASE"),
-            System.getenv("SUPABASE_SERVICE_ROLE_KEY")
+            env("_API_KEY_SECR_SUPABASE"),
+            env("SUPABASE_SERVICE_ROLE_KEY")
     );
-    String _API_KEY_BRUGGE = System.getenv("_API_KEY_BRUGGE");
-    String _API_KEY_HOME = System.getenv("_API_KEY_HOME");
-    String _API_KEY_ALL = System.getenv("_API_KEY_ALL");
-    String _API_KEY_0505 = System.getenv("_API_KEY_0505");
+    String _API_KEY_ALL = env("_API_KEY_ALL");
 
-    String _API_KEY_ACTIVE = firstNonBlank(_API_KEY_ALL, _API_KEY_HOME, _API_KEY_BRUGGE, _API_KEY_0505);
+    String _API_KEY_ACTIVE = _API_KEY_ALL;
 
-    String _BASE_URL_SUPABASE = firstNonBlank(System.getenv("_BASE_URL_SUPABASE"), System.getenv("SUPABASE_URL"));
-    String _BASE_URL_CLASH = firstNonBlank(System.getenv("_BASE_URL_CLASH"), "https://api.clashofclans.com/v1");
-    String _CACHE_ENABLED = firstNonBlank(System.getenv("CACHE_ENABLED"), "true");
-    String _CACHE_MODE = firstNonBlank(System.getenv("CACHE_MODE"), "layered");
+    String _BASE_URL_SUPABASE = firstNonBlank(env("_BASE_URL_SUPABASE"), env("SUPABASE_URL"));
+    String _BASE_URL_CLASH = firstNonBlank(env("_BASE_URL_CLASH"), "https://api.clashofclans.com/v1");
+    String _CACHE_ENABLED = firstNonBlank(env("CACHE_ENABLED"), "true");
+    String _CACHE_MODE = firstNonBlank(env("CACHE_MODE"), "layered");
     String _ALLOWED_ORIGINS = firstNonBlank(
-            System.getenv("ALLOWED_ORIGINS"),
-            "http://localhost:5173,http://127.0.0.1:5173"
+            env("ALLOWED_ORIGINS"),
+            "http://localhost:5173,http://127.0.0.1:5173,"
+                    + "http://localhost:63342,http://127.0.0.1:63342"
     );
-    String _SERVER_PORT = firstNonBlank(System.getenv("PORT"), System.getenv("SERVER_PORT"), "8080");
-    String _MAX_REQUEST_BODY_BYTES = firstNonBlank(System.getenv("MAX_REQUEST_BODY_BYTES"), "1048576");
-    String _PUBLIC_RATE_LIMIT = firstNonBlank(System.getenv("PUBLIC_RATE_LIMIT_PER_MINUTE"), "90");
-    String _SENSITIVE_RATE_LIMIT = firstNonBlank(System.getenv("SENSITIVE_RATE_LIMIT_PER_MINUTE"), "10");
-    String _DATA_RATE_LIMIT = firstNonBlank(System.getenv("DATA_RATE_LIMIT_PER_MINUTE"), "180");
+    String _SERVER_PORT = firstNonBlank(env("PORT"), env("SERVER_PORT"), "8080");
+    String _MAX_REQUEST_BODY_BYTES = firstNonBlank(env("MAX_REQUEST_BODY_BYTES"), "1048576");
+    String _PUBLIC_RATE_LIMIT = firstNonBlank(env("PUBLIC_RATE_LIMIT_PER_MINUTE"), "90");
+    String _SENSITIVE_RATE_LIMIT = firstNonBlank(env("SENSITIVE_RATE_LIMIT_PER_MINUTE"), "10");
+    String _DATA_RATE_LIMIT = firstNonBlank(env("DATA_RATE_LIMIT_PER_MINUTE"), "180");
+
+    String _AUTH_COOKIE_SECURE = firstNonBlank(env("AUTH_COOKIE_SECURE"), "false");
+    String _AUTH_COOKIE_SAME_SITE = firstNonBlank(env("AUTH_COOKIE_SAME_SITE"), "Lax");
+    String _AUTH_REFRESH_COOKIE_MAX_AGE_SECONDS = firstNonBlank(
+            env("AUTH_REFRESH_COOKIE_MAX_AGE_SECONDS"),
+            "34560000"
+    );
+    String _AUTH_EMAIL_CONFIRM_REDIRECT_URL = firstNonBlank(
+            env("AUTH_EMAIL_CONFIRM_REDIRECT_URL"),
+            "http://localhost:5173/subPages/login.html"
+    );
+    String _AUTH_PASSWORD_RESET_REDIRECT_URL = firstNonBlank(
+            env("AUTH_PASSWORD_RESET_REDIRECT_URL"),
+            "http://localhost:5173/subPages/login.html"
+    );
+
+    String _AUTH_LOGIN = "/AuthLogin";
+    String _AUTH_SIGNUP = "/AuthSignup";
+    String _AUTH_SESSION = "/AuthSession";
+    String _AUTH_RECOVER = "/AuthRecover";
+    String _AUTH_CHANGE_PASSWORD = "/AuthChangePassword";
+    String _AUTH_LOGOUT = "/AuthLogout";
 
     String _EXT_CLAN_CURRENTWAR_LEAGUEGROUP = "/ClanCurrentWarLeagueGroup";
     String _EXT_CLAN_WARLEAGUES_WARS = "/ClanWarLeaguesWars";
@@ -155,6 +176,34 @@ public class Config {
         return _BASE_URL_CLASH;
     }
 
+    boolean isAuthCookieSecure() {
+        return "true".equalsIgnoreCase(_AUTH_COOKIE_SECURE)
+                || "None".equalsIgnoreCase(getAuthCookieSameSite());
+    }
+
+    String getAuthCookieSameSite() {
+        if ("Strict".equalsIgnoreCase(_AUTH_COOKIE_SAME_SITE)) return "Strict";
+        if ("None".equalsIgnoreCase(_AUTH_COOKIE_SAME_SITE)) return "None";
+        return "Lax";
+    }
+
+    long getAuthRefreshCookieMaxAgeSeconds() {
+        try {
+            long value = Long.parseLong(_AUTH_REFRESH_COOKIE_MAX_AGE_SECONDS);
+            return Math.max(3600L, Math.min(value, 34_560_000L));
+        } catch (NumberFormatException invalidValue) {
+            return 34_560_000L;
+        }
+    }
+
+    String getAuthEmailConfirmationRedirectUrl() {
+        return _AUTH_EMAIL_CONFIRM_REDIRECT_URL == null ? "" : _AUTH_EMAIL_CONFIRM_REDIRECT_URL.trim();
+    }
+
+    String getAuthPasswordResetRedirectUrl() {
+        return _AUTH_PASSWORD_RESET_REDIRECT_URL == null ? "" : _AUTH_PASSWORD_RESET_REDIRECT_URL.trim();
+    }
+
     boolean isCacheEnabled() {
         return !"false".equalsIgnoreCase(_CACHE_ENABLED);
     }
@@ -183,17 +232,23 @@ public class Config {
     }
 
     int getRateLimitForPath(String path) {
-        if (_EXT_PLAYER_VERIFY_TOKEN.equals(path)
+        if (_AUTH_LOGIN.equals(path)
+                || _AUTH_SIGNUP.equals(path)
+                || _AUTH_RECOVER.equals(path)
+                || _AUTH_CHANGE_PASSWORD.equals(path)
+                || _EXT_PLAYER_VERIFY_TOKEN.equals(path)
                 || _EXT_SUPA_USER_MAKE.equals(path)
                 || _EXT_SUPA_USER_CHECK.equals(path)) {
             return positiveInt(_SENSITIVE_RATE_LIMIT, 10);
         }
-        if (path != null && (path.startsWith("/Clan")
+        if (_AUTH_SESSION.equals(path)
+                || _AUTH_LOGOUT.equals(path)
+                || (path != null && (path.startsWith("/Clan")
                 || path.startsWith("/Player")
                 || path.startsWith("/League")
                 || path.startsWith("/Locations")
                 || path.startsWith("/Labels")
-                || path.startsWith("/GoldPass"))) {
+                || path.startsWith("/GoldPass")))) {
             return positiveInt(_PUBLIC_RATE_LIMIT, 90);
         }
         return positiveInt(_DATA_RATE_LIMIT, 180);
@@ -222,5 +277,16 @@ public class Config {
         if (_API_KEY_SECR_SUPABASE == null || _API_KEY_SECR_SUPABASE.isBlank()) missing.add("SUPABASE_SERVICE_ROLE_KEY");
         if (_API_KEY_ACTIVE == null || _API_KEY_ACTIVE.isBlank()) missing.add("CLASH_API_KEY");
         return List.copyOf(missing);
+    }
+
+    private static final Dotenv DOTENV = Dotenv.configure()
+            .ignoreIfMissing()
+            .load();
+
+    private static String env(String name) {
+        return firstNonBlank(
+                System.getenv(name),
+                DOTENV.get(name)
+        );
     }
 }

@@ -1,4 +1,3 @@
-import { getAccessToken } from '../auth/auth-client.js';
 import { withGlobalLoading } from './loading-state.js';
 
 export class HttpError extends Error {
@@ -37,11 +36,6 @@ export async function requestJson(url, {
             ...headers
         };
         if (body !== undefined) requestHeaders['Content-Type'] ||= 'application/json';
-        if (auth) {
-            const token = await getAccessToken();
-            if (!token) throw new HttpError('Je sessie is verlopen. Log opnieuw in.', { status: 401, code: 'AUTH_REQUIRED' });
-            requestHeaders.Authorization = `Bearer ${token}`;
-        }
 
         let response;
         try {
@@ -49,7 +43,8 @@ export async function requestJson(url, {
                 method,
                 headers: requestHeaders,
                 body: body === undefined || typeof body === 'string' ? body : JSON.stringify(body),
-                signal
+                signal,
+                credentials: 'include'
             });
         } catch (error) {
             if (error?.name === 'AbortError') throw error;

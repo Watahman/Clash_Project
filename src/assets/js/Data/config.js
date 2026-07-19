@@ -7,8 +7,9 @@ export function setLoading(value) {
     isLoading = value;
 }
 
-const configuredBaseUrl = String(import.meta.env.VITE_API_BASE_URL || '').trim();
-export const _BASE_URL = (configuredBaseUrl || '/api').replace(/\/+$/, '');
+const configuredBaseUrl = String(window.APP_CONFIG?.API_BASE_URL || '').trim();
+
+export const _BASE_URL = configuredBaseUrl.replace(/\/+$/, '');
 
 export const _EXT_CLAN_CURRENTWAR_LEAGUEGROUP = "/ClanCurrentWarLeagueGroup";
 export const _EXT_CLAN_WARLEAGUES_WARS = "/ClanWarLeaguesWars";

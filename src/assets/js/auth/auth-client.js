@@ -1,131 +1,142 @@
-import { createClient } from '@supabase/supabase-js';
+import { _BASE_URL } from '../Data/config.js';
+import { requestJson, HttpError } from '../utils/request-json.js';
 
 const LEGACY_USER_ID_KEY = 'id';
-let client;
+const listeners = new Set();
 
 export class AuthConfigurationError extends Error {
     constructor() {
-        super('Supabase Auth is niet geconfigureerd.');
+        super('Authenticatie is niet geconfigureerd.');
         this.name = 'AuthConfigurationError';
     }
 }
 
-function authConfig() {
-    return {
-        url: String(import.meta.env.VITE_SUPABASE_URL || '').trim(),
-        key: String(import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim()
-    };
-}
-
-export function isAuthConfigured() {
-    const config = authConfig();
-    return Boolean(config.url && config.key);
-}
-
-export function getAuthClient() {
-    if (!isAuthConfigured()) throw new AuthConfigurationError();
-    if (!client) {
-        const config = authConfig();
-        client = createClient(config.url, config.key, {
-            auth: {
-                persistSession: true,
-                autoRefreshToken: true,
-                detectSessionInUrl: true
-            }
-        });
-    }
-    return client;
+function authEndpoint(path) {
+    return `${_BASE_URL}${path}`;
 }
 
 function rememberUser(user) {
-    if (user?.id) localStorage.setItem(LEGACY_USER_ID_KEY, user.id);
-    else localStorage.removeItem(LEGACY_USER_ID_KEY);
+    if (user?.id) {
+        localStorage.setItem(LEGACY_USER_ID_KEY, user.id);
+    } else {
+        localStorage.removeItem(LEGACY_USER_ID_KEY);
+    }
+}
+
+function notify(session) {
+    rememberUser(session?.user);
+
+    listeners.forEach(callback => {
+        callback?.(session || null);
+    });
+}
+
+export function isAuthConfigured() {
+    return true;
 }
 
 export async function syncAuthSession() {
-    if (!isAuthConfigured()) return null;
-    const { data, error } = await getAuthClient().auth.getSession();
-    if (error) throw error;
-    rememberUser(data.session?.user);
-    return data.session || null;
-}
+    try {
+        const data = await requestJson(authEndpoint('/AuthSession'), {
+            method: 'POST',
+            body: {},
+            auth: false,
+            loading: 'background'
+        });
 
-export async function getAccessToken() {
-    const session = await syncAuthSession();
-    return session?.access_token || null;
+        const session = data?.session || null;
+        notify(session);
+        return session;
+    } catch (error) {
+        if (error instanceof HttpError && error.status === 401) {
+            notify(null);
+            return null;
+        }
+
+        throw error;
+    }
 }
 
 export async function signInWithPassword(email, password) {
-    const { data, error } = await getAuthClient().auth.signInWithPassword({
-        email: String(email || '').trim(),
-        password
+    const data = await requestJson(authEndpoint('/AuthLogin'), {
+        body: {
+            email: String(email || '').trim(),
+            password
+        },
+        auth: false,
+        loading: 'blocking',
+        loadingMessage: 'Inloggen...'
     });
-    if (error) throw error;
-    rememberUser(data.user);
+
+    notify(data.session || null);
     return data;
 }
 
 export async function signUpWithPassword(name, email, password) {
-    const { data, error } = await getAuthClient().auth.signUp({
-        email: String(email || '').trim(),
-        password,
-        options: {
-            data: { display_name: String(name || '').trim() }
-        }
+    const data = await requestJson(authEndpoint('/AuthSignup'), {
+        body: {
+            name: String(name || '').trim(),
+            email: String(email || '').trim(),
+            password
+        },
+        auth: false,
+        loading: 'blocking',
+        loadingMessage: 'Account maken...'
     });
-    if (error) throw error;
-    rememberUser(data.user && data.session ? data.user : null);
+
+    notify(data.session || null);
     return data;
 }
 
 export async function requestPasswordReset(email) {
-    const redirectTo = new URL('./login.html', window.location.href).href;
-    const { data, error } = await getAuthClient().auth.resetPasswordForEmail(
-        String(email || '').trim(),
-        { redirectTo }
-    );
-    if (error) throw error;
-    return data;
-}
-
-export async function signInWithGoogle(redirectUrl) {
-    const redirectTo = redirectUrl || new URL('./dashboard.html', window.location.href).href;
-    const { data, error } = await getAuthClient().auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo }
+    return requestJson(authEndpoint('/AuthRecover'), {
+        body: {
+            email: String(email || '').trim()
+        },
+        auth: false
     });
-    if (error) throw error;
-    return data;
 }
 
-export async function changeAuthenticatedPassword(currentPassword, newPassword) {
-    const client = getAuthClient();
-    const { data: userData, error: userError } = await client.auth.getUser();
-    if (userError) throw userError;
-    const email = userData.user?.email;
-    if (!email) throw new Error('Geen e-mailadres gevonden voor deze sessie.');
+export async function signInWithGoogle() {
+    const returnUrl = new URL('../index.html', window.location.href).href;
 
-    const { error: verifyError } = await client.auth.signInWithPassword({ email, password: currentPassword });
-    if (verifyError) throw verifyError;
+    window.location.assign(
+        `${authEndpoint('/AuthGoogle')}?returnUrl=${encodeURIComponent(returnUrl)}`
+    );
+}
 
-    const { data, error } = await client.auth.updateUser({ password: newPassword });
-    if (error) throw error;
-    return data;
+export async function changeAuthenticatedPassword(
+    currentPassword,
+    newPassword
+) {
+    return requestJson(authEndpoint('/AuthChangePassword'), {
+        body: {
+            currentPassword,
+            newPassword
+        },
+        auth: true,
+        loading: 'blocking',
+        loadingMessage: 'Wachtwoord wijzigen...'
+    });
 }
 
 export async function signOut() {
-    if (isAuthConfigured()) {
-        const { error } = await getAuthClient().auth.signOut();
-        if (error) throw error;
+    try {
+        await requestJson(authEndpoint('/AuthLogout'), {
+            body: {},
+            auth: false
+        });
+    } finally {
+        notify(null);
     }
-    rememberUser(null);
 }
 
 export function onAuthStateChange(callback) {
-    if (!isAuthConfigured()) return () => {};
-    const { data } = getAuthClient().auth.onAuthStateChange((_event, session) => {
-        rememberUser(session?.user);
-        callback?.(session || null);
-    });
-    return () => data.subscription.unsubscribe();
+    listeners.add(callback);
+
+    syncAuthSession()
+        .then(session => callback?.(session))
+        .catch(() => callback?.(null));
+
+    return () => listeners.delete(callback);
 }

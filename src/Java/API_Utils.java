@@ -45,6 +45,7 @@ public class API_Utils {
         String origin = exchange.getRequestHeaders().getFirst("Origin");
         if (origin != null && conf.isOriginAllowed(origin)) {
             exchange.getResponseHeaders().set("Access-Control-Allow-Origin", origin);
+            exchange.getResponseHeaders().set("Access-Control-Allow-Credentials", "true");
             exchange.getResponseHeaders().set("Vary", "Origin");
         }
         exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");

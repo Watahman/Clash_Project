@@ -15,7 +15,11 @@
     "type": "git",
     "url": "git+https://github.com/Watahman/Clash_Project.git"
   },
-  "keywords": ["clash-of-clans", "cwl", "planner"],
+  "keywords": [
+    "clash-of-clans",
+    "cwl",
+    "planner"
+  ],
   "license": "MIT",
   "type": "module",
   "bugs": {
@@ -27,8 +31,5 @@
     "jsdom": "^26.1.0",
     "vite": "^8.0.16",
     "vitest": "^3.2.6"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.110.7"
   }
 }

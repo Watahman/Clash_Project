@@ -18,6 +18,7 @@ public class Main {
         SUPABASE_Friend supaFriend;
         SUPABASE_CWLPlanner supaCWLPlanner;
         SUPABASE_User supaUser;
+        SUPABASE_Auth supaAuth;
         API_Player apiPlayer;
         API_Locations apiLocations;
         API_Leagues apiLeagues;
@@ -39,6 +40,7 @@ public class Main {
         apiLocations = new API_Locations(server, conf);
         apiPlayer = new API_Player(server, conf);
         supaUser = new SUPABASE_User(server, conf);
+        supaAuth = new SUPABASE_Auth(server, conf);
         supaCWLPlanner = new SUPABASE_CWLPlanner(server, conf);
         supaFriend = new SUPABASE_Friend(server, conf);
         supaGroup = new SUPABASE_Group(server, conf);
@@ -85,6 +87,8 @@ public class Main {
 
         apiLabels.getLabelsPlayers();
         apiLabels.getLabelsClans();
+
+        supaAuth.registerRoutes();
 
         supaUser.createUser();
         supaUser.getUserInfo();
