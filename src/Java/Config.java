@@ -167,9 +167,18 @@ public class Config {
 
     String getClashApiKey() {
         if (_API_KEY_ACTIVE == null || _API_KEY_ACTIVE.isBlank()) {
-            throw new IllegalStateException("Ontbrekende Clash API key env var, bv. _API_KEY_ALL");
+            throw new IllegalStateException(
+                    "Ontbrekende Clash API key env var, bv. _API_KEY_ALL"
+            );
         }
-        return _API_KEY_ACTIVE;
+
+        String key = _API_KEY_ACTIVE.trim();
+
+        if (key.regionMatches(true, 0, "Bearer ", 0, 7)) {
+            return key;
+        }
+
+        return "Bearer " + key;
     }
 
     String getClashBaseUrl() {
@@ -284,9 +293,22 @@ public class Config {
             .load();
 
     private static String env(String name) {
-        return firstNonBlank(
+        return stripQuotes(firstNonBlank(
                 System.getenv(name),
                 DOTENV.get(name)
-        );
+        ));
+    }
+
+    private static String stripQuotes(String value) {
+        if (value == null) return null;
+        String trimmed = value.trim();
+        if (trimmed.length() >= 2) {
+            char first = trimmed.charAt(0);
+            char last = trimmed.charAt(trimmed.length() - 1);
+            if ((first == '\'' && last == '\'') || (first == '"' && last == '"')) {
+                return trimmed.substring(1, trimmed.length() - 1).trim();
+            }
+        }
+        return trimmed;
     }
 }

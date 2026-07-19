@@ -325,30 +325,68 @@ function renderPlanSnapshot(plan, token) {
     }));
 }
 
+function needsPlayerEnrichment(player) {
+    const tag = normalizeTag(player?.tag);
+    const name = String(player?.name || '').trim();
+    const townHallLevel = Number(player?.townHallLevel);
+
+    return Boolean(tag) && (
+        !name ||
+        name === tag ||
+        !Number.isFinite(townHallLevel) ||
+        townHallLevel < 1
+    );
+}
+
 async function enrichPlanSnapshot(info, token, signal) {
-    const document = normalizePlanDocument(info);
-    const tasks = [
-        ...document.freePlayers.map(player => () => enrichPlayer(player.tag, token, signal)),
-        ...document.clans.flatMap(clan => [
-            () => enrichClan(clan, token, signal),
-            ...clan.players.map(player => () => enrichPlayer(player.tag, token, signal))
-        ])
-    ];
-    await runLimited(tasks, ENRICH_CONCURRENCY);
+    const planDocument = normalizePlanDocument(info);
+
+    const playerTags = new Set(
+        [
+            ...planDocument.freePlayers,
+            ...planDocument.clans.flatMap(clan => clan.players)
+        ]
+            .filter(needsPlayerEnrichment)
+            .map(player => normalizeTag(player.tag))
+            .filter(Boolean)
+    );
+
+    const clanTasks = planDocument.clans
+        .filter(clan => normalizeTag(clan?.tag))
+        .map(clan => () => enrichClan(clan, token, signal));
+
+    const playerTasks = [...playerTags]
+        .map(tag => () => enrichPlayer(tag, token, signal));
+
+    await runLimited(
+        [...clanTasks, ...playerTasks],
+        ENRICH_CONCURRENCY
+    );
 }
 
 async function enrichPlayer(tag, token, signal) {
     try {
         const data = await getPlayerBasicData(tag, { signal });
         if (token !== activeLoadToken) return;
-        const card = Array.from(document.querySelectorAll('.cwl-player-article[data-planner-card="true"]'))
-            .find(element => getCardTag(element) === normalizeTag(tag));
-        if (!card) return;
-        card.querySelector('.cwl-player-name').textContent = data.name || tag;
-        card.querySelector('.cwl-player-clan').textContent = data.clanName || t('cwl.noClan');
-        card.dataset.townHall = String(data.townHallLevel || 1);
-        const image = card.querySelector('.cwl-player-townhall-foto');
-        if (image) image.src = `../assets/css/pictures/townhalls/Town_Hall${data.townHallLevel || 1}.png`;
+        const normalizedTag = normalizeTag(tag);
+        const cards = Array.from(
+            document.querySelectorAll('.cwl-player-article[data-planner-card="true"]')
+        ).filter(element => getCardTag(element) === normalizedTag);
+
+        cards.forEach(card => {
+            const name = card.querySelector('.cwl-player-name');
+            const clan = card.querySelector('.cwl-player-clan');
+            const townHallLevel = Number(data.townHallLevel) || 1;
+
+            if (name) name.textContent = data.name || tag;
+            if (clan) clan.textContent = data.clanName || t('cwl.noClan');
+            card.dataset.townHall = String(townHallLevel);
+
+            const image = card.querySelector('.cwl-player-townhall-foto');
+            if (image) {
+                image.src = `../assets/css/pictures/townhalls/Town_Hall${townHallLevel}.png`;
+            }
+        });
     } catch (error) {
         if (error?.name !== 'AbortError') return;
     }
