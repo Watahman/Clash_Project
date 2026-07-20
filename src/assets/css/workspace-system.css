@@ -35,10 +35,10 @@
     --shadow-raised: 0 0.5rem 0.5rem rgba(0, 0, 0, 0.18);
     --z-dropdown: 30;
     --z-sticky: 40;
+    --z-popover: 50;
     --z-backdrop: 60;
     --z-modal: 70;
     --z-toast: 80;
-    --z-popover: 50;
     color-scheme: dark;
     font-family: Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
@@ -156,6 +156,29 @@ body.workspace-app .workspace-content input:focus-visible { outline: 0.18rem sol
 .theme-button { display: grid; width: 2.45rem; height: 2.45rem; flex: 0 0 auto; place-items: center; border: 0.0625rem solid var(--border) !important; border-radius: var(--radius-small); background: transparent; padding: 0; color: var(--text-muted); }
 .theme-button:hover { background: var(--surface-raised); color: var(--text); }
 .language-select { width: auto; min-width: 4.5rem; height: 2.45rem; border: 0.0625rem solid var(--border); border-radius: var(--radius-small); background: var(--surface-raised); padding: 0.35rem 1.8rem 0.35rem 0.6rem; color: var(--text-muted); font-size: 0.75rem; }
+
+.language-switcher { position: relative; flex: 0 0 auto; }
+.language-switcher-button { display: inline-flex; min-width: 8.8rem; height: 2.45rem; align-items: center; gap: 0.55rem; border: 0.0625rem solid var(--border) !important; border-radius: var(--radius-small); background: transparent; padding: 0 0.65rem; color: var(--text-muted); transition: border-color 160ms ease-out, background 160ms ease-out, color 160ms ease-out; }
+.language-switcher-button:hover,
+.language-switcher.is-open .language-switcher-button { border-color: var(--border-strong) !important; background: var(--surface-raised); color: var(--text); }
+.language-switcher-globe { display: grid; width: 1.1rem; height: 1.1rem; flex: 0 0 auto; place-items: center; color: var(--accent-strong); }
+.language-switcher-globe svg { width: 100%; height: 100%; stroke: currentColor; stroke-width: 1.65; stroke-linecap: round; stroke-linejoin: round; }
+.language-switcher-current { display: flex; min-width: 0; flex: 1; align-items: baseline; gap: 0.4rem; text-align: left; }
+.language-switcher-current-code { color: var(--text); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.05em; }
+.language-switcher-current-name { overflow: hidden; color: var(--text-muted); font-size: 0.69rem; text-overflow: ellipsis; white-space: nowrap; }
+.language-switcher-chevron { display: grid; width: 0.85rem; height: 0.85rem; flex: 0 0 auto; place-items: center; transition: transform 160ms ease-out; }
+.language-switcher-chevron svg { width: 100%; height: 100%; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.language-switcher.is-open .language-switcher-chevron { transform: rotate(180deg); }
+.language-switcher-menu { position: absolute; z-index: var(--z-dropdown); top: calc(100% + 0.55rem); right: 0; width: min(15rem, calc(100vw - 2rem)); border: 0.0625rem solid var(--border-strong); border-radius: var(--radius-medium); background: var(--surface); padding: 0.35rem; box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.32); }
+.language-switcher-option { display: grid; width: 100%; min-height: 2.7rem; grid-template-columns: 2.15rem minmax(0, 1fr) 1.25rem; align-items: center; gap: 0.65rem; border-radius: var(--radius-small); background: transparent; padding: 0.4rem 0.55rem; color: var(--text-muted); text-align: left; }
+.language-switcher-option:hover,
+.language-switcher-option:focus-visible { background: var(--surface-raised); color: var(--text); }
+.language-switcher-option.is-active { background: var(--accent-soft); color: var(--text); }
+.language-switcher-code { display: grid; height: 1.7rem; place-items: center; border: 0.0625rem solid var(--border); border-radius: 0.35rem; background: var(--surface-subtle); color: var(--accent-strong); font-size: 0.64rem; font-weight: 800; letter-spacing: 0.07em; }
+.language-switcher-option-name { overflow: hidden; font-size: 0.75rem; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.language-switcher-check { display: grid; width: 1rem; height: 1rem; place-items: center; color: var(--accent-strong); opacity: 0; }
+.language-switcher-check svg { width: 100%; height: 100%; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.language-switcher-option.is-active .language-switcher-check { opacity: 1; }
 
 /* Public website */
 body.public-site { background: radial-gradient(circle at 77% 5%, rgba(215, 173, 85, 0.08), transparent 24%), var(--bg); }
@@ -419,7 +442,8 @@ body.workspace-app > .overlay { grid-column: 1 / -1; }
     .public-nav a { min-height: 2.75rem; padding: 0.75rem; }
     .public-actions .link-button,
     .public-actions .button,
-    .public-actions .language-select { display: none; }
+    .public-actions .language-select,
+    .public-actions .language-switcher { display: none; }
     .public-menu { display: grid; }
     .auth-layout { grid-template-columns: 1fr; }
     .auth-context { display: none; }
@@ -452,7 +476,8 @@ body.workspace-app > .overlay { grid-column: 1 / -1; }
     .public-footer { grid-template-columns: 1fr; gap: 1.2rem; }
     .public-footer p { order: 3; }
     .public-footer nav { justify-content: flex-start; }
-    .auth-header-actions .language-select { display: none; }
+    .auth-header-actions .language-select,
+    .auth-header-actions .language-switcher { display: none; }
     .auth-header-actions { gap: 0.55rem; }
     .auth-header .link-button { font-size: 0.75rem; }
     .auth-form-wrap { padding: 1rem; }
@@ -462,7 +487,8 @@ body.workspace-app > .overlay { grid-column: 1 / -1; }
     .workspace-breadcrumbs span,
     .workspace-breadcrumbs b,
     .workspace-sync,
-    .workspace-top-actions .language-select { display: none; }
+    .workspace-top-actions .language-select,
+    .workspace-top-actions .language-switcher { display: none; }
     .workspace-top-actions { gap: 0.45rem; }
     .workspace-notifications-panel { position: fixed; top: calc(var(--topbar-height) - 0.2rem); right: 0.8rem; width: min(23rem, calc(100vw - 1.6rem)); }
     .workspace-dashboard { padding: 1.5rem 1rem 3rem; }

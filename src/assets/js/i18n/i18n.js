@@ -4,6 +4,18 @@ import { translations } from './translations.js';
 const STORAGE_KEY = 'clashtools_language';
 const DEFAULT_LANG = 'nl';
 
+const LANGUAGE_METADATA = Object.freeze({
+    nl: Object.freeze({ code: 'NL', name: 'Nederlands' }),
+    en: Object.freeze({ code: 'EN', name: 'English' }),
+    fr: Object.freeze({ code: 'FR', name: 'Français' }),
+    de: Object.freeze({ code: 'DE', name: 'Deutsch' }),
+    es: Object.freeze({ code: 'ES', name: 'Español' })
+});
+
+const LANGUAGE_ICON = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.8 12h16.4M12 3.5c2.2 2.3 3.4 5.1 3.4 8.5S14.2 18.2 12 20.5M12 3.5C9.8 5.8 8.6 8.6 8.6 12s1.2 6.2 3.4 8.5"/></svg>';
+const CHEVRON_ICON = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 9.5 5 5 5-5"/></svg>';
+const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6.5 12.5 3.3 3.3 7.7-8"/></svg>';
+
 export function getLanguage() {
     const stored = localStorage.getItem(STORAGE_KEY);
     return translations[stored] ? stored : DEFAULT_LANG;
@@ -50,28 +62,172 @@ export function applyI18n(root = document) {
     });
 }
 
+function getLanguageMeta(language) {
+    return LANGUAGE_METADATA[language] || {
+        code: language.toUpperCase(),
+        name: translations[language]?.['language.label'] || language.toUpperCase()
+    };
+}
+
+function syncLanguageSwitcher(switcher) {
+    if (!switcher) return;
+
+    const language = getLanguage();
+    const metadata = getLanguageMeta(language);
+    const button = switcher.querySelector('[data-language-trigger]');
+    const currentCode = switcher.querySelector('[data-language-current-code]');
+    const currentName = switcher.querySelector('[data-language-current-name]');
+
+    if (currentCode) currentCode.textContent = metadata.code;
+    if (currentName) currentName.textContent = metadata.name;
+
+    if (button) {
+        const languageLabel = t('header.language');
+        button.setAttribute('aria-label', `${languageLabel}: ${metadata.name}`);
+        button.title = `${languageLabel}: ${metadata.name}`;
+    }
+
+    switcher.querySelectorAll('[data-language-option]').forEach(option => {
+        const isSelected = option.dataset.languageOption === language;
+        option.classList.toggle('is-active', isSelected);
+        option.setAttribute('aria-selected', String(isSelected));
+        option.tabIndex = isSelected ? 0 : -1;
+    });
+}
+
+function closeLanguageSwitcher(switcher, { restoreFocus = false } = {}) {
+    const button = switcher?.querySelector('[data-language-trigger]');
+    const menu = switcher?.querySelector('[data-language-menu]');
+    if (!button || !menu || menu.classList.contains('hidden')) return;
+
+    menu.classList.add('hidden');
+    button.setAttribute('aria-expanded', 'false');
+    switcher.classList.remove('is-open');
+
+    if (restoreFocus) button.focus();
+}
+
+function openLanguageSwitcher(switcher) {
+    const button = switcher?.querySelector('[data-language-trigger]');
+    const menu = switcher?.querySelector('[data-language-menu]');
+    if (!button || !menu) return;
+
+    menu.classList.remove('hidden');
+    button.setAttribute('aria-expanded', 'true');
+    switcher.classList.add('is-open');
+
+    const selected = menu.querySelector('[aria-selected="true"]');
+    window.requestAnimationFrame(() => selected?.focus());
+}
+
+function moveLanguageFocus(options, currentIndex, direction) {
+    if (!options.length) return;
+    const nextIndex = (currentIndex + direction + options.length) % options.length;
+    options.forEach((option, index) => {
+        option.tabIndex = index === nextIndex ? 0 : -1;
+    });
+    options[nextIndex].focus();
+}
+
+function createLanguageSwitcher(control) {
+    const switcher = document.createElement('div');
+    switcher.className = 'language-switcher';
+    switcher.dataset.languageSwitcher = 'true';
+
+    const options = Object.keys(translations).map(language => {
+        const metadata = getLanguageMeta(language);
+        return `<button class="language-switcher-option" type="button" role="option" data-language-option="${language}" aria-selected="false" tabindex="-1">
+            <span class="language-switcher-code" aria-hidden="true">${metadata.code}</span>
+            <span class="language-switcher-option-name">${metadata.name}</span>
+            <span class="language-switcher-check">${CHECK_ICON}</span>
+        </button>`;
+    }).join('');
+
+    switcher.innerHTML = `
+        <button class="language-switcher-button" type="button" data-language-trigger aria-haspopup="listbox" aria-expanded="false">
+            <span class="language-switcher-globe">${LANGUAGE_ICON}</span>
+            <span class="language-switcher-current">
+                <span class="language-switcher-current-code" data-language-current-code></span>
+                <span class="language-switcher-current-name" data-language-current-name></span>
+            </span>
+            <span class="language-switcher-chevron">${CHEVRON_ICON}</span>
+        </button>
+        <div class="language-switcher-menu hidden" data-language-menu role="listbox" aria-label="${t('header.language')}">
+            ${options}
+        </div>`;
+
+    control.replaceWith(switcher);
+
+    const button = switcher.querySelector('[data-language-trigger]');
+    const menu = switcher.querySelector('[data-language-menu]');
+
+    button.addEventListener('click', () => {
+        if (menu.classList.contains('hidden')) openLanguageSwitcher(switcher);
+        else closeLanguageSwitcher(switcher);
+    });
+
+    button.addEventListener('keydown', event => {
+        if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+        event.preventDefault();
+        openLanguageSwitcher(switcher);
+    });
+
+    menu.addEventListener('click', event => {
+        const option = event.target.closest('[data-language-option]');
+        if (!option) return;
+        setLanguage(option.dataset.languageOption);
+        closeLanguageSwitcher(switcher, { restoreFocus: true });
+    });
+
+    menu.addEventListener('keydown', event => {
+        const optionsList = Array.from(menu.querySelectorAll('[data-language-option]'));
+        const currentIndex = Math.max(0, optionsList.indexOf(document.activeElement));
+
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            moveLanguageFocus(optionsList, currentIndex, 1);
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            moveLanguageFocus(optionsList, currentIndex, -1);
+        } else if (event.key === 'Home') {
+            event.preventDefault();
+            optionsList[0]?.focus();
+        } else if (event.key === 'End') {
+            event.preventDefault();
+            optionsList.at(-1)?.focus();
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            closeLanguageSwitcher(switcher, { restoreFocus: true });
+        }
+    });
+
+    document.addEventListener('pointerdown', event => {
+        if (!switcher.contains(event.target)) closeLanguageSwitcher(switcher);
+    });
+
+    window.addEventListener('clashtools:language-changed', () => {
+        menu.setAttribute('aria-label', t('header.language'));
+        syncLanguageSwitcher(switcher);
+    });
+
+    syncLanguageSwitcher(switcher);
+    return switcher;
+}
+
 export function initLanguageSwitcher() {
+    const existingSwitcher = document.querySelector('[data-language-switcher]');
+    if (existingSwitcher) {
+        syncLanguageSwitcher(existingSwitcher);
+        return;
+    }
+
     let control = document.querySelector('[data-language-control]');
     if (!control) {
         control = Array.from(document.querySelectorAll('header .right button')).find(button => button.id !== 'profile-btn');
     }
     if (!control) return;
 
-    if (control.tagName.toLowerCase() !== 'select') {
-        const select = document.createElement('select');
-        select.className = 'language-select';
-        select.setAttribute('aria-label', t('header.language'));
-        select.dataset.languageControl = 'true';
-        select.innerHTML = Object.keys(translations).map(lang => `<option value="${lang}">${translations[lang]['language.label'] || lang.toUpperCase()}</option>`).join('');
-        control.replaceWith(select);
-        control = select;
-    } else {
-        control.classList.add('language-select');
-        control.dataset.languageControl = 'true';
-    }
-
-    control.value = getLanguage();
-    control.onchange = () => setLanguage(control.value);
+    createLanguageSwitcher(control);
 }
 
 export function initI18n(root = document) {
