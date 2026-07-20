@@ -115,6 +115,31 @@ function persistSidebarState(collapsed) {
     }
 }
 
+function applyInitialSidebarState(body) {
+    const previousTransition = body.style.transition;
+
+    // The body already exists before the module runs. Disable the grid
+    // transition while restoring the saved state so a collapsed sidebar does
+    // not briefly render at its expanded width during page navigation.
+    body.style.transition = 'none';
+    body.classList.toggle('workspace-sidebar-collapsed', getStoredSidebarState());
+
+    return () => {
+        const restoreTransition = () => {
+            if (previousTransition) body.style.transition = previousTransition;
+            else body.style.removeProperty('transition');
+        };
+
+        if (typeof window.requestAnimationFrame === 'function') {
+            window.requestAnimationFrame(() => {
+                window.requestAnimationFrame(restoreTransition);
+            });
+        } else {
+            window.setTimeout(restoreTransition, 0);
+        }
+    };
+}
+
 function syncCollapsedSidebarLabels(sidebar, collapsed) {
     sidebar.querySelectorAll('[data-workspace-nav]').forEach(link => {
         const label = link.querySelector('span')?.textContent?.trim();
@@ -354,7 +379,7 @@ function initWorkspaceShell() {
     if (!main) return;
     body.querySelector(':scope > header')?.remove();
 
-    body.classList.toggle('workspace-sidebar-collapsed', getStoredSidebarState());
+    const finishInitialSidebarRestore = applyInitialSidebarState(body);
 
     const currentPage = body.dataset.workspacePage || 'dashboard';
     const markup = shellMarkup(currentPage);
@@ -372,6 +397,7 @@ function initWorkspaceShell() {
     backdrop.setAttribute('aria-label', t('shell.closeMenu'));
     body.prepend(backdrop, sidebar, area);
     body.dataset.shellReady = 'true';
+    finishInitialSidebarRestore();
 
     document.querySelector(`[data-workspace-nav="${currentPage}"]`)?.setAttribute('aria-current', 'page');
     initI18n(body);
