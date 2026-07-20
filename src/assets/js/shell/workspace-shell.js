@@ -1,6 +1,11 @@
 import { initI18n, t } from '../i18n/i18n.js';
 import { isAuthConfigured, syncAuthSession } from '../auth/auth-client.js';
 import { getThemePreference, setThemePreference } from '../theme/theme-manager.js';
+import { getNotifications, markNotificationRead } from '../Supabase/Supabase-Notifications.js';
+import { getCurrentUserId } from '../utils/user.js';
+
+let notificationsData = null;
+let notificationsRequestId = 0;
 
 const pageConfig = {
     dashboard: { key: 'nav.dashboard', fallback: 'Dashboard' },
@@ -52,7 +57,19 @@ function shellMarkup(currentPage) {
                 <span class="workspace-sync"><i></i><span data-i18n="shell.online">Online</span></span>
                 <button type="button" data-language-control data-i18n="header.language">Taal</button>
                 <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle"><span aria-hidden="true">◐</span></button>
-                <button class="workspace-icon-button" id="workspace-notifications" type="button" data-i18n-aria-label="notifications.title">${icons.bell}</button>
+                <div class="workspace-notifications" id="workspace-notifications-root">
+                    <button class="workspace-icon-button" id="workspace-notifications" type="button" aria-expanded="false" aria-controls="workspace-notifications-panel" data-i18n-aria-label="notifications.title">
+                        ${icons.bell}
+                        <span class="workspace-notifications-count hidden" id="workspace-notifications-count" aria-hidden="true">0</span>
+                    </button>
+                    <section class="workspace-notifications-panel hidden" id="workspace-notifications-panel" aria-labelledby="workspace-notifications-title" aria-live="polite">
+                        <div class="workspace-notifications-heading">
+                            <strong id="workspace-notifications-title" data-i18n="notifications.title">Notificaties</strong>
+                            <button class="workspace-notifications-close" id="workspace-notifications-close" type="button" data-i18n-aria-label="common.close" aria-label="Sluiten">&times;</button>
+                        </div>
+                        <div class="workspace-notifications-list" id="workspace-notifications-list"></div>
+                    </section>
+                </div>
                 <button class="workspace-avatar workspace-avatar-top" id="workspace-profile-shortcut" type="button" data-i18n-aria-label="shell.openProfile">CT</button>
             </div>
         </header>`
@@ -102,7 +119,149 @@ function initMobileSidebar(sidebar, backdrop) {
 function initProfileShortcuts() {
     const profileButton = document.querySelector('#profile-btn');
     document.querySelector('#workspace-profile-shortcut')?.addEventListener('click', () => profileButton?.click());
-    document.querySelector('#workspace-notifications')?.addEventListener('click', () => profileButton?.click());
+}
+
+function setNotificationsCount(count) {
+    const badge = document.querySelector('#workspace-notifications-count');
+    if (!badge) return;
+    const safeCount = Math.max(0, Number(count) || 0);
+    badge.textContent = safeCount > 99 ? '99+' : String(safeCount);
+    badge.classList.toggle('hidden', safeCount === 0);
+}
+
+function renderNotifications(data) {
+    const list = document.querySelector('#workspace-notifications-list');
+    if (!list) return;
+
+    const items = Array.isArray(data?.items) ? data.items : [];
+    const unread = Number(data?.unread ?? items.filter(item => !item.read_at).length);
+    setNotificationsCount(unread);
+    list.replaceChildren();
+
+    if (!items.length) {
+        const empty = document.createElement('p');
+        empty.className = 'workspace-notifications-empty';
+        empty.textContent = t('notifications.empty');
+        list.appendChild(empty);
+        return;
+    }
+
+    items.forEach(notification => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'workspace-notification-item';
+        item.classList.toggle('unread', !notification.read_at);
+
+        const title = document.createElement('strong');
+        title.textContent = notification.title || t('notifications.title');
+
+        const body = document.createElement('span');
+        body.textContent = notification.type === 'poll_reminder'
+            ? t('notifications.pollReminderBody')
+            : notification.body || '';
+
+        item.append(title, body);
+        item.addEventListener('click', async () => {
+            const userId = getCurrentUserId();
+            if (!notification.read_at && userId) {
+                await markNotificationRead(userId, notification.id).catch(() => null);
+                notification.read_at = new Date().toISOString();
+                item.classList.remove('unread');
+                data.unread = Math.max(0, Number(data.unread ?? unread) - 1);
+                setNotificationsCount(data.unread);
+            }
+
+            if (notification.related_group_id) {
+                sessionStorage.setItem('clashtoolsOpenGroupId', notification.related_group_id);
+                window.location.href = window.location.pathname.includes('/subPages/')
+                    ? './groups.html'
+                    : './subPages/groups.html';
+            }
+        });
+
+        list.appendChild(item);
+    });
+}
+
+async function loadWorkspaceNotifications({ showLoading = false } = {}) {
+    const list = document.querySelector('#workspace-notifications-list');
+    const panel = document.querySelector('#workspace-notifications-panel');
+    const userId = getCurrentUserId();
+    const requestId = ++notificationsRequestId;
+
+    if (!list || !panel) return;
+    if (!userId) {
+        notificationsData = { items: [], unread: 0 };
+        renderNotifications(notificationsData);
+        return;
+    }
+
+    if (showLoading && !notificationsData) {
+        list.replaceChildren();
+        const loading = document.createElement('p');
+        loading.className = 'workspace-notifications-empty';
+        loading.textContent = t('profile.loading');
+        list.appendChild(loading);
+    }
+
+    panel.setAttribute('aria-busy', 'true');
+    try {
+        const data = await getNotifications(userId);
+        if (requestId !== notificationsRequestId) return;
+        notificationsData = data || { items: [], unread: 0 };
+        renderNotifications(notificationsData);
+    } catch {
+        if (requestId !== notificationsRequestId) return;
+        list.replaceChildren();
+        const error = document.createElement('p');
+        error.className = 'workspace-notifications-empty workspace-notifications-error';
+        error.textContent = t('profile.loadError');
+        list.appendChild(error);
+    } finally {
+        if (requestId === notificationsRequestId) panel.removeAttribute('aria-busy');
+    }
+}
+
+function initNotificationsPopover() {
+    const root = document.querySelector('#workspace-notifications-root');
+    const button = document.querySelector('#workspace-notifications');
+    const panel = document.querySelector('#workspace-notifications-panel');
+    const closeButton = document.querySelector('#workspace-notifications-close');
+    if (!root || !button || !panel || !closeButton) return;
+
+    const close = ({ restoreFocus = false } = {}) => {
+        if (panel.classList.contains('hidden')) return;
+        panel.classList.add('hidden');
+        button.setAttribute('aria-expanded', 'false');
+        if (restoreFocus) button.focus();
+    };
+
+    const open = () => {
+        panel.classList.remove('hidden');
+        button.setAttribute('aria-expanded', 'true');
+        void loadWorkspaceNotifications({ showLoading: true });
+        window.requestAnimationFrame(() => closeButton.focus());
+    };
+
+    button.addEventListener('click', () => {
+        if (panel.classList.contains('hidden')) open();
+        else close();
+    });
+    closeButton.addEventListener('click', () => close({ restoreFocus: true }));
+    document.addEventListener('pointerdown', event => {
+        if (!panel.classList.contains('hidden') && !root.contains(event.target)) close();
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && !panel.classList.contains('hidden')) {
+            event.preventDefault();
+            close({ restoreFocus: true });
+        }
+    });
+    window.addEventListener('clashtools:language-changed', () => {
+        if (notificationsData) renderNotifications(notificationsData);
+    });
+
+    void loadWorkspaceNotifications();
 }
 
 async function protectRoute() {
@@ -142,6 +301,7 @@ function initWorkspaceShell() {
     initThemeButton();
     initMobileSidebar(sidebar, backdrop);
     initProfileShortcuts();
+    initNotificationsPopover();
     window.addEventListener('clashtools:language-changed', updateThemeButton);
     void protectRoute();
 }
