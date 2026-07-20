@@ -15,6 +15,7 @@ const LANGUAGE_METADATA = Object.freeze({
 const LANGUAGE_ICON = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.8 12h16.4M12 3.5c2.2 2.3 3.4 5.1 3.4 8.5S14.2 18.2 12 20.5M12 3.5C9.8 5.8 8.6 8.6 8.6 12s1.2 6.2 3.4 8.5"/></svg>';
 const CHEVRON_ICON = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 9.5 5 5 5-5"/></svg>';
 const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6.5 12.5 3.3 3.3 7.7-8"/></svg>';
+const languageChangeHandlers = new WeakMap();
 
 export function getLanguage() {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -117,7 +118,9 @@ function openLanguageSwitcher(switcher) {
     switcher.classList.add('is-open');
 
     const selected = menu.querySelector('[aria-selected="true"]');
-    window.requestAnimationFrame(() => selected?.focus());
+    const focusSelected = () => selected?.focus();
+    if (typeof window.requestAnimationFrame === 'function') window.requestAnimationFrame(focusSelected);
+    else window.setTimeout(focusSelected, 0);
 }
 
 function moveLanguageFocus(options, currentIndex, direction) {
@@ -129,10 +132,23 @@ function moveLanguageFocus(options, currentIndex, direction) {
     options[nextIndex].focus();
 }
 
-function createLanguageSwitcher(control) {
+export function mountLanguageSwitcher(control, { variant = '', onChange = null } = {}) {
+    if (!control) return null;
+
+    if (control.matches?.('[data-language-switcher]')) {
+        if (variant) control.classList.add(`language-switcher--${variant}`);
+        if (typeof onChange === 'function') languageChangeHandlers.set(control, onChange);
+        syncLanguageSwitcher(control);
+        return control;
+    }
+
     const switcher = document.createElement('div');
     switcher.className = 'language-switcher';
+    if (variant) switcher.classList.add(`language-switcher--${variant}`);
     switcher.dataset.languageSwitcher = 'true';
+
+    if (control.id) switcher.id = control.id;
+    if (typeof onChange === 'function') languageChangeHandlers.set(switcher, onChange);
 
     const options = Object.keys(translations).map(language => {
         const metadata = getLanguageMeta(language);
@@ -175,7 +191,9 @@ function createLanguageSwitcher(control) {
     menu.addEventListener('click', event => {
         const option = event.target.closest('[data-language-option]');
         if (!option) return;
-        setLanguage(option.dataset.languageOption);
+        const language = option.dataset.languageOption;
+        setLanguage(language);
+        languageChangeHandlers.get(switcher)?.(language);
         closeLanguageSwitcher(switcher, { restoreFocus: true });
     });
 
@@ -214,23 +232,24 @@ function createLanguageSwitcher(control) {
     return switcher;
 }
 
-export function initLanguageSwitcher() {
-    const existingSwitcher = document.querySelector('[data-language-switcher]');
-    if (existingSwitcher) {
-        syncLanguageSwitcher(existingSwitcher);
+export function initLanguageSwitcher(root = document) {
+    const existingSwitchers = Array.from(root.querySelectorAll('[data-language-switcher]'));
+    existingSwitchers.forEach(syncLanguageSwitcher);
+
+    const controls = Array.from(root.querySelectorAll('[data-language-control]'));
+    if (controls.length) {
+        controls.forEach(control => mountLanguageSwitcher(control));
         return;
     }
 
-    let control = document.querySelector('[data-language-control]');
-    if (!control) {
-        control = Array.from(document.querySelectorAll('header .right button')).find(button => button.id !== 'profile-btn');
-    }
-    if (!control) return;
+    if (existingSwitchers.length) return;
 
-    createLanguageSwitcher(control);
+    const fallbackControl = Array.from(document.querySelectorAll('header .right button'))
+        .find(button => button.id !== 'profile-btn');
+    if (fallbackControl) mountLanguageSwitcher(fallbackControl);
 }
 
 export function initI18n(root = document) {
-    initLanguageSwitcher();
+    initLanguageSwitcher(root);
     applyI18n(root);
 }

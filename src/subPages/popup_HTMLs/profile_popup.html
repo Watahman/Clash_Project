@@ -84,14 +84,16 @@
                         <span data-i18n="settings.language">Taal</span>
                         <small data-i18n="settings.languageHelp">Kies de taal van de volledige werkruimte.</small>
                     </div>
-                    <label class="po-field-label" for="po-settings-language" data-i18n="settings.language">Taal</label>
-                    <select id="po-settings-language">
-                        <option value="nl">NL</option>
-                        <option value="en">EN</option>
-                        <option value="fr">FR</option>
-                        <option value="de">DE</option>
-                        <option value="es">ES</option>
-                    </select>
+                    <div class="po-language-picker">
+                        <button id="po-settings-language-button" type="button" data-profile-language-control data-i18n="settings.language">Taal</button>
+                        <select id="po-settings-language" class="po-language-native" aria-hidden="true" tabindex="-1">
+                            <option value="nl">Nederlands</option>
+                            <option value="en">English</option>
+                            <option value="fr">Français</option>
+                            <option value="de">Deutsch</option>
+                            <option value="es">Español</option>
+                        </select>
+                    </div>
                 </section>
 
                 <section class="po-settings-card">

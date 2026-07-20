@@ -1,5 +1,5 @@
 import { updateUserName } from "../Supabase/Supabase-User.js";
-import { getLanguage, setLanguage, t } from "../i18n/i18n.js";
+import { getLanguage, mountLanguageSwitcher, setLanguage, t } from "../i18n/i18n.js";
 import { clearCachePrefix, invalidateUserCache } from "../cache/local-cache.js";
 import { getCurrentUserId } from "../utils/user.js";
 import { getThemePreference, setThemePreference } from "../theme/theme-manager.js";
@@ -10,6 +10,12 @@ let currentProfile = null;
 let onRefreshProfile = null;
 let onProfileUpdated = null;
 let refs = {};
+let messageTimer = null;
+
+const MESSAGE_DURATION = Object.freeze({
+    success: 2500,
+    error: 4000
+});
 
 function q(selector) {
     return document.querySelector(selector);
@@ -17,12 +23,28 @@ function q(selector) {
 
 function setMessage(key, state = 'success') {
     if (!refs.message) return;
+
+    if (messageTimer) {
+        window.clearTimeout(messageTimer);
+        messageTimer = null;
+    }
+
     refs.message.textContent = t(key);
     refs.message.dataset.state = state;
     refs.message.classList.remove('hidden');
+
+    const duration = MESSAGE_DURATION[state] || MESSAGE_DURATION.success;
+    messageTimer = window.setTimeout(() => {
+        clearMessage();
+    }, duration);
 }
 
 function clearMessage() {
+    if (messageTimer) {
+        window.clearTimeout(messageTimer);
+        messageTimer = null;
+    }
+
     if (!refs.message) return;
     refs.message.textContent = '';
     refs.message.removeAttribute('data-state');
@@ -45,6 +67,18 @@ function syncThemeButtons() {
 
 function syncLanguageControl() {
     if (refs.languageSelect) refs.languageSelect.value = getLanguage();
+}
+
+function initProfileLanguageSwitcher() {
+    const switcher = mountLanguageSwitcher(refs.languageControl, {
+        variant: 'profile',
+        onChange: language => {
+            if (refs.languageSelect) refs.languageSelect.value = language;
+            setMessage('settings.saved');
+        }
+    });
+
+    if (switcher) refs.languageControl = switcher;
 }
 
 function isStrongPassword(password) {
@@ -161,6 +195,7 @@ function bindRefs() {
         refreshBtn: q('#po-refresh-profile'),
         message: q('#po-settings-message'),
         languageSelect: q('#po-settings-language'),
+        languageControl: q('#po-settings-language-button'),
         themeOptions: document.querySelectorAll('.po-theme-option')
     };
 }
@@ -175,6 +210,7 @@ export function initProfileSettings(options = {}) {
     bindRefs();
     onRefreshProfile = options.onRefreshProfile;
     onProfileUpdated = options.onProfileUpdated;
+    initProfileLanguageSwitcher();
 
     refs.themeOptions?.forEach(button => {
         bindOnce(button, 'click', () => {
