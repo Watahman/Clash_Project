@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
     deletePlan: vi.fn().mockResolvedValue({ success: true }),
+    syncAuthSession: vi.fn().mockResolvedValue(null),
     getAllPlans: vi.fn().mockResolvedValue([{
         id: 'plan-1',
         name: 'Juli',
@@ -13,7 +14,8 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
     getLanguage: () => 'nl',
     initI18n: vi.fn(),
-    t: (key) => ({
+    t: (key, values = {}) => {
+        const value = ({
         'drafts.open': 'Open',
         'drafts.rename': 'Hernoem',
         'drafts.copy': 'Kopieer',
@@ -22,15 +24,20 @@ vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
         'drafts.loading': 'Laden',
         'drafts.deleted': 'Verwijderd',
         'drafts.deleteConfirm': 'Bevestigen',
+        'drafts.empty': 'Geen plannen',
+        'drafts.noMatches': 'Geen plannen gevonden',
+        'drafts.results': '{visible} van {total} plannen zichtbaar',
         'plans.name': 'Plan',
         'plans.clans': 'Clans',
         'plans.freeRoster': 'Vrij roster',
         'plans.updated': 'Bijgewerkt',
         'plans.unknownDate': 'Onbekend'
-    })[key] || key
+        })[key] || key;
+        return Object.entries(values).reduce((result, [name, replacement]) => result.replaceAll(`{${name}}`, replacement), value);
+    }
 }));
 vi.mock('../../src/assets/js/profile/profile_popup.js', () => ({ profileHTML: vi.fn() }));
-vi.mock('../../src/assets/js/auth/auth-client.js', () => ({ syncAuthSession: vi.fn().mockResolvedValue(null) }));
+vi.mock('../../src/assets/js/auth/auth-client.js', () => ({ syncAuthSession: mocks.syncAuthSession }));
 vi.mock('../../src/assets/js/utils/user.js', () => ({ getCurrentUserId: () => 'user-1' }));
 vi.mock('../../src/assets/js/Supabase/Supabase-Plan.js', () => ({
     copyPlan: vi.fn(),
@@ -42,6 +49,7 @@ vi.mock('../../src/assets/js/Supabase/Supabase-Plan.js', () => ({
 describe('saved plan actions', () => {
     beforeEach(() => {
         vi.resetModules();
+        mocks.syncAuthSession.mockReset().mockResolvedValue(null);
         mocks.deletePlan.mockClear();
         mocks.getAllPlans.mockReset().mockResolvedValue([{
             id: 'plan-1',
@@ -52,6 +60,8 @@ describe('saved plan actions', () => {
         localStorage.clear();
         document.body.innerHTML = `
             <p id="drafts-status"></p>
+            <input id="drafts-search"><select id="drafts-sort"><option value="updated-desc">Recent</option><option value="updated-asc">Oudst</option><option value="name-asc">Naam A-Z</option><option value="name-desc">Naam Z-A</option></select>
+            <p id="drafts-filter-status"></p>
             <table><tbody id="draft-cwl-container"></tbody></table>
             <div class="profile-placeholder"></div>`;
     });
@@ -72,5 +82,35 @@ describe('saved plan actions', () => {
         await vi.waitFor(() => expect(mocks.deletePlan).toHaveBeenCalledWith('plan-1', 'user-1'));
         expect(document.querySelector('[data-plan-id="plan-1"]')).toBeNull();
         expect(localStorage.getItem('planner_id')).toBeNull();
+    });
+
+    it('filters and sorts already loaded plans without another request', async () => {
+        mocks.getAllPlans.mockResolvedValue([
+            { id: 'bravo', name: 'Bravo', updated_at: '2026-06-01T10:00:00Z', isOwner: true, info: { freePlayers: [], clans: [] } },
+            { id: 'alpha', name: 'Álpha', updated_at: '2026-07-10T10:00:00Z', isOwner: true, info: { freePlayers: [], clans: [] } },
+            { id: 'charlie', name: 'Charlie', updated_at: null, isOwner: false, info: { freePlayers: [], clans: [] } }
+        ]);
+        await import('../../src/assets/js/pages/cwl-planner-drafts.js');
+        await vi.waitFor(() => expect(document.querySelectorAll('[data-plan-id]')).toHaveLength(3));
+
+        const names = () => [...document.querySelectorAll('[data-plan-id] td:first-child strong')].map(element => element.textContent);
+        expect(names()).toEqual(['Álpha', 'Bravo', 'Charlie']);
+
+        const sort = document.querySelector('#drafts-sort');
+        sort.value = 'name-desc';
+        sort.dispatchEvent(new Event('change', { bubbles: true }));
+        expect(names()).toEqual(['Charlie', 'Bravo', 'Álpha']);
+
+        const search = document.querySelector('#drafts-search');
+        search.value = 'alpha';
+        search.dispatchEvent(new Event('input', { bubbles: true }));
+        expect(names()).toEqual(['Álpha']);
+        expect(document.querySelector('#drafts-filter-status').textContent).toBe('1 van 3 plannen zichtbaar');
+
+        search.value = 'bestaat niet';
+        search.dispatchEvent(new Event('input', { bubbles: true }));
+        expect(document.querySelectorAll('[data-plan-id]')).toHaveLength(0);
+        expect(document.querySelector('#draft-cwl-container').textContent).toContain('Geen plannen gevonden');
+        expect(mocks.getAllPlans).toHaveBeenCalledTimes(1);
     });
 });

@@ -3,6 +3,7 @@ import { profileHTML } from '../profile/profile_popup.js';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { getCurrentUserId } from '../utils/user.js';
 import { summarizePlan } from '../cwl/cwl-plan-summary.js';
+import { filterAndSortPlans } from '../cwl/cwl-plan-list.js';
 import {
     copyPlan,
     deletePlan,
@@ -14,10 +15,14 @@ const refs = {};
 let plans = [];
 let userId = null;
 let activeController;
+const listState = { query: '', sort: 'updated-desc' };
 
 function initRefs() {
     refs.container = document.querySelector('#draft-cwl-container');
     refs.status = document.querySelector('#drafts-status');
+    refs.search = document.querySelector('#drafts-search');
+    refs.sort = document.querySelector('#drafts-sort');
+    refs.filterStatus = document.querySelector('#drafts-filter-status');
 }
 
 function setStatus(message = '', state = '') {
@@ -75,14 +80,44 @@ function emptyRow(messageKey, actionKey = '', actionHref = '') {
 function render() {
     refs.container.replaceChildren();
     if (!userId) {
+        updateFilterStatus(0, 0);
         refs.container.appendChild(emptyRow('drafts.loginRequired', 'auth.login', './login.html'));
         return;
     }
     if (!plans.length) {
+        updateFilterStatus(0, 0);
         refs.container.appendChild(emptyRow('drafts.empty', 'dashboard.createFirstPlan', './cwl-planner.html'));
         return;
     }
-    plans.forEach(plan => refs.container.appendChild(renderPlan(plan)));
+    const visiblePlans = filterAndSortPlans(plans, { ...listState, language: getLanguage() });
+    updateFilterStatus(visiblePlans.length, plans.length);
+    if (!visiblePlans.length) {
+        refs.container.appendChild(emptyRow('drafts.noMatches'));
+        return;
+    }
+    visiblePlans.forEach(plan => refs.container.appendChild(renderPlan(plan)));
+}
+
+function updateFilterStatus(visible, total) {
+    if (!refs.filterStatus) return;
+    refs.filterStatus.textContent = total ? t('drafts.results', { visible, total }) : '';
+    refs.filterStatus.hidden = !total;
+}
+
+function setListControlsEnabled(enabled) {
+    if (refs.search) refs.search.disabled = !enabled;
+    if (refs.sort) refs.sort.disabled = !enabled;
+}
+
+function bindListControls() {
+    refs.search?.addEventListener('input', event => {
+        listState.query = event.currentTarget.value;
+        render();
+    });
+    refs.sort?.addEventListener('change', event => {
+        listState.sort = event.currentTarget.value;
+        render();
+    });
 }
 
 function cell(label, value) {
@@ -183,6 +218,7 @@ async function removePlan(plan) {
         await deletePlan(plan.id, userId);
         plans = plans.filter(item => item.id !== plan.id);
         if (localStorage.getItem('planner_id') === plan.id) localStorage.removeItem('planner_id');
+        setListControlsEnabled(plans.length > 0);
         render();
         setStatus(t('drafts.deleted'), 'success');
     } catch (error) {
@@ -200,11 +236,13 @@ async function loadPlans() {
     activeController?.abort();
     activeController = new AbortController();
     setStatus(t('drafts.loading'));
+    setListControlsEnabled(false);
     const result = await getAllPlansFromDatabase(userId, {
         signal: activeController.signal,
         forceRefresh: true
     });
     plans = Array.isArray(result) ? result.map(summarizePlan) : [];
+    setListControlsEnabled(plans.length > 0);
     render();
     setStatus('');
 }
@@ -213,6 +251,8 @@ async function init() {
     initI18n();
     await syncAuthSession().catch(() => null);
     initRefs();
+    bindListControls();
+    setListControlsEnabled(false);
     profileHTML({ preload: false });
     window.addEventListener('clashtools:language-changed', render);
     userId = getCurrentUserId();

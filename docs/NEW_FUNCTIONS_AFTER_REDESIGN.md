@@ -19,7 +19,8 @@ De redesign is op 18 juli 2026 volledig visueel en functioneel gecontroleerd. Ge
 - Vrij-roster zoeken is als eerste afzonderlijk goedgekeurde functie van Onderdeel 8 geïmplementeerd en gecontroleerd.
 - Sterren per war day is als tweede afzonderlijk goedgekeurde functie gebouwd op de reeds geladen echte rondedata.
 - Klassementspositie per war day is als derde functie gebouwd zonder snapshotopslag of migratie; een dag verschijnt alleen bij een complete, afgeronde groepsronde.
-- Mobiele bracketnavigatie, plannen zoeken/sorteren en Groups-ledenfilters blijven `NEW_NOT_IMPLEMENTED`.
+- Zoeken en sorteren in Opgeslagen plannen is als vierde functie volledig client-side gebouwd op reeds geladen planmetadata.
+- Mobiele bracketnavigatie en Groups-ledenfilters blijven `NEW_NOT_IMPLEMENTED`.
 - Onboarding, het aandachtfilter en historische snapshotopslag blijven `OPTIONAL_NOT_APPROVED`.
 
 ## Onderdeel 8 — functie 1
@@ -34,12 +35,16 @@ De gebruiker gaf toestemming om de volgende meest cruciale of moeilijke functie 
 
 Na toestemming om verder te gaan is de technisch moeilijkere klassementspositie per war day onderzocht en gebouwd. De bestaande standberekening wordt per cumulatieve, volledig geladen en afgeronde ronde hergebruikt. Bij een ontbrekende war, onvolledige clandekking of eerdere datakloof blijft die dag en elke latere dag leeg. Het gerichte rapport staat in [`post-redesign/03-position-per-war-day.md`](post-redesign/03-position-per-war-day.md).
 
+## Onderdeel 8 — functie 4
+
+De gebruiker gaf toestemming om nog één open functie te bouwen. Zoeken en sorteren in Opgeslagen plannen is gekozen als de grootste dagelijkse efficiëntiewinst zonder nieuwe backendafhankelijkheid. Zoeken werkt op plannaam; sorteren ondersteunt recent, oudst en naam in beide richtingen. Alles gebruikt de reeds geladen lijst en doet geen extra request per interactie. Het gerichte rapport staat in [`post-redesign/04-saved-plans-search-sort.md`](post-redesign/04-saved-plans-search-sort.md).
+
 ## Vastgestelde nieuwe functies
 
 | Functie | Auditstatus | Huidige lacune | Benodigde echte databron | Goedkeuring | Vroegste fase |
 |---|---|---|---|---|---|
 | Vrij roster zoeken op spelersnaam of tag | `IMPLEMENTED_PART8` | Zichtbaar zoekveld met naam-/tagfilter, live resultaatteller en afzonderlijke geen-resultatenstatus | Reeds geladen `freePlayers`; volledig client-side, geen API-call per toetsaanslag | Goedgekeurd op 18 juli 2026 | Onderdeel 8, functie 1 |
-| Plannen zoeken en sorteren | `NEW_NOT_IMPLEMENTED` | Draftspagina heeft geen zoekveld of sorteerbesturing | Reeds geladen planmetadata: naam en `updated_at` | Nog niet goedgekeurd | Onderdeel 8 |
+| Plannen zoeken en sorteren | `IMPLEMENTED_PART8` | Zoekveld, vier sorteermodi, live resultaatteller en afzonderlijke geen-resultatenstatus | Reeds geladen planmetadata: naam en `updated_at`; volledig client-side zonder extra request | Goedgekeurd op 18 juli 2026 | Onderdeel 8, functie 4 |
 | Plan exporteren vanuit Opgeslagen plannen | `NEW_NOT_IMPLEMENTED` | Drafts ondersteunt openen, hernoemen, kopiëren en verwijderen, maar geen export | Volledig bestaand plandocument via planservice | Nog niet goedgekeurd | Onderdeel 8 of afzonderlijk besluit na Onderdeel 2 |
 | Sterren per war day als lijngrafiek | `IMPLEMENTED_PART8` | Toegankelijke responsieve grafiek met dag 1–7, echte datapunten, lege toekomstige dagen en detailtooltip | Reeds geladen rondedata met status, sterren, destruction en tegenstander; geen nieuwe opslag | Goedgekeurd via keuze voor de meest cruciale/moeilijke volgende functie op 18 juli 2026 | Onderdeel 8, functie 2 |
 | Klassementspositie per war day als lijngrafiek | `IMPLEMENTED_PART8` | Toegankelijke cumulatieve positiecurve met strikte volledigheidscontrole en lege dagen na een datakloof | Bestaande leaguegroep, round war-tags en volledig geladen afgeronde wars; bestaande standberekening, geen nieuwe opslag | Goedgekeurd op 18 juli 2026 | Onderdeel 8, functie 3 |
