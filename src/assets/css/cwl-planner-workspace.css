@@ -149,6 +149,44 @@
 
 .workspace-planner .button-primary:hover { background: var(--accent-strong); }
 
+.workspace-planner #cwl-save-plan-button::before {
+    content: "";
+    display: none;
+    width: 0.85rem;
+    height: 0.85rem;
+    flex: 0 0 0.85rem;
+    box-sizing: border-box;
+}
+
+.workspace-planner #cwl-save-plan-button[data-save-feedback="saving"] {
+    cursor: progress;
+}
+
+.workspace-planner #cwl-save-plan-button[data-save-feedback="saving"]::before {
+    display: block;
+    border: 0.14rem solid color-mix(in srgb, currentColor 35%, transparent);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: cwl-save-button-spin 0.7s linear infinite;
+}
+
+.workspace-planner #cwl-save-plan-button[data-save-feedback="saved"]::before,
+.workspace-planner #cwl-save-plan-button[data-save-feedback="error"]::before {
+    display: grid;
+    place-items: center;
+    border: 0;
+    font-size: 0.9rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.workspace-planner #cwl-save-plan-button[data-save-feedback="saved"]::before { content: "✓"; }
+.workspace-planner #cwl-save-plan-button[data-save-feedback="error"]::before { content: "×"; }
+
+@keyframes cwl-save-button-spin {
+    to { transform: rotate(1turn); }
+}
+
 .workspace-planner > .cwl-context-toolbar {
     display: flex;
     flex-direction: row;
@@ -468,6 +506,8 @@
     grid-column: 3;
     grid-row: 1;
     justify-self: end;
+    cursor: help;
+    user-select: none;
     max-width: 6rem;
     overflow: hidden;
     border-radius: 999px;
@@ -591,15 +631,5 @@
 
 @media (prefers-reduced-motion: reduce) {
     .workspace-planner * { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
-}
-
-/* Keep the approved player-card layout while the actual card is moved to the drag layer. */
-.workspace-planner .cwl-player-article.cwl-player-dragging {
-    margin: 0 !important;
-    border: 1px solid var(--border-strong) !important;
-    border-radius: var(--radius-small);
-    background: var(--surface) !important;
-    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.28);
-    cursor: grabbing;
-    opacity: 0.96;
+    .workspace-planner #cwl-save-plan-button[data-save-feedback="saving"]::before { animation: none; }
 }
