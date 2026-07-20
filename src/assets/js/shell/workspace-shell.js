@@ -102,10 +102,7 @@ function initMobileSidebar(sidebar, backdrop) {
 function initProfileShortcuts() {
     const profileButton = document.querySelector('#profile-btn');
     document.querySelector('#workspace-profile-shortcut')?.addEventListener('click', () => profileButton?.click());
-    document.querySelector('#workspace-notifications')?.addEventListener('click', () => {
-        profileButton?.click();
-        window.setTimeout(() => document.querySelector('#po-notifications-btn')?.click(), 0);
-    });
+    document.querySelector('#workspace-notifications')?.addEventListener('click', () => profileButton?.click());
 }
 
 async function protectRoute() {
