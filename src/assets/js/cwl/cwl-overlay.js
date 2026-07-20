@@ -7,6 +7,7 @@ import { initGroupOverlay } from "./cwl-group.js";
 import { getCurrentUserId } from "../utils/user.js";
 import { uniquePlayers } from "./cwl-utils.js";
 import { t } from "../i18n/i18n.js";
+import { allowsThirtyPlayerCwl } from "./cwl-league-rules.js";
 
 let accountLoadToken = 0;
 let activeAccountSource = 'user';
@@ -248,14 +249,17 @@ export function initAddClanButton(refs) {
 
     overlayAddClanBtn.addEventListener("click", () => {
         const clanID = cwlInputClanCode.value.trim();
-        const playerAmount = selectAmountPlayers.value;
         if (clanID !== "") {
             setButtonBusy(overlayAddClanBtn, true);
             getClanInfoRequest(clanID)
                 .then(data => {
-                    createClanCard(data, playerAmount);
+                    const leagueName = data?.warLeague?.name || "";
+                    const allowThirty = allowsThirtyPlayerCwl(leagueName);
+                    applyCwlSizeRestriction(selectAmountPlayers, allowThirty, leagueName);
+                    createClanCard(data, allowThirty ? selectAmountPlayers.value : "15");
                     document.querySelector("#cwl-overlay-add-clan")?.classList.add("hidden");
                     cwlInputClanCode.value = "";
+                    applyCwlSizeRestriction(selectAmountPlayers, true);
                 })
                 .catch(error => console.error(error))
                 .finally(() => setButtonBusy(overlayAddClanBtn, false));
@@ -278,11 +282,18 @@ export function ensureCwlSizeOptions(selectAmountPlayers) {
     }
 }
 
-export function applyCwlSizeRestriction(selectAmountPlayers, allowThirty) {
+export function applyCwlSizeRestriction(selectAmountPlayers, allowThirty, leagueName = '') {
     ensureCwlSizeOptions(selectAmountPlayers);
     const thirtyOption = selectAmountPlayers.querySelector('option[value="30"]');
-    if (!allowThirty && thirtyOption) {
-        thirtyOption.remove();
-        selectAmountPlayers.value = "15";
+    if (!thirtyOption) return;
+
+    thirtyOption.disabled = !allowThirty;
+    thirtyOption.textContent = allowThirty ? '30v30' : t('cwl.thirtyUnavailableOption');
+    selectAmountPlayers.title = allowThirty
+        ? ''
+        : t('cwl.thirtyUnavailableForLeague', { league: leagueName || t('cwl.thisLeague') });
+
+    if (!allowThirty && selectAmountPlayers.value === '30') {
+        selectAmountPlayers.value = '15';
     }
 }

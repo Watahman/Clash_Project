@@ -1,7 +1,7 @@
 import { canAutosave, isLoading, setLoading, setCanAutosave } from '../Data/config.js';
 import { getClanInfoRequest } from '../API/API-Clan.js';
 import { getPlayerBasicData } from '../API/API-Functions.js';
-import { createPlayerCard, createClanCard } from '../templates/CWLTemplates.js';
+import { createPlayerCard, createClanCard, applyClanLeagueRestriction } from '../templates/CWLTemplates.js';
 import { getAllPlansFromDatabase, getPlanFromDatabase, setPlanToDatabase } from '../Supabase/Supabase-Plan.js';
 import { getCurrentUserId } from '../utils/user.js';
 import { t } from '../i18n/i18n.js';
@@ -406,6 +406,7 @@ async function enrichClan(clan, token, signal) {
         card.querySelector('.cwl-clan-name').textContent = clanName;
         card.querySelector('.cwl-clan-tag').textContent = clanTag;
         card.querySelector('.cwl-clan-league').textContent = leagueName ? ` · ${leagueName}` : '';
+        applyClanLeagueRestriction(card, leagueName, { persist: false });
         const badge = data?.badgeUrls?.small;
         const logo = card.querySelector('.cwl-clan-logo');
         if (badge) logo.src = badge;

@@ -2,6 +2,7 @@ import { savePlan } from '../cwl/cwl-plan-io.js';
 import { applyAvailabilityToCard } from '../cwl/cwl-availability.js';
 import { getCardTag, normalizePlayer, normalizeTag, plannerHasPlayer, uniquePlayers } from '../cwl/cwl-utils.js';
 import { t } from '../i18n/i18n.js';
+import { allowsThirtyPlayerCwl, normalizeCwlCapacity } from '../cwl/cwl-league-rules.js';
 
 function createPlayerCard(playerInfo, clanuuid) {
     const players = uniquePlayers(playerInfo);
@@ -185,11 +186,43 @@ function rememberPlannerPlayers() {
     localStorage.setItem('clashtools_last_planner_players', JSON.stringify(players));
 }
 
+
+function updateClanCapacityCounter(article) {
+    const select = article.querySelector('.cwl-clan-capacity');
+    const counter = article.querySelector('.cwl-amount-of-players-in-clan');
+    if (!select || !counter) return;
+    const playerCount = article.querySelectorAll('.cwl-clan-player-list .cwl-player-article[data-planner-card="true"]').length;
+    counter.textContent = `${playerCount}/${select.value}`;
+    article.dataset.clanCapacity = select.value;
+}
+
+function applyClanLeagueRestriction(article, leagueName, options = {}) {
+    const select = article?.querySelector('.cwl-clan-capacity');
+    const thirtyOption = select?.querySelector('option[value="30"]');
+    if (!select || !thirtyOption) return false;
+
+    const allowThirty = allowsThirtyPlayerCwl(leagueName);
+    article.dataset.clanLeague = leagueName || '';
+    thirtyOption.disabled = !allowThirty;
+    thirtyOption.textContent = allowThirty ? '30v30' : t('cwl.thirtyUnavailableOption');
+    select.title = allowThirty
+        ? ''
+        : t('cwl.thirtyUnavailableForLeague', { league: leagueName || t('cwl.thisLeague') });
+
+    const changed = !allowThirty && select.value === '30';
+    if (changed) {
+        select.value = '15';
+        updateClanCapacityCounter(article);
+        if (options.persist !== false) savePlan();
+    }
+    return changed;
+}
+
 function createClanCard(clanInfo, playerAmount, uuid = '') {
     const clanTag = normalizeTag(clanInfo?.tag);
-    const capacity = [15, 30].includes(Number(playerAmount)) ? Number(playerAmount) : 15;
     const clanName = clanInfo?.name || clanTag || t('cwl.clan');
     const leagueName = clanInfo?.warLeague?.name || '';
+    const capacity = normalizeCwlCapacity(playerAmount, leagueName);
 
     const clanTemplate = document.querySelector('#cwl-clan-template');
     const clanTemplateClone = clanTemplate.content.cloneNode(true);
@@ -221,7 +254,9 @@ function createClanCard(clanInfo, playerAmount, uuid = '') {
     article.id = 'cwl-clan-template_' + clanUuid;
     article.dataset.clanTag = clanTag;
     article.dataset.clanName = clanName;
+    article.dataset.clanLeague = leagueName;
     article.dataset.clanCapacity = String(capacity);
+    applyClanLeagueRestriction(article, leagueName, { persist: false });
 
     deleteClan.addEventListener('click', event => {
         const currentArticle = event.target.closest('article');
@@ -402,4 +437,4 @@ function updateAllPlayerCounters() {
     });
 }
 
-export { createPlayerCard, createClanCard, updateAllPlayerCounters };
+export { createPlayerCard, createClanCard, updateAllPlayerCounters, applyClanLeagueRestriction };

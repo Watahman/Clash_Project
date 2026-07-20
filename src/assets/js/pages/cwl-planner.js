@@ -6,6 +6,7 @@ import { initPlanIO, savePlan, loadAllPlans, loadPlanListener, startNewPlan } fr
 import { initFreeRosterFilter } from "../cwl/cwl-roster-filter.js";
 import { getClanInfoRequest } from "../API/API-Clan.js";
 import * as conf from "../Data/config.js";
+import { allowsThirtyPlayerCwl } from "../cwl/cwl-league-rules.js";
 
 export { savePlan };
 
@@ -102,6 +103,12 @@ function refreshPlannerLabels() {
     });
     document.querySelectorAll('.cwl-clan-capacity').forEach(select => {
         select.setAttribute('aria-label', t('planner.format'));
+        const article = select.closest('.cwl-clan-article');
+        const thirtyOption = select.querySelector('option[value="30"]');
+        if (!article || !thirtyOption || !thirtyOption.disabled) return;
+        const leagueName = article.dataset.clanLeague || t('cwl.thisLeague');
+        thirtyOption.textContent = t('cwl.thirtyUnavailableOption');
+        select.title = t('cwl.thirtyUnavailableForLeague', { league: leagueName });
     });
     document.querySelectorAll('.cwl-delete-clan').forEach(button => {
         button.title = t('cwl.deleteClan');
@@ -178,13 +185,12 @@ function guessCwlSize() {
                 return;
             }
             getClanInfoRequest(clanTag).then(data => {
-                const league = data?.warLeague?.name || "";
-                const championLeague = [
-                    "Champion League I",
-                    "Champion League II",
-                    "Champion League III"
-                ].includes(league);
-                applyCwlSizeRestriction(selectAmountPlayers, !championLeague);
+                const leagueName = data?.warLeague?.name || "";
+                applyCwlSizeRestriction(
+                    selectAmountPlayers,
+                    allowsThirtyPlayerCwl(leagueName),
+                    leagueName
+                );
             }).catch(() => applyCwlSizeRestriction(selectAmountPlayers, true));
         }, 500);
     });

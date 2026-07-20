@@ -426,7 +426,10 @@ const part3 = Object.freeze({
         "planner.rosterResults": "{visible} van {total} spelers zichtbaar",
         "planner.emptyClans": "Voeg een clan toe om de planning te beginnen.",
         "cwl.deleteClan": "Clan verwijderen",
-        "cwl.noClan": "Geen clan"
+        "cwl.noClan": "Geen clan",
+        "cwl.thirtyUnavailableOption": "30v30 — niet beschikbaar",
+        "cwl.thirtyUnavailableForLeague": "30v30 is niet beschikbaar in {league}.",
+        "cwl.thisLeague": "deze CWL-league"
     },
     en: {
         "planner.kicker": "CWL Planner",
@@ -444,7 +447,10 @@ const part3 = Object.freeze({
         "planner.rosterResults": "{visible} of {total} players shown",
         "planner.emptyClans": "Add a clan to start planning.",
         "cwl.deleteClan": "Delete clan",
-        "cwl.noClan": "No clan"
+        "cwl.noClan": "No clan",
+        "cwl.thirtyUnavailableOption": "30v30 — unavailable",
+        "cwl.thirtyUnavailableForLeague": "30v30 is unavailable in {league}.",
+        "cwl.thisLeague": "this CWL league"
     },
     fr: {
         "planner.kicker": "Planificateur CWL",
@@ -462,7 +468,10 @@ const part3 = Object.freeze({
         "planner.rosterResults": "{visible} joueur(s) affiché(s) sur {total}",
         "planner.emptyClans": "Ajoutez un clan pour commencer la planification.",
         "cwl.deleteClan": "Supprimer le clan",
-        "cwl.noClan": "Aucun clan"
+        "cwl.noClan": "Aucun clan",
+        "cwl.thirtyUnavailableOption": "30v30 — indisponible",
+        "cwl.thirtyUnavailableForLeague": "Le 30v30 n’est pas disponible en {league}.",
+        "cwl.thisLeague": "cette ligue CWL"
     },
     de: {
         "planner.kicker": "CWL-Planer",
@@ -480,7 +489,10 @@ const part3 = Object.freeze({
         "planner.rosterResults": "{visible} von {total} Spielern sichtbar",
         "planner.emptyClans": "Füge einen Clan hinzu, um mit der Planung zu beginnen.",
         "cwl.deleteClan": "Clan löschen",
-        "cwl.noClan": "Kein Clan"
+        "cwl.noClan": "Kein Clan",
+        "cwl.thirtyUnavailableOption": "30v30 — nicht verfügbar",
+        "cwl.thirtyUnavailableForLeague": "30v30 ist in {league} nicht verfügbar.",
+        "cwl.thisLeague": "dieser CWL-Liga"
     },
     es: {
         "planner.kicker": "Planificador CWL",
@@ -498,7 +510,10 @@ const part3 = Object.freeze({
         "planner.rosterResults": "{visible} de {total} jugadores visibles",
         "planner.emptyClans": "Añade un clan para empezar a planificar.",
         "cwl.deleteClan": "Eliminar clan",
-        "cwl.noClan": "Sin clan"
+        "cwl.noClan": "Sin clan",
+        "cwl.thirtyUnavailableOption": "30v30 — no disponible",
+        "cwl.thirtyUnavailableForLeague": "30v30 no está disponible en {league}.",
+        "cwl.thisLeague": "esta liga CWL"
     }
 });
 
