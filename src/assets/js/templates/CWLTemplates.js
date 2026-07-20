@@ -280,7 +280,6 @@ function createClanCard(clanInfo, playerAmount, uuid = '') {
 
 function makePlayerDraggable(element) {
     let offsetX, offsetY;
-    let startLeft, startTop;
     let dragging = false;
     element.originalContainer = element.parentElement;
     element.classList.add('draggable');
@@ -294,20 +293,23 @@ function makePlayerDraggable(element) {
         element.originalContainer = element.parentElement;
 
         const rect = element.getBoundingClientRect();
-        startLeft = rect.left + window.scrollX;
-        startTop = rect.top + window.scrollY;
         offsetX = event.clientX - rect.left;
         offsetY = event.clientY - rect.top;
 
-        element.style.position = 'absolute';
-        element.style.left = startLeft + 'px';
-        element.style.top = startTop + 'px';
+        const dragLayer = element.closest('.workspace-planner') || document.body;
+        element.classList.add('cwl-player-dragging');
+        element.style.position = 'fixed';
+        element.style.left = rect.left + 'px';
+        element.style.top = rect.top + 'px';
+        element.style.setProperty('width', rect.width + 'px', 'important');
+        element.style.setProperty('height', rect.height + 'px', 'important');
         element.style.zIndex = '1000';
-        document.body.appendChild(element);
+        element.style.pointerEvents = 'none';
+        dragLayer.appendChild(element);
 
         const onMouseMove = moveEvent => {
-            element.style.left = (moveEvent.clientX - offsetX + window.scrollX) + 'px';
-            element.style.top = (moveEvent.clientY - offsetY + window.scrollY) + 'px';
+            element.style.left = (moveEvent.clientX - offsetX) + 'px';
+            element.style.top = (moveEvent.clientY - offsetY) + 'px';
         };
 
         const onMouseUp = upEvent => {
@@ -327,10 +329,14 @@ function makePlayerDraggable(element) {
 
             if (!dropped) element.originalContainer.appendChild(element);
 
+            element.classList.remove('cwl-player-dragging');
             element.style.position = '';
             element.style.left = '';
             element.style.top = '';
+            element.style.removeProperty('width');
+            element.style.removeProperty('height');
             element.style.zIndex = '';
+            element.style.pointerEvents = '';
 
             updateAllPlayerCounters();
             rememberPlannerPlayers();
