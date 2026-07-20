@@ -70,6 +70,14 @@ html { min-width: 20rem; scroll-behavior: smooth; }
 body.public-site,
 body.auth-page,
 body.workspace-app { min-width: 20rem; min-height: 100vh; margin: 0; background: var(--bg); color: var(--text); font-family: inherit; }
+
+/* Prevent a flash of unstyled content: workspace-shell.js builds the real
+   sidebar/topbar layout in JS and removes the raw <header>/<main> markup
+   that ships in the HTML. Until it has run (data-shell-ready="true"), hide
+   that raw markup so the page shows its already-correct dark background
+   instead of an unstyled, top-left-aligned flash for a split second. */
+body.workspace-app:not([data-shell-ready="true"]) > header,
+body.workspace-app:not([data-shell-ready="true"]) > main { visibility: hidden; }
 body.public-site button,
 body.public-site input,
 body.public-site select,
@@ -126,6 +134,8 @@ body.workspace-app .workspace-content a:focus-visible,
 body.workspace-app .workspace-content input:focus-visible { outline: 0.18rem solid var(--accent); outline-offset: 0.15rem; }
 
 .sr-only { position: absolute !important; width: 0.0625rem !important; height: 0.0625rem !important; overflow: hidden !important; margin: -0.0625rem !important; padding: 0 !important; border: 0 !important; clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; }
+
+.hidden, .po-hidden { display: none !important; }
 
 .skip-link { position: fixed; top: 0.75rem; left: 0.75rem; z-index: var(--z-toast); transform: translateY(-180%); border-radius: var(--radius-small); background: var(--accent); padding: 0.75rem 1rem; color: #18130a !important; font-weight: 750; transition: transform 180ms ease-out; }
 .skip-link:focus { transform: translateY(0); }
