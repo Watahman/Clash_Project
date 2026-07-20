@@ -76,9 +76,16 @@ function buildPlayerElement(player, target) {
             townHallImage.src = '../assets/css/pictures/townhalls/Town_Hall1.png';
         }
     }, { once: true });
-    element.querySelector('.cwl-player-hashtag').textContent = normalized.tag;
-    element.querySelector('.cwl-player-name').textContent = normalized.name;
-    element.querySelector('.cwl-player-clan').textContent = normalized.clanName || t('cwl.noClan');
+    const tagElement = element.querySelector('.cwl-player-hashtag');
+    const nameElement = element.querySelector('.cwl-player-name');
+    const clanElement = element.querySelector('.cwl-player-clan');
+    const clanLabel = normalized.clanName || t('cwl.noClan');
+    tagElement.textContent = normalized.tag;
+    tagElement.title = normalized.tag;
+    nameElement.textContent = normalized.name;
+    nameElement.title = normalized.name;
+    clanElement.textContent = clanLabel;
+    clanElement.title = clanLabel;
     element.dataset.playerTag = normalized.tag;
     element.dataset.townHall = String(normalized.townHallLevel);
     element.dataset.source = target.source;
