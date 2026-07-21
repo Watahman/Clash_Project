@@ -100,7 +100,7 @@ export function initGroupsAdminPanel(emptyMessage) {
 
 function queryElements() {
     return {
-        settingsBtn: document.querySelector('#groups-settings-btn'),
+        settingsBtn: document.querySelector('#groups-inspector-roles'),
         overlay: document.querySelector('#groups-admin-overlay'),
         closeBtn: document.querySelector('#groups-admin-close'),
         title: document.querySelector('#groups-admin-title'),
