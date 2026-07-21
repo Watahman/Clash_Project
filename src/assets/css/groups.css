@@ -1,14 +1,11 @@
-/* ============================================================
-   GROUPS PAGE — Clan command sidebar + detail panel
-   ============================================================ */
 main#groups-main {
     display: grid;
     grid-template-columns: var(--sidebar-w) 1.25rem minmax(0, 1fr);
     height: calc(100vh - var(--header-h));
     overflow: hidden;
     background:
-        radial-gradient(circle at 82% 12%, rgba(246,183,60,0.08), transparent 24rem),
-        radial-gradient(circle at 22% 88%, rgba(155,92,255,0.08), transparent 24rem);
+            radial-gradient(circle at 82% 12%, rgba(246,183,60,0.08), transparent 24rem),
+            radial-gradient(circle at 22% 88%, rgba(155,92,255,0.08), transparent 24rem);
     transition: grid-template-columns 0.22s ease;
 }
 main#groups-main.sidebar-collapsed { grid-template-columns: 0 1.25rem minmax(0, 1fr); }
@@ -356,8 +353,13 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
     outline: 2px solid rgba(246,183,60,.62);
     outline-offset: 2px;
 }
-#groups-main button img,
-#groups-main .groups-code-pill img {
+/* Keep utility-button icons compact without shrinking badges inside group-card buttons. */
+#groups-main .groups-code-pill img,
+#groups-main .groups-icon-button img,
+#groups-main .btn-groups-icon img,
+#groups-main .btn-groups-accent img,
+#groups-main .btn-groups-default img,
+#groups-main .btn-groups-danger img {
     display: block !important;
     flex: 0 0 auto !important;
     width: 1rem !important;
@@ -708,8 +710,8 @@ main#groups-main.sidebar-collapsed #groups-collapse-icon { transform: rotate(180
 /* Global light-mode pass: readable sidebar + visible cards */
 :root[data-theme="light"] main#groups-main {
     background:
-        radial-gradient(circle at 82% 12%, rgba(184,109,18,0.10), transparent 24rem),
-        radial-gradient(circle at 22% 88%, rgba(111,70,216,0.09), transparent 24rem);
+            radial-gradient(circle at 82% 12%, rgba(184,109,18,0.10), transparent 24rem),
+            radial-gradient(circle at 22% 88%, rgba(111,70,216,0.09), transparent 24rem);
 }
 :root[data-theme="light"] #groups-sidebar,
 :root[data-theme="light"] #groups-collapse-btn {
