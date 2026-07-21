@@ -211,3 +211,22 @@ body.workspace-app[data-workspace-page="drafts"] .drafts-shell {
         padding-inline: var(--space-4);
     }
 }
+
+/* Groups-paginaheader gelijkzetten met de eerste contentbox */
+body.workspace-app[data-workspace-page="groups"] .groups-page-header {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    margin-inline: 0;
+    padding-inline: 0 !important;
+    position: static;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+
+body.workspace-app[data-workspace-page="groups"]
+.groups-page-header > div:first-child {
+    margin: 0;
+    transform: none;
+}
