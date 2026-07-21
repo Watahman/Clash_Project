@@ -1,5 +1,4 @@
 import { createBaseCard } from "../templates/BaseTemplates.js";
-import { postPlayerVerifyTokenRequest } from "../API/API-Player.js";
 import { getPlayerWithBattleData } from "../API/API-Functions.js";
 import { addBaseToUser } from "../Supabase/Supabase-User.js";
 import { getCurrentUserId } from "../utils/user.js";
@@ -38,16 +37,21 @@ export function handleAddBase(inputBaseTag, inputBaseToken) {
     if (!playerId || !playerToken) return Promise.reject(new Error(t('profile.accountMissingFields')));
     if (profileHasBase(playerId)) return Promise.reject(new Error(t('profile.accountAlreadyExists')));
 
-    return postPlayerVerifyTokenRequest(playerId, playerToken).then(confirmation => {
-        if (confirmation.status === "ok") {
-            return getPlayerWithBattleData(playerId).then(playerData => {
-                if (profileHasBase(playerData?.[0]?.tag || playerId)) throw new Error(t('profile.accountAlreadyExists'));
-                return addBaseToUser(userId, playerData[0]).then(result => {
-                    createBaseCard(playerData[0]);
-                    return result;
-                });
+    return getPlayerWithBattleData(playerId)
+        .then(playerData => {
+            const base = playerData?.[0];
+            if (!base) throw new Error(t('profile.accountVerifyFailed'));
+            if (profileHasBase(base.tag || playerId)) throw new Error(t('profile.accountAlreadyExists'));
+
+            return addBaseToUser(userId, base, playerToken).then(result => {
+                createBaseCard(base);
+                return result;
             });
-        }
-        throw new Error(t('profile.accountVerifyFailed'));
-    });
+        })
+        .catch(error => {
+            if (error?.code === 'ACCOUNT_VERIFICATION_FAILED' || error?.code === 'ACCOUNT_TOKEN_REQUIRED') {
+                throw new Error(t('profile.accountVerifyFailed'));
+            }
+            throw error;
+        });
 }

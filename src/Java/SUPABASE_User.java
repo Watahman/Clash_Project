@@ -6,6 +6,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 public class SUPABASE_User {
     private final HttpServer server;
     private final Config conf;
@@ -87,64 +90,71 @@ public class SUPABASE_User {
         server.createContext(conf._EXT_SUPA_USER_ADD_ACCOUNT, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject json = utils.parseBody(ex);
             String userId = utils.requireAuthenticatedUser(ex);
+            String playerToken = utils.requireString(json, "playerToken").trim();
             JsonElement accountEl = json.get("base");
 
+            if (playerToken.isBlank()) {
+                utils.sendJsonResponse(ex,
+                        "{\"error\":\"Accounttoken ontbreekt\",\"code\":\"ACCOUNT_TOKEN_REQUIRED\"}",
+                        400);
+                return;
+            }
             if (accountEl == null || accountEl.isJsonNull() || !accountEl.isJsonObject()) {
                 utils.sendJsonResponse(ex, "{\"error\":\"Veld 'base' moet een object zijn\"}", 400);
                 return;
             }
 
-            JsonArray users = JsonParser.parseString(SUPABASE_Client.getWithBody("users", "select=accounts&id=" + SUPABASE_Client.eq(userId))).getAsJsonArray();
-            if (users.isEmpty()) {
-                utils.sendJsonResponse(ex, "{\"error\":\"Gebruiker niet gevonden\"}", 404);
-                return;
-            }
-
-            JsonElement accountsEl = users.get(0).getAsJsonObject().get("accounts");
-            JsonArray accounts = (accountsEl == null || accountsEl.isJsonNull()) ? new JsonArray() : accountsEl.getAsJsonArray();
             JsonObject newAccount = accountEl.getAsJsonObject();
             String newTag = normalizeTag(readFirstString(newAccount, "tag", "playerTag", "accountTag", "clashTag"));
             if (newTag.isBlank()) {
                 utils.sendJsonResponse(ex, "{\"error\":\"Account tag ontbreekt\"}", 400);
                 return;
             }
-            for (JsonElement existingEl : accounts) {
-                if (!existingEl.isJsonObject()) continue;
-                String existingTag = normalizeTag(readFirstString(existingEl.getAsJsonObject(), "tag", "playerTag", "accountTag", "clashTag"));
-                if (newTag.equals(existingTag)) {
-                    utils.sendJsonResponse(ex, "{\"error\":\"Account bestaat al\"}", 409);
-                    return;
-                }
-            }
-            JsonArray tagOwners = JsonParser.parseString(SUPABASE_Client.getWithBody(
-                    "user_accounts",
-                    "select=user_id&player_tag=" + SUPABASE_Client.eq(newTag) + "&limit=1"
-            )).getAsJsonArray();
-            if (!tagOwners.isEmpty()
-                    && !userId.equals(tagOwners.get(0).getAsJsonObject().get("user_id").getAsString())) {
-                throw new HttpException(409, "{\"error\":\"Dit Clash-account is al gekoppeld\"}");
-            }
+
+            verifyAccountOwnership(newTag, playerToken);
             newAccount.addProperty("tag", newTag);
-            accounts.add(newAccount);
 
-            JsonObject patch = new JsonObject();
-            patch.add("accounts", accounts);
-            String result = SUPABASE_Client.patch("users", "id=" + SUPABASE_Client.eq(userId), patch.toString());
+            JsonObject rpcBody = new JsonObject();
+            rpcBody.addProperty("p_user_id", userId);
+            rpcBody.addProperty("p_player_tag", newTag);
+            rpcBody.add("p_account", newAccount.deepCopy());
 
-            JsonObject accountRow = new JsonObject();
-            accountRow.addProperty("user_id", userId);
-            accountRow.addProperty("player_tag", newTag);
-            String playerName = readFirstString(newAccount, "name", "playerName");
-            if (!playerName.isBlank()) accountRow.addProperty("player_name", playerName);
-            JsonElement townHall = newAccount.get("townHallLevel");
-            if (townHall == null || townHall.isJsonNull()) townHall = newAccount.get("townHall");
-            if (townHall != null && !townHall.isJsonNull()) accountRow.addProperty("town_hall_level", townHall.getAsInt());
-            accountRow.add("snapshot", newAccount.deepCopy());
-            accountRow.addProperty("updated_at", java.time.Instant.now().toString());
-            SUPABASE_Client.upsert("user_accounts", "user_id,player_tag", accountRow.toString());
-
+            String result = SUPABASE_Client.rpc(
+                    "claim_verified_user_account",
+                    rpcBody.toString()
+            );
             utils.sendJsonResponse(ex, result, 200);
         }));
+    }
+
+    private void verifyAccountOwnership(String playerTag, String playerToken) throws Exception {
+        JsonObject verifyBody = new JsonObject();
+        verifyBody.addProperty("token", playerToken);
+
+        String response;
+        try {
+            response = utils.postClashApiResponse(
+                    conf.getClashBaseUrl()
+                            + "/players/"
+                            + URLEncoder.encode(playerTag, StandardCharsets.UTF_8)
+                            + "/verifytoken",
+                    verifyBody.toString()
+            );
+        } catch (HttpException error) {
+            throw new HttpException(
+                    403,
+                    "{\"error\":\"Accountverificatie mislukt\",\"code\":\"ACCOUNT_VERIFICATION_FAILED\"}"
+            );
+        }
+
+        JsonObject verification = JsonParser.parseString(response).getAsJsonObject();
+        String status = readFirstString(verification, "status");
+        if (!"ok".equalsIgnoreCase(status)) {
+            throw new HttpException(
+                    403,
+                    "{\"error\":\"Accountverificatie mislukt\",\"code\":\"ACCOUNT_VERIFICATION_FAILED\"}"
+            );
+        }
     }
 
     public void updateUserName() {

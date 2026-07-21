@@ -2,7 +2,7 @@ import * as config from "../Data/config.js";
 import { databaseRequestWithBody } from "./Supabase-Client.js";
 import { cacheKeys } from "../cache/cache-keys.js";
 import { CACHE_STALE, CACHE_TTL } from "../cache/cache-policy.js";
-import { removeCached } from "../cache/local-cache.js";
+import { clearCachePrefix, invalidateUserCache, removeCached } from "../cache/local-cache.js";
 
 export async function createUser(name, email, password) {
     const path = config._BASE_URL + config._EXT_SUPA_USER_MAKE
@@ -59,13 +59,19 @@ export async function checkUserId(userId) {
     })
 }
 
-export async function addBaseToUser(userId, base) {
+export async function addBaseToUser(userId, base, playerToken) {
     const path = config._BASE_URL + config._EXT_SUPA_USER_ADD_ACCOUNT
     const data = {
         userId: userId,
-        base: base
+        base: base,
+        playerToken: playerToken
     };
-    return databaseRequestWithBody(path, data).then(result => {
+    return databaseRequestWithBody(path, data).then(async result => {
+        await invalidateUserCache(userId);
+        await Promise.all([
+            clearCachePrefix('users.'),
+            clearCachePrefix('groups.')
+        ]);
         removeCached(cacheKeys.userInfo(userId));
         removeCached(cacheKeys.userCheck(userId));
         removeCached(cacheKeys.userAccounts(userId));
