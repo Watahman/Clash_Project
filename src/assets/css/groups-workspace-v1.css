@@ -1,3 +1,4 @@
+/* Groups V1 workspace — scoped overrides for the approved master-detail layout. */
 body.workspace-app[data-workspace-page="groups"] main#groups-main {
     display: block;
     width: min(100%, 100rem);
@@ -57,6 +58,50 @@ body.workspace-app[data-workspace-page="groups"] main#groups-main.sidebar-collap
     align-items: center;
     justify-content: flex-end;
     gap: 0.55rem;
+}
+
+.groups-page-actions {
+    flex: 0 0 auto;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-add-button {
+    display: inline-flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    border: 0.0625rem solid color-mix(in srgb, var(--accent) 72%, transparent);
+    border-radius: calc(var(--radius-small) + 0.15rem);
+    background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 78%, #fff 22%));
+    padding: 0.72rem 1rem;
+    color: var(--accent-contrast, #17130a);
+    box-shadow: 0 0.5rem 1.25rem color-mix(in srgb, var(--accent) 16%, transparent);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-add-button:hover {
+    border-color: color-mix(in srgb, var(--accent) 88%, #fff 12%);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 88%, #fff 12%), var(--accent));
+    box-shadow: 0 0.65rem 1.5rem color-mix(in srgb, var(--accent) 22%, transparent);
+    transform: translateY(-0.0625rem);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-add-button:active {
+    transform: translateY(0);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-add-button:focus-visible {
+    outline: 0.125rem solid color-mix(in srgb, var(--accent) 55%, #fff 45%);
+    outline-offset: 0.18rem;
+}
+
+.groups-add-button-icon {
+    width: 1.05rem;
+    height: 1.05rem;
+    flex: 0 0 auto;
 }
 
 .groups-workspace {
@@ -167,22 +212,6 @@ body.workspace-app[data-workspace-page="groups"] .groups-item-meta {
     justify-self: start;
 }
 
-.group-index-add {
-    display: flex;
-    width: 100%;
-    min-height: 3rem;
-    align-items: center;
-    gap: 0.45rem;
-    border-top: 0.0625rem solid var(--border) !important;
-    background: transparent;
-    padding: 0.7rem 0.4rem;
-    color: var(--accent-strong);
-    font-size: 0.72rem;
-    font-weight: 750;
-    text-align: left;
-}
-
-.group-index-add:hover { background: var(--surface-raised); }
 
 body.workspace-app[data-workspace-page="groups"] .groups-item-logo,
 body.workspace-app[data-workspace-page="groups"] .groups-detail-logo {
@@ -617,7 +646,6 @@ body.workspace-app[data-workspace-page="groups"] .groups-admin-card { border: 0;
     .group-index-heading { min-height: 4.5rem; }
     body.workspace-app[data-workspace-page="groups"] #groups-list { display: flex; overflow-x: auto; }
     body.workspace-app[data-workspace-page="groups"] .groups-item.group-index-row { min-width: 14rem; border-right: 0.0625rem solid var(--border); }
-    .group-index-add { width: auto; border: 0 !important; }
     .group-detail { padding: 0; }
 }
 
@@ -625,6 +653,7 @@ body.workspace-app[data-workspace-page="groups"] .groups-admin-card { border: 0;
     body.workspace-app[data-workspace-page="groups"] main#groups-main { padding: 1.25rem 1rem 2rem; }
     .groups-page-actions { width: 100%; justify-content: stretch; }
     .groups-page-actions .button { flex: 1; }
+    body.workspace-app[data-workspace-page="groups"] .groups-add-button { width: 100%; }
     .group-detail-header { grid-template-columns: 3.15rem minmax(0, 1fr); padding: 0.7rem 0; }
     .groups-header-actions { grid-column: 1 / -1; justify-content: flex-start; }
     .groups-detail-tabs { gap: 1rem; }

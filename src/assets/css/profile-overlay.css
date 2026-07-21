@@ -1,6 +1,3 @@
-/* ============================================================
-   PROFILE OVERLAY — shared war-room modal style
-   ============================================================ */
 #profile-overlay {
     display: none;
     position: fixed;
@@ -112,7 +109,6 @@
 .po-friend-reject { color: var(--red); border-color: rgba(255,91,74,0.24); background: var(--red-dim); }
 .po-friend-clock { color: var(--text-3); border: 1px solid var(--border-subtle); background: rgba(255,255,255,0.04); }
 .po-friend-clock img { width: 0.9rem; height: 0.9rem; filter: invert(52%) sepia(13%) saturate(439%) hue-rotate(178deg); }
-
 @media (max-width: 42rem) {
     .po-card { height: min(90vh, 46rem); }
     .po-tabs { overflow-x: auto; }
@@ -889,79 +885,6 @@
 #profile-overlay .po-notification-item { border-radius: var(--radius-small, 0.45rem); }
 #profile-overlay .po-notification-item.unread { background: var(--accent-soft, var(--accent-dim)); }
 
-#profile-overlay .po-language-picker {
-    position: relative;
-    min-width: 0;
-}
-
-#profile-overlay .po-language-native {
-    position: absolute !important;
-    width: 0.0625rem !important;
-    height: 0.0625rem !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-    clip: rect(0 0 0 0) !important;
-    clip-path: inset(50%) !important;
-    padding: 0 !important;
-    border: 0 !important;
-    margin: -0.0625rem !important;
-    white-space: nowrap !important;
-}
-
-#profile-overlay .language-switcher--profile {
-    width: 100%;
-}
-
-#profile-overlay .language-switcher--profile .language-switcher-button {
-    width: 100%;
-    min-width: 0;
-    min-height: 2.75rem;
-    height: auto;
-    border-color: var(--border-strong, var(--border-visible)) !important;
-    background: var(--surface-subtle, var(--input-bg));
-    padding: 0.55rem 0.7rem;
-    color: var(--text-muted, var(--text-3));
-}
-
-#profile-overlay .language-switcher--profile .language-switcher-button:hover,
-#profile-overlay .language-switcher--profile.is-open .language-switcher-button {
-    border-color: var(--accent, var(--border-focus)) !important;
-    background: var(--surface-raised, var(--surface-3));
-    color: var(--text, var(--text-1));
-}
-
-#profile-overlay .language-switcher--profile .language-switcher-current-code {
-    color: var(--text, var(--text-1));
-}
-
-#profile-overlay .language-switcher--profile .language-switcher-menu {
-    position: static;
-    width: 100%;
-    margin-top: 0.45rem;
-    border-color: var(--border-strong, var(--border-visible));
-    background: var(--surface-subtle, var(--input-bg));
-    box-shadow: none;
-}
-
-#profile-overlay .language-switcher--profile .language-switcher-option {
-    min-height: 2.55rem;
-    border: 0 !important;
-    background: transparent;
-    padding: 0.4rem 0.55rem;
-    color: var(--text-muted, var(--text-3));
-}
-
-#profile-overlay .language-switcher--profile .language-switcher-option:hover,
-#profile-overlay .language-switcher--profile .language-switcher-option:focus-visible {
-    background: var(--surface-raised, var(--surface-3));
-    color: var(--text, var(--text-1));
-}
-
-#profile-overlay .language-switcher--profile .language-switcher-option.is-active {
-    background: var(--accent-soft, var(--accent-dim));
-    color: var(--text, var(--text-1));
-}
-
 @media (max-width: 42rem) {
     #profile-overlay { align-items: flex-end; padding: 0.5rem; }
     #profile-overlay .po-card { width: 100%; max-height: calc(100vh - 1rem); border-radius: 0.75rem 0.75rem 0 0; }
@@ -971,4 +894,29 @@
     #profile-overlay .po-panel { min-height: 0; }
     #profile-overlay .po-password-grid { grid-template-columns: 1fr; }
     #profile-overlay .po-settings-inline { flex-direction: column; }
+}
+
+/* Settings feedback: keep the success/error notice visually intact even when
+   another stylesheet is loaded later or data-state is briefly missing. */
+#profile-overlay #po-settings-message.po-settings-message:not(.hidden) {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0.72rem 0.85rem;
+    border: 0.0625rem solid rgba(112, 197, 154, 0.28);
+    border-radius: var(--radius-small, var(--radius-sm, 0.55rem));
+    background: var(--success-soft, var(--green-dim, rgba(56, 217, 138, 0.13))) !important;
+    color: var(--success, var(--green, #38d98a)) !important;
+    box-shadow: inset 0 0 0 0.0625rem rgba(112, 197, 154, 0.06);
+    font-family: var(--font-ui, Inter, system-ui, sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+#profile-overlay #po-settings-message.po-settings-message[data-state="error"]:not(.hidden) {
+    border-color: rgba(224, 129, 129, 0.3);
+    background: var(--danger-soft, var(--red-dim, rgba(255, 91, 74, 0.13))) !important;
+    color: var(--danger, var(--red, #ff5b4a)) !important;
+    box-shadow: inset 0 0 0 0.0625rem rgba(224, 129, 129, 0.06);
 }

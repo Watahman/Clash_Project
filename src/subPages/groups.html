@@ -30,8 +30,12 @@
             <p data-i18n="groups.workspaceIntro">Leden, accounts, polls en clans in één master-detailwerkruimte.</p>
         </div>
         <div class="groups-page-actions">
-            <button class="button button-secondary" id="groups-join-shortcut" type="button" data-i18n="groups.joinWithCode">Join met code</button>
-            <button class="button button-primary" id="groups-new-btn" type="button" data-i18n="groups.newGroup">Nieuwe groep</button>
+            <button class="button button-primary groups-add-button" id="groups-new-btn" type="button">
+                <svg class="groups-add-button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span data-i18n="groups.newGroup">Groep toevoegen</span>
+            </button>
         </div>
     </header>
 
@@ -44,7 +48,6 @@
             <div id="groups-list" class="group-list" role="listbox" aria-label="Jouw groepen" data-i18n-aria-label="groups.title">
                 <p class="groups-empty" data-i18n="groups.none">Geen groepen</p>
             </div>
-            <button class="group-index-add" id="groups-new-rail" type="button"><span aria-hidden="true">+</span><span data-i18n="groups.newGroup">Nieuwe groep</span></button>
         </aside>
 
         <section id="groups-detail" class="group-detail" aria-live="polite">
