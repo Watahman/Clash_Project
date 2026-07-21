@@ -400,7 +400,7 @@ body.workspace-app[data-workspace-page="groups"] .groups-role-badge.co-leader { 
 body.workspace-app[data-workspace-page="groups"] .groups-member-item {
     display: grid;
     min-height: 4.8rem;
-    grid-template-columns: 2rem minmax(9rem, 0.8fr) auto minmax(7.5rem, 0.55fr) minmax(12rem, 1.15fr);
+    grid-template-columns: 2rem minmax(9rem, 0.85fr) auto minmax(12rem, 1.2fr);
     align-items: center;
     gap: 0.75rem;
     border: 0;
@@ -426,48 +426,6 @@ body.workspace-app[data-workspace-page="groups"] .groups-member-item {
 .groups-member-identity { display: grid; min-width: 0; gap: 0.18rem; }
 body.workspace-app[data-workspace-page="groups"] .groups-member-name { overflow: hidden; color: var(--text); font-family: inherit; font-size: 0.76rem; font-weight: 750; letter-spacing: 0; text-overflow: ellipsis; text-transform: none; white-space: nowrap; }
 .groups-member-code { color: var(--text-muted); font-size: 0.61rem; }
-.groups-member-activity {
-    display: grid;
-    min-width: 0;
-    align-content: center;
-    gap: 0.14rem;
-    cursor: default;
-}
-.groups-member-activity-label {
-    overflow: hidden;
-    color: var(--text-subtle);
-    font-size: 0.52rem;
-    font-weight: 750;
-    letter-spacing: 0.055em;
-    text-overflow: ellipsis;
-    text-transform: uppercase;
-    white-space: nowrap;
-}
-.groups-member-activity-value {
-    overflow: hidden;
-    color: var(--text);
-    font-size: 0.67rem;
-    font-weight: 750;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.groups-member-activity.is-muted .groups-member-activity-value {
-    color: var(--text-muted);
-    font-weight: 600;
-}
-.groups-member-activity.is-loading .groups-member-activity-value::before {
-    content: "";
-    display: inline-block;
-    width: 0.48rem;
-    height: 0.48rem;
-    margin-right: 0.3rem;
-    border: 0.1rem solid color-mix(in srgb, var(--accent) 25%, transparent);
-    border-top-color: var(--accent-strong);
-    border-radius: 50%;
-    vertical-align: -0.04rem;
-    animation: groups-activity-spin 0.8s linear infinite;
-}
-@keyframes groups-activity-spin { to { transform: rotate(360deg); } }
 .groups-member-accounts { display: flex; min-width: 0; flex-wrap: wrap; gap: 0.35rem; }
 .groups-account-chip { display: inline-flex; max-width: 100%; align-items: center; gap: 0.3rem; border: 0.0625rem solid var(--border); border-radius: 999rem; background: var(--surface-subtle); padding: 0.24rem 0.45rem; color: var(--text-muted); font-size: 0.61rem; white-space: nowrap; }
 .groups-account-chip strong { overflow: hidden; max-width: 9rem; color: var(--text); text-overflow: ellipsis; }
@@ -617,7 +575,6 @@ body.workspace-app[data-workspace-page="groups"] .groups-admin-card { border: 0;
     .groups-header-actions { grid-column: 1 / -1; justify-content: flex-start; }
     .groups-detail-tabs { gap: 1rem; }
     body.workspace-app[data-workspace-page="groups"] .groups-member-item { grid-template-columns: 2rem minmax(0, 1fr) auto; }
-    .groups-member-activity { grid-column: 2 / -1; }
     .groups-member-accounts { grid-column: 2 / -1; }
     .groups-management-grid { display: block; }
     .groups-management-section,
@@ -627,4 +584,42 @@ body.workspace-app[data-workspace-page="groups"] .groups-admin-card { border: 0;
     .groups-inline-form .button { grid-column: 1 / -1; }
     body.workspace-app[data-workspace-page="groups"] .groups-poll-notice { grid-template-columns: 1fr; }
     .groups-poll-notice .button { justify-self: start; }
+}
+
+/* Group code copy feedback: exactly one icon is visible at every moment. */
+#groups-main #groups-detail-code[data-copy-state="idle"] #groups-detail-copy,
+#groups-main #groups-detail-code[data-copy-state="copied"] #groups-detail-checkmark {
+    display: block !important;
+}
+
+#groups-main #groups-detail-code[data-copy-state="idle"] #groups-detail-checkmark,
+#groups-main #groups-detail-code[data-copy-state="copied"] #groups-detail-copy,
+#groups-main #groups-detail-code img.hidden,
+#groups-main #groups-detail-code img[hidden] {
+    display: none !important;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-code-pill #groups-detail-checkmark.is-copy-feedback-active {
+    animation: groups-copy-confirm 0.32s ease-out both;
+}
+
+@keyframes groups-copy-confirm {
+    0% {
+        opacity: 0;
+        transform: scale(0.55) rotate(-12deg);
+    }
+    65% {
+        opacity: 1;
+        transform: scale(1.14) rotate(3deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.workspace-app[data-workspace-page="groups"] .groups-code-pill #groups-detail-checkmark.is-copy-feedback-active {
+        animation: none;
+    }
 }
