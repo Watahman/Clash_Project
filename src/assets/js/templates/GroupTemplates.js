@@ -2,6 +2,7 @@ import { t } from '../i18n/i18n.js';
 import { getGroupInfo, getGroupMembers } from '../Supabase/Supabase-Group.js';
 import { applyRoleBadge, getCurrentUserRole, getMemberRole, isGroupAdmin } from '../groups/groups-roles.js';
 import { renderBadge } from '../groups/groups-badges.js';
+import { renderGroupMemberActivities } from '../groups/groups-member-activity.js';
 
 function memberLabel(count) {
     return count === 1 ? `1 ${t('groups.memberSingle')}` : `${count} ${t('groups.members')}`;
@@ -109,6 +110,7 @@ function renderGroupView(group, members, dispatch) {
     document.querySelectorAll('.groups-admin-only').forEach(element => element.classList.toggle('hidden', !canAdmin));
     document.querySelectorAll('.groups-member-only').forEach(element => element.classList.toggle('hidden', canAdmin));
     addAllMembers(safeMembers, group.owner_id);
+    void renderGroupMemberActivities(group.id, safeMembers, document);
 
     if (dispatch) {
         window.dispatchEvent(new CustomEvent('clashtools:group-opened', { detail: { group, members: safeMembers, currentRole, canAdmin } }));
@@ -128,7 +130,9 @@ function addAllMembers(members, creatorId) {
 
     members.forEach(member => {
         const fragment = document.querySelector('#groups-member-template').content.cloneNode(true);
+        const item = fragment.querySelector('.groups-member-item');
         const user = profileOf(member) || { id: member.user_id, name: member.user_id };
+        item.dataset.userId = user.id || member.user_id;
         fragment.querySelector('.groups-member-name').textContent = user.name || member.user_id;
         fragment.querySelector('.groups-member-code').textContent = user.code || member.user_id;
         applyRoleBadge(fragment.querySelector('.groups-role-badge'), getMemberRole(member, { owner_id: creatorId }, user.id || member.user_id), t);

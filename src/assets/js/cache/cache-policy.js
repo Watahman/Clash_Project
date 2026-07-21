@@ -8,6 +8,7 @@ export const CACHE_TTL = Object.freeze({
     GROUPS: 90 * 1000,
     GROUP_INFO: 5 * 60 * 1000,
     GROUP_MEMBERS: 90 * 1000,
+    GROUP_MEMBER_ACTIVITY: 60 * 1000,
     GROUP_CLANS: 5 * 60 * 1000,
     GROUP_POLLS: 45 * 1000,
     PLANS: 20 * 1000,

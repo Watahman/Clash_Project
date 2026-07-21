@@ -218,6 +218,39 @@ public class API_Utils {
         sendJsonResponse(exchange, response, 200);
     }
 
+    public String clashGetCachedValue(String path, long ttlMs) throws Exception {
+        if (!conf.isCacheEnabled() || ttlMs <= 0 || "none".equalsIgnoreCase(conf.getCacheMode())) {
+            return getClashApiResponse(conf.getClashBaseUrl() + path);
+        }
+
+        String key = CacheKeys.clashGet(path);
+        CacheEntry cached = L1_CACHE.get(key);
+        if (cached == null && "layered".equalsIgnoreCase(conf.getCacheMode())) {
+            cached = L2_CACHE.get(key);
+            if (cached != null) L1_CACHE.put(key, cached);
+        }
+
+        if (cached != null && cached.isFresh()) return cachedValueOrThrow(cached);
+        if (cached != null && cached.isUsable()) {
+            refreshSingleFlight(key, path, ttlMs).exceptionally(error -> null);
+            return cachedValueOrThrow(cached);
+        }
+
+        try {
+            return cachedValueOrThrow(refreshSingleFlight(key, path, ttlMs).join());
+        } catch (CompletionException wrapped) {
+            Throwable cause = wrapped.getCause();
+            if (cause instanceof HttpException httpException) throw httpException;
+            if (cause instanceof Exception exception) throw exception;
+            throw wrapped;
+        }
+    }
+
+    private String cachedValueOrThrow(CacheEntry entry) throws HttpException {
+        if (entry.sourceStatus() >= 200 && entry.sourceStatus() < 300) return entry.value();
+        throw new HttpException(entry.sourceStatus(), entry.value());
+    }
+
     public void clashGetCached(HttpExchange exchange, String path, long ttlMs) throws Exception {
         if (!conf.isCacheEnabled() || ttlMs <= 0 || "none".equalsIgnoreCase(conf.getCacheMode())) {
             clashGet(exchange, path);

@@ -66,6 +66,15 @@ export async function getGroupMembers(groupId) {
     })
 }
 
+export async function getGroupMemberActivity(groupId, requestOptions = {}) {
+    const path = config._BASE_URL + config._EXT_SUPA_GROUP_MEMBER_ACTIVITY;
+    return databaseRequestWithBody(path, { groupId }, {
+        key: cacheKeys.groupMemberActivity(groupId),
+        ttlMs: CACHE_TTL.GROUP_MEMBER_ACTIVITY,
+        staleMs: CACHE_STALE.SHORT
+    }, requestOptions);
+}
+
 export async function joinGroup(userId, groupCode) {
     const path = config._BASE_URL + config._EXT_SUPA_GROUP_JOIN
     const data = {

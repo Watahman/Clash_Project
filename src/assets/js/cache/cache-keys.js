@@ -18,6 +18,7 @@ export const cacheKeys = Object.freeze({
     groupsOfUser: userId => `groups.ofUser:${normalizeKeyPart(userId)}`,
     groupInfo: groupId => `groups.info:${normalizeKeyPart(groupId)}`,
     groupMembers: groupId => `groups.members:${normalizeKeyPart(groupId)}`,
+    groupMemberActivity: groupId => `groups.activity:${normalizeKeyPart(groupId)}`,
     groupClans: groupId => `groups.clans:${normalizeKeyPart(groupId)}`,
     groupPolls: (groupId, userId = 'user') => `groups.polls:${normalizeKeyPart(groupId)}:${normalizeKeyPart(userId)}`,
     plansOfUser: userId => `plans.ofUser:${normalizeKeyPart(userId)}`,

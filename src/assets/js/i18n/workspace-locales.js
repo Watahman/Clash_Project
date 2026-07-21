@@ -426,10 +426,7 @@ const part3 = Object.freeze({
         "planner.rosterResults": "{visible} van {total} spelers zichtbaar",
         "planner.emptyClans": "Voeg een clan toe om de planning te beginnen.",
         "cwl.deleteClan": "Clan verwijderen",
-        "cwl.noClan": "Geen clan",
-        "cwl.thirtyUnavailableOption": "30v30 — niet beschikbaar",
-        "cwl.thirtyUnavailableForLeague": "30v30 is niet beschikbaar in {league}.",
-        "cwl.thisLeague": "deze CWL-league"
+        "cwl.noClan": "Geen clan"
     },
     en: {
         "planner.kicker": "CWL Planner",
@@ -447,10 +444,7 @@ const part3 = Object.freeze({
         "planner.rosterResults": "{visible} of {total} players shown",
         "planner.emptyClans": "Add a clan to start planning.",
         "cwl.deleteClan": "Delete clan",
-        "cwl.noClan": "No clan",
-        "cwl.thirtyUnavailableOption": "30v30 — unavailable",
-        "cwl.thirtyUnavailableForLeague": "30v30 is unavailable in {league}.",
-        "cwl.thisLeague": "this CWL league"
+        "cwl.noClan": "No clan"
     },
     fr: {
         "planner.kicker": "Planificateur CWL",
@@ -468,10 +462,7 @@ const part3 = Object.freeze({
         "planner.rosterResults": "{visible} joueur(s) affiché(s) sur {total}",
         "planner.emptyClans": "Ajoutez un clan pour commencer la planification.",
         "cwl.deleteClan": "Supprimer le clan",
-        "cwl.noClan": "Aucun clan",
-        "cwl.thirtyUnavailableOption": "30v30 — indisponible",
-        "cwl.thirtyUnavailableForLeague": "Le 30v30 n’est pas disponible en {league}.",
-        "cwl.thisLeague": "cette ligue CWL"
+        "cwl.noClan": "Aucun clan"
     },
     de: {
         "planner.kicker": "CWL-Planer",
@@ -489,10 +480,7 @@ const part3 = Object.freeze({
         "planner.rosterResults": "{visible} von {total} Spielern sichtbar",
         "planner.emptyClans": "Füge einen Clan hinzu, um mit der Planung zu beginnen.",
         "cwl.deleteClan": "Clan löschen",
-        "cwl.noClan": "Kein Clan",
-        "cwl.thirtyUnavailableOption": "30v30 — nicht verfügbar",
-        "cwl.thirtyUnavailableForLeague": "30v30 ist in {league} nicht verfügbar.",
-        "cwl.thisLeague": "dieser CWL-Liga"
+        "cwl.noClan": "Kein Clan"
     },
     es: {
         "planner.kicker": "Planificador CWL",
@@ -510,10 +498,7 @@ const part3 = Object.freeze({
         "planner.rosterResults": "{visible} de {total} jugadores visibles",
         "planner.emptyClans": "Añade un clan para empezar a planificar.",
         "cwl.deleteClan": "Eliminar clan",
-        "cwl.noClan": "Sin clan",
-        "cwl.thirtyUnavailableOption": "30v30 — no disponible",
-        "cwl.thirtyUnavailableForLeague": "30v30 no está disponible en {league}.",
-        "cwl.thisLeague": "esta liga CWL"
+        "cwl.noClan": "Sin clan"
     }
 });
 
@@ -713,7 +698,23 @@ const part5 = Object.freeze({
         "groups.inviteCode": "Uitnodigingscode",
         "groups.inspectorDescription": "Samenwerking, beschikbaarheid en accounts voor {name}.",
         "groups.noLinkedAccounts": "Geen gekoppelde accounts",
-        "groups.account": "Account"
+        "groups.account": "Account",
+        "groups.lastIngameActivity": "Ingame actief",
+        "groups.activityLoading": "Controleren...",
+        "groups.activityNoAccounts": "Geen account gekoppeld",
+        "groups.activityNotMeasured": "Nog niet gemeten",
+        "groups.activityUnavailable": "Niet beschikbaar",
+        "groups.activitySourceRanked": "Ranked aanval",
+        "groups.activitySourceAttack": "Aanval",
+        "groups.activitySourceDefense": "Verdediging",
+        "groups.activitySourceWarAttack": "Waraanval",
+        "groups.activitySourceDonation": "Donatie",
+        "groups.activitySourceCapital": "Clan Capital",
+        "groups.activitySourceBuilder": "Builder Base-aanval",
+        "groups.activitySourceProgress": "Voortgang",
+        "groups.activitySourceDetected": "Gedetecteerde activiteit",
+        "groups.activityTooltip": "Geschatte laatste activiteit via {source}.",
+        "groups.activityTooltipAccount": "Geschatte laatste activiteit via {source} op {account}."
     },
     en: {
         "groups.workspaceKicker": "Clan network",
@@ -747,7 +748,23 @@ const part5 = Object.freeze({
         "groups.inviteCode": "Invitation code",
         "groups.inspectorDescription": "Collaboration, availability and accounts for {name}.",
         "groups.noLinkedAccounts": "No linked accounts",
-        "groups.account": "Account"
+        "groups.account": "Account",
+        "groups.lastIngameActivity": "Last ingame activity",
+        "groups.activityLoading": "Checking...",
+        "groups.activityNoAccounts": "No linked account",
+        "groups.activityNotMeasured": "Not measured yet",
+        "groups.activityUnavailable": "Unavailable",
+        "groups.activitySourceRanked": "Ranked attack",
+        "groups.activitySourceAttack": "Attack",
+        "groups.activitySourceDefense": "Defense",
+        "groups.activitySourceWarAttack": "War attack",
+        "groups.activitySourceDonation": "Donation",
+        "groups.activitySourceCapital": "Clan Capital",
+        "groups.activitySourceBuilder": "Builder Base attack",
+        "groups.activitySourceProgress": "Progress",
+        "groups.activitySourceDetected": "Detected activity",
+        "groups.activityTooltip": "Estimated last activity via {source}.",
+        "groups.activityTooltipAccount": "Estimated last activity via {source} on {account}."
     },
     fr: {
         "groups.workspaceKicker": "Réseau de clans",
@@ -781,7 +798,23 @@ const part5 = Object.freeze({
         "groups.inviteCode": "Code d’invitation",
         "groups.inspectorDescription": "Collaboration, disponibilités et comptes pour {name}.",
         "groups.noLinkedAccounts": "Aucun compte lié",
-        "groups.account": "Compte"
+        "groups.account": "Compte",
+        "groups.lastIngameActivity": "Dernière activité en jeu",
+        "groups.activityLoading": "Vérification...",
+        "groups.activityNoAccounts": "Aucun compte lié",
+        "groups.activityNotMeasured": "Pas encore mesurée",
+        "groups.activityUnavailable": "Indisponible",
+        "groups.activitySourceRanked": "Attaque classée",
+        "groups.activitySourceAttack": "Attaque",
+        "groups.activitySourceDefense": "Défense",
+        "groups.activitySourceWarAttack": "Attaque de guerre",
+        "groups.activitySourceDonation": "Don",
+        "groups.activitySourceCapital": "Capitale de clan",
+        "groups.activitySourceBuilder": "Attaque de la base des ouvriers",
+        "groups.activitySourceProgress": "Progression",
+        "groups.activitySourceDetected": "Activité détectée",
+        "groups.activityTooltip": "Dernière activité estimée via {source}.",
+        "groups.activityTooltipAccount": "Dernière activité estimée via {source} sur {account}."
     },
     de: {
         "groups.workspaceKicker": "Clan-Netzwerk",
@@ -815,7 +848,23 @@ const part5 = Object.freeze({
         "groups.inviteCode": "Einladungscode",
         "groups.inspectorDescription": "Zusammenarbeit, Verfügbarkeit und Konten für {name}.",
         "groups.noLinkedAccounts": "Keine verknüpften Konten",
-        "groups.account": "Konto"
+        "groups.account": "Konto",
+        "groups.lastIngameActivity": "Letzte Ingame-Aktivität",
+        "groups.activityLoading": "Wird geprüft...",
+        "groups.activityNoAccounts": "Kein Konto verknüpft",
+        "groups.activityNotMeasured": "Noch nicht gemessen",
+        "groups.activityUnavailable": "Nicht verfügbar",
+        "groups.activitySourceRanked": "Ranglistenangriff",
+        "groups.activitySourceAttack": "Angriff",
+        "groups.activitySourceDefense": "Verteidigung",
+        "groups.activitySourceWarAttack": "Kriegsangriff",
+        "groups.activitySourceDonation": "Spende",
+        "groups.activitySourceCapital": "Clanstadt",
+        "groups.activitySourceBuilder": "Angriff in der Bauarbeiterbasis",
+        "groups.activitySourceProgress": "Fortschritt",
+        "groups.activitySourceDetected": "Erkannte Aktivität",
+        "groups.activityTooltip": "Geschätzte letzte Aktivität über {source}.",
+        "groups.activityTooltipAccount": "Geschätzte letzte Aktivität über {source} auf {account}."
     },
     es: {
         "groups.workspaceKicker": "Red de clanes",
@@ -849,7 +898,23 @@ const part5 = Object.freeze({
         "groups.inviteCode": "Código de invitación",
         "groups.inspectorDescription": "Colaboración, disponibilidad y cuentas de {name}.",
         "groups.noLinkedAccounts": "No hay cuentas vinculadas",
-        "groups.account": "Cuenta"
+        "groups.account": "Cuenta",
+        "groups.lastIngameActivity": "Última actividad en el juego",
+        "groups.activityLoading": "Comprobando...",
+        "groups.activityNoAccounts": "No hay cuenta vinculada",
+        "groups.activityNotMeasured": "Aún no medida",
+        "groups.activityUnavailable": "No disponible",
+        "groups.activitySourceRanked": "Ataque clasificatorio",
+        "groups.activitySourceAttack": "Ataque",
+        "groups.activitySourceDefense": "Defensa",
+        "groups.activitySourceWarAttack": "Ataque de guerra",
+        "groups.activitySourceDonation": "Donación",
+        "groups.activitySourceCapital": "Capital del clan",
+        "groups.activitySourceBuilder": "Ataque de la Base del Constructor",
+        "groups.activitySourceProgress": "Progreso",
+        "groups.activitySourceDetected": "Actividad detectada",
+        "groups.activityTooltip": "Última actividad estimada mediante {source}.",
+        "groups.activityTooltipAccount": "Última actividad estimada mediante {source} en {account}."
     }
 });
 

@@ -120,6 +120,7 @@ public class Config {
 
     String _EXT_SUPA_GROUP_MAKE = "/SupabaseGroupMake";
     String _EXT_SUPA_GROUP_MEMBERS = "/SupabaseGroupMembers";
+    String _EXT_SUPA_GROUP_MEMBER_ACTIVITY = "/SupabaseGroupMemberActivity";
     String _EXT_SUPA_GROUP_INFO = "/SupabaseGroupInfo";
     String _EXT_SUPA_GROUP_JOIN = "/SupabaseGroupJoin";
     String _EXT_SUPA_GROUP_LEAVE = "/SupabaseGroupLeave";

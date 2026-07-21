@@ -13,6 +13,7 @@ public class Main {
 
     private void run() throws Exception {
         SUPABASE_Group supaGroup;
+        SUPABASE_GroupActivity supaGroupActivity;
         SUPABASE_GroupPolls supaGroupPolls;
         SUPABASE_Notifications supaNotifications;
         SUPABASE_Friend supaFriend;
@@ -44,6 +45,7 @@ public class Main {
         supaCWLPlanner = new SUPABASE_CWLPlanner(server, conf);
         supaFriend = new SUPABASE_Friend(server, conf);
         supaGroup = new SUPABASE_Group(server, conf);
+        supaGroupActivity = new SUPABASE_GroupActivity(server, conf);
         supaGroupPolls = new SUPABASE_GroupPolls(server, conf);
         supaNotifications = new SUPABASE_Notifications(server, conf);
 
@@ -117,6 +119,7 @@ public class Main {
         supaGroup.getUserGroups();
         supaGroup.getGroupInfo();
         supaGroup.getGroupMembers();
+        supaGroupActivity.getGroupMemberActivity();
         supaGroup.joinGroup();
         supaGroup.leaveGroup();
         supaGroup.getGroupClans();
