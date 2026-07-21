@@ -78,7 +78,7 @@ async function init() {
     guessCwlSize();
     void loadAllPlans();
     loadPlanListener();
-    profileHTML({ preload: false });
+    profileHTML();
 }
 
 function initPlanNameSync() {

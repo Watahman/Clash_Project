@@ -253,7 +253,7 @@ async function init() {
     initRefs();
     bindListControls();
     setListControlsEnabled(false);
-    profileHTML({ preload: false });
+    profileHTML();
     window.addEventListener('clashtools:language-changed', render);
     userId = getCurrentUserId();
     if (!userId) {

@@ -142,7 +142,11 @@ function profileInit() {
             redirectToLogin();
             return;
         }
-        refreshProfileData(true);
+
+        // The popup markup and styling are preloaded, but account data is not
+        // allowed to delay opening. Cached data is shown immediately; without
+        // cache the existing loading state is shown while data refreshes.
+        void refreshProfileData(true);
     };
 
     profile.onclick = (e) => { poBackdrop(e); };

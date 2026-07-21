@@ -1,0 +1,65 @@
+/*
+ * Short visual loading gate.
+ *
+ * Only stylesheets, fonts and initially visible images can delay the reveal.
+ * API calls, cache refreshes, background requests and later DOM updates never
+ * keep a workspace page hidden.
+ */
+html.workspace-page-loading {
+    min-height: 100%;
+    background: #0d131b;
+}
+
+html.workspace-page-loading[data-theme="light"] {
+    background: #eef2f6;
+}
+
+html.workspace-page-loading body {
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+html.workspace-page-loading::before,
+html.workspace-navigation-waiting::before {
+    content: "";
+    position: fixed;
+    z-index: 2147483647;
+    inset: 50% auto auto 50%;
+    inline-size: 2.1rem;
+    block-size: 2.1rem;
+    border: 0.18rem solid rgb(255 255 255 / 0.18);
+    border-top-color: #d9aa45;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: workspace-loading-spin 0.7s linear infinite;
+}
+
+html.workspace-page-loading[data-theme="light"]::before,
+html.workspace-navigation-waiting[data-theme="light"]::before {
+    border-color: rgb(15 23 42 / 0.16);
+    border-top-color: #b87916;
+}
+
+html.workspace-navigation-waiting::after {
+    content: "";
+    position: fixed;
+    z-index: 2147483646;
+    inset: 0;
+    background: rgb(4 9 15 / 0.12);
+    cursor: wait;
+}
+
+html.workspace-navigation-waiting[data-theme="light"]::after {
+    background: rgb(238 242 246 / 0.22);
+}
+
+@keyframes workspace-loading-spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.workspace-page-loading::before,
+    html.workspace-navigation-waiting::before {
+        animation-duration: 1.4s;
+    }
+}

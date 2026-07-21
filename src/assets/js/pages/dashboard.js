@@ -217,10 +217,10 @@ async function loadRecentGroups(userId) {
 async function init() {
     initI18n();
     initRefs();
-    profileHTML({ preload: false });
     refs.accountLine.addEventListener('click', () => document.querySelector('#profile-btn')?.click());
     window.addEventListener('clashtools:language-changed', renderAll);
     await syncAuthSession().catch(() => null);
+    profileHTML();
     const userId = getCurrentUserId();
     state.loggedIn = Boolean(userId);
     if (!userId) {
