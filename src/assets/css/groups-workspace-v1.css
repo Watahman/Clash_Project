@@ -825,3 +825,16 @@ body.workspace-app[data-workspace-page="groups"] .groups-detail-logo > img {
     object-fit: contain !important;
     transform: none !important;
 }
+
+/* Verberg de nutteloze scrollbar bij de groepstabs */
+body.workspace-app[data-workspace-page="groups"] .groups-detail-tabs {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+body.workspace-app[data-workspace-page="groups"]
+.groups-detail-tabs::-webkit-scrollbar {
+    display: none;
+}
