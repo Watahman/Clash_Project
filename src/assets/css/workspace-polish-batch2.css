@@ -1,0 +1,342 @@
+/*
+ * Workspace content polish — batch 2
+ *
+ * Safe page-content corrections only. This stylesheet intentionally avoids
+ * the app shell, top bar, sidebar, language picker, notifications and profile
+ * overlay. Load it after workspace-polish.css.
+ */
+
+body.workspace-app {
+    --workspace-panel-gutter: clamp(0.9rem, 1.45vw, 1.2rem);
+    --workspace-panel-gutter-compact: clamp(0.7rem, 1vw, 0.9rem);
+    --workspace-section-gap: clamp(0.85rem, 1.35vw, 1.1rem);
+}
+
+/* ------------------------------------------------------------
+   Shared content-panel alignment
+   ------------------------------------------------------------ */
+body.workspace-app .workspace-content :is(
+    .workspace-section-block,
+    .drafts-table-block
+) {
+    overflow: clip;
+}
+
+body.workspace-app .workspace-content :is(
+    .workspace-section-block,
+    .drafts-table-block
+) > :is(.workspace-table-wrap, .workspace-inline-status) {
+    width: 100%;
+    margin-inline: 0;
+}
+
+body.workspace-app .workspace-content .workspace-section-heading {
+    padding-inline: var(--workspace-panel-gutter);
+}
+
+body.workspace-app .workspace-content .workspace-data-table th,
+body.workspace-app .workspace-content .workspace-data-table td {
+    padding-inline: var(--workspace-panel-gutter);
+}
+
+body.workspace-app .workspace-content .workspace-inline-status {
+    padding-inline: var(--workspace-panel-gutter);
+}
+
+body.workspace-app .workspace-content .workspace-inline-status:empty {
+    display: none;
+}
+
+/* Quiet secondary controls in light mode. Inputs stay white; secondary
+   actions use the softer panel colour so every control is not a white card. */
+:root[data-theme="light"] body.workspace-app .workspace-content .button-secondary,
+:root[data-theme="light"] body.workspace-app .workspace-content .cwl-add-player-button {
+    background: var(--surface-subtle);
+    color: var(--text-muted);
+    box-shadow: none;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-content .button-secondary:hover,
+:root[data-theme="light"] body.workspace-app .workspace-content .cwl-add-player-button:hover {
+    background: var(--surface-hover);
+    color: var(--text);
+}
+
+/* ------------------------------------------------------------
+   Dashboard and saved plans
+   ------------------------------------------------------------ */
+body.workspace-app[data-workspace-page="dashboard"] .workspace-launch-list > a {
+    padding-inline: 0.45rem 0.6rem;
+}
+
+body.workspace-app[data-workspace-page="dashboard"] .workspace-launch-list > a:hover {
+    padding-left: 0.8rem;
+}
+
+body.workspace-app[data-workspace-page="dashboard"] .workspace-dashboard-split {
+    gap: var(--workspace-section-gap);
+}
+
+body.workspace-app[data-workspace-page="dashboard"] .workspace-section-block,
+body.workspace-app[data-workspace-page="drafts"] .drafts-table-block {
+    min-height: 100%;
+}
+
+body.workspace-app[data-workspace-page="dashboard"] .workspace-groups-summary > #dashboard-group-list:empty,
+body.workspace-app[data-workspace-page="dashboard"] .workspace-recent-plans tbody:empty {
+    min-height: 7rem;
+}
+
+body.workspace-app[data-workspace-page="drafts"] .drafts-status {
+    margin-bottom: var(--workspace-panel-gutter-compact);
+}
+
+body.workspace-app[data-workspace-page="drafts"] .draft-actions .button:not(.button-primary) {
+    background: transparent;
+    box-shadow: none;
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="drafts"] .draft-actions .button:not(.button-primary):hover {
+    background: var(--surface-hover);
+}
+
+/* ------------------------------------------------------------
+   CWL Planner
+   ------------------------------------------------------------ */
+body.workspace-app[data-workspace-page="planner"] .cwl-context-toolbar,
+body.workspace-app[data-workspace-page="planner"] .cwl-planner-layout {
+    width: 100%;
+}
+
+body.workspace-app[data-workspace-page="planner"] .cwl-panel-heading,
+body.workspace-app[data-workspace-page="planner"] .cwl-board-heading {
+    padding-inline: var(--workspace-panel-gutter);
+}
+
+body.workspace-app[data-workspace-page="planner"] .cwl-roster-tools {
+    padding-inline: var(--workspace-panel-gutter);
+}
+
+body.workspace-app[data-workspace-page="planner"] .cwl-add-player-button {
+    width: calc(100% - (2 * var(--workspace-panel-gutter)));
+    margin-inline: var(--workspace-panel-gutter);
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-available-players,
+body.workspace-app[data-workspace-page="planner"] #cwl-all-clans {
+    padding-inline: var(--workspace-panel-gutter);
+}
+
+body.workspace-app[data-workspace-page="planner"] .cwl-clan-article:last-child {
+    margin-bottom: 0;
+}
+
+/* ------------------------------------------------------------
+   Operation Board
+   ------------------------------------------------------------ */
+body.workspace-app[data-workspace-page="operation"] .op-context-toolbar {
+    padding-inline: var(--workspace-panel-gutter);
+}
+
+body.workspace-app[data-workspace-page="operation"] .operation-help {
+    background: var(--surface);
+    padding-inline: var(--workspace-panel-gutter);
+}
+
+body.workspace-app[data-workspace-page="operation"] .op-metrics-bar {
+    overflow: clip;
+    border: 0.0625rem solid var(--border-strong);
+    background: var(--surface);
+}
+
+body.workspace-app[data-workspace-page="operation"] .op-metrics-bar > div {
+    padding-inline: var(--workspace-panel-gutter);
+}
+
+body.workspace-app[data-workspace-page="operation"] :is(
+    .op-history-grid,
+    .op-operation-layout,
+    .op-operation-ledger,
+    .op-operation-side
+) {
+    gap: var(--workspace-section-gap);
+}
+
+body.workspace-app[data-workspace-page="operation"] .op-section-heading,
+body.workspace-app[data-workspace-page="operation"] .op-roster-filter-row {
+    padding-inline: var(--workspace-panel-gutter);
+}
+
+body.workspace-app[data-workspace-page="operation"] .op-table th,
+body.workspace-app[data-workspace-page="operation"] .op-table td {
+    padding-inline: var(--workspace-panel-gutter-compact);
+}
+
+body.workspace-app[data-workspace-page="operation"] :is(
+    .op-standing-row,
+    .op-bonus-list li,
+    .op-standings-note,
+    .op-advice-note
+) {
+    padding-inline: var(--workspace-panel-gutter);
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="operation"] .operation-actions .button-secondary,
+:root[data-theme="light"] body.workspace-app[data-workspace-page="operation"] #op-standalone-load {
+    background: var(--surface-subtle);
+}
+
+/* ------------------------------------------------------------
+   Groups
+   ------------------------------------------------------------ */
+body.workspace-app[data-workspace-page="groups"] .group-index-heading {
+    padding-inline: 0.15rem;
+}
+
+body.workspace-app[data-workspace-page="groups"] #groups-list {
+    padding-bottom: 0.5rem;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-item.group-index-row {
+    margin-inline: 0;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-tab-panel.is-visible {
+    padding-bottom: var(--workspace-panel-gutter);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-member-item {
+    padding-inline: 0.2rem;
+}
+
+/* The management columns previously deliberately removed their outer
+   padding, leaving forms and rows against the divider and page edge. */
+body.workspace-app[data-workspace-page="groups"] .groups-management-section,
+body.workspace-app[data-workspace-page="groups"] .groups-management-section:first-child,
+body.workspace-app[data-workspace-page="groups"] .groups-management-section:last-child {
+    padding-right: var(--workspace-panel-gutter);
+    padding-left: var(--workspace-panel-gutter);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-section-heading {
+    padding-inline: 0.1rem;
+}
+
+body.workspace-app[data-workspace-page="groups"] :is(
+    .groups-admin-member,
+    .groups-linked-clan,
+    .groups-unlinked-account,
+    .groups-poll-summary,
+    .groups-poll-day-summary,
+    .groups-poll-result-user
+) {
+    padding-inline: 0.2rem;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-inspector-stats > div,
+body.workspace-app[data-workspace-page="groups"] .groups-inspector-link {
+    padding-right: 0.15rem;
+    padding-left: 0.15rem;
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] :is(
+    .groups-overlay-tab,
+    .groups-create-option,
+    .groups-admin-member-actions button
+) {
+    background: var(--surface-subtle);
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] :is(
+    .groups-overlay-tab,
+    .groups-create-option,
+    .groups-admin-member-actions button
+):hover {
+    background: var(--surface-hover);
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] :is(
+    .groups-overlay-tab-active,
+    .groups-create-option-active
+) {
+    background: var(--surface-raised);
+}
+
+/* ------------------------------------------------------------
+   Bracket generator
+   ------------------------------------------------------------ */
+body.workspace-app[data-workspace-page="bracket"] .bracket-layout {
+    gap: var(--workspace-section-gap);
+}
+
+body.workspace-app[data-workspace-page="bracket"] :is(.bracket-setup, .bracket-result) {
+    overflow: clip;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-setup {
+    padding: var(--workspace-panel-gutter);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-header {
+    padding-inline: var(--workspace-panel-gutter);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-board {
+    padding: clamp(1rem, 1.7vw, 1.5rem);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-file-actions {
+    gap: 0.45rem;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-file-actions button {
+    min-height: 2.15rem;
+    border: 0.0625rem solid transparent;
+    border-radius: var(--radius-small);
+    padding: 0.38rem 0.55rem;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-file-actions button:hover {
+    border-color: var(--border);
+    background: var(--surface-raised);
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="bracket"] .bracket-file-actions button {
+    background: var(--surface-subtle);
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="bracket"] .bracket-file-actions #bracket-reset {
+    background: var(--danger-soft);
+}
+
+/* ------------------------------------------------------------
+   Responsive safeguards
+   ------------------------------------------------------------ */
+@media (max-width: 58rem) {
+    body.workspace-app[data-workspace-page="groups"] .groups-management-section,
+    body.workspace-app[data-workspace-page="groups"] .groups-management-section:first-child,
+    body.workspace-app[data-workspace-page="groups"] .groups-management-section:last-child {
+        padding-right: 0;
+        padding-left: 0;
+    }
+}
+
+@media (max-width: 46rem) {
+    body.workspace-app {
+        --workspace-panel-gutter: 0.85rem;
+        --workspace-panel-gutter-compact: 0.65rem;
+    }
+
+    body.workspace-app[data-workspace-page="dashboard"] .workspace-launch-list > a {
+        grid-template-columns: 2.2rem minmax(0, 1fr);
+        padding-inline: 0.25rem;
+    }
+
+    body.workspace-app[data-workspace-page="dashboard"] .workspace-launch-list b {
+        display: none;
+    }
+
+    body.workspace-app[data-workspace-page="operation"] .op-metrics-bar > div {
+        padding-inline: var(--workspace-panel-gutter);
+    }
+}
