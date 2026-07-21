@@ -1,3 +1,5 @@
+export const DEFAULT_GROUP_BADGE_URL = new URL('../../css/pictures/default-clan-banner.png', import.meta.url).href;
+
 export const GROUP_BADGES = ['shield', 'swords', 'crown', 'war_star', 'tower', 'flame', 'banner', 'helmet'];
 
 const SVG = {
@@ -22,19 +24,14 @@ export function badgeSvg(badge, className = 'groups-badge-svg') {
 export function renderBadge(element, badge, badgeUrl = '') {
     if (!element) return;
     const officialBadgeUrl = String(badgeUrl || '').trim();
-    if (officialBadgeUrl) {
-        element.innerHTML = '';
-        const image = document.createElement('img');
-        image.className = 'groups-badge-img';
-        image.src = officialBadgeUrl;
-        image.alt = '';
-        image.loading = 'lazy';
-        element.appendChild(image);
-        element.dataset.badge = 'official';
-        return;
-    }
-    element.innerHTML = badgeSvg(badge);
-    element.dataset.badge = normalizeGroupBadge(badge);
+    element.innerHTML = '';
+    const image = document.createElement('img');
+    image.className = 'groups-badge-img';
+    image.src = officialBadgeUrl || DEFAULT_GROUP_BADGE_URL;
+    image.alt = '';
+    image.loading = officialBadgeUrl ? 'lazy' : 'eager';
+    element.appendChild(image);
+    element.dataset.badge = officialBadgeUrl ? 'official' : 'default';
 }
 
 export function badgeLabelKey(badge) {

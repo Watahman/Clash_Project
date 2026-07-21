@@ -1,5 +1,5 @@
 import { getClanInfoRequest, getClanMembersRequest } from "../API/API-Clan.js";
-import { addGroupClan, getGroupClans, removeGroupClan } from "../Supabase/Supabase-Group.js";
+import { addGroupClan, getGroupClans, getGroupInfo, removeGroupClan } from "../Supabase/Supabase-Group.js";
 import { t } from "../i18n/i18n.js";
 import { withGlobalLoading } from "../utils/loading-state.js";
 import { renderBadge } from "./groups-badges.js";
@@ -29,12 +29,16 @@ export function createClanAdmin(elements, getState, setMessage, emptyMessage) {
 
     function load() {
         const { group, userId, canAdmin } = getState();
-        if (!group || !userId || !canAdmin) return;
+        if (!group || !userId || !canAdmin) return Promise.resolve();
         const requestedGroupId = group.id;
-        withGlobalLoading(() => getGroupClans(group.id, userId)
-            .then(data => {
+        return withGlobalLoading(() => Promise.all([
+            getGroupClans(group.id, userId),
+            getGroupInfo(group.id)
+        ])
+            .then(([clans, groupData]) => {
                 if (getState().group?.id !== requestedGroupId) return;
-                setLinkedClans(data, requestedGroupId);
+                setLinkedClans(clans, requestedGroupId);
+                applyFreshGroupBadge(Array.isArray(groupData) ? groupData[0] : groupData);
             })
             .catch(error => {
                 if (getState().group?.id !== requestedGroupId) return;
@@ -42,6 +46,17 @@ export function createClanAdmin(elements, getState, setMessage, emptyMessage) {
                 setLinkedClans([], requestedGroupId);
                 setMessage(t('groups.linkedClansLoadError'));
             }), t('groups.loading'));
+    }
+
+    function applyFreshGroupBadge(freshGroup) {
+        const { group } = getState();
+        if (!group || !freshGroup?.id || freshGroup.id !== group.id) return;
+        group.badge = freshGroup.badge || 'banner';
+        group.badge_url = freshGroup.badge_url || '';
+        renderBadge(document.querySelector('#groups-detail-logo'), group.badge, group.badge_url);
+        const activeCard = [...document.querySelectorAll('.groups-item')]
+            .find(item => item.dataset.groupId === group.id);
+        renderBadge(activeCard?.querySelector('.groups-item-logo'), group.badge, group.badge_url);
     }
 
     function add() {
@@ -57,17 +72,12 @@ export function createClanAdmin(elements, getState, setMessage, emptyMessage) {
                     tag: normalizeTag(info?.tag || tag),
                     name: info?.name || tag,
                     badgeUrl: officialBadgeUrl
-                }).then(() => {
-                    if (!group.badge_url && officialBadgeUrl) {
-                        group.badge_url = officialBadgeUrl;
-                        renderBadge(document.querySelector('#groups-detail-logo'), group.badge, group.badge_url);
-                    }
                 });
             })
-            .then(() => {
+            .then(async () => {
                 if (elements.clanTag) elements.clanTag.value = '';
                 setMessage(t('groups.clanLinked'), 'success');
-                load();
+                await load();
             })
             .catch(error => {
                 console.error(error);
@@ -81,14 +91,10 @@ export function createClanAdmin(elements, getState, setMessage, emptyMessage) {
         if (!group || !userId || !canAdmin || !tag) return;
 
         withGlobalLoading(() => removeGroupClan(group.id, userId, tag)
-            .then(() => {
-                linkedClans = linkedClans.filter(clan => normalizeTag(clan.clan_tag) !== tag);
-                renderLinkedClans();
-                window.dispatchEvent(new CustomEvent('clashtools:group-clans-updated', {
-                    detail: { groupId: group.id, count: linkedClans.length }
-                }));
+            .then(async () => {
                 renderScanPlaceholder(t('groups.scanFirst'));
                 setMessage(t('groups.clanRemoved'), 'success');
+                await load();
             })
             .catch(error => {
                 console.error(error);
@@ -105,12 +111,21 @@ export function createClanAdmin(elements, getState, setMessage, emptyMessage) {
     function linkedClanNode(clan) {
         const item = document.createElement('div');
         item.className = 'groups-linked-clan';
+        if (clan.is_primary) item.classList.add('is-primary');
         const badge = document.createElement('div');
         badge.className = 'groups-linked-clan-badge';
-        if (clan.badge_url) badge.appendChild(Object.assign(document.createElement('img'), { src: clan.badge_url, alt: '' }));
+        renderBadge(badge, 'banner', clan.badge_url);
         const text = document.createElement('div');
         text.className = 'groups-linked-clan-text';
-        text.append(textNode('strong', clan.clan_name || clan.clan_tag), textNode('span', normalizeTag(clan.clan_tag)));
+        const nameLine = document.createElement('div');
+        nameLine.className = 'groups-linked-clan-name-line';
+        nameLine.appendChild(textNode('strong', clan.clan_name || clan.clan_tag));
+        if (clan.is_primary) {
+            const primary = textNode('span', t('groups.primaryClan'));
+            primary.className = 'groups-primary-clan-label';
+            nameLine.appendChild(primary);
+        }
+        text.append(nameLine, textNode('span', normalizeTag(clan.clan_tag)));
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'btn-groups-icon groups-danger';

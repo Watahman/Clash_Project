@@ -257,6 +257,7 @@ export const nl = Object.freeze({
   "groups.adminTitle": "Groepsbeheer",
   "groups.adminSubtitle": "Beheer deze groep.",
   "groups.linkedClans": "Gekoppelde clans",
+  "groups.primaryClan": "Hoofdclan",
   "groups.addClan": "Clan toevoegen",
   "groups.noLinkedClans": "Nog geen clans gekoppeld",
   "groups.unlinkedAccounts": "Niet-gelinkte accounts",

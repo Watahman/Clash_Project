@@ -249,6 +249,7 @@ export const fr = Object.freeze({
   "groups.adminTitle": "Admin groupe",
   "groups.adminSubtitle": "Gerer ce groupe.",
   "groups.linkedClans": "Clans lies",
+  "groups.primaryClan": "Clan principal",
   "groups.addClan": "Ajouter clan",
   "groups.noLinkedClans": "Aucun clan lie",
   "groups.unlinkedAccounts": "Comptes non lies",

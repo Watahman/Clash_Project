@@ -7,7 +7,6 @@ import { getCurrentUserId } from '../utils/user.js';
 import { withGlobalLoading } from '../utils/loading-state.js';
 import { initCopyFeedback } from '../utils/copy-feedback.js';
 import { initGroupsAdminPanel } from '../groups/groups-admin-panel.js';
-import { badgeLabelKey, badgeSvg, GROUP_BADGES } from '../groups/groups-badges.js';
 import { initGroupPolls } from '../groups/groups-polls.js';
 import { activateGroupTab, bindGroupTabs } from '../groups/groups-tabs.js';
 import { syncAuthSession } from '../auth/auth-client.js';
@@ -35,7 +34,6 @@ const groupsClanHint = document.querySelector('#groups-clan-hint');
 const groupsOverlayCreateBtn = document.querySelector('#groups-overlay-create-btn');
 const groupsInputJoinCode = document.querySelector('#groups-input-join-code');
 const groupsOverlayJoinBtn = document.querySelector('#groups-overlay-join-btn');
-const groupsBadgeOptions = document.querySelector('#groups-badge-options');
 const groupsDetailCheckmark = document.querySelector('#groups-detail-checkmark');
 const groupsDetailCopy = document.querySelector('#groups-detail-copy');
 const groupOverlayLeave = document.querySelector('#groups-overlay-leave');
@@ -49,7 +47,6 @@ const OPEN_GROUP_STORAGE_KEY = 'clashtoolsOpenGroupId';
 const SELECTED_GROUP_STORAGE_KEY = 'clashtoolsSelectedGroupId';
 const GROUP_TAB_STORAGE_PREFIX = 'clashtoolsGroupTab:';
 let adminPanel;
-let selectedBadge = 'shield';
 let createMode = 'name';
 let currentGroupId = '';
 let reloadSequence = 0;
@@ -57,7 +54,6 @@ let reloadSequence = 0;
 async function init() {
     initI18n();
     await syncAuthSession().catch(() => null);
-    initBadgePicker();
     initCreateJoinOverlay();
     initDetailTabs();
     initStaticActions();
@@ -109,7 +105,7 @@ function initCreateJoinOverlay() {
         const value = createMode === 'clanTag' ? groupsInputClanTag?.value.trim() : groupsInputName?.value.trim();
         if (!value) return;
         groupsOverlayNew?.classList.add('hidden');
-        await createNewGroup(value, createMode, selectedBadge);
+        await createNewGroup(value, createMode);
     });
     groupsOverlayJoinBtn?.addEventListener('click', async () => {
         const code = groupsInputJoinCode?.value.trim();
@@ -190,13 +186,13 @@ async function reloadGroups() {
     }
 }
 
-async function createNewGroup(value, option, badge = 'shield') {
+async function createNewGroup(value, option) {
     const userId = requireLoggedIn();
     if (!userId || !value) return;
 
     if (option === 'name') {
         await withGlobalLoading(async () => {
-            const created = await createGroup(value, userId, badge);
+            const created = await createGroup(value, userId);
             const groupId = Array.isArray(created) ? created[0]?.id : created?.id;
             if (groupId) localStorage.setItem(SELECTED_GROUP_STORAGE_KEY, groupId);
             if (groupsInputName) groupsInputName.value = '';
@@ -211,7 +207,7 @@ async function createNewGroup(value, option, badge = 'shield') {
             const clanTag = normalizeClanTag(clanInfo?.tag || value);
             const clanName = clanInfo?.name || clanTag;
             const officialBadgeUrl = clanBadgeUrl(clanInfo);
-            const createdGroup = await createGroup(clanName, userId, badge, officialBadgeUrl);
+            const createdGroup = await createGroup(clanName, userId);
             const groupId = Array.isArray(createdGroup) ? createdGroup[0]?.id : createdGroup?.id;
             if (!groupId) throw new Error('GROUP_ID_MISSING');
             await addGroupClan(groupId, userId, { tag: clanTag, name: clanName, badgeUrl: officialBadgeUrl })
@@ -239,27 +235,6 @@ function normalizeClanTag(value) {
 
 function clanBadgeUrl(clanInfo) {
     return clanInfo?.badgeUrls?.medium || clanInfo?.badgeUrls?.small || clanInfo?.badgeUrls?.large || '';
-}
-
-function initBadgePicker() {
-    if (!groupsBadgeOptions) return;
-    groupsBadgeOptions.replaceChildren();
-    GROUP_BADGES.forEach(badge => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'groups-badge-option';
-        button.dataset.badge = badge;
-        button.title = t(badgeLabelKey(badge));
-        button.innerHTML = badgeSvg(badge);
-        button.addEventListener('click', () => selectBadge(badge));
-        groupsBadgeOptions.appendChild(button);
-    });
-    selectBadge(selectedBadge);
-}
-
-function selectBadge(badge) {
-    selectedBadge = badge;
-    groupsBadgeOptions?.querySelectorAll('.groups-badge-option').forEach(button => button.classList.toggle('active', button.dataset.badge === selectedBadge));
 }
 
 async function joinGroupFun(code) {

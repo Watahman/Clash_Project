@@ -1,10 +1,8 @@
 <!DOCTYPE html>
-<html lang="nl" class="workspace-page-loading">
+<html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../assets/css/workspace-loading.css">
-    <script src="../assets/js/shell/workspace-bootstrap.js"></script>
     <title>Groepen · Tools for Clash</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="../assets/css/Main-css.css">
@@ -18,7 +16,6 @@
     <script type="module" src="../assets/js/pages/groups.js"></script>
     <link rel="stylesheet" href="../assets/css/light-theme.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
-    <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
 </head>
 <body class="workspace-app" data-workspace-page="groups">
 <header>
@@ -136,7 +133,7 @@
 <div class="overlay hidden" id="groups-overlay-new">
     <div class="overlay-container groups-overlay-tabbed" role="dialog" aria-modal="true" aria-label="Groep aanmaken of joinen">
         <div class="groups-overlay-tabs" role="tablist"><button class="groups-overlay-tab groups-overlay-tab-active" id="groups-tab-create" type="button" data-i18n="groups.create">Aanmaken</button><button class="groups-overlay-tab" id="groups-tab-join" type="button" data-i18n="groups.join">Joinen</button></div>
-        <div class="groups-overlay-panel" id="groups-panel-create"><div class="groups-create-options"><button class="groups-create-option groups-create-option-active" id="groups-create-opt-name" type="button"><span data-i18n="groups.groupName">Groepsnaam</span></button><button class="groups-create-option" id="groups-create-opt-clan" type="button"><span data-i18n="groups.clan">Clash of Clans clan</span></button></div><div id="groups-create-by-name"><input id="groups-input-name" type="text" placeholder="Groepsnaam"></div><div id="groups-create-by-clan" class="hidden"><input id="groups-input-clan-tag" type="text" placeholder="Clantag: #ABC123"><p class="groups-clan-hint" id="groups-clan-hint"></p></div><div class="groups-badge-picker" id="groups-badge-picker" aria-label="Groepsbadge"><span class="groups-badge-picker-title" data-i18n="groups.chooseBadge">Kies badge</span><div class="groups-badge-options" id="groups-badge-options"></div></div><button class="button button-primary button-full" id="groups-overlay-create-btn" type="button" data-i18n="groups.createBtn">Aanmaken</button></div>
+        <div class="groups-overlay-panel" id="groups-panel-create"><div class="groups-create-options"><button class="groups-create-option groups-create-option-active" id="groups-create-opt-name" type="button"><span data-i18n="groups.groupName">Groepsnaam</span></button><button class="groups-create-option" id="groups-create-opt-clan" type="button"><span data-i18n="groups.clan">Clash of Clans clan</span></button></div><div id="groups-create-by-name"><input id="groups-input-name" type="text" placeholder="Groepsnaam"></div><div id="groups-create-by-clan" class="hidden"><input id="groups-input-clan-tag" type="text" placeholder="Clantag: #ABC123"><p class="groups-clan-hint" id="groups-clan-hint"></p></div><button class="button button-primary button-full" id="groups-overlay-create-btn" type="button" data-i18n="groups.createBtn">Aanmaken</button></div>
         <div class="groups-overlay-panel hidden" id="groups-panel-join"><input id="groups-input-join-code" type="text" placeholder="Groepscode: ######"><button class="button button-primary button-full" id="groups-overlay-join-btn" type="button" data-i18n="groups.joinBtn">Joinen</button></div>
     </div>
 </div>

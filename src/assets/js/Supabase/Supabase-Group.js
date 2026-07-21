@@ -16,13 +16,11 @@ function invalidateUserGroups(userId) {
     if (userId) removeCached(cacheKeys.groupsOfUser(userId));
 }
 
-export async function createGroup(name, ownerId, badge = 'shield', badgeUrl = '') {
+export async function createGroup(name, ownerId) {
     const path = config._BASE_URL + config._EXT_SUPA_GROUP_MAKE
     const data = {
         name: name,
-        ownerId: ownerId,
-        badge: badge,
-        badgeUrl: badgeUrl || null
+        ownerId: ownerId
     };
     return databaseRequestWithBody(path, data).then(result => {
         invalidateUserGroups(ownerId);

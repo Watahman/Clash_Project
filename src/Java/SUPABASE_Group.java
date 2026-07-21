@@ -3,6 +3,7 @@ package Java;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 
@@ -30,16 +31,14 @@ public class SUPABASE_Group {
             String ownerId   = utils.requireAuthenticatedUser(ex);
             JsonObject json  = utils.parseBody(ex);
             String naam      = utils.requireString(json, "name");
-            String badge     = normalizeGroupBadge(json.has("badge") ? json.get("badge").getAsString() : "shield");
             String code      = API_Utils.generateCode();
 
             JsonObject group = new JsonObject();
             group.addProperty("name",     naam);
             group.addProperty("owner_id", ownerId);
             group.addProperty("code",     code);
-            group.addProperty("badge",    badge);
-            String badgeUrl = readFirstString(json, "badgeUrl", "badge_url").trim();
-            if (!badgeUrl.isBlank()) group.addProperty("badge_url", badgeUrl);
+            group.addProperty("badge",    "banner");
+            group.add("badge_url", JsonNull.INSTANCE);
 
             String result = SUPABASE_Client.post("groups", group.toString());
             JsonArray resultArray = JsonParser.parseString(result).getAsJsonArray();
@@ -76,6 +75,7 @@ public class SUPABASE_Group {
             JsonObject json = utils.parseBody(ex);
             String id       = utils.requireString(json, "groupId");
             requireGroupMember(id, userId);
+            syncGroupBadgeToPrimaryClan(id);
             String result   = SUPABASE_Client.getWithBody("groups", "id=" + SUPABASE_Client.eq(id));
 
             JsonArray resultArray = JsonParser.parseString(result).getAsJsonArray();
@@ -173,9 +173,9 @@ public class SUPABASE_Group {
 
             requireGroupMember(groupId, userId);
 
-            String result = SUPABASE_Client.getWithBody("group_clans",
-                    "group_id=" + SUPABASE_Client.eq(groupId) + "&order=created_at.asc");
-            utils.sendJsonResponse(ex, result, 200);
+            JsonArray clans = getOrderedGroupClans(groupId);
+            markPrimaryClan(clans);
+            utils.sendJsonResponse(ex, clans.toString(), 200);
         }));
     }
 
@@ -190,7 +190,7 @@ public class SUPABASE_Group {
             if (clanTag.isBlank()) throw new IllegalArgumentException("Ongeldige clantag");
             if (clanName.isBlank()) throw new IllegalArgumentException("Clan naam ontbreekt");
 
-            JsonObject group = requireGroupAdmin(groupId, userId);
+            requireGroupAdmin(groupId, userId);
 
             JsonObject row = new JsonObject();
             row.addProperty("group_id", groupId);
@@ -203,9 +203,7 @@ public class SUPABASE_Group {
             }
 
             String result = SUPABASE_Client.post("group_clans", row.toString());
-            if (badgeUrl != null && !badgeUrl.isJsonNull() && !badgeUrl.getAsString().trim().isBlank()) {
-                patchGroupBadgeUrlIfMissing(groupId, group, badgeUrl.getAsString().trim());
-            }
+            syncGroupBadgeToPrimaryClan(groupId);
             utils.sendJsonResponse(ex, result, 201);
         }));
     }
@@ -223,6 +221,7 @@ public class SUPABASE_Group {
 
             String result = SUPABASE_Client.deleteColumn("group_clans",
                     "group_id=" + SUPABASE_Client.eq(groupId) + "&clan_tag=" + SUPABASE_Client.eq(clanTag));
+            syncGroupBadgeToPrimaryClan(groupId);
             utils.sendJsonResponse(ex, result.isBlank() ? "{\"success\":true}" : result, 200);
         }));
     }
@@ -677,13 +676,41 @@ public class SUPABASE_Group {
         return SUPABASE_Client.patch("groups", "id=" + SUPABASE_Client.eq(groupId), groupUpdate.toString());
     }
 
-    private void patchGroupBadgeUrlIfMissing(String groupId, JsonObject group, String badgeUrl) throws Exception {
+    private JsonArray getOrderedGroupClans(String groupId) throws Exception {
+        String result = SUPABASE_Client.getWithBody("group_clans",
+                "group_id=" + SUPABASE_Client.eq(groupId) + "&order=created_at.asc,id.asc");
+        return JsonParser.parseString(result).getAsJsonArray();
+    }
+
+    private void markPrimaryClan(JsonArray clans) {
+        for (int index = 0; index < clans.size(); index++) {
+            clans.get(index).getAsJsonObject().addProperty("is_primary", index == 0);
+        }
+    }
+
+    private String syncGroupBadgeToPrimaryClan(String groupId) throws Exception {
+        JsonArray clans = getOrderedGroupClans(groupId);
+        String primaryBadgeUrl = clans.isEmpty()
+                ? ""
+                : readFirstString(clans.get(0).getAsJsonObject(), "badge_url", "badgeUrl").trim();
+
+        JsonArray groups = JsonParser.parseString(SUPABASE_Client.getWithBody(
+                "groups", "id=" + SUPABASE_Client.eq(groupId))).getAsJsonArray();
+        if (groups.isEmpty()) return primaryBadgeUrl;
+
+        JsonObject group = groups.get(0).getAsJsonObject();
         String currentBadgeUrl = readFirstString(group, "badge_url", "badgeUrl").trim();
-        if (!currentBadgeUrl.isBlank() || badgeUrl.isBlank()) return;
+        String currentBadge = readFirstString(group, "badge").trim();
+        if (Objects.equals(currentBadgeUrl, primaryBadgeUrl) && Objects.equals(currentBadge, "banner")) {
+            return primaryBadgeUrl;
+        }
 
         JsonObject update = new JsonObject();
-        update.addProperty("badge_url", badgeUrl);
+        update.addProperty("badge", "banner");
+        if (primaryBadgeUrl.isBlank()) update.add("badge_url", JsonNull.INSTANCE);
+        else update.addProperty("badge_url", primaryBadgeUrl);
         SUPABASE_Client.patch("groups", "id=" + SUPABASE_Client.eq(groupId), update.toString());
+        return primaryBadgeUrl;
     }
 
     private String normalizeGroupBadge(String value) {

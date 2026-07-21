@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { groupMemberSummary, memberAccounts } from '../../src/assets/js/templates/GroupTemplates.js';
 import { isGroupAdmin } from '../../src/assets/js/groups/groups-roles.js';
 import { activateGroupTab, bindGroupTabs } from '../../src/assets/js/groups/groups-tabs.js';
+import { renderBadge } from '../../src/assets/js/groups/groups-badges.js';
 
 describe('Groups V1 workspace', () => {
     it('keeps the approved four real tabs and removes dead or broken controls', () => {
@@ -15,6 +16,22 @@ describe('Groups V1 workspace', () => {
         expect(html).toContain('id="groups-settings-btn"');
         expect(html).toContain('id="groups-poll-reminder-btn"');
         expect(html).toContain('id="groups-admin-scan-unlinked"');
+        expect(html).not.toContain('groups-badge-picker');
+        expect(html).not.toContain('groups-badge-options');
+    });
+
+
+    it('uses the Clash default banner until a main clan provides an official badge', () => {
+        document.body.innerHTML = '<div id="group-badge"></div>';
+        const badge = document.querySelector('#group-badge');
+
+        renderBadge(badge, 'shield', '');
+        expect(badge.dataset.badge).toBe('default');
+        expect(badge.querySelector('img')?.src).toContain('default-clan-banner.png');
+
+        renderBadge(badge, 'shield', 'https://example.com/clan-badge.png');
+        expect(badge.dataset.badge).toBe('official');
+        expect(badge.querySelector('img')?.src).toBe('https://example.com/clan-badge.png');
     });
 
     it('counts every linked account regardless of stored account shape', () => {

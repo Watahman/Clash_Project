@@ -826,6 +826,35 @@ body.workspace-app[data-workspace-page="groups"] .groups-detail-logo > img {
     transform: none !important;
 }
 
+
+/* The first linked clan is the group's main clan and owns the group badge. */
+body.workspace-app[data-workspace-page="groups"] .groups-linked-clan-name-line {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-linked-clan-name-line > strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-primary-clan-label {
+    flex: 0 0 auto;
+    border: 0.0625rem solid color-mix(in srgb, var(--accent) 38%, var(--border));
+    border-radius: 999rem;
+    background: var(--accent-soft);
+    padding: 0.18rem 0.38rem;
+    color: var(--accent-strong);
+    font-size: 0.56rem;
+    font-weight: 750;
+    line-height: 1;
+    text-transform: none;
+}
+
 /* Verberg de nutteloze scrollbar bij de groepstabs */
 body.workspace-app[data-workspace-page="groups"] .groups-detail-tabs {
     overflow-x: auto;
