@@ -433,7 +433,7 @@ body.workspace-app[data-workspace-page="groups"] .groups-role-badge.co-leader { 
 body.workspace-app[data-workspace-page="groups"] .groups-member-item {
     display: grid;
     min-height: 4.8rem;
-    grid-template-columns: 2rem minmax(9rem, 0.8fr) auto minmax(7.5rem, 0.55fr) minmax(12rem, 1.15fr);
+    grid-template-columns: 2.2rem minmax(9rem, 0.8fr) auto minmax(7.5rem, 0.55fr) minmax(12rem, 1.15fr);
     align-items: center;
     gap: 0.75rem;
     border: 0;
@@ -444,17 +444,22 @@ body.workspace-app[data-workspace-page="groups"] .groups-member-item {
     box-shadow: none;
 }
 
-.groups-member-avatar {
-    display: grid;
-    width: 1.8rem;
-    height: 1.8rem;
+body.workspace-app[data-workspace-page="groups"] .groups-member-avatar {
+    display: inline-grid;
+    width: 2.2rem;
+    height: 2.2rem;
+    flex: 0 0 2.2rem;
     place-items: center;
     border: 0;
     border-radius: 50%;
-    background: var(--surface-raised);
+    background: rgba(215, 173, 85, 0.14);
+    color: var(--accent-strong);
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    text-transform: uppercase;
 }
-
-.groups-member-avatar img { width: 0.9rem; height: 0.9rem; opacity: 0.65; }
 
 .groups-member-identity { display: grid; min-width: 0; gap: 0.18rem; }
 body.workspace-app[data-workspace-page="groups"] .groups-member-name { overflow: hidden; color: var(--text); font-family: inherit; font-size: 0.76rem; font-weight: 750; letter-spacing: 0; text-overflow: ellipsis; text-transform: none; white-space: nowrap; }
@@ -657,7 +662,7 @@ body.workspace-app[data-workspace-page="groups"] .groups-admin-card { border: 0;
     .group-detail-header { grid-template-columns: 3.15rem minmax(0, 1fr); padding: 0.7rem 0; }
     .groups-header-actions { grid-column: 1 / -1; justify-content: flex-start; }
     .groups-detail-tabs { gap: 1rem; }
-    body.workspace-app[data-workspace-page="groups"] .groups-member-item { grid-template-columns: 2rem minmax(0, 1fr) auto; }
+    body.workspace-app[data-workspace-page="groups"] .groups-member-item { grid-template-columns: 2.2rem minmax(0, 1fr) auto; }
     .groups-member-activity { grid-column: 2 / -1; }
     .groups-member-accounts { grid-column: 2 / -1; }
     .groups-management-grid { display: block; }
@@ -866,4 +871,12 @@ body.workspace-app[data-workspace-page="groups"] .groups-detail-tabs {
 body.workspace-app[data-workspace-page="groups"]
 .groups-detail-tabs::-webkit-scrollbar {
     display: none;
+}
+
+/* Dezelfde avatarstijl als het profiel in light mode */
+:root[data-theme="light"]
+body.workspace-app[data-workspace-page="groups"]
+.groups-member-avatar {
+    background: #fff1d2;
+    color: #81530d;
 }

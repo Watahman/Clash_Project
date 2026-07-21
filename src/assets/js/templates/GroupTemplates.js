@@ -8,6 +8,26 @@ function memberLabel(count) {
     return count === 1 ? `1 ${t('groups.memberSingle')}` : `${count} ${t('groups.members')}`;
 }
 
+function memberInitials(name) {
+    const parts = String(name || '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+
+    if (!parts.length) {
+        return '?';
+    }
+
+    if (parts.length === 1) {
+        return parts[0]
+            .slice(0, 2)
+            .toUpperCase();
+    }
+
+    return `${parts[0][0]}${parts[1][0]}`
+        .toUpperCase();
+}
+
 export function memberAccounts(member) {
     const profile = profileOf(member);
     const value = profile?.accounts;
@@ -133,8 +153,18 @@ function addAllMembers(members, creatorId) {
         const item = fragment.querySelector('.groups-member-item');
         const user = profileOf(member) || { id: member.user_id, name: member.user_id };
         item.dataset.userId = user.id || member.user_id;
-        fragment.querySelector('.groups-member-name').textContent = user.name || member.user_id;
+        const displayName = user.name || member.user_id;
+
+        fragment.querySelector('.groups-member-name').textContent = displayName;
         fragment.querySelector('.groups-member-code').textContent = user.code || member.user_id;
+
+        const avatar = fragment.querySelector('.groups-member-avatar');
+
+        if (avatar) {
+            avatar.textContent = memberInitials(displayName);
+            avatar.title = displayName;
+        }
+
         applyRoleBadge(fragment.querySelector('.groups-role-badge'), getMemberRole(member, { owner_id: creatorId }, user.id || member.user_id), t);
         renderAccounts(fragment.querySelector('.groups-member-accounts'), memberAccounts(member));
         memberList?.appendChild(fragment);
