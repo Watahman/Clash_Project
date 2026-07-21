@@ -59,18 +59,76 @@
 
             <div id="groups-detail-content" class="hidden">
                 <header class="group-detail-header">
-                    <div class="groups-detail-logo group-avatar-large" id="groups-detail-logo" aria-hidden="true">CT</div>
+                    <div
+                            class="groups-detail-logo group-avatar-large"
+                            id="groups-detail-logo"
+                            aria-hidden="true"
+                    >
+                        CT
+                    </div>
+
                     <div class="groups-detail-info">
-                        <h2 class="groups-detail-name" id="groups-detail-name">Groepsnaam</h2>
+                        <div class="groups-detail-title-row">
+                            <h2 class="groups-detail-name" id="groups-detail-name">
+                                Groepsnaam
+                            </h2>
+
+                            <span class="groups-role-badge" id="groups-detail-role">
+                                Lid
+                            </span>
+                        </div>
+
                         <div class="groups-detail-meta">
-                            <span id="groups-detail-count">0 leden</span><span aria-hidden="true">·</span><span data-i18n="groups.code">code</span>
-                            <button class="groups-code-pill" id="groups-detail-code" title="" data-i18n-title="groups.copyCode" type="button" data-copy-state="idle"><img src="../assets/css/pictures/copy.svg" id="groups-detail-copy" alt="" aria-hidden="false"><img src="../assets/css/pictures/checkmark_blank.svg" id="groups-detail-checkmark" class="hidden" alt="" hidden aria-hidden="true" style="display: none !important;"><span id="groups-detail-code-text">------</span></button>
-                            <span aria-hidden="true">·</span><span class="groups-role-badge" id="groups-detail-role">Lid</span><span class="groups-since" id="groups-detail-since">sinds —</span>
+                            <span id="groups-detail-count">0 leden</span>
+                            <span aria-hidden="true">·</span>
+                            <span class="groups-since" id="groups-detail-since">
+                                sinds —
+                            </span>
                         </div>
                     </div>
+
                     <div class="groups-header-actions">
-                        <button class="button button-secondary button-small groups-admin-only hidden" id="groups-settings-btn" type="button" data-i18n="groups.rolesPermissions">Rollen en rechten</button>
-                        <button class="groups-icon-button groups-danger" id="groups-leave-btn" type="button" title="" data-i18n-title="groups.leaveGroup" data-i18n-aria-label="groups.leaveGroup"><img src="../assets/css/pictures/leaving-door.svg" alt=""></button>
+                        <button
+                                class="groups-code-pill"
+                                id="groups-detail-code"
+                                type="button"
+                                title=""
+                                data-i18n-title="groups.copyCode"
+                                data-copy-state="idle"
+                        >
+                            <span id="groups-detail-code-text">------</span>
+
+                            <img
+                                    src="../assets/css/pictures/copy.svg"
+                                    id="groups-detail-copy"
+                                    alt=""
+                                    aria-hidden="false"
+                            >
+
+                            <img
+                                    src="../assets/css/pictures/checkmark_blank.svg"
+                                    id="groups-detail-checkmark"
+                                    class="hidden"
+                                    alt=""
+                                    hidden
+                                    aria-hidden="true"
+                                    style="display: none !important;"
+                            >
+                        </button>
+
+                        <button
+                                class="groups-icon-button groups-danger"
+                                id="groups-leave-btn"
+                                type="button"
+                                title=""
+                                data-i18n-title="groups.leaveGroup"
+                                data-i18n-aria-label="groups.leaveGroup"
+                        >
+                            <img
+                                    src="../assets/css/pictures/leaving-door.svg"
+                                    alt=""
+                            >
+                        </button>
                     </div>
                 </header>
 

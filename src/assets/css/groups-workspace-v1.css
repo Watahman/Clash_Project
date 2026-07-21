@@ -880,3 +880,108 @@ body.workspace-app[data-workspace-page="groups"]
     background: #fff1d2;
     color: #81530d;
 }
+
+/* Groups detail header: naam + rol links, code + verlaten rechts */
+body.workspace-app[data-workspace-page="groups"]
+.group-detail-header {
+    grid-template-columns: 3.15rem minmax(0, 1fr) auto;
+    column-gap: 0.9rem;
+}
+
+body.workspace-app[data-workspace-page="groups"]
+.groups-detail-title-row {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+body.workspace-app[data-workspace-page="groups"]
+.groups-detail-title-row .groups-detail-name {
+    min-width: 0;
+    flex: 0 1 auto;
+}
+
+body.workspace-app[data-workspace-page="groups"]
+.groups-detail-title-row .groups-role-badge {
+    flex: 0 0 auto;
+}
+
+body.workspace-app[data-workspace-page="groups"]
+.group-detail-header .groups-header-actions {
+    display: flex;
+    width: auto;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.35rem;
+}
+
+body.workspace-app[data-workspace-page="groups"]
+.group-detail-header .groups-code-pill {
+    display: inline-flex;
+    min-height: auto;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+
+    color: var(--accent-strong);
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 0.72rem;
+    font-weight: 750;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+body.workspace-app[data-workspace-page="groups"]
+.group-detail-header .groups-code-pill:hover {
+    border: 0;
+    background: transparent;
+    color: var(--accent);
+}
+
+body.workspace-app[data-workspace-page="groups"]
+.group-detail-header .groups-code-pill:hover
+#groups-detail-code-text {
+    text-decoration: underline;
+}
+
+body.workspace-app[data-workspace-page="groups"]
+#groups-detail-code-text {
+    order: 1;
+}
+
+body.workspace-app[data-workspace-page="groups"]
+#groups-detail-copy,
+body.workspace-app[data-workspace-page="groups"]
+#groups-detail-checkmark {
+    order: 2;
+    width: 0.75rem;
+    height: 0.75rem;
+    flex: 0 0 auto;
+}
+
+body.workspace-app[data-workspace-page="groups"]
+.group-detail-header #groups-leave-btn {
+    flex: 0 0 auto;
+}
+
+@media (max-width: 44rem) {
+    body.workspace-app[data-workspace-page="groups"]
+    .group-detail-header {
+        grid-template-columns: 3.15rem minmax(0, 1fr);
+    }
+
+    body.workspace-app[data-workspace-page="groups"]
+    .group-detail-header .groups-header-actions {
+        width: 100%;
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+    }
+}

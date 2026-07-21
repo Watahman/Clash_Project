@@ -40,7 +40,6 @@ const groupOverlayLeave = document.querySelector('#groups-overlay-leave');
 const groupsLeaveBtn = document.querySelector('#groups-leave-btn');
 const groupsLeaveCancelBtn = document.querySelector('#groups-leave-cancel-btn');
 const groupsLeaveConfirmBtn = document.querySelector('#groups-leave-confirm-btn');
-const groupsSettingsBtn = document.querySelector('#groups-settings-btn');
 const groupsAdminOverlay = document.querySelector('#groups-admin-overlay');
 
 const OPEN_GROUP_STORAGE_KEY = 'clashtoolsOpenGroupId';
@@ -71,7 +70,6 @@ function initStaticActions() {
     groupsNewBtn?.addEventListener('click', () => openNewGroupOverlay('create'));
     groupsNewRail?.addEventListener('click', () => openNewGroupOverlay('create'));
     groupsJoinShortcut?.addEventListener('click', () => openNewGroupOverlay('join'));
-    document.querySelector('#groups-inspector-roles')?.addEventListener('click', () => groupsSettingsBtn?.click());
     document.querySelector('#groups-inspector-code')?.addEventListener('click', () => groupsDetailCode?.click());
     document.querySelector('#groups-inspector-leave')?.addEventListener('click', () => groupsLeaveBtn?.click());
 
@@ -268,7 +266,6 @@ function resetGroupDetail() {
     currentGroupId = '';
     groupsDetailEmpty?.classList.remove('hidden');
     groupsDetailContent?.classList.add('hidden');
-    groupsSettingsBtn?.classList.add('hidden');
     groupsAdminOverlay?.classList.add('hidden');
     document.querySelector('#groups-inspector-management')?.classList.add('hidden');
     document.querySelectorAll('.groups-item.active').forEach(item => {
