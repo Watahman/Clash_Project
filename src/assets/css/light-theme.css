@@ -671,3 +671,34 @@
 :root[data-theme="light"] body.workspace-app[data-workspace-page="planner"] .cwl-board {
     background: #ffffff !important;
 }
+
+/* Destructieve groepsacties blijven rood in light mode */
+:root[data-theme="light"]
+body.workspace-app[data-workspace-page="groups"]
+#groups-inspector-leave {
+    color: var(--danger) !important;
+    background: transparent !important;
+}
+
+:root[data-theme="light"]
+body.workspace-app[data-workspace-page="groups"]
+#groups-inspector-leave:hover {
+    background: var(--danger-soft) !important;
+    color: var(--danger) !important;
+}
+
+/* Rode leave-knop bovenaan de geselecteerde groep */
+:root[data-theme="light"]
+body.workspace-app[data-workspace-page="groups"]
+#groups-leave-btn {
+    border-color: color-mix(in srgb, var(--danger) 35%, transparent) !important;
+    background: var(--danger-soft) !important;
+    color: var(--danger) !important;
+}
+
+:root[data-theme="light"]
+body.workspace-app[data-workspace-page="groups"]
+#groups-leave-btn:hover {
+    border-color: var(--danger) !important;
+    background: color-mix(in srgb, var(--danger) 17%, white) !important;
+}
