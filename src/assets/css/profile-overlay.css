@@ -165,7 +165,7 @@
 
 
 /* Iteration: profile cards as compact clickable articles */
-.po-panel-content{gap:.62rem!important}.po-base-item{display:grid!important;grid-template-columns:3rem minmax(0,1fr) auto!important;min-height:4.65rem!important;padding:.7rem .78rem!important;border-radius:var(--radius-md)!important;background:linear-gradient(180deg,rgba(23,31,47,.96),rgba(12,17,26,.96))!important;border:1px solid var(--border-subtle)!important}.po-base-item:hover{border-color:rgba(246,183,60,.3)!important;transform:translateY(-1px)}.po-base-icon,.po-friend-avatar{width:3rem!important;height:3rem!important;border-radius:var(--radius-sm)!important;display:grid!important;place-items:center!important}.po-base-icon img,.po-base-img{width:2.55rem!important;height:2.55rem!important;object-fit:contain!important;border-radius:0!important}.po-shield-icon svg,.po-base-icon svg,.po-friend-avatar svg{color:var(--accent);width:1.65rem;height:1.65rem}.po-base-name{font-size:1.02rem!important;line-height:1!important}.po-base-info{font-family:var(--font-mono);font-size:.72rem!important;color:var(--text-3)!important}.po-base-chevron{width:1rem!important;height:1rem!important;opacity:.68}.po-card-base::after,.po-card-friend::after,.po-card-clan::after{content:'›';color:var(--text-3);font-size:1.25rem;line-height:1;margin-left:.25rem}.po-card-base .po-base-chevron,.po-card-friend .po-base-chevron{display:none}.po-friend-actions{grid-column:3}.po-friend-list-content .po-base-item{grid-template-columns:3rem minmax(0,1fr) auto!important}
+.po-panel-content{gap:.62rem!important}.po-base-item{display:grid!important;grid-template-columns:3rem minmax(0,1fr) auto!important;min-height:4.65rem!important;padding:.7rem .78rem!important;border-radius:var(--radius-md)!important;background:linear-gradient(180deg,rgba(23,31,47,.96),rgba(12,17,26,.96))!important;border:1px solid var(--border-subtle)!important}.po-base-item:hover{border-color:rgba(246,183,60,.3)!important;transform:translateY(-1px)}.po-base-icon,.po-friend-avatar{width:3rem!important;height:3rem!important;border-radius:var(--radius-sm)!important;display:grid!important;place-items:center!important}.po-base-icon img,.po-base-img{width:2.55rem!important;height:2.55rem!important;object-fit:contain!important;border-radius:0!important}.po-shield-icon svg,.po-base-icon svg,.po-friend-avatar svg{color:var(--accent);width:1.65rem;height:1.65rem}.po-base-name{font-size:1.02rem!important;line-height:1!important}.po-base-info{font-family:var(--font-mono);font-size:.72rem!important;color:var(--text-3)!important}.po-base-chevron{width:1rem!important;height:1rem!important;opacity:.68}.po-card-base::after,.po-card-friend::after,.po-card-clan::after{content:'';color:var(--text-3);font-size:1.25rem;line-height:1;margin-left:.25rem}.po-card-base .po-base-chevron,.po-card-friend .po-base-chevron{display:none}.po-friend-actions{grid-column:3}.po-friend-list-content .po-base-item{grid-template-columns:3rem minmax(0,1fr) auto!important}
 
 
 /* Final approved pass: profile dynamic cards */
@@ -210,13 +210,7 @@
     text-align: center;
 }
 .po-base-chevron { display: none !important; }
-.po-card-base::after, .po-card-friend::after, .po-card-clan::after {
-    content: '›';
-    color: var(--text-3);
-    font-size: 1.45rem;
-    line-height: 1;
-    justify-self: end;
-}
+
 .po-friend-list-content .po-base-item { grid-template-columns: 3rem minmax(0, 1fr) auto !important; }
 .po-friend-actions { justify-self: end; margin-left: 0 !important; }
 
@@ -268,6 +262,14 @@
     background: var(--surface-2) !important;
     box-shadow: var(--inner-line), var(--shadow-sm);
 }
+
+.po-card-base::after,
+.po-card-friend::after,
+.po-card-clan::after {
+    content: none !important;
+    display: none !important;
+}
+
 .po-base-item:hover {
     border-color: var(--border-mid) !important;
     background: var(--surface-3) !important;
