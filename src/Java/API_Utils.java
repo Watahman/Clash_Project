@@ -218,6 +218,35 @@ public class API_Utils {
         sendJsonResponse(exchange, response, 200);
     }
 
+    /**
+     * Returns fresh Clash data for checks where stale-while-revalidate would hide
+     * a recent change. Fresh cache entries are reused, but stale entries are
+     * refreshed synchronously before the value is returned.
+     */
+    public String clashGetFreshValue(String path, long ttlMs) throws Exception {
+        if (!conf.isCacheEnabled() || ttlMs <= 0 || "none".equalsIgnoreCase(conf.getCacheMode())) {
+            return getClashApiResponse(conf.getClashBaseUrl() + path);
+        }
+
+        String key = CacheKeys.clashGet(path);
+        CacheEntry cached = L1_CACHE.get(key);
+        if (cached == null && "layered".equalsIgnoreCase(conf.getCacheMode())) {
+            cached = L2_CACHE.get(key);
+            if (cached != null) L1_CACHE.put(key, cached);
+        }
+
+        if (cached != null && cached.isFresh()) return cachedValueOrThrow(cached);
+
+        try {
+            return cachedValueOrThrow(refreshSingleFlight(key, path, ttlMs).join());
+        } catch (CompletionException wrapped) {
+            Throwable cause = wrapped.getCause();
+            if (cause instanceof HttpException httpException) throw httpException;
+            if (cause instanceof Exception exception) throw exception;
+            throw wrapped;
+        }
+    }
+
     public String clashGetCachedValue(String path, long ttlMs) throws Exception {
         if (!conf.isCacheEnabled() || ttlMs <= 0 || "none".equalsIgnoreCase(conf.getCacheMode())) {
             return getClashApiResponse(conf.getClashBaseUrl() + path);

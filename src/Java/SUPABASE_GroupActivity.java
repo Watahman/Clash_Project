@@ -91,7 +91,7 @@ public final class SUPABASE_GroupActivity {
     private JsonArray readGroupMemberships(String groupId) throws Exception {
         return JsonParser.parseString(SUPABASE_Client.getWithBody(
                 "group_members",
-                "select=user_id&group_id=" + SUPABASE_Client.eq(groupId) + "&order=created_at.asc"
+                "select=user_id&group_id=" + SUPABASE_Client.eq(groupId) + "&order=joined_at.asc"
         )).getAsJsonArray();
     }
 
@@ -150,7 +150,7 @@ public final class SUPABASE_GroupActivity {
         if (accountId.isBlank() || playerTag.isBlank()) return row;
 
         String encodedTag = URLEncoder.encode(playerTag, StandardCharsets.UTF_8);
-        JsonObject player = JsonParser.parseString(utils.clashGetCachedValue(
+        JsonObject player = JsonParser.parseString(utils.clashGetFreshValue(
                 "/players/" + encodedTag,
                 CachePolicy.PLAYER_INFO
         )).getAsJsonObject();
