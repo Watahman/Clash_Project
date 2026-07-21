@@ -1,0 +1,179 @@
+body.workspace-app {
+    --workspace-page-title-size: clamp(2.35rem, 4vw, 3.25rem);
+    --workspace-page-kicker-size: 0.7rem;
+    --workspace-page-kicker-gap: 0.5rem;
+    --workspace-page-description-gap: 0.7rem;
+    --workspace-page-header-gap: 1.8rem;
+    --groups-column-gutter: clamp(0.9rem, 1.25vw, 1.2rem);
+    --groups-detail-gutter: clamp(1rem, 1.6vw, 1.35rem);
+}
+
+/* ------------------------------------------------------------
+   Page heading rhythm
+   ------------------------------------------------------------ */
+body.workspace-app .workspace-content :is(
+    .workspace-page-header,
+    .workspace-page-header-row,
+    .cwl-page-header,
+    .op-page-header,
+    .groups-page-header,
+    .bracket-page-header
+) {
+    margin-bottom: var(--workspace-page-header-gap);
+}
+
+body.workspace-app .workspace-content :is(
+    .page-kicker,
+    .hero-eyebrow,
+    .cwl-page-kicker,
+    .op-page-kicker,
+    .groups-page-kicker,
+    .bracket-page-kicker
+) {
+    margin: 0 0 var(--workspace-page-kicker-gap) !important;
+    color: color-mix(in srgb, var(--accent-strong) 78%, var(--accent) 22%) !important;
+    font-family: Inter, "Segoe UI", system-ui, sans-serif !important;
+    font-size: var(--workspace-page-kicker-size) !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.11em !important;
+    text-transform: uppercase !important;
+}
+
+body.workspace-app .workspace-content :is(
+    .workspace-page-header,
+    .workspace-page-header-row,
+    .cwl-page-header,
+    .op-page-header,
+    .groups-page-header,
+    .bracket-page-header
+) h1 {
+    margin: 0 !important;
+    color: var(--text) !important;
+    font-family: Inter, "Segoe UI", system-ui, sans-serif !important;
+    font-size: var(--workspace-page-title-size) !important;
+    font-weight: 800 !important;
+    line-height: 1.05 !important;
+    letter-spacing: -0.04em !important;
+    text-transform: none !important;
+    text-wrap: balance;
+}
+
+body.workspace-app .workspace-content .workspace-page-header > p:last-child,
+body.workspace-app .workspace-content .workspace-page-header-row > div:first-child > p:last-child,
+body.workspace-app .workspace-content :is(
+    .cwl-page-header,
+    .op-page-header,
+    .groups-page-header,
+    .bracket-page-header
+) > div:first-child > p:last-child,
+body.workspace-app .workspace-content .bracket-page-header > p:last-child {
+    max-width: 46rem;
+    margin: var(--workspace-page-description-gap) 0 0 !important;
+    color: var(--text-muted) !important;
+    font-family: Inter, "Segoe UI", system-ui, sans-serif !important;
+    font-size: 0.9rem !important;
+    line-height: 1.6 !important;
+    text-wrap: pretty;
+}
+
+/* ------------------------------------------------------------
+   Groups: deliberate edge spacing, quiet controls and full-width bars
+   ------------------------------------------------------------ */
+body.workspace-app[data-workspace-page="groups"] .group-index {
+    padding-inline: var(--groups-column-gutter);
+}
+
+body.workspace-app[data-workspace-page="groups"] .group-detail {
+    padding-inline: var(--groups-detail-gutter);
+}
+
+body.workspace-app[data-workspace-page="groups"] .group-inspector {
+    padding: 1.35rem var(--groups-column-gutter) 0 clamp(1rem, 1.35vw, 1.25rem);
+}
+
+body.workspace-app[data-workspace-page="groups"] .workspace-content .button-secondary {
+    border-color: var(--border-strong) !important;
+    background: var(--surface-raised) !important;
+    color: var(--text-muted) !important;
+    box-shadow: none !important;
+}
+
+body.workspace-app[data-workspace-page="groups"] .workspace-content .button-secondary:hover {
+    background: var(--surface-hover) !important;
+    color: var(--text) !important;
+}
+
+/* The selected-group header and tabs are structural bars. They should reach
+   the column edges while their text keeps the same inner gutter. */
+body.workspace-app[data-workspace-page="groups"] .group-detail-header,
+body.workspace-app[data-workspace-page="groups"] .groups-detail-tabs {
+    margin-inline: calc(0rem - var(--groups-detail-gutter));
+    padding-inline: var(--groups-detail-gutter);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-detail-tabs {
+    background: var(--surface-subtle);
+}
+
+/* The global light-theme button rule must not turn navigation tabs into white
+   cards. Their active underline already communicates selection. */
+body.workspace-app[data-workspace-page="groups"] .groups-detail-tabs button,
+body.workspace-app[data-workspace-page="groups"] .groups-inspector-link {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-detail-tabs button:hover {
+    color: var(--text) !important;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-overlay-tabs {
+    background: var(--surface-subtle);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-overlay-tab,
+body.workspace-app[data-workspace-page="groups"] .groups-create-option,
+body.workspace-app[data-workspace-page="groups"] .groups-admin-member-actions button {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-overlay-tab:hover,
+body.workspace-app[data-workspace-page="groups"] .groups-create-option:hover,
+body.workspace-app[data-workspace-page="groups"] .groups-admin-member-actions button:hover {
+    background: var(--surface-hover) !important;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-overlay-tab-active,
+body.workspace-app[data-workspace-page="groups"] .groups-create-option-active {
+    background: var(--surface-raised) !important;
+}
+
+/* Selected cards need breathing room after the column receives a gutter. */
+body.workspace-app[data-workspace-page="groups"] .groups-item.group-index-row {
+    border-radius: var(--radius-small);
+}
+
+@media (max-width: 58rem) {
+    body.workspace-app[data-workspace-page="groups"] .group-index {
+        padding: 0 0 1rem;
+    }
+
+    body.workspace-app[data-workspace-page="groups"] .group-detail {
+        padding-inline: 0;
+    }
+
+    body.workspace-app[data-workspace-page="groups"] .group-detail-header,
+    body.workspace-app[data-workspace-page="groups"] .groups-detail-tabs {
+        margin-inline: 0;
+        padding-inline: 0;
+    }
+}
+
+@media (max-width: 46rem) {
+    body.workspace-app {
+        --workspace-page-title-size: clamp(2rem, 10vw, 2.55rem);
+        --workspace-page-header-gap: 1.5rem;
+    }
+}

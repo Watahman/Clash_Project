@@ -1,0 +1,673 @@
+:root[data-theme="light"] {
+    color-scheme: light;
+
+    /* Workspace design tokens */
+    --bg: #f1f4f6;
+    --surface: #ffffff;
+    --surface-subtle: #f7f9fb;
+    --surface-raised: #edf1f4;
+    --surface-hover: #e8edf1;
+    --text: #19232e;
+    --text-muted: #5f6d7a;
+    --text-subtle: #7f8b97;
+    --border: rgba(25, 35, 46, 0.11);
+    --border-strong: rgba(25, 35, 46, 0.19);
+    --accent: #e1ad45;
+    --accent-strong: #85580f;
+    --accent-soft: rgba(225, 173, 69, 0.18);
+    --success: #247a50;
+    --success-soft: rgba(36, 122, 80, 0.11);
+    --warning: #8b5b19;
+    --warning-soft: rgba(139, 91, 25, 0.11);
+    --danger: #a53e3e;
+    --danger-soft: rgba(165, 62, 62, 0.10);
+    --sidebar-bg: #f8fafb;
+    --shadow-raised: 0 0.75rem 2rem rgba(35, 48, 61, 0.10);
+
+    /* Legacy / page-specific design tokens */
+    --bg-2: #e9edf1;
+    --surface-1: #ffffff;
+    --surface-2: #f7f9fb;
+    --surface-3: #edf1f4;
+    --surface-4: #e4e9ed;
+    --surface-glass: rgba(255, 255, 255, 0.86);
+    --surface-card: #ffffff;
+    --surface-elevated: #f8fafb;
+    --surface-dark-soft: #17212c;
+    --border-subtle: rgba(25, 35, 46, 0.09);
+    --border-mid: rgba(25, 35, 46, 0.15);
+    --border-visible: rgba(25, 35, 46, 0.19);
+    --border-focus: rgba(183, 123, 32, 0.62);
+    --accent-2: #efc365;
+    --accent-dark: #70480c;
+    --accent-dim: rgba(225, 173, 69, 0.18);
+    --accent-glow: rgba(225, 173, 69, 0.20);
+    --purple: #6544bd;
+    --purple-dim: rgba(101, 68, 189, 0.11);
+    --purple-glow: rgba(101, 68, 189, 0.15);
+    --green: #247a50;
+    --green-dim: rgba(36, 122, 80, 0.11);
+    --red: #a53e3e;
+    --red-dim: rgba(165, 62, 62, 0.10);
+    --blue: #276f9f;
+    --blue-dim: rgba(39, 111, 159, 0.10);
+    --text-1: #19232e;
+    --text-2: #465563;
+    --text-3: #6b7885;
+    --text-4: #929ca6;
+    --text-on-dark: #f5f7fa;
+    --text-muted-on-dark: #b9c2cc;
+    --input-bg: #ffffff;
+    --input-focus-bg: #ffffff;
+    --button-bg: #ffffff;
+    --button-hover-bg: #eef2f6;
+    --disabled-bg: #e8edf1;
+    --shadow-sm: 0 0.4rem 1.2rem rgba(35, 48, 61, 0.08);
+    --shadow-md: 0 0.9rem 2.3rem rgba(35, 48, 61, 0.11);
+    --shadow-lg: 0 1.4rem 3.5rem rgba(35, 48, 61, 0.16);
+    --card-shadow: 0 0.65rem 1.6rem rgba(35, 48, 61, 0.09);
+    --inner-line: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+/* ---------- Global canvas and shared controls ---------- */
+:root[data-theme="light"] body,
+:root[data-theme="light"] body.workspace-app,
+:root[data-theme="light"] body.public-site,
+:root[data-theme="light"] body.auth-page {
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+:root[data-theme="light"] body.workspace-app {
+    background-image: none !important;
+}
+
+:root[data-theme="light"] body:not(.workspace-app) {
+    background-image:
+            radial-gradient(circle at 82% 4%, rgba(183, 123, 32, 0.08), transparent 25rem),
+            linear-gradient(180deg, #f3f5f7 0%, var(--bg) 100%);
+}
+
+:root[data-theme="light"] body::before {
+    background-image:
+            linear-gradient(rgba(25, 35, 46, 0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(25, 35, 46, 0.025) 1px, transparent 1px);
+}
+
+:root[data-theme="light"] body::after {
+    background: none;
+}
+
+:root[data-theme="light"] input,
+:root[data-theme="light"] select,
+:root[data-theme="light"] textarea {
+    color: var(--text);
+    background-color: var(--surface);
+    border-color: var(--border-strong);
+}
+
+:root[data-theme="light"] input::placeholder,
+:root[data-theme="light"] textarea::placeholder {
+    color: var(--text-subtle);
+    opacity: 1;
+}
+
+:root[data-theme="light"] .button-secondary,
+:root[data-theme="light"] .button:not(.button-primary),
+:root[data-theme="light"] .theme-button,
+:root[data-theme="light"] .workspace-icon-button,
+:root[data-theme="light"] .groups-icon-button {
+    background: var(--surface);
+    border-color: var(--border-strong) !important;
+    color: var(--text-muted);
+}
+
+:root[data-theme="light"] .button-secondary:hover,
+:root[data-theme="light"] .button:not(.button-primary):hover,
+:root[data-theme="light"] .theme-button:hover,
+:root[data-theme="light"] .workspace-icon-button:hover,
+:root[data-theme="light"] .groups-icon-button:hover {
+    background: var(--surface-hover);
+    color: var(--text);
+}
+
+:root[data-theme="light"] .button-primary,
+:root[data-theme="light"] .workspace-gateway-links a:first-child {
+    border-color: var(--accent) !important;
+    background: var(--accent);
+    color: #18130a !important;
+}
+
+:root[data-theme="light"] .button-primary:hover,
+:root[data-theme="light"] .workspace-gateway-links a:first-child:hover {
+    background: var(--accent-2);
+    border-color: var(--accent-2) !important;
+}
+
+/* ---------- Public and authentication pages ---------- */
+:root[data-theme="light"] .public-header,
+:root[data-theme="light"] .auth-header {
+    background: rgba(255, 255, 255, 0.88);
+    border-color: var(--border);
+    box-shadow: 0 0.5rem 1.5rem rgba(35, 48, 61, 0.06);
+}
+
+:root[data-theme="light"] .auth-context {
+    border-color: var(--border);
+    background: #f4f6f8;
+}
+
+:root[data-theme="light"] .auth-form,
+:root[data-theme="light"] .product-window,
+:root[data-theme="light"] .preview-shell {
+    background: var(--surface);
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-raised);
+}
+
+:root[data-theme="light"] .auth-divider span {
+    background: var(--surface);
+}
+
+/* ---------- App shell ---------- */
+:root[data-theme="light"] .workspace-sidebar {
+    border-right-color: rgba(255, 255, 255, 0.08);
+    background: var(--sidebar-bg);
+    box-shadow: 0.5rem 0 1.5rem rgba(13, 20, 28, 0.05);
+}
+
+:root[data-theme="light"] .workspace-topbar {
+    border-bottom-color: var(--border);
+    background: rgba(255, 255, 255, 0.90);
+    box-shadow: 0 0.35rem 1.25rem rgba(35, 48, 61, 0.06);
+}
+
+:root[data-theme="light"] .workspace-area,
+:root[data-theme="light"] .workspace-content,
+:root[data-theme="light"] .workspace-dashboard,
+:root[data-theme="light"] .drafts-main,
+:root[data-theme="light"] .bracket-workspace-page,
+:root[data-theme="light"] main#groups-main,
+:root[data-theme="light"] .workspace-planner,
+:root[data-theme="light"] .operation-workspace {
+    background: var(--bg) !important;
+}
+
+:root[data-theme="light"] .workspace-section-block,
+:root[data-theme="light"] .workspace-gateway,
+:root[data-theme="light"] .workspace-summary-panel,
+:root[data-theme="light"] .workspace-table-panel {
+    border-color: var(--border-strong);
+    background: var(--surface);
+    box-shadow: var(--card-shadow);
+}
+
+:root[data-theme="light"] .workspace-section-heading,
+:root[data-theme="light"] .workspace-data-table th,
+:root[data-theme="light"] .workspace-inline-status {
+    background: var(--surface-subtle);
+}
+
+:root[data-theme="light"] .workspace-data-table tbody tr:hover:not(.workspace-empty-row),
+:root[data-theme="light"] .workspace-summary-row:hover,
+:root[data-theme="light"] .workspace-account-line:hover {
+    background: var(--surface-hover);
+}
+
+:root[data-theme="light"] .workspace-account-line {
+    background: var(--surface-subtle);
+}
+
+:root[data-theme="light"] .workspace-launch-list > a:hover {
+    background: linear-gradient(90deg, var(--accent-soft), transparent 72%);
+}
+
+/* ---------- Language and notifications popovers ---------- */
+:root[data-theme="light"] .language-switcher-button {
+    border-color: var(--border-strong) !important;
+    background: var(--surface);
+}
+
+:root[data-theme="light"] .language-switcher-button:hover,
+:root[data-theme="light"] .language-switcher.is-open .language-switcher-button {
+    background: var(--surface-hover);
+}
+
+:root[data-theme="light"] .language-switcher-menu,
+:root[data-theme="light"] .workspace-notifications-panel {
+    border-color: var(--border-strong);
+    background: var(--surface);
+    box-shadow: 0 1rem 2.5rem rgba(35, 48, 61, 0.16);
+}
+
+:root[data-theme="light"] .language-switcher-code,
+:root[data-theme="light"] .workspace-notifications-heading {
+    background: var(--surface-subtle);
+}
+
+:root[data-theme="light"] .language-switcher-option:hover,
+:root[data-theme="light"] .language-switcher-option:focus-visible,
+:root[data-theme="light"] .workspace-notification-item:hover {
+    background: var(--surface-hover);
+}
+
+:root[data-theme="light"] .workspace-notifications-count {
+    border-color: #ffffff;
+}
+
+/* ---------- CWL planner and operation board ---------- */
+:root[data-theme="light"] .workspace-planner > .cwl-context-toolbar,
+:root[data-theme="light"] .op-context-toolbar {
+    border-color: var(--border-strong);
+    background: var(--surface-subtle);
+}
+
+:root[data-theme="light"] .cwl-planner-layout {
+    border-color: var(--border-strong);
+    background: var(--surface);
+    box-shadow: var(--card-shadow);
+}
+
+:root[data-theme="light"] .workspace-planner .cwl-sidebar,
+:root[data-theme="light"] .workspace-planner .cwl-board {
+    background: var(--surface) !important;
+}
+
+:root[data-theme="light"] .workspace-planner .cwl-sidebar {
+    border-right-color: var(--border-strong);
+}
+
+:root[data-theme="light"] .cwl-panel-heading,
+:root[data-theme="light"] .cwl-board-heading,
+:root[data-theme="light"] .operation-panel-head,
+:root[data-theme="light"] .op-metrics-bar {
+    background: var(--surface-subtle);
+    border-color: var(--border);
+}
+
+:root[data-theme="light"] .workspace-planner .cwl-player-article,
+:root[data-theme="light"] .workspace-planner .cwl-clan-article,
+:root[data-theme="light"] .operation-panel,
+:root[data-theme="light"] .op-score-card,
+:root[data-theme="light"] .op-round-card,
+:root[data-theme="light"] .op-standing-row,
+:root[data-theme="light"] .op-bonus-list li {
+    border-color: var(--border-strong);
+    background: var(--surface);
+    box-shadow: 0 0.35rem 1rem rgba(35, 48, 61, 0.06);
+}
+
+:root[data-theme="light"] .workspace-planner .cwl-player-article:hover,
+:root[data-theme="light"] .workspace-planner .cwl-clan-article:hover {
+    background: var(--surface-hover);
+}
+
+:root[data-theme="light"] .workspace-planner .cwl-player-townhall-foto,
+:root[data-theme="light"] .workspace-planner .cwl-clan-logo {
+    background: var(--surface-subtle);
+    border-color: var(--border);
+}
+
+:root[data-theme="light"] .op-table thead,
+:root[data-theme="light"] .op-table th {
+    background: var(--surface-subtle);
+}
+
+/* ---------- Groups ---------- */
+:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] main#groups-main {
+    background: var(--bg) !important;
+}
+
+:root[data-theme="light"] .groups-workspace {
+    border: 0.0625rem solid var(--border-strong);
+    background: var(--surface);
+    box-shadow: var(--card-shadow);
+}
+
+:root[data-theme="light"] .group-index,
+:root[data-theme="light"] .group-detail,
+:root[data-theme="light"] .group-inspector,
+:root[data-theme="light"] #groups-detail {
+    background: var(--surface) !important;
+}
+
+:root[data-theme="light"] .group-index {
+    border-right-color: var(--border-strong);
+}
+
+:root[data-theme="light"] .group-inspector {
+    border-left-color: var(--border-strong);
+}
+
+:root[data-theme="light"] .group-index-heading,
+:root[data-theme="light"] .group-detail-header,
+:root[data-theme="light"] .groups-section-heading,
+:root[data-theme="light"] .groups-detail-tabs,
+:root[data-theme="light"] .group-inspector > header {
+    background: var(--surface-subtle);
+    border-color: var(--border);
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] .groups-item.group-index-row:hover {
+    background: var(--surface-hover);
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] .groups-item.group-index-row.active {
+    background: linear-gradient(90deg, var(--accent-soft), rgba(183, 123, 32, 0.025));
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] .groups-role-badge,
+:root[data-theme="light"] #groups-sidebar .groups-role-badge {
+    color: var(--text-muted) !important;
+    background: var(--surface-raised) !important;
+    border-color: var(--border-strong) !important;
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] .groups-role-badge.leader,
+:root[data-theme="light"] #groups-sidebar .groups-role-badge.leader {
+    color: var(--accent-strong) !important;
+    background: var(--accent-soft) !important;
+    border-color: rgba(183, 123, 32, 0.30) !important;
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] .groups-role-badge.co-leader,
+:root[data-theme="light"] #groups-sidebar .groups-role-badge.co-leader {
+    color: var(--success) !important;
+    background: var(--success-soft) !important;
+    border-color: rgba(36, 122, 80, 0.28) !important;
+}
+
+:root[data-theme="light"] .groups-member-item,
+:root[data-theme="light"] .groups-admin-card,
+:root[data-theme="light"] .groups-linked-clan,
+:root[data-theme="light"] .groups-unlinked-account,
+:root[data-theme="light"] .groups-admin-member,
+:root[data-theme="light"] .groups-poll-account-card,
+:root[data-theme="light"] .groups-poll-result-user,
+:root[data-theme="light"] .groups-poll-summary,
+:root[data-theme="light"] .groups-poll-day-summary,
+:root[data-theme="light"] .groups-admin-panel {
+    border-color: var(--border-strong);
+    background: var(--surface);
+    box-shadow: 0 0.35rem 1rem rgba(35, 48, 61, 0.06);
+}
+
+:root[data-theme="light"] .groups-create-option.groups-create-option-active,
+:root[data-theme="light"] .groups-code-pill {
+    color: var(--purple) !important;
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] .groups-item-logo,
+:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] .groups-detail-logo {
+    color: #287c74;
+}
+
+/* ---------- Bracket and drafts ---------- */
+:root[data-theme="light"] body.workspace-app[data-workspace-page="bracket"] .bracket-setup,
+:root[data-theme="light"] .bracket-result,
+:root[data-theme="light"] .drafts-shell .workspace-section-block {
+    border-color: var(--border-strong);
+    background: var(--surface);
+    box-shadow: var(--card-shadow);
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="bracket"] .bracket-match {
+    border-color: var(--border-strong);
+    background: var(--surface-subtle);
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="bracket"] .bracket-match button:not(:disabled):hover {
+    background: var(--surface-hover);
+}
+
+:root[data-theme="light"] .draft-rename-form input {
+    background: var(--surface);
+}
+
+/* ---------- Profile popup ---------- */
+:root[data-theme="light"] #profile-overlay {
+    background: rgba(25, 35, 46, 0.38);
+}
+
+:root[data-theme="light"] #profile-overlay .po-card {
+    border-color: var(--border-strong);
+    background: var(--surface);
+    box-shadow: 0 1.5rem 4rem rgba(25, 35, 46, 0.22);
+}
+
+:root[data-theme="light"] #profile-overlay .po-topbar,
+:root[data-theme="light"] #profile-overlay .po-tabs,
+:root[data-theme="light"] #profile-overlay .po-footer {
+    border-color: var(--border);
+    background: var(--surface-subtle);
+}
+
+:root[data-theme="light"] #profile-overlay .po-settings-card,
+:root[data-theme="light"] #profile-overlay .po-base-item,
+:root[data-theme="light"] #profile-overlay .po-card-clan,
+:root[data-theme="light"] #profile-overlay .po-friend-item,
+:root[data-theme="light"] #profile-overlay .po-group-item {
+    border-color: var(--border-strong) !important;
+    background: var(--surface) !important;
+    box-shadow: 0 0.35rem 1rem rgba(35, 48, 61, 0.06);
+}
+
+:root[data-theme="light"] #profile-overlay .po-theme-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+:root[data-theme="light"] #profile-overlay .po-theme-option {
+    min-height: 2.55rem;
+    border-color: var(--border-strong);
+    background: var(--surface-subtle);
+    color: var(--text-muted);
+}
+
+:root[data-theme="light"] #profile-overlay .po-theme-option:hover {
+    background: var(--surface-hover);
+    color: var(--text);
+}
+
+:root[data-theme="light"] #profile-overlay .po-theme-option.po-theme-active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+}
+
+:root[data-theme="light"] #profile-overlay .po-settings-message:not(.hidden):not([data-state="error"]),
+:root[data-theme="light"] #profile-overlay .po-settings-message[data-state="success"] {
+    border: 0.0625rem solid rgba(36, 122, 80, 0.24);
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+:root[data-theme="light"] #profile-overlay .po-settings-message[data-state="error"] {
+    border: 0.0625rem solid rgba(165, 62, 62, 0.24);
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+@media (max-width: 46rem) {
+    :root[data-theme="light"] .groups-workspace,
+    :root[data-theme="light"] .cwl-planner-layout,
+    :root[data-theme="light"] body.workspace-app[data-workspace-page="bracket"] .bracket-setup,
+    :root[data-theme="light"] .bracket-result {
+        box-shadow: none;
+    }
+}
+
+
+/* ---------- Light mode polish: page headers, sidebar and control contrast ---------- */
+
+/* Main-css.css styles every <header> as a sticky navigation bar. These are
+   page headings, so they must stay visually part of the page canvas. */
+:root[data-theme="light"] body.workspace-app .cwl-page-header,
+:root[data-theme="light"] body.workspace-app .op-page-header,
+:root[data-theme="light"] body.workspace-app .groups-page-header,
+:root[data-theme="light"] body.workspace-app .bracket-page-header,
+:root[data-theme="light"] body.workspace-app .workspace-page-header,
+:root[data-theme="light"] body.workspace-app .workspace-page-header-row {
+    position: static !important;
+    inset: auto !important;
+    z-index: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* A light sidebar with explicit text colors. The original sidebar uses
+   hard-coded dark-theme colors, so changing only --sidebar-bg is not enough. */
+:root[data-theme="light"] body.workspace-app .workspace-sidebar {
+    border-right-color: #d8e0e6 !important;
+    background: var(--sidebar-bg) !important;
+    box-shadow: 0.45rem 0 1.4rem rgba(40, 53, 66, 0.06);
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-brand {
+    border-bottom-color: #dfe5ea;
+    background: #ffffff;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-brand strong {
+    color: #18232e;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-brand small {
+    color: #667583;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-nav p {
+    color: #778592;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-nav a {
+    color: #53616e;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-nav a svg {
+    color: #71808d;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-nav a:hover {
+    background: #ebf0f3;
+    color: #17222d;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-nav a:hover svg {
+    color: #43515e;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-nav a[aria-current="page"] {
+    background: #fff3d8;
+    color: #754b0b;
+    box-shadow: inset 0.18rem 0 0 var(--accent);
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-nav a[aria-current="page"] svg {
+    color: #986716;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-sidebar-bottom {
+    border-top-color: #dfe5ea;
+    background: #ffffff;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-profile-button {
+    background: transparent !important;
+    color: var(--text-muted) !important;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-profile-button:hover {
+    background: #edf1f4 !important;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-profile-copy strong {
+    color: #1c2732;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-profile-copy small,
+:root[data-theme="light"] body.workspace-app .workspace-profile-arrow {
+    color: #6e7c89;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-avatar {
+    background: #fff1d2;
+    color: #81530d;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-sidebar-toggle {
+    border-color: #cfd8df !important;
+    background: #ffffff !important;
+    color: #5c6b78 !important;
+    box-shadow: 0 0.35rem 1rem rgba(40, 53, 66, 0.16) !important;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-sidebar-toggle:hover {
+    border-color: rgba(190, 133, 31, 0.55) !important;
+    background: #fff8e9 !important;
+    color: #85580f !important;
+}
+
+/* Keep the top bar clean and flatter than a content card. */
+:root[data-theme="light"] body.workspace-app .workspace-topbar {
+    border-bottom-color: #dce3e8;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: none;
+}
+
+/* The previous light select arrow repeated as a tiled pattern. */
+:root[data-theme="light"] select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: var(--surface) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 5L10 1' stroke='%23705a32' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.8rem center !important;
+    background-size: 0.7rem 0.45rem !important;
+    padding-right: 2.2rem !important;
+}
+
+/* Softer gold primary actions: still prominent, but not the dark ochre block
+   that overpowered the light interface. */
+:root[data-theme="light"] .button-primary,
+:root[data-theme="light"] .workspace-planner .button-primary,
+:root[data-theme="light"] .workspace-gateway-links a:first-child,
+:root[data-theme="light"] .groups-page-add-button,
+:root[data-theme="light"] .btn-groups-accent {
+    border-color: #d3a03a !important;
+    background: #e7b957 !important;
+    color: #3a290c !important;
+    box-shadow: none !important;
+}
+
+:root[data-theme="light"] .button-primary:hover,
+:root[data-theme="light"] .workspace-planner .button-primary:hover,
+:root[data-theme="light"] .workspace-gateway-links a:first-child:hover,
+:root[data-theme="light"] .groups-page-add-button:hover,
+:root[data-theme="light"] .btn-groups-accent:hover {
+    border-color: #c8922d !important;
+    background: #dda944 !important;
+    color: #2f2109 !important;
+}
+
+/* Planner panels retain the same hierarchy as dark mode: one canvas, one
+   toolbar surface and two equal content columns. */
+:root[data-theme="light"] body.workspace-app[data-workspace-page="planner"] .workspace-planner {
+    background: var(--bg) !important;
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="planner"] .cwl-context-toolbar,
+:root[data-theme="light"] body.workspace-app[data-workspace-page="planner"] .cwl-panel-heading,
+:root[data-theme="light"] body.workspace-app[data-workspace-page="planner"] .cwl-board-heading {
+    background: #f7f9fa !important;
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="planner"] .cwl-sidebar,
+:root[data-theme="light"] body.workspace-app[data-workspace-page="planner"] .cwl-board {
+    background: #ffffff !important;
+}
