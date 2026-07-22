@@ -1001,6 +1001,10 @@ function renderBonusAdvice(roster) {
         return;
     }
     ranked.forEach(player => {
+        const difficulty = player.attackDifficulty?.multiplier;
+        const difficultyLabel = difficulty == null
+            ? '—'
+            : t(difficulty >= 1.12 ? 'op.difficultyHigh' : difficulty <= 0.88 ? 'op.difficultyLow' : 'op.difficultyMedium');
         const li = document.createElement('li');
         li.innerHTML = `
             <div class="op-bonus-content">
@@ -1013,6 +1017,7 @@ function renderBonusAdvice(roster) {
                     <span title="${escapeHtml(t('op.destruction'))}"><strong>${parseNumber(player.destruction, 0).toFixed(1)}%</strong></span>
                     <span title="${escapeHtml(t('op.attacksUsed'))}"><strong>${parseNumber(player.attacksUsed, 0)}/${parseNumber(player.availableAttacks, 0)}</strong><small>${escapeHtml(t('op.attacks'))}</small></span>
                     <span title="${escapeHtml(t('op.missed'))}"><strong>${parseNumber(player.missed, 0)}</strong><small>${escapeHtml(t('op.missed'))}</small></span>
+                    <span class="op-prediction-detail" title="${escapeHtml(t('op.attackDifficulty'))}"><strong>${escapeHtml(difficultyLabel)}</strong><small>${difficulty == null ? '—' : `${parseNumber(difficulty, 1).toFixed(2)}×`}</small></span>
                     <span title="${escapeHtml(t('op.defense'))}"><strong>${player.defense?.stars == null ? '—' : `${parseNumber(player.defense.stars, 0).toFixed(2)}★ · ${parseNumber(player.defense.destruction, 0).toFixed(1)}%`}</strong><small>${escapeHtml(t('op.defenseShort'))}</small></span>
                 </div>
             </div>`;

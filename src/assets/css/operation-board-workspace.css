@@ -548,6 +548,8 @@
     border-top: 1px solid var(--border);
 }
 
+.operation-workspace-page .op-bonus-performance > .op-prediction-detail { display: none; }
+
 .operation-workspace-page .op-round-prediction-label {
     color: var(--accent-strong);
     font-size: 0.64rem;

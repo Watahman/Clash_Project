@@ -165,6 +165,7 @@ function buildWarPerformance(report, insightByTag) {
             performance.set(normalized, {
                 adjustedStars: 0,
                 attacks: 0,
+                difficultyTotal: 0,
                 defenses: 0,
                 concededStars: 0,
                 concededDestruction: 0
@@ -191,6 +192,7 @@ function buildWarPerformance(report, insightByTag) {
                 );
                 player.attacks += 1;
                 player.adjustedStars += number(attack.stars, 0) * comparison.difficultyMultiplier;
+                player.difficultyTotal += comparison.difficultyMultiplier;
             });
         });
 
@@ -213,6 +215,7 @@ function applyPerformanceToRoster(roster, insightByTag, performance) {
         const tag = normalizeTag(player.tag);
         const insight = insightByTag.get(tag) || {};
         const result = performance.get(tag) || {};
+        const attacks = number(result.attacks, 0);
         const defenses = number(result.defenses, 0);
         const defenseStars = defenses ? number(result.concededStars, 0) / defenses : insight?.defense?.stars;
         const defenseDestruction = defenses ? number(result.concededDestruction, 0) / defenses : insight?.defense?.destruction;
@@ -222,7 +225,11 @@ function applyPerformanceToRoster(roster, insightByTag, performance) {
         return {
             ...player,
             insight,
-            difficultyAdjustedStars: number(result.adjustedStars, number(player.stars, 0)),
+            difficultyAdjustedStars: attacks ? number(result.adjustedStars, 0) : number(player.stars, 0),
+            attackDifficulty: {
+                count: attacks,
+                multiplier: attacks ? number(result.difficultyTotal, attacks) / attacks : null
+            },
             defense: {
                 count: defenses || number(insight?.defense?.count, 0),
                 stars: defenseStars,
