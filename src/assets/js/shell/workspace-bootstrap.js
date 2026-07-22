@@ -7,8 +7,7 @@
         'cwl-planner.html',
         'cwl-planner-drafts.html',
         'cwl-operation-board.html',
-        'groups.html',
-        'bracket-generator.html'
+        'groups.html'
     ];
 
     const INITIAL_VISUAL_TIMEOUT_MS = 1800;

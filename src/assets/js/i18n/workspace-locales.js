@@ -1,5 +1,6 @@
 const en = Object.freeze({
     "a11y.skipContent": "Skip to content",
+    "common.comingSoon": "(Coming soon)",
     "a11y.skipForm": "Skip to form",
     "public.navigation": "Public navigation",
     "public.features": "Features",
@@ -90,6 +91,7 @@ const en = Object.freeze({
 const nl = Object.freeze({
     ...en,
     "a11y.skipContent": "Ga naar inhoud",
+    "common.comingSoon": "(Coming soon)",
     "a11y.skipForm": "Ga naar formulier",
     "public.navigation": "Publieke navigatie",
     "public.features": "Functies",
@@ -174,7 +176,7 @@ const nl = Object.freeze({
 
 const fr = Object.freeze({
     ...en,
-    "a11y.skipContent": "Aller au contenu", "a11y.skipForm": "Aller au formulaire",
+    "a11y.skipContent": "Aller au contenu", "common.comingSoon": "(Coming soon)", "a11y.skipForm": "Aller au formulaire",
     "public.navigation": "Navigation publique", "public.features": "Fonctions", "public.startFree": "Commencer gratuitement", "public.openMenu": "Ouvrir le menu",
     "public.createAccount": "Créer un compte gratuit", "public.haveAccount": "J’ai déjà un compte", "public.freeNote": "Utilisation gratuite · aucune donnée de paiement requise",
     "public.samplePlan": "Plan principal de juillet", "public.sampleSummary": "2 clans · 3 joueurs libres", "public.saved": "Enregistré", "public.available": "Disponible", "public.rotation": "Rotation", "public.core": "Noyau", "public.sampleData": "Données d’exemple",
@@ -197,7 +199,7 @@ const fr = Object.freeze({
 
 const de = Object.freeze({
     ...en,
-    "a11y.skipContent": "Zum Inhalt springen", "a11y.skipForm": "Zum Formular springen",
+    "a11y.skipContent": "Zum Inhalt springen", "common.comingSoon": "(Coming soon)", "a11y.skipForm": "Zum Formular springen",
     "public.navigation": "Öffentliche Navigation", "public.features": "Funktionen", "public.startFree": "Kostenlos starten", "public.openMenu": "Menü öffnen",
     "public.createAccount": "Kostenloses Konto erstellen", "public.haveAccount": "Ich habe bereits ein Konto", "public.freeNote": "Kostenlos nutzbar · keine Zahlungsdaten nötig",
     "public.samplePlan": "Hauptplanung Juli", "public.sampleSummary": "2 Clans · 3 freie Spieler", "public.saved": "Gespeichert", "public.available": "Verfügbar", "public.rotation": "Rotation", "public.core": "Kern", "public.sampleData": "Beispieldaten",
@@ -220,7 +222,7 @@ const de = Object.freeze({
 
 const es = Object.freeze({
     ...en,
-    "a11y.skipContent": "Saltar al contenido", "a11y.skipForm": "Saltar al formulario",
+    "a11y.skipContent": "Saltar al contenido", "common.comingSoon": "(Coming soon)", "a11y.skipForm": "Saltar al formulario",
     "public.navigation": "Navegación pública", "public.features": "Funciones", "public.startFree": "Empezar gratis", "public.openMenu": "Abrir menú",
     "public.createAccount": "Crear una cuenta gratis", "public.haveAccount": "Ya tengo una cuenta", "public.freeNote": "Uso gratuito · no se requieren datos de pago",
     "public.samplePlan": "Plan principal de julio", "public.sampleSummary": "2 clanes · 3 jugadores libres", "public.saved": "Guardado", "public.available": "Disponible", "public.rotation": "Rotación", "public.core": "Núcleo", "public.sampleData": "Datos de ejemplo",

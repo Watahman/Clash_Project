@@ -82,6 +82,11 @@ function navLink(page, href) {
     return `<a href="${href}" data-workspace-nav="${page}">${icons[page]}<span data-i18n="${config.key}">${config.fallback}</span></a>`;
 }
 
+function comingSoonNavItem(page) {
+    const config = pageConfig[page];
+    return `<a class="workspace-nav-coming-soon" data-workspace-nav="${page}" aria-disabled="true" tabindex="-1">${icons[page]}<span class="workspace-nav-item-copy"><span data-i18n="${config.key}">${config.fallback}</span><small class="workspace-coming-soon-badge" data-i18n="common.comingSoon">(Coming soon)</small></span></a>`;
+}
+
 function shellMarkup(currentPage) {
     const current = pageConfig[currentPage] || pageConfig.dashboard;
     return {
@@ -97,7 +102,7 @@ function shellMarkup(currentPage) {
                 ${navLink('operation', './cwl-operation-board.html')}
                 <p data-i18n="shell.collaborate">Samenwerken</p>
                 ${navLink('groups', './groups.html')}
-                ${navLink('bracket', './bracket-generator.html')}
+                ${comingSoonNavItem('bracket')}
             </nav>
             <div class="workspace-sidebar-bottom"><button class="workspace-profile-button" id="profile-btn" type="button" data-i18n-aria-label="shell.openProfile"><span class="workspace-avatar" aria-hidden="true">CT</span><span class="workspace-profile-copy"><strong data-i18n="header.user">Gebruiker</strong><small data-i18n="shell.profileAccounts">Profiel & accounts</small></span><span class="workspace-profile-arrow" aria-hidden="true">›</span></button></div>
         </aside>`,

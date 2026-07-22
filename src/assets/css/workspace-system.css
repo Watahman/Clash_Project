@@ -576,3 +576,114 @@ body.workspace-app > .overlay { grid-column: 1 / -1; }
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
 }
+
+/* Tournament bracket: visible as planned, but unavailable until release. */
+.workspace-coming-soon-badge {
+    display: inline-flex;
+    width: max-content;
+    max-width: 100%;
+    align-items: center;
+    border: 0.0625rem solid color-mix(in srgb, var(--accent) 32%, var(--border));
+    border-radius: 999rem;
+    background: var(--accent-soft);
+    padding: 0.16rem 0.42rem;
+    color: var(--accent-strong);
+    font-size: 0.58rem;
+    font-style: normal;
+    font-weight: 750;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.workspace-nav a.workspace-nav-coming-soon {
+    cursor: not-allowed;
+    opacity: 0.68;
+}
+
+.workspace-nav a.workspace-nav-coming-soon:hover {
+    background: transparent !important;
+    color: #98a4af !important;
+}
+
+.workspace-nav a.workspace-nav-coming-soon:hover svg {
+    color: #77838f !important;
+}
+
+.workspace-nav-item-copy {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.45rem;
+}
+
+.workspace-nav-item-copy > span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.workspace-nav-coming-soon .workspace-coming-soon-badge {
+    flex: 0 0 auto;
+    border-color: rgba(215, 173, 85, 0.2);
+    background: rgba(215, 173, 85, 0.08);
+    padding-inline: 0.34rem;
+    font-size: 0.5rem;
+}
+
+.workspace-launch-title-row,
+.feature-title-row {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.feature-title-row h3 {
+    margin: 0;
+}
+
+.workspace-launch-list > a.workspace-launch-coming-soon {
+    cursor: not-allowed;
+    opacity: 0.72;
+}
+
+.workspace-launch-list > a.workspace-launch-coming-soon:hover {
+    background: transparent !important;
+    padding-left: 0.45rem !important;
+}
+
+.workspace-launch-coming-soon > b,
+.feature-coming-soon-action {
+    color: var(--accent-strong);
+    font-size: 0.7rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.feature-row-coming-soon {
+    opacity: 0.78;
+}
+
+.feature-coming-soon-action {
+    cursor: not-allowed;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-nav a.workspace-nav-coming-soon:hover {
+    background: transparent !important;
+    color: #53616e !important;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-nav a.workspace-nav-coming-soon:hover svg {
+    color: #71808d !important;
+}
+
+@media (max-width: 42rem) {
+    .feature-coming-soon-action {
+        grid-column: 2;
+        justify-self: start;
+    }
+}
+
