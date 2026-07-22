@@ -707,3 +707,13 @@ body.workspace-app[data-workspace-page="groups"]
 :root[data-theme="light"] body.workspace-app[data-workspace-page="operation"] .op-bonus-list li {
     box-shadow: none;
 }
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="operation"] .op-round-card.op-round-win {
+    border-color: color-mix(in srgb, var(--success) 48%, var(--border));
+    background: var(--success-soft);
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="operation"] .op-round-card.op-round-loss {
+    border-color: color-mix(in srgb, var(--danger) 48%, var(--border));
+    background: var(--danger-soft);
+}

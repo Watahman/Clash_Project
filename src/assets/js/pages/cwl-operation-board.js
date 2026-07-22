@@ -792,6 +792,7 @@ function renderRounds(rounds) {
     rounds.forEach(round => {
         const card = document.createElement('article');
         card.className = `op-round-card op-round-${round.result} op-round-state-${round.state}`;
+        card.setAttribute('aria-label', `${t('op.day')} ${round.day}: ${resultText(round.result)}`);
         card.innerHTML = `
             <div class="op-round-title">
                 <strong>${t('op.day')} ${round.day}</strong>
@@ -802,8 +803,7 @@ function renderRounds(rounds) {
                 <span><strong>${parseNumber(round.stars, 0)}</strong>${t('op.stars')}</span>
                 <span><strong>${parseNumber(round.destruction, 0).toFixed(1)}%</strong>Dest</span>
                 <span><strong>${parseNumber(round.attacksUsed, 0)}/${parseNumber(round.availableAttacks, 0)}</strong>Atk</span>
-            </div>
-            <p class="op-result-text">${escapeHtml(resultText(round.result))}</p>`;
+            </div>`;
         refs.roundsList.appendChild(card);
     });
 }

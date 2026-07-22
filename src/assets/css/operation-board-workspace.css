@@ -499,6 +499,20 @@
 }
 
 .operation-workspace-page .op-round-card:hover { background: var(--surface-hover); }
+.operation-workspace-page .op-round-card.op-round-win {
+    border-color: color-mix(in srgb, var(--success) 58%, var(--border));
+    background: var(--success-soft);
+}
+.operation-workspace-page .op-round-card.op-round-loss {
+    border-color: color-mix(in srgb, var(--danger) 58%, var(--border));
+    background: var(--danger-soft);
+}
+.operation-workspace-page .op-round-card.op-round-win:hover {
+    background: color-mix(in srgb, var(--success-soft) 82%, var(--surface-hover));
+}
+.operation-workspace-page .op-round-card.op-round-loss:hover {
+    background: color-mix(in srgb, var(--danger-soft) 82%, var(--surface-hover));
+}
 .operation-workspace-page .op-round-notStarted,
 .operation-workspace-page .op-round-notAvailable { opacity: 0.78; }
 
