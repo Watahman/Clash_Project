@@ -38,7 +38,7 @@ describe('Part 6 profile and settings', () => {
         expect(html).not.toContain('src=""');
         expect(new Set(ids).size).toBe(ids.length);
         expect([...html.matchAll(/class="po-tab(?: [^"]*)?"/g)]).toHaveLength(4);
-        expect(html).toContain('id="po-settings-language"');
+        expect(html).toContain('id="po-settings-language-button"');
         expect(html).toContain('id="po-loading-state"');
     });
 
@@ -47,7 +47,7 @@ describe('Part 6 profile and settings', () => {
             <button class="po-theme-option" data-theme-choice="dark"></button>
             <button class="po-theme-option" data-theme-choice="light"></button>
             <button class="po-theme-option" data-theme-choice="system"></button>
-            <select id="po-settings-language"><option value="nl">NL</option><option value="en">EN</option></select>
+            <button id="po-settings-language-button" type="button"></button>
             <p id="po-settings-message" class="hidden"></p>`;
 
         initProfileSettings();
@@ -58,10 +58,9 @@ describe('Part 6 profile and settings', () => {
         expect(dark.dataset.poSettingsBoundTheme).toBe('true');
         expect(dark.getAttribute('aria-pressed')).toBe('true');
 
-        const language = document.querySelector('#po-settings-language');
-        language.value = 'en';
-        language.dispatchEvent(new Event('change', { bubbles: true }));
-        expect(language.dataset.poSettingsBoundLanguage).toBe('true');
+        const language = document.querySelector('#po-settings-language-button');
+        expect(document.querySelectorAll('[data-language-switcher]')).toHaveLength(1);
+        language.querySelector('[data-language-option="en"]').click();
         expect(localStorage.getItem('clashtools_language')).toBe('en');
     });
 

@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "CWL planning, operation tracking, groups, polls and tournament tools for Clash of Clans.",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "node scripts/serve-static.mjs",
+    "build": "node scripts/build-static.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "check:migrations": "node scripts/check-migrations.mjs",
@@ -29,7 +29,6 @@
   "devDependencies": {
     "fake-indexeddb": "^6.2.2",
     "jsdom": "^26.1.0",
-    "vite": "^8.0.16",
     "vitest": "^3.2.6"
   }
 }

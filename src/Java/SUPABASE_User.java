@@ -45,14 +45,6 @@ public class SUPABASE_User {
         }));
     }
 
-    public void checkUserLogin() {
-        server.createContext(conf._EXT_SUPA_USER_CHECK, exchange -> utils.handlePost(exchange, ex -> {
-            utils.sendJsonResponse(ex,
-                    "{\"error\":\"Gebruik Supabase Auth\",\"code\":\"LEGACY_AUTH_DISABLED\"}",
-                    410);
-        }));
-    }
-
     public void compareUserId() {
         server.createContext(conf._EXT_SUPA_USER_IDCHECK, exchange -> utils.handlePost(exchange, ex -> {
             utils.parseBody(ex);
@@ -75,14 +67,6 @@ public class SUPABASE_User {
             userJson.add("accounts", (accounts != null && !accounts.isJsonNull()) ? accounts.getAsJsonArray() : new JsonArray());
 
             utils.sendJsonResponse(ex, userJson.toString(), 200);
-        }));
-    }
-
-    public void createUser() {
-        server.createContext(conf._EXT_SUPA_USER_MAKE, exchange -> utils.handlePost(exchange, ex -> {
-            utils.sendJsonResponse(ex,
-                    "{\"error\":\"Gebruik Supabase Auth\",\"code\":\"LEGACY_AUTH_DISABLED\"}",
-                    410);
         }));
     }
 
@@ -182,15 +166,6 @@ public class SUPABASE_User {
             response.addProperty("success", true);
             response.addProperty("name", name);
             utils.sendJsonResponse(ex, response.toString(), 200);
-        }));
-    }
-
-    public void changePassword() {
-        server.createContext(conf._EXT_SUPA_USER_CHANGE_PASSWORD, exchange -> utils.handlePost(exchange, ex -> {
-            utils.requireAuthenticatedUser(ex);
-            utils.sendJsonResponse(ex,
-                    "{\"error\":\"Wijzig het wachtwoord via Supabase Auth\",\"code\":\"LEGACY_PASSWORD_DISABLED\"}",
-                    410);
         }));
     }
 

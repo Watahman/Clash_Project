@@ -31,7 +31,7 @@ bin/
 # Environment variables
 .env
 .env.local
-!.env
+!.env.example
 
 # Node
 node_modules/
@@ -41,6 +41,9 @@ node_modules/
 
 # Java / Maven
 target/
+
+# Local runtime cache
+data/cache/
 
 # Generated builds, logs and discarded starter projects
 dist/

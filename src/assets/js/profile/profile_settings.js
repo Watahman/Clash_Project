@@ -4,6 +4,7 @@ import { clearCachePrefix, invalidateUserCache } from "../cache/local-cache.js";
 import { getCurrentUserId } from "../utils/user.js";
 import { getThemePreference, setThemePreference } from "../theme/theme-manager.js";
 import { changeAuthenticatedPassword } from "../auth/auth-client.js";
+import { isStrongPassword } from "../utils/password.js";
 
 let initialized = false;
 let currentProfile = null;
@@ -74,15 +75,6 @@ function initProfileLanguageSwitcher() {
     });
 
     if (switcher) refs.languageControl = switcher;
-}
-
-function isStrongPassword(password) {
-    return typeof password === 'string'
-        && password.length >= 8
-        && /[a-z]/.test(password)
-        && /[A-Z]/.test(password)
-        && /\d/.test(password)
-        && /[^A-Za-z0-9]/.test(password);
 }
 
 function readName() {

@@ -92,14 +92,11 @@ public class Main {
 
         supaAuth.registerRoutes();
 
-        supaUser.createUser();
         supaUser.getUserInfo();
         supaUser.getUserBases();
-        supaUser.checkUserLogin();
         supaUser.compareUserId();
         supaUser.addAccountToUser();
         supaUser.updateUserName();
-        supaUser.changePassword();
 
         supaCWLPlanner.saveCWLPlanner();
         supaCWLPlanner.getAllPlanners();

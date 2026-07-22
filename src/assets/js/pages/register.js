@@ -1,10 +1,10 @@
 import { initI18n, t } from '../i18n/i18n.js';
 import {
-    AuthConfigurationError,
     signInWithGoogle,
     signUpWithPassword,
     syncAuthSession
 } from '../auth/auth-client.js';
+import { isStrongPassword } from '../utils/password.js';
 
 const form = document.querySelector('#auth-form');
 const nameInput = document.querySelector('#username');
@@ -25,6 +25,17 @@ function setBusy(busy) {
     submitButton.disabled = busy;
     googleButton.disabled = busy;
     form.setAttribute('aria-busy', String(busy));
+}
+
+async function registerWithGoogle() {
+    setBusy(true);
+    setStatus(t('auth.redirecting'), 'loading');
+    try {
+        await signInWithGoogle('/subPages/dashboard.html');
+    } catch (error) {
+        setStatus(error?.code === 'AUTH_NOT_CONFIGURED' ? t('auth.notConfigured') : t('auth.oauthUnavailable'), 'error');
+        setBusy(false);
+    }
 }
 
 function passwordStrength(password) {
@@ -49,7 +60,7 @@ async function submitRegistration(event) {
     event.preventDefault();
     updatePasswordHints();
     if (!form.reportValidity()) return;
-    if (passwordStrength(passwordInput.value) < 2) {
+    if (!isStrongPassword(passwordInput.value) || passwordStrength(passwordInput.value) < 3) {
         setStatus(t('auth.passwordRequirements'), 'error');
         passwordInput.focus();
         return;
@@ -67,24 +78,13 @@ async function submitRegistration(event) {
         updatePasswordHints();
         setStatus(t('auth.confirmEmail'), 'success');
     } catch (error) {
-        const message = error instanceof AuthConfigurationError
+        const message = error?.code === 'AUTH_NOT_CONFIGURED'
             ? t('auth.notConfigured')
             : error?.status === 429
                 ? t('auth.tooManyRequests')
                 : t('auth.registrationError');
         setStatus(message, 'error');
     } finally {
-        setBusy(false);
-    }
-}
-
-async function registerWithGoogle() {
-    setBusy(true);
-    setStatus(t('auth.redirecting'), 'loading');
-    try {
-        await signInWithGoogle(new URL('./dashboard.html', window.location.href).href);
-    } catch (error) {
-        setStatus(error instanceof AuthConfigurationError ? t('auth.notConfigured') : t('auth.oauthUnavailable'), 'error');
         setBusy(false);
     }
 }

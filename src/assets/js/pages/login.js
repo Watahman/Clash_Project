@@ -1,6 +1,5 @@
 import { initI18n, t } from '../i18n/i18n.js';
 import {
-    AuthConfigurationError,
     requestPasswordReset,
     signInWithGoogle,
     signInWithPassword,
@@ -17,13 +16,13 @@ const status = document.querySelector('#auth-status');
 
 function destinationAfterLogin() {
     const requested = new URLSearchParams(window.location.search).get('next');
-    if (!requested) return './dashboard.html';
+    if (!requested) return '/subPages/dashboard.html';
     try {
         const destination = new URL(requested, window.location.origin);
-        if (destination.origin !== window.location.origin || !destination.pathname.includes('/subPages/')) return './dashboard.html';
+        if (destination.origin !== window.location.origin || !destination.pathname.startsWith('/subPages/')) return '/subPages/dashboard.html';
         return `${destination.pathname}${destination.search}${destination.hash}`;
     } catch {
-        return './dashboard.html';
+        return '/subPages/dashboard.html';
     }
 }
 
@@ -34,13 +33,24 @@ function setStatus(message = '', state = '') {
 
 function setBusy(busy) {
     submitButton.disabled = busy;
-    googleButton.disabled = busy;
     forgotButton.disabled = busy;
+    googleButton.disabled = busy;
     form.setAttribute('aria-busy', String(busy));
 }
 
+async function loginWithGoogle() {
+    setBusy(true);
+    setStatus(t('auth.redirecting'), 'loading');
+    try {
+        await signInWithGoogle(destinationAfterLogin());
+    } catch (error) {
+        setStatus(error?.code === 'AUTH_NOT_CONFIGURED' ? t('auth.notConfigured') : t('auth.oauthUnavailable'), 'error');
+        setBusy(false);
+    }
+}
+
 function authErrorMessage(error) {
-    if (error instanceof AuthConfigurationError) return t('auth.notConfigured');
+    if (error?.code === 'AUTH_NOT_CONFIGURED') return t('auth.notConfigured');
     if (error?.status === 429) return t('auth.tooManyRequests');
     return t('auth.invalidCredentials');
 }
@@ -72,19 +82,8 @@ async function resetPassword() {
         await requestPasswordReset(emailInput.value);
         setStatus(t('auth.resetSent'), 'success');
     } catch (error) {
-        setStatus(error instanceof AuthConfigurationError ? t('auth.notConfigured') : t('auth.resetError'), 'error');
+        setStatus(error?.code === 'AUTH_NOT_CONFIGURED' ? t('auth.notConfigured') : t('auth.resetError'), 'error');
     } finally {
-        setBusy(false);
-    }
-}
-
-async function loginWithGoogle() {
-    setBusy(true);
-    setStatus(t('auth.redirecting'), 'loading');
-    try {
-        await signInWithGoogle(new URL(destinationAfterLogin(), window.location.href).href);
-    } catch (error) {
-        setStatus(error instanceof AuthConfigurationError ? t('auth.notConfigured') : t('auth.oauthUnavailable'), 'error');
         setBusy(false);
     }
 }
@@ -94,6 +93,10 @@ function init() {
     form.addEventListener('submit', submitLogin);
     forgotButton.addEventListener('click', resetPassword);
     googleButton.addEventListener('click', loginWithGoogle);
+    if (new URLSearchParams(window.location.search).get('oauth') === 'failed') {
+        setStatus(t('auth.oauthUnavailable'), 'error');
+        window.history.replaceState({}, '', window.location.pathname);
+    }
     syncAuthSession()
         .then(session => {
             if (session) window.location.href = destinationAfterLogin();

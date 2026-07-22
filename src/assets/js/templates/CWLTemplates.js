@@ -1,6 +1,6 @@
 import { savePlan } from '../cwl/cwl-plan-io.js';
 import { applyAvailabilityToCard } from '../cwl/cwl-availability.js';
-import { getCardTag, normalizePlayer, normalizeTag, plannerHasPlayer, uniquePlayers } from '../cwl/cwl-utils.js';
+import { escapeCssIdentifier, getCardTag, normalizePlayer, normalizeTag, plannerHasPlayer, uniquePlayers } from '../cwl/cwl-utils.js';
 import { t } from '../i18n/i18n.js';
 import { allowsThirtyPlayerCwl, normalizeCwlCapacity } from '../cwl/cwl-league-rules.js';
 import { normalizeRosterStatus } from '../cwl/cwl-plan-schema.js';
@@ -68,7 +68,7 @@ function getPlayerTarget(clanuuid) {
         };
     }
     if (clanuuid != null) {
-        const clan = document.querySelector(`#cwl-clan-template_${CSS.escape(clanuuid)}`);
+        const clan = document.querySelector(`#cwl-clan-template_${escapeCssIdentifier(clanuuid)}`);
         return clan ? { container: clan.querySelector('.cwl-clan-player-list'), classes: [], source: 'planner', isPlanner: true } : null;
     }
     return { container: document.querySelector('#cwl-available-players'), classes: [], source: 'planner', isPlanner: true };
@@ -283,7 +283,7 @@ function attachMoveControl(element) {
     select.addEventListener('change', () => {
         const target = select.value === 'free'
             ? document.querySelector('#cwl-available-players')
-            : document.querySelector(`#${CSS.escape(select.value)} .cwl-clan-player-list`);
+            : document.querySelector(`#${escapeCssIdentifier(select.value)} .cwl-clan-player-list`);
         const previousContainer = element.parentElement;
         if (!target || target === previousContainer) return;
         const previousStatus = normalizeRosterStatus(element.dataset.rosterStatus);

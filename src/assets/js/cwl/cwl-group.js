@@ -4,7 +4,7 @@ import { getUserBases } from "../Supabase/Supabase-User.js";
 import { createClanCard, createPlayerCard } from "../templates/CWLTemplates.js";
 import { getCurrentUserId } from "../utils/user.js";
 import { clearActiveCwlPoll, setActiveCwlPoll } from "./cwl-availability.js";
-import { normalizeTag, uniquePlayers } from "./cwl-utils.js";
+import { escapeCssIdentifier, normalizeTag, uniquePlayers } from "./cwl-utils.js";
 import { t } from "../i18n/i18n.js";
 
 let refs = {};
@@ -52,7 +52,7 @@ async function loadGroups() {
         for (const membership of memberships) {
             const info = await getGroupInfo(membership.group_id).catch(() => null);
             const group = Array.isArray(info) ? info[0] : info;
-            if (!group?.id || refs.selectGroup.querySelector(`option[value="${CSS.escape(group.id)}"]`)) continue;
+            if (!group?.id || refs.selectGroup.querySelector(`option[value="${escapeCssIdentifier(group.id)}"]`)) continue;
             const option = document.createElement('option');
             option.value = group.id;
             option.textContent = group.name;
@@ -76,7 +76,7 @@ async function loadSelectedGroup(groupId, preferredPollId = '') {
                 console.error(error);
                 return [];
             }),
-            getGroupClans(groupId, currentUserId).catch(error => {
+            getGroupClans(groupId).catch(error => {
                 console.error(error);
                 return [];
             }),
@@ -127,7 +127,7 @@ function renderGroupPreview(groupId) {
     refs.groupPreview?.classList.add('hidden');
     refs.groupPreviewList?.classList.remove('hidden');
     createPlayerCard(state.players, `group|${groupId}`);
-    refs.groupPreviewList?.querySelectorAll(`[data-clanuuid="${CSS.escape(groupId)}"]`)
+    refs.groupPreviewList?.querySelectorAll(`[data-clanuuid="${escapeCssIdentifier(groupId)}"]`)
         .forEach(card => card.classList.remove('hidden'));
 }
 

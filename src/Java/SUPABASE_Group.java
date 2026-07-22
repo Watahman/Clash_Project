@@ -7,13 +7,11 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 
 public class SUPABASE_Group {
     private final HttpServer server;
@@ -30,32 +28,20 @@ public class SUPABASE_Group {
         server.createContext(conf._EXT_SUPA_GROUP_MAKE, exchange -> utils.handlePost(exchange, ex -> {
             String ownerId   = utils.requireAuthenticatedUser(ex);
             JsonObject json  = utils.parseBody(ex);
-            String naam      = utils.requireString(json, "name");
+            String naam      = utils.requireString(json, "name").trim();
             String code      = API_Utils.generateCode();
 
-            JsonObject group = new JsonObject();
-            group.addProperty("name",     naam);
-            group.addProperty("owner_id", ownerId);
-            group.addProperty("code",     code);
-            group.addProperty("badge",    "banner");
-            group.add("badge_url", JsonNull.INSTANCE);
-
-            String result = SUPABASE_Client.post("groups", group.toString());
-            JsonArray resultArray = JsonParser.parseString(result).getAsJsonArray();
-
-            if (resultArray.isEmpty()) {
-                utils.sendJsonResponse(ex, "{\"error\":\"Groep aanmaken mislukt\"}", 500);
-                return;
+            if (naam.length() < 2 || naam.length() > 80) {
+                throw new IllegalArgumentException("Groepsnaam moet 2 tot 80 tekens lang zijn");
             }
 
-            String id = resultArray.get(0).getAsJsonObject().get("id").getAsString();
-
-            JsonObject groupMember = new JsonObject();
-            groupMember.addProperty("group_id", id);
-            groupMember.addProperty("user_id",  ownerId);
-            groupMember.addProperty("role", "leader");
-            SUPABASE_Client.post("group_members", groupMember.toString());
-
+            JsonObject rpcBody = new JsonObject();
+            rpcBody.addProperty("p_owner_user_id", ownerId);
+            rpcBody.addProperty("p_name", naam);
+            rpcBody.addProperty("p_code", code);
+            rpcBody.addProperty("p_badge", "banner");
+            rpcBody.add("p_badge_url", JsonNull.INSTANCE);
+            String result = SUPABASE_Client.rpc("create_group_with_owner", rpcBody.toString());
             utils.sendJsonResponse(ex, result, 201);
         }));
     }
@@ -84,7 +70,7 @@ public class SUPABASE_Group {
                 return;
             }
 
-            utils.sendJsonResponse(ex, sanitizeGroupInfoForGeneralRead(result), 200);
+            utils.sendJsonResponse(ex, result, 200);
         }));
     }
 
@@ -257,128 +243,12 @@ public class SUPABASE_Group {
             String groupId  = utils.requireString(json, "groupId");
             String targetId = utils.requireString(json, "targetUserId");
 
-            JsonObject group = requireGroupLeader(groupId, actorId);
-            ensureGroupMember(groupId, targetId);
-
-            if (Objects.equals(actorId, targetId)) {
-                utils.sendJsonResponse(ex, "{\"success\":true,\"message\":\"Leader blijft ongewijzigd\"}", 200);
-                return;
-            }
-
-            String previousTargetRole = getMemberRole(groupId, targetId);
-            try {
-                patchMemberRole(groupId, actorId, "co_leader");
-                patchMemberRole(groupId, targetId, "leader");
-                String result = patchGroupOwner(groupId, targetId);
-                utils.sendJsonResponse(ex, result, 200);
-            } catch (Exception transferError) {
-                try {
-                    patchMemberRole(groupId, targetId, previousTargetRole);
-                    patchMemberRole(groupId, actorId, "leader");
-                    patchGroupOwner(groupId, actorId);
-                } catch (Exception rollbackError) {
-                    transferError.addSuppressed(rollbackError);
-                }
-                throw transferError;
-            }
-        }));
-    }
-
-    public void getGroupPolls() {
-        server.createContext(conf._EXT_SUPA_GROUP_POLLS_GET, exchange -> utils.handlePost(exchange, ex -> {
-            String userId = utils.requireAuthenticatedUser(ex);
-            JsonObject json = utils.parseBody(ex);
-            String groupId  = utils.requireString(json, "groupId");
-
-            requireGroupMember(groupId, userId);
-            JsonObject group = getGroup(groupId);
-            JsonArray polls = getPollsFromGroup(group);
-            boolean canSeeAllAnswers = canManageGroup(group, groupId, userId);
-            utils.sendJsonResponse(ex, sanitizePollsForUser(polls, userId, canSeeAllAnswers).toString(), 200);
-        }));
-    }
-
-    public void createGroupPoll() {
-        server.createContext(conf._EXT_SUPA_GROUP_POLL_CREATE, exchange -> utils.handlePost(exchange, ex -> {
-            String userId = utils.requireAuthenticatedUser(ex);
-            JsonObject json = utils.parseBody(ex);
-            String groupId  = utils.requireString(json, "groupId");
-            String title    = utils.requireString(json, "title").trim();
-            int rounds      = json.has("rounds") ? json.get("rounds").getAsInt() : 7;
-
-            if (title.isBlank()) throw new IllegalArgumentException("Poll titel ontbreekt");
-            if (rounds < 1 || rounds > 7) throw new IllegalArgumentException("Rounds moet tussen 1 en 7 liggen");
-
-            requireGroupAdmin(groupId, userId);
-            JsonArray polls = getPolls(groupId);
-            closeOpenCwlPolls(polls);
-
-            JsonObject poll = new JsonObject();
-            poll.addProperty("id", UUID.randomUUID().toString());
-            poll.addProperty("title", title);
-            poll.addProperty("type", "cwl_availability");
-            poll.addProperty("creator_id", userId);
-            poll.addProperty("created_at", Instant.now().toString());
-            poll.addProperty("status", "open");
-            poll.addProperty("rounds", rounds);
-            poll.add("answers", new JsonObject());
-            polls.add(poll);
-
-            savePolls(groupId, polls);
-            utils.sendJsonResponse(ex, poll.toString(), 201);
-        }));
-    }
-
-    public void answerGroupPoll() {
-        server.createContext(conf._EXT_SUPA_GROUP_POLL_ANSWER, exchange -> utils.handlePost(exchange, ex -> {
-            String userId = utils.requireAuthenticatedUser(ex);
-            JsonObject json = utils.parseBody(ex);
-            String groupId  = utils.requireString(json, "groupId");
-            String pollId   = utils.requireString(json, "pollId");
-            JsonArray accounts = utils.requireArray(json, "accounts");
-
-            requireGroupMember(groupId, userId);
-            JsonArray polls = getPolls(groupId);
-            JsonObject poll = findPoll(polls, pollId);
-            if (!Objects.equals(poll.get("status").getAsString(), "open")) {
-                throw new HttpException(403, "{\"error\":\"Poll is gesloten\"}");
-            }
-
-            JsonArray validatedAccounts = validatePollAccounts(userId, accounts);
-            JsonObject answer = new JsonObject();
-            answer.addProperty("user_id", userId);
-            answer.addProperty("updated_at", Instant.now().toString());
-            answer.add("accounts", validatedAccounts);
-            if (!poll.has("answers") || !poll.get("answers").isJsonObject()) poll.add("answers", new JsonObject());
-            poll.getAsJsonObject("answers").add(userId, answer);
-
-            savePolls(groupId, polls);
-            utils.sendJsonResponse(ex, answer.toString(), 200);
-        }));
-    }
-
-    public void setGroupPollStatus() {
-        server.createContext(conf._EXT_SUPA_GROUP_POLL_STATUS, exchange -> utils.handlePost(exchange, ex -> {
-            String userId = utils.requireAuthenticatedUser(ex);
-            JsonObject json = utils.parseBody(ex);
-            String groupId  = utils.requireString(json, "groupId");
-            String pollId   = utils.requireString(json, "pollId");
-            String status   = utils.requireString(json, "status").trim().toLowerCase();
-
-            if (!Objects.equals(status, "open") && !Objects.equals(status, "closed")) {
-                throw new IllegalArgumentException("Ongeldige poll status");
-            }
-
-            requireGroupAdmin(groupId, userId);
-            JsonArray polls = getPolls(groupId);
-            JsonObject poll = findPoll(polls, pollId);
-            if (Objects.equals(status, "open")) {
-                closeOpenCwlPolls(polls);
-            }
-            poll.addProperty("status", status);
-            if (Objects.equals(status, "closed")) poll.addProperty("closed_at", Instant.now().toString());
-            savePolls(groupId, polls);
-            utils.sendJsonResponse(ex, poll.toString(), 200);
+            JsonObject rpcBody = new JsonObject();
+            rpcBody.addProperty("p_actor_user_id", actorId);
+            rpcBody.addProperty("p_group_id", groupId);
+            rpcBody.addProperty("p_target_user_id", targetId);
+            String result = SUPABASE_Client.rpc("transfer_group_leadership", rpcBody.toString());
+            utils.sendJsonResponse(ex, result, 200);
         }));
     }
 
@@ -461,137 +331,6 @@ public class SUPABASE_Group {
         return tag;
     }
 
-    private String normalizePlayerTag(String value) {
-        return normalizeClanTag(value);
-    }
-
-    private JsonArray getPolls(String groupId) throws Exception {
-        return getPollsFromGroup(getGroup(groupId));
-    }
-
-    private JsonArray getPollsFromGroup(JsonObject group) {
-        JsonElement pollsEl = group.get("polls");
-        if (pollsEl == null || pollsEl.isJsonNull()) return new JsonArray();
-        if (pollsEl.isJsonArray()) return pollsEl.getAsJsonArray();
-        return JsonParser.parseString(pollsEl.getAsString()).getAsJsonArray();
-    }
-
-    private void savePolls(String groupId, JsonArray polls) throws Exception {
-        JsonObject update = new JsonObject();
-        update.add("polls", polls);
-        SUPABASE_Client.patch("groups", "id=" + SUPABASE_Client.eq(groupId), update.toString());
-    }
-
-    private JsonObject findPoll(JsonArray polls, String pollId) throws HttpException {
-        for (JsonElement element : polls) {
-            JsonObject poll = element.getAsJsonObject();
-            JsonElement id = poll.get("id");
-            if (id != null && Objects.equals(id.getAsString(), pollId)) return poll;
-        }
-        throw new HttpException(404, "{\"error\":\"Poll niet gevonden\"}");
-    }
-
-    private String sanitizeGroupInfoForGeneralRead(String result) {
-        JsonArray groups = JsonParser.parseString(result).getAsJsonArray();
-        for (JsonElement groupEl : groups) {
-            if (!groupEl.isJsonObject()) continue;
-            JsonObject group = groupEl.getAsJsonObject();
-            group.add("polls", sanitizePollsForPublicMetadata(getPollsFromGroup(group)));
-        }
-        return groups.toString();
-    }
-
-    private JsonArray sanitizePollsForPublicMetadata(JsonArray polls) {
-        JsonArray safePolls = new JsonArray();
-        for (JsonElement element : polls) {
-            if (!element.isJsonObject()) continue;
-            JsonObject poll = element.getAsJsonObject().deepCopy();
-            poll.add("answers", new JsonObject());
-            safePolls.add(poll);
-        }
-        return safePolls;
-    }
-
-    private void closeOpenCwlPolls(JsonArray polls) {
-        for (JsonElement element : polls) {
-            if (!element.isJsonObject()) continue;
-            JsonObject poll = element.getAsJsonObject();
-            if (Objects.equals(readFirstString(poll, "type"), "cwl_availability")
-                    && Objects.equals(readFirstString(poll, "status"), "open")) {
-                poll.addProperty("status", "closed");
-                poll.addProperty("closed_at", Instant.now().toString());
-            }
-        }
-    }
-
-    private JsonArray sanitizePollsForUser(JsonArray polls, String userId, boolean canSeeAllAnswers) {
-        JsonArray safePolls = new JsonArray();
-        for (JsonElement element : polls) {
-            if (!element.isJsonObject()) continue;
-            JsonObject copy = element.getAsJsonObject().deepCopy();
-            if (!canSeeAllAnswers) {
-                JsonObject ownAnswers = new JsonObject();
-                if (copy.has("answers") && copy.get("answers").isJsonObject()) {
-                    JsonObject answers = copy.getAsJsonObject("answers");
-                    JsonElement ownAnswer = answers.get(userId);
-                    if (ownAnswer != null && ownAnswer.isJsonObject()) ownAnswers.add(userId, ownAnswer.deepCopy());
-                }
-                copy.add("answers", ownAnswers);
-            }
-            safePolls.add(copy);
-        }
-        return safePolls;
-    }
-
-    private JsonArray validatePollAccounts(String userId, JsonArray submittedAccounts) throws Exception {
-        Map<String, JsonObject> allowedAccounts = getUserAccountsByTag(userId);
-        JsonArray validated = new JsonArray();
-        Set<String> usedTags = new HashSet<>();
-
-        for (JsonElement element : submittedAccounts) {
-            if (!element.isJsonObject()) throw new IllegalArgumentException("Ongeldig poll account");
-            JsonObject submitted = element.getAsJsonObject();
-            String tag = normalizePlayerTag(readFirstString(submitted, "tag", "playerTag", "accountTag"));
-            if (tag.isBlank() || !allowedAccounts.containsKey(tag)) {
-                throw new HttpException(403, "{\"error\":\"Poll bevat een account dat niet bij deze gebruiker hoort\"}");
-            }
-            if (!usedTags.add(tag)) {
-                throw new IllegalArgumentException("Dubbel account in poll antwoord: " + tag);
-            }
-
-            JsonObject source = allowedAccounts.get(tag);
-            boolean wantsCwl = readBoolean(submitted, "wantsCwl", true);
-            JsonObject safe = new JsonObject();
-            safe.addProperty("name", fallback(readFirstString(source, "name", "playerName", "accountName"), tag));
-            safe.addProperty("tag", tag);
-            String townHall = fallback(readFirstString(source, "townHallLevel", "townHall", "townhall", "th"),
-                    readFirstString(submitted, "townHall", "townHallLevel"));
-            safe.addProperty("townHall", townHall);
-            safe.addProperty("wantsCwl", wantsCwl);
-            safe.add("days", wantsCwl ? sanitizeDays(submitted.get("days")) : new JsonObject());
-            validated.add(safe);
-        }
-
-        return validated;
-    }
-
-    private Map<String, JsonObject> getUserAccountsByTag(String userId) throws Exception {
-        JsonArray users = JsonParser.parseString(
-                SUPABASE_Client.getWithBody("users", "id=" + SUPABASE_Client.eq(userId))).getAsJsonArray();
-        if (users.isEmpty()) throw new HttpException(404, "{\"error\":\"Gebruiker niet gevonden\"}");
-
-        JsonObject user = users.get(0).getAsJsonObject();
-        JsonArray accounts = parseAccounts(user.get("accounts"));
-        Map<String, JsonObject> byTag = new HashMap<>();
-        for (JsonElement accountEl : accounts) {
-            if (!accountEl.isJsonObject()) continue;
-            JsonObject account = accountEl.getAsJsonObject();
-            String tag = normalizePlayerTag(readFirstString(account, "tag", "playerTag", "accountTag"));
-            if (!tag.isBlank()) byTag.put(tag, account);
-        }
-        return byTag;
-    }
-
     private JsonArray hydrateMemberProfiles(JsonArray members) throws Exception {
         Set<String> userIds = new HashSet<>();
         for (JsonElement element : members) {
@@ -616,29 +355,6 @@ public class SUPABASE_Group {
         return members;
     }
 
-    private JsonArray parseAccounts(JsonElement accountsEl) {
-        if (accountsEl == null || accountsEl.isJsonNull()) return new JsonArray();
-        if (accountsEl.isJsonArray()) return accountsEl.getAsJsonArray();
-        if (accountsEl.isJsonPrimitive()) {
-            String value = accountsEl.getAsString();
-            if (value == null || value.isBlank()) return new JsonArray();
-            JsonElement parsed = JsonParser.parseString(value);
-            return parsed.isJsonArray() ? parsed.getAsJsonArray() : new JsonArray();
-        }
-        return new JsonArray();
-    }
-
-    private JsonObject sanitizeDays(JsonElement daysEl) {
-        JsonObject safeDays = new JsonObject();
-        if (daysEl == null || !daysEl.isJsonObject()) return safeDays;
-        JsonObject submittedDays = daysEl.getAsJsonObject();
-        for (int day = 1; day <= 7; day += 1) {
-            String key = String.valueOf(day);
-            if (submittedDays.has(key)) safeDays.addProperty(key, readBoolean(submittedDays, key, false));
-        }
-        return safeDays;
-    }
-
     private String readFirstString(JsonObject object, String... fields) {
         if (object == null) return "";
         for (String field : fields) {
@@ -648,32 +364,12 @@ public class SUPABASE_Group {
         return "";
     }
 
-    private boolean readBoolean(JsonObject object, String field, boolean defaultValue) {
-        if (object == null || !object.has(field) || object.get(field).isJsonNull()) return defaultValue;
-        JsonElement value = object.get(field);
-        if (value.isJsonPrimitive()) {
-            String raw = value.getAsString();
-            if (Objects.equals(raw, "true") || Objects.equals(raw, "false")) return Boolean.parseBoolean(raw);
-        }
-        return defaultValue;
-    }
-
-    private String fallback(String first, String second) {
-        return first == null || first.isBlank() ? (second == null ? "" : second) : first;
-    }
-
     private String patchMemberRole(String groupId, String userId, String role) throws Exception {
         JsonObject update = new JsonObject();
         update.addProperty("role", normalizeGroupRole(role));
         return SUPABASE_Client.patch("group_members",
                 "group_id=" + SUPABASE_Client.eq(groupId) + "&user_id=" + SUPABASE_Client.eq(userId),
                 update.toString());
-    }
-
-    private String patchGroupOwner(String groupId, String ownerId) throws Exception {
-        JsonObject groupUpdate = new JsonObject();
-        groupUpdate.addProperty("owner_id", ownerId);
-        return SUPABASE_Client.patch("groups", "id=" + SUPABASE_Client.eq(groupId), groupUpdate.toString());
     }
 
     private JsonArray getOrderedGroupClans(String groupId) throws Exception {

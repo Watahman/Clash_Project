@@ -9,21 +9,19 @@ import * as conf from "../Data/config.js";
 
 export { savePlan };
 
-let addClanPlayersBtn, overlayAddPlayersBtn, addClanBtn, overlayAddClanBtn;
+let addClanBtn, overlayAddClanBtn;
 let cwlInputTag, cwlInputClanCode, selectAmountPlayers;
 let savePlanBtn, newPlanBtn, planName, loadPlan;
 let manualSaveInFlight = false;
 let saveFeedbackTimer;
 let availablePlayers, allClans, totalPlayerAmount;
 let pageTitle;
-let addPlayersBtn, overlayConfirmTagBtn, accountsSearch, accountList,
+let addPlayersBtn, overlayConfirmTagBtn, accountList,
     addSelectedBtn, segBtns, selectGroup, groupPreview,
     groupPreviewList, loadGroupBtn, modalTabBtn, modalAccountListEmpty,
     selectGroupPoll, groupLinkedClans;
 
 function labelInit() {
-    addClanPlayersBtn      = document.querySelector("#cwl-add-clan-players-button");
-    overlayAddPlayersBtn   = document.querySelector("#cwl-overlay-add-players-button");
     addClanBtn             = document.querySelector("#cwl-add-clan-button");
     overlayAddClanBtn      = document.querySelector("#cwl-overlay-add-clan-button");
     cwlInputTag            = document.querySelector("#cwl-input-tag");
@@ -39,7 +37,6 @@ function labelInit() {
     pageTitle              = document.querySelector("#cwl-page-title");
     addPlayersBtn          = document.querySelector("#cwl-add-players-button");
     overlayConfirmTagBtn   = document.querySelector("#cwl-overlay-confirm-tag-button");
-    accountsSearch         = document.querySelector("#cwl-accounts-search");
     accountList            = document.querySelector("#cwl-account-list");
     addSelectedBtn         = document.querySelector("#cwl-overlay-add-selected-button");
     segBtns                = document.querySelectorAll(".modal-seg-btn");

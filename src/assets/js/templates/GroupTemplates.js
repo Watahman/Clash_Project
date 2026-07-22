@@ -9,26 +9,6 @@ function memberLabel(count) {
     return count === 1 ? `1 ${t('groups.memberSingle')}` : `${count} ${t('groups.members')}`;
 }
 
-function memberInitials(name) {
-    const parts = String(name || '')
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean);
-
-    if (!parts.length) {
-        return '?';
-    }
-
-    if (parts.length === 1) {
-        return parts[0]
-            .slice(0, 2)
-            .toUpperCase();
-    }
-
-    return `${parts[0][0]}${parts[1][0]}`
-        .toUpperCase();
-}
-
 export function memberAccounts(member) {
     const profile = profileOf(member);
     const value = profile?.accounts;

@@ -13,7 +13,7 @@ describe('Groups V1 workspace', () => {
         expect(tabs).toEqual(['members', 'availability', 'polls', 'clans']);
         expect(html).not.toContain('data-admin-tab="future"');
         expect(html).not.toContain('groups-invite-btn');
-        expect(html).toContain('id="groups-settings-btn"');
+        expect(html).toContain('id="groups-inspector-roles"');
         expect(html).toContain('id="groups-poll-reminder-btn"');
         expect(html).toContain('id="groups-admin-scan-unlinked"');
         expect(html).not.toContain('groups-badge-picker');

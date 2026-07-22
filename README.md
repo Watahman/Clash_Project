@@ -4,18 +4,18 @@ ClashTools is a vanilla JavaScript and Java application for CWL planning and liv
 
 ## Architecture
 
-- `src/`: Vite frontend and Java HTTP backend.
+- `src/`: static frontend and Java HTTP backend.
 - `src/assets/js/auth`: Supabase Auth browser session handling.
 - `src/assets/js/cache`: IndexedDB stale-while-revalidate cache.
 - `src/Java`: authenticated API gateway, authorization and the layered Clash response cache.
 - `database/migrations`: ordered PostgreSQL/Supabase schema and security migrations.
 - `test`: Vitest/JSDOM and JUnit regression tests.
 
-The browser uses same-origin `/api` routes by default. During development, Vite proxies those routes to `http://localhost:8080`. The Java server validates every protected bearer token with Supabase Auth and derives the acting profile server-side.
+The browser uses same-origin `/api` routes by default. During development, the small Node static server proxies those routes to `http://localhost:8080`. The Java server validates every protected bearer token with Supabase Auth and derives the acting profile server-side.
 
 ## Requirements
 
-- Node.js 22 or a Vite 8-compatible runtime
+- Node.js 22
 - JDK 21
 - Maven 3.9+
 - A Supabase project
@@ -33,7 +33,7 @@ mvn compile exec:java
 npm run dev
 ```
 
-Open `http://localhost:5173`. Never expose the Supabase service-role key through a `VITE_` variable or frontend bundle.
+Open `http://localhost:5173`. Set `DEV_API_TARGET` only when the Java API runs elsewhere. Never expose the Supabase service-role key through a frontend variable or static file.
 
 ## Environment variables
 
@@ -44,16 +44,21 @@ Open `http://localhost:5173`. Never expose the Supabase service-role key through
 | `_API_KEY_SECR_SUPABASE` or `SUPABASE_SERVICE_ROLE_KEY` | yes | Server-only service-role key |
 | `_API_KEY_ALL` | yes | Clash API authorization value, including `Bearer ` |
 | `_BASE_URL_CLASH` | no | Clash API base URL |
-| `VITE_SUPABASE_URL` | yes | Public Supabase URL for browser auth |
-| `VITE_SUPABASE_ANON_KEY` | yes | Public Supabase publishable/anon key |
-| `VITE_API_BASE_URL` | no | Browser API base; defaults to `/api` |
 | `SERVER_PORT` or `PORT` | no | Backend port; defaults to `8080` |
 | `ALLOWED_ORIGINS` | production | Comma-separated browser-origin allowlist |
+| `AUTH_GOOGLE_CALLBACK_URL` | production | Exact same-origin callback URL, for example `https://example.com/api/AuthGoogleCallback` |
+| `AUTH_COOKIE_SECURE` | production | Set to `true` when the public application uses HTTPS |
+| `AUTH_COOKIE_SAME_SITE` | no | Session-cookie SameSite mode; defaults to `Lax` |
 | `CACHE_ENABLED`, `CACHE_MODE` | no | Layered public Clash response cache configuration |
 | `MAX_REQUEST_BODY_BYTES` | no | Request body limit |
 | `PUBLIC_RATE_LIMIT_PER_MINUTE` | no | Public Clash route limit per IP and route |
+| `TRUST_PROXY_HEADERS` | no | Set to `true` only behind a trusted reverse proxy so rate limits use `X-Forwarded-For` |
 | `SENSITIVE_RATE_LIMIT_PER_MINUTE` | no | Token verification and legacy auth route limit |
 | `DATA_RATE_LIMIT_PER_MINUTE` | no | Authenticated data route limit |
+
+### Google login
+
+Google login uses a server-side PKCE flow. Enable Google in Supabase Authentication, enter the Google web Client ID and Client Secret there, and add the Supabase project callback shown by the Google provider page to Google Cloud's authorized redirect URIs. Add this application's `AUTH_GOOGLE_CALLBACK_URL` to the Supabase redirect allow list. For local development that application callback is `http://localhost:5173/api/AuthGoogleCallback`; production must use the HTTPS production domain.
 
 ## Database
 

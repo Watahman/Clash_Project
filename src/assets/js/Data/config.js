@@ -54,15 +54,12 @@ export const _EXT_LABELS_CLANS = "/LabelsClans"
 
 export const _EXT_SUPA_CONF = "/SupabaseConfigInfo"
 
-export const _EXT_SUPA_USER_MAKE = "/SupabaseUserMake"
 export const _EXT_SUPA_USER_INFO = "/SupabaseUserInfo"
 export const _EXT_SUPA_USER_BASES = "/SupabaseUserBases";
 export const _EXT_SUPA_USER_GROUPS = "/SupabaseUserGroups";
-export const _EXT_SUPA_USER_CHECK = "/SupabaseUserCheck";
 export const _EXT_SUPA_USER_IDCHECK = "/SupabaseUserIdCheck"
 export const _EXT_SUPA_USER_ADD_ACCOUNT = "/SupabaseUserAddAccount";
 export const _EXT_SUPA_USER_UPDATE_NAME = "/SupabaseUserUpdateName";
-export const _EXT_SUPA_USER_CHANGE_PASSWORD = "/SupabaseUserChangePassword";
 
 export const _EXT_SUPA_USER_ADD_FRIEND = "/SupabaseUserAddFriend";
 export const _EXT_SUPA_USER_GET_PENDING_FRIENDS = "/SupabaseUserGetPendingFriends";

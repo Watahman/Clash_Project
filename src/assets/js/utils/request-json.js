@@ -26,7 +26,6 @@ export async function requestJson(url, {
     body,
     headers = {},
     signal,
-    auth = false,
     loading = 'background',
     loadingMessage = 'Laden...'
 } = {}) {

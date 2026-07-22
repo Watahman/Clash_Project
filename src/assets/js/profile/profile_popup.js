@@ -2,8 +2,8 @@ import { checkUserId } from "../Supabase/Supabase-User.js";
 import {getFriendRequests, getFriends, getPendingFriendRequests} from "../Supabase/Supabase-Friend.js";
 import { createFriendRequestCard, createFriendPendingCard } from "../templates/FriendTemplates.js";
 import { loadBases } from "./profile_bases.js";
-import {loadFriends, renderFriends} from "./profile_friends.js";
-import {loadClans, renderGroups, resetClansLoaded} from "./profile_groups.js";
+import { renderFriends } from "./profile_friends.js";
+import { renderGroups, resetClansLoaded } from "./profile_groups.js";
 import { poTab } from "./profile_tabs.js";
 import { copyWithFeedback, resetCopyFeedback } from "../utils/clipboard.js";
 import { getCurrentUserId } from "../utils/user.js";
@@ -11,7 +11,6 @@ import {getGroupsOfUser} from "../Supabase/Supabase-Group.js";
 import { applyI18n, t } from "../i18n/i18n.js";
 import { initProfileSettings, resetProfileSettings, syncProfileSettings } from "./profile_settings.js";
 import { signOut } from "../auth/auth-client.js";
-import { invalidateUserCache } from "../cache/local-cache.js";
 import { getNotifications, markNotificationRead } from "../Supabase/Supabase-Notifications.js";
 
 let profile, closeProfileBtn, userCode, profileTabs, openProfileBtn, activeTab;
@@ -23,7 +22,7 @@ let friendListContent, friendListClose;
 let overlayAddBaseBtn, overlayAddClanBtn;
 let inputBaseTag, inputBaseToken, inputClanTag;
 let poLogoutBtn, poSettings;
-let friendListTitle, poGroupList;
+let friendListTitle;
 let notificationsBtn, notificationsCount, notificationsPanel, notificationsClose, notificationsList;
 let cachedProfile = null;
 let profileMarkupPromise = null;
@@ -115,7 +114,6 @@ function labelInit() {
     inputClanTag       = document.querySelector("#po-input-clan-tag");
     friendListTitle    = document.querySelector("#po-friend-list-title");
     poAddText          = document.querySelector("#po-add-text");
-    poGroupList        = document.querySelector("#po-group-list");
     poLogoutBtn        = document.querySelector("#po-logout-btn");
     poSettings         = document.querySelector(".po-settings");
     notificationsBtn   = document.querySelector('#po-notifications-btn');
@@ -181,12 +179,10 @@ function profileInit() {
     };
 
     poLogoutBtn.onclick = async () => {
-        const userId = getCurrentUserId();
         poLogoutBtn.disabled = true;
         try {
             await signOut();
         } finally {
-            await invalidateUserCache(userId);
             [
                 'planner_id',
                 'clashtools_planner_cache',
@@ -302,7 +298,7 @@ function refreshProfileData(openAfterLoad = false) {
         profile.removeAttribute('aria-busy');
         profileLoadingState?.classList.add('hidden');
         return userData;
-    }).catch(error => {
+    }).catch(() => {
         profile.removeAttribute('aria-busy');
         profileLoadingState?.classList.add('hidden');
         if (openAfterLoad && poUsername) poUsername.textContent = t('profile.loadError');
@@ -451,14 +447,6 @@ function redirectToLogin() {
         window.location.href = './login.html';
     } else {
         window.location.href = './subPages/login.html';
-    }
-}
-
-function isUserLoggedIn() {
-    if (getCurrentUserId() === null) {
-        redirectToLogin();
-    } else {
-        refreshProfileData(true);
     }
 }
 

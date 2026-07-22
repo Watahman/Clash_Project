@@ -40,6 +40,7 @@ public class Config {
     String _PUBLIC_RATE_LIMIT = firstNonBlank(env("PUBLIC_RATE_LIMIT_PER_MINUTE"), "90");
     String _SENSITIVE_RATE_LIMIT = firstNonBlank(env("SENSITIVE_RATE_LIMIT_PER_MINUTE"), "10");
     String _DATA_RATE_LIMIT = firstNonBlank(env("DATA_RATE_LIMIT_PER_MINUTE"), "180");
+    String _TRUST_PROXY_HEADERS = firstNonBlank(env("TRUST_PROXY_HEADERS"), "false");
 
     String _AUTH_COOKIE_SECURE = firstNonBlank(env("AUTH_COOKIE_SECURE"), "false");
     String _AUTH_COOKIE_SAME_SITE = firstNonBlank(env("AUTH_COOKIE_SAME_SITE"), "Lax");
@@ -55,6 +56,10 @@ public class Config {
             env("AUTH_PASSWORD_RESET_REDIRECT_URL"),
             "http://localhost:5173/subPages/login.html"
     );
+    String _AUTH_GOOGLE_CALLBACK_URL = firstNonBlank(
+            env("AUTH_GOOGLE_CALLBACK_URL"),
+            "http://localhost:5173/api/AuthGoogleCallback"
+    );
 
     String _AUTH_LOGIN = "/AuthLogin";
     String _AUTH_SIGNUP = "/AuthSignup";
@@ -62,6 +67,8 @@ public class Config {
     String _AUTH_RECOVER = "/AuthRecover";
     String _AUTH_CHANGE_PASSWORD = "/AuthChangePassword";
     String _AUTH_LOGOUT = "/AuthLogout";
+    String _AUTH_GOOGLE = "/AuthGoogle";
+    String _AUTH_GOOGLE_CALLBACK = "/AuthGoogleCallback";
 
     String _EXT_CLAN_CURRENTWAR_LEAGUEGROUP = "/ClanCurrentWarLeagueGroup";
     String _EXT_CLAN_WARLEAGUES_WARS = "/ClanWarLeaguesWars";
@@ -106,15 +113,12 @@ public class Config {
 
     String _EXT_SUPA_CONF = "/SupabaseConfigInfo";
 
-    String _EXT_SUPA_USER_MAKE = "/SupabaseUserMake";
     String _EXT_SUPA_USER_INFO = "/SupabaseUserInfo";
     String _EXT_SUPA_USER_BASES = "/SupabaseUserBases";
     String _EXT_SUPA_USER_GROUPS = "/SupabaseUserGroups";
-    String _EXT_SUPA_USER_CHECK = "/SupabaseUserCheck";
     String _EXT_SUPA_USER_IDCHECK = "/SupabaseUserIdCheck";
     String _EXT_SUPA_USER_ADD_ACCOUNT = "/SupabaseUserAddAccount";
     String _EXT_SUPA_USER_UPDATE_NAME = "/SupabaseUserUpdateName";
-    String _EXT_SUPA_USER_CHANGE_PASSWORD = "/SupabaseUserChangePassword";
 
     String _EXT_SUPA_USER_ADD_FRIEND = "/SupabaseUserAddFriend";
     String _EXT_SUPA_USER_GET_PENDING_FRIENDS = "/SupabaseUserGetPendingFriends";
@@ -226,6 +230,19 @@ public class Config {
         return _AUTH_PASSWORD_RESET_REDIRECT_URL == null ? "" : _AUTH_PASSWORD_RESET_REDIRECT_URL.trim();
     }
 
+    String getAuthGoogleCallbackUrl() {
+        String value = _AUTH_GOOGLE_CALLBACK_URL == null ? "" : _AUTH_GOOGLE_CALLBACK_URL.trim();
+        try {
+            java.net.URI uri = java.net.URI.create(value);
+            if (!uri.isAbsolute() || uri.getHost() == null || !("http".equals(uri.getScheme()) || "https".equals(uri.getScheme()))) {
+                throw new IllegalArgumentException();
+            }
+            return uri.toString();
+        } catch (IllegalArgumentException invalidUrl) {
+            throw new IllegalStateException("Ongeldige AUTH_GOOGLE_CALLBACK_URL");
+        }
+    }
+
     boolean isCacheEnabled() {
         return !"false".equalsIgnoreCase(_CACHE_ENABLED);
     }
@@ -272,9 +289,9 @@ public class Config {
                 || _AUTH_SIGNUP.equals(path)
                 || _AUTH_RECOVER.equals(path)
                 || _AUTH_CHANGE_PASSWORD.equals(path)
-                || _EXT_PLAYER_VERIFY_TOKEN.equals(path)
-                || _EXT_SUPA_USER_MAKE.equals(path)
-                || _EXT_SUPA_USER_CHECK.equals(path)) {
+                || _AUTH_GOOGLE.equals(path)
+                || _AUTH_GOOGLE_CALLBACK.equals(path)
+                || _EXT_PLAYER_VERIFY_TOKEN.equals(path)) {
             return positiveInt(_SENSITIVE_RATE_LIMIT, 10);
         }
         if (_AUTH_SESSION.equals(path)
@@ -288,6 +305,10 @@ public class Config {
             return positiveInt(_PUBLIC_RATE_LIMIT, 90);
         }
         return positiveInt(_DATA_RATE_LIMIT, 180);
+    }
+
+    boolean trustsProxyHeaders() {
+        return "true".equalsIgnoreCase(_TRUST_PROXY_HEADERS);
     }
 
     private int positiveInt(String value, int fallback) {

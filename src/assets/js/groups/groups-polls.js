@@ -102,7 +102,7 @@ export function initGroupPolls(emptyMessage) {
                 if (el.titleInput) el.titleInput.value = '';
                 loadPolls();
             })
-            .catch(error => console.error(error)), t('groups.loading'));
+            .catch(error => showPollError(error)), t('groups.loading'));
     }
 
     function toggleStatus(poll) {
@@ -110,7 +110,7 @@ export function initGroupPolls(emptyMessage) {
         const status = poll.status === 'open' ? 'closed' : 'open';
         withGlobalLoading(() => setGroupPollStatus(group.id, getCurrentUserId(), poll.id, status)
             .then(loadPolls)
-            .catch(error => console.error(error)), t('groups.loading'));
+            .catch(error => showPollError(error)), t('groups.loading'));
     }
 
     async function openAnswerOverlay() {
@@ -187,7 +187,12 @@ export function initGroupPolls(emptyMessage) {
                 closeAnswerOverlay();
                 loadPolls();
             })
-            .catch(error => console.error(error)), t('groups.loading'));
+            .catch(error => showPollError(error, el.answerBody)), t('groups.loading'));
+    }
+
+    function showPollError(error, container = el.results) {
+        console.error(error);
+        container?.replaceChildren(emptyMessage(t('groups.pollActionError')));
     }
 
     function readAccountAnswer(card) {

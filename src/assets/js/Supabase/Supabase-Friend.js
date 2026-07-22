@@ -15,7 +15,6 @@ function invalidateFriendCaches(...userIds) {
 export async function addFriend(userId, friendCode) {
     const path = config._BASE_URL + config._EXT_SUPA_USER_ADD_FRIEND
     const data = {
-        userId: userId,
         friendCode: friendCode
     };
     return databaseRequestWithBody(path, data).then(result => {
@@ -26,10 +25,7 @@ export async function addFriend(userId, friendCode) {
 
 export async function getPendingFriendRequests(userId) {
     const path = config._BASE_URL + config._EXT_SUPA_USER_GET_PENDING_FRIENDS
-    const data = {
-        userId: userId
-    };
-    return databaseRequestWithBody(path, data, {
+    return databaseRequestWithBody(path, {}, {
         key: cacheKeys.friendsPending(userId),
         ttlMs: CACHE_TTL.FRIEND_REQUESTS,
         staleMs: CACHE_STALE.SHORT
@@ -38,10 +34,7 @@ export async function getPendingFriendRequests(userId) {
 
 export async function getFriendRequests(userId) {
     const path = config._BASE_URL + config._EXT_SUPA_USER_GET_FRIEND_REQUESTS
-    const data = {
-        userId: userId
-    };
-    return databaseRequestWithBody(path, data, {
+    return databaseRequestWithBody(path, {}, {
         key: cacheKeys.friendsRequests(userId),
         ttlMs: CACHE_TTL.FRIEND_REQUESTS,
         staleMs: CACHE_STALE.SHORT
@@ -50,10 +43,7 @@ export async function getFriendRequests(userId) {
 
 export async function getFriends(userId) {
     const path = config._BASE_URL + config._EXT_SUPA_USER_GET_FRIENDS
-    const data = {
-        userId: userId
-    };
-    return databaseRequestWithBody(path, data, {
+    return databaseRequestWithBody(path, {}, {
         key: cacheKeys.friends(userId),
         ttlMs: CACHE_TTL.FRIENDS,
         staleMs: CACHE_STALE.SHORT
@@ -63,7 +53,6 @@ export async function getFriends(userId) {
 export async function acceptFriendRequest(userId, friendId) {
     const path = config._BASE_URL + config._EXT_SUPA_USER_ACCEPT_FRIEND
     const data = {
-        userId: userId,
         friendId: friendId
     };
     return databaseRequestWithBody(path, data).then(result => {
@@ -75,7 +64,6 @@ export async function acceptFriendRequest(userId, friendId) {
 export async function rejectFriendRequest(userId, friendId) {
     const path = config._BASE_URL + config._EXT_SUPA_USER_REJECT_FRIEND
     const data = {
-        userId: userId,
         friendId: friendId
     };
     return databaseRequestWithBody(path, data).then(result => {

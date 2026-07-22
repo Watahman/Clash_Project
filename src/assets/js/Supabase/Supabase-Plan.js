@@ -7,7 +7,6 @@ import { removeCached, setCached } from "../cache/local-cache.js";
 export async function setPlanToDatabase(userId, planId, name, planInfo, revision = null) {
     const path = config._BASE_URL + config._EXT_SUPA_CWLPLANNER_DATA_SET
     const data = {
-        userId: userId,
         planId: planId,
         name: name,
         planInfo: planInfo,
@@ -43,10 +42,7 @@ export async function getPlanFromDatabase(planId, requestOptions = {}) {
 
 export async function getAllPlansFromDatabase(userId, requestOptions = {}) {
     const path = config._BASE_URL + config._EXT_SUPA_CWLPLANNER_DATA_GET_ALL
-    const data = {
-        userId: userId
-    };
-    return databaseRequestWithBody(path, data, {
+    return databaseRequestWithBody(path, {}, {
         key: cacheKeys.plansOfUser(userId),
         ttlMs: CACHE_TTL.PLANS,
         staleMs: CACHE_STALE.SHORT

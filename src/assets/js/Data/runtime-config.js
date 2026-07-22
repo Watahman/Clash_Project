@@ -1,3 +1,5 @@
+const existingConfig = window.APP_CONFIG || {};
 window.APP_CONFIG = {
-    API_BASE_URL: 'http://localhost:8080'
+    ...existingConfig,
+    API_BASE_URL: String(existingConfig.API_BASE_URL || '/api').replace(/\/+$/, '')
 };

@@ -1,5 +1,5 @@
 import { initI18n, t } from '../i18n/i18n.js';
-import { isAuthConfigured, syncAuthSession } from '../auth/auth-client.js';
+import { syncAuthSession } from '../auth/auth-client.js';
 import { getThemePreference, setThemePreference } from '../theme/theme-manager.js';
 
 function toggleTheme() {
@@ -47,7 +47,7 @@ function initPublicMenu() {
 }
 
 async function redirectReturningUser() {
-    if (!document.body.classList.contains('public-site') || !isAuthConfigured()) return;
+    if (!document.body.classList.contains('public-site')) return;
     const session = await syncAuthSession().catch(() => null);
     if (session) window.location.replace('./subPages/dashboard.html');
 }

@@ -8,8 +8,7 @@ export function poTab(btn, refs) {
         friendRequestBtn, friendPendingBtn,
         addBase, addClan,
         overlayAddBaseBtn, overlayAddClanBtn,
-        inputBaseTag, inputBaseToken, inputClanTag,
-        controller
+        inputBaseTag, inputBaseToken, inputClanTag
     } = refs;
 
     profileTabs.forEach(t => t.classList.remove('po-tab-active'));

@@ -1,15 +1,9 @@
 import { _BASE_URL } from '../Data/config.js';
 import { requestJson, HttpError } from '../utils/request-json.js';
+import { clearCachePrefix } from '../cache/local-cache.js';
 
 const LEGACY_USER_ID_KEY = 'id';
 const listeners = new Set();
-
-export class AuthConfigurationError extends Error {
-    constructor() {
-        super('Authenticatie is niet geconfigureerd.');
-        this.name = 'AuthConfigurationError';
-    }
-}
 
 function authEndpoint(path) {
     return `${_BASE_URL}${path}`;
@@ -23,7 +17,10 @@ function rememberUser(user) {
     }
 }
 
-function notify(session) {
+async function notify(session, { clearAll = false } = {}) {
+    const previousUserId = localStorage.getItem(LEGACY_USER_ID_KEY) || '';
+    const nextUserId = session?.user?.id || '';
+    if (clearAll || previousUserId !== nextUserId) await clearCachePrefix('');
     rememberUser(session?.user);
 
     listeners.forEach(callback => {
@@ -31,25 +28,20 @@ function notify(session) {
     });
 }
 
-export function isAuthConfigured() {
-    return true;
-}
-
 export async function syncAuthSession() {
     try {
         const data = await requestJson(authEndpoint('/AuthSession'), {
             method: 'POST',
             body: {},
-            auth: false,
             loading: 'background'
         });
 
         const session = data?.session || null;
-        notify(session);
+        await notify(session);
         return session;
     } catch (error) {
+        await notify(null, { clearAll: true });
         if (error instanceof HttpError && error.status === 401) {
-            notify(null);
             return null;
         }
 
@@ -63,12 +55,11 @@ export async function signInWithPassword(email, password) {
             email: String(email || '').trim(),
             password
         },
-        auth: false,
         loading: 'blocking',
         loadingMessage: 'Inloggen...'
     });
 
-    notify(data.session || null);
+    await notify(data.session || null);
     return data;
 }
 
@@ -79,12 +70,11 @@ export async function signUpWithPassword(name, email, password) {
             email: String(email || '').trim(),
             password
         },
-        auth: false,
         loading: 'blocking',
         loadingMessage: 'Account maken...'
     });
 
-    notify(data.session || null);
+    await notify(data.session || null);
     return data;
 }
 
@@ -92,17 +82,8 @@ export async function requestPasswordReset(email) {
     return requestJson(authEndpoint('/AuthRecover'), {
         body: {
             email: String(email || '').trim()
-        },
-        auth: false
+        }
     });
-}
-
-export async function signInWithGoogle() {
-    const returnUrl = new URL('../index.html', window.location.href).href;
-
-    window.location.assign(
-        `${authEndpoint('/AuthGoogle')}?returnUrl=${encodeURIComponent(returnUrl)}`
-    );
 }
 
 export async function changeAuthenticatedPassword(
@@ -114,7 +95,6 @@ export async function changeAuthenticatedPassword(
             currentPassword,
             newPassword
         },
-        auth: true,
         loading: 'blocking',
         loadingMessage: 'Wachtwoord wijzigen...'
     });
@@ -123,20 +103,35 @@ export async function changeAuthenticatedPassword(
 export async function signOut() {
     try {
         await requestJson(authEndpoint('/AuthLogout'), {
-            body: {},
-            auth: false
+            body: {}
         });
     } finally {
-        notify(null);
+        await notify(null, { clearAll: true });
     }
 }
 
 export function onAuthStateChange(callback) {
     listeners.add(callback);
 
-    syncAuthSession()
-        .then(session => callback?.(session))
-        .catch(() => callback?.(null));
+    void syncAuthSession().catch(() => {});
 
     return () => listeners.delete(callback);
+}
+
+export async function getGoogleSignInUrl(next = '/subPages/dashboard.html') {
+    const data = await requestJson(authEndpoint('/AuthGoogle'), {
+        body: { next },
+        loading: 'blocking',
+        loadingMessage: 'Doorsturen naar Google...'
+    });
+    if (!data?.url) {
+        throw new HttpError('Google-login gaf geen geldige doorstuur-URL.', {
+            code: 'INVALID_GOOGLE_AUTH_RESPONSE'
+        });
+    }
+    return data.url;
+}
+
+export async function signInWithGoogle(next = '/subPages/dashboard.html') {
+    window.location.assign(await getGoogleSignInUrl(next));
 }

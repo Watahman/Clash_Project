@@ -4,7 +4,6 @@ import { requestJson } from "../utils/request-json.js";
 export async function databaseRequestWithBody(path, body, cacheOptions = null, requestOptions = {}) {
     const request = () => requestJson(path, {
         body,
-        auth: requestOptions.auth !== false,
         signal: requestOptions.signal,
         loading: requestOptions.loading || 'background',
         loadingMessage: requestOptions.loadingMessage

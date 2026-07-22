@@ -81,47 +81,57 @@ public class API_Utils {
     public String getClashApiResponse(String urlStr) throws Exception {
         URL url = new URL(urlStr);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("Authorization", conf.getClashApiKey());
-        conn.setRequestProperty("Accept", "application/json");
-        conn.setConnectTimeout(8_000);
-        conn.setReadTimeout(15_000);
+        try {
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Authorization", conf.getClashApiKey());
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setConnectTimeout(8_000);
+            conn.setReadTimeout(15_000);
 
-        int statusCode = conn.getResponseCode();
-        String responseBody = readResponseBody(conn, statusCode);
-        if (statusCode < 200 || statusCode >= 300) {
-            throw new HttpException(statusCode, responseBody);
+            int statusCode = conn.getResponseCode();
+            String responseBody = readResponseBody(conn, statusCode);
+            if (statusCode < 200 || statusCode >= 300) {
+                throw new HttpException(statusCode, responseBody);
+            }
+            return responseBody;
+        } finally {
+            conn.disconnect();
         }
-        return responseBody;
     }
 
     public String postClashApiResponse(String urlStr, String jsonBody) throws Exception {
         URL url = new URL(urlStr);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("Authorization", conf.getClashApiKey());
-        conn.setRequestProperty("Accept", "application/json");
-        conn.setRequestProperty("Content-Type", "application/json");
-        conn.setDoOutput(true);
-        conn.setConnectTimeout(8_000);
-        conn.setReadTimeout(15_000);
+        try {
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization", conf.getClashApiKey());
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoOutput(true);
+            conn.setConnectTimeout(8_000);
+            conn.setReadTimeout(15_000);
 
-        try (OutputStream os = conn.getOutputStream()) {
-            os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
-        }
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
+            }
 
-        int statusCode = conn.getResponseCode();
-        String responseBody = readResponseBody(conn, statusCode);
-        if (statusCode < 200 || statusCode >= 300) {
-            throw new HttpException(statusCode, responseBody);
+            int statusCode = conn.getResponseCode();
+            String responseBody = readResponseBody(conn, statusCode);
+            if (statusCode < 200 || statusCode >= 300) {
+                throw new HttpException(statusCode, responseBody);
+            }
+            return responseBody;
+        } finally {
+            conn.disconnect();
         }
-        return responseBody;
     }
 
     private String readResponseBody(HttpURLConnection conn, int statusCode) throws Exception {
         InputStream stream = (statusCode >= 200 && statusCode < 300) ? conn.getInputStream() : conn.getErrorStream();
         if (stream == null) return "{\"error\":\"HTTP " + statusCode + "\"}";
-        return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+        try (stream) {
+            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+        }
     }
 
     public void sendJsonResponse(HttpExchange exchange, String json, int statusCode) throws Exception {
@@ -167,6 +177,14 @@ public class API_Utils {
     }
 
     public void handlePost(HttpExchange exchange, PostHandler handler) {
+        handleRequest(exchange, "POST", handler);
+    }
+
+    public void handleGet(HttpExchange exchange, PostHandler handler) {
+        handleRequest(exchange, "GET", handler);
+    }
+
+    private void handleRequest(HttpExchange exchange, String expectedMethod, PostHandler handler) {
         try {
             addCORS(exchange);
             String origin = exchange.getRequestHeaders().getFirst("Origin");
@@ -179,7 +197,7 @@ public class API_Utils {
                 exchange.sendResponseHeaders(204, -1);
                 return;
             }
-            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+            if (!expectedMethod.equalsIgnoreCase(exchange.getRequestMethod())) {
                 sendJsonResponse(exchange, "{\"error\":\"Method not allowed\"}", 405);
                 return;
             }
@@ -338,6 +356,13 @@ public class API_Utils {
         String address = exchange.getRemoteAddress() == null
                 ? "unknown"
                 : exchange.getRemoteAddress().getAddress().getHostAddress();
+        if (conf.trustsProxyHeaders()) {
+            String forwarded = exchange.getRequestHeaders().getFirst("X-Forwarded-For");
+            if (forwarded != null && !forwarded.isBlank()) {
+                String firstHop = forwarded.split(",", 2)[0].trim();
+                if (!firstHop.isBlank()) address = firstHop;
+            }
+        }
         return address + "|" + path;
     }
 

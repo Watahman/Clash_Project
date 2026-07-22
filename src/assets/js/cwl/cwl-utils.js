@@ -4,6 +4,32 @@ export function normalizeTag(value) {
     return tag.startsWith('#') ? tag : `#${tag}`;
 }
 
+export function escapeCssIdentifier(value) {
+    if (globalThis.CSS?.escape) return globalThis.CSS.escape(String(value));
+    const input = String(value);
+    let escaped = '';
+    for (let index = 0; index < input.length; index += 1) {
+        const code = input.charCodeAt(index);
+        if (code === 0) {
+            escaped += '\uFFFD';
+        } else if ((code >= 1 && code <= 31) || code === 127
+            || (index === 0 && code >= 48 && code <= 57)
+            || (index === 1 && code >= 48 && code <= 57 && input.charCodeAt(0) === 45)) {
+            escaped += `\\${code.toString(16)} `;
+        } else if (index === 0 && code === 45 && input.length === 1) {
+            escaped += '\\-';
+        } else if (code >= 128 || code === 45 || code === 95
+            || (code >= 48 && code <= 57)
+            || (code >= 65 && code <= 90)
+            || (code >= 97 && code <= 122)) {
+            escaped += input.charAt(index);
+        } else {
+            escaped += `\\${input.charAt(index)}`;
+        }
+    }
+    return escaped;
+}
+
 export function getPlayerTag(player) {
     return normalizeTag(player?.tag || player?.playerTag || player?.accountTag || player?.clashTag);
 }
@@ -39,5 +65,5 @@ export function getCardTag(card) {
 export function plannerHasPlayer(tag) {
     const normalizedTag = normalizeTag(tag);
     if (!normalizedTag) return false;
-    return Boolean(document.querySelector(`.cwl-player-article[data-planner-card="true"][data-player-tag="${CSS.escape(normalizedTag)}"]`));
+    return Boolean(document.querySelector(`.cwl-player-article[data-planner-card="true"][data-player-tag="${escapeCssIdentifier(normalizedTag)}"]`));
 }

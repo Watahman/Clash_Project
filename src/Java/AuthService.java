@@ -20,6 +20,9 @@ import java.util.List;
 public final class AuthService {
     private static final String ACCESS_COOKIE = "ct_access";
     private static final String REFRESH_COOKIE = "ct_refresh";
+    private static final String GOOGLE_VERIFIER_COOKIE = "ct_google_verifier";
+    private static final String GOOGLE_NEXT_COOKIE = "ct_google_next";
+    private static final long GOOGLE_FLOW_MAX_AGE_SECONDS = 10 * 60L;
     private static final int MAX_COOKIE_HEADER_LENGTH = 32_768;
 
     private static final HttpClient CLIENT = HttpClient.newBuilder()
@@ -95,6 +98,79 @@ public final class AuthService {
         if (!redirectUrl.isBlank()) path += "?redirect_to=" + encode(redirectUrl);
 
         sendJson("POST", path, payload, null);
+    }
+
+    public String startGoogleOAuth(HttpExchange exchange, String requestedNext) throws Exception {
+        ensureGoogleProviderEnabled();
+        OAuthPkce.Flow flow = OAuthPkce.create();
+        String destination = OAuthPkce.sanitizeNext(requestedNext);
+        addOAuthFlowCookie(exchange, GOOGLE_VERIFIER_COOKIE, flow.verifier(), GOOGLE_FLOW_MAX_AGE_SECONDS);
+        addOAuthFlowCookie(
+                exchange,
+                GOOGLE_NEXT_COOKIE,
+                Base64.getUrlEncoder().withoutPadding().encodeToString(destination.getBytes(StandardCharsets.UTF_8)),
+                GOOGLE_FLOW_MAX_AGE_SECONDS
+        );
+
+        return config.getSupabaseUrl()
+                + "/auth/v1/authorize?provider=google"
+                + "&redirect_to=" + encode(config.getAuthGoogleCallbackUrl())
+                + "&code_challenge=" + encode(flow.challenge())
+                + "&code_challenge_method=s256";
+    }
+
+    public String completeGoogleOAuth(HttpExchange exchange, String authCode) throws Exception {
+        String verifier = readCookie(exchange, GOOGLE_VERIFIER_COOKIE);
+        String destination = decodeNextCookie(readCookie(exchange, GOOGLE_NEXT_COOKIE));
+        if (authCode == null || authCode.isBlank() || verifier.isBlank()) {
+            clearGoogleFlowCookies(exchange);
+            throw new HttpException(
+                    400,
+                    "{\"error\":\"Google-aanmelding is verlopen\",\"code\":\"GOOGLE_AUTH_FLOW_EXPIRED\"}"
+            );
+        }
+
+        try {
+            JsonObject payload = new JsonObject();
+            payload.addProperty("auth_code", authCode);
+            payload.addProperty("code_verifier", verifier);
+            JsonObject authResponse = sendJson("POST", "/auth/v1/token?grant_type=pkce", payload, null);
+            SessionData session = requireSessionData(authResponse);
+            writeSessionCookies(exchange, session);
+            return destination;
+        } finally {
+            clearGoogleFlowCookies(exchange);
+        }
+    }
+
+    public void clearGoogleFlowCookies(HttpExchange exchange) {
+        addOAuthFlowCookie(exchange, GOOGLE_VERIFIER_COOKIE, "", 0);
+        addOAuthFlowCookie(exchange, GOOGLE_NEXT_COOKIE, "", 0);
+    }
+
+    private void ensureGoogleProviderEnabled() throws Exception {
+        JsonObject settings = sendJson("GET", "/auth/v1/settings", null, null);
+        JsonElement external = settings.get("external");
+        boolean enabled = external != null
+                && external.isJsonObject()
+                && external.getAsJsonObject().has("google")
+                && external.getAsJsonObject().get("google").getAsBoolean();
+        if (!enabled) {
+            throw new HttpException(
+                    503,
+                    "{\"error\":\"Google-login is nog niet ingeschakeld in Supabase\",\"code\":\"GOOGLE_AUTH_NOT_CONFIGURED\"}"
+            );
+        }
+    }
+
+    private String decodeNextCookie(String encoded) {
+        if (encoded == null || encoded.isBlank()) return OAuthPkce.sanitizeNext("");
+        try {
+            String value = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
+            return OAuthPkce.sanitizeNext(value);
+        } catch (IllegalArgumentException invalidCookie) {
+            return OAuthPkce.sanitizeNext("");
+        }
     }
 
     public JsonObject changePassword(
@@ -418,12 +494,20 @@ public final class AuthService {
     }
 
     private void addCookie(HttpExchange exchange, String name, String value, long maxAgeSeconds) {
+        addCookie(exchange, name, value, maxAgeSeconds, config.getAuthCookieSameSite());
+    }
+
+    private void addOAuthFlowCookie(HttpExchange exchange, String name, String value, long maxAgeSeconds) {
+        addCookie(exchange, name, value, maxAgeSeconds, "Lax");
+    }
+
+    private void addCookie(HttpExchange exchange, String name, String value, long maxAgeSeconds, String sameSite) {
         String safeValue = value == null ? "" : value.replace("\r", "").replace("\n", "");
         StringBuilder cookie = new StringBuilder()
                 .append(name).append('=').append(safeValue)
                 .append("; Path=/")
                 .append("; HttpOnly")
-                .append("; SameSite=").append(config.getAuthCookieSameSite())
+                .append("; SameSite=").append(sameSite)
                 .append("; Max-Age=").append(Math.max(0, maxAgeSeconds));
         if (config.isAuthCookieSecure()) cookie.append("; Secure");
         exchange.getResponseHeaders().add("Set-Cookie", cookie.toString());

@@ -32,7 +32,7 @@ export function createClanAdmin(elements, getState, setMessage, emptyMessage) {
         if (!group || !userId || !canAdmin) return Promise.resolve();
         const requestedGroupId = group.id;
         return withGlobalLoading(() => Promise.all([
-            getGroupClans(group.id, userId),
+            getGroupClans(group.id),
             getGroupInfo(group.id)
         ])
             .then(([clans, groupData]) => {
@@ -68,7 +68,7 @@ export function createClanAdmin(elements, getState, setMessage, emptyMessage) {
         withGlobalLoading(() => getClanInfoRequest(tag)
             .then(info => {
                 const officialBadgeUrl = badgeUrl(info);
-                return addGroupClan(group.id, userId, {
+                return addGroupClan(group.id, {
                     tag: normalizeTag(info?.tag || tag),
                     name: info?.name || tag,
                     badgeUrl: officialBadgeUrl
@@ -90,7 +90,7 @@ export function createClanAdmin(elements, getState, setMessage, emptyMessage) {
         const tag = normalizeTag(clanTag);
         if (!group || !userId || !canAdmin || !tag) return;
 
-        withGlobalLoading(() => removeGroupClan(group.id, userId, tag)
+        withGlobalLoading(() => removeGroupClan(group.id, tag)
             .then(async () => {
                 renderScanPlaceholder(t('groups.scanFirst'));
                 setMessage(t('groups.clanRemoved'), 'success');

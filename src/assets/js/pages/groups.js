@@ -41,6 +41,7 @@ const groupsLeaveBtn = document.querySelector('#groups-leave-btn');
 const groupsLeaveCancelBtn = document.querySelector('#groups-leave-cancel-btn');
 const groupsLeaveConfirmBtn = document.querySelector('#groups-leave-confirm-btn');
 const groupsAdminOverlay = document.querySelector('#groups-admin-overlay');
+const groupsPageStatus = document.querySelector('#groups-page-status');
 
 const OPEN_GROUP_STORAGE_KEY = 'clashtoolsOpenGroupId';
 const SELECTED_GROUP_STORAGE_KEY = 'clashtoolsSelectedGroupId';
@@ -189,18 +190,23 @@ async function createNewGroup(value, option) {
     if (!userId || !value) return;
 
     if (option === 'name') {
+        setPageStatus('');
         await withGlobalLoading(async () => {
             const created = await createGroup(value, userId);
             const groupId = Array.isArray(created) ? created[0]?.id : created?.id;
             if (groupId) localStorage.setItem(SELECTED_GROUP_STORAGE_KEY, groupId);
             if (groupsInputName) groupsInputName.value = '';
             await reloadGroups();
-        }, t('groups.loading')).catch(console.error);
+        }, t('groups.loading')).catch(error => {
+            console.error(error);
+            setPageStatus(t('groups.createError'));
+        });
         return;
     }
 
     await withGlobalLoading(async () => {
         try {
+            setPageStatus('');
             const clanInfo = await getClanInfoRequest(value);
             const clanTag = normalizeClanTag(clanInfo?.tag || value);
             const clanName = clanInfo?.name || clanTag;
@@ -208,7 +214,7 @@ async function createNewGroup(value, option) {
             const createdGroup = await createGroup(clanName, userId);
             const groupId = Array.isArray(createdGroup) ? createdGroup[0]?.id : createdGroup?.id;
             if (!groupId) throw new Error('GROUP_ID_MISSING');
-            await addGroupClan(groupId, userId, { tag: clanTag, name: clanName, badgeUrl: officialBadgeUrl })
+            await addGroupClan(groupId, { tag: clanTag, name: clanName, badgeUrl: officialBadgeUrl })
                 .catch(error => {
                     console.error(error);
                     throw new Error('GROUP_CLAN_LINK_FAILED');
@@ -221,6 +227,7 @@ async function createNewGroup(value, option) {
             console.error(error);
             const linkFailed = ['GROUP_ID_MISSING', 'GROUP_CLAN_LINK_FAILED'].includes(error?.message);
             if (groupsClanHint) groupsClanHint.textContent = linkFailed ? t('groups.clanLinkError') : t('groups.clanNotFound');
+            setPageStatus(linkFailed ? t('groups.clanLinkError') : t('groups.createError'));
         }
     }, t('groups.loading'));
 }
@@ -238,11 +245,15 @@ function clanBadgeUrl(clanInfo) {
 async function joinGroupFun(code) {
     const userId = requireLoggedIn();
     if (!userId || !code) return;
+    setPageStatus('');
     await withGlobalLoading(async () => {
         await joinGroup(userId, code);
         if (groupsInputJoinCode) groupsInputJoinCode.value = '';
         await reloadGroups();
-    }, t('groups.loading')).catch(console.error);
+    }, t('groups.loading')).catch(error => {
+        console.error(error);
+        setPageStatus(t('groups.joinError'));
+    });
 }
 
 function leaveGroupFun() {
@@ -253,12 +264,16 @@ function leaveGroupFun() {
         const code = document.querySelector('#groups-detail-code-text')?.textContent?.trim();
         groupOverlayLeave?.classList.add('hidden');
         if (!userId || !code) return;
+        setPageStatus('');
         await withGlobalLoading(async () => {
             await leaveGroup(userId, code);
             localStorage.removeItem(SELECTED_GROUP_STORAGE_KEY);
             resetGroupDetail();
             await reloadGroups();
-        }, t('groups.loading')).catch(console.error);
+        }, t('groups.loading')).catch(error => {
+            console.error(error);
+            setPageStatus(t('groups.leaveError'));
+        });
     });
 }
 
@@ -309,6 +324,12 @@ function overlayBackdropClose() {
 function setText(selector, value) {
     const element = document.querySelector(selector);
     if (element) element.textContent = value;
+}
+
+function setPageStatus(message) {
+    if (!groupsPageStatus) return;
+    groupsPageStatus.textContent = message || '';
+    groupsPageStatus.hidden = !message;
 }
 
 void init();

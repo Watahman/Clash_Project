@@ -6,7 +6,7 @@ import { getAllPlansFromDatabase, getPlanFromDatabase, setPlanToDatabase } from 
 import { getCurrentUserId } from '../utils/user.js';
 import { t } from '../i18n/i18n.js';
 import { getActiveCwlPollMeta } from './cwl-availability.js';
-import { getCardTag, normalizeTag } from './cwl-utils.js';
+import { escapeCssIdentifier, getCardTag, normalizeTag } from './cwl-utils.js';
 import {
     CWL_PLAN_SCHEMA_VERSION,
     normalizePlanDocument,
@@ -302,11 +302,12 @@ export async function loadPlanById(planId) {
     } catch (error) {
         if (error?.name !== 'AbortError' && token === activeLoadToken) setSaveStatus('error');
     } finally {
-        if (token !== activeLoadToken) return;
-        setLoading(false);
-        setCanAutosave(true);
-        suppressSave = false;
-        window.dispatchEvent(new CustomEvent('clashtools:cwl-plan-loaded'));
+        if (token === activeLoadToken) {
+            setLoading(false);
+            setCanAutosave(true);
+            suppressSave = false;
+            window.dispatchEvent(new CustomEvent('clashtools:cwl-plan-loaded'));
+        }
     }
 }
 
@@ -404,7 +405,7 @@ async function enrichClan(clan, token, signal) {
     try {
         const data = await getClanInfoRequest(clan.tag, { signal });
         if (token !== activeLoadToken) return;
-        const card = document.querySelector(`#cwl-clan-template_${CSS.escape(clan.id)}`);
+        const card = document.querySelector(`#cwl-clan-template_${escapeCssIdentifier(clan.id)}`);
         if (!card) return;
         const clanName = data.name || clan.name || clan.tag || t('cwl.clan');
         const clanTag = normalizeTag(data.tag || clan.tag);

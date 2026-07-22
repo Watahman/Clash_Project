@@ -1,5 +1,5 @@
 import { initI18n, t } from '../i18n/i18n.js';
-import { isAuthConfigured, syncAuthSession } from '../auth/auth-client.js';
+import { syncAuthSession } from '../auth/auth-client.js';
 import { getThemePreference, setThemePreference } from '../theme/theme-manager.js';
 import { getNotifications, markNotificationRead } from '../Supabase/Supabase-Notifications.js';
 import { getCurrentUserId } from '../utils/user.js';
@@ -417,7 +417,6 @@ function initNotificationsPopover() {
 }
 
 async function protectRoute() {
-    if (!isAuthConfigured()) return;
     const session = await syncAuthSession().catch(() => null);
     if (session) return;
     const next = `${window.location.pathname}${window.location.search}${window.location.hash}`;
