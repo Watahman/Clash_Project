@@ -3,6 +3,8 @@ import { isAuthConfigured, syncAuthSession } from '../auth/auth-client.js';
 import { getThemePreference, setThemePreference } from '../theme/theme-manager.js';
 import { getNotifications, markNotificationRead } from '../Supabase/Supabase-Notifications.js';
 import { getCurrentUserId } from '../utils/user.js';
+import { checkUserId } from '../Supabase/Supabase-User.js';
+import { getNameInitials } from '../utils/name-initials.js';
 
 let notificationsData = null;
 let notificationsRequestId = 0;
@@ -17,6 +19,51 @@ const pageConfig = {
     groups: { key: 'nav.groups', fallback: 'Groepen' },
     bracket: { key: 'nav.bracket', fallback: 'Bracket generator' }
 };
+
+function applyWorkspaceUserIdentity(userData) {
+    const user = Array.isArray(userData)
+        ? userData[0]
+        : userData;
+
+    const name = String(user?.name || '').trim();
+
+    if (!name) {
+        return;
+    }
+
+    const initials = getNameInitials(name, 'CT');
+
+    document
+        .querySelectorAll('.workspace-avatar')
+        .forEach(avatar => {
+            avatar.textContent = initials;
+            avatar.title = name;
+        });
+
+    const profileName = document.querySelector(
+        '.workspace-profile-copy strong'
+    );
+
+    if (profileName) {
+        profileName.removeAttribute('data-i18n');
+        profileName.textContent = name;
+    }
+}
+
+async function loadWorkspaceUserIdentity() {
+    const userId = getCurrentUserId();
+
+    if (!userId) {
+        return;
+    }
+
+    try {
+        const userData = await checkUserId(userId);
+        applyWorkspaceUserIdentity(userData);
+    } catch {
+        // De standaardwaarde CT/Gebruiker blijft zichtbaar.
+    }
+}
 
 const icons = {
     dashboard: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 11.5 12 5l8 6.5v7a1 1 0 0 1-1 1h-5v-5h-4v5H5a1 1 0 0 1-1-1v-7Z" stroke-width="1.7" stroke-linejoin="round"/></svg>',
@@ -406,7 +453,20 @@ function initWorkspaceShell() {
     initMobileSidebar(sidebar, backdrop);
     initProfileShortcuts();
     initNotificationsPopover();
-    window.addEventListener('clashtools:language-changed', updateThemeButton);
+
+    window.addEventListener(
+        'clashtools:user-profile-updated',
+        event => {
+            applyWorkspaceUserIdentity(event.detail);
+        }
+    );
+
+    window.addEventListener(
+        'clashtools:language-changed',
+        updateThemeButton
+    );
+
+    void loadWorkspaceUserIdentity();
     void protectRoute();
 }
 

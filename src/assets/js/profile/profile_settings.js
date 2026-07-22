@@ -107,9 +107,24 @@ async function saveName() {
             setMessage('settings.nameChangeError', 'error');
             return;
         }
-        currentProfile = { ...currentProfile, name };
+        currentProfile = {
+            ...currentProfile,
+            name
+        };
+
         q('#po-username').textContent = name;
+
         onProfileUpdated?.(currentProfile);
+
+        window.dispatchEvent(
+            new CustomEvent(
+                'clashtools:user-profile-updated',
+                {
+                    detail: currentProfile
+                }
+            )
+        );
+
         setMessage('settings.nameChanged');
     } catch {
         setMessage('settings.nameChangeError', 'error');

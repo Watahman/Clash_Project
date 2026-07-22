@@ -7,6 +7,7 @@ import { getAllPlansFromDatabase } from '../Supabase/Supabase-Plan.js';
 import { getGroupInfo, getGroupsOfUser } from '../Supabase/Supabase-Group.js';
 import { roleLabelKey } from '../groups/groups-roles.js';
 import { summarizePlan } from '../cwl/cwl-plan-summary.js';
+import { getNameInitials } from '../utils/name-initials.js';
 
 const refs = {};
 const state = {
@@ -116,11 +117,6 @@ function renderPlans() {
     state.plans.slice(0, 3).forEach(plan => refs.planList.appendChild(planRow(plan)));
 }
 
-function groupInitials(name) {
-    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
-    return (parts.slice(0, 2).map(part => part[0]).join('') || 'CT').toUpperCase();
-}
-
 function groupRow(entry) {
     const link = document.createElement('a');
     link.className = 'workspace-summary-row';
@@ -128,7 +124,7 @@ function groupRow(entry) {
     link.addEventListener('click', () => sessionStorage.setItem('clashtoolsOpenGroupId', entry.group.id));
     const mark = document.createElement('span');
     mark.className = 'workspace-group-mark';
-    mark.textContent = groupInitials(entry.group.name);
+    mark.textContent = getNameInitials(entry.group.name);
     const copy = document.createElement('span');
     const name = document.createElement('strong');
     name.textContent = entry.group.name;
@@ -182,15 +178,6 @@ function renderUser() {
     const accounts = Array.isArray(state.user?.accounts) ? state.user.accounts : [];
     refs.accountCount.textContent = String(accounts.length);
     refs.accountLine.hidden = accounts.length === 0;
-
-    if (!name) return;
-    const shellName = document.querySelector('.workspace-profile-copy strong');
-    if (shellName) {
-        shellName.removeAttribute('data-i18n');
-        shellName.textContent = name;
-    }
-    const initials = groupInitials(name);
-    document.querySelectorAll('.workspace-avatar').forEach(avatar => { avatar.textContent = initials; });
 }
 
 function renderAll() {

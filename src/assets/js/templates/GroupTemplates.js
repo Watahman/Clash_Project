@@ -3,6 +3,7 @@ import { getGroupInfo, getGroupMembers } from '../Supabase/Supabase-Group.js';
 import { applyRoleBadge, getCurrentUserRole, getMemberRole, isGroupAdmin } from '../groups/groups-roles.js';
 import { renderBadge } from '../groups/groups-badges.js';
 import { renderGroupMemberActivities } from '../groups/groups-member-activity.js';
+import { getNameInitials } from '../utils/name-initials.js';
 
 function memberLabel(count) {
     return count === 1 ? `1 ${t('groups.memberSingle')}` : `${count} ${t('groups.members')}`;
@@ -151,17 +152,31 @@ function addAllMembers(members, creatorId) {
     members.forEach(member => {
         const fragment = document.querySelector('#groups-member-template').content.cloneNode(true);
         const item = fragment.querySelector('.groups-member-item');
-        const user = profileOf(member) || { id: member.user_id, name: member.user_id };
-        item.dataset.userId = user.id || member.user_id;
+        const user = profileOf(member) || {
+            id: member.user_id,
+            name: member.user_id
+        };
+
         const displayName = user.name || member.user_id;
 
-        fragment.querySelector('.groups-member-name').textContent = displayName;
-        fragment.querySelector('.groups-member-code').textContent = user.code || member.user_id;
+        item.dataset.userId = user.id || member.user_id;
 
-        const avatar = fragment.querySelector('.groups-member-avatar');
+        fragment.querySelector('.groups-member-name').textContent =
+            displayName;
+
+        fragment.querySelector('.groups-member-code').textContent =
+            user.code || member.user_id;
+
+        const avatar = fragment.querySelector(
+            '.groups-member-avatar'
+        );
 
         if (avatar) {
-            avatar.textContent = memberInitials(displayName);
+            avatar.textContent = getNameInitials(
+                displayName,
+                '?'
+            );
+
             avatar.title = displayName;
         }
 
