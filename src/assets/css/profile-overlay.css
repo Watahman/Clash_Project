@@ -2,13 +2,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    z-index: 9998;
-    align-items: center;
     justify-content: center;
-    padding: 1.4rem;
-    background: rgba(2,4,8,0.74);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
 }
 #profile-overlay.po-open { display: flex; }
 .po-card {
@@ -20,7 +14,6 @@
     overflow: hidden;
     border: 1px solid rgba(246,183,60,0.23);
     border-radius: var(--radius-xl);
-    background: linear-gradient(180deg, rgba(18,24,36,0.98), rgba(8,11,16,0.98));
     box-shadow: var(--shadow-lg), var(--inner-line);
 }
 .po-topbar { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1rem 0; }
@@ -50,7 +43,6 @@
     border-radius: var(--radius-lg);
     color: var(--accent);
     border: 1px solid rgba(246,183,60,0.24);
-    background: linear-gradient(145deg, rgba(246,183,60,0.14), rgba(155,92,255,0.12));
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 0 2rem rgba(246,183,60,0.08);
 }
 .po-user-info { min-width: 0; display: flex; flex-direction: column; gap: 0.45rem; }
@@ -75,17 +67,15 @@
 .po-tab:hover { color: var(--text-1); background: rgba(255,255,255,0.04); border-color: var(--border-subtle); }
 .po-tab.po-tab-active { color: var(--accent); background: var(--accent-dim); border-color: rgba(246,183,60,0.24); }
 .po-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.8rem; padding: 1rem; overflow: hidden; }
-.po-panel-content { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.55rem; overflow-y: auto; }
-.po-base-icon, .po-friend-avatar { width: 2.6rem; height: 2.6rem; border-radius: var(--radius-sm); }
+.po-panel-content { flex: 1; overflow-y: auto; }
 .po-base-icon svg, .po-friend-avatar svg { color: var(--accent); }
 .po-base-img { width: 2.25rem; height: 2.25rem; object-fit: cover; border-radius: var(--radius-xs); }
-.po-base-chevron { width: 0.85rem; height: 0.85rem; filter: invert(52%) sepia(13%) saturate(439%) hue-rotate(178deg); }
+.po-base-chevron { filter: invert(52%) sepia(13%) saturate(439%) hue-rotate(178deg); }
 #po-add-container { display: flex; gap: 0.55rem; flex-shrink: 0; }
 #po-add, #po-friend-requests-btn, #po-friend-pending-btn { flex: 1; justify-content: center; border-style: dashed; }
 .po-footer { padding: 0.85rem 1rem; border-top: 1px solid var(--border-subtle); background: rgba(0,0,0,0.15); }
 .po-settings { display: flex; flex-direction: column; gap: 0.75rem; margin-top: auto; }
 #po-logout-btn {
-    width: 100%;
     justify-content: center;
     color: var(--red);
     border-color: rgba(255,91,74,0.32);
@@ -96,7 +86,6 @@
 #po-container-friend-list { width: min(30rem, 100%); max-height: 72vh; overflow: hidden; }
 .po-friend-list-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-bottom: 0.4rem; }
 .po-friend-list-content { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.55rem; overflow-y: auto; }
-.po-friend-actions { display: flex; gap: 0.4rem; }
 .po-friend-accept, .po-friend-reject, .po-friend-clock {
     width: 2rem;
     height: 2rem;
@@ -108,7 +97,7 @@
 .po-friend-accept { color: var(--green); border-color: rgba(56,217,138,0.24); background: var(--green-dim); }
 .po-friend-reject { color: var(--red); border-color: rgba(255,91,74,0.24); background: var(--red-dim); }
 .po-friend-clock { color: var(--text-3); border: 1px solid var(--border-subtle); background: rgba(255,255,255,0.04); }
-.po-friend-clock img { width: 0.9rem; height: 0.9rem; filter: invert(52%) sepia(13%) saturate(439%) hue-rotate(178deg); }
+.po-friend-clock img { filter: invert(52%) sepia(13%) saturate(439%) hue-rotate(178deg); }
 @media (max-width: 42rem) {
     .po-card { height: min(90vh, 46rem); }
     .po-tabs { overflow-x: auto; }
@@ -121,12 +110,7 @@
 .po-panel-content {
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
     min-height: 16rem;
-}
-.po-base-item {
-    min-height: 4.15rem;
-    flex: 0 0 auto;
 }
 .po-base-icon, .po-friend-avatar {
     width: 2.7rem;
@@ -139,9 +123,7 @@
     object-fit: contain;
 }
 .po-base-text {
-    min-width: 0;
     flex: 1;
-    display: flex;
     flex-direction: column;
 }
 .po-base-name, .po-base-info {
@@ -152,7 +134,6 @@
 .po-friend-actions {
     display: flex;
     gap: 0.4rem;
-    margin-left: auto;
 }
 .po-friend-actions button, .po-friend-clock {
     width: 2rem;
@@ -164,8 +145,7 @@
 .po-friend-clock img { width: 1rem; height: 1rem; }
 
 
-/* Iteration: profile cards as compact clickable articles */
-.po-panel-content{gap:.62rem!important}.po-base-item{display:grid!important;grid-template-columns:3rem minmax(0,1fr) auto!important;min-height:4.65rem!important;padding:.7rem .78rem!important;border-radius:var(--radius-md)!important;background:linear-gradient(180deg,rgba(23,31,47,.96),rgba(12,17,26,.96))!important;border:1px solid var(--border-subtle)!important}.po-base-item:hover{border-color:rgba(246,183,60,.3)!important;transform:translateY(-1px)}.po-base-icon,.po-friend-avatar{width:3rem!important;height:3rem!important;border-radius:var(--radius-sm)!important;display:grid!important;place-items:center!important}.po-base-icon img,.po-base-img{width:2.55rem!important;height:2.55rem!important;object-fit:contain!important;border-radius:0!important}.po-shield-icon svg,.po-base-icon svg,.po-friend-avatar svg{color:var(--accent);width:1.65rem;height:1.65rem}.po-base-name{font-size:1.02rem!important;line-height:1!important}.po-base-info{font-family:var(--font-mono);font-size:.72rem!important;color:var(--text-3)!important}.po-base-chevron{width:1rem!important;height:1rem!important;opacity:.68}.po-card-base::after,.po-card-friend::after,.po-card-clan::after{content:'';color:var(--text-3);font-size:1.25rem;line-height:1;margin-left:.25rem}.po-card-base .po-base-chevron,.po-card-friend .po-base-chevron{display:none}.po-friend-actions{grid-column:3}.po-friend-list-content .po-base-item{grid-template-columns:3rem minmax(0,1fr) auto!important}
+/* Iteration: profile cards as compact clickable articles */.po-base-icon,.po-friend-avatar{width:3rem!important;height:3rem!important;border-radius:var(--radius-sm)!important;display:grid!important;place-items:center!important}.po-base-icon img,.po-base-img{width:2.55rem!important;height:2.55rem!important;object-fit:contain!important;border-radius:0!important}.po-shield-icon svg,.po-base-icon svg,.po-friend-avatar svg{color:var(--accent);width:1.65rem;height:1.65rem}.po-base-chevron{width:1rem!important;height:1rem!important;opacity:.68}.po-card-base::after,.po-card-friend::after,.po-card-clan::after{content:'';color:var(--text-3);font-size:1.25rem;line-height:1;margin-left:.25rem}.po-card-base .po-base-chevron,.po-card-friend .po-base-chevron{display:none}.po-friend-actions{grid-column:3}
 
 
 /* Final approved pass: profile dynamic cards */
@@ -181,21 +161,16 @@
     width: 100% !important;
     flex: 0 0 auto !important;
     padding: .68rem .78rem !important;
-    border: 1px solid var(--border-subtle) !important;
-    border-left: 3px solid var(--accent) !important;
     border-radius: var(--radius-md) !important;
-    background: linear-gradient(180deg, rgba(23,31,47,.96), rgba(12,17,26,.96)) !important;
-    box-shadow: var(--inner-line);
     transition: transform .14s ease, border-color .14s ease, background .14s ease;
 }
-.po-base-item:hover { transform: translateY(-1px); border-color: rgba(246,183,60,.32) !important; }
+.po-base-item:hover { transform: translateY(-1px); }
 .po-base-icon, .po-friend-avatar, .po-shield-icon {
     width: 3rem !important;
     height: 3rem !important;
     display: grid !important;
     place-items: center !important;
     border-radius: var(--radius-sm) !important;
-    background: rgba(0,0,0,.20);
     border: 1px solid rgba(246,183,60,.12);
 }
 .po-base-img, .po-base-icon img { width: 2.55rem !important; height: 2.55rem !important; object-fit: contain !important; }
@@ -228,9 +203,6 @@
 }
 
 /* Profile/settings polish */
-:root[data-theme="light"] #profile-overlay {
-    background: rgba(26, 34, 48, 0.36);
-}
 .po-card {
     border-color: var(--border-subtle);
     background: linear-gradient(180deg, var(--surface-1), var(--surface-2));
@@ -474,9 +446,6 @@
 }
 
 /* Global light-mode pass: profile popup readability */
-:root[data-theme="light"] #profile-overlay {
-    background: rgba(29, 39, 55, 0.38);
-}
 :root[data-theme="light"] .po-card {
     background: var(--surface-elevated);
     border-color: var(--border-visible);

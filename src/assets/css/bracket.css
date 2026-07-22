@@ -17,9 +17,6 @@
 .bracket-controls textarea { resize: vertical; }
 .bracket-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
 .bracket-actions button { flex: 1 1 9rem; }
-.bracket-status { min-height: 1.25rem; color: var(--text-3); }
-.bracket-status[data-state="error"] { color: var(--red); }
-.bracket-status[data-state="success"] { color: var(--green); }
 .bracket-board {
     display: flex;
     align-items: stretch;

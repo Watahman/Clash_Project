@@ -26,10 +26,10 @@ body.workspace-app[data-workspace-page="bracket"] .bracket-page-header { display
 .bracket-page-header h1 { margin: 0; color: var(--text); font-family: Manrope, Inter, "Segoe UI", sans-serif; font-size: 3rem; letter-spacing: -0.04em; line-height: 1.05; text-transform: none; text-wrap: balance; }
 .bracket-page-header p:last-child { max-width: 44rem; margin: 0.65rem 0 0; color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; text-wrap: pretty; }
 
-body.workspace-app[data-workspace-page="bracket"] .bracket-layout { display: grid; grid-template-columns: minmax(17rem, 23rem) minmax(34rem, 1fr); gap: 1rem; align-items: stretch; }
+body.workspace-app[data-workspace-page="bracket"] .bracket-layout { display: grid; grid-template-columns: minmax(17rem, 23rem) minmax(34rem, 1fr); align-items: stretch; }
 body.workspace-app[data-workspace-page="bracket"] .bracket-setup,
 .bracket-result { min-width: 0; border: 0.0625rem solid var(--border); background: var(--surface); }
-body.workspace-app[data-workspace-page="bracket"] .bracket-setup { display: flex; flex-direction: column; padding: 1rem; }
+body.workspace-app[data-workspace-page="bracket"] .bracket-setup { display: flex; flex-direction: column; }
 
 .bracket-section-heading,
 .bracket-result-header { display: flex; min-height: 4.5rem; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 0.0625rem solid var(--border); }
@@ -70,7 +70,7 @@ body.workspace-app[data-workspace-page="bracket"] .bracket-setup { display: flex
 .bracket-result-meta small { color: var(--text-muted); font-size: 0.6rem; }
 .bracket-result-meta strong { overflow: hidden; max-width: 10rem; color: var(--text); font-size: 0.76rem; text-overflow: ellipsis; white-space: nowrap; }
 
-body.workspace-app[data-workspace-page="bracket"] .bracket-board { display: flex; flex: 1; min-width: 0; align-items: stretch; gap: 2rem; overflow-x: auto; border: 0; border-radius: 0; background: transparent; padding: 1.5rem; }
+body.workspace-app[data-workspace-page="bracket"] .bracket-board { display: flex; flex: 1; min-width: 0; align-items: stretch; gap: 2rem; overflow-x: auto; border: 0; border-radius: 0; background: transparent; }
 body.workspace-app[data-workspace-page="bracket"] .bracket-round { display: flex; min-width: 11rem; flex: 1 0 11rem; flex-direction: column; justify-content: space-around; gap: 0.75rem; }
 body.workspace-app[data-workspace-page="bracket"] .bracket-round h2 { margin: 0 0 0.35rem; color: var(--text-muted); font-size: 0.66rem; font-weight: 750; text-align: left; }
 body.workspace-app[data-workspace-page="bracket"] .bracket-match { display: grid; gap: 0; overflow: hidden; border: 0.0625rem solid var(--border); border-radius: var(--radius-small); background: var(--surface-subtle); padding: 0; }
