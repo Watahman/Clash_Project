@@ -24,8 +24,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class API_Utils {
-    private static final CacheStore L1_CACHE = new InMemoryCacheStore();
-    private static final CacheStore L2_CACHE = new PersistentCacheStore();
+    private static final Object CACHE_INIT_LOCK = new Object();
+    private static volatile CacheStore L1_CACHE;
+    private static volatile CacheStore L2_CACHE;
     private static final ConcurrentHashMap<String, CompletableFuture<CacheEntry>> IN_FLIGHT = new ConcurrentHashMap<>();
     private static final RateLimiter RATE_LIMITER = new RateLimiter();
     private static final ExecutorService CACHE_EXECUTOR = Executors.newFixedThreadPool(4, runnable -> {
@@ -38,7 +39,24 @@ public class API_Utils {
 
     public API_Utils(Config conf) {
         this.conf = conf;
+        ensureCacheStores(conf);
         this.authService = new AuthService(conf);
+    }
+
+    private static void ensureCacheStores(Config conf) {
+        if (L1_CACHE != null && L2_CACHE != null) return;
+
+        synchronized (CACHE_INIT_LOCK) {
+            if (L1_CACHE == null) {
+                L1_CACHE = new InMemoryCacheStore(conf.getCacheMemoryMaxEntries());
+            }
+            if (L2_CACHE == null) {
+                L2_CACHE = new PersistentCacheStore(
+                        conf.getCacheDatabasePath(),
+                        conf.getCacheDiskMaxEntries()
+                );
+            }
+        }
     }
 
     public void addCORS(HttpExchange exchange) {

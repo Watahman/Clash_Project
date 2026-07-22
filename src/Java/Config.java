@@ -18,6 +18,18 @@ public class Config {
     String _BASE_URL_CLASH = firstNonBlank(env("_BASE_URL_CLASH"), "https://api.clashofclans.com/v1");
     String _CACHE_ENABLED = firstNonBlank(env("CACHE_ENABLED"), "true");
     String _CACHE_MODE = firstNonBlank(env("CACHE_MODE"), "layered");
+    String _CACHE_DB_PATH = firstNonBlank(
+            env("CACHE_DB_PATH"),
+            "data/cache/clashtools-cache.db"
+    );
+    String _CACHE_MEMORY_MAX_ENTRIES = firstNonBlank(
+            env("CACHE_MEMORY_MAX_ENTRIES"),
+            "5000"
+    );
+    String _CACHE_DISK_MAX_ENTRIES = firstNonBlank(
+            env("CACHE_DISK_MAX_ENTRIES"),
+            "25000"
+    );
     String _ALLOWED_ORIGINS = firstNonBlank(
             env("ALLOWED_ORIGINS"),
             "http://localhost:5173,http://127.0.0.1:5173,"
@@ -222,6 +234,20 @@ public class Config {
         return _CACHE_MODE == null || _CACHE_MODE.isBlank() ? "layered" : _CACHE_MODE;
     }
 
+    String getCacheDatabasePath() {
+        return _CACHE_DB_PATH == null || _CACHE_DB_PATH.isBlank()
+                ? "data/cache/clashtools-cache.db"
+                : _CACHE_DB_PATH.trim();
+    }
+
+    int getCacheMemoryMaxEntries() {
+        return boundedInt(_CACHE_MEMORY_MAX_ENTRIES, 5_000, 100, 100_000);
+    }
+
+    int getCacheDiskMaxEntries() {
+        return boundedInt(_CACHE_DISK_MAX_ENTRIES, 25_000, 1_000, 1_000_000);
+    }
+
     int getServerPort() {
         try {
             int port = Integer.parseInt(_SERVER_PORT);
@@ -265,8 +291,12 @@ public class Config {
     }
 
     private int positiveInt(String value, int fallback) {
+        return boundedInt(value, fallback, 1, 10_000);
+    }
+
+    private int boundedInt(String value, int fallback, int minimum, int maximum) {
         try {
-            return Math.max(1, Math.min(Integer.parseInt(value), 10_000));
+            return Math.max(minimum, Math.min(Integer.parseInt(value), maximum));
         } catch (NumberFormatException invalidValue) {
             return fallback;
         }

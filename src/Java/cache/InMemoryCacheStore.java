@@ -1,19 +1,68 @@
 package Java.cache;
 
-import java.util.Comparator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Expiry;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * Fast in-process cache backed by Caffeine.
+ *
+ * Entries expire at their individual staleUntil timestamp. CacheEntry still
+ * decides whether a value is fresh or stale-while-revalidate usable.
+ */
 public class InMemoryCacheStore implements CacheStore {
-    private static final int MAX_ENTRIES = 1000;
-    private final ConcurrentHashMap<String, CacheEntry> entries = new ConcurrentHashMap<>();
+    private static final int DEFAULT_MAX_ENTRIES = 5_000;
+
+    private final Cache<String, CacheEntry> entries;
+
+    public InMemoryCacheStore() {
+        this(DEFAULT_MAX_ENTRIES);
+    }
+
+    public InMemoryCacheStore(int maxEntries) {
+        entries = Caffeine.<String, CacheEntry>newBuilder()
+                .maximumSize(Math.max(100, maxEntries))
+                .expireAfter(new Expiry<String, CacheEntry>() {
+                    @Override
+                    public long expireAfterCreate(String key, CacheEntry value, long currentTime) {
+                        return remainingNanos(value);
+                    }
+
+                    @Override
+                    public long expireAfterUpdate(
+                            String key,
+                            CacheEntry value,
+                            long currentTime,
+                            long currentDuration
+                    ) {
+                        return remainingNanos(value);
+                    }
+
+                    @Override
+                    public long expireAfterRead(
+                            String key,
+                            CacheEntry value,
+                            long currentTime,
+                            long currentDuration
+                    ) {
+                        return Math.min(currentDuration, remainingNanos(value));
+                    }
+                })
+                .build();
+    }
 
     @Override
     public CacheEntry get(String key) {
-        CacheEntry entry = entries.get(key);
+        if (key == null || key.isBlank()) return null;
+
+        CacheEntry entry = entries.getIfPresent(key);
         if (entry == null) return null;
         if (!entry.isUsable()) {
-            entries.remove(key);
+            entries.invalidate(key);
             return null;
         }
         return entry;
@@ -22,29 +71,32 @@ public class InMemoryCacheStore implements CacheStore {
     @Override
     public void put(String key, CacheEntry entry) {
         if (key == null || key.isBlank() || entry == null || entry.value() == null) return;
+        if (!entry.isUsable()) {
+            entries.invalidate(key);
+            return;
+        }
         entries.put(key, entry);
-        cleanup();
     }
 
     @Override
     public void invalidate(String key) {
-        if (key != null) entries.remove(key);
+        if (key != null) entries.invalidate(key);
     }
 
     @Override
     public void invalidatePrefix(String prefix) {
-        if (prefix == null) return;
-        entries.keySet().removeIf(key -> key.startsWith(prefix));
+        if (prefix == null || prefix.isEmpty()) return;
+
+        List<String> matches = new ArrayList<>();
+        for (String key : entries.asMap().keySet()) {
+            if (key.startsWith(prefix)) matches.add(key);
+        }
+        entries.invalidateAll(matches);
     }
 
-    private void cleanup() {
-        entries.entrySet().removeIf(entry -> !entry.getValue().isUsable());
-        if (entries.size() <= MAX_ENTRIES) return;
-
-        entries.entrySet().stream()
-                .sorted(Comparator.comparingLong(entry -> entry.getValue().fetchedAt()))
-                .limit(entries.size() - MAX_ENTRIES)
-                .map(Map.Entry::getKey)
-                .forEach(entries::remove);
+    private static long remainingNanos(CacheEntry entry) {
+        long remainingMs = entry.staleUntil() - System.currentTimeMillis();
+        if (remainingMs <= 0) return 0;
+        return TimeUnit.MILLISECONDS.toNanos(remainingMs);
     }
 }
