@@ -963,3 +963,12 @@ header nav.center::-webkit-scrollbar { display: none; }
     background: rgba(255,255,255,0.72);
     border-color: var(--border-visible);
 }
+
+.cwl-page-header {
+    position: static;
+    inset: auto;
+    z-index: auto;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
