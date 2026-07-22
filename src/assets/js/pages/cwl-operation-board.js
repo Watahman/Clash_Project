@@ -2,6 +2,11 @@ import { profileHTML } from '../profile/profile_popup.js';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { normalizePlanDocument } from '../cwl/cwl-plan-schema.js';
 import { buildRankingHistory, renderRankingHistoryChart } from '../cwl/cwl-ranking-history.js';
+import {
+    applyCwlPredictions,
+    buildPlayerInsight,
+    collectPredictionPlayerTags
+} from '../cwl/cwl-performance-prediction.js';
 import { renderStarsPerDayChart } from '../cwl/cwl-stars-chart.js';
 import {
     decideWarResult,
@@ -19,9 +24,11 @@ import {
     getClanCurrentWarLeagueGroupRequest,
     getClanWarLeagueWarRequest
 } from '../API/API-Clan.js';
-import { getPlayerInfoRequest } from '../API/API-Player.js';
+import { getPlayerBattleLogRequest, getPlayerInfoRequest } from '../API/API-Player.js';
 
 const refs = {};
+const PREDICTION_CONCURRENCY = 4;
+const PREDICTION_START_INTERVAL_MS = 750;
 const planCache = new Map();
 let selectedPlan = null;
 let selectedClan = null;
@@ -282,6 +289,8 @@ function prefetchPlan(plan) {
 
 function selectPlan(planId) {
     const token = ++planSelectToken;
+    requestToken += 1;
+    reportController?.abort();
     selectedPlan = null;
     selectedClan = null;
     latestReport = null;
@@ -370,6 +379,61 @@ async function enrichPlannedPlayers(clan, members = [], signal) {
     return { ...clan, players: enriched };
 }
 
+async function loadPredictionInsights(report, signal) {
+    const tags = collectPredictionPlayerTags(report);
+    const insights = new Map();
+    let nextIndex = 0;
+    let nextRequestStart = 0;
+
+    async function waitForRequestSlot() {
+        const now = Date.now();
+        const startAt = Math.max(now, nextRequestStart);
+        nextRequestStart = startAt + PREDICTION_START_INTERVAL_MS;
+        if (startAt > now) await new Promise(resolve => setTimeout(resolve, startAt - now));
+    }
+
+    async function worker() {
+        while (nextIndex < tags.length) {
+            if (signal.aborted) throw new DOMException('Request aborted', 'AbortError');
+            const tag = tags[nextIndex];
+            nextIndex += 1;
+            await waitForRequestSlot();
+            if (signal.aborted) throw new DOMException('Request aborted', 'AbortError');
+            const [profileResult, battleLogResult] = await Promise.allSettled([
+                getPlayerInfoRequest(tag, { signal }),
+                getPlayerBattleLogRequest(tag, { signal })
+            ]);
+            if (signal.aborted) throw new DOMException('Request aborted', 'AbortError');
+            const profile = profileResult.status === 'fulfilled' && !profileResult.value?.error ? profileResult.value : {};
+            const battleLog = battleLogResult.status === 'fulfilled' && !battleLogResult.value?.error ? battleLogResult.value : {};
+            insights.set(tag, buildPlayerInsight(profile, battleLog));
+        }
+    }
+
+    const workers = Array.from(
+        { length: Math.min(PREDICTION_CONCURRENCY, tags.length) },
+        () => worker()
+    );
+    await Promise.all(workers);
+    return insights;
+}
+
+async function enrichReportPredictions(report, token, signal) {
+    try {
+        const insights = await loadPredictionInsights(report, signal);
+        if (token !== requestToken || signal.aborted || latestReport !== report) return;
+        latestReport = applyCwlPredictions(report, insights);
+        renderReport(latestReport);
+    } catch (error) {
+        if (error?.name === 'AbortError' || token !== requestToken) return;
+        console.error(error);
+        if (latestReport === report) {
+            latestReport = { ...report, predictionState: 'unavailable' };
+            renderReport(latestReport);
+        }
+    }
+}
+
 async function refreshClanReport(clan) {
     const token = ++requestToken;
     reportController?.abort();
@@ -434,9 +498,10 @@ async function refreshClanReport(clan) {
             report.wars = [{ ...report.currentWar, _round: 1, _warTag: 'currentwar' }];
         }
 
-        latestReport = buildReport(report);
+        latestReport = { ...buildReport(report), predictionState: 'loading' };
         renderReport(latestReport);
         setState('ready');
+        void enrichReportPredictions(latestReport, token, signal);
     } catch (error) {
         if (error?.name === 'AbortError') return;
         setState('error', true);
@@ -682,12 +747,13 @@ function getPlayerStatus(player) {
 
 function renderReport(report) {
     setPhase(report.phase);
+    refs.starsChart.setAttribute('aria-busy', String(report.predictionState === 'loading'));
     const countedRounds = report.rounds.filter(isRoundCountedForScoreboard);
     refs.roundState.textContent = countedRounds.length ? `${countedRounds.length} ${t('op.roundsShort')}` : t('op.noPlayedRounds');
     refs.roundCount.textContent = `${report.rounds.length} ${t('op.roundsShort')}`;
     setHelp(report.wars.length ? t('op.liveLoaded') : t('op.noLeagueData'));
     renderRosterViewOptions(report);
-    renderRounds(report.rounds);
+    renderRounds(report.rounds, report.predictionState);
     renderStarsPerDayChart(refs.starsChart, report.rounds, refs.starsChartState);
     renderRankingHistoryChart(refs.positionChart, report.rankingHistory, refs.positionChartState);
     renderScoreboard(report);
@@ -703,6 +769,7 @@ function clearReport(resetSelectors = true) {
     refs.attacksUsed.textContent = '0/0';
     refs.missed.textContent = '0';
     refs.currentPosition.textContent = '-';
+    refs.starsChart.setAttribute('aria-busy', 'false');
     refs.thList.replaceChildren();
     renderStarsPerDayChart(refs.starsChart, [], refs.starsChartState);
     renderRankingHistoryChart(refs.positionChart, [], refs.positionChartState);
@@ -787,7 +854,29 @@ function renderStandings(report) {
     refs.standingsNote.textContent = t('op.standingsNote', { count: standings.completedWars });
 }
 
-function renderRounds(rounds) {
+function predictionMarkup(round, predictionState) {
+    const prediction = round.prediction;
+    if (prediction) {
+        const maximumStars = parseNumber(prediction.availableAttacks, 0) * 3;
+        return `
+            <div class="op-round-prediction" data-state="ready">
+                <span class="op-round-prediction-label">${escapeHtml(t('op.chartPrediction'))}</span>
+                <div class="op-bonus-performance op-prediction-performance">
+                    <span title="${escapeHtml(t('op.predictedStars'))}"><strong>${parseNumber(prediction.stars, 0).toFixed(2)}/${maximumStars}</strong><small>${escapeHtml(t('op.stars'))}</small></span>
+                    <span title="${escapeHtml(t('op.predictedDestruction'))}"><strong>${parseNumber(prediction.destruction, 0).toFixed(2)}%</strong><small>Dest</small></span>
+                    <span title="${escapeHtml(t('op.predictedAttacks'))}"><strong>${parseNumber(prediction.attacksUsed, 0).toFixed(2)}/${parseNumber(prediction.availableAttacks, 0)}</strong><small>${escapeHtml(t('op.attacks'))}</small></span>
+                </div>
+            </div>`;
+    }
+    const loading = predictionState === 'loading';
+    return `
+        <div class="op-round-prediction" data-state="${loading ? 'loading' : 'unavailable'}">
+            <span class="op-round-prediction-label">${escapeHtml(t('op.chartPrediction'))}</span>
+            <span class="op-prediction-state">${escapeHtml(t(loading ? 'op.predictionLoading' : 'op.predictionUnavailable'))}</span>
+        </div>`;
+}
+
+function renderRounds(rounds, predictionState = 'idle') {
     refs.roundsList.replaceChildren();
     rounds.forEach(round => {
         const card = document.createElement('article');
@@ -803,7 +892,8 @@ function renderRounds(rounds) {
                 <span><strong>${parseNumber(round.stars, 0)}</strong>${t('op.stars')}</span>
                 <span><strong>${parseNumber(round.destruction, 0).toFixed(1)}%</strong>Dest</span>
                 <span><strong>${parseNumber(round.attacksUsed, 0)}/${parseNumber(round.availableAttacks, 0)}</strong>Atk</span>
-            </div>`;
+            </div>
+            ${predictionMarkup(round, predictionState)}`;
         refs.roundsList.appendChild(card);
     });
 }
@@ -894,7 +984,13 @@ function renderBonusAdvice(roster) {
     const ranked = [...roster]
         .map(player => ({
             ...player,
-            score: parseNumber(player.stars, 0) * 120 + parseNumber(player.destruction, 0) + parseNumber(player.attacksUsed, 0) * 25 + (player.planned ? 10 : 0) - parseNumber(player.missed, 0) * 180 - (player.status === 'unplanned' ? 35 : 0)
+            score: parseNumber(player.difficultyAdjustedStars, parseNumber(player.stars, 0)) * 120
+                + parseNumber(player.destruction, 0) * Math.max(1, parseNumber(player.attacksUsed, 0))
+                + parseNumber(player.attacksUsed, 0) * 25
+                + parseNumber(player.defense?.rating, 0) * 100 * Math.min(3, parseNumber(player.defense?.count, 0))
+                + (player.planned ? 10 : 0)
+                - parseNumber(player.missed, 0) * 180
+                - (player.status === 'unplanned' ? 35 : 0)
         }))
         .sort((a, b) => b.score - a.score)
         .slice(0, 10);
@@ -917,6 +1013,7 @@ function renderBonusAdvice(roster) {
                     <span title="${escapeHtml(t('op.destruction'))}"><strong>${parseNumber(player.destruction, 0).toFixed(1)}%</strong></span>
                     <span title="${escapeHtml(t('op.attacksUsed'))}"><strong>${parseNumber(player.attacksUsed, 0)}/${parseNumber(player.availableAttacks, 0)}</strong><small>${escapeHtml(t('op.attacks'))}</small></span>
                     <span title="${escapeHtml(t('op.missed'))}"><strong>${parseNumber(player.missed, 0)}</strong><small>${escapeHtml(t('op.missed'))}</small></span>
+                    <span title="${escapeHtml(t('op.defense'))}"><strong>${player.defense?.stars == null ? '—' : `${parseNumber(player.defense.stars, 0).toFixed(2)}★ · ${parseNumber(player.defense.destruction, 0).toFixed(1)}%`}</strong><small>${escapeHtml(t('op.defenseShort'))}</small></span>
                 </div>
             </div>`;
         refs.bonusList.appendChild(li);

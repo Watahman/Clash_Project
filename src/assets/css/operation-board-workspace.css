@@ -539,6 +539,30 @@
 .operation-workspace-page .op-round-stats strong { color: var(--text); font-size: 0.88rem; }
 .operation-workspace-page .op-result-text { color: var(--text-muted); font-size: 0.66rem; text-transform: none; }
 
+.operation-workspace-page .op-round-prediction {
+    display: grid;
+    min-height: 3rem;
+    gap: 0.4rem;
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border);
+}
+
+.operation-workspace-page .op-round-prediction-label {
+    color: var(--accent-strong);
+    font-size: 0.64rem;
+    font-weight: 700;
+}
+
+.operation-workspace-page .op-prediction-performance {
+    justify-content: flex-start;
+    gap: 0.35rem var(--space-2);
+}
+
+.operation-workspace-page .op-prediction-performance strong { font-size: 0.68rem; }
+.operation-workspace-page .op-prediction-state { color: var(--text-muted); font-size: 0.64rem; line-height: 1.35; }
+.operation-workspace-page .op-round-prediction[data-state="loading"] .op-prediction-state { color: var(--text-subtle); }
+
 .operation-workspace-page .op-status-pill,
 .operation-workspace-page .op-badge {
     display: inline-flex;

@@ -20,13 +20,13 @@ export async function getPlayerBattleLogRequest(playerID, requestOptions = {}) {
     const path = config._BASE_URL + config._EXT_PLAYER_BATTLE_LOG;
     const body = JSON.stringify({
         playerID: playerID
-    }, requestOptions)
+    })
 
     return fetchClashAPIRequest(path, body, {
         key: cacheKeys.clashPlayerBattleLog(playerID),
         ttlMs: CACHE_TTL.CLASH_WAR_LIVE,
         staleMs: CACHE_STALE.SHORT
-    })
+    }, requestOptions)
 }
 
 export async function postPlayerVerifyTokenRequest(playerID, playerToken, requestOptions = {}){
@@ -42,11 +42,11 @@ export async function getPlayerLeagueHistoryRequest(playerID, requestOptions = {
     const path = config._BASE_URL + config._EXT_PLAYER_LEAGUE_HISTORY;
     const body = JSON.stringify({
         playerID: playerID
-    }, requestOptions)
+    })
 
     return fetchClashAPIRequest(path, body, {
         key: cacheKeys.clashPlayerLeagueHistory(playerID),
         ttlMs: CACHE_TTL.CLASH_PLAYER_SLOW,
         staleMs: CACHE_STALE.LONG
-    })
+    }, requestOptions)
 }

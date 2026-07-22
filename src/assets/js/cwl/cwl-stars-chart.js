@@ -25,10 +25,23 @@ function buildStarsPerDaySeries(rounds = []) {
             day,
             state: round?.state || 'notAvailable',
             stars: hasData ? Math.max(0, safeNumber(round.stars, 0)) : null,
+            predictedStars: Number.isFinite(Number(round?.prediction?.stars))
+                ? Math.max(0, Number(round.prediction.stars))
+                : null,
             destruction: hasData ? Math.max(0, safeNumber(round.destruction, 0)) : null,
             opponent: hasData ? String(round.opponent || '-').trim() || '-' : null
         };
     });
+}
+
+function buildPredictionSeries(series) {
+    const actual = series.filter(point => point.stars != null);
+    const lastActual = actual.at(-1);
+    const future = series
+        .filter(point => point.stars == null && point.predictedStars != null && (!lastActual || point.day > lastActual.day))
+        .map(point => ({ day: point.day, value: point.predictedStars }));
+    if (!future.length) return [];
+    return lastActual ? [{ day: lastActual.day, value: lastActual.stars }, ...future] : future;
 }
 
 function getStarsScaleMaximum(series) {
@@ -60,7 +73,10 @@ function renderStarsPerDayChart(container, rounds = [], status) {
     if (!container) return;
     const series = buildStarsPerDaySeries(rounds);
     const played = series.filter(point => point.stars != null);
-    const prediction = buildWeightedPrediction(series, 'stars', { minimum: 0 });
+    const difficultyPrediction = buildPredictionSeries(series);
+    const prediction = difficultyPrediction.length
+        ? difficultyPrediction
+        : buildWeightedPrediction(series, 'stars', { minimum: 0 });
     const maximum = getStarsScaleMaximum([
         ...series,
         ...prediction.map(point => ({ stars: point.value }))
