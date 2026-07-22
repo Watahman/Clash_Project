@@ -808,7 +808,7 @@ function renderRounds(rounds) {
     });
 }
 
-function getPlayerDayDisplay(player, day, round) {
+function getPlayerDayDisplay(player, day) {
     const stat = player.dayStats?.[day];
     if (stat) {
         return {
@@ -818,12 +818,9 @@ function getPlayerDayDisplay(player, day, round) {
             availableAttacks: stat.availableAttacks,
             stars: stat.stars,
             destruction: stat.destruction,
-            missed: stat.missed,
-            statusText: stat.stateText,
-            statusKind: stat.state === 'live' ? 'info' : stat.state === 'completed' ? 'ok' : 'muted'
+            missed: stat.missed
         };
     }
-    const notStarted = round && !isAttackCountingState(round.state);
     return {
         warText: t('op.notInThisWar'),
         warKind: 'muted',
@@ -831,9 +828,7 @@ function getPlayerDayDisplay(player, day, round) {
         availableAttacks: 0,
         stars: 0,
         destruction: 0,
-        missed: 0,
-        statusText: notStarted ? round.stateText : t('op.notInThisWar'),
-        statusKind: 'muted'
+        missed: 0
     };
 }
 
@@ -845,7 +840,6 @@ function renderRoster() {
     const view = refs.rosterView.value;
     const isDayView = view.startsWith('day:');
     const day = isDayView ? parseNumber(view.split(':')[1], 0) : 0;
-    const round = isDayView ? report.rounds.find(item => item.day === day) : null;
 
     const roster = report.roster.filter(player => {
         const matchesSearch = !query || lower(player.name).includes(query) || lower(player.tag).includes(query);
@@ -862,15 +856,13 @@ function renderRoster() {
         return;
     }
     roster.forEach(player => {
-        const display = isDayView ? getPlayerDayDisplay(player, day, round) : {
+        const display = isDayView ? getPlayerDayDisplay(player, day) : {
             warText: player.warParticipant ? t('op.inAnyWar') : t('op.notInWar'),
             warKind: player.warParticipant ? 'ok' : 'muted',
             attacksUsed: player.attacksUsed,
             availableAttacks: player.availableAttacks,
             stars: player.stars,
-            destruction: player.destruction,
-            statusText: statusText(player.status),
-            statusKind: statusKind(player.status)
+            destruction: player.destruction
         };
         const row = document.createElement('tr');
         row.className = `op-player-row op-status-${player.status}`;
@@ -881,8 +873,7 @@ function renderRoster() {
             <td>${badge(display.warText, display.warKind)}</td>
             <td>${parseNumber(display.attacksUsed, 0)}/${parseNumber(display.availableAttacks, 0)}</td>
             <td>${parseNumber(display.stars, 0)}★</td>
-            <td>${parseNumber(display.destruction, 0).toFixed(1)}%</td>
-            <td>${badge(display.statusText, display.statusKind)}</td>`;
+            <td>${parseNumber(display.destruction, 0).toFixed(1)}%</td>`;
         refs.rosterBody.appendChild(row);
     });
 }
@@ -892,7 +883,7 @@ function renderEmptyRoster() {
     const row = document.createElement('tr');
     row.className = 'op-table-empty';
     const cell = document.createElement('td');
-    cell.colSpan = 8;
+    cell.colSpan = 7;
     cell.textContent = t('op.noRoster');
     row.appendChild(cell);
     refs.rosterBody.appendChild(row);
@@ -933,13 +924,6 @@ function renderBonusAdvice(roster) {
 }
 
 function badge(text, kind = 'muted') { return `<span class="op-badge op-badge-${kind}">${escapeHtml(text)}</span>`; }
-function statusKind(status) { return status === 'ok' ? 'ok' : status === 'unplanned' ? 'warn' : status === 'plannedOnly' ? 'info' : 'muted'; }
-function statusText(status) {
-    if (status === 'unplanned') return t('op.unplannedParticipant');
-    if (status === 'plannedOnly') return t('op.plannedOnly');
-    if (status === 'apiOnly') return t('op.apiOnly');
-    return t('op.ok');
-}
 function chip(text) { const span = document.createElement('span'); span.textContent = text; return span; }
 
 function exportReport() {

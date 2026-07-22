@@ -577,7 +577,7 @@
 }
 
 .operation-workspace-page .op-table-wrap { max-height: none !important; overflow: auto; }
-.operation-workspace-page .op-table { width: 100%; min-width: 50rem; border-collapse: collapse; }
+.operation-workspace-page .op-table { width: 100%; min-width: 44rem; border-collapse: collapse; }
 .operation-workspace-page .op-table th,
 .operation-workspace-page .op-table td { padding: 0.65rem; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
 .operation-workspace-page .op-table th { color: var(--text-muted); font-size: 0.65rem; letter-spacing: 0.04em; text-transform: uppercase; }
