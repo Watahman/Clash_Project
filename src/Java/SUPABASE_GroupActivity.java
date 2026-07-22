@@ -3,21 +3,27 @@ package Java;
 import Java.cache.CachePolicy;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,13 +32,27 @@ import java.util.concurrent.Executors;
  * Estimates the most recent in-game activity of linked Clash accounts.
  *
  * The Clash API does not expose a direct online/last-seen value. Exact timestamps
- * are used when league history exposes creationTime. Other activity is detected by
- * comparing public player counters and the recent battle-log fingerprint between
- * scans; the detection time is then stored as the estimate.
+ * are used when league history exposes creationTime for an offensive entry.
+ * Other activity is detected only from counters and battle-log entries that require
+ * an action by the player; incoming attacks and other passive changes are ignored.
  */
 public final class SUPABASE_GroupActivity {
     private static final long REFRESH_INTERVAL_MS = 5 * 60 * 1000L;
     private static final int MAX_PARALLEL_REFRESHES = 6;
+    private static final String OWN_BATTLE_FINGERPRINT_PREFIX = "own-v2:";
+    private static final Set<String> OWN_ATTACK_KEYS = Set.of(
+            "attack", "attacks", "attacklog", "attacklogs",
+            "offense", "offenses", "offence", "offences",
+            "offensive", "offensiveattacks"
+    );
+    private static final Set<String> DEFENSE_KEYS = Set.of(
+            "defense", "defenses", "defenselog", "defenselogs",
+            "defence", "defences", "defencelog", "defencelogs",
+            "defensive", "defensivebattles"
+    );
+    private static final Set<String> ACTIVITY_TYPE_KEYS = Set.of(
+            "type", "entrytype", "battletype", "logtype", "kind"
+    );
     private static final ExecutorService REFRESH_EXECUTOR = Executors.newFixedThreadPool(
             MAX_PARALLEL_REFRESHES,
             runnable -> {
@@ -167,7 +187,7 @@ public final class SUPABASE_GroupActivity {
         JsonObject previousSnapshot = readObject(row, "activity_snapshot");
         JsonObject currentSnapshot = createActivitySnapshot(player);
         String previousBattleFingerprint = readString(row, "battle_log_fingerprint");
-        String currentBattleFingerprint = fingerprintBattleLog(battleLog);
+        String currentBattleFingerprint = fingerprintOwnBattleLog(battleLog);
         Instant previousActivity = readInstant(row, "last_activity_at");
         String previousSource = readString(row, "last_activity_source");
 
@@ -229,7 +249,7 @@ public final class SUPABASE_GroupActivity {
         try {
             return JsonParser.parseString(utils.clashGetCachedValue(path, ttlMs));
         } catch (Exception ignored) {
-            return new JsonArray();
+            return JsonNull.INSTANCE;
         }
     }
 
@@ -261,7 +281,9 @@ public final class SUPABASE_GroupActivity {
         if (previous == null || previous.size() == 0) return ActivitySignal.none();
         Instant observedAt = Instant.now();
 
-        if (increased(previous, current, "donations") || increased(previous, current, "donationsReceived")) {
+        // Only outgoing donations prove that this player was active. Receiving
+        // troops is caused by another player and must not update the timestamp.
+        if (increased(previous, current, "donations")) {
             return new ActivitySignal(observedAt, "donation");
         }
         if (increased(previous, current, "warStars")) {
@@ -273,28 +295,22 @@ public final class SUPABASE_GroupActivity {
         if (increased(previous, current, "attackWins")) {
             return new ActivitySignal(observedAt, "attack");
         }
-        if (increased(previous, current, "defenseWins")) {
-            return new ActivitySignal(observedAt, "defense");
-        }
-        if (changed(previous, current, "builderBaseTrophies")) {
-            return new ActivitySignal(observedAt, "builder_attack");
-        }
-        if (changed(previous, current, "trophies")) {
+
+        // The versioned fingerprint contains offensive entries only. Comparing
+        // entry sets instead of the complete log avoids treating incoming
+        // defenses, reordered entries or expired old entries as player activity.
+        if (hasNewOwnBattleEntry(previousBattleFingerprint, currentBattleFingerprint)) {
             return new ActivitySignal(observedAt, "attack");
         }
-        if (!previousBattleFingerprint.isBlank()
-                && !currentBattleFingerprint.isBlank()
-                && !previousBattleFingerprint.equals(currentBattleFingerprint)) {
-            return new ActivitySignal(observedAt, "attack");
-        }
-        if (increased(previous, current, "expLevel") || increased(previous, current, "townHallLevel")) {
-            return new ActivitySignal(observedAt, "progress");
-        }
+
+        // Intentionally ignored: donationsReceived, defenseWins, trophy changes,
+        // builder-base trophy changes and automatic progression. Those values can
+        // change without the player performing an action at that moment.
         return ActivitySignal.none();
     }
 
     static ActivitySignal latestExactLeagueActivity(JsonElement leagueHistory) {
-        Instant latest = findLatestCreationTime(leagueHistory);
+        Instant latest = findLatestOwnAttackCreationTime(leagueHistory);
         return latest == null ? ActivitySignal.none() : new ActivitySignal(latest, "ranked_attack");
     }
 
@@ -314,28 +330,50 @@ public final class SUPABASE_GroupActivity {
                 .orElse(ActivitySignal.none());
     }
 
-    static Instant findLatestCreationTime(JsonElement element) {
+    static Instant findLatestOwnAttackCreationTime(JsonElement element) {
+        return findLatestOwnAttackCreationTime(element, false);
+    }
+
+    private static Instant findLatestOwnAttackCreationTime(JsonElement element, boolean ownAttackContext) {
         if (element == null || element.isJsonNull()) return null;
-        Instant latest = null;
+
         if (element.isJsonArray()) {
+            Instant latest = null;
             for (JsonElement child : element.getAsJsonArray()) {
-                Instant candidate = findLatestCreationTime(child);
-                if (candidate != null && (latest == null || candidate.isAfter(latest))) latest = candidate;
+                Instant candidate = findLatestOwnAttackCreationTime(child, ownAttackContext);
+                latest = later(latest, candidate);
             }
             return latest;
         }
         if (!element.isJsonObject()) return null;
 
         JsonObject object = element.getAsJsonObject();
+        ActivityKind kind = readActivityKind(object);
+        if (kind == ActivityKind.DEFENSE) return null;
+
+        boolean localAttackContext = ownAttackContext || kind == ActivityKind.ATTACK;
+        Instant latest = null;
+
         for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
-            if ("creationTime".equals(entry.getKey()) || "creation_time".equals(entry.getKey())) {
-                Instant candidate = parseClashInstant(entry.getValue().isJsonNull() ? "" : entry.getValue().getAsString());
+            String normalizedKey = normalizeJsonKey(entry.getKey());
+            JsonElement value = entry.getValue();
+
+            if (DEFENSE_KEYS.contains(normalizedKey)) {
+                continue;
+            }
+            if (OWN_ATTACK_KEYS.contains(normalizedKey)) {
+                latest = later(latest, findLatestOwnAttackCreationTime(value, true));
+                continue;
+            }
+            if (localAttackContext && isCreationTimeKey(normalizedKey)) {
+                Instant candidate = parseClashInstant(value == null || value.isJsonNull() ? "" : value.getAsString());
                 if (candidate != null && !candidate.isAfter(Instant.now().plusSeconds(300))) {
-                    if (latest == null || candidate.isAfter(latest)) latest = candidate;
+                    latest = later(latest, candidate);
                 }
-            } else if (entry.getValue().isJsonArray() || entry.getValue().isJsonObject()) {
-                Instant candidate = findLatestCreationTime(entry.getValue());
-                if (candidate != null && (latest == null || candidate.isAfter(latest))) latest = candidate;
+                continue;
+            }
+            if (value != null && (value.isJsonArray() || value.isJsonObject())) {
+                latest = later(latest, findLatestOwnAttackCreationTime(value, localAttackContext));
             }
         }
         return latest;
@@ -366,10 +404,196 @@ public final class SUPABASE_GroupActivity {
         return null;
     }
 
-    private static String fingerprintBattleLog(JsonElement battleLog) {
+    static String fingerprintOwnBattleLog(JsonElement battleLog) {
         if (battleLog == null || battleLog.isJsonNull()) return "";
-        String raw = battleLog.toString();
-        return Integer.toUnsignedString(raw.hashCode(), 36) + ":" + raw.length();
+
+        Set<String> canonicalEntries = new LinkedHashSet<>();
+        collectOwnBattleEntries(battleLog, false, canonicalEntries);
+
+        Set<String> hashes = new java.util.TreeSet<>();
+        for (String entry : canonicalEntries) {
+            hashes.add(sha256(entry));
+        }
+        return OWN_BATTLE_FINGERPRINT_PREFIX + String.join(",", hashes);
+    }
+
+    static boolean hasNewOwnBattleEntry(String previousFingerprint, String currentFingerprint) {
+        Set<String> previousEntries = parseOwnBattleFingerprint(previousFingerprint);
+        Set<String> currentEntries = parseOwnBattleFingerprint(currentFingerprint);
+
+        // A legacy full-log fingerprint is used as a baseline once. This prevents
+        // the deployment of the stricter algorithm from creating fake activity.
+        if (previousEntries == null || currentEntries == null || currentEntries.isEmpty()) {
+            return false;
+        }
+        for (String entry : currentEntries) {
+            if (!previousEntries.contains(entry)) return true;
+        }
+        return false;
+    }
+
+    private static Set<String> parseOwnBattleFingerprint(String fingerprint) {
+        if (fingerprint == null || !fingerprint.startsWith(OWN_BATTLE_FINGERPRINT_PREFIX)) {
+            return null;
+        }
+
+        String payload = fingerprint.substring(OWN_BATTLE_FINGERPRINT_PREFIX.length());
+        Set<String> entries = new HashSet<>();
+        if (payload.isBlank()) return entries;
+
+        for (String entry : payload.split(",")) {
+            String clean = entry.trim();
+            if (!clean.isBlank()) entries.add(clean);
+        }
+        return entries;
+    }
+
+    private static void collectOwnBattleEntries(
+            JsonElement element,
+            boolean ownAttackContext,
+            Set<String> entries
+    ) {
+        if (element == null || element.isJsonNull()) return;
+
+        if (element.isJsonArray()) {
+            for (JsonElement child : element.getAsJsonArray()) {
+                collectOwnBattleEntries(child, ownAttackContext, entries);
+            }
+            return;
+        }
+        if (!element.isJsonObject()) return;
+
+        JsonObject object = element.getAsJsonObject();
+        ActivityKind kind = readActivityKind(object);
+        if (kind == ActivityKind.DEFENSE) return;
+
+        boolean localAttackContext = ownAttackContext || kind == ActivityKind.ATTACK;
+        if (localAttackContext) {
+            entries.add(canonicalOwnAttackJson(object));
+            return;
+        }
+
+        for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
+            String normalizedKey = normalizeJsonKey(entry.getKey());
+            if (DEFENSE_KEYS.contains(normalizedKey)) continue;
+
+            if (OWN_ATTACK_KEYS.contains(normalizedKey)) {
+                addOwnAttackContainerEntries(entry.getValue(), entries);
+            } else if (entry.getValue() != null
+                    && (entry.getValue().isJsonArray() || entry.getValue().isJsonObject())) {
+                collectOwnBattleEntries(entry.getValue(), false, entries);
+            }
+        }
+    }
+
+    private static void addOwnAttackContainerEntries(JsonElement element, Set<String> entries) {
+        if (element == null || element.isJsonNull()) return;
+        if (element.isJsonArray()) {
+            for (JsonElement child : element.getAsJsonArray()) {
+                if (child != null && child.isJsonObject()
+                        && readActivityKind(child.getAsJsonObject()) == ActivityKind.DEFENSE) {
+                    continue;
+                }
+                entries.add(canonicalOwnAttackJson(child));
+            }
+            return;
+        }
+        entries.add(canonicalOwnAttackJson(element));
+    }
+
+    private static String canonicalOwnAttackJson(JsonElement element) {
+        if (element == null || element.isJsonNull()) return "null";
+        if (element.isJsonPrimitive()) return element.toString();
+
+        if (element.isJsonArray()) {
+            StringBuilder result = new StringBuilder("[");
+            boolean first = true;
+            for (JsonElement child : element.getAsJsonArray()) {
+                if (!first) result.append(',');
+                result.append(canonicalOwnAttackJson(child));
+                first = false;
+            }
+            return result.append(']').toString();
+        }
+
+        TreeMap<String, JsonElement> sorted = new TreeMap<>();
+        for (Map.Entry<String, JsonElement> entry : element.getAsJsonObject().entrySet()) {
+            if (!DEFENSE_KEYS.contains(normalizeJsonKey(entry.getKey()))) {
+                sorted.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        StringBuilder result = new StringBuilder("{");
+        boolean first = true;
+        for (Map.Entry<String, JsonElement> entry : sorted.entrySet()) {
+            if (!first) result.append(',');
+            result.append('"').append(escapeJson(entry.getKey())).append('"');
+            result.append(':').append(canonicalOwnAttackJson(entry.getValue()));
+            first = false;
+        }
+        return result.append('}').toString();
+    }
+
+    private static String escapeJson(String value) {
+        return value
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"");
+    }
+
+    private static String sha256(String value) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                    .digest(value.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder(digest.length * 2);
+            for (byte item : digest) hex.append(String.format("%02x", item));
+            return hex.toString();
+        } catch (NoSuchAlgorithmException impossible) {
+            throw new IllegalStateException("SHA-256 is not available", impossible);
+        }
+    }
+
+    private static ActivityKind readActivityKind(JsonObject object) {
+        if (object == null) return ActivityKind.UNKNOWN;
+
+        for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
+            if (!ACTIVITY_TYPE_KEYS.contains(normalizeJsonKey(entry.getKey()))) continue;
+            JsonElement value = entry.getValue();
+            if (value == null || value.isJsonNull() || !value.isJsonPrimitive()) continue;
+
+            String normalizedValue = normalizeJsonKey(value.getAsString());
+            if (normalizedValue.contains("defense") || normalizedValue.contains("defence")) {
+                return ActivityKind.DEFENSE;
+            }
+            if (normalizedValue.contains("attack")
+                    || normalizedValue.contains("offense")
+                    || normalizedValue.contains("offence")) {
+                return ActivityKind.ATTACK;
+            }
+        }
+        return ActivityKind.UNKNOWN;
+    }
+
+    private static boolean isCreationTimeKey(String normalizedKey) {
+        return "creationtime".equals(normalizedKey)
+                || "battletime".equals(normalizedKey)
+                || "eventtime".equals(normalizedKey);
+    }
+
+    private static String normalizeJsonKey(String value) {
+        if (value == null) return "";
+        return value.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
+    }
+
+    private static Instant later(Instant first, Instant second) {
+        if (first == null) return second;
+        if (second == null) return first;
+        return second.isAfter(first) ? second : first;
+    }
+
+    private enum ActivityKind {
+        ATTACK,
+        DEFENSE,
+        UNKNOWN
     }
 
     private JsonObject buildResponse(JsonArray memberships, JsonArray accountRows) {
@@ -425,12 +649,6 @@ public final class SUPABASE_GroupActivity {
         Long before = readLong(previous, field);
         Long after = readLong(current, field);
         return before != null && after != null && after > before;
-    }
-
-    private static boolean changed(JsonObject previous, JsonObject current, String field) {
-        Long before = readLong(previous, field);
-        Long after = readLong(current, field);
-        return before != null && after != null && !after.equals(before);
     }
 
     private static void copyNumber(JsonObject source, JsonObject target, String field) {
