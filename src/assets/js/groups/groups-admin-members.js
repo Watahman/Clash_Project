@@ -1,6 +1,7 @@
 import { setGroupMemberRole, transferGroupLeadership } from "../Supabase/Supabase-GroupRoles.js";
 import { t } from "../i18n/i18n.js";
 import { withGlobalLoading } from "../utils/loading-state.js";
+import { bindBackdropClick } from "../utils/backdrop-click.js";
 import {
     applyRoleBadge,
     isGroupLeader,
@@ -119,9 +120,7 @@ export function createMemberRoleAdmin(elements, getState, setMessage, emptyMessa
 
     elements.confirmCancel?.addEventListener('click', closeTransferConfirm);
     elements.confirmAccept?.addEventListener('click', confirmTransfer);
-    elements.confirmOverlay?.addEventListener('click', event => {
-        if (event.target === elements.confirmOverlay) closeTransferConfirm();
-    });
+    bindBackdropClick(elements.confirmOverlay, closeTransferConfirm);
 
     return { render, closeTransferConfirm };
 }

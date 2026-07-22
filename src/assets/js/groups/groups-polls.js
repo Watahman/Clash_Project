@@ -3,6 +3,7 @@ import { checkUserId } from "../Supabase/Supabase-User.js";
 import { t } from "../i18n/i18n.js";
 import { getCurrentUserId } from "../utils/user.js";
 import { withGlobalLoading } from "../utils/loading-state.js";
+import { bindBackdropClick } from "../utils/backdrop-click.js";
 import { isGroupAdmin } from "./groups-roles.js";
 
 export function initGroupPolls(emptyMessage) {
@@ -27,7 +28,7 @@ export function initGroupPolls(emptyMessage) {
     el.answerClose?.addEventListener('click', closeAnswerOverlay);
     el.answerCancel?.addEventListener('click', closeAnswerOverlay);
     el.answerSave?.addEventListener('click', saveAnswer);
-    el.answerOverlay?.addEventListener('click', event => { if (event.target === el.answerOverlay) closeAnswerOverlay(); });
+    bindBackdropClick(el.answerOverlay, closeAnswerOverlay);
     el.reminderBtn?.addEventListener('click', sendReminder);
 
     async function loadPolls() {

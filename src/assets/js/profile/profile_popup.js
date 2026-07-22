@@ -12,6 +12,7 @@ import { applyI18n, t } from "../i18n/i18n.js";
 import { initProfileSettings, resetProfileSettings, syncProfileSettings } from "./profile_settings.js";
 import { signOut } from "../auth/auth-client.js";
 import { getNotifications, markNotificationRead } from "../Supabase/Supabase-Notifications.js";
+import { bindBackdropClick } from "../utils/backdrop-click.js";
 
 let profile, closeProfileBtn, userCode, profileTabs, openProfileBtn, activeTab;
 let friendRequestBtn, friendPendingBtn, friendList, emptyFriendRequest;
@@ -147,7 +148,7 @@ function profileInit() {
         void refreshProfileData(true);
     };
 
-    profile.onclick = (e) => { poBackdrop(e); };
+    bindBackdropClick(profile, closeProfile);
     closeProfileBtn.onclick = () => { closeProfile(); };
     userCode.onclick = () => { copyWithFeedback(poCode.textContent, poIcoCopy, poIcoCheck); };
     profileTabs.forEach(tab => { tab.onclick = () => { poTab(tab, tabRefs); }; });
@@ -437,10 +438,6 @@ function trapProfileFocus(event) {
     }
 }
 
-function poBackdrop(e) {
-    if (e.target.id === 'profile-overlay') closeProfile();
-}
-
 function redirectToLogin() {
     const path = window.location.pathname;
     if (path.includes('/subPages/')) {
@@ -451,17 +448,9 @@ function redirectToLogin() {
 }
 
 function clickToCloseOverlays(){
-    addBase.addEventListener('click', (e) => {
-        if (e.target === addBase) closeProfileMiniOverlay(addBase)
-    })
-
-    addClan.addEventListener('click', (e) => {
-        if (e.target === addClan) closeProfileMiniOverlay(addClan)
-    })
-
-    friendList.addEventListener('click', (e) => {
-        if (e.target === friendList) friendList.classList.add('hidden')
-    })
+    bindBackdropClick(addBase, () => closeProfileMiniOverlay(addBase));
+    bindBackdropClick(addClan, () => closeProfileMiniOverlay(addClan));
+    bindBackdropClick(friendList, () => friendList.classList.add('hidden'));
 }
 
 function closeProfileMiniOverlay(overlay) {

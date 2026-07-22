@@ -10,6 +10,7 @@ import { initGroupsAdminPanel } from '../groups/groups-admin-panel.js';
 import { initGroupPolls } from '../groups/groups-polls.js';
 import { activateGroupTab, bindGroupTabs } from '../groups/groups-tabs.js';
 import { syncAuthSession } from '../auth/auth-client.js';
+import { bindBackdropClick } from '../utils/backdrop-click.js';
 
 const groupsNewBtn = document.querySelector('#groups-new-btn');
 const groupsNewRail = document.querySelector('#groups-new-rail');
@@ -317,8 +318,8 @@ function escPopupClose() {
 }
 
 function overlayBackdropClose() {
-    groupsOverlayNew?.addEventListener('click', event => { if (event.target === groupsOverlayNew) groupsOverlayNew.classList.add('hidden'); });
-    groupOverlayLeave?.addEventListener('click', event => { if (event.target === groupOverlayLeave) groupOverlayLeave.classList.add('hidden'); });
+    bindBackdropClick(groupsOverlayNew, () => groupsOverlayNew.classList.add('hidden'));
+    bindBackdropClick(groupOverlayLeave, () => groupOverlayLeave.classList.add('hidden'));
 }
 
 function setText(selector, value) {

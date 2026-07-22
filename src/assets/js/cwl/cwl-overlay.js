@@ -8,19 +8,18 @@ import { getCurrentUserId } from "../utils/user.js";
 import { uniquePlayers } from "./cwl-utils.js";
 import { t } from "../i18n/i18n.js";
 import { allowsThirtyPlayerCwl } from "./cwl-league-rules.js";
+import { bindBackdropClick } from "../utils/backdrop-click.js";
 
 let accountLoadToken = 0;
 let activeAccountSource = 'user';
 let refsCache = {};
 
 export function initOverlayHide() {
-    document.querySelectorAll(".overlay").forEach(overlay =>
-        overlay.addEventListener("click", () => {
+    document.querySelectorAll(".overlay").forEach(overlay => {
+        bindBackdropClick(overlay, () => {
             overlay.classList.add("hidden");
             resetCwlOverlayState();
-        }));
-    document.querySelectorAll(".overlay-container").forEach(overlayContainer => {
-        overlayContainer.addEventListener("click", (e) => { e.stopPropagation(); });
+        });
     });
 }
 

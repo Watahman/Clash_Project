@@ -4,6 +4,7 @@ import { getCurrentUserId } from "../utils/user.js";
 import { createClanAdmin } from "./groups-admin-clans.js";
 import { createMemberRoleAdmin } from "./groups-admin-members.js";
 import { getCurrentUserRole, isGroupAdmin } from "./groups-roles.js";
+import { bindBackdropClick } from "../utils/backdrop-click.js";
 
 export function initGroupsAdminPanel(emptyMessage) {
     const elements = queryElements();
@@ -32,7 +33,7 @@ export function initGroupsAdminPanel(emptyMessage) {
 
     elements.settingsBtn?.addEventListener('click', open);
     elements.closeBtn?.addEventListener('click', close);
-    elements.overlay?.addEventListener('click', event => { if (event.target === elements.overlay) close(); });
+    bindBackdropClick(elements.overlay, close);
     elements.tabs.forEach(tab => tab.addEventListener('click', () => showTab(tab.dataset.adminTab)));
 
     function open() {
