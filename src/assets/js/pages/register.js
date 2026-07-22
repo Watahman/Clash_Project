@@ -89,17 +89,15 @@ async function submitRegistration(event) {
     }
 }
 
-function init() {
+async function init() {
     initI18n();
     form.addEventListener('submit', submitRegistration);
     passwordInput.addEventListener('input', updatePasswordHints);
     confirmationInput.addEventListener('input', updatePasswordHints);
     googleButton.addEventListener('click', registerWithGoogle);
-    syncAuthSession()
-        .then(session => {
-            if (session) window.location.href = './dashboard.html';
-        })
-        .catch(() => {});
+    const session = await syncAuthSession().catch(() => null);
+    if (session) window.location.href = './dashboard.html';
 }
 
-init();
+const initialRegisterLoad = init();
+window.clashtoolsRegisterInitialLoad?.(initialRegisterLoad);

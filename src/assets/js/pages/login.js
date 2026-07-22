@@ -88,7 +88,7 @@ async function resetPassword() {
     }
 }
 
-function init() {
+async function init() {
     initI18n();
     form.addEventListener('submit', submitLogin);
     forgotButton.addEventListener('click', resetPassword);
@@ -97,13 +97,9 @@ function init() {
         setStatus(t('auth.oauthUnavailable'), 'error');
         window.history.replaceState({}, '', window.location.pathname);
     }
-    syncAuthSession()
-        .then(session => {
-            if (session) window.location.href = destinationAfterLogin();
-        })
-        .catch(() => {
-            // A missing/expired session is the normal state on this page.
-        });
+    const session = await syncAuthSession().catch(() => null);
+    if (session) window.location.href = destinationAfterLogin();
 }
 
-init();
+const initialLoginLoad = init();
+window.clashtoolsRegisterInitialLoad?.(initialLoginLoad);

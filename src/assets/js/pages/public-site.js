@@ -52,12 +52,13 @@ async function redirectReturningUser() {
     if (session) window.location.replace('./subPages/dashboard.html');
 }
 
-function init() {
+async function init() {
     initI18n();
     initThemeButtons();
     initPublicMenu();
     window.addEventListener('clashtools:language-changed', updateThemeButtons);
-    void redirectReturningUser();
+    await redirectReturningUser();
 }
 
-init();
+const initialPublicSiteLoad = init();
+window.clashtoolsRegisterInitialLoad?.(initialPublicSiteLoad);
