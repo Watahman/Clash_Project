@@ -73,7 +73,7 @@ async function init() {
     initPlayerSorting();
     initPlanNameSync();
     guessCwlSize();
-    void loadAllPlans();
+    await loadAllPlans();
     loadPlanListener();
     profileHTML();
 }
@@ -218,4 +218,5 @@ function guessCwlSize() {
     });
 }
 
-void init();
+const initialPageLoad = init();
+window.clashtoolsRegisterInitialLoad?.(initialPageLoad);

@@ -11,11 +11,13 @@
     ];
 
     const INITIAL_VISUAL_TIMEOUT_MS = 1800;
+    const INITIAL_CONTENT_TIMEOUT_MS = 12000;
     const NAVIGATION_VISUAL_TIMEOUT_MS = 3200;
     const NAVIGATION_SPINNER_DELAY_MS = 140;
 
     const preloadedPages = new Map();
     const prefetchedAssets = new Map();
+    const initialLoadTasks = [];
     const originalFetch = window.fetch.bind(window);
 
     let pageRevealed = false;
@@ -23,10 +25,16 @@
     applyStoredThemeImmediately();
     installNavigationPreloading();
 
+    window.clashtoolsRegisterInitialLoad = task => {
+        const promise = Promise.resolve(task);
+        initialLoadTasks.push(promise);
+        return promise;
+    };
+
     void revealWhenVisualsAreReady();
 
-    // Never leave the application hidden because one visual resource failed.
-    window.setTimeout(revealPage, INITIAL_VISUAL_TIMEOUT_MS + 350);
+    // Never leave the application hidden indefinitely when a request stalls.
+    window.setTimeout(revealPage, INITIAL_CONTENT_TIMEOUT_MS + 500);
 
     function applyStoredThemeImmediately() {
         try {
@@ -48,13 +56,19 @@
     async function revealWhenVisualsAreReady() {
         await domReady();
 
-        await Promise.race([
-            Promise.allSettled([
-                waitForStylesheets(),
-                waitForFonts(),
-                waitForInitialImages()
+        await Promise.allSettled([
+            Promise.race([
+                Promise.allSettled([
+                    waitForStylesheets(),
+                    waitForFonts(),
+                    waitForInitialImages()
+                ]),
+                delay(INITIAL_VISUAL_TIMEOUT_MS)
             ]),
-            delay(INITIAL_VISUAL_TIMEOUT_MS)
+            Promise.race([
+                Promise.allSettled(initialLoadTasks),
+                delay(INITIAL_CONTENT_TIMEOUT_MS)
+            ])
         ]);
 
         await nextPaint();

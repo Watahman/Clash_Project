@@ -250,9 +250,9 @@ function loadPlans() {
     refs.planSelect.replaceChildren(option('', userId ? t('op.loadingPlans') : t('groups.login'), { disabled: true, selected: true }));
     refs.clanSelect.replaceChildren(option('', t('op.selectPlanFirst'), { disabled: true, selected: true }));
     refs.clanSelect.disabled = true;
-    if (!userId) return;
+    if (!userId) return Promise.resolve();
 
-    getAllPlansFromDatabase(userId).then(plans => {
+    return getAllPlansFromDatabase(userId).then(plans => {
         const normalizedPlans = Array.isArray(plans) ? plans.map(normalizePlan).filter(Boolean) : [];
         refs.planSelect.replaceChildren(option('', normalizedPlans.length ? t('op.selectPlanPlaceholder') : t('cwl.noPlan'), { disabled: true, selected: true }));
         normalizedPlans.forEach(plan => {
@@ -1034,9 +1034,10 @@ async function init() {
     initEvents();
     clearReport(false);
     refreshOperationLabels();
-    loadPlans();
+    await loadPlans();
     setPhase('unknown');
     setState('idle');
 }
 
-void init();
+const initialPageLoad = init();
+window.clashtoolsRegisterInitialLoad?.(initialPageLoad);

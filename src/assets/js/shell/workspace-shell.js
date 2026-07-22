@@ -380,7 +380,7 @@ function initNotificationsPopover() {
     const button = document.querySelector('#workspace-notifications');
     const panel = document.querySelector('#workspace-notifications-panel');
     const closeButton = document.querySelector('#workspace-notifications-close');
-    if (!root || !button || !panel || !closeButton) return;
+    if (!root || !button || !panel || !closeButton) return Promise.resolve();
 
     const close = ({ restoreFocus = false } = {}) => {
         if (panel.classList.contains('hidden')) return;
@@ -414,14 +414,23 @@ function initNotificationsPopover() {
         if (notificationsData) renderNotifications(notificationsData);
     });
 
-    void loadWorkspaceNotifications();
+    return Promise.resolve();
 }
 
 async function protectRoute() {
     const session = await syncAuthSession().catch(() => null);
-    if (session) return;
+    if (session) return true;
     const next = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     window.location.replace(`./login.html?next=${encodeURIComponent(next)}`);
+    return false;
+}
+
+async function loadInitialWorkspaceData() {
+    if (!await protectRoute()) return;
+    await Promise.allSettled([
+        loadWorkspaceUserIdentity(),
+        loadWorkspaceNotifications()
+    ]);
 }
 
 function initWorkspaceShell() {
@@ -466,8 +475,8 @@ function initWorkspaceShell() {
         updateThemeButton
     );
 
-    void loadWorkspaceUserIdentity();
-    void protectRoute();
+    return loadInitialWorkspaceData();
 }
 
-initWorkspaceShell();
+const initialWorkspaceLoad = initWorkspaceShell();
+window.clashtoolsRegisterInitialLoad?.(initialWorkspaceLoad);

@@ -238,4 +238,5 @@ async function init() {
     renderAll();
 }
 
-void init();
+const initialPageLoad = init();
+window.clashtoolsRegisterInitialLoad?.(initialPageLoad);

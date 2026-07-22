@@ -333,4 +333,5 @@ function setPageStatus(message) {
     groupsPageStatus.hidden = !message;
 }
 
-void init();
+const initialPageLoad = init();
+window.clashtoolsRegisterInitialLoad?.(initialPageLoad);
