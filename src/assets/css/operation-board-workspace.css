@@ -653,10 +653,30 @@
 .operation-workspace-page .op-bonus-player { display: grid; min-width: 0; gap: 0.18rem; }
 .operation-workspace-page .op-bonus-player strong { overflow: hidden; color: var(--text); font-size: 0.78rem; text-overflow: ellipsis; text-transform: none; white-space: nowrap; }
 .operation-workspace-page .op-bonus-player span { overflow: hidden; color: var(--text-muted); font-size: 0.62rem; text-overflow: ellipsis; white-space: nowrap; }
-.op-bonus-performance { display: grid; grid-template-columns: repeat(4, minmax(2.6rem, auto)); gap: var(--space-2); }
-.operation-workspace-page .op-bonus-performance > span { display: grid; justify-items: end; gap: 0.12rem; color: var(--text-muted); line-height: 1.1; }
-.operation-workspace-page .op-bonus-performance strong { color: var(--text); font-size: 0.72rem; font-variant-numeric: tabular-nums; }
-.operation-workspace-page .op-bonus-performance small { max-width: 5rem; overflow: hidden; font-size: 0.54rem; text-overflow: ellipsis; white-space: nowrap; }
+.op-bonus-performance {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.3rem var(--space-2);
+}
+
+.operation-workspace-page .op-bonus-performance > span {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.22rem;
+    color: var(--text-muted);
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.operation-workspace-page .op-bonus-performance > span + span {
+    padding-left: var(--space-2);
+    border-left: 1px solid var(--border);
+}
+
+.operation-workspace-page .op-bonus-performance strong { color: var(--text); font-size: 0.7rem; font-variant-numeric: tabular-nums; }
+.operation-workspace-page .op-bonus-performance small { font-size: 0.56rem; }
 .op-advice-note { padding: var(--space-3); color: var(--text-muted); font-size: 0.68rem; }
 
 .operation-workspace-page #op-rounds-list:empty::before,
@@ -713,8 +733,8 @@
     .op-stars-x-axis-row { grid-template-columns: 2rem minmax(0, 1fr); gap: var(--space-1); }
     .op-stars-plot { height: 12rem; margin-inline: 0.35rem; }
     .op-chart-legend { margin-left: 2.35rem; }
-    .op-bonus-content { grid-template-columns: minmax(6rem, 1fr) auto; gap: var(--space-2); }
-    .op-bonus-performance { grid-template-columns: repeat(4, minmax(2.2rem, auto)); gap: var(--space-1); }
+    .op-bonus-content { grid-template-columns: 1fr; gap: var(--space-2); }
+    .op-bonus-performance { justify-content: flex-start; }
 }
 
 @media (prefers-reduced-motion: reduce) {

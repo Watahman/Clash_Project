@@ -913,8 +913,8 @@ function renderBonusAdvice(roster) {
                     <span>TH${parseNumber(player.townHall, 0) || '-'} · ${escapeHtml(player.tag)}</span>
                 </div>
                 <div class="op-bonus-performance">
-                    <span title="${escapeHtml(t('op.stars'))}"><strong>${parseNumber(player.stars, 0)}</strong><small>★</small></span>
-                    <span title="${escapeHtml(t('op.destruction'))}"><strong>${parseNumber(player.destruction, 0).toFixed(1)}</strong><small>%</small></span>
+                    <span title="${escapeHtml(t('op.stars'))}"><strong>${parseNumber(player.stars, 0)}★</strong></span>
+                    <span title="${escapeHtml(t('op.destruction'))}"><strong>${parseNumber(player.destruction, 0).toFixed(1)}%</strong></span>
                     <span title="${escapeHtml(t('op.attacksUsed'))}"><strong>${parseNumber(player.attacksUsed, 0)}/${parseNumber(player.availableAttacks, 0)}</strong><small>${escapeHtml(t('op.attacks'))}</small></span>
                     <span title="${escapeHtml(t('op.missed'))}"><strong>${parseNumber(player.missed, 0)}</strong><small>${escapeHtml(t('op.missed'))}</small></span>
                 </div>
