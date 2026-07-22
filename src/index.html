@@ -54,24 +54,33 @@
         <div class="product-window" id="preview" aria-label="Voorbeeld van CWL Planner" data-i18n-aria-label="public.previewLabel">
             <div class="window-top"><span></span><span></span><span></span><strong>CWL Planner</strong></div>
             <div class="preview-shell">
-                <aside class="preview-sidebar">
-                    <b data-i18n="cwl.playersSub">Vrij roster</b>
-                    <div><i class="th-mini">16</i><span><strong>Nova</strong><small>#9UY8LCQ2</small></span></div>
-                    <div><i class="th-mini">15</i><span><strong>Axel</strong><small>#Y0J2C8PL</small></span></div>
-                    <div><i class="th-mini">14</i><span><strong>Milo</strong><small>#J28QP0RY</small></span></div>
-                </aside>
-                <section class="preview-board">
-                    <header><span><small data-i18n="public.samplePlan">Hoofdplanning juli</small><strong data-i18n="public.sampleSummary">2 clans · 3 spelers vrij</strong></span><span class="preview-save" data-i18n="public.saved">Opgeslagen</span></header>
-                    <article class="preview-clan">
-                        <div class="preview-clan-head"><span class="clan-shield">BW</span><span><strong>Belgian Warriors</strong><small>Crystal I · 15v15</small></span><b>13/15</b></div>
-                        <div class="preview-row"><span>01</span><strong>Emile</strong><small>TH16</small><em data-i18n="public.available">Beschikbaar</em></div>
-                        <div class="preview-row"><span>02</span><strong>Valkyrie</strong><small>TH16</small><em data-i18n="public.rotation">Rotatie</em></div>
-                        <div class="preview-row"><span>03</span><strong>Luna</strong><small>TH15</small><em data-i18n="public.core">Kern</em></div>
-                    </article>
-                    <article class="preview-clan preview-clan-muted">
-                        <div class="preview-clan-head"><span class="clan-shield">BA</span><span><strong>Belgian Academy</strong><small>Gold I · 30v30</small></span><b>24/30</b></div>
-                    </article>
-                </section>
+                <div class="preview-toolbar">
+                    <span><small data-i18n="planner.plan">Plan</small><strong data-i18n="public.samplePlan">Hoofdplanning juli</strong></span>
+                    <span><small data-i18n="planner.name">Naam</small><strong>CWL juli</strong></span>
+                    <span class="preview-add-clan"><b aria-hidden="true">+</b><span data-i18n="cwl.addClan">Clan toevoegen</span></span>
+                    <em class="preview-save" data-i18n="public.saved">Opgeslagen</em>
+                </div>
+                <div class="preview-planner-layout">
+                    <aside class="preview-sidebar">
+                        <header><span><small data-i18n="planner.source">Planbron</small><b data-i18n="cwl.playersSub">Vrij roster</b></span><strong>3</strong></header>
+                        <div class="preview-roster-tools"><span data-i18n="planner.searchRosterPlaceholder">Zoek op naam of tag</span><b>TH ↓</b></div>
+                        <div class="preview-player preview-free-player"><img src="assets/css/pictures/townhalls/Town_Hall16.png" alt=""><span><strong>Nova</strong><small>Belgian Warriors · #9UY8LCQ2</small></span></div>
+                        <div class="preview-player preview-free-player"><img src="assets/css/pictures/townhalls/Town_Hall15.png" alt=""><span><strong>Axel</strong><small>Belgian Academy · #Y0J2C8PL</small></span></div>
+                        <div class="preview-player preview-free-player"><img src="assets/css/pictures/townhalls/Town_Hall14.png" alt=""><span><strong>Milo</strong><small>Belgian Warriors · #J28QP0RY</small></span></div>
+                    </aside>
+                    <section class="preview-board">
+                        <header><span><small data-i18n="cwl.clansSub">Planning board</small><strong data-i18n="cwl.clansTitle">Clans</strong></span><b data-i18n="public.sampleSummary">2 clans · 3 spelers vrij</b></header>
+                        <article class="preview-clan">
+                            <div class="preview-clan-head"><img src="assets/css/pictures/default-clan-banner.png" alt=""><span><strong>Belgian Warriors</strong><small>#2P8JUCR9C · Crystal I</small></span><em><small data-i18n="planner.format">Formaat</small><b>15v15</b></em><b>13/15</b></div>
+                            <div class="preview-player preview-clan-player is-core"><img src="assets/css/pictures/townhalls/Town_Hall16.png" alt=""><span><strong>Emile</strong><small>Belgian Warriors · #LQURPQJ0Y</small></span><i aria-hidden="true"></i><em data-i18n="public.core">Kern</em></div>
+                            <div class="preview-player preview-clan-player is-rotation"><img src="assets/css/pictures/townhalls/Town_Hall16.png" alt=""><span><strong>Valkyrie</strong><small>Belgian Warriors · #9RYJQVG2</small></span><i aria-hidden="true"></i><em data-i18n="public.rotation">Rotatie</em></div>
+                            <div class="preview-player preview-clan-player is-core"><img src="assets/css/pictures/townhalls/Town_Hall15.png" alt=""><span><strong>Luna</strong><small>Belgian Warriors · #Y28CVQP0</small></span><i aria-hidden="true"></i><em data-i18n="public.core">Kern</em></div>
+                        </article>
+                        <article class="preview-clan preview-clan-muted">
+                            <div class="preview-clan-head"><img src="assets/css/pictures/default-clan-banner.png" alt=""><span><strong>Belgian Academy</strong><small>#2QG0V9LPC · Gold I</small></span><em><small data-i18n="planner.format">Formaat</small><b>30v30</b></em><b>24/30</b></div>
+                        </article>
+                    </section>
+                </div>
             </div>
             <span class="prototype-mark" data-i18n="public.sampleData">Voorbeelddata</span>
         </div>
