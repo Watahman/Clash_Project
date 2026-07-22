@@ -1,5 +1,6 @@
 import { isAttackCountingState } from './cwl-war-state.js';
 import { t } from '../i18n/i18n.js';
+import { buildWeightedPrediction } from './cwl-chart-prediction.js';
 
 const DAY_COUNT = 7;
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -59,7 +60,11 @@ function renderStarsPerDayChart(container, rounds = [], status) {
     if (!container) return;
     const series = buildStarsPerDaySeries(rounds);
     const played = series.filter(point => point.stars != null);
-    const maximum = getStarsScaleMaximum(series);
+    const prediction = buildWeightedPrediction(series, 'stars', { minimum: 0 });
+    const maximum = getStarsScaleMaximum([
+        ...series,
+        ...prediction.map(point => ({ stars: point.value }))
+    ]);
     const xForDay = day => ((day - 1) / (DAY_COUNT - 1)) * 100;
     const yForStars = stars => 100 - (stars / maximum) * 100;
 
@@ -105,6 +110,12 @@ function renderStarsPerDayChart(container, rounds = [], status) {
         path.classList.add('op-stars-line');
         svg.appendChild(path);
     });
+    if (prediction.length > 1) {
+        const path = document.createElementNS(SVG_NS, 'path');
+        path.setAttribute('d', prediction.map((point, index) => `${index ? 'L' : 'M'} ${xForDay(point.day)} ${yForStars(point.value)}`).join(' '));
+        path.classList.add('op-stars-line', 'op-prediction-line');
+        svg.appendChild(path);
+    }
     plot.appendChild(svg);
 
     played.forEach(point => {
@@ -187,7 +198,18 @@ function renderStarsPerDayChart(container, rounds = [], status) {
             opponent: point.opponent
         })).join(' ');
 
-    container.append(visual, xAxisRow, summary);
+    const legend = createChartLegend(prediction.length > 1);
+    container.append(visual, xAxisRow, legend, summary);
+}
+
+function createChartLegend(showPrediction) {
+    const legend = document.createElement('div');
+    legend.className = 'op-chart-legend';
+    legend.hidden = !showPrediction;
+    legend.innerHTML = `
+        <span><i class="op-chart-legend-actual" aria-hidden="true"></i>${t('op.chartActual')}</span>
+        <span><i class="op-chart-legend-prediction" aria-hidden="true"></i>${t('op.chartPrediction')}</span>`;
+    return legend;
 }
 
 export { buildStarsPerDaySeries, getLineSegments, getStarsScaleMaximum, renderStarsPerDayChart };

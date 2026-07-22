@@ -46,7 +46,7 @@ export const nl = Object.freeze({
   "op.stateLive": "Live",
   "op.statePreparation": "Voorbereiding",
   "op.stateNotStarted": "Nog niet gestart",
-  "op.stateNotAvailable": "Niet beschikbaar",
+  "op.stateNotAvailable": "Nog niet gestart",
   "op.stateUnknown": "Onbekend",
   "op.resultWin": "Win",
   "op.resultLoss": "Loss",

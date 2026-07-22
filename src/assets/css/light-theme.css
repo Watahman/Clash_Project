@@ -702,3 +702,8 @@ body.workspace-app[data-workspace-page="groups"]
     border-color: var(--danger) !important;
     background: color-mix(in srgb, var(--danger) 17%, white) !important;
 }
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="operation"] .op-round-card,
+:root[data-theme="light"] body.workspace-app[data-workspace-page="operation"] .op-bonus-list li {
+    box-shadow: none;
+}

@@ -465,7 +465,7 @@ function cwlStateText(stateKey) {
     if (stateKey === 'live') return t('op.stateLive');
     if (stateKey === 'preparation') return t('op.statePreparation');
     if (stateKey === 'notStarted') return t('op.stateNotStarted');
-    if (stateKey === 'notAvailable') return t('op.stateNotAvailable');
+    if (stateKey === 'notAvailable') return t('op.stateNotStarted');
     return t('op.stateUnknown');
 }
 
@@ -474,22 +474,22 @@ function resultText(result) {
     if (result === 'loss') return t('op.resultLoss');
     if (result === 'draw') return t('op.resultDraw');
     if (result === 'notStarted') return t('op.stateNotStarted');
-    if (result === 'notAvailable') return t('op.stateNotAvailable');
+    if (result === 'notAvailable') return t('op.stateNotStarted');
     return t('op.resultPending');
 }
 
 function createEmptyRound(day) {
     return {
         day,
-        state: 'notAvailable',
-        stateText: cwlStateText('notAvailable'),
+        state: 'notStarted',
+        stateText: cwlStateText('notStarted'),
         opponent: '-',
         stars: 0,
         destruction: 0,
         attacksUsed: 0,
         availableAttacks: 0,
         missed: 0,
-        result: 'notAvailable'
+        result: 'notStarted'
     };
 }
 
@@ -915,7 +915,19 @@ function renderBonusAdvice(roster) {
     }
     ranked.forEach(player => {
         const li = document.createElement('li');
-        li.innerHTML = `<strong>${escapeHtml(player.name)}</strong><span>${parseNumber(player.stars, 0)}★ · ${parseNumber(player.destruction, 0).toFixed(1)}% · ${parseNumber(player.attacksUsed, 0)}/${parseNumber(player.availableAttacks, 0)} attacks · ${parseNumber(player.missed, 0)} missed</span>`;
+        li.innerHTML = `
+            <div class="op-bonus-content">
+                <div class="op-bonus-player">
+                    <strong>${escapeHtml(player.name)}</strong>
+                    <span>TH${parseNumber(player.townHall, 0) || '-'} · ${escapeHtml(player.tag)}</span>
+                </div>
+                <div class="op-bonus-performance">
+                    <span title="${escapeHtml(t('op.stars'))}"><strong>${parseNumber(player.stars, 0)}</strong><small>★</small></span>
+                    <span title="${escapeHtml(t('op.destruction'))}"><strong>${parseNumber(player.destruction, 0).toFixed(1)}</strong><small>%</small></span>
+                    <span title="${escapeHtml(t('op.attacksUsed'))}"><strong>${parseNumber(player.attacksUsed, 0)}/${parseNumber(player.availableAttacks, 0)}</strong><small>${escapeHtml(t('op.attacks'))}</small></span>
+                    <span title="${escapeHtml(t('op.missed'))}"><strong>${parseNumber(player.missed, 0)}</strong><small>${escapeHtml(t('op.missed'))}</small></span>
+                </div>
+            </div>`;
         refs.bonusList.appendChild(li);
     });
 }
@@ -977,7 +989,17 @@ function normalizeImportedReport(data) {
         return {
             ...data,
             roster: data.roster.map(player => ({ ...player, tag: normalizeTag(player.tag), name: player.name || normalizeTag(player.tag), townHall: parseNumber(player.townHall || player.townHallLevel, 0), dayStats: player.dayStats || {} })).filter(player => player.tag),
-            rounds: data.rounds.map((round, index) => ({ ...createEmptyRound(index + 1), ...round, day: round.day || index + 1, stateText: round.stateText || cwlStateText(round.state || 'unknown') })),
+            rounds: data.rounds.map((round, index) => {
+                const state = round.state === 'notAvailable' ? 'notStarted' : round.state || 'notStarted';
+                return {
+                    ...createEmptyRound(index + 1),
+                    ...round,
+                    day: round.day || index + 1,
+                    state,
+                    stateText: cwlStateText(state),
+                    result: round.result === 'notAvailable' ? 'notStarted' : round.result || 'notStarted'
+                };
+            }),
             wars: Array.isArray(data.wars) ? data.wars : [],
             leagueWars,
             standings,

@@ -256,7 +256,7 @@
 
 .op-operation-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(18rem, 21rem);
+    grid-template-columns: minmax(0, 1fr) minmax(24rem, 28rem);
     gap: var(--space-4);
     align-items: start;
 }
@@ -326,7 +326,15 @@
 }
 
 .op-ranking-line { stroke: var(--success); }
-.op-ranking-point .op-stars-point-dot { background: var(--success); outline-color: var(--success); }
+.op-prediction-line {
+    stroke-dasharray: 0.35rem 0.35rem;
+    opacity: 0.78;
+}
+.op-ranking-prediction-line { stroke: var(--success); }
+.op-ranking-point .op-stars-point-dot {
+    background: var(--success);
+    box-shadow: 0 0 0 0.14rem color-mix(in srgb, var(--success) 24%, transparent);
+}
 .operation-workspace-page .op-ranking-point:hover .op-stars-point-dot,
 .operation-workspace-page .op-ranking-point:focus-visible .op-stars-point-dot,
 .operation-workspace-page .op-ranking-point.is-open .op-stars-point-dot { background: var(--success); }
@@ -350,10 +358,10 @@
     display: block;
     width: 0.72rem;
     height: 0.72rem;
-    border: 0.16rem solid var(--surface);
+    border: 0;
     border-radius: 50%;
     background: var(--accent);
-    outline: 1px solid var(--accent);
+    box-shadow: 0 0 0 0.14rem color-mix(in srgb, var(--accent) 24%, transparent);
     transition: transform 140ms ease-out, background 140ms ease-out;
 }
 
@@ -411,6 +419,22 @@
 .op-stars-x-axis small { font-size: 0.58rem; }
 .op-stars-x-axis strong { overflow: hidden; color: var(--text-muted); font-size: 0.66rem; text-overflow: ellipsis; }
 
+.op-chart-legend {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    margin: var(--space-3) 0 0 3.1rem;
+    color: var(--text-muted);
+    font-size: 0.66rem;
+}
+
+.op-chart-legend[hidden] { display: none; }
+.op-chart-legend span { display: inline-flex; align-items: center; gap: var(--space-2); }
+.op-chart-legend i { width: 1.6rem; border-top: 0.14rem solid var(--accent); }
+.op-chart-legend .op-chart-legend-prediction { border-top-style: dashed; opacity: 0.78; }
+.op-ranking-chart-legend i { border-top-color: var(--success); }
+
 .operation-workspace-page .op-stars-chart-empty {
     position: absolute;
     top: 50%;
@@ -459,36 +483,36 @@
 
 .operation-workspace-page .op-rounds-list {
     display: grid;
-    grid-template-columns: repeat(7, minmax(7.25rem, 1fr));
-    gap: 0;
-    padding: 0;
+    grid-template-columns: repeat(7, minmax(12.5rem, 1fr));
+    gap: var(--space-3);
+    padding: var(--space-4);
     overflow-x: auto;
+    scrollbar-gutter: stable;
 }
 
 .operation-workspace-page .op-round-card {
-    min-height: 9.5rem;
-    padding: 0.8rem;
-    border: 0;
-    border-right: 1px solid var(--border);
-    border-radius: 0;
-    background: transparent;
+    min-height: 11rem;
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-medium);
+    background: var(--surface-subtle);
 }
 
-.operation-workspace-page .op-round-card:last-child { border-right: 0; }
 .operation-workspace-page .op-round-card:hover { background: var(--surface-hover); }
 .operation-workspace-page .op-round-notStarted,
-.operation-workspace-page .op-round-notAvailable { opacity: 0.62; }
+.operation-workspace-page .op-round-notAvailable { opacity: 0.78; }
 
 .operation-workspace-page .op-round-title {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
     gap: var(--space-2);
     margin-bottom: var(--space-3);
 }
 
 .operation-workspace-page .op-round-title strong { color: var(--text); font-size: 0.78rem; text-transform: none; }
-.operation-workspace-page .op-round-opponent-name { min-height: 2.1rem; margin: 0 0 var(--space-2); color: var(--text); font-size: 0.75rem; text-transform: none; }
+.operation-workspace-page .op-round-opponent-name { min-height: 2.1rem; margin: 0 0 var(--space-2); color: var(--text); font-size: 0.82rem; text-transform: none; }
 
 .operation-workspace-page .op-round-stats {
     display: grid;
@@ -497,8 +521,8 @@
     margin: var(--space-2) 0;
 }
 
-.operation-workspace-page .op-round-stats span { color: var(--text-muted); font-size: 0.6rem; }
-.operation-workspace-page .op-round-stats strong { color: var(--text); font-size: 0.78rem; }
+.operation-workspace-page .op-round-stats span { color: var(--text-muted); font-size: 0.66rem; }
+.operation-workspace-page .op-round-stats strong { color: var(--text); font-size: 0.88rem; }
 .operation-workspace-page .op-result-text { color: var(--text-muted); font-size: 0.66rem; text-transform: none; }
 
 .operation-workspace-page .op-status-pill,
@@ -516,7 +540,8 @@
     font-size: 0.62rem;
     line-height: 1.1;
     text-transform: none;
-    white-space: nowrap;
+    max-width: 100%;
+    white-space: normal;
 }
 
 .operation-workspace-page .op-badge-ok,
@@ -572,22 +597,52 @@
 .operation-workspace-page .op-standing-rank { color: var(--accent); font-weight: 800; }
 .operation-workspace-page .op-standings-note { padding: var(--space-3); border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.68rem; }
 
-.operation-workspace-page .op-bonus-list { list-style: none; counter-reset: bonus; }
+.operation-workspace-page .op-bonus-list {
+    gap: var(--space-2);
+    padding: var(--space-3);
+    list-style: none;
+    counter-reset: bonus;
+}
 .operation-workspace-page .op-bonus-list li {
     display: grid;
     grid-template-columns: 1.5rem minmax(0, 1fr);
+    align-items: center;
     gap: var(--space-2);
-    padding: 0.7rem var(--space-3);
-    border: 0;
-    border-bottom: 1px solid var(--border);
-    border-radius: 0;
-    background: transparent;
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    background: var(--surface-subtle);
     counter-increment: bonus;
 }
 
-.operation-workspace-page .op-bonus-list li::before { content: counter(bonus); color: var(--text-muted); font-size: 0.7rem; }
-.operation-workspace-page .op-bonus-list strong { color: var(--text); font-size: 0.75rem; text-transform: none; }
-.operation-workspace-page .op-bonus-list span { color: var(--text-muted); font-size: 0.66rem; line-height: 1.45; }
+.operation-workspace-page .op-bonus-list li::before {
+    content: counter(bonus);
+    display: grid;
+    width: 1.5rem;
+    height: 1.5rem;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    font-size: 0.68rem;
+    font-weight: 800;
+}
+
+.op-bonus-content {
+    display: grid;
+    grid-template-columns: minmax(7rem, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+    min-width: 0;
+}
+
+.operation-workspace-page .op-bonus-player { display: grid; min-width: 0; gap: 0.18rem; }
+.operation-workspace-page .op-bonus-player strong { overflow: hidden; color: var(--text); font-size: 0.78rem; text-overflow: ellipsis; text-transform: none; white-space: nowrap; }
+.operation-workspace-page .op-bonus-player span { overflow: hidden; color: var(--text-muted); font-size: 0.62rem; text-overflow: ellipsis; white-space: nowrap; }
+.op-bonus-performance { display: grid; grid-template-columns: repeat(4, minmax(2.6rem, auto)); gap: var(--space-2); }
+.operation-workspace-page .op-bonus-performance > span { display: grid; justify-items: end; gap: 0.12rem; color: var(--text-muted); line-height: 1.1; }
+.operation-workspace-page .op-bonus-performance strong { color: var(--text); font-size: 0.72rem; font-variant-numeric: tabular-nums; }
+.operation-workspace-page .op-bonus-performance small { max-width: 5rem; overflow: hidden; font-size: 0.54rem; text-overflow: ellipsis; white-space: nowrap; }
 .op-advice-note { padding: var(--space-3); color: var(--text-muted); font-size: 0.68rem; }
 
 .operation-workspace-page #op-rounds-list:empty::before,
@@ -643,6 +698,9 @@
     .op-stars-chart-visual,
     .op-stars-x-axis-row { grid-template-columns: 2rem minmax(0, 1fr); gap: var(--space-1); }
     .op-stars-plot { height: 12rem; margin-inline: 0.35rem; }
+    .op-chart-legend { margin-left: 2.35rem; }
+    .op-bonus-content { grid-template-columns: minmax(6rem, 1fr) auto; gap: var(--space-2); }
+    .op-bonus-performance { grid-template-columns: repeat(4, minmax(2.2rem, auto)); gap: var(--space-1); }
 }
 
 @media (prefers-reduced-motion: reduce) {

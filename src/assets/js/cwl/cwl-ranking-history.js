@@ -1,5 +1,6 @@
 import { normalizeWarState } from './cwl-war-state.js';
 import { t } from '../i18n/i18n.js';
+import { buildWeightedPrediction } from './cwl-chart-prediction.js';
 
 const DAY_COUNT = 7;
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -104,6 +105,7 @@ function renderRankingHistoryChart(container, history = [], status) {
     const normalized = Array.from({ length: DAY_COUNT }, (_, index) => history[index] || emptyHistoryPoint(index + 1));
     const available = normalized.filter(point => point.rank != null);
     const clanCount = Math.max(2, ...available.map(point => Number(point.clanCount) || 0));
+    const prediction = buildWeightedPrediction(normalized, 'rank', { minimum: 1, maximum: clanCount });
     const xForDay = day => ((day - 1) / (DAY_COUNT - 1)) * 100;
     const yForRank = rank => ((rank - 1) / (clanCount - 1)) * 100;
 
@@ -146,6 +148,12 @@ function renderRankingHistoryChart(container, history = [], status) {
         path.classList.add('op-stars-line', 'op-ranking-line');
         svg.appendChild(path);
     });
+    if (prediction.length > 1) {
+        const path = document.createElementNS(SVG_NS, 'path');
+        path.setAttribute('d', prediction.map((point, index) => `${index ? 'L' : 'M'} ${xForDay(point.day)} ${yForRank(point.value)}`).join(' '));
+        path.classList.add('op-stars-line', 'op-prediction-line', 'op-ranking-prediction-line');
+        svg.appendChild(path);
+    }
     plot.appendChild(svg);
 
     available.forEach(point => {
@@ -227,7 +235,13 @@ function renderRankingHistoryChart(container, history = [], status) {
             stars: point.stars,
             destruction: point.destruction.toFixed(1)
         })).join(' ');
-    container.append(visual, xAxisRow, summary);
+    const legend = document.createElement('div');
+    legend.className = 'op-chart-legend op-ranking-chart-legend';
+    legend.hidden = prediction.length < 2;
+    legend.innerHTML = `
+        <span><i class="op-chart-legend-actual" aria-hidden="true"></i>${t('op.chartActual')}</span>
+        <span><i class="op-chart-legend-prediction" aria-hidden="true"></i>${t('op.chartPrediction')}</span>`;
+    container.append(visual, xAxisRow, legend, summary);
 }
 
 export { buildRankingHistory, getLineSegments, renderRankingHistoryChart };
