@@ -251,6 +251,7 @@ export function initGroupPolls(emptyMessage) {
         const answer = poll.answers?.[member.user_id];
         const node = document.createElement('div');
         node.className = 'groups-poll-result-user';
+        node.dataset.userId = member.user_id;
         const profile = Array.isArray(member.profile) ? member.profile[0] : member.profile;
         node.appendChild(textNode('strong', profile?.name || member.name || member.user_id));
         if (!answer) {

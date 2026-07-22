@@ -8,6 +8,7 @@ import { getGroupInfo, getGroupsOfUser } from '../Supabase/Supabase-Group.js';
 import { roleLabelKey } from '../groups/groups-roles.js';
 import { summarizePlan } from '../cwl/cwl-plan-summary.js';
 import { getNameInitials } from '../utils/name-initials.js';
+import { onUserProfileUpdate } from '../profile/profile-events.js';
 
 const refs = {};
 const state = {
@@ -204,6 +205,10 @@ async function loadRecentGroups(userId) {
 async function init() {
     initI18n();
     initRefs();
+    onUserProfileUpdate(profile => {
+        state.user = { ...state.user, ...profile };
+        renderUser();
+    });
     refs.accountLine.addEventListener('click', () => document.querySelector('#profile-btn')?.click());
     window.addEventListener('clashtools:language-changed', renderAll);
     await syncAuthSession().catch(() => null);

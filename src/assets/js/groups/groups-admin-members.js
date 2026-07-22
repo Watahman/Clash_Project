@@ -31,6 +31,7 @@ export function createMemberRoleAdmin(elements, getState, setMessage, emptyMessa
         const user = Array.isArray(userData) ? userData[0] : userData;
         const item = document.createElement('div');
         item.className = 'groups-admin-member';
+        item.dataset.userId = user?.id || member.user_id;
 
         const info = document.createElement('div');
         info.className = 'groups-admin-member-info';

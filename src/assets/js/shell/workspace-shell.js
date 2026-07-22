@@ -5,6 +5,7 @@ import { getNotifications, markNotificationRead } from '../Supabase/Supabase-Not
 import { getCurrentUserId } from '../utils/user.js';
 import { checkUserId } from '../Supabase/Supabase-User.js';
 import { getNameInitials } from '../utils/name-initials.js';
+import { onUserProfileUpdate } from '../profile/profile-events.js';
 
 let notificationsData = null;
 let notificationsRequestId = 0;
@@ -458,12 +459,7 @@ function initWorkspaceShell() {
     initProfileShortcuts();
     initNotificationsPopover();
 
-    window.addEventListener(
-        'clashtools:user-profile-updated',
-        event => {
-            applyWorkspaceUserIdentity(event.detail);
-        }
-    );
+    onUserProfileUpdate(applyWorkspaceUserIdentity);
 
     window.addEventListener(
         'clashtools:language-changed',

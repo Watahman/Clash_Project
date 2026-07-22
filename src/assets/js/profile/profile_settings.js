@@ -5,6 +5,7 @@ import { getCurrentUserId } from "../utils/user.js";
 import { getThemePreference, setThemePreference } from "../theme/theme-manager.js";
 import { changeAuthenticatedPassword } from "../auth/auth-client.js";
 import { isStrongPassword } from "../utils/password.js";
+import { publishUserProfileUpdate } from "./profile-events.js";
 
 let initialized = false;
 let currentProfile = null;
@@ -108,14 +109,7 @@ async function saveName() {
 
         onProfileUpdated?.(currentProfile);
 
-        window.dispatchEvent(
-            new CustomEvent(
-                'clashtools:user-profile-updated',
-                {
-                    detail: currentProfile
-                }
-            )
-        );
+        publishUserProfileUpdate(currentProfile);
 
         setMessage('settings.nameChanged');
     } catch {

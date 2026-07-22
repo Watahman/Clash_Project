@@ -4,6 +4,7 @@ import { applyRoleBadge, getCurrentUserRole, getMemberRole, isGroupAdmin } from 
 import { renderBadge } from '../groups/groups-badges.js';
 import { renderGroupMemberActivities } from '../groups/groups-member-activity.js';
 import { getNameInitials } from '../utils/name-initials.js';
+import { onUserProfileUpdate } from '../profile/profile-events.js';
 
 function memberLabel(count) {
     return count === 1 ? `1 ${t('groups.memberSingle')}` : `${count} ${t('groups.members')}`;
@@ -209,6 +210,32 @@ function setText(selector, value) {
     const element = document.querySelector(selector);
     if (element) element.textContent = value;
 }
+
+function applyLiveProfileName(profile) {
+    const userId = String(profile?.id || '').trim();
+    const name = String(profile?.name || '').trim();
+    if (!userId || !name) return;
+
+    document.querySelectorAll('[data-user-id]').forEach(item => {
+        if (String(item.dataset.userId || '') !== userId) return;
+
+        let nameElement = item.querySelector(
+            '.groups-member-name, .groups-admin-member-info strong'
+        );
+        if (!nameElement && item.classList.contains('groups-poll-result-user')) {
+            nameElement = item.querySelector('strong');
+        }
+        if (nameElement) nameElement.textContent = name;
+
+        const avatar = item.querySelector('.groups-member-avatar');
+        if (avatar) {
+            avatar.textContent = getNameInitials(name, '?');
+            avatar.title = name;
+        }
+    });
+}
+
+onUserProfileUpdate(applyLiveProfileName);
 
 window.addEventListener('clashtools:group-roles-updated', event => {
     const group = event.detail?.group;

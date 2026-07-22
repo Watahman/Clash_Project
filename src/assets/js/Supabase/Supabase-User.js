@@ -56,9 +56,13 @@ export async function addBaseToUser(userId, base, playerToken) {
 export async function updateUserName(userId, name) {
     const path = config._BASE_URL + config._EXT_SUPA_USER_UPDATE_NAME;
     const data = { name };
-    return databaseRequestWithBody(path, data).then(result => {
-        removeCached(cacheKeys.userInfo(userId));
-        removeCached(cacheKeys.userCheck(userId));
+    return databaseRequestWithBody(path, data).then(async result => {
+        await Promise.all([
+            removeCached(cacheKeys.userInfo(userId)),
+            removeCached(cacheKeys.userCheck(userId)),
+            clearCachePrefix('friends.'),
+            clearCachePrefix('groups.')
+        ]);
         return result;
     });
 }
