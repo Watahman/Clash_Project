@@ -1,11 +1,24 @@
 import { normalizeTag } from './cwl-utils.js';
 
-export const CWL_PLAN_SCHEMA_VERSION = 2;
+export const CWL_PLAN_SCHEMA_VERSION = 3;
 
-export function normalizePlayerSnapshot(player, fallbackClanName = '') {
+export const CWL_ROSTER_STATUSES = Object.freeze(['core', 'rotation', 'reserve']);
+
+export function normalizeRosterStatus(value, fallback = '') {
+    const status = String(value || '').trim().toLowerCase();
+    return CWL_ROSTER_STATUSES.includes(status) ? status : fallback;
+}
+
+export function normalizePlayerSnapshot(player, fallbackClanName = '', fallbackRosterStatus = '') {
     if (typeof player === 'string') {
         const tag = normalizeTag(player);
-        return tag ? { tag, name: tag, townHallLevel: 1, clanName: fallbackClanName } : null;
+        return tag ? {
+            tag,
+            name: tag,
+            townHallLevel: 1,
+            clanName: fallbackClanName,
+            rosterStatus: normalizeRosterStatus('', fallbackRosterStatus)
+        } : null;
     }
     if (!player || typeof player !== 'object') return null;
     const tag = normalizeTag(player.tag || player.playerTag || player.accountTag || player.clashTag);
@@ -15,14 +28,18 @@ export function normalizePlayerSnapshot(player, fallbackClanName = '') {
         name: String(player.name || player.playerName || tag).trim(),
         townHallLevel: Math.max(1, Number(player.townHallLevel || player.townHall || player.th || 1)),
         clanName: String(player.clanName || player.clan?.name || fallbackClanName || '').trim(),
-        clanTag: normalizeTag(player.clanTag || player.clantag || player.clan?.tag || '')
+        clanTag: normalizeTag(player.clanTag || player.clantag || player.clan?.tag || ''),
+        rosterStatus: normalizeRosterStatus(
+            player.rosterStatus || player.roster_status || player.status,
+            fallbackRosterStatus
+        )
     };
 }
 
-function uniquePlayerSnapshots(players, fallbackClanName = '') {
+function uniquePlayerSnapshots(players, fallbackClanName = '', fallbackRosterStatus = '') {
     const byTag = new Map();
     (Array.isArray(players) ? players : []).forEach(player => {
-        const normalized = normalizePlayerSnapshot(player, fallbackClanName);
+        const normalized = normalizePlayerSnapshot(player, fallbackClanName, fallbackRosterStatus);
         if (normalized && !byTag.has(normalized.tag)) byTag.set(normalized.tag, normalized);
     });
     return [...byTag.values()];
@@ -84,10 +101,5 @@ export function validatePlanDocument(input) {
     if (new Set(allTags).size !== allTags.length) {
         throw new Error('Een speler kan maar één keer in een plan voorkomen.');
     }
-    document.clans.forEach(clan => {
-        if (clan.players.length > clan.capacity) {
-            throw new Error(`Clan ${clan.name} bevat meer dan ${clan.capacity} spelers.`);
-        }
-    });
     return document;
 }

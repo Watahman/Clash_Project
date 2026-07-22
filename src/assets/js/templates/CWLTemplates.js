@@ -3,6 +3,7 @@ import { applyAvailabilityToCard } from '../cwl/cwl-availability.js';
 import { getCardTag, normalizePlayer, normalizeTag, plannerHasPlayer, uniquePlayers } from '../cwl/cwl-utils.js';
 import { t } from '../i18n/i18n.js';
 import { allowsThirtyPlayerCwl, normalizeCwlCapacity } from '../cwl/cwl-league-rules.js';
+import { normalizeRosterStatus } from '../cwl/cwl-plan-schema.js';
 
 function createPlayerCard(playerInfo, clanuuid) {
     const players = uniquePlayers(playerInfo);
@@ -26,6 +27,13 @@ function createPlayerCard(playerInfo, clanuuid) {
             makePlayerDraggable(element);
             attachDeleteButton(element);
             attachMoveControl(element);
+            const preferredStatus = normalizeRosterStatus(
+                player.rosterStatus || player.roster_status || player.status
+            );
+            syncPlayerRosterStatus(element, {
+                preferredStatus,
+                autoReserve: !preferredStatus
+            });
             applyAvailabilityToCard(element);
             plannerChanged = true;
         }
@@ -105,6 +113,125 @@ function attachPreviewSelection(element) {
     });
 }
 
+
+function clanCapacity(clan) {
+    return Number(
+        clan?.querySelector('.cwl-clan-capacity')?.value
+        || clan?.dataset?.clanCapacity
+        || 15
+    );
+}
+
+function nonReservePlayerCount(clan, excludedPlayer = null) {
+    if (!clan) return 0;
+    return Array.from(
+        clan.querySelectorAll('.cwl-clan-player-list .cwl-player-article[data-planner-card="true"]')
+    ).filter(player => (
+        player !== excludedPlayer
+        && normalizeRosterStatus(player.dataset.rosterStatus, 'core') !== 'reserve'
+    )).length;
+}
+
+function statusOption(value, labelKey) {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = t(labelKey);
+    return option;
+}
+
+function attachRosterStatusControl(element) {
+    let select = element.querySelector('.cwl-roster-status');
+
+    if (select) {
+        return select;
+    }
+
+    select = document.createElement('select');
+    select.className = 'cwl-roster-status';
+    select.setAttribute(
+        'aria-label',
+        t('cwl.rosterStatus')
+    );
+    select.title = t('cwl.rosterStatus');
+
+    select.append(
+        statusOption('core', 'cwl.rosterCore'),
+        statusOption('rotation', 'cwl.rosterRotation'),
+        statusOption('reserve', 'cwl.rosterReserve')
+    );
+
+    select.addEventListener(
+        'pointerdown',
+        event => event.stopPropagation()
+    );
+
+    select.addEventListener(
+        'mousedown',
+        event => event.stopPropagation()
+    );
+
+    select.addEventListener('change', () => {
+        element.dataset.rosterStatus =
+            normalizeRosterStatus(
+                select.value,
+                'core'
+            );
+
+        updateAllPlayerCounters();
+        rememberPlannerPlayers();
+        savePlan();
+    });
+
+    const moveSelect = element.querySelector(
+        '.cwl-move-player'
+    );
+
+    const deleteButton = element.querySelector(
+        '.cwl-delete-player'
+    );
+
+    if (moveSelect) {
+        element.insertBefore(select, moveSelect);
+    } else if (deleteButton) {
+        element.insertBefore(select, deleteButton);
+    } else {
+        element.appendChild(select);
+    }
+
+    if (deleteButton) {
+        element.appendChild(deleteButton);
+    }
+
+    return select;
+}
+
+function syncPlayerRosterStatus(element, options = {}) {
+    const clan = element.closest('.cwl-clan-article');
+    if (!clan) {
+        delete element.dataset.rosterStatus;
+        element.querySelector('.cwl-roster-status')?.remove();
+        return '';
+    }
+
+    const preferredStatus = normalizeRosterStatus(
+        options.preferredStatus || element.dataset.rosterStatus
+    );
+    let status = preferredStatus || 'core';
+    const isNewClanPlacement = options.autoReserve === true;
+    if (
+        isNewClanPlacement
+        && status !== 'reserve'
+        && nonReservePlayerCount(clan, element) >= clanCapacity(clan)
+    ) {
+        status = 'reserve';
+    }
+
+    element.dataset.rosterStatus = status;
+    const select = attachRosterStatusControl(element);
+    select.value = status;
+    return status;
+}
+
 function attachDeleteButton(element) {
     if (element.querySelector('.cwl-delete-player')) return;
     const button = document.createElement('button');
@@ -157,8 +284,14 @@ function attachMoveControl(element) {
         const target = select.value === 'free'
             ? document.querySelector('#cwl-available-players')
             : document.querySelector(`#${CSS.escape(select.value)} .cwl-clan-player-list`);
-        if (!target || target === element.parentElement) return;
+        const previousContainer = element.parentElement;
+        if (!target || target === previousContainer) return;
+        const previousStatus = normalizeRosterStatus(element.dataset.rosterStatus);
         target.appendChild(element);
+        syncPlayerRosterStatus(element, {
+            preferredStatus: previousStatus,
+            autoReserve: target.matches('.cwl-clan-player-list')
+        });
         updateAllPlayerCounters();
         rememberPlannerPlayers();
         window.dispatchEvent(new CustomEvent('clashtools:cwl-player-added'));
@@ -181,7 +314,8 @@ function rememberPlannerPlayers() {
         name: player.querySelector('.cwl-player-name')?.textContent || '',
         clanName: player.querySelector('.cwl-player-clan')?.textContent || '',
         tag: getCardTag(player),
-        townHall: Number(player.dataset.townHall || 1)
+        townHall: Number(player.dataset.townHall || 1),
+        rosterStatus: normalizeRosterStatus(player.dataset.rosterStatus)
     })).filter(player => player.tag);
     localStorage.setItem('clashtools_last_planner_players', JSON.stringify(players));
 }
@@ -191,9 +325,29 @@ function updateClanCapacityCounter(article) {
     const select = article.querySelector('.cwl-clan-capacity');
     const counter = article.querySelector('.cwl-amount-of-players-in-clan');
     if (!select || !counter) return;
-    const playerCount = article.querySelectorAll('.cwl-clan-player-list .cwl-player-article[data-planner-card="true"]').length;
-    counter.textContent = `${playerCount}/${select.value}`;
-    article.dataset.clanCapacity = select.value;
+
+    const players = Array.from(
+        article.querySelectorAll('.cwl-clan-player-list .cwl-player-article[data-planner-card="true"]')
+    );
+    const capacity = Number(select.value || 15);
+    const reserves = players.filter(player => (
+        normalizeRosterStatus(player.dataset.rosterStatus, 'core') === 'reserve'
+    )).length;
+    const active = players.length - reserves;
+
+    counter.textContent = reserves > 0
+        ? `${active}/${capacity} · ${t(reserves === 1 ? 'cwl.reserveCountOne' : 'cwl.reserveCountMany', { count: reserves })}`
+        : `${active}/${capacity}`;
+    counter.title = t('cwl.rosterCounterTitle', {
+        total: players.length,
+        active,
+        reserve: reserves,
+        capacity
+    });
+    counter.dataset.totalPlayers = String(players.length);
+    counter.dataset.activePlayers = String(active);
+    counter.dataset.reservePlayers = String(reserves);
+    article.dataset.clanCapacity = String(capacity);
 }
 
 function applyClanLeagueRestriction(article, leagueName, options = {}) {
@@ -242,10 +396,8 @@ function createClanCard(clanInfo, playerAmount, uuid = '') {
     capacitySelect.value = String(capacity);
     capacitySelect.setAttribute('aria-label', t('planner.format'));
     capacitySelect.addEventListener('change', () => {
-        const counter = article.querySelector('.cwl-amount-of-players-in-clan');
-        const count = article.querySelectorAll('.cwl-clan-player-list .cwl-player-article[data-planner-card="true"]').length;
-        counter.textContent = `${count}/${capacitySelect.value}`;
         article.dataset.clanCapacity = capacitySelect.value;
+        updateClanCapacityCounter(article);
         savePlan();
     });
     const deleteClan = clanTemplateClone.querySelector('.cwl-delete-clan');
@@ -262,6 +414,7 @@ function createClanCard(clanInfo, playerAmount, uuid = '') {
         const currentArticle = event.target.closest('article');
         currentArticle.querySelectorAll('.cwl-player-article[data-planner-card="true"]').forEach(player => {
             document.querySelector('#cwl-available-players').appendChild(player);
+            syncPlayerRosterStatus(player);
             applyAvailabilityToCard(player);
         });
         currentArticle.remove();
@@ -285,7 +438,7 @@ function makePlayerDraggable(element) {
     element.classList.add('draggable');
 
     element.addEventListener('mousedown', event => {
-        if (event.target.closest('.cwl-delete-player')) return;
+        if (event.target.closest('.cwl-delete-player, .cwl-move-player, .cwl-roster-status')) return;
         event.preventDefault();
         event.stopPropagation();
         if (dragging) return;
@@ -315,19 +468,26 @@ function makePlayerDraggable(element) {
         const onMouseUp = upEvent => {
             dragging = false;
             const lists = document.querySelectorAll('.cwl-clan-player-list, #cwl-available-players');
-            let dropped = false;
+            const previousContainer = element.originalContainer;
+            let targetContainer = null;
 
-            lists.forEach(list => {
+            for (const list of lists) {
                 const listRect = list.getBoundingClientRect();
                 if (upEvent.clientX >= listRect.left && upEvent.clientX <= listRect.right &&
                     upEvent.clientY >= listRect.top && upEvent.clientY <= listRect.bottom) {
-                    list.appendChild(element);
-                    element.originalContainer = list;
-                    dropped = true;
+                    targetContainer = list;
+                    break;
                 }
-            });
+            }
 
-            if (!dropped) element.originalContainer.appendChild(element);
+            const finalContainer = targetContainer || previousContainer;
+            const previousStatus = normalizeRosterStatus(element.dataset.rosterStatus);
+            finalContainer.appendChild(element);
+            element.originalContainer = finalContainer;
+            syncPlayerRosterStatus(element, {
+                preferredStatus: previousStatus,
+                autoReserve: Boolean(targetContainer && targetContainer !== previousContainer && targetContainer.matches('.cwl-clan-player-list'))
+            });
 
             element.classList.remove('cwl-player-dragging');
             element.style.position = '';
@@ -434,13 +594,7 @@ function updateAllPlayerCounters() {
     document.querySelector('#cwl-total-player-amount').textContent =
         String(document.querySelectorAll('#cwl-available-players .cwl-player-article[data-planner-card="true"]').length);
 
-    document.querySelectorAll('.cwl-clan-article').forEach(clan => {
-        const counter = clan.querySelector('.cwl-amount-of-players-in-clan');
-        if (!counter) return;
-        const max = counter.textContent.split('/')[1] || '15';
-        const count = clan.querySelectorAll('.cwl-clan-player-list .cwl-player-article[data-planner-card="true"]').length;
-        counter.textContent = `${count}/${max}`;
-    });
+    document.querySelectorAll('.cwl-clan-article').forEach(updateClanCapacityCounter);
 }
 
 export { createPlayerCard, createClanCard, updateAllPlayerCounters, applyClanLeagueRestriction };

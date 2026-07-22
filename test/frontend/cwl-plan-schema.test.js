@@ -31,12 +31,33 @@ describe('CWL plan schema', () => {
         })).toThrow(/maar één keer/i);
     });
 
-    it('rejects rosters beyond their configured capacity', () => {
-        const players = Array.from({ length: 16 }, (_, index) => ({ tag: `#P${index}Y` }));
-        expect(() => validatePlanDocument({
-            schemaVersion: 2,
+    it('accepts extra clan players and preserves their roster roles', () => {
+        const players = Array.from({ length: 16 }, (_, index) => ({
+            tag: `#P${index}Y`,
+            rosterStatus: index === 15 ? 'reserve' : 'core'
+        }));
+        const document = validatePlanDocument({
+            schemaVersion: 3,
             freePlayers: [],
             clans: [{ tag: '#CLAN', capacity: 15, players }]
-        })).toThrow(/meer dan 15/i);
+        });
+
+        expect(document.clans[0].players).toHaveLength(16);
+        expect(document.clans[0].players[15].rosterStatus).toBe('reserve');
+    });
+
+    it('normalizes invalid roster roles without rejecting the plan', () => {
+        const document = normalizePlanDocument({
+            clans: [{
+                tag: '#CLAN',
+                capacity: 15,
+                players: [
+                    { tag: '#AAA', rosterStatus: 'rotation' },
+                    { tag: '#BBB', rosterStatus: 'unknown' }
+                ]
+            }]
+        });
+
+        expect(document.clans[0].players.map(player => player.rosterStatus)).toEqual(['rotation', '']);
     });
 });

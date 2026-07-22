@@ -3,12 +3,32 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const { savePlan } = vi.hoisted(() => ({ savePlan: vi.fn() }));
 
 vi.mock('../../src/assets/js/cwl/cwl-plan-io.js', () => ({ savePlan }));
+vi.mock('../../src/assets/js/cwl/cwl-availability.js', () => ({
+    applyAvailabilityToCard: vi.fn()
+}));
 vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
-    t: key => ({
-        'cwl.clan': 'Clan',
-        'cwl.deleteClan': 'Clan verwijderen',
-        'planner.format': 'Formaat'
-    })[key] || key
+    t: (key, params = {}) => {
+        let value = ({
+            'cwl.clan': 'Clan',
+            'cwl.deleteClan': 'Clan verwijderen',
+            'cwl.removePlayer': 'Speler verwijderen',
+            'cwl.movePlayer': 'Speler verplaatsen',
+            'cwl.moveToAvailable': 'Beschikbaar',
+            'cwl.noClan': 'Geen clan',
+            'cwl.rosterStatus': 'Rol in CWL',
+            'cwl.rosterCore': 'Kernspeler',
+            'cwl.rosterRotation': 'Roulatiespeler',
+            'cwl.rosterReserve': 'Reserve',
+            'cwl.reserveCountOne': '+{count} reserve',
+            'cwl.reserveCountMany': '+{count} reserves',
+            'cwl.rosterCounterTitle': '{total} spelers: {active} actief voor {capacity} plaatsen, {reserve} reserve',
+            'planner.format': 'Formaat'
+        })[key] || key;
+        Object.entries(params).forEach(([name, replacement]) => {
+            value = value.replaceAll(`{${name}}`, replacement);
+        });
+        return value;
+    }
 }));
 
 describe('CWL planner clan rows', () => {
@@ -19,6 +39,16 @@ describe('CWL planner clan rows', () => {
             <div id="cwl-all-clans"></div>
             <div id="cwl-available-players"></div>
             <p id="cwl-total-player-amount">0</p>
+            <template id="cwl-player-template">
+                <article class="cwl-player-article">
+                    <img class="cwl-player-townhall-foto" alt="">
+                    <div class="cwl-player-info">
+                        <p class="cwl-player-name"></p>
+                        <p class="cwl-player-clan"></p>
+                        <p class="cwl-player-hashtag"></p>
+                    </div>
+                </article>
+            </template>
             <template id="cwl-clan-template">
                 <article class="cwl-clan-article">
                     <div class="cwl-clan-info-card">
@@ -59,4 +89,41 @@ describe('CWL planner clan rows', () => {
         expect(clan.querySelector('.cwl-amount-of-players-in-clan').textContent).toBe('0/30');
         expect(savePlan).toHaveBeenCalledOnce();
     });
+
+    it('allows players beyond capacity and automatically marks overflow as reserve', async () => {
+        const { createClanCard, createPlayerCard } = await import('../../src/assets/js/templates/CWLTemplates.js');
+        createClanCard({ tag: '#AAA111', name: 'North Guard' }, 15, 'north');
+
+        for (let index = 0; index < 16; index += 1) {
+            createPlayerCard({
+                tag: `#PLAYER${index}`,
+                name: `Player ${index}`,
+                townHallLevel: 17
+            }, 'north');
+        }
+
+        const clan = document.querySelector('.cwl-clan-article');
+        const players = clan.querySelectorAll('.cwl-player-article');
+        expect(players).toHaveLength(16);
+        expect(players[14].dataset.rosterStatus).toBe('core');
+        expect(players[15].dataset.rosterStatus).toBe('reserve');
+        expect(players[15].querySelector('.cwl-roster-status')?.value).toBe('reserve');
+        expect(clan.querySelector('.cwl-amount-of-players-in-clan').textContent).toBe('15/15 · +1 reserve');
+
+        const status = players[15].querySelector('.cwl-roster-status');
+        status.value = 'rotation';
+        status.dispatchEvent(new Event('change'));
+        expect(players[15].dataset.rosterStatus).toBe('rotation');
+        expect(clan.querySelector('.cwl-amount-of-players-in-clan').textContent).toBe('16/15');
+    });
+
+    it('only shows the roster role selector while a player is inside a clan', async () => {
+        const { createPlayerCard } = await import('../../src/assets/js/templates/CWLTemplates.js');
+        createPlayerCard({ tag: '#FREE1', name: 'Free player', townHallLevel: 16 }, null);
+
+        const player = document.querySelector('#cwl-available-players .cwl-player-article');
+        expect(player.querySelector('.cwl-roster-status')).toBeNull();
+        expect(player.dataset.rosterStatus).toBeUndefined();
+    });
+
 });

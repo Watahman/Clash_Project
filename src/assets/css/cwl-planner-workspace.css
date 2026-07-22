@@ -39,6 +39,9 @@
 }
 
 .cwl-page-header {
+    position: static;
+    inset: auto;
+    z-index: auto;
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
@@ -50,6 +53,9 @@
     padding: 0;
     border: 0;
     background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
 }
 
 .cwl-page-kicker,
@@ -432,6 +438,18 @@
     transform: none !important;
 }
 
+.workspace-planner
+.cwl-clan-player-list
+.cwl-player-article {
+    grid-template-columns:
+        2.35rem
+        minmax(0, 1fr)
+        auto
+        clamp(5.8rem, 8vw, 7.2rem)
+        clamp(5.5rem, 9vw, 7rem)
+        1.9rem !important;
+}
+
 .workspace-planner #cwl-available-players .cwl-player-article:first-child { border-top: 1px solid var(--border) !important; }
 .workspace-planner .cwl-player-article::after { content: none !important; }
 
@@ -500,6 +518,42 @@
     justify-self: start;
     color: var(--text-subtle) !important;
     font-family: var(--font-mono);
+}
+
+
+.workspace-planner .cwl-roster-status {
+    grid-column: 4;
+    grid-row: 1;
+    justify-self: end;
+
+    width: clamp(5.8rem, 8vw, 7.2rem);
+    min-width: 0;
+    min-height: 1.9rem;
+    margin: 0;
+
+    padding: 0.2rem 1.35rem 0.2rem 0.42rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    background: var(--surface-subtle);
+    color: var(--text-muted);
+
+    font-size: 0.62rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.workspace-planner .cwl-player-article[data-roster-status="core"] .cwl-roster-status {
+    border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+    color: var(--accent-strong);
+}
+
+.workspace-planner .cwl-player-article[data-roster-status="rotation"] .cwl-roster-status {
+    border-color: color-mix(in srgb, var(--blue) 34%, var(--border));
+    color: var(--blue);
+}
+
+.workspace-planner .cwl-player-article[data-roster-status="reserve"] .cwl-roster-status {
+    color: var(--text-subtle);
 }
 
 .workspace-planner .cwl-availability-indicator {
@@ -575,6 +629,24 @@
     opacity: 1;
 }
 
+.workspace-planner
+.cwl-clan-player-list
+.cwl-roster-status {
+    grid-column: 4;
+}
+
+.workspace-planner
+.cwl-clan-player-list
+.cwl-move-player {
+    grid-column: 5;
+}
+
+.workspace-planner
+.cwl-clan-player-list
+.cwl-delete-player {
+    grid-column: 6;
+}
+
 .workspace-planner .cwl-clan-player-list.drag-over {
     outline: 2px solid var(--accent);
     outline-offset: -2px;
@@ -626,6 +698,34 @@
         grid-row: 2;
         justify-self: start;
         width: min(100%, 11rem);
+    }
+
+    .workspace-planner
+    .cwl-clan-player-list
+    .cwl-roster-status {
+        grid-column: 2 / -1;
+        grid-row: 2;
+        justify-self: start;
+
+        width: min(100%, 11rem);
+        margin: 0;
+    }
+
+    .workspace-planner
+    .cwl-clan-player-list
+    .cwl-move-player {
+        grid-column: 2 / -1;
+        grid-row: 3;
+        justify-self: start;
+
+        width: min(100%, 11rem);
+    }
+
+    .workspace-planner
+    .cwl-clan-player-list
+    .cwl-delete-player {
+        grid-column: 4;
+        grid-row: 1;
     }
 }
 

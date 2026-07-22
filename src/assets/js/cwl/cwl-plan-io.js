@@ -7,7 +7,12 @@ import { getCurrentUserId } from '../utils/user.js';
 import { t } from '../i18n/i18n.js';
 import { getActiveCwlPollMeta } from './cwl-availability.js';
 import { getCardTag, normalizeTag } from './cwl-utils.js';
-import { normalizePlanDocument, validatePlanDocument } from './cwl-plan-schema.js';
+import {
+    CWL_PLAN_SCHEMA_VERSION,
+    normalizePlanDocument,
+    normalizeRosterStatus,
+    validatePlanDocument
+} from './cwl-plan-schema.js';
 
 const PLAN_CACHE_KEY = 'clashtools_planner_cache';
 const ACTIVE_PLAN_KEY = 'planner_id';
@@ -76,18 +81,21 @@ function setSaveStatus(state) {
 }
 
 function readPlayerCard(player) {
-    return {
+    const snapshot = {
         name: player.querySelector('.cwl-player-name')?.textContent || '',
         clanName: player.querySelector('.cwl-player-clan')?.textContent || '',
         tag: getCardTag(player),
         townHallLevel: Number(player.dataset.townHall || 1)
     };
+    const rosterStatus = normalizeRosterStatus(player.dataset.rosterStatus);
+    if (rosterStatus) snapshot.rosterStatus = rosterStatus;
+    return snapshot;
 }
 
 function serializePlan() {
     const pollMeta = getActiveCwlPollMeta();
     const document = {
-        schemaVersion: 2,
+        schemaVersion: CWL_PLAN_SCHEMA_VERSION,
         freePlayers: Array.from(
             availablePlayers.querySelectorAll('.cwl-player-article[data-planner-card="true"]'),
             readPlayerCard
@@ -96,7 +104,7 @@ function serializePlan() {
             id: clan.id.split('_').at(-1),
             tag: normalizeTag(clan.dataset.clanTag),
             name: clan.dataset.clanName || clan.querySelector('.cwl-clan-name')?.textContent || '',
-            capacity: Number(clan.querySelector('.cwl-amount-of-players-in-clan')?.textContent?.split('/')[1] || 15),
+            capacity: Number(clan.querySelector('.cwl-clan-capacity')?.value || clan.dataset.clanCapacity || 15),
             badgeUrl: clan.querySelector('.cwl-clan-logo')?.src || '',
             players: Array.from(
                 clan.querySelectorAll('.cwl-player-article[data-planner-card="true"]'),
