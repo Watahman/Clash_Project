@@ -794,6 +794,31 @@
     font-size: 0.68rem;
 }
 
+#profile-overlay #po-friend-requests-btn,
+#profile-overlay #po-friend-pending-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+#profile-overlay .po-request-count {
+    min-width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 999px;
+    background: var(--red);
+    padding: 0 0.25rem;
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 800;
+    line-height: 1.15rem;
+    text-align: center;
+}
+
+#profile-overlay .po-request-count.hidden {
+    display: none;
+}
+
 #profile-overlay #po-add:hover,
 #profile-overlay #po-friend-requests-btn:hover,
 #profile-overlay #po-friend-pending-btn:hover { background: var(--surface-raised, var(--surface-3)); color: var(--text, var(--text-1)); }

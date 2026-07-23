@@ -15,12 +15,15 @@ import { getNotifications, markNotificationRead } from "../Supabase/Supabase-Not
 import { bindBackdropClick } from "../utils/backdrop-click.js";
 import {
     buildGroupPollHref,
+    isFriendNotification,
+    isFriendRequestNotification,
     pollNotificationCopy,
     stageGroupPollNavigation
 } from "../notifications/poll-notifications.js";
 
 let profile, closeProfileBtn, userCode, profileTabs, openProfileBtn, activeTab;
 let friendRequestBtn, friendPendingBtn, friendList, emptyFriendRequest;
+let friendRequestCount;
 let addBase, addClan, addBtn, emptyLabel;
 let poUsername, poCode, poMemberSince, profileLoadingState;
 let poIcoCopy, poIcoCheck, poAddText;
@@ -98,6 +101,7 @@ function labelInit() {
     openProfileBtn     = document.querySelector("#profile-btn");
     activeTab          = document.querySelector(".po-tab-active");
     friendRequestBtn   = document.querySelector("#po-friend-requests-btn");
+    friendRequestCount = document.querySelector("#po-friend-requests-count");
     friendPendingBtn   = document.querySelector("#po-friend-pending-btn");
     friendList         = document.querySelector("#po-friend-list");
     emptyFriendRequest = document.querySelector("#po-empty-friendrequest");
@@ -175,7 +179,15 @@ function profileInit() {
     friendRequestBtn.onclick = () => {
         const userId = getCurrentUserId();
         if (!userId) { redirectToLogin(); return; }
-        openFriendList('profile.requests', () => getFriendRequests(userId), createFriendRequestCard, friendRequestBtn);
+        openFriendList(
+            'profile.requests',
+            () => getFriendRequests(userId).then(items => {
+                updateFriendRequestCount(Array.isArray(items) ? items.length : 0);
+                return items;
+            }),
+            item => createFriendRequestCard(item, { onResolved: handleFriendRequestResolved }),
+            friendRequestBtn
+        );
     };
 
     friendPendingBtn.onclick = () => {
@@ -253,6 +265,20 @@ function preloadProfileData() {
     refreshProfileData(false).catch(() => {});
 }
 
+function updateFriendRequestCount(value) {
+    if (!friendRequestCount || !friendRequestBtn) return;
+    const count = Math.max(0, Number(value) || 0);
+    friendRequestCount.textContent = String(count);
+    friendRequestCount.classList.toggle('hidden', count === 0);
+    friendRequestBtn.setAttribute('aria-label', t('profile.requestCount', { count }));
+}
+
+function handleFriendRequestResolved() {
+    const remaining = friendListContent?.querySelectorAll('.po-base-item').length || 0;
+    updateFriendRequestCount(remaining);
+    emptyFriendRequest?.classList.toggle('hidden', remaining > 0);
+}
+
 function refreshProfileData(openAfterLoad = false) {
     const userId = getCurrentUserId();
     if (!userId) return Promise.resolve(null);
@@ -281,9 +307,10 @@ function refreshProfileData(openAfterLoad = false) {
     profileRefreshPromise = Promise.all([
         checkUserId(userId),
         getFriends(userId),
+        getFriendRequests(userId).catch(() => []),
         getGroupsOfUser(userId),
         getNotifications(userId).catch(() => ({ unread: 0, items: [] }))
-    ]).then(([userData, friends = [], groups = [], notifications]) => {
+    ]).then(([userData, friends = [], friendRequests = [], groups = [], notifications]) => {
         if (!userData || userData.error) {
             profile.removeAttribute('aria-busy');
             profileLoadingState?.classList.add('hidden');
@@ -299,6 +326,7 @@ function refreshProfileData(openAfterLoad = false) {
         loadBases(userData.accounts || [], emptyLabel, true);
         renderFriends(Array.isArray(friends) ? friends : [], emptyLabel, true);
         renderGroups(Array.isArray(groups) ? groups : [], emptyLabel, true);
+        updateFriendRequestCount(Array.isArray(friendRequests) ? friendRequests.length : 0);
         renderNotifications(notifications);
         applyActiveProfileTab();
         profile.removeAttribute('aria-busy');
@@ -365,6 +393,15 @@ function renderNotifications(data) {
                 window.location.href = pollHref || (window.location.pathname.includes('/subPages/')
                     ? './groups.html'
                     : './subPages/groups.html');
+            } else if (isFriendNotification(notification)) {
+                notificationsPanel.classList.add('hidden');
+                const friendsTab = document.querySelector('#po-tab-friends');
+                if (friendsTab) poTab(friendsTab, tabRefs);
+                if (isFriendRequestNotification(notification)) {
+                    friendRequestBtn.click();
+                } else {
+                    await refreshProfileData(false);
+                }
             }
         });
         notificationsList.appendChild(button);

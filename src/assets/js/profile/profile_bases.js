@@ -3,6 +3,7 @@ import { getPlayerWithBattleData } from "../API/API-Functions.js";
 import { addBaseToUser } from "../Supabase/Supabase-User.js";
 import { getCurrentUserId } from "../utils/user.js";
 import { t } from "../i18n/i18n.js";
+import { hideProfileEmptyStateFor } from "./profile_empty_state.js";
 
 function normalizeTag(value) {
     const tag = String(value || '').trim().toUpperCase();
@@ -45,6 +46,7 @@ export function handleAddBase(inputBaseTag, inputBaseToken) {
 
             return addBaseToUser(userId, base, playerToken).then(result => {
                 createBaseCard(base);
+                hideProfileEmptyStateFor('po-tab-bases');
                 return result;
             });
         })

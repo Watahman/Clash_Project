@@ -143,8 +143,11 @@
                     </svg>
                     <span id="po-add-text" data-i18n="profile.addBase">Base toevoegen</span>
                 </button>
-                <button id="po-friend-requests-btn" class="hidden" data-i18n="profile.requests">Requests</button>
-                <button id="po-friend-pending-btn" class="hidden" data-i18n="profile.pending">Pending</button>
+                <button id="po-friend-requests-btn" class="hidden">
+                    <span data-i18n="profile.requests">Requests</span>
+                    <b id="po-friend-requests-count" class="po-request-count hidden" aria-live="polite">0</b>
+                </button>
+                <button id="po-friend-pending-btn" class="hidden"><span data-i18n="profile.pending">Pending</span></button>
             </div>
         </div>
 

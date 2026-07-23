@@ -13,6 +13,7 @@ Take a verified database backup before applying migrations to an existing Supaba
 9. `20260723_006_restrict_security_definer_helpers.sql`
 10. `20260723112630_notify_all_members_about_poll_events.sql`
 11. `20260723122121_group_membership_notifications_and_shared_clans.sql`
+12. `20260723144101_friend_request_notifications.sql`
 
 Before migration 001, check for duplicate profile email/auth mappings, orphaned group or plan memberships, and duplicate plan links. Before migration 002, run `CHECK_BEFORE_GROUP_MEMBER_UNIQUE_INDEX.sql`, inspect invalid or duplicate player tags, and resolve any player tag owned by multiple users.
 

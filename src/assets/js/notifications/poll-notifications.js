@@ -3,6 +3,7 @@ export const OPEN_POLL_STORAGE_KEY = 'clashtoolsOpenPollId';
 export const GROUP_TAB_STORAGE_PREFIX = 'clashtoolsGroupTab:';
 
 const POLL_NOTIFICATION_TYPES = new Set(['poll_created', 'poll_reminder']);
+const FRIEND_NOTIFICATION_TYPES = new Set(['friend_request', 'friend_accepted']);
 
 export function isPollNotification(notification) {
     return POLL_NOTIFICATION_TYPES.has(notification?.type)
@@ -16,6 +17,16 @@ export function isGroupMemberJoinedNotification(notification) {
         && Boolean(notification?.related_group_id);
 }
 
+export function isFriendNotification(notification) {
+    return FRIEND_NOTIFICATION_TYPES.has(notification?.type)
+        && Boolean(notification?.payload?.actorId);
+}
+
+export function isFriendRequestNotification(notification) {
+    return notification?.type === 'friend_request'
+        && isFriendNotification(notification);
+}
+
 export function unreadPollNotificationCount(items, groupId = '') {
     return (Array.isArray(items) ? items : []).filter(notification => {
         if (notification?.read_at || !isPollNotification(notification)) return false;
@@ -24,6 +35,20 @@ export function unreadPollNotificationCount(items, groupId = '') {
 }
 
 export function pollNotificationCopy(notification, translate) {
+    if (isFriendNotification(notification)) {
+        const request = notification.type === 'friend_request';
+        return {
+            title: translate(request
+                ? 'notifications.friendRequestTitle'
+                : 'notifications.friendAcceptedTitle'),
+            body: translate(request
+                ? 'notifications.friendRequestBody'
+                : 'notifications.friendAcceptedBody', {
+                name: notification?.payload?.actorName || ''
+            })
+        };
+    }
+
     if (isGroupMemberJoinedNotification(notification)) {
         return {
             title: translate('notifications.memberJoinedTitle'),

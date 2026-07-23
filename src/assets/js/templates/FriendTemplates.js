@@ -1,5 +1,6 @@
 import { acceptFriendRequest, rejectFriendRequest } from "../Supabase/Supabase-Friend.js";
 import { getCurrentUserId } from "../utils/user.js";
+import { hideProfileEmptyStateFor } from "../profile/profile_empty_state.js";
 
 function friendData(value) {
     if (typeof value === 'string') return { id: value, name: value, code: '' };
@@ -15,7 +16,7 @@ function friendExists(friendId) {
     return Array.from(document.querySelectorAll('.po-card-friend')).some(card => card.dataset.friendId === friendId);
 }
 
-export function createFriendRequestCard(friend) {
+export function createFriendRequestCard(friend, options = {}) {
     const friendRequestTemplate = document.querySelector("#po-friend-request-template");
     const friendRequestTemplateCopy = friendRequestTemplate.content.cloneNode(true);
     const user = friendData(friend);
@@ -27,11 +28,13 @@ export function createFriendRequestCard(friend) {
         acceptFriendRequest(getCurrentUserId(), user.id).then(() => {
             card.remove();
             createFriendCard({ user_b: user.id, profile: user });
+            options.onResolved?.();
         });
     };
     friendRequestTemplateCopy.querySelector(".po-friend-reject").onclick = () => {
         rejectFriendRequest(getCurrentUserId(), user.id).then(() => {
             card.remove();
+            options.onResolved?.();
         });
     };
     document.querySelector(".po-friend-list-content").appendChild(friendRequestTemplateCopy);
@@ -49,6 +52,7 @@ export function createFriendCard(friend) {
     friendTemplateCopy.querySelector(".po-base-info").textContent = user.code ? "#" + user.code : '';
     if (activeTab?.id !== "po-tab-friends") item.classList.add('hidden');
     document.querySelector(".po-panel-content").appendChild(friendTemplateCopy);
+    hideProfileEmptyStateFor('po-tab-friends');
 }
 
 export function createFriendCardFromData(data) {
@@ -60,6 +64,7 @@ export function createFriendCardFromData(data) {
     friendTemplateCopy.querySelector(".po-base-info").textContent = "#" + data.code;
     if (activeTab?.id !== "po-tab-friends") item.classList.add('hidden');
     document.querySelector(".po-panel-content").appendChild(friendTemplateCopy);
+    hideProfileEmptyStateFor('po-tab-friends');
 }
 
 export function createFriendPendingCard(friend) {
