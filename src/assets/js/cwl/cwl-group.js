@@ -3,7 +3,7 @@ import { getGroupPolls } from "../Supabase/Supabase-GroupPolls.js";
 import { getUserBases } from "../Supabase/Supabase-User.js";
 import { createClanCard, createPlayerCard } from "../templates/CWLTemplates.js";
 import { getCurrentUserId } from "../utils/user.js";
-import { clearActiveCwlPoll, setActiveCwlPoll } from "./cwl-availability.js";
+import { clearActiveCwlPoll, getActiveCwlPollMeta, setActiveCwlPoll } from "./cwl-availability.js";
 import { escapeCssIdentifier, normalizeTag, uniquePlayers } from "./cwl-utils.js";
 import { t } from "../i18n/i18n.js";
 
@@ -11,6 +11,8 @@ let refs = {};
 let currentUserId = '';
 let loadToken = 0;
 const groupState = new Map();
+const pollCatalog = new Map();
+let pollCatalogGroups = [];
 
 export function initGroupOverlay(selectGroup, overlayRefs = {}) {
     currentUserId = getCurrentUserId();
@@ -20,25 +22,33 @@ export function initGroupOverlay(selectGroup, overlayRefs = {}) {
         groupPreview: overlayRefs.groupPreview || document.querySelector('#cwl-group-preview'),
         groupPreviewList: overlayRefs.groupPreviewList || document.querySelector('#cwl-group-preview-list'),
         pollSelect: overlayRefs.selectGroupPoll || document.querySelector('#cwl-select-group-poll'),
-        linkedClans: overlayRefs.groupLinkedClans || document.querySelector('#cwl-group-linked-clans')
+        linkedClans: overlayRefs.groupLinkedClans || document.querySelector('#cwl-group-linked-clans'),
+        rosterPollSelect: overlayRefs.rosterPollSelect || document.querySelector('#cwl-roster-poll-select')
     };
 
     resetPollSelect();
-    if (!currentUserId || !refs.selectGroup) return;
+    setRosterPollSelectState('loading');
+    if (!currentUserId || !refs.selectGroup) {
+        setRosterPollSelectState('empty');
+        return;
+    }
 
     loadGroups();
     refs.selectGroup.addEventListener('change', () => loadSelectedGroup(refs.selectGroup.value));
     refs.pollSelect?.addEventListener('change', () => activateSelectedPoll());
+    refs.rosterPollSelect?.addEventListener('change', activateRosterPollSelection);
     refs.loadGroupBtn?.addEventListener('click', addSelectedGroupToPlanner);
     window.addEventListener('clashtools:cwl-plan-meta-loaded', event => {
         const { groupId, pollId } = event.detail || {};
         applyPlannerGroupSelection(groupId, pollId);
     });
+    window.addEventListener('clashtools:language-changed', renderRosterPollSelect);
 }
 
 export async function applyPlannerGroupSelection(groupId, pollId = '') {
     if (!groupId || !refs.selectGroup) {
         clearActiveCwlPoll();
+        syncRosterPollSelection();
         return;
     }
     refs.selectGroup.value = groupId;
@@ -48,19 +58,59 @@ export async function applyPlannerGroupSelection(groupId, pollId = '') {
 async function loadGroups() {
     try {
         const memberships = await getGroupsOfUser(currentUserId);
-        if (!Array.isArray(memberships)) return;
-        for (const membership of memberships) {
+        if (!Array.isArray(memberships)) {
+            setRosterPollSelectState('empty');
+            return;
+        }
+        const groups = (await Promise.all(memberships.map(async membership => {
             const info = await getGroupInfo(membership.group_id).catch(() => null);
-            const group = Array.isArray(info) ? info[0] : info;
+            return Array.isArray(info) ? info[0] : info;
+        }))).filter(group => group?.id);
+
+        for (const group of groups) {
             if (!group?.id || refs.selectGroup.querySelector(`option[value="${escapeCssIdentifier(group.id)}"]`)) continue;
             const option = document.createElement('option');
             option.value = group.id;
             option.textContent = group.name;
             refs.selectGroup.appendChild(option);
         }
+        await loadPollCatalog(groups);
     } catch (error) {
         console.error(error);
+        setRosterPollSelectState('error');
     }
+}
+
+async function loadPollCatalog(groups) {
+    pollCatalog.clear();
+    pollCatalogGroups = [];
+    if (!groups.length) {
+        setRosterPollSelectState('empty');
+        return;
+    }
+
+    const results = await Promise.all(groups.map(async group => {
+        try {
+            const polls = normalizePolls(await getGroupPolls(group.id, currentUserId));
+            return { group, polls, failed: false };
+        } catch (error) {
+            console.error(error);
+            return { group, polls: [], failed: true };
+        }
+    }));
+
+    pollCatalogGroups = results;
+    results.forEach(({ group, polls }) => {
+        const existing = groupState.get(group.id) || {};
+        groupState.set(group.id, { ...existing, polls });
+        polls.forEach(poll => pollCatalog.set(pollSelectionValue(group.id, poll.id), { group, poll }));
+    });
+
+    if (!pollCatalog.size) {
+        setRosterPollSelectState(results.every(result => result.failed) ? 'error' : 'empty');
+        return;
+    }
+    renderRosterPollSelect();
 }
 
 async function loadSelectedGroup(groupId, preferredPollId = '') {
@@ -68,6 +118,7 @@ async function loadSelectedGroup(groupId, preferredPollId = '') {
     clearGroupPreview();
     resetPollSelect();
     clearActiveCwlPoll();
+    syncRosterPollSelection();
     if (!groupId) return;
 
     try {
@@ -162,16 +213,30 @@ function renderPollSelect(groupId, preferredPollId = '') {
         || polls[0];
     if (selectedPoll && refs.pollSelect) {
         refs.pollSelect.value = selectedPoll.id;
-        setActiveCwlPoll(groupId, selectedPoll);
+        activatePoll(groupId, selectedPoll);
     }
 }
 
-function activateSelectedPoll() {
+function activateSelectedPoll(notify = true) {
     const groupId = refs.selectGroup?.value || '';
     const pollId = refs.pollSelect?.value || '';
     const poll = groupState.get(groupId)?.polls?.find(item => item.id === pollId);
+    activatePoll(groupId, poll || null, notify);
+}
+
+function activateRosterPollSelection() {
+    const selection = pollCatalog.get(refs.rosterPollSelect?.value || '');
+    activatePoll(selection?.group?.id || '', selection?.poll || null, true);
+}
+
+function activatePoll(groupId, poll, notify = false) {
     if (poll) setActiveCwlPoll(groupId, poll);
     else clearActiveCwlPoll();
+    syncRosterPollSelection();
+    if (!notify) return;
+    window.dispatchEvent(new CustomEvent('clashtools:cwl-active-poll-changed', {
+        detail: getActiveCwlPollMeta()
+    }));
 }
 
 function addSelectedGroupToPlanner() {
@@ -180,7 +245,7 @@ function addSelectedGroupToPlanner() {
     if (!state) return;
     createPlayerCard(state.players);
     state.clans.forEach(clan => createClanCard(toPlannerClan(clan), 15));
-    activateSelectedPoll();
+    activateSelectedPoll(false);
     window.dispatchEvent(new CustomEvent('clashtools:cwl-close-add-player-overlay'));
 }
 
@@ -190,6 +255,67 @@ function toPlannerClan(clan) {
         tag: normalizeTag(clan.clan_tag),
         badgeUrls: { small: clan.badge_url || '../assets/css/pictures/default-clan-banner.png' }
     };
+}
+
+function renderRosterPollSelect() {
+    const select = refs.rosterPollSelect;
+    if (!select || !pollCatalog.size) return;
+    const selectedValue = activePollSelectionValue();
+    select.replaceChildren(option('', t('cwl.noPollSelected')));
+
+    pollCatalogGroups.forEach(({ group, polls }) => {
+        if (!polls.length) return;
+        const groupOptions = document.createElement('optgroup');
+        groupOptions.label = group.name;
+        polls.forEach(poll => {
+            const pollOption = option(
+                pollSelectionValue(group.id, poll.id),
+                `${group.name} — ${poll.title || 'CWL poll'} (${pollStatusLabel(poll.status)})`
+            );
+            groupOptions.appendChild(pollOption);
+        });
+        select.appendChild(groupOptions);
+    });
+
+    select.disabled = false;
+    select.value = pollCatalog.has(selectedValue) ? selectedValue : '';
+}
+
+function setRosterPollSelectState(state) {
+    const select = refs.rosterPollSelect;
+    if (!select) return;
+    const key = {
+        loading: 'cwl.pollSelectLoading',
+        error: 'cwl.pollSelectError',
+        empty: 'cwl.noGroupPolls'
+    }[state] || 'cwl.noPollSelected';
+    select.replaceChildren(option('', t(key)));
+    select.disabled = state !== 'ready';
+}
+
+function syncRosterPollSelection() {
+    const select = refs.rosterPollSelect;
+    if (!select || select.disabled) return;
+    const value = activePollSelectionValue();
+    select.value = pollCatalog.has(value) ? value : '';
+}
+
+function activePollSelectionValue() {
+    const { groupId, pollId } = getActiveCwlPollMeta();
+    return pollSelectionValue(groupId, pollId);
+}
+
+function pollSelectionValue(groupId, pollId) {
+    return groupId && pollId ? `${groupId}::${pollId}` : '';
+}
+
+function pollStatusLabel(status) {
+    const key = {
+        open: 'cwl.pollStatusOpen',
+        closed: 'cwl.pollStatusClosed',
+        archived: 'cwl.pollStatusArchived'
+    }[status];
+    return key ? t(key) : String(status || '');
 }
 
 function normalizePolls(polls) {

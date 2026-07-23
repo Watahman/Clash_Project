@@ -28,7 +28,8 @@ export function initGroupsAdminPanel(emptyMessage) {
         members = Array.isArray(event.detail?.members) ? event.detail.members : [];
         currentRole = event.detail?.currentRole || 'member';
         resetPanel();
-        if (isGroupAdmin(currentRole)) preloadAdminData();
+        clanAdmin.load();
+        if (isGroupAdmin(currentRole)) memberAdmin.render();
     });
 
     elements.settingsBtn?.addEventListener('click', open);
@@ -44,7 +45,7 @@ export function initGroupsAdminPanel(emptyMessage) {
 
     function close() {
         elements.overlay?.classList.add('hidden');
-        memberAdmin.closeTransferConfirm();
+        memberAdmin.closeConfirm();
     }
 
     function resetPanel() {
@@ -52,11 +53,6 @@ export function initGroupsAdminPanel(emptyMessage) {
         clearMessage();
         updateTitle();
         clanAdmin.reset();
-        memberAdmin.render();
-    }
-
-    function preloadAdminData() {
-        clanAdmin.load();
         memberAdmin.render();
     }
 
@@ -116,8 +112,10 @@ function queryElements() {
         members: document.querySelector('#groups-admin-members'),
         roleHelp: document.querySelector('#groups-admin-role-help'),
         confirmOverlay: document.querySelector('#groups-role-confirm-overlay'),
+        confirmTitle: document.querySelector('#groups-role-confirm-title'),
         confirmText: document.querySelector('#groups-role-confirm-text'),
         confirmCancel: document.querySelector('#groups-role-confirm-cancel'),
-        confirmAccept: document.querySelector('#groups-role-confirm-accept')
+        confirmAccept: document.querySelector('#groups-role-confirm-accept'),
+        confirmAcceptText: document.querySelector('#groups-role-confirm-accept-text')
     };
 }

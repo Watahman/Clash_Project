@@ -95,30 +95,13 @@ public class SUPABASE_Group {
             JsonObject json = utils.parseBody(ex);
             String code     = utils.requireString(json, "groupCode").trim();
 
-            JsonArray groupArray = JsonParser.parseString(
-                    SUPABASE_Client.getWithBody("groups", "code=" + SUPABASE_Client.eq(code))).getAsJsonArray();
-
-            if (groupArray.isEmpty()) {
-                utils.sendJsonResponse(ex, "{\"error\":\"Groep niet gevonden met code: " + API_Utils.escapeJson(code) + "\"}", 404);
-                return;
-            }
-
-            String groupId = groupArray.get(0).getAsJsonObject().get("id").getAsString();
-
-            JsonArray existing = JsonParser.parseString(SUPABASE_Client.getWithBody("group_members",
-                    "group_id=" + SUPABASE_Client.eq(groupId) + "&user_id=" + SUPABASE_Client.eq(userId))).getAsJsonArray();
-            if (!existing.isEmpty()) {
-                utils.sendJsonResponse(ex, "{\"success\":true,\"message\":\"Gebruiker is al lid\"}", 200);
-                return;
-            }
-
-            JsonObject member = new JsonObject();
-            member.addProperty("user_id",  userId);
-            member.addProperty("group_id", groupId);
-            member.addProperty("role", "member");
-
-            String result = SUPABASE_Client.post("group_members", member.toString());
-            utils.sendJsonResponse(ex, result, 201);
+            JsonObject rpcBody = new JsonObject();
+            rpcBody.addProperty("p_actor_user_id", userId);
+            rpcBody.addProperty("p_group_code", code);
+            String result = SUPABASE_Client.rpc("join_group_with_notifications", rpcBody.toString());
+            JsonObject response = JsonParser.parseString(result).getAsJsonObject();
+            boolean joined = response.has("joined") && response.get("joined").getAsBoolean();
+            utils.sendJsonResponse(ex, response.toString(), joined ? 201 : 200);
         }));
     }
 
@@ -246,6 +229,22 @@ public class SUPABASE_Group {
             rpcBody.addProperty("p_group_id", groupId);
             rpcBody.addProperty("p_target_user_id", targetId);
             String result = SUPABASE_Client.rpc("transfer_group_leadership", rpcBody.toString());
+            utils.sendJsonResponse(ex, result, 200);
+        }));
+    }
+
+    public void kickGroupMember() {
+        server.createContext(conf._EXT_SUPA_GROUP_MEMBER_KICK, exchange -> utils.handlePost(exchange, ex -> {
+            String actorId = utils.requireAuthenticatedUser(ex);
+            JsonObject json = utils.parseBody(ex);
+            String groupId  = utils.requireString(json, "groupId");
+            String targetId = utils.requireString(json, "targetUserId");
+
+            JsonObject rpcBody = new JsonObject();
+            rpcBody.addProperty("p_actor_user_id", actorId);
+            rpcBody.addProperty("p_group_id", groupId);
+            rpcBody.addProperty("p_target_user_id", targetId);
+            String result = SUPABASE_Client.rpc("kick_group_member", rpcBody.toString());
             utils.sendJsonResponse(ex, result, 200);
         }));
     }

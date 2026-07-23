@@ -56,35 +56,27 @@ public final class SUPABASE_GroupPolls {
             if (rounds < 1 || rounds > 7) throw new IllegalArgumentException("Rounds moet tussen 1 en 7 liggen");
             access.requireAdmin(groupId, actorId);
 
-            JsonArray open = JsonParser.parseString(SUPABASE_Client.getWithBody(
-                    "group_polls",
-                    "select=id&group_id=" + SUPABASE_Client.eq(groupId)
-                            + "&type=eq.cwl_availability&status=eq.open&limit=1"
-            )).getAsJsonArray();
-            if (!open.isEmpty()) {
-                throw new HttpException(409, "{\"error\":\"Er is al een open CWL poll\",\"code\":\"OPEN_POLL_EXISTS\"}");
+            JsonObject rpcBody = new JsonObject();
+            rpcBody.addProperty("p_actor_user_id", actorId);
+            rpcBody.addProperty("p_group_id", groupId);
+            rpcBody.addProperty("p_title", title);
+            rpcBody.addProperty("p_rounds", rounds);
+            if (request.has("deadline") && !request.get("deadline").isJsonNull()) {
+                rpcBody.addProperty("p_deadline", Instant.parse(request.get("deadline").getAsString()).toString());
+            } else {
+                rpcBody.add("p_deadline", null);
             }
 
-            JsonObject poll = new JsonObject();
-            poll.addProperty("group_id", groupId);
-            poll.addProperty("creator_id", actorId);
-            poll.addProperty("type", "cwl_availability");
-            poll.addProperty("title", title);
-            poll.addProperty("status", "open");
-            poll.addProperty("rounds", rounds);
-            if (request.has("deadline") && !request.get("deadline").isJsonNull()) {
-                poll.addProperty("deadline", Instant.parse(request.get("deadline").getAsString()).toString());
-            }
-            JsonArray result;
+            String result;
             try {
-                result = JsonParser.parseString(SUPABASE_Client.post("group_polls", poll.toString())).getAsJsonArray();
+                result = SUPABASE_Client.rpc("create_group_poll_with_notifications", rpcBody.toString());
             } catch (HttpException conflict) {
                 if (conflict.getStatusCode() == 409) {
                     throw new HttpException(409, "{\"error\":\"Er is al een open CWL poll\",\"code\":\"OPEN_POLL_EXISTS\"}");
                 }
                 throw conflict;
             }
-            utils.sendJsonResponse(ex, result.isEmpty() ? poll.toString() : result.get(0).toString(), 201);
+            utils.sendJsonResponse(ex, result, 201);
         }));
     }
 

@@ -19,6 +19,13 @@ export function isGroupLeader(role) {
     return normalizeGroupRole(role) === ROLE_LEADER;
 }
 
+export function canKickGroupMember(actorRole, targetRole) {
+    const actor = normalizeGroupRole(actorRole);
+    const target = normalizeGroupRole(targetRole);
+    return (actor === ROLE_LEADER && [ROLE_CO_LEADER, ROLE_MEMBER].includes(target))
+        || (actor === ROLE_CO_LEADER && target === ROLE_MEMBER);
+}
+
 export function getMemberRole(member, group, currentUserId) {
     if (group?.owner_id && group.owner_id === currentUserId) return ROLE_LEADER;
     return normalizeGroupRole(member?.role);

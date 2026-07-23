@@ -135,18 +135,20 @@ function addAllMembers(members, creatorId) {
         const item = fragment.querySelector('.groups-member-item');
         const user = profileOf(member) || {
             id: member.user_id,
-            name: member.user_id
+            name: ''
         };
 
-        const displayName = user.name || member.user_id;
+        const displayName = String(user.name || '').trim() || t('groups.member');
 
         item.dataset.userId = user.id || member.user_id;
 
         fragment.querySelector('.groups-member-name').textContent =
             displayName;
 
-        fragment.querySelector('.groups-member-code').textContent =
-            user.code || member.user_id;
+        const memberCode = fragment.querySelector('.groups-member-code');
+        const publicCode = String(user.code || '').trim();
+        memberCode.textContent = publicCode;
+        memberCode.hidden = !publicCode;
 
         const avatar = fragment.querySelector(
             '.groups-member-avatar'

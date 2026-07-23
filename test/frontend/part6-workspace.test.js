@@ -42,6 +42,17 @@ describe('Part 6 profile and settings', () => {
         expect(html).toContain('id="po-loading-state"');
     });
 
+    it('keeps friend and add dialogs centered without legacy global overlay styles', () => {
+        const html = readFileSync('src/subPages/popup_HTMLs/profile_popup.html', 'utf8');
+        const css = readFileSync('src/assets/css/profile-overlay.css', 'utf8');
+
+        expect(html).toContain('id="po-friend-list" role="dialog" aria-modal="true"');
+        expect(css).toMatch(/\.profile-placeholder > \.overlay\s*\{[^}]*position:\s*fixed;/s);
+        expect(css).toMatch(/\.profile-placeholder > \.overlay\s*\{[^}]*align-items:\s*center;/s);
+        expect(css).toMatch(/\.profile-placeholder > \.overlay > \.overlay-container\s*\{[^}]*background:/s);
+        expect(css).toContain('.profile-placeholder > .overlay.hidden { display: none; }');
+    });
+
     it('binds setting controls only once when the profile is initialized again', () => {
         document.body.innerHTML = `
             <button class="po-theme-option" data-theme-choice="dark"></button>

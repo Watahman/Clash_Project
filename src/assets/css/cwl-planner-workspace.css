@@ -272,6 +272,23 @@
     padding: var(--space-4) var(--space-4) 0;
 }
 
+.cwl-roster-select-row {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: var(--space-3);
+    min-width: 0;
+}
+
+.cwl-roster-select-row label,
+.cwl-roster-select-row select {
+    min-width: 0;
+}
+
+.workspace-planner #cwl-roster-poll-select:disabled {
+    cursor: wait;
+    opacity: 0.72;
+}
+
 .cwl-roster-filter-status {
     min-height: 1rem;
     margin: calc(var(--space-1) * -1) 0 0;

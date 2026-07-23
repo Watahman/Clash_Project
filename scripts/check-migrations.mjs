@@ -24,7 +24,9 @@ const requiredOrder = [
     '20260716_001_auth_profiles_and_core_rls.sql',
     '20260716_002_accounts_polls_notifications.sql',
     '20260716_003_persistent_api_cache.sql',
-    '20260716_004_poll_transactions_and_reminders.sql'
+    '20260716_004_poll_transactions_and_reminders.sql',
+    '20260723112630_notify_all_members_about_poll_events.sql',
+    '20260723122121_group_membership_notifications_and_shared_clans.sql'
 ];
 let lastIndex = -1;
 for (const required of requiredOrder) {

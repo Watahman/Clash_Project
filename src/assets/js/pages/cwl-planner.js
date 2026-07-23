@@ -19,7 +19,7 @@ let pageTitle;
 let addPlayersBtn, overlayConfirmTagBtn, accountList,
     addSelectedBtn, segBtns, selectGroup, groupPreview,
     groupPreviewList, loadGroupBtn, modalTabBtn, modalAccountListEmpty,
-    selectGroupPoll, groupLinkedClans;
+    selectGroupPoll, groupLinkedClans, rosterPollSelect;
 
 function labelInit() {
     addClanBtn             = document.querySelector("#cwl-add-clan-button");
@@ -48,6 +48,7 @@ function labelInit() {
     modalAccountListEmpty  = document.querySelector("#modal-account-list-empty");
     selectGroupPoll        = document.querySelector("#cwl-select-group-poll");
     groupLinkedClans       = document.querySelector("#cwl-group-linked-clans");
+    rosterPollSelect       = document.querySelector("#cwl-roster-poll-select");
 }
 
 async function init() {
@@ -59,7 +60,8 @@ async function init() {
     initAddPlayersOverlay({
         addPlayersBtn, modalTabBtn, segBtns, selectGroup, overlayConfirmTagBtn,
         cwlInputTag, addSelectedBtn, accountList, modalAccountListEmpty,
-        groupPreview, groupPreviewList, loadGroupBtn, selectGroupPoll, groupLinkedClans
+        groupPreview, groupPreviewList, loadGroupBtn, selectGroupPoll, groupLinkedClans,
+        rosterPollSelect
     });
     initAddClanButton({ addClanBtn, overlayAddClanBtn, cwlInputClanCode, selectAmountPlayers });
     savePlanButton();
@@ -72,6 +74,7 @@ async function init() {
     });
     initPlayerSorting();
     initPlanNameSync();
+    window.addEventListener('clashtools:cwl-active-poll-changed', () => savePlan());
     guessCwlSize();
     await loadAllPlans();
     loadPlanListener();

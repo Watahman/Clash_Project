@@ -75,7 +75,10 @@
             </div>
             <div class="cwl-roster-tools">
                 <label class="cwl-roster-search"><span data-i18n="planner.searchRoster">Vrij roster doorzoeken</span><input id="cwl-roster-search" type="search" autocomplete="off" aria-controls="cwl-available-players" data-i18n-placeholder="planner.searchRosterPlaceholder" placeholder="Zoek op naam of tag"></label>
-                <label><span data-i18n="cwl.sortPlayers">Spelers sorteren</span><select id="cwl-player-sorting" data-i18n-aria-label="cwl.sortPlayers" aria-label="Spelers sorteren"><option value="townhall" data-i18n="cwl.sortTownhall">Town Hall</option><option value="name" data-i18n="cwl.sortName">Naam</option></select></label>
+                <div class="cwl-roster-select-row">
+                    <label><span data-i18n="cwl.sortPlayers">Spelers sorteren</span><select id="cwl-player-sorting" data-i18n-aria-label="cwl.sortPlayers" aria-label="Spelers sorteren"><option value="townhall" data-i18n="cwl.sortTownhall">Town Hall</option><option value="name" data-i18n="cwl.sortName">Naam</option></select></label>
+                    <label><span data-i18n="cwl.pollResults">Pollresultaat</span><select id="cwl-roster-poll-select" data-i18n-aria-label="cwl.pollResults" aria-label="Pollresultaat" disabled><option value="" data-i18n="cwl.pollSelectLoading">Polls laden...</option></select></label>
+                </div>
                 <p class="cwl-roster-filter-status" id="cwl-roster-filter-status" role="status" aria-live="polite"></p>
             </div>
             <button class="cwl-add-player-button" id="cwl-add-players-button" type="button"><span aria-hidden="true">+</span><span data-i18n="cwl.addPlayers">Spelers toevoegen</span></button>

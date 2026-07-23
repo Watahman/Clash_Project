@@ -13,6 +13,11 @@ import { initProfileSettings, resetProfileSettings, syncProfileSettings } from "
 import { signOut } from "../auth/auth-client.js";
 import { getNotifications, markNotificationRead } from "../Supabase/Supabase-Notifications.js";
 import { bindBackdropClick } from "../utils/backdrop-click.js";
+import {
+    buildGroupPollHref,
+    pollNotificationCopy,
+    stageGroupPollNavigation
+} from "../notifications/poll-notifications.js";
 
 let profile, closeProfileBtn, userCode, profileTabs, openProfileBtn, activeTab;
 let friendRequestBtn, friendPendingBtn, friendList, emptyFriendRequest;
@@ -320,6 +325,9 @@ function renderNotifications(data) {
     const unread = Number(data?.unread || items.filter(item => !item.read_at).length);
     notificationsCount.textContent = String(unread);
     notificationsCount.classList.toggle('hidden', unread === 0);
+    window.dispatchEvent(new CustomEvent('clashtools:notifications-updated', {
+        detail: { items }
+    }));
     notificationsList.replaceChildren();
     if (!items.length) {
         const empty = document.createElement('p');
@@ -333,12 +341,11 @@ function renderNotifications(data) {
         button.type = 'button';
         button.className = 'po-notification-item';
         button.classList.toggle('unread', !notification.read_at);
+        const copy = pollNotificationCopy(notification, t);
         const title = document.createElement('strong');
-        title.textContent = notification.title || t('notifications.title');
+        title.textContent = copy.title;
         const body = document.createElement('span');
-        body.textContent = notification.type === 'poll_reminder'
-            ? t('notifications.pollReminderBody')
-            : notification.body || '';
+        body.textContent = copy.body;
         button.append(title, body);
         button.addEventListener('click', async () => {
             if (!notification.read_at) {
@@ -348,12 +355,16 @@ function renderNotifications(data) {
                 const nextUnread = Math.max(0, Number(notificationsCount.textContent || 0) - 1);
                 notificationsCount.textContent = String(nextUnread);
                 notificationsCount.classList.toggle('hidden', nextUnread === 0);
+                window.dispatchEvent(new CustomEvent('clashtools:notifications-updated', {
+                    detail: { items }
+                }));
             }
             if (notification.related_group_id) {
-                sessionStorage.setItem('clashtoolsOpenGroupId', notification.related_group_id);
-                window.location.href = window.location.pathname.includes('/subPages/')
+                const pollHref = buildGroupPollHref(notification, window.location.href);
+                stageGroupPollNavigation(notification, sessionStorage, localStorage);
+                window.location.href = pollHref || (window.location.pathname.includes('/subPages/')
                     ? './groups.html'
-                    : './subPages/groups.html';
+                    : './subPages/groups.html');
             }
         });
         notificationsList.appendChild(button);

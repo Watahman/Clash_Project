@@ -82,7 +82,7 @@
     background: var(--red-dim);
 }
 #po-logout-btn:hover { color: #ffd0cc; border-color: rgba(255,91,74,0.55); }
-#po-friend-list { z-index: 9999; }
+#po-friend-list { z-index: var(--z-modal, 70); }
 #po-container-friend-list { width: min(30rem, 100%); max-height: 72vh; overflow: hidden; }
 .po-friend-list-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-bottom: 0.4rem; }
 .po-friend-list-content { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.55rem; overflow-y: auto; }
@@ -856,6 +856,159 @@
 #profile-overlay .po-notification-item { border-radius: var(--radius-small, 0.45rem); }
 #profile-overlay .po-notification-item.unread { background: var(--accent-soft, var(--accent-dim)); }
 
+/* Profile sub-dialogs are siblings of #profile-overlay in the injected
+   placeholder, so they must not depend on the legacy global .overlay rules. */
+.profile-placeholder > .overlay {
+    position: fixed;
+    z-index: var(--z-modal, 70);
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(3, 6, 9, 0.72);
+    backdrop-filter: blur(0.45rem);
+    -webkit-backdrop-filter: blur(0.45rem);
+}
+
+.profile-placeholder > .overlay.hidden { display: none; }
+
+.profile-placeholder > .overlay > .overlay-container {
+    box-sizing: border-box;
+    width: min(100%, 30rem);
+    max-height: min(40rem, calc(100vh - 2rem));
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    overflow: hidden;
+    border: 0.0625rem solid var(--border-strong, var(--border-visible));
+    border-radius: 0.75rem;
+    background: var(--surface, var(--surface-1));
+    padding: 1rem;
+    box-shadow: 0 0.5rem 0.5rem rgba(0, 0, 0, 0.18);
+}
+
+.profile-placeholder > .overlay > .overlay-container > input {
+    width: 100%;
+    min-height: 2.65rem;
+    border: 0.0625rem solid var(--border, var(--border-visible));
+    border-radius: var(--radius-small, 0.45rem);
+    background: var(--surface-subtle, var(--input-bg));
+    padding: 0.55rem 0.7rem;
+    color: var(--text, var(--text-1));
+    font: inherit;
+    font-size: 0.75rem;
+}
+
+.profile-placeholder > .overlay > .overlay-container > input::placeholder {
+    color: var(--text-muted, var(--text-3));
+    opacity: 1;
+}
+
+.profile-placeholder > .overlay > .overlay-container > button:not(.po-friend-list-close) {
+    min-height: 2.5rem;
+    justify-content: center;
+    border: 0.0625rem solid var(--accent, var(--border-focus));
+    border-radius: var(--radius-small, 0.45rem);
+    background: var(--accent, var(--accent-dim));
+    color: #18130a;
+    font-size: 0.72rem;
+    font-weight: 750;
+}
+
+#po-container-friend-list { max-height: min(36rem, calc(100vh - 2rem)); }
+
+#po-friend-list .po-friend-list-header {
+    min-height: 2.5rem;
+    border-bottom: 0.0625rem solid var(--border, var(--border-subtle));
+    padding-bottom: 0.75rem;
+}
+
+#po-friend-list .po-friend-list-title {
+    color: var(--text, var(--text-1));
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 750;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+#po-friend-list .po-friend-list-close {
+    display: grid;
+    width: 2.2rem;
+    height: 2.2rem;
+    min-width: 0;
+    min-height: 0;
+    place-items: center;
+    border: 0.0625rem solid var(--border, var(--border-subtle));
+    border-radius: var(--radius-small, 0.45rem);
+    background: transparent;
+    padding: 0;
+    color: var(--text-muted, var(--text-3));
+}
+
+#po-friend-list .po-friend-list-close:hover {
+    background: var(--surface-raised, var(--surface-3));
+    color: var(--text, var(--text-1));
+}
+
+#po-friend-list .po-friend-list-content { gap: 0; }
+
+#po-friend-list .po-base-item {
+    min-height: 4.5rem !important;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto !important;
+    gap: 0.75rem !important;
+    border: 0 !important;
+    border-bottom: 0.0625rem solid var(--border, var(--border-subtle)) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 0.7rem 0.25rem !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+#po-friend-list .po-base-item:hover {
+    background: var(--surface-raised, var(--surface-3)) !important;
+    transform: none !important;
+}
+
+#po-friend-list .po-friend-avatar {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    border: 0 !important;
+    border-radius: var(--radius-small, 0.45rem) !important;
+    background: var(--surface-raised, var(--surface-3));
+}
+
+#po-friend-list .po-base-name {
+    color: var(--text, var(--text-1));
+    font-family: inherit;
+    font-size: 0.78rem !important;
+    font-weight: 750;
+    letter-spacing: 0;
+    line-height: 1.2 !important;
+    text-transform: none;
+}
+
+#po-friend-list .po-base-info {
+    color: var(--text-muted, var(--text-3)) !important;
+    font-family: inherit !important;
+    font-size: 0.64rem !important;
+}
+
+#po-friend-list .po-empty {
+    display: grid;
+    min-height: 9rem;
+    place-content: center;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 2rem 1rem;
+    color: var(--text-muted, var(--text-3));
+    box-shadow: none;
+    font-size: 0.75rem;
+}
+
 @media (max-width: 42rem) {
     #profile-overlay { align-items: flex-end; padding: 0.5rem; }
     #profile-overlay .po-card { width: 100%; max-height: calc(100vh - 1rem); border-radius: 0.75rem 0.75rem 0 0; }
@@ -865,6 +1018,12 @@
     #profile-overlay .po-panel { min-height: 0; }
     #profile-overlay .po-password-grid { grid-template-columns: 1fr; }
     #profile-overlay .po-settings-inline { flex-direction: column; }
+    .profile-placeholder > .overlay { align-items: flex-end; padding: 0.5rem; }
+    .profile-placeholder > .overlay > .overlay-container {
+        width: 100%;
+        max-height: calc(100vh - 1rem);
+        border-radius: 0.75rem 0.75rem 0 0;
+    }
 }
 
 /* Settings feedback: keep the success/error notice visually intact even when

@@ -1,9 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { groupMemberSummary, memberAccounts } from '../../src/assets/js/templates/GroupTemplates.js';
-import { isGroupAdmin } from '../../src/assets/js/groups/groups-roles.js';
+import { canKickGroupMember, isGroupAdmin } from '../../src/assets/js/groups/groups-roles.js';
 import { activateGroupTab, bindGroupTabs } from '../../src/assets/js/groups/groups-tabs.js';
 import { renderBadge } from '../../src/assets/js/groups/groups-badges.js';
+import { createMemberRoleAdmin } from '../../src/assets/js/groups/groups-admin-members.js';
 
 describe('Groups V1 workspace', () => {
     it('keeps the approved four real tabs and removes dead or broken controls', () => {
@@ -15,7 +16,10 @@ describe('Groups V1 workspace', () => {
         expect(html).not.toContain('groups-invite-btn');
         expect(html).toContain('id="groups-inspector-roles"');
         expect(html).toContain('id="groups-poll-reminder-btn"');
+        expect(html).toContain('id="groups-detail-tab-availability-count"');
         expect(html).toContain('id="groups-admin-scan-unlinked"');
+        expect(html).toContain('data-i18n="groups.clansSharedHelp"');
+        expect(html).toContain('groups-inline-form groups-admin-only hidden');
         expect(html).not.toContain('groups-badge-picker');
         expect(html).not.toContain('groups-badge-options');
     });
@@ -52,6 +56,50 @@ describe('Groups V1 workspace', () => {
         expect(isGroupAdmin('unexpected-role')).toBe(false);
     });
 
+    it('enforces the leader and co-leader kick hierarchy', () => {
+        expect(canKickGroupMember('leader', 'co_leader')).toBe(true);
+        expect(canKickGroupMember('leader', 'member')).toBe(true);
+        expect(canKickGroupMember('leader', 'leader')).toBe(false);
+        expect(canKickGroupMember('co_leader', 'member')).toBe(true);
+        expect(canKickGroupMember('co_leader', 'co_leader')).toBe(false);
+        expect(canKickGroupMember('co_leader', 'leader')).toBe(false);
+        expect(canKickGroupMember('member', 'member')).toBe(false);
+    });
+
+    it('never exposes internal member UUIDs as display names or codes', () => {
+        const adminSource = readFileSync('src/assets/js/groups/groups-admin-members.js', 'utf8');
+        const memberSource = readFileSync('src/assets/js/templates/GroupTemplates.js', 'utf8');
+        const pollSource = readFileSync('src/assets/js/groups/groups-polls.js', 'utf8');
+
+        expect(adminSource).not.toContain("textNode('span', member.user_id)");
+        expect(adminSource).not.toContain('user?.name || member.user_id');
+        expect(memberSource).not.toContain('name: member.user_id');
+        expect(memberSource).not.toContain('user.code || member.user_id');
+        expect(pollSource).not.toContain('profile?.name || member.name || member.user_id');
+    });
+
+    it('shows the public user ID beside the member name in role cards', async () => {
+        document.body.innerHTML = '<div id="members"></div>';
+        const uuid = '2094a3a0-ff61-45f0-9ea8-ef7bc1c40ace';
+        const admin = createMemberRoleAdmin(
+            { members: document.querySelector('#members') },
+            () => ({
+                currentRole: 'member',
+                members: [{ user_id: uuid, role: 'member', profile: { id: uuid, name: 'Emile', code: 'CP1234' } }]
+            }),
+            () => {},
+            message => document.createTextNode(message),
+            async () => {}
+        );
+
+        await admin.render();
+
+        expect(document.querySelector('.groups-admin-member-heading strong')?.textContent).toBe('Emile');
+        expect(document.querySelector('.groups-admin-member-code')?.textContent).toBe('#CP1234');
+        expect(document.querySelector('.groups-admin-member-avatar')?.textContent).toBe('E');
+        expect(document.querySelector('.groups-admin-member')?.textContent).not.toContain(uuid);
+    });
+
     it('binds tab navigation once and switches panels without loading data', () => {
         document.body.innerHTML = `<nav class="groups-detail-tabs">
             <button data-group-tab="members"><span>Leden</span></button>
@@ -72,5 +120,32 @@ describe('Groups V1 workspace', () => {
         expect(document.querySelector('.groups-detail-tabs .is-active').dataset.groupTab).toBe('polls');
         expect(document.querySelector('.groups-tab-panel.is-visible')).toBeNull();
         expect(document.querySelector('[data-group-panel="polls"]').classList.contains('is-visible')).toBe(true);
+    });
+});
+
+describe('Group membership transactions', () => {
+    const migration = readFileSync(
+        'database/migrations/20260723122121_group_membership_notifications_and_shared_clans.sql',
+        'utf8'
+    );
+    const javaHandler = readFileSync('src/Java/SUPABASE_Group.java', 'utf8');
+
+    it('joins atomically and notifies every leader with the member name', () => {
+        expect(migration).toContain('join_group_with_notifications');
+        expect(migration).toContain("member.role in ('leader', 'co_leader')");
+        expect(migration).toContain("'memberName', member_name");
+        expect(migration).toContain("'group_update'");
+        expect(migration).toContain('on conflict (group_id, user_id) do nothing');
+        expect(javaHandler).toContain('SUPABASE_Client.rpc("join_group_with_notifications"');
+    });
+
+    it('stores clans per group and protects the kick hierarchy in the database', () => {
+        expect(migration).toContain('group_clans_member_read');
+        expect(migration).toContain('public.is_group_member(group_id)');
+        expect(migration).toContain('public.can_manage_group(group_id)');
+        expect(migration).toContain('kick_group_member');
+        expect(migration).toContain("actor_role = 'leader' and target_role in ('co_leader', 'member')");
+        expect(migration).toContain("actor_role = 'co_leader' and target_role = 'member'");
+        expect(javaHandler).toContain('SUPABASE_Client.rpc("kick_group_member"');
     });
 });

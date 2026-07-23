@@ -23,6 +23,7 @@ export async function createGroupPoll(groupId, userId, title, rounds = 7) {
     const path = config._BASE_URL + config._EXT_SUPA_GROUP_POLL_CREATE;
     return databaseRequestWithBody(path, { groupId, title, rounds }).then(result => {
         invalidatePollCaches(groupId, userId);
+        removeCached(cacheKeys.notifications(userId));
         return result;
     });
 }
@@ -43,7 +44,10 @@ export async function setGroupPollStatus(groupId, userId, pollId, status) {
     });
 }
 
-export async function sendGroupPollReminder(groupId, pollId) {
+export async function sendGroupPollReminder(groupId, pollId, userId) {
     const path = config._BASE_URL + config._EXT_SUPA_GROUP_POLL_REMIND;
-    return databaseRequestWithBody(path, { groupId, pollId });
+    return databaseRequestWithBody(path, { groupId, pollId }).then(result => {
+        if (userId) removeCached(cacheKeys.notifications(userId));
+        return result;
+    });
 }

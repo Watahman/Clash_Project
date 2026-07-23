@@ -5,6 +5,7 @@ import { getCurrentUserId } from "../utils/user.js";
 import { withGlobalLoading } from "../utils/loading-state.js";
 import { bindBackdropClick } from "../utils/backdrop-click.js";
 import { isGroupAdmin } from "./groups-roles.js";
+import { OPEN_POLL_STORAGE_KEY } from "../notifications/poll-notifications.js";
 
 export function initGroupPolls(emptyMessage) {
     const el = query();
@@ -41,10 +42,21 @@ export function initGroupPolls(emptyMessage) {
                 if (group?.id !== requestedGroupId) return;
                 polls = Array.isArray(data) ? data : [];
                 activePoll = findLatestOpenCwlPoll(polls);
+                const requestedPollId = sessionStorage.getItem(OPEN_POLL_STORAGE_KEY) || '';
+                const requestedPoll = polls.find(poll => poll.id === requestedPollId) || null;
                 renderNotice();
                 if (isAdmin()) {
                     renderAdminPolls();
-                    renderResults(activePoll || polls[0] || null);
+                    renderResults(requestedPoll || activePoll || polls[0] || null);
+                }
+                if (requestedPoll) {
+                    sessionStorage.removeItem(OPEN_POLL_STORAGE_KEY);
+                    window.dispatchEvent(new CustomEvent('clashtools:group-tab-requested', {
+                        detail: { tab: 'availability' }
+                    }));
+                    window.requestAnimationFrame(() => {
+                        (el.notice || el.results)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                    });
                 }
             })
             .catch(() => {
@@ -101,6 +113,7 @@ export function initGroupPolls(emptyMessage) {
         withGlobalLoading(() => createGroupPoll(group.id, getCurrentUserId(), title, rounds)
             .then(() => {
                 if (el.titleInput) el.titleInput.value = '';
+                window.dispatchEvent(new CustomEvent('clashtools:notifications-refresh-requested'));
                 loadPolls();
             })
             .catch(error => showPollError(error)), t('groups.loading'));
@@ -254,7 +267,7 @@ export function initGroupPolls(emptyMessage) {
         node.className = 'groups-poll-result-user';
         node.dataset.userId = member.user_id;
         const profile = Array.isArray(member.profile) ? member.profile[0] : member.profile;
-        node.appendChild(textNode('strong', profile?.name || member.name || member.user_id));
+        node.appendChild(textNode('strong', profile?.name || member.name || t('groups.member')));
         if (!answer) {
             node.appendChild(textNode('span', t('groups.notAnswered')));
             return node;
@@ -272,12 +285,12 @@ export function initGroupPolls(emptyMessage) {
         const poll = selectedResultPoll || activePoll;
         if (!isAdmin() || !group || !poll) return;
         el.reminderBtn.disabled = true;
-        sendGroupPollReminder(group.id, poll.id)
+        sendGroupPollReminder(group.id, poll.id, getCurrentUserId())
             .then(result => {
+                window.dispatchEvent(new CustomEvent('clashtools:notifications-refresh-requested'));
                 const message = t('groups.reminderResult', {
                     created: result?.created || 0,
-                    skipped: result?.skipped || 0,
-                    answered: result?.answered || 0
+                    skipped: result?.skipped || 0
                 });
                 el.results?.prepend(Object.assign(document.createElement('p'), {
                     className: 'groups-admin-help',

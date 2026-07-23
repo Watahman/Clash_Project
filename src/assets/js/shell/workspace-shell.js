@@ -6,6 +6,11 @@ import { getCurrentUserId } from '../utils/user.js';
 import { checkUserId } from '../Supabase/Supabase-User.js';
 import { getNameInitials } from '../utils/name-initials.js';
 import { onUserProfileUpdate } from '../profile/profile-events.js';
+import {
+    buildGroupPollHref,
+    pollNotificationCopy,
+    stageGroupPollNavigation
+} from '../notifications/poll-notifications.js';
 
 let notificationsData = null;
 let notificationsRequestId = 0;
@@ -289,6 +294,9 @@ function renderNotifications(data) {
     const items = Array.isArray(data?.items) ? data.items : [];
     const unread = Number(data?.unread ?? items.filter(item => !item.read_at).length);
     setNotificationsCount(unread);
+    window.dispatchEvent(new CustomEvent('clashtools:notifications-updated', {
+        detail: { items }
+    }));
     list.replaceChildren();
 
     if (!items.length) {
@@ -305,13 +313,12 @@ function renderNotifications(data) {
         item.className = 'workspace-notification-item';
         item.classList.toggle('unread', !notification.read_at);
 
+        const copy = pollNotificationCopy(notification, t);
         const title = document.createElement('strong');
-        title.textContent = notification.title || t('notifications.title');
+        title.textContent = copy.title;
 
         const body = document.createElement('span');
-        body.textContent = notification.type === 'poll_reminder'
-            ? t('notifications.pollReminderBody')
-            : notification.body || '';
+        body.textContent = copy.body;
 
         item.append(title, body);
         item.addEventListener('click', async () => {
@@ -322,13 +329,17 @@ function renderNotifications(data) {
                 item.classList.remove('unread');
                 data.unread = Math.max(0, Number(data.unread ?? unread) - 1);
                 setNotificationsCount(data.unread);
+                window.dispatchEvent(new CustomEvent('clashtools:notifications-updated', {
+                    detail: { items }
+                }));
             }
 
             if (notification.related_group_id) {
-                sessionStorage.setItem('clashtoolsOpenGroupId', notification.related_group_id);
-                window.location.href = window.location.pathname.includes('/subPages/')
+                const pollHref = buildGroupPollHref(notification, window.location.href);
+                stageGroupPollNavigation(notification, sessionStorage, localStorage);
+                window.location.href = pollHref || (window.location.pathname.includes('/subPages/')
                     ? './groups.html'
-                    : './subPages/groups.html';
+                    : './subPages/groups.html');
             }
         });
 
@@ -412,6 +423,12 @@ function initNotificationsPopover() {
     });
     window.addEventListener('clashtools:language-changed', () => {
         if (notificationsData) renderNotifications(notificationsData);
+    });
+    window.addEventListener('clashtools:notifications-requested', () => {
+        if (notificationsData) renderNotifications(notificationsData);
+    });
+    window.addEventListener('clashtools:notifications-refresh-requested', () => {
+        void loadWorkspaceNotifications();
     });
 
     return Promise.resolve();

@@ -124,6 +124,7 @@ public class Main {
         supaGroup.removeGroupClan();
         supaGroup.setGroupMemberRole();
         supaGroup.transferGroupLeadership();
+        supaGroup.kickGroupMember();
         supaGroupPolls.getGroupPolls();
         supaGroupPolls.createGroupPoll();
         supaGroupPolls.answerGroupPoll();

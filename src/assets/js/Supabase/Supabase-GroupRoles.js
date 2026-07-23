@@ -25,3 +25,11 @@ export async function transferGroupLeadership(groupId, actorId, targetUserId) {
         return result;
     });
 }
+
+export async function kickGroupMember(groupId, actorId, targetUserId) {
+    const path = config._BASE_URL + config._EXT_SUPA_GROUP_MEMBER_KICK;
+    return databaseRequestWithBody(path, { groupId, targetUserId }).then(result => {
+        invalidateGroupRoleCaches(groupId, actorId, targetUserId);
+        return result;
+    });
+}

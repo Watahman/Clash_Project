@@ -5,7 +5,7 @@ const content = {
         en: {
             title: 'Privacy policy',
             description: 'How ClashPanel handles account, planner, group and technical data.',
-            summary: 'This draft explains the data flows visible in the current ClashPanel codebase. It is not a legal guarantee and should be reviewed against the final hosting and Supabase configuration before publication.',
+            summary: 'This policy explains how ClashPanel handles the account, planner, group and technical data needed to provide the service.',
             sections: [
                 ['Data we process', [
                     'Account data such as your email address, display name and authentication identifiers.',
@@ -19,22 +19,22 @@ const content = {
                 ]],
                 ['Storage and sharing', [
                     'Supabase stores account and application records. The browser stores language, theme, selected context and short-lived cached responses in local storage or IndexedDB.',
-                    'ClashPanel does not sell personal data. Data is shared only with service providers needed to operate the application, subject to their own terms and the final production configuration.'
+                    'ClashPanel does not sell personal data. Data is shared only with service providers needed to operate the application, subject to their own terms.'
                 ]],
                 ['Retention and your choices', [
-                    'Records should be kept only while needed for the service, security, backup and legal obligations. Exact production retention periods still require operator review.',
+                    'Records are kept only while needed for the service, security, backups and legal obligations.',
                     'You may request access, correction or deletion through support.clashpanel@gmail.com. Applicable rights depend on your location. Never email passwords, access tokens or verification tokens.'
                 ]],
                 ['Security and changes', [
                     'ClashPanel uses server-side credentials, authenticated sessions, ownership checks and database row-level policies. No online service can promise absolute security.',
-                    'This draft should be updated when hosting, analytics, advertising, contact details or data processors change.'
+                    'This policy is updated when hosting, analytics, advertising, contact details or data processors change.'
                 ]]
             ]
         },
         nl: {
             title: 'Privacybeleid',
             description: 'Hoe ClashPanel omgaat met account-, planner-, groeps- en technische gegevens.',
-            summary: 'Dit concept beschrijft de gegevensstromen die in de huidige ClashPanel-code zichtbaar zijn. Het is geen juridische garantie en moet vóór publicatie worden gecontroleerd tegen de definitieve hosting- en Supabase-configuratie.',
+            summary: 'Dit beleid legt uit hoe ClashPanel omgaat met de account-, planner-, groeps- en technische gegevens die nodig zijn om de dienst aan te bieden.',
             sections: [
                 ['Gegevens die we verwerken', [
                     'Accountgegevens zoals je e-mailadres, weergavenaam en authenticatie-identificatoren.',
@@ -48,15 +48,15 @@ const content = {
                 ]],
                 ['Opslag en delen', [
                     'Supabase bewaart account- en applicatierecords. De browser bewaart taal, thema, geselecteerde context en tijdelijke cachedata in local storage of IndexedDB.',
-                    'ClashPanel verkoopt geen persoonsgegevens. Gegevens worden alleen gedeeld met dienstverleners die nodig zijn voor de werking, volgens hun eigen voorwaarden en de definitieve productieconfiguratie.'
+                    'ClashPanel verkoopt geen persoonsgegevens. Gegevens worden alleen gedeeld met dienstverleners die nodig zijn voor de werking, volgens hun eigen voorwaarden.'
                 ]],
                 ['Bewaartermijnen en je keuzes', [
-                    'Records horen alleen bewaard te blijven zolang dat nodig is voor de dienst, beveiliging, back-ups en wettelijke verplichtingen. Exacte productietermijnen moeten nog door de beheerder worden vastgelegd.',
+                    'Records worden alleen bewaard zolang dat nodig is voor de dienst, beveiliging, back-ups en wettelijke verplichtingen.',
                     'Je kunt via support.clashpanel@gmail.com inzage, correctie of verwijdering vragen. Welke rechten gelden hangt af van je locatie. Mail nooit wachtwoorden, access tokens of verificatietokens.'
                 ]],
                 ['Beveiliging en wijzigingen', [
                     'ClashPanel gebruikt server-side credentials, geauthenticeerde sessies, eigendomscontroles en row-level databasebeleid. Geen enkele onlinedienst kan absolute beveiliging garanderen.',
-                    'Dit concept moet worden bijgewerkt wanneer hosting, analytics, advertenties, contactgegevens of verwerkers wijzigen.'
+                    'Dit beleid wordt bijgewerkt wanneer hosting, analytics, advertenties, contactgegevens of verwerkers wijzigen.'
                 ]]
             ]
         }
@@ -65,10 +65,10 @@ const content = {
         en: {
             title: 'Cookie policy',
             description: 'Essential cookies and browser storage used by ClashPanel.',
-            summary: 'ClashPanel currently uses essential authentication cookies and browser storage. The reviewed code does not include advertising or analytics cookies.',
+            summary: 'ClashPanel uses essential authentication cookies and browser storage. It does not use advertising or analytics cookies.',
             sections: [
                 ['Essential session cookies', [
-                    'The HttpOnly cookies ct_access and ct_refresh keep you signed in. Temporary HttpOnly cookies support the Google sign-in flow. Secure and SameSite settings must be enabled correctly for the production domain.',
+                    'The HttpOnly cookies ct_access and ct_refresh keep you signed in. Temporary HttpOnly cookies support the Google sign-in flow. Secure and SameSite settings protect these cookies on the production domain.',
                     'These cookies are necessary for requested account functions and cannot be disabled inside ClashPanel without signing out.'
                 ]],
                 ['Browser storage', [
@@ -77,17 +77,17 @@ const content = {
                 ]],
                 ['Third-party resources', [
                     'The current interface loads fonts from Google Fonts. That request can expose technical connection data such as an IP address and user agent to the provider.',
-                    'No consent-management platform is present in the reviewed code. If non-essential cookies or tracking are added, ClashPanel must request consent where required and expose a footer control to reopen preferences.'
+                    'ClashPanel does not currently use non-essential cookies or tracking. If this changes, consent will be requested where required and cookie preferences will remain accessible.'
                 ]]
             ]
         },
         nl: {
             title: 'Cookiebeleid',
             description: 'Essentiële cookies en browseropslag die ClashPanel gebruikt.',
-            summary: 'ClashPanel gebruikt momenteel essentiële authenticatiecookies en browseropslag. De gecontroleerde code bevat geen advertentie- of analyticscookies.',
+            summary: 'ClashPanel gebruikt essentiële authenticatiecookies en browseropslag. Er worden geen advertentie- of analyticscookies gebruikt.',
             sections: [
                 ['Essentiële sessiecookies', [
-                    'De HttpOnly-cookies ct_access en ct_refresh houden je aangemeld. Tijdelijke HttpOnly-cookies ondersteunen de Google-loginflow. Secure- en SameSite-instellingen moeten correct staan voor het productiedomein.',
+                    'De HttpOnly-cookies ct_access en ct_refresh houden je aangemeld. Tijdelijke HttpOnly-cookies ondersteunen de Google-loginflow. Secure- en SameSite-instellingen beschermen deze cookies op het productiedomein.',
                     'Deze cookies zijn nodig voor de gevraagde accountfuncties en kunnen binnen ClashPanel niet worden uitgeschakeld zonder uit te loggen.'
                 ]],
                 ['Browseropslag', [
@@ -96,7 +96,7 @@ const content = {
                 ]],
                 ['Externe bronnen', [
                     'De huidige interface laadt lettertypes via Google Fonts. Die aanvraag kan technische verbindingsgegevens zoals een IP-adres en user agent met de provider delen.',
-                    'In de gecontroleerde code is geen consent management platform aanwezig. Als later niet-essentiële cookies of tracking worden toegevoegd, moet ClashPanel waar nodig toestemming vragen en in de footer een knop tonen waarmee voorkeuren opnieuw geopend kunnen worden.'
+                    'ClashPanel gebruikt momenteel geen niet-essentiële cookies of tracking. Als dit verandert, wordt waar nodig toestemming gevraagd en blijven cookievoorkeuren toegankelijk.'
                 ]]
             ]
         }
@@ -104,8 +104,8 @@ const content = {
     terms: {
         en: {
             title: 'Terms of use',
-            description: 'Draft rules for responsible use of ClashPanel.',
-            summary: 'These draft terms describe the intended use of ClashPanel. They should be legally reviewed and completed with operator details and governing-law choices before publication.',
+            description: 'Rules for responsible use of ClashPanel.',
+            summary: 'These terms describe the responsible and permitted use of ClashPanel.',
             sections: [
                 ['Using ClashPanel', [
                     'Use the service only for lawful clan organisation and fan-content purposes. Keep your account credentials secure and provide accurate information where the workflow depends on it.',
@@ -113,7 +113,7 @@ const content = {
                 ]],
                 ['Availability and changes', [
                     'Features can be changed, limited or temporarily unavailable for maintenance, security or upstream API reasons. ClashPanel does not promise uninterrupted availability or specific game results.',
-                    'Draft, live-war and prediction information should be checked before making important clan decisions.'
+                    'Plan, live-war and prediction information should be checked before making important clan decisions.'
                 ]],
                 ['Your content', [
                     'You remain responsible for plan names, group content and other information you submit. Do not upload confidential, unlawful or infringing content.',
@@ -126,8 +126,8 @@ const content = {
         },
         nl: {
             title: 'Gebruiksvoorwaarden',
-            description: 'Conceptregels voor verantwoord gebruik van ClashPanel.',
-            summary: 'Deze conceptvoorwaarden beschrijven het bedoelde gebruik van ClashPanel. Laat ze juridisch controleren en vul beheerdersgegevens en rechtskeuze aan vóór publicatie.',
+            description: 'Regels voor verantwoord gebruik van ClashPanel.',
+            summary: 'Deze voorwaarden beschrijven het verantwoorde en toegestane gebruik van ClashPanel.',
             sections: [
                 ['ClashPanel gebruiken', [
                     'Gebruik de dienst alleen voor rechtmatige clanorganisatie en fancontent. Beveilig je accountgegevens en geef correcte informatie wanneer de workflow daarvan afhangt.',
@@ -204,16 +204,13 @@ function render() {
     root.replaceChildren();
 
     const header = document.createElement('header');
-    const concept = document.createElement('span');
-    concept.className = 'policy-concept';
-    concept.textContent = language === 'nl' ? 'Concept voor pre-launchcontrole' : 'Pre-launch draft';
     const title = document.createElement('h1');
     title.textContent = copy.title;
     const summary = document.createElement('p');
     summary.textContent = copy.summary;
     const updated = document.createElement('p');
     updated.textContent = language === 'nl' ? 'Laatst bijgewerkt: 23 juli 2026' : 'Last updated: 23 July 2026';
-    header.append(concept, title, summary, updated);
+    header.append(title, summary, updated);
     root.appendChild(header);
 
     copy.sections.forEach(([heading, paragraphs]) => {

@@ -11,6 +11,13 @@ import { initGroupPolls } from '../groups/groups-polls.js';
 import { activateGroupTab, bindGroupTabs } from '../groups/groups-tabs.js';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { bindBackdropClick } from '../utils/backdrop-click.js';
+import {
+    GROUP_TAB_STORAGE_PREFIX,
+    OPEN_GROUP_STORAGE_KEY,
+    OPEN_POLL_STORAGE_KEY,
+    readGroupPollTarget,
+    unreadPollNotificationCount
+} from '../notifications/poll-notifications.js';
 
 const groupsNewBtn = document.querySelector('#groups-new-btn');
 const groupsNewRail = document.querySelector('#groups-new-rail');
@@ -44,16 +51,16 @@ const groupsLeaveConfirmBtn = document.querySelector('#groups-leave-confirm-btn'
 const groupsAdminOverlay = document.querySelector('#groups-admin-overlay');
 const groupsPageStatus = document.querySelector('#groups-page-status');
 
-const OPEN_GROUP_STORAGE_KEY = 'clashtoolsOpenGroupId';
 const SELECTED_GROUP_STORAGE_KEY = 'clashtoolsSelectedGroupId';
-const GROUP_TAB_STORAGE_PREFIX = 'clashtoolsGroupTab:';
 let adminPanel;
 let createMode = 'name';
 let currentGroupId = '';
 let reloadSequence = 0;
+let notificationItems = [];
 
 async function init() {
     initI18n();
+    stageRequestedPollTarget();
     await syncAuthSession().catch(() => null);
     initCreateJoinOverlay();
     initDetailTabs();
@@ -79,13 +86,38 @@ function initStaticActions() {
         currentGroupId = event.detail?.group?.id || '';
         const storedTab = currentGroupId ? localStorage.getItem(`${GROUP_TAB_STORAGE_PREFIX}${currentGroupId}`) : '';
         showGroupTab(storedTab || 'members', false);
+        updateAvailabilityNotificationCount();
+        window.dispatchEvent(new CustomEvent('clashtools:notifications-requested'));
     });
     window.addEventListener('clashtools:group-tab-requested', event => showGroupTab(event.detail?.tab || 'members'));
+    window.addEventListener('clashtools:notifications-updated', event => {
+        notificationItems = Array.isArray(event.detail?.items) ? event.detail.items : [];
+        updateAvailabilityNotificationCount();
+    });
     window.addEventListener('clashtools:group-clans-updated', event => {
         if (!currentGroupId || event.detail?.groupId !== currentGroupId) return;
         setText('#groups-detail-tab-clan-count', String(event.detail?.count || 0));
         setText('#groups-inspector-clans', String(event.detail?.count || 0));
     });
+}
+
+function stageRequestedPollTarget() {
+    const target = readGroupPollTarget(window.location.href);
+    if (!target.groupId) return;
+    sessionStorage.setItem(OPEN_GROUP_STORAGE_KEY, target.groupId);
+    if (target.pollId) sessionStorage.setItem(OPEN_POLL_STORAGE_KEY, target.pollId);
+    localStorage.setItem(`${GROUP_TAB_STORAGE_PREFIX}${target.groupId}`, target.tab || 'members');
+}
+
+function updateAvailabilityNotificationCount() {
+    const badge = document.querySelector('#groups-detail-tab-availability-count');
+    if (!badge) return;
+    const count = currentGroupId
+        ? unreadPollNotificationCount(notificationItems, currentGroupId)
+        : 0;
+    badge.textContent = count > 99 ? '99+' : String(count);
+    badge.setAttribute('aria-label', t('notifications.unreadPollCount', { count }));
+    badge.classList.toggle('hidden', count === 0);
 }
 
 function requireLoggedIn() {
@@ -280,6 +312,7 @@ function leaveGroupFun() {
 
 function resetGroupDetail() {
     currentGroupId = '';
+    updateAvailabilityNotificationCount();
     groupsDetailEmpty?.classList.remove('hidden');
     groupsDetailContent?.classList.add('hidden');
     groupsAdminOverlay?.classList.add('hidden');

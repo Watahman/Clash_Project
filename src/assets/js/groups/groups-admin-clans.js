@@ -28,8 +28,8 @@ export function createClanAdmin(elements, getState, setMessage, emptyMessage) {
     }
 
     function load() {
-        const { group, userId, canAdmin } = getState();
-        if (!group || !userId || !canAdmin) return Promise.resolve();
+        const { group, userId } = getState();
+        if (!group || !userId) return Promise.resolve();
         const requestedGroupId = group.id;
         return withGlobalLoading(() => Promise.all([
             getGroupClans(group.id),
@@ -132,7 +132,8 @@ export function createClanAdmin(elements, getState, setMessage, emptyMessage) {
         btn.title = t('groups.removeClan');
         btn.textContent = 'x';
         btn.addEventListener('click', () => remove(clan.clan_tag));
-        item.append(badge, text, btn);
+        item.append(badge, text);
+        if (getState().canAdmin) item.appendChild(btn);
         return item;
     }
 
