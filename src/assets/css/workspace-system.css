@@ -292,6 +292,8 @@ body.public-site { background: radial-gradient(circle at 77% 5%, rgba(215, 173, 
 .policy-document h2 { margin-top: 2.25rem; font-size: 1.25rem; }
 .policy-document ul { display: grid; gap: 0.55rem; color: var(--text-muted); line-height: 1.65; padding-left: 1.25rem; }
 .policy-document a { color: var(--accent); text-decoration: underline; text-underline-offset: 0.2em; }
+.policy-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
+.policy-actions .button { color: var(--text); text-decoration: none; }
 .policy-concept { display: inline-flex; margin-bottom: 1rem; border-radius: var(--radius-small); background: var(--surface-2); color: var(--text-muted); padding: 0.45rem 0.65rem; font-size: 0.78rem; }
 .auth-legal { margin: 0; color: var(--text-muted); font-size: 0.76rem; line-height: 1.5; text-align: center; }
 .auth-legal a { color: var(--text); text-decoration: underline; text-underline-offset: 0.18em; }

@@ -1034,7 +1034,7 @@ function exportReport() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'clashtools-cwl-operation-report.json';
+    a.download = 'clashpanel-cwl-operation-report.json';
     a.click();
     URL.revokeObjectURL(url);
 }

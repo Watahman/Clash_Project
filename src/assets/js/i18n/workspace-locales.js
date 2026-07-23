@@ -5,6 +5,7 @@ const en = Object.freeze({
     "public.navigation": "Public navigation",
     "public.features": "Features",
     "public.preview": "Preview",
+    "public.feedback": "Bugs & feature requests",
     "public.startFree": "Start for free",
     "public.openMenu": "Open menu",
     "public.createAccount": "Create a free account",
@@ -18,7 +19,7 @@ const en = Object.freeze({
     "public.rotation": "Rotation",
     "public.core": "Core",
     "public.sampleData": "Sample data",
-    "public.audienceLabel": "Who ClashTools is for",
+    "public.audienceLabel": "Who ClashPanel is for",
     "public.forLeaders": "For clan leaders",
     "public.forCoLeaders": "For co-leaders",
     "public.forOrganizers": "For CWL organisers",
@@ -42,9 +43,9 @@ const en = Object.freeze({
     "public.contact": "Contact",
     "public.fanPolicy": "Supercell Fan Content Policy",
     "public.cookiePreferences": "Cookie preferences",
-    "public.disclaimer": "ClashTools is unofficial and is not endorsed by Supercell. For more information, see Supercell's Fan Content Policy.",
+    "public.disclaimer": "ClashPanel is unofficial and is not endorsed by Supercell. For more information, see Supercell's Fan Content Policy.",
     "public.notFoundTitle": "Page not found",
-    "public.notFoundText": "This address does not point to a ClashTools page.",
+    "public.notFoundText": "This address does not point to a ClashPanel page.",
     "public.backHome": "Back to the homepage",
     "theme.toggle": "Switch theme",
     "theme.useDark": "Use dark theme",
@@ -97,7 +98,7 @@ const en = Object.freeze({
     "home.step3Title": "Track every clan live",
     "home.step3Desc": "View stars, attacks, standings, war days, rotation and bonus advice in Operation Board.",
     "home.openGroups": "Open Groups",
-    "home.footer": "© 2026 ClashTools · Not affiliated with Supercell"
+    "home.footer": "© 2026 ClashPanel · Not affiliated with Supercell"
 });
 
 const nl = Object.freeze({
@@ -107,6 +108,7 @@ const nl = Object.freeze({
     "a11y.skipForm": "Ga naar formulier",
     "public.navigation": "Publieke navigatie",
     "public.features": "Functies",
+    "public.feedback": "Bugs & ideeën",
     "public.startFree": "Gratis starten",
     "public.openMenu": "Menu openen",
     "public.createAccount": "Maak gratis een account",
@@ -120,7 +122,7 @@ const nl = Object.freeze({
     "public.rotation": "Rotatie",
     "public.core": "Kern",
     "public.sampleData": "Voorbeelddata",
-    "public.audienceLabel": "Voor wie ClashTools bedoeld is",
+    "public.audienceLabel": "Voor wie ClashPanel bedoeld is",
     "public.forLeaders": "Voor clanleiders",
     "public.forCoLeaders": "Voor co-leiders",
     "public.forOrganizers": "Voor CWL-organisatoren",
@@ -144,9 +146,9 @@ const nl = Object.freeze({
     "public.contact": "Contact",
     "public.fanPolicy": "Supercell Fan Content Policy",
     "public.cookiePreferences": "Cookievoorkeuren",
-    "public.disclaimer": "ClashTools is onofficieel en wordt niet ondersteund door Supercell. Bekijk voor meer informatie het Fan Content Policy van Supercell.",
+    "public.disclaimer": "ClashPanel is onofficieel en wordt niet ondersteund door Supercell. Bekijk voor meer informatie het Fan Content Policy van Supercell.",
     "public.notFoundTitle": "Pagina niet gevonden",
-    "public.notFoundText": "Dit adres verwijst niet naar een ClashTools-pagina.",
+    "public.notFoundText": "Dit adres verwijst niet naar een ClashPanel-pagina.",
     "public.backHome": "Terug naar de homepage",
     "theme.toggle": "Thema wisselen",
     "theme.useDark": "Donker thema gebruiken",
@@ -195,7 +197,7 @@ const nl = Object.freeze({
     "home.step3Title": "Volg elke clan live op",
     "home.step3Desc": "Bekijk sterren, aanvallen, stand, war days, rotatie en bonusadvies in Operation Board.",
     "home.openGroups": "Open Groepen",
-    "home.footer": "© 2026 ClashTools · Niet gelieerd aan Supercell"
+    "home.footer": "© 2026 ClashPanel · Niet gelieerd aan Supercell"
 });
 
 const fr = Object.freeze({
@@ -218,7 +220,7 @@ const fr = Object.freeze({
     "dashboard.welcome": "Bon retour.", "dashboard.intro": "Ouvrez un outil depuis la navigation. Les plans récents, groupes et comptes liés seront connectés aux données réelles dans la prochaine partie.", "dashboard.chooseTool": "Choisissez où continuer", "dashboard.noFakeData": "Cette entrée n’affiche volontairement aucune statistique d’exemple ni tâche inventée.",
     "home.eyebrow": "Planification CWL sans tableurs", "home.title": "De la disponibilité à une semaine CWL claire.", "home.desc": "Rassemblez les comptes, créez un plan avec plusieurs clans et suivez chaque clan en direct, sans noyer l’information dans des cartes séparées.",
     "home.step1Title": "Rassemblez comptes et disponibilités", "home.step1Desc": "Ajoutez des joueurs via leurs tags, vos comptes, vos amis ou un groupe avec résultats de sondage.", "home.step2Title": "Créez un plan avec plusieurs clans", "home.step2Desc": "Chaque clan conserve sa ligue et son format de roster. Les joueurs restent déplaçables entre les clans.", "home.step3Title": "Suivez chaque clan en direct", "home.step3Desc": "Consultez étoiles, attaques, classement, war days, rotation et conseils bonus dans Operation Board.",
-    "home.openGroups": "Ouvrir Groupes", "home.footer": "© 2026 ClashTools · Non affilié à Supercell"
+    "home.openGroups": "Ouvrir Groupes", "home.footer": "© 2026 ClashPanel · Non affilié à Supercell"
 });
 
 const de = Object.freeze({
@@ -241,7 +243,7 @@ const de = Object.freeze({
     "dashboard.welcome": "Willkommen zurück.", "dashboard.intro": "Öffne ein Tool über die Navigation. Letzte Pläne, Gruppen und verknüpfte Accounts werden im nächsten Abschnitt mit echten Daten verbunden.", "dashboard.chooseTool": "Wähle, wo du weiterarbeiten möchtest", "dashboard.noFakeData": "Dieser Einstieg zeigt bewusst keine Beispielstatistiken oder erfundenen Aufgaben.",
     "home.eyebrow": "CWL-Planung ohne Tabellen", "home.title": "Von Verfügbarkeit zu einer klaren CWL-Woche.", "home.desc": "Sammle Accounts, erstelle einen Plan mit mehreren Clans und verfolge jeden Clan live, ohne wichtige Informationen in einzelnen Karten zu verlieren.",
     "home.step1Title": "Accounts und Verfügbarkeit sammeln", "home.step1Desc": "Füge Spieler über Tags, eigene Accounts, Freunde oder eine Gruppe mit Poll-Ergebnissen hinzu.", "home.step2Title": "Einen Plan mit mehreren Clans bauen", "home.step2Desc": "Jeder Clan behält seine League und sein Rosterformat. Spieler bleiben zwischen Clans verschiebbar.", "home.step3Title": "Jeden Clan live verfolgen", "home.step3Desc": "Sieh Sterne, Angriffe, Tabelle, War Days, Rotation und Bonusratschläge im Operation Board.",
-    "home.openGroups": "Gruppen öffnen", "home.footer": "© 2026 ClashTools · Nicht mit Supercell verbunden"
+    "home.openGroups": "Gruppen öffnen", "home.footer": "© 2026 ClashPanel · Nicht mit Supercell verbunden"
 });
 
 const es = Object.freeze({
@@ -264,7 +266,7 @@ const es = Object.freeze({
     "dashboard.welcome": "Bienvenido de nuevo.", "dashboard.intro": "Abre una herramienta desde la navegación. Los planes recientes, grupos y cuentas vinculadas se conectarán con datos reales en la siguiente parte.", "dashboard.chooseTool": "Elige dónde quieres continuar", "dashboard.noFakeData": "Esta entrada no muestra estadísticas de ejemplo ni tareas inventadas.",
     "home.eyebrow": "Planificación CWL sin hojas de cálculo", "home.title": "De la disponibilidad a una semana CWL clara.", "home.desc": "Reúne cuentas, crea un plan con varios clanes y sigue cada clan en directo, sin enterrar información importante en tarjetas separadas.",
     "home.step1Title": "Reúne cuentas y disponibilidad", "home.step1Desc": "Añade jugadores mediante tags, tus cuentas, amigos o un grupo con resultados de encuesta.", "home.step2Title": "Crea un plan con varios clanes", "home.step2Desc": "Cada clan mantiene su liga y formato de roster. Los jugadores siguen moviéndose entre clanes.", "home.step3Title": "Sigue cada clan en directo", "home.step3Desc": "Consulta estrellas, ataques, clasificación, war days, rotación y consejo de bonus en Operation Board.",
-    "home.openGroups": "Abrir Grupos", "home.footer": "© 2026 ClashTools · No afiliado a Supercell"
+    "home.openGroups": "Abrir Grupos", "home.footer": "© 2026 ClashPanel · No afiliado a Supercell"
 });
 
 const part2 = Object.freeze({

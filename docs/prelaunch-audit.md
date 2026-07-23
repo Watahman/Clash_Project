@@ -1,4 +1,4 @@
-# ClashTools pre-launch audit
+# ClashPanel pre-launch audit
 
 Datum: 23 juli 2026
 Auditbranch: `fix/prelaunch-readiness`
@@ -51,7 +51,8 @@ Geen bevestigde open kritieke problemen.
    - De migratie is bewust niet uitgevoerd. Dit blijft een launchvoorwaarde totdat ze in staging is beoordeeld, getest en daarna volgens het normale productieproces is toegepast.
 
 2. **Juridische en contactgegevens**
-   - De policyteksten zijn technische concepten. Operator/verwerkingsverantwoordelijke, privécontact voor account- en beveiligingsverzoeken, bewaartermijnen en toepasselijk recht moeten nog definitief worden ingevuld en juridisch worden beoordeeld.
+   - `support.clashpanel@gmail.com` is als private route voor support, feature requests, account-, privacy- en beveiligingsvragen ingesteld.
+   - De policyteksten blijven technische concepten. Operator/verwerkingsverantwoordelijke, bewaartermijnen en toepasselijk recht moeten nog definitief worden ingevuld en juridisch worden beoordeeld.
 
 ## Uitgevoerde wijzigingen
 
@@ -105,6 +106,8 @@ Geen bevestigde open kritieke problemen.
 - Polls en reminders hebben werkende handlers en bleven zichtbaar.
 - Bracket generator blijft expliciet als “coming soon” gemarkeerd en wordt niet als werkende actie aangeboden.
 - Cookievoorkeuren blijven verborgen zolang geen CMP aanwezig is. Als `window.ClashToolsCMP.openPreferences` wordt aangeboden en `clashtools:cmp-ready` wordt verstuurd, wordt de knop zichtbaar en kan de voorkeurendialoog opnieuw worden geopend.
+- De zichtbare productnaam is gewijzigd naar ClashPanel; bestaande interne opslagkeys, events en cacheheaders met `clashtools` blijven voor compatibiliteit behouden.
+- De publieke navigatie bevat nu een directe ingang voor bugmeldingen en feature requests.
 
 ### Privacy, policies en releasebestanden
 
@@ -161,7 +164,7 @@ Maven toont op de gebruikte IntelliJ Java 25-runtime waarschuwingen over toekoms
    - Voer een staging-smoketest uit met echte Supabase- en Clash API-configuratie, inclusief 400/403/404/429/5xx-paden.
 
 4. **Policy en support**
-   - Vul operator/verwerkingsverantwoordelijke, privé support-/securitycontact, bewaartermijnen en toepasselijk recht in.
+   - Vul operator/verwerkingsverantwoordelijke, bewaartermijnen en toepasselijk recht in.
    - Laat privacy-, cookie- en gebruiksvoorwaarden juridisch beoordelen.
    - Overweeg Google Fonts lokaal te hosten; werk cookiebeleid en CMP bij vóór analytics, advertenties of andere niet-essentiële opslag worden toegevoegd.
 
@@ -174,7 +177,7 @@ Maven toont op de gebruikte IntelliJ Java 25-runtime waarschuwingen over toekoms
 1. Supabase-migratie en RLS/granttests in staging en productieproces afronden.
 2. Definitieve secrets-, cookie-, CORS-, proxy- en authconfiguratie vastleggen.
 3. Echt domein instellen, productiebuild maken en hosting/404/HTTPS controleren.
-4. Juridische gegevens en een privé support-/securitycontact invullen en reviewen.
+4. Juridische beheerdersgegevens invullen en de policyteksten reviewen.
 5. Gitleaks/CI plus de live staging-smoketest groen afronden.
 
 Na deze vijf acties kan de beslissing van **CONDITIONAL GO** naar **GO**.
@@ -184,9 +187,14 @@ Na deze vijf acties kan de beslissing van **CONDITIONAL GO** naar **GO**.
 ### Configuratie, documentatie en build
 
 - `.env.example`
+- `AUDIT_RELEASE_READINESS.md`
+- `package.json`
+- `package-lock.json`
+- `pom.xml`
 - `README.md`
 - `scripts/build-static.mjs`
 - `database/migrations/20260723_006_restrict_security_definer_helpers.sql`
+- `docs/REDESIGN_FINAL_REPORT.md`
 - `docs/prelaunch-audit.md`
 
 ### Java-backend
@@ -208,6 +216,8 @@ Na deze vijf acties kan de beslissing van **CONDITIONAL GO** naar **GO**.
 - `src/assets/js/i18n/workspace-locales.js`
 - `src/assets/js/pages/public-policy.js`
 - `src/assets/js/pages/public-site.js`
+- `src/assets/js/pages/cwl-operation-board.js`
+- `src/assets/js/shell/workspace-shell.js`
 - `src/assets/js/utils/request-json.js`
 
 ### Publieke en applicatiepagina's

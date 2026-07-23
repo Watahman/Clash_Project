@@ -1,6 +1,6 @@
-# ClashTools
+# ClashPanel
 
-ClashTools is a vanilla JavaScript and Java application for CWL planning and live operation tracking. It also includes groups, role management, availability polls, internal reminders, player-account verification, saved drafts and a local single-elimination bracket generator.
+ClashPanel is a vanilla JavaScript and Java application for CWL planning and live operation tracking. It also includes groups, role management, availability polls, internal reminders, player-account verification, saved drafts and a local single-elimination bracket generator.
 
 ## Architecture
 

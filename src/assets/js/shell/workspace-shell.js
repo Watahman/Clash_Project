@@ -92,7 +92,7 @@ function shellMarkup(currentPage) {
     const current = pageConfig[currentPage] || pageConfig.dashboard;
     return {
         sidebar: `<aside class="workspace-sidebar" id="workspace-sidebar">
-            <a class="workspace-brand" href="./dashboard.html"><img src="../assets/css/pictures/clashtools-logo.png" alt=""><span><strong>ClashTools</strong><small>CWL workspace</small></span></a>
+            <a class="workspace-brand" href="./dashboard.html"><img src="../assets/css/pictures/clashtools-logo.png" alt=""><span><strong>ClashPanel</strong><small>CWL workspace</small></span></a>
             <button class="workspace-sidebar-toggle" id="workspace-sidebar-toggle" type="button" aria-controls="workspace-sidebar" aria-expanded="true">${icons.collapse}</button>
             <nav class="workspace-nav" id="workspace-navigation" aria-label="Applicatienavigatie" data-i18n-aria-label="shell.navigation">
                 <p data-i18n="shell.overview">Overzicht</p>
@@ -109,7 +109,7 @@ function shellMarkup(currentPage) {
         </aside>`,
         topbar: `<header class="workspace-topbar">
             <button class="workspace-mobile-menu" id="workspace-mobile-menu" type="button" aria-controls="workspace-sidebar" aria-expanded="false" data-i18n-aria-label="shell.openMenu">${icons.menu}</button>
-            <div class="workspace-breadcrumbs"><span>ClashTools</span><b>/</b><strong data-workspace-current data-i18n="${current.key}">${current.fallback}</strong></div>
+            <div class="workspace-breadcrumbs"><span>ClashPanel</span><b>/</b><strong data-workspace-current data-i18n="${current.key}">${current.fallback}</strong></div>
             <div class="workspace-top-actions">
                 <span class="workspace-sync"><i></i><span data-i18n="shell.online">Online</span></span>
                 <button type="button" data-language-control data-i18n="header.language">Taal</button>

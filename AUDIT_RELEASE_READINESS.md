@@ -1,4 +1,4 @@
-# ClashTools release-readiness audit
+# ClashPanel release-readiness audit
 
 Audit date: 2026-07-16  
 Audited base: `origin/codex/profile-settings-theme` (`541dce5`)  

@@ -1,4 +1,4 @@
-# Eindrapport ClashTools-redesign
+# Eindrapport ClashPanel-redesign
 
 Datum: 18 juli 2026
 
