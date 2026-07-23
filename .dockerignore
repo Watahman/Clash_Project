@@ -1,0 +1,12 @@
+.git
+.env
+.env.local
+node_modules
+dist
+target
+test
+test-output
+data
+.reference
+.idea
+.vscode
