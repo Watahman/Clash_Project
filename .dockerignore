@@ -10,3 +10,10 @@ data
 .reference
 .idea
 .vscode
+
+**
+!Dockerfile
+!pom.xml
+!src/
+!src/Java/
+!src/Java/**
