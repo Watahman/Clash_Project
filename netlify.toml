@@ -1,0 +1,5 @@
+[[redirects]]
+from = "/api/*"
+to = "https://clashpanel-api-982136486076.europe-west1.run.app/:splat"
+status = 200
+force = true
