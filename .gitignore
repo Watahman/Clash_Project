@@ -5,6 +5,7 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 .kotlin
+cloudrun-env.yaml
 
 ### Eclipse ###
 .apt_generated
