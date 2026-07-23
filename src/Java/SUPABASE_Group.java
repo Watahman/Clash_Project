@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
+import Java.cache.CacheKeys;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -170,10 +171,9 @@ public class SUPABASE_Group {
             String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
             String groupId  = utils.requireString(json, "groupId");
-            String clanTag  = normalizeClanTag(utils.requireString(json, "clanTag"));
+            String clanTag  = CacheKeys.requireValidTag(utils.requireString(json, "clanTag"));
             String clanName = utils.requireString(json, "clanName").trim();
 
-            if (clanTag.isBlank()) throw new IllegalArgumentException("Ongeldige clantag");
             if (clanName.isBlank()) throw new IllegalArgumentException("Clan naam ontbreekt");
 
             requireGroupAdmin(groupId, userId);
@@ -199,9 +199,7 @@ public class SUPABASE_Group {
             String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
             String groupId  = utils.requireString(json, "groupId");
-            String clanTag  = normalizeClanTag(utils.requireString(json, "clanTag"));
-
-            if (clanTag.isBlank()) throw new IllegalArgumentException("Ongeldige clantag");
+            String clanTag  = CacheKeys.requireValidTag(utils.requireString(json, "clanTag"));
 
             requireGroupAdmin(groupId, userId);
 
@@ -321,14 +319,6 @@ public class SUPABASE_Group {
             return role;
         }
         throw new IllegalArgumentException("Ongeldige rol: " + value);
-    }
-
-    private String normalizeClanTag(String value) {
-        if (value == null) return "";
-        String tag = value.trim().toUpperCase();
-        if (tag.isBlank()) return "";
-        if (!tag.startsWith("#")) tag = "#" + tag;
-        return tag;
     }
 
     private JsonArray hydrateMemberProfiles(JsonArray members) throws Exception {

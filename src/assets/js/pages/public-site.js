@@ -29,6 +29,21 @@ function initPublicMenu() {
     const nav = document.querySelector('#public-nav');
     if (!button || !nav) return;
 
+    const actions = document.querySelector('.public-actions');
+    const languageSwitcher = actions?.querySelector('[data-language-switcher]');
+    const mobileControls = document.createElement('div');
+    mobileControls.className = 'public-nav-mobile-controls';
+    if (languageSwitcher) nav.append(mobileControls);
+
+    const syncLanguageControl = () => {
+        if (!languageSwitcher || !actions) return;
+        if (window.matchMedia('(max-width: 70rem)').matches) {
+            mobileControls.append(languageSwitcher);
+        } else {
+            actions.prepend(languageSwitcher);
+        }
+    };
+
     const close = () => {
         button.setAttribute('aria-expanded', 'false');
         nav.classList.remove('is-open');
@@ -44,10 +59,30 @@ function initPublicMenu() {
     document.addEventListener('keydown', event => {
         if (event.key === 'Escape') close();
     });
+
+    syncLanguageControl();
+    window.addEventListener('resize', syncLanguageControl, { passive: true });
+}
+
+function initCookiePreferencesControls() {
+    const controls = Array.from(document.querySelectorAll('[data-cookie-preferences]'));
+    if (!controls.length) return;
+
+    const sync = () => {
+        const openPreferences = window.ClashToolsCMP?.openPreferences;
+        controls.forEach(control => {
+            control.hidden = typeof openPreferences !== 'function';
+            control.onclick = typeof openPreferences === 'function'
+                ? () => openPreferences.call(window.ClashToolsCMP)
+                : null;
+        });
+    };
+    sync();
+    window.addEventListener('clashtools:cmp-ready', sync);
 }
 
 async function redirectReturningUser() {
-    if (!document.body.classList.contains('public-site')) return;
+    if (document.body.dataset.redirectAuthenticated !== 'true') return;
     const session = await syncAuthSession().catch(() => null);
     if (session) window.location.replace('./subPages/dashboard.html');
 }
@@ -56,6 +91,7 @@ async function init() {
     initI18n();
     initThemeButtons();
     initPublicMenu();
+    initCookiePreferencesControls();
     window.addEventListener('clashtools:language-changed', updateThemeButtons);
     await redirectReturningUser();
 }

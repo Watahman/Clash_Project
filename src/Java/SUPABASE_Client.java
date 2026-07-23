@@ -95,7 +95,7 @@ public class SUPABASE_Client {
 
         if (status < 200 || status >= 300) {
             if (responseBody.isBlank()) responseBody = "{\"error\":\"Supabase HTTP " + status + "\"}";
-            throw new HttpException(status, responseBody);
+            throw HttpException.upstream(status, responseBody, "Databank");
         }
 
         return responseBody;

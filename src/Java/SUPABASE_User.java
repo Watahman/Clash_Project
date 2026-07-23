@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
+import Java.cache.CacheKeys;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -34,8 +35,13 @@ public class SUPABASE_User {
             JsonObject json = utils.parseBody(ex);
             String actorId = utils.requireAuthenticatedUser(ex);
             String id = utils.requireString(json, "userId");
-            String select = actorId.equals(id) ? "id,name,code,accounts,created_at" : "id,name,code,created_at";
-            String result = SUPABASE_Client.getWithBody("users", "select=" + select + "&id=" + SUPABASE_Client.eq(id));
+            if (!actorId.equals(id)) {
+                throw new HttpException(403, "{\"error\":\"Geen toegang tot dit gebruikersprofiel\"}");
+            }
+            String result = SUPABASE_Client.getWithBody(
+                    "users",
+                    "select=id,name,code,accounts,created_at&id=" + SUPABASE_Client.eq(actorId)
+            );
             JsonArray users = JsonParser.parseString(result).getAsJsonArray();
             if (users.isEmpty()) {
                 utils.sendJsonResponse(ex, "{\"error\":\"Gebruiker niet gevonden\"}", 404);
@@ -77,7 +83,7 @@ public class SUPABASE_User {
             String playerToken = utils.requireString(json, "playerToken").trim();
             JsonElement accountEl = json.get("base");
 
-            if (playerToken.isBlank()) {
+            if (playerToken.isBlank() || playerToken.length() > 128) {
                 utils.sendJsonResponse(ex,
                         "{\"error\":\"Accounttoken ontbreekt\",\"code\":\"ACCOUNT_TOKEN_REQUIRED\"}",
                         400);
@@ -89,11 +95,12 @@ public class SUPABASE_User {
             }
 
             JsonObject newAccount = accountEl.getAsJsonObject();
-            String newTag = normalizeTag(readFirstString(newAccount, "tag", "playerTag", "accountTag", "clashTag"));
-            if (newTag.isBlank()) {
+            String rawTag = readFirstString(newAccount, "tag", "playerTag", "accountTag", "clashTag");
+            if (rawTag.isBlank()) {
                 utils.sendJsonResponse(ex, "{\"error\":\"Account tag ontbreekt\"}", 400);
                 return;
             }
+            String newTag = CacheKeys.requireValidTag(rawTag);
 
             verifyAccountOwnership(newTag, playerToken);
             newAccount.addProperty("tag", newTag);
@@ -167,13 +174,6 @@ public class SUPABASE_User {
             response.addProperty("name", name);
             utils.sendJsonResponse(ex, response.toString(), 200);
         }));
-    }
-
-    private String normalizeTag(String value) {
-        if (value == null) return "";
-        String tag = value.trim().toUpperCase();
-        if (tag.isBlank()) return "";
-        return tag.startsWith("#") ? tag : "#" + tag;
     }
 
     private String readFirstString(JsonObject object, String... fields) {

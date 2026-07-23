@@ -380,12 +380,8 @@ public final class AuthService {
 
     private void ensureSuccess(HttpResponse<String> response) throws HttpException {
         int status = response.statusCode();
-        String body = response.body() == null ? "" : response.body();
-
         if (status < 200 || status >= 300) {
-            System.err.println(
-                    "Supabase Auth fout: status=" + status + ", body=" + body
-            );
+            System.err.println("Supabase Auth fout: status=" + status);
         }
 
         if (status >= 200 && status < 300) {

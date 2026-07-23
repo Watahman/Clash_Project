@@ -45,6 +45,7 @@ Open `http://localhost:5173`. Set `DEV_API_TARGET` only when the Java API runs e
 | `_API_KEY_ALL` | yes | Clash API authorization value, including `Bearer ` |
 | `_BASE_URL_CLASH` | no | Clash API base URL |
 | `SERVER_PORT` or `PORT` | no | Backend port; defaults to `8080` |
+| `PUBLIC_SITE_URL` | production | Absolute public origin used to generate `robots.txt` and `sitemap.xml` during the frontend build |
 | `ALLOWED_ORIGINS` | production | Comma-separated browser-origin allowlist |
 | `AUTH_GOOGLE_CALLBACK_URL` | production | Exact same-origin callback URL, for example `https://example.com/api/AuthGoogleCallback` |
 | `AUTH_COOKIE_SECURE` | production | Set to `true` when the public application uses HTTPS |
@@ -77,6 +78,6 @@ mvn package
 
 ## Production notes
 
-Build the frontend with `npm run build`, serve `dist/` over HTTPS and reverse-proxy `/api` to the Java service. Run the packaged Java JAR with JDK 21. Configure an exact production origin allowlist, keep service credentials in the hosting secret store, apply migrations before new application code, and monitor `429`, `401`, upstream Clash errors and cache health.
+Build the frontend with `PUBLIC_SITE_URL=https://your-domain.example npm run build`, serve `dist/` over HTTPS and reverse-proxy `/api` to the Java service. Run the packaged Java JAR with JDK 21. Configure an exact production origin allowlist, keep service credentials in the hosting secret store, apply migrations before new application code, configure the host to serve `404.html` for missing pages, and monitor `429`, `401`, upstream Clash errors and cache health.
 
 Before release, complete [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md). The CI workflow builds both sides, runs tests, validates migration ordering and performs a history-aware secret scan.

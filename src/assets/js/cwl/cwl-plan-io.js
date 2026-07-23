@@ -278,6 +278,9 @@ export function loadPlanListener() {
 
 export async function loadPlanById(planId) {
     const token = ++activeLoadToken;
+    const previousPlanId = activePlanId;
+    const previousAutosaveState = canAutosave;
+    let loadSucceeded = false;
     planContextToken += 1;
     activeLoadController?.abort();
     activeLoadController = new AbortController();
@@ -298,15 +301,22 @@ export async function loadPlanById(planId) {
         planCache.set(normalized.id, normalized);
         if (normalized.revision != null) planRevisions.set(normalized.id, normalized.revision);
         renderPlanSnapshot(normalized, token);
+        loadSucceeded = true;
         void enrichPlanSnapshot(normalized.info, token, activeLoadController.signal);
     } catch (error) {
-        if (error?.name !== 'AbortError' && token === activeLoadToken) setSaveStatus('error');
+        if (error?.name !== 'AbortError' && token === activeLoadToken) {
+            setActivePlan(previousPlanId);
+            if (loadPlan) loadPlan.value = previousPlanId || '';
+            setSaveStatus('error');
+        }
     } finally {
         if (token === activeLoadToken) {
             setLoading(false);
-            setCanAutosave(true);
+            setCanAutosave(loadSucceeded ? true : previousAutosaveState);
             suppressSave = false;
-            window.dispatchEvent(new CustomEvent('clashtools:cwl-plan-loaded'));
+            if (loadSucceeded) {
+                window.dispatchEvent(new CustomEvent('clashtools:cwl-plan-loaded'));
+            }
         }
     }
 }

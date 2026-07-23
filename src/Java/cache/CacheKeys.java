@@ -2,8 +2,11 @@ package Java.cache;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 public final class CacheKeys {
+    private static final Pattern CLASH_TAG = Pattern.compile("^#[0289PYLQGRJCUV]{3,15}$");
+
     private CacheKeys() {}
 
     public static String clashGet(String path) {
@@ -15,6 +18,14 @@ public final class CacheKeys {
         String tag = value.trim().toUpperCase();
         if (tag.isBlank()) return "";
         return tag.startsWith("#") ? tag : "#" + tag;
+    }
+
+    public static String requireValidTag(String value) {
+        String tag = normalizeTag(value);
+        if (!CLASH_TAG.matcher(tag).matches()) {
+            throw new IllegalArgumentException("Ongeldige speler- of clantag");
+        }
+        return tag;
     }
 
     private static String normalizePath(String path) {

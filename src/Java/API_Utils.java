@@ -3,6 +3,7 @@ package Java;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import Java.cache.CacheKeys;
@@ -91,7 +92,7 @@ public class API_Utils {
             int statusCode = conn.getResponseCode();
             String responseBody = readResponseBody(conn, statusCode);
             if (statusCode < 200 || statusCode >= 300) {
-                throw new HttpException(statusCode, responseBody);
+                throw HttpException.upstream(statusCode, responseBody, "Clash API");
             }
             return responseBody;
         } finally {
@@ -118,7 +119,7 @@ public class API_Utils {
             int statusCode = conn.getResponseCode();
             String responseBody = readResponseBody(conn, statusCode);
             if (statusCode < 200 || statusCode >= 300) {
-                throw new HttpException(statusCode, responseBody);
+                throw HttpException.upstream(statusCode, responseBody, "Clash API");
             }
             return responseBody;
         } finally {
@@ -163,7 +164,15 @@ public class API_Utils {
         }
         String body = new String(bytes, StandardCharsets.UTF_8);
         if (body.isBlank()) throw new IllegalArgumentException("Request body is leeg");
-        return JsonParser.parseString(body).getAsJsonObject();
+        try {
+            JsonElement parsed = JsonParser.parseString(body);
+            if (!parsed.isJsonObject()) {
+                throw new IllegalArgumentException("Request body moet een JSON-object zijn");
+            }
+            return parsed.getAsJsonObject();
+        } catch (JsonParseException | IllegalStateException e) {
+            throw new IllegalArgumentException("Request body bevat ongeldige JSON");
+        }
     }
 
     public String requireAuthenticatedUser(HttpExchange exchange) throws Exception {
@@ -173,6 +182,9 @@ public class API_Utils {
     public String requireString(JsonObject json, String field) throws IllegalArgumentException {
         JsonElement el = json.get(field);
         if (el == null || el.isJsonNull()) throw new IllegalArgumentException("Verplicht veld ontbreekt: " + field);
+        if (!el.isJsonPrimitive() || !el.getAsJsonPrimitive().isString()) {
+            throw new IllegalArgumentException("Veld moet tekst zijn: " + field);
+        }
         return el.getAsString();
     }
 
@@ -229,7 +241,7 @@ public class API_Utils {
             } catch (HttpException e) {
                 long duration = System.currentTimeMillis() - start;
                 System.out.printf("[%s] %d ms (%d)%n", path, duration, e.getStatusCode());
-                sendJsonResponse(exchange, e.getResponseBody(), e.getStatusCode());
+                sendJsonResponse(exchange, publicErrorBody(e), publicStatus(e));
             } catch (Exception e) {
                 long duration = System.currentTimeMillis() - start;
                 System.out.printf("[%s] %d ms (500)%n", path, duration);
@@ -313,7 +325,7 @@ public class API_Utils {
 
     private String cachedValueOrThrow(CacheEntry entry) throws HttpException {
         if (entry.sourceStatus() >= 200 && entry.sourceStatus() < 300) return entry.value();
-        throw new HttpException(entry.sourceStatus(), entry.value());
+        throw HttpException.upstream(entry.sourceStatus(), entry.value(), "Clash API");
     }
 
     public void clashGetCached(HttpExchange exchange, String path, long ttlMs) throws Exception {
@@ -425,6 +437,33 @@ public class API_Utils {
     public static String escapeJson(String value) {
         if (value == null) return "";
         return value.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
+    }
+
+    static int publicStatus(HttpException error) {
+        if (error.isSafeToExpose()) return error.getStatusCode();
+        return switch (error.getStatusCode()) {
+            case 400, 401, 403, 404, 409, 422, 429 -> error.getStatusCode();
+            default -> 502;
+        };
+    }
+
+    static String publicErrorBody(HttpException error) {
+        if (error.isSafeToExpose()) return error.getResponseBody();
+        String provider = error.getUpstream().isBlank() ? "Externe service" : error.getUpstream();
+        String message = switch (error.getStatusCode()) {
+            case 400, 422 -> provider + " heeft de aanvraag afgewezen.";
+            case 401, 403 -> provider + " heeft geen toegang verleend.";
+            case 404 -> "De gevraagde gegevens zijn niet gevonden.";
+            case 409 -> "De aanvraag botst met de huidige gegevens.";
+            case 429 -> provider + " ontvangt te veel aanvragen. Probeer later opnieuw.";
+            default -> provider + " is tijdelijk niet beschikbaar.";
+        };
+        String code = switch (error.getStatusCode()) {
+            case 429 -> "UPSTREAM_RATE_LIMITED";
+            case 404 -> "UPSTREAM_NOT_FOUND";
+            default -> "UPSTREAM_ERROR";
+        };
+        return "{\"error\":\"" + escapeJson(message) + "\",\"code\":\"" + code + "\"}";
     }
 
     @FunctionalInterface

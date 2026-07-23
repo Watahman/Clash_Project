@@ -20,4 +20,11 @@ class CacheKeysTest {
         assertNotEquals(clan, currentWar);
         assertNotEquals(members, currentWar);
     }
+
+    @Test
+    void validatesTagsBeforeTheyReachTheClashApi() {
+        assertEquals("#P0LYQ8", CacheKeys.requireValidTag("p0lyq8"));
+        assertThrows(IllegalArgumentException.class, () -> CacheKeys.requireValidTag("#ABC123"));
+        assertThrows(IllegalArgumentException.class, () -> CacheKeys.requireValidTag("../../players"));
+    }
 }

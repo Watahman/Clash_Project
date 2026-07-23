@@ -42,4 +42,17 @@ describe('central JSON request errors', () => {
             message: 'De server gaf een ongeldig antwoord.'
         });
     });
+
+    it('aborts a request that exceeds the configured timeout', async () => {
+        vi.stubGlobal('fetch', vi.fn((url, options) => new Promise((resolve, reject) => {
+            options.signal.addEventListener('abort', () => {
+                reject(new DOMException('Aborted', 'AbortError'));
+            }, { once: true });
+        })));
+
+        await expect(requestJson('/test', { timeoutMs: 5 })).rejects.toMatchObject({
+            status: 0,
+            code: 'REQUEST_TIMEOUT'
+        });
+    });
 });

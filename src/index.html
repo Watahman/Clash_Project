@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="ClashTools brengt CWL-beschikbaarheid, planning en live opvolging samen.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="ClashTools · CWL planning without spreadsheets">
+    <meta property="og:description" content="Plan multiple CWL clans, collect availability and follow live wars in one clear workflow.">
+    <meta name="twitter:card" content="summary">
     <link rel="stylesheet" href="assets/css/workspace-loading.css">
     <script src="assets/js/shell/workspace-bootstrap.js"></script>
     <title>ClashTools · CWL-planning zonder spreadsheets</title>
@@ -14,7 +18,7 @@
     <link rel="stylesheet" href="assets/css/light-theme.css">
     <link rel="stylesheet" href="assets/css/workspace-polish.css">
 </head>
-<body class="public-site">
+<body class="public-site" data-redirect-authenticated="true">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Ga naar inhoud</a>
 
 <header class="public-header">
@@ -114,9 +118,19 @@
 </main>
 
 <footer class="public-footer">
-    <a class="public-brand" href="index.html"><img src="assets/css/pictures/clashtools-logo.png" alt=""><span>ClashTools</span></a>
-    <p data-i18n="home.footer">© 2026 ClashTools · Niet gelieerd aan Supercell</p>
-    <nav aria-label="Voetnavigatie" data-i18n-aria-label="public.footerNav"><a href="#features" data-i18n="public.features">Functies</a><a href="subPages/login.html" data-i18n="auth.login">Inloggen</a><a href="subPages/register.html" data-i18n="auth.registerLink">Registreren</a></nav>
+    <div class="public-footer-main">
+        <a class="public-brand" href="index.html"><img src="assets/css/pictures/clashtools-logo.png" alt=""><span>ClashTools</span></a>
+        <nav aria-label="Voetnavigatie" data-i18n-aria-label="public.footerNav">
+            <a href="subPages/privacy.html" data-i18n="public.privacy">Privacy</a>
+            <a href="subPages/cookies.html" data-i18n="public.cookies">Cookies</a>
+            <a href="subPages/terms.html" data-i18n="public.terms">Gebruiksvoorwaarden</a>
+            <a href="subPages/contact.html" data-i18n="public.contact">Contact</a>
+            <a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer" data-i18n="public.fanPolicy">Supercell Fan Content Policy</a>
+            <button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookievoorkeuren</button>
+        </nav>
+    </div>
+    <p class="public-disclaimer" data-i18n="public.disclaimer">ClashTools is onofficieel en wordt niet ondersteund door Supercell. Bekijk voor meer informatie het Fan Content Policy van Supercell.</p>
+    <p class="public-footer-meta" data-i18n="home.footer">© 2026 ClashTools · Niet gelieerd aan Supercell</p>
 </footer>
 </body>
 </html>
