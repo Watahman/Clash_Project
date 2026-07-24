@@ -7,12 +7,14 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
+    "html_handling": "none",
+    "not_found_handling": "404-page",
     "run_worker_first": [
       "/api/*"
     ]
   },
 
   "vars": {
-    "CLOUD_RUN_ORIGIN": " https://clashpanel-api-982136486076.europe-west1.run.app"
+    "CLOUD_RUN_ORIGIN": "https://clashpanel-api-982136486076.europe-west1.run.app"
   }
 }
