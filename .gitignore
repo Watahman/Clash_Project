@@ -54,3 +54,8 @@ vite-project/
 
 # Local visual reference material
 .reference/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example

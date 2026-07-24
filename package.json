@@ -9,7 +9,9 @@
     "test:watch": "vitest",
     "check:migrations": "node scripts/check-migrations.mjs",
     "check:endpoints": "node scripts/check-endpoints.mjs",
-    "check": "npm run check:migrations && npm run check:endpoints && npm test && npm run build"
+    "check": "npm run check:migrations && npm run check:endpoints && npm test && npm run build",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   },
   "repository": {
     "type": "git",
@@ -29,6 +31,7 @@
   "devDependencies": {
     "fake-indexeddb": "^6.2.2",
     "jsdom": "^26.1.0",
-    "vitest": "^3.2.6"
+    "vitest": "^3.2.6",
+    "wrangler": "^4.114.0"
   }
 }
