@@ -15,7 +15,7 @@ public class Config {
     String _API_KEY_ACTIVE = _API_KEY_ALL;
 
     String _BASE_URL_SUPABASE = firstNonBlank(env("_BASE_URL_SUPABASE"), env("SUPABASE_URL"));
-    String _BASE_URL_CLASH = firstNonBlank(env("_BASE_URL_CLASH"), "https://api.clashofclans.com/v1");
+    String _BASE_URL_CLASH = firstNonBlank(env("_BASE_URL_CLASH"), "https://cocproxy.royaleapi.dev/v1");
     String _CACHE_ENABLED = firstNonBlank(env("CACHE_ENABLED"), "true");
     String _CACHE_MODE = firstNonBlank(env("CACHE_MODE"), "layered");
     String _CACHE_DB_PATH = firstNonBlank(
