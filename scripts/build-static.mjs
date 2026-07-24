@@ -13,7 +13,10 @@ await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 await cp(source, output, { recursive: true });
 
-const publicSiteUrl = String(process.env.PUBLIC_SITE_URL || '').trim().replace(/\/+$/, '');
+const publicSiteUrl = String(
+    process.env.PUBLIC_SITE_URL || 'https://clashpanel.com'
+).trim().replace(/\/+$/, '');
+
 if (publicSiteUrl) {
     const parsedUrl = new URL(publicSiteUrl);
     if (!['http:', 'https:'].includes(parsedUrl.protocol) || !parsedUrl.hostname) {
