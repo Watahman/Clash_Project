@@ -29,6 +29,7 @@
   "devDependencies": {
     "fake-indexeddb": "^6.2.2",
     "jsdom": "^26.1.0",
-    "vitest": "^3.2.6"
+    "vitest": "^3.2.6",
+    "wrangler": "^4.114.0"
   }
 }
