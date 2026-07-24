@@ -2,7 +2,6 @@ export default {
     async fetch(request, env) {
         const incomingUrl = new URL(request.url);
 
-        // Backendrequests naar Google Cloud Run.
         if (
             incomingUrl.pathname === "/api" ||
             incomingUrl.pathname.startsWith("/api/")
@@ -15,7 +14,7 @@ export default {
             }
 
             const backendPath =
-                incomingUrl.pathname.substring("/api".length) || "/";
+                incomingUrl.pathname.slice("/api".length) || "/";
 
             const targetUrl = new URL(backendPath, env.CLOUD_RUN_ORIGIN);
             targetUrl.search = incomingUrl.search;
@@ -29,46 +28,11 @@ export default {
                 method: request.method,
                 headers,
                 body:
-                    request.method === "GET" ||
-                    request.method === "HEAD"
+                    request.method === "GET" || request.method === "HEAD"
                         ? undefined
                         : request.body,
                 redirect: "manual"
             });
-        }
-
-        // Oude lowercase/clean URLs naar het echte bestand redirecten.
-        if (
-            incomingUrl.pathname === "/subpages" ||
-            incomingUrl.pathname.startsWith("/subpages/")
-        ) {
-            let remainder = incomingUrl.pathname.slice("/subpages".length);
-
-            // Herstel foutieve dubbele paden zoals:
-            // /subpages/subPages/dashboard.html
-            remainder = remainder.replace(/^\/subPages(?=\/|$)/, "");
-
-            // Herstel de echte hoofdletters van deze map.
-            remainder = remainder.replace(
-                /^\/popup_htmls(?=\/|$)/i,
-                "/popup_HTMLs"
-            );
-
-            if (!remainder || remainder === "/") {
-                remainder = "/dashboard.html";
-            }
-
-            const finalPart = remainder.split("/").pop() || "";
-
-            if (!finalPart.includes(".")) {
-                remainder += ".html";
-            }
-
-            const canonicalUrl = new URL(request.url);
-            canonicalUrl.pathname = `/subPages${remainder}`;
-
-            // Tijdelijke redirect tijdens het testen.
-            return Response.redirect(canonicalUrl.toString(), 302);
         }
 
         return env.ASSETS.fetch(request);
