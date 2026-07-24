@@ -2,7 +2,7 @@ import '../theme/theme-manager.js';
 import { translations } from './translations.js';
 
 const STORAGE_KEY = 'clashtools_language';
-const DEFAULT_LANG = 'nl';
+const DEFAULT_LANG = 'en';
 
 const LANGUAGE_METADATA = Object.freeze({
     nl: Object.freeze({ code: 'NL', name: 'Nederlands' }),
