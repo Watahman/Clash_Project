@@ -208,13 +208,13 @@
 
     function workspacePageUrls() {
         return PAGE_NAMES.map(name =>
-            new URL(`/subPages/${name}`, window.location.origin)
+            new URL(`/subpages/${name}`, window.location.origin)
         );
     }
 
     function profileMarkupUrl() {
         return new URL(
-            "/subPages/popup_HTMLs/profile_popup.html",
+            "/subpages/popup_htmls/profile_popup.html",
             window.location.origin
         );
     }
@@ -223,7 +223,7 @@
         try {
             const url = new URL(value, window.location.href);
             if (url.origin !== window.location.origin) return null;
-            if (!PAGE_NAMES.some(name => url.pathname.endsWith(`/subPages/${name}`))) {
+            if (!PAGE_NAMES.some(name => url.pathname.endsWith(`/subpages/${name}`))) {
                 return null;
             }
             return url;

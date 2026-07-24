@@ -337,9 +337,9 @@ function renderNotifications(data) {
             if (notification.related_group_id) {
                 const pollHref = buildGroupPollHref(notification, window.location.href);
                 stageGroupPollNavigation(notification, sessionStorage, localStorage);
-                window.location.href = pollHref || (window.location.pathname.includes('/subPages/')
+                window.location.href = pollHref || (window.location.pathname.includes('/subpages/')
                     ? './groups.html'
-                    : './subPages/groups.html');
+                    : './subpages/groups.html');
             }
         });
 

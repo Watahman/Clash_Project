@@ -51,7 +51,7 @@ function normalizeProfileAssetPaths() {
 }
 
 function getProfilePopupPath() {
-    return "/subPages/popup_HTMLs/profile_popup.html";
+    return "/subpages/popup_htmls/profile_popup.html";
 }
 
 
@@ -208,7 +208,7 @@ function profileInit() {
                 localStorage.removeItem(key);
                 sessionStorage.removeItem(key);
             });
-            window.location.href = window.location.pathname.includes('/subPages/')
+            window.location.href = window.location.pathname.includes('/subpages/')
                 ? '../index.html'
                 : './index.html';
         }
@@ -389,9 +389,9 @@ function renderNotifications(data) {
             if (notification.related_group_id) {
                 const pollHref = buildGroupPollHref(notification, window.location.href);
                 stageGroupPollNavigation(notification, sessionStorage, localStorage);
-                window.location.href = pollHref || (window.location.pathname.includes('/subPages/')
+                window.location.href = pollHref || (window.location.pathname.includes('/subpages/')
                     ? './groups.html'
-                    : './subPages/groups.html');
+                    : './subpages/groups.html');
             } else if (isFriendNotification(notification)) {
                 notificationsPanel.classList.add('hidden');
                 const friendsTab = document.querySelector('#po-tab-friends');
@@ -487,10 +487,10 @@ function trapProfileFocus(event) {
 
 function redirectToLogin() {
     const path = window.location.pathname;
-    if (path.includes('/subPages/')) {
+    if (path.includes('/subpages/')) {
         window.location.href = './login.html';
     } else {
-        window.location.href = './subPages/login.html';
+        window.location.href = './subpages/login.html';
     }
 }
 

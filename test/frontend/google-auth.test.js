@@ -14,11 +14,11 @@ describe('Google authentication', () => {
         ));
         vi.stubGlobal('fetch', fetchMock);
 
-        await expect(getGoogleSignInUrl('/subPages/groups.html?tab=polls'))
+        await expect(getGoogleSignInUrl('/subpages/groups.html?tab=polls'))
             .resolves.toContain('provider=google');
 
         const [, options] = fetchMock.mock.calls[0];
-        expect(JSON.parse(options.body)).toEqual({ next: '/subPages/groups.html?tab=polls' });
+        expect(JSON.parse(options.body)).toEqual({ next: '/subpages/groups.html?tab=polls' });
         expect(options.credentials).toBe('include');
     });
 
@@ -34,8 +34,8 @@ describe('Google authentication', () => {
     });
 
     it('keeps Google controls on login and registration pages', () => {
-        const login = readFileSync('src/subPages/login.html', 'utf8');
-        const register = readFileSync('src/subPages/register.html', 'utf8');
+        const login = readFileSync('src/subpages/login.html', 'utf8');
+        const register = readFileSync('src/subpages/register.html', 'utf8');
         expect(login).toContain('id="google-login"');
         expect(register).toContain('id="google-login"');
     });

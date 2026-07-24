@@ -5,7 +5,7 @@ import { initProfileSettings } from '../../src/assets/js/profile/profile_setting
 
 describe('Part 6 bracket workspace', () => {
     it('separates setup from the generated result while keeping every bracket action', () => {
-        const html = readFileSync('src/subPages/bracket-generator.html', 'utf8');
+        const html = readFileSync('src/subpages/bracket-generator.html', 'utf8');
 
         expect(html).toContain('class="bracket-setup"');
         expect(html).toContain('class="bracket-result"');
@@ -31,7 +31,7 @@ describe('Part 6 profile and settings', () => {
     });
 
     it('uses a reusable fragment with unique controls, safe image sources and all approved tabs', () => {
-        const html = readFileSync('src/subPages/popup_HTMLs/profile_popup.html', 'utf8');
+        const html = readFileSync('src/subpages/popup_htmls/profile_popup.html', 'utf8');
         const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]);
 
         expect(html).not.toMatch(/<!doctype|<html|<head|<body/i);
@@ -43,7 +43,7 @@ describe('Part 6 profile and settings', () => {
     });
 
     it('keeps friend and add dialogs centered without legacy global overlay styles', () => {
-        const html = readFileSync('src/subPages/popup_HTMLs/profile_popup.html', 'utf8');
+        const html = readFileSync('src/subpages/popup_htmls/profile_popup.html', 'utf8');
         const css = readFileSync('src/assets/css/profile-overlay.css', 'utf8');
 
         expect(html).toContain('id="po-friend-list" role="dialog" aria-modal="true"');

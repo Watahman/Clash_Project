@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 describe('Public production copy', () => {
     const home = readFileSync('src/index.html', 'utf8');
     const policies = readFileSync('src/assets/js/pages/public-policy.js', 'utf8');
-    const terms = readFileSync('src/subPages/terms.html', 'utf8');
+    const terms = readFileSync('src/subpages/terms.html', 'utf8');
 
     it('advertises only features available from the public homepage', () => {
         expect(home).not.toContain('feature-row-coming-soon');

@@ -7,7 +7,7 @@ import java.util.Base64;
 
 final class OAuthPkce {
     private static final SecureRandom RANDOM = new SecureRandom();
-    private static final String DEFAULT_DESTINATION = "/subPages/dashboard.html";
+    private static final String DEFAULT_DESTINATION = "/subpages/dashboard.html";
 
     private OAuthPkce() {}
 
@@ -31,7 +31,7 @@ final class OAuthPkce {
         try {
             URI uri = URI.create(value).normalize();
             String path = uri.getRawPath();
-            if (uri.isAbsolute() || uri.getRawAuthority() != null || path == null || !path.startsWith("/subPages/")) {
+            if (uri.isAbsolute() || uri.getRawAuthority() != null || path == null || !path.startsWith("/subpages/")) {
                 return DEFAULT_DESTINATION;
             }
             StringBuilder destination = new StringBuilder(path);

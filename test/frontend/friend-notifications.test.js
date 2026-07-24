@@ -35,7 +35,7 @@ describe('friend notifications', () => {
     });
 
     it('keeps the request count as a separate element so translations cannot remove it', () => {
-        const markup = readFileSync('src/subPages/popup_HTMLs/profile_popup.html', 'utf8');
+        const markup = readFileSync('src/subpages/popup_htmls/profile_popup.html', 'utf8');
         document.body.innerHTML = markup;
 
         const button = document.querySelector('#po-friend-requests-btn');

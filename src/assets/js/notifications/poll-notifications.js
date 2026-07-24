@@ -82,9 +82,9 @@ export function buildGroupPollHref(notification, currentHref) {
     const groupJoinNotification = isGroupMemberJoinedNotification(notification);
     if (!pollNotification && !groupJoinNotification) return '';
     const currentUrl = new URL(currentHref);
-    const groupsPath = currentUrl.pathname.includes('/subPages/')
+    const groupsPath = currentUrl.pathname.includes('/subpages/')
         ? './groups.html'
-        : './subPages/groups.html';
+        : './subpages/groups.html';
     const destination = new URL(groupsPath, currentUrl);
     destination.searchParams.set('groupId', notification.related_group_id);
     if (pollNotification) destination.searchParams.set('pollId', notification.related_poll_id);

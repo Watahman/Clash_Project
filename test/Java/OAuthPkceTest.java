@@ -28,12 +28,12 @@ class OAuthPkceTest {
     @Test
     void onlyAllowsInternalSubPageDestinations() {
         assertEquals(
-                "/subPages/groups.html?tab=polls#active",
-                OAuthPkce.sanitizeNext("/subPages/groups.html?tab=polls#active")
+                "/subpages/groups.html?tab=polls#active",
+                OAuthPkce.sanitizeNext("/subpages/groups.html?tab=polls#active")
         );
-        assertEquals("/subPages/dashboard.html", OAuthPkce.sanitizeNext("https://evil.example/subPages/groups.html"));
-        assertEquals("/subPages/dashboard.html", OAuthPkce.sanitizeNext("//evil.example/subPages/groups.html"));
-        assertEquals("/subPages/dashboard.html", OAuthPkce.sanitizeNext("/subPages/../../index.html"));
-        assertEquals("/subPages/dashboard.html", OAuthPkce.sanitizeNext("/subPages/groups.html\r\nLocation:https://evil.example"));
+        assertEquals("/subpages/dashboard.html", OAuthPkce.sanitizeNext("https://evil.example/subpages/groups.html"));
+        assertEquals("/subpages/dashboard.html", OAuthPkce.sanitizeNext("//evil.example/subpages/groups.html"));
+        assertEquals("/subpages/dashboard.html", OAuthPkce.sanitizeNext("/subpages/../../index.html"));
+        assertEquals("/subpages/dashboard.html", OAuthPkce.sanitizeNext("/subpages/groups.html\r\nLocation:https://evil.example"));
     }
 }

@@ -1,5 +1,5 @@
 function getAssetPrefix() {
-    return window.location.pathname.includes('/subPages/') ? '../assets/css/pictures/' : 'assets/css/pictures/';
+    return window.location.pathname.includes('/subpages/') ? '../assets/css/pictures/' : 'assets/css/pictures/';
 }
 
 function normalizeTag(value) {

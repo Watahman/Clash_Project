@@ -61,9 +61,9 @@ describe('poll notifications', () => {
 
         const href = buildGroupPollHref(
             pollNotification,
-            'https://clashpanel.example/subPages/dashboard.html'
+            'https://clashpanel.example/subpages/dashboard.html'
         );
-        expect(href).toBe('https://clashpanel.example/subPages/groups.html?groupId=group-1&pollId=poll-1&tab=availability');
+        expect(href).toBe('https://clashpanel.example/subpages/groups.html?groupId=group-1&pollId=poll-1&tab=availability');
         expect(readGroupPollTarget(href)).toEqual({
             groupId: 'group-1',
             pollId: 'poll-1',
@@ -98,9 +98,9 @@ describe('poll notifications', () => {
 
         const href = buildGroupPollHref(
             memberJoinedNotification,
-            'https://clashpanel.example/subPages/dashboard.html'
+            'https://clashpanel.example/subpages/dashboard.html'
         );
-        expect(href).toBe('https://clashpanel.example/subPages/groups.html?groupId=group-1&tab=members');
+        expect(href).toBe('https://clashpanel.example/subpages/groups.html?groupId=group-1&tab=members');
         expect(readGroupPollTarget(href)).toEqual({
             groupId: 'group-1',
             pollId: '',

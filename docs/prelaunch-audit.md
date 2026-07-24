@@ -226,18 +226,18 @@ Na deze vijf acties kan de beslissing van **CONDITIONAL GO** naar **GO**.
 - `src/index.html`
 - `src/robots.txt`
 - `src/sitemap.xml`
-- `src/subPages/bracket-generator.html`
-- `src/subPages/contact.html`
-- `src/subPages/cookies.html`
-- `src/subPages/cwl-operation-board.html`
-- `src/subPages/cwl-planner-drafts.html`
-- `src/subPages/cwl-planner.html`
-- `src/subPages/dashboard.html`
-- `src/subPages/groups.html`
-- `src/subPages/login.html`
-- `src/subPages/privacy.html`
-- `src/subPages/register.html`
-- `src/subPages/terms.html`
+- `src/subpages/bracket-generator.html`
+- `src/subpages/contact.html`
+- `src/subpages/cookies.html`
+- `src/subpages/cwl-operation-board.html`
+- `src/subpages/cwl-planner-drafts.html`
+- `src/subpages/cwl-planner.html`
+- `src/subpages/dashboard.html`
+- `src/subpages/groups.html`
+- `src/subpages/login.html`
+- `src/subpages/privacy.html`
+- `src/subpages/register.html`
+- `src/subpages/terms.html`
 
 ### Tests
 

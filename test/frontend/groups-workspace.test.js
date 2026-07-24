@@ -8,7 +8,7 @@ import { createMemberRoleAdmin } from '../../src/assets/js/groups/groups-admin-m
 
 describe('Groups V1 workspace', () => {
     it('keeps the approved four real tabs and removes dead or broken controls', () => {
-        const html = readFileSync('src/subPages/groups.html', 'utf8');
+        const html = readFileSync('src/subpages/groups.html', 'utf8');
         const tabs = [...html.matchAll(/data-group-tab="([^"]+)"/g)].map(match => match[1]);
 
         expect(tabs).toEqual(['members', 'availability', 'polls', 'clans']);

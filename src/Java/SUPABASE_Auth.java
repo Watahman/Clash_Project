@@ -135,7 +135,7 @@ public final class SUPABASE_Auth {
                 destination = authService.completeGoogleOAuth(ex, queryParameter(ex, "code"));
             } catch (Exception authError) {
                 authService.clearGoogleFlowCookies(ex);
-                destination = "/subPages/login.html?oauth=failed";
+                destination = "/subpages/login.html?oauth=failed";
             }
             ex.getResponseHeaders().set("Location", destination);
             ex.sendResponseHeaders(303, -1);

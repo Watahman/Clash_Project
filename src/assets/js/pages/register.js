@@ -31,7 +31,7 @@ async function registerWithGoogle() {
     setBusy(true);
     setStatus(t('auth.redirecting'), 'loading');
     try {
-        await signInWithGoogle('/subPages/dashboard.html');
+        await signInWithGoogle('/subpages/dashboard.html');
     } catch (error) {
         setStatus(error?.code === 'AUTH_NOT_CONFIGURED' ? t('auth.notConfigured') : t('auth.oauthUnavailable'), 'error');
         setBusy(false);

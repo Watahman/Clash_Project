@@ -50,11 +50,11 @@ public class Config {
     );
     String _AUTH_EMAIL_CONFIRM_REDIRECT_URL = firstNonBlank(
             env("AUTH_EMAIL_CONFIRM_REDIRECT_URL"),
-            "http://localhost:5173/subPages/login.html"
+            "http://localhost:5173/subpages/login.html"
     );
     String _AUTH_PASSWORD_RESET_REDIRECT_URL = firstNonBlank(
             env("AUTH_PASSWORD_RESET_REDIRECT_URL"),
-            "http://localhost:5173/subPages/login.html"
+            "http://localhost:5173/subpages/login.html"
     );
     String _AUTH_GOOGLE_CALLBACK_URL = firstNonBlank(
             env("AUTH_GOOGLE_CALLBACK_URL"),

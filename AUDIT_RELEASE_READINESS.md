@@ -49,15 +49,15 @@ Missing locale keys at baseline:
 
 ## Confirmed P2 / completeness findings
 
-| Area | File(s) | Cause / impact | Proposed fix |
-|---|---|---|---|
-| Bracket generator | `src/subPages/bracket-generator.html` | Static “Coming soon” page. | Implement single-elimination generation, byes, seed/shuffle, progression, local persistence, and versioned JSON import/export. |
-| Drafts | `src/subPages/cwl-planner-drafts.html` | Static shell with no plan list or actions. | Load authenticated user's plans and add open/rename/copy/delete with confirmation and server authorization. |
+| Area | File(s)                                                                  | Cause / impact | Proposed fix |
+|---|--------------------------------------------------------------------------|---|---|
+| Bracket generator | `src/subpages/bracket-generator.html`                                    | Static “Coming soon” page. | Implement single-elimination generation, byes, seed/shuffle, progression, local persistence, and versioned JSON import/export. |
+| Drafts | `src/subpages/cwl-planner-drafts.html`                                   | Static shell with no plan list or actions. | Load authenticated user's plans and add open/rename/copy/delete with confirmation and server authorization. |
 | API wrappers | `API-Goldpass.js`, `API-Labels.js`, `API-Leagues.js`, `API-Locations.js` | Empty files while backend routes exist. | Add consistent wrappers or explicitly document/remove unused backend-only modules. |
-| Login UX | `login.html`, `register.html`, page scripts | Inputs are not real forms; Enter/error/loading flows are incomplete; forgot password is `href="#"`; Google control is non-functional. | Use semantic forms and implement configured Auth actions; disable unavailable providers with an explanation. |
-| Profile/group controls | profile and groups modules | Profile data fans out to multiple blocking calls; profile/group member data creates N+1 lookups; group add action/later section are incomplete. | Batch public profiles, background-refresh cached profile data, and connect controls to real flows. |
+| Login UX | `login.html`, `register.html`, page scripts                              | Inputs are not real forms; Enter/error/loading flows are incomplete; forgot password is `href="#"`; Google control is non-functional. | Use semantic forms and implement configured Auth actions; disable unavailable providers with an explanation. |
+| Profile/group controls | profile and groups modules                                               | Profile data fans out to multiple blocking calls; profile/group member data creates N+1 lookups; group add action/later section are incomplete. | Batch public profiles, background-refresh cached profile data, and connect controls to real flows. |
 | Repository hygiene | tracked `.idea`, `*.iml`, `test-output`, `TEST_REPORT_*`, `vite-project` | Generated IDE/test/demo content is tracked. The isolated Vite demo is not referenced by the production build. | Remove tracked generated/demo artifacts after final reference verification and update `.gitignore`. |
-| Documentation/CI | repository root | No README or CI workflow; environment example omits runtime/CORS/cache/auth settings. | Add architecture/setup/migration/deploy documentation, safe `.env.example`, and build/test/secret/static CI. |
+| Documentation/CI | repository root                                                          | No README or CI workflow; environment example omits runtime/CORS/cache/auth settings. | Add architecture/setup/migration/deploy documentation, safe `.env.example`, and build/test/secret/static CI. |
 
 ## Race conditions and edge cases to cover
 

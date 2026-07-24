@@ -118,7 +118,7 @@ export function onAuthStateChange(callback) {
     return () => listeners.delete(callback);
 }
 
-export async function getGoogleSignInUrl(next = '/subPages/dashboard.html') {
+export async function getGoogleSignInUrl(next = '/subpages/dashboard.html') {
     const data = await requestJson(authEndpoint('/AuthGoogle'), {
         body: { next },
         loading: 'blocking',
@@ -132,6 +132,6 @@ export async function getGoogleSignInUrl(next = '/subPages/dashboard.html') {
     return data.url;
 }
 
-export async function signInWithGoogle(next = '/subPages/dashboard.html') {
+export async function signInWithGoogle(next = '/subpages/dashboard.html') {
     window.location.assign(await getGoogleSignInUrl(next));
 }
