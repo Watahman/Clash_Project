@@ -207,17 +207,16 @@
     }
 
     function workspacePageUrls() {
-        const directory = window.location.pathname.includes('/subPages/')
-            ? './'
-            : './subPages/';
-        return PAGE_NAMES.map(name => new URL(`${directory}${name}`, window.location.href));
+        return PAGE_NAMES.map(name =>
+            new URL(`/subPages/${name}`, window.location.origin)
+        );
     }
 
     function profileMarkupUrl() {
-        const relative = window.location.pathname.includes('/subPages/')
-            ? './popup_HTMLs/profile_popup.html'
-            : './subPages/popup_HTMLs/profile_popup.html';
-        return new URL(relative, window.location.href);
+        return new URL(
+            "/subPages/popup_HTMLs/profile_popup.html",
+            window.location.origin
+        );
     }
 
     function toWorkspaceUrl(value) {

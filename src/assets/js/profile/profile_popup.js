@@ -43,16 +43,15 @@ let friendListTrigger = null;
 
 
 function normalizeProfileAssetPaths() {
-    const prefix = window.location.pathname.includes('/subPages/') ? '../assets/css/pictures/' : 'assets/css/pictures/';
-    document.querySelectorAll('[data-profile-src]').forEach(img => {
+    const prefix = "/assets/css/pictures/";
+
+    document.querySelectorAll("[data-profile-src]").forEach(img => {
         img.src = prefix + img.dataset.profileSrc;
     });
 }
 
 function getProfilePopupPath() {
-    const path = window.location.pathname;
-    if (path.includes('/subPages/')) return './popup_HTMLs/profile_popup.html';
-    return './subPages/popup_HTMLs/profile_popup.html';
+    return "/subPages/popup_HTMLs/profile_popup.html";
 }
 
 
