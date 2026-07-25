@@ -228,6 +228,7 @@ async function analyzeFile(file) {
         if (token !== state.analysisToken) return;
         setProgress(1, t('cwl.sheetAnalysisComplete'));
         renderResults();
+        setPreviewMode(true);
     } catch (error) {
         console.error('Spreadsheet import failed', error);
         setStatus(t('cwl.sheetReadError'), 'error');
@@ -370,6 +371,8 @@ async function importSelected() {
             skipped
         }), 'success');
         setProgress(1, t('cwl.sheetImportComplete'));
+        document.querySelector('#cwl-overlay-import-spreadsheet')?.classList.add('hidden');
+        resetImporter();
     } catch (error) {
         console.error('Spreadsheet planner import failed', error);
         setStatus(t('cwl.sheetImportError'), 'error');
@@ -510,7 +513,16 @@ function resetImporter() {
     setStatus('', '');
     setProgress(0, '');
     clearResults();
+    setPreviewMode(false);
     setBusy(false);
+}
+
+
+function setPreviewMode(enabled) {
+    const overlay = document.querySelector('#cwl-overlay-import-spreadsheet');
+    const container = document.querySelector('#cwl-container-import-spreadsheet');
+    overlay?.classList.toggle('is-preview-mode', enabled);
+    container?.classList.toggle('is-preview-mode', enabled);
 }
 
 function clearResults() {

@@ -146,3 +146,57 @@
     }
     .cwl-sheet-duplicate { grid-column: 2 / -1; }
 }
+
+
+/* Once analysis is complete, turn the importer into a workspace-sized preview. */
+#cwl-overlay-import-spreadsheet.is-preview-mode {
+    padding: 12px;
+}
+
+#cwl-container-import-spreadsheet.is-preview-mode {
+    width: min(1440px, calc(100vw - 24px));
+    height: calc(100vh - 24px);
+    max-height: none;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+#cwl-container-import-spreadsheet.is-preview-mode .cwl-sheet-import-intro,
+#cwl-container-import-spreadsheet.is-preview-mode .cwl-sheet-dropzone {
+    display: none;
+}
+
+#cwl-container-import-spreadsheet.is-preview-mode .cwl-sheet-summary {
+    margin-top: 12px;
+    flex: 0 0 auto;
+}
+
+#cwl-container-import-spreadsheet.is-preview-mode .cwl-sheet-preview {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow: auto;
+    align-content: start;
+    padding: 2px 4px 8px 0;
+}
+
+#cwl-container-import-spreadsheet.is-preview-mode .cwl-sheet-import-actions {
+    flex: 0 0 auto;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color, rgba(255,255,255,.08));
+}
+
+@media (max-width: 700px) {
+    #cwl-overlay-import-spreadsheet.is-preview-mode {
+        padding: 0;
+    }
+
+    #cwl-container-import-spreadsheet.is-preview-mode {
+        width: 100vw;
+        height: 100dvh;
+        max-height: none;
+        border-radius: 0;
+    }
+}
