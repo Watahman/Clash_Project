@@ -666,7 +666,7 @@
     display: flex;
     min-height: 3rem;
     gap: 1.25rem;
-    overflow-x: auto;
+    overflow-x: hidden;
     border-bottom: 0.0625rem solid var(--border, var(--border-subtle));
     background: transparent;
     padding: 0 1rem;
