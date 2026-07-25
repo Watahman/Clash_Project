@@ -587,9 +587,15 @@ function setProgress(value, label) {
 
 function setBusy(busy) {
     state.busy = busy;
+
     document.querySelector('#cwl-spreadsheet-file-input')?.toggleAttribute('disabled', busy);
     document.querySelector('#cwl-spreadsheet-reset')?.toggleAttribute('disabled', busy);
+    document.querySelector('#cwl-spreadsheet-import-selected')?.toggleAttribute('disabled', busy);
+
     document.querySelector('#cwl-spreadsheet-dropzone')?.classList.toggle('is-busy', busy);
+
+    document.body.style.cursor = busy ? 'wait' : '';
+
     renderResults();
 }
 
