@@ -170,7 +170,17 @@
             <span class="cwl-sheet-progress-label" id="cwl-spreadsheet-progress-label"></span>
         </div>
 
-        <p class="cwl-sheet-summary" id="cwl-spreadsheet-summary"></p>
+        <div class="cwl-sheet-preview-toolbar">
+            <p class="cwl-sheet-summary" id="cwl-spreadsheet-summary"></p>
+            <label class="cwl-sheet-scope-control" for="cwl-spreadsheet-import-scope">
+                <span data-i18n="cwl.sheetImportWhat">Import</span>
+                <select id="cwl-spreadsheet-import-scope">
+                    <option value="both" data-i18n="cwl.sheetImportBoth">Players & clans</option>
+                    <option value="player" data-i18n="cwl.sheetImportPlayersOnly">Players only</option>
+                    <option value="clan" data-i18n="cwl.sheetImportClansOnly">Clans only</option>
+                </select>
+            </label>
+        </div>
         <div class="cwl-sheet-preview" id="cwl-spreadsheet-preview"></div>
 
         <div class="cwl-sheet-import-actions">

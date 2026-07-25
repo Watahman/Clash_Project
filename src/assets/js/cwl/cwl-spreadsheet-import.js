@@ -26,7 +26,8 @@ function createEmptyState() {
         candidates: [],
         results: [],
         busy: false,
-        analysisToken: 0
+        analysisToken: 0,
+        importScope: 'both'
     };
 }
 
@@ -133,6 +134,7 @@ export function initSpreadsheetImport() {
     const dropzone = document.querySelector('#cwl-spreadsheet-dropzone');
     const importButton = document.querySelector('#cwl-spreadsheet-import-selected');
     const resetButton = document.querySelector('#cwl-spreadsheet-reset');
+    const scopeSelect = document.querySelector('#cwl-spreadsheet-import-scope');
 
     if (!openButton || !overlay || !input || !dropzone || !importButton) return;
 
@@ -172,6 +174,10 @@ export function initSpreadsheetImport() {
 
     importButton.addEventListener('click', importSelected);
     resetButton?.addEventListener('click', resetImporter);
+    scopeSelect?.addEventListener('change', () => {
+        state.importScope = scopeSelect.value || 'both';
+        renderResults();
+    });
     document.querySelector('#cwl-spreadsheet-preview')?.addEventListener('change', handlePreviewChange);
     window.addEventListener('clashtools:language-changed', () => renderResults());
 
@@ -301,6 +307,11 @@ function plannerHasClan(tag) {
         .some(article => normalizeTag(article.dataset.clanTag) === normalized);
 }
 
+export function matchesImportScope(result, scope = 'both') {
+    if (!result?.selectedType) return false;
+    return scope === 'both' || result.selectedType === scope;
+}
+
 function handlePreviewChange(event) {
     const row = event.target.closest('[data-import-index]');
     if (!row) return;
@@ -323,7 +334,12 @@ function handlePreviewChange(event) {
 
 async function importSelected() {
     if (state.busy) return;
-    const selected = state.results.filter(result => result?.selected && result.selectedType && !result.alreadyInPlanner);
+    const selected = state.results.filter(result =>
+        result?.selected
+        && result.selectedType
+        && !result.alreadyInPlanner
+        && matchesImportScope(result, state.importScope)
+    );
     if (!selected.length) {
         setStatus(t('cwl.sheetNothingSelected'), 'warning');
         return;
@@ -398,7 +414,7 @@ function renderResults() {
     const counts = resolved.reduce((acc, result) => {
         acc[result.detectedType] = (acc[result.detectedType] || 0) + 1;
         if (result.alreadyInPlanner) acc.duplicate += 1;
-        if (result.selected) acc.selected += 1;
+        if (result.selected && matchesImportScope(result, state.importScope)) acc.selected += 1;
         return acc;
     }, { player: 0, clan: 0, ambiguous: 0, invalid: 0, duplicate: 0, selected: 0 });
 
@@ -421,14 +437,15 @@ function renderResults() {
 
 function buildResultRow(result, index) {
     const row = document.createElement('article');
-    row.className = `cwl-sheet-result cwl-sheet-result--${result.detectedType}`;
+    const inScope = matchesImportScope(result, state.importScope);
+    row.className = `cwl-sheet-result cwl-sheet-result--${result.detectedType}${inScope ? '' : ' is-out-of-scope'}`;
     row.dataset.importIndex = String(index);
 
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.dataset.importSelect = 'true';
-    checkbox.checked = Boolean(result.selected);
-    checkbox.disabled = result.detectedType === 'invalid' || result.alreadyInPlanner;
+    checkbox.checked = Boolean(result.selected && inScope);
+    checkbox.disabled = result.detectedType === 'invalid' || result.alreadyInPlanner || !inScope;
     checkbox.setAttribute('aria-label', t('cwl.sheetSelectTag', { tag: result.tag }));
 
     const main = document.createElement('div');
@@ -455,6 +472,12 @@ function buildResultRow(result, index) {
         : buildTypeBadge(result);
 
     row.append(checkbox, main, meta, typeControl);
+    if (!inScope && result.detectedType !== 'invalid') {
+        const excluded = document.createElement('span');
+        excluded.className = 'cwl-sheet-scope-excluded';
+        excluded.textContent = t('cwl.sheetExcludedByScope');
+        row.appendChild(excluded);
+    }
     if (result.alreadyInPlanner) {
         const duplicate = document.createElement('span');
         duplicate.className = 'cwl-sheet-duplicate';
@@ -509,6 +532,8 @@ function resetImporter() {
     state = { ...createEmptyState(), analysisToken: state.analysisToken };
     const input = document.querySelector('#cwl-spreadsheet-file-input');
     if (input) input.value = '';
+    const scopeSelect = document.querySelector('#cwl-spreadsheet-import-scope');
+    if (scopeSelect) scopeSelect.value = 'both';
     setFileLabel('');
     setStatus('', '');
     setProgress(0, '');

@@ -73,6 +73,42 @@
     color: var(--text-secondary, #9ca3af);
 }
 
+
+.cwl-sheet-preview-toolbar {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 18px 0 8px;
+}
+
+.cwl-sheet-preview-toolbar .cwl-sheet-summary {
+    margin: 0;
+}
+
+.cwl-sheet-scope-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+    color: var(--text-secondary, #9ca3af);
+    font-size: .84rem;
+}
+
+.cwl-sheet-scope-control select {
+    min-width: 150px;
+}
+
+.cwl-sheet-result.is-out-of-scope {
+    opacity: .5;
+}
+
+.cwl-sheet-scope-excluded {
+    grid-column: 2 / -1;
+    color: var(--text-secondary, #9ca3af);
+    font-size: .78rem;
+}
+
 .cwl-sheet-preview {
     display: grid;
     gap: 7px;
@@ -138,6 +174,16 @@
 }
 
 @media (max-width: 700px) {
+    .cwl-sheet-preview-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .cwl-sheet-scope-control {
+        justify-content: space-between;
+    }
+
     .cwl-sheet-result {
         grid-template-columns: auto 1fr auto;
     }
@@ -167,7 +213,7 @@
     display: none;
 }
 
-#cwl-container-import-spreadsheet.is-preview-mode .cwl-sheet-summary {
+#cwl-container-import-spreadsheet.is-preview-mode .cwl-sheet-preview-toolbar {
     margin-top: 12px;
     flex: 0 0 auto;
 }
