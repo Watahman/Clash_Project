@@ -1,5 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+const clanApiMocks = vi.hoisted(() => ({
+    getClanInfoRequest: vi.fn(),
+    getClanMembersRequest: vi.fn(),
+    getClanCurrentWarLeagueGroupRequest: vi.fn(),
+    getClanWarLeagueWarRequest: vi.fn()
+}));
+const playerApiMocks = vi.hoisted(() => ({
+    getPlayerBattleLogRequest: vi.fn(),
+    getPlayerInfoRequest: vi.fn()
+}));
+
+vi.mock('../../src/assets/js/API/API-Clan.js', () => clanApiMocks);
+vi.mock('../../src/assets/js/API/API-Player.js', () => playerApiMocks);
+
 vi.mock('../../src/assets/js/profile/profile_popup.js', () => ({ profileHTML: vi.fn() }));
 vi.mock('../../src/assets/js/auth/auth-client.js', () => ({ syncAuthSession: vi.fn().mockResolvedValue(null) }));
 vi.mock('../../src/assets/js/utils/user.js', () => ({ getCurrentUserId: () => null }));
@@ -44,6 +58,7 @@ vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
         'op.apiOnly': 'Bench',
         'op.ok': 'Klaar',
         'op.noRoster': 'Nog geen roster',
+        'op.noActiveCwl': 'Geen actieve CWL',
         'op.syncIdle': 'Nog niet gesynchroniseerd',
         'op.importedState': 'JSON geïmporteerd'
     })[key] || key
@@ -52,6 +67,13 @@ vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
 describe('CWL Operation Board', () => {
     beforeEach(() => {
         vi.resetModules();
+        vi.clearAllMocks();
+        clanApiMocks.getClanInfoRequest.mockResolvedValue({ tag: '#PQL', name: 'Belgian Warriors' });
+        clanApiMocks.getClanMembersRequest.mockResolvedValue({ items: [] });
+        clanApiMocks.getClanCurrentWarLeagueGroupRequest.mockResolvedValue({ state: 'inWar', rounds: [{ warTags: ['#0'] }] });
+        clanApiMocks.getClanWarLeagueWarRequest.mockResolvedValue({});
+        playerApiMocks.getPlayerInfoRequest.mockResolvedValue({});
+        playerApiMocks.getPlayerBattleLogRequest.mockResolvedValue({});
         document.body.innerHTML = `
             <select id="op-plan-select"></select><select id="op-clan-select"></select>
             <button id="op-refresh"></button><button id="op-export"></button><button id="op-import-json"></button>
@@ -63,7 +85,7 @@ describe('CWL Operation Board', () => {
             <div id="op-stars-chart"></div><span id="op-stars-chart-state"></span>
             <div id="op-position-chart"></div><span id="op-position-chart-state"></span>
             <span id="op-standings-state"></span><div id="op-standings-list"></div><p id="op-standings-note"></p>
-            <span id="op-roster-count"></span><table><tbody id="op-roster-body"></tbody></table><input id="op-roster-filter"><select id="op-roster-view"></select>
+            <span id="op-roster-count"></span><table><thead><tr><th>Player</th><th>TH</th><th data-op-roster-column="planning">Planning</th><th data-op-roster-column="war">War</th><th>Attacks</th><th>Stars</th><th>Destruction</th></tr></thead><tbody id="op-roster-body"></tbody></table><input id="op-roster-filter"><select id="op-roster-view"></select>
             <ol id="op-bonus-list"></ol><div class="profile-placeholder"></div>`;
     });
 
@@ -112,4 +134,42 @@ describe('CWL Operation Board', () => {
         expect(document.querySelectorAll('#op-bonus-list li')).toHaveLength(2);
         expect(document.querySelector('#op-live-state').dataset.state).toBe('imported');
     });
+
+    it('keeps the board empty and shows a message when no active CWL exists', async () => {
+        const noCwlError = Object.assign(new Error('notFound'), { status: 404 });
+        clanApiMocks.getClanCurrentWarLeagueGroupRequest.mockRejectedValueOnce(noCwlError);
+
+        await import('../../src/assets/js/pages/cwl-operation-board.js');
+        await vi.waitFor(() => expect(document.querySelector('#op-roster-body').children.length).toBe(1));
+
+        document.querySelector('#op-standalone-clan-tag').value = '#PQL';
+        document.querySelector('#op-standalone-load').click();
+
+        await vi.waitFor(() => expect(document.querySelector('#op-help').textContent).toBe('Geen actieve CWL'));
+        expect(document.querySelector('#op-live-state').dataset.state).toBe('idle');
+        expect(document.querySelector('#op-total-stars').textContent).toBe('0');
+        expect(document.querySelector('#op-roster-count').textContent).toBe('0 spelers');
+        expect(document.querySelectorAll('#op-roster-body .op-player-row')).toHaveLength(0);
+        expect(clanApiMocks.getClanWarLeagueWarRequest).not.toHaveBeenCalled();
+    });
+
+    it('hides planning and war columns for a directly loaded clan tag', async () => {
+        clanApiMocks.getClanMembersRequest.mockResolvedValueOnce({
+            items: [{ tag: '#P0L', name: 'Emile', townHallLevel: 17 }]
+        });
+
+        await import('../../src/assets/js/pages/cwl-operation-board.js');
+        await vi.waitFor(() => expect(document.querySelector('#op-roster-body').children.length).toBe(1));
+
+        document.querySelector('#op-standalone-clan-tag').value = '#PQL';
+        document.querySelector('#op-standalone-load').click();
+
+        await vi.waitFor(() => expect(document.querySelectorAll('#op-roster-body .op-player-row')).toHaveLength(1));
+        expect(document.querySelector('[data-op-roster-column="planning"]').hidden).toBe(true);
+        expect(document.querySelector('[data-op-roster-column="war"]').hidden).toBe(true);
+        expect(document.querySelector('#op-roster-body .op-player-row').children).toHaveLength(5);
+        expect(Array.from(document.querySelector('#op-roster-view').options).map(option => option.value)).not.toContain('planned');
+        expect(Array.from(document.querySelector('#op-roster-view').options).map(option => option.value)).not.toContain('unplanned');
+    });
+
 });

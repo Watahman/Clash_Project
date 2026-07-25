@@ -20,7 +20,6 @@ import { getAllPlansFromDatabase, getPlanFromDatabase } from '../Supabase/Supaba
 import {
     getClanInfoRequest,
     getClanMembersRequest,
-    getClanCurrentWarRequest,
     getClanCurrentWarLeagueGroupRequest,
     getClanWarLeagueWarRequest
 } from '../API/API-Clan.js';
@@ -185,6 +184,8 @@ function initRefs() {
     refs.standingsNote = document.querySelector('#op-standings-note');
     refs.rosterCount = document.querySelector('#op-roster-count');
     refs.rosterBody = document.querySelector('#op-roster-body');
+    refs.rosterPlanningHeader = document.querySelector('[data-op-roster-column="planning"]');
+    refs.rosterWarHeader = document.querySelector('[data-op-roster-column="war"]');
     refs.rosterFilter = document.querySelector('#op-roster-filter');
     refs.rosterView = document.querySelector('#op-roster-view');
     refs.bonusList = document.querySelector('#op-bonus-list');
@@ -217,6 +218,33 @@ function setHelp(text, isError = false) {
 function setPhase(stateKey = 'unknown') {
     refs.phase.textContent = cwlStateText(stateKey);
     refs.phase.dataset.state = stateKey;
+}
+
+function isStandaloneRosterMode(report = latestReport) {
+    return Boolean(report?.clan?.standalone || (!report && selectedClan?.standalone));
+}
+
+function syncRosterMode(report = latestReport) {
+    const standalone = isStandaloneRosterMode(report);
+    if (refs.rosterPlanningHeader) refs.rosterPlanningHeader.hidden = standalone;
+    if (refs.rosterWarHeader) refs.rosterWarHeader.hidden = standalone;
+}
+
+function isActiveLeagueGroup(group) {
+    if (!group || group.error || !Array.isArray(group.rounds) || group.rounds.length === 0) return false;
+    return normalizeLeaguePhase(group.state) !== 'completed';
+}
+
+function isNoActiveCwlResult(result) {
+    if (result?.status === 'fulfilled') return !isActiveLeagueGroup(result.value);
+    return Number(result?.reason?.status) === 404;
+}
+
+function showNoActiveCwl() {
+    clearReport(false);
+    setPhase('unknown');
+    setState('idle');
+    setHelp(t('op.noActiveCwl'), true);
 }
 
 function initEvents() {
@@ -294,6 +322,7 @@ function selectPlan(planId) {
     selectedPlan = null;
     selectedClan = null;
     latestReport = null;
+    syncRosterMode(null);
     refs.clanSelect.disabled = true;
     refs.clanSelect.replaceChildren(option('', t('op.loadingClans'), { disabled: true, selected: true }));
     clearReport();
@@ -360,6 +389,7 @@ function loadStandaloneClan() {
     refs.planSelect.value = '';
     refs.clanSelect.disabled = true;
     refs.clanSelect.replaceChildren(option('', t('op.standaloneMode'), { disabled: true, selected: true }));
+    syncRosterMode();
     refreshClanReport(selectedClan);
 }
 
@@ -443,14 +473,22 @@ async function refreshClanReport(clan) {
     setHelp(t('op.loadingLive'));
     clearReport(false);
     try {
-        const [clanInfo, membersData, leagueGroup, currentWar] = await Promise.allSettled([
+        const [clanInfo, membersData, leagueGroup] = await Promise.allSettled([
             getClanInfoRequest(clan.tag, { signal }),
             getClanMembersRequest(clan.tag, { signal }),
-            getClanCurrentWarLeagueGroupRequest(clan.tag, { signal }),
-            getClanCurrentWarRequest(clan.tag, { signal })
+            getClanCurrentWarLeagueGroupRequest(clan.tag, { signal })
         ]);
         if (token !== requestToken) return;
-        const hasCoreData = [clanInfo, membersData, leagueGroup, currentWar].some(result =>
+
+        if (isNoActiveCwlResult(leagueGroup)) {
+            showNoActiveCwl();
+            return;
+        }
+        if (leagueGroup.status !== 'fulfilled' || !isActiveLeagueGroup(leagueGroup.value)) {
+            throw leagueGroup.reason || new Error('Unable to load CWL league group');
+        }
+
+        const hasCoreData = [clanInfo, membersData].some(result =>
             result.status === 'fulfilled' && result.value && !result.value.error
         );
         if (!hasCoreData) throw new Error('No live clan data available');
@@ -471,8 +509,7 @@ async function refreshClanReport(clan) {
             clan: enrichedClan,
             clanInfo: clanInfoValue,
             members,
-            leagueGroup: leagueGroup.status === 'fulfilled' ? leagueGroup.value : null,
-            currentWar: currentWar.status === 'fulfilled' ? currentWar.value : null,
+            leagueGroup: leagueGroup.value,
             leagueWars: [],
             wars: [],
             phase: 'unknown'
@@ -492,12 +529,6 @@ async function refreshClanReport(clan) {
                 .map(result => result.value);
             report.wars = report.leagueWars.filter(war => getWarSide(war, enrichedClan.tag));
         }
-
-        if (report.wars.length === 0 && report.currentWar && !report.currentWar.error && getWarSide(report.currentWar, enrichedClan.tag)) {
-            report.phase = normalizeLeaguePhase(report.currentWar.state || report.phase);
-            report.wars = [{ ...report.currentWar, _round: 1, _warTag: 'currentwar' }];
-        }
-
         latestReport = { ...buildReport(report), predictionState: 'loading' };
         renderReport(latestReport);
         setState('ready');
@@ -746,6 +777,7 @@ function getPlayerStatus(player) {
 }
 
 function renderReport(report) {
+    syncRosterMode(report);
     setPhase(report.phase);
     refs.starsChart.setAttribute('aria-busy', String(report.predictionState === 'loading'));
     const countedRounds = report.rounds.filter(isRoundCountedForScoreboard);
@@ -782,17 +814,22 @@ function clearReport(resetSelectors = true) {
     refs.bonusList.replaceChildren();
     refs.rosterCount.textContent = '0 ' + t('op.players');
     renderRosterViewOptions(null);
+    syncRosterMode(null);
     if (resetSelectors) setPhase('unknown');
 }
 
 function renderRosterViewOptions(report) {
     const current = refs.rosterView.value || 'all';
-    refs.rosterView.replaceChildren(
-        option('all', t('op.viewAll')),
-        option('planned', t('op.viewPlanned')),
-        option('unplanned', t('op.viewUnplanned')),
-        option('missed', t('op.viewMissed'))
-    );
+    const standalone = isStandaloneRosterMode(report);
+    const baseOptions = standalone
+        ? [option('all', t('op.viewAll')), option('missed', t('op.viewMissed'))]
+        : [
+            option('all', t('op.viewAll')),
+            option('planned', t('op.viewPlanned')),
+            option('unplanned', t('op.viewUnplanned')),
+            option('missed', t('op.viewMissed'))
+        ];
+    refs.rosterView.replaceChildren(...baseOptions);
     if (report?.rounds?.length) {
         refs.rosterView.appendChild(option('', '──────────', { disabled: true }));
         report.rounds.forEach(round => {
@@ -956,11 +993,18 @@ function renderRoster() {
         };
         const row = document.createElement('tr');
         row.className = `op-player-row op-status-${player.status}`;
+        const standalone = isStandaloneRosterMode(report);
+        const planningCell = standalone
+            ? ''
+            : `<td>${badge(player.planned ? t('op.planned') : t('op.notPlanned'), player.planned ? 'ok' : 'warn')}</td>`;
+        const warCell = standalone
+            ? ''
+            : `<td>${badge(display.warText, display.warKind)}</td>`;
         row.innerHTML = `
             <td><strong>${escapeHtml(player.name)}</strong><span>${escapeHtml(player.tag)}</span></td>
             <td>TH${player.townHall || '-'}</td>
-            <td>${badge(player.planned ? t('op.planned') : t('op.notPlanned'), player.planned ? 'ok' : 'warn')}</td>
-            <td>${badge(display.warText, display.warKind)}</td>
+            ${planningCell}
+            ${warCell}
             <td>${parseNumber(display.attacksUsed, 0)}/${parseNumber(display.availableAttacks, 0)}</td>
             <td>${parseNumber(display.stars, 0)}★</td>
             <td>${parseNumber(display.destruction, 0).toFixed(1)}%</td>`;
@@ -973,7 +1017,7 @@ function renderEmptyRoster() {
     const row = document.createElement('tr');
     row.className = 'op-table-empty';
     const cell = document.createElement('td');
-    cell.colSpan = 7;
+    cell.colSpan = isStandaloneRosterMode() ? 5 : 7;
     cell.textContent = t('op.noRoster');
     row.appendChild(cell);
     refs.rosterBody.appendChild(row);

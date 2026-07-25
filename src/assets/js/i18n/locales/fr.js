@@ -23,6 +23,7 @@ export const fr = Object.freeze({
   "op.viewAll": "Tout",
   "op.filterPlaceholder": "Chercher joueur ou tag",
   "op.noLeagueData": "Aucune donnee CWL active ou disponible. Planning et membres clan restent visibles.",
+  "op.noActiveCwl": "Aucune CWL active n’a été trouvée pour ce clan. Rien n’a été chargé.",
   "op.liveLoaded": "Donnees CWL live chargees.",
   "op.noLiveWars": "Aucune guerre live",
   "op.noPlayedRounds": "Aucun round joue",
