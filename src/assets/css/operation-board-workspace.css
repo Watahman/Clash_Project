@@ -602,6 +602,10 @@
     border-bottom: 1px solid var(--border);
 }
 
+.op-roster-filter {
+    padding-left: 0.75rem;
+}
+
 .operation-workspace-page .op-table-wrap { max-height: none !important; overflow: auto; }
 .operation-workspace-page .op-table { width: 100%; min-width: 44rem; border-collapse: collapse; }
 .operation-workspace-page .op-table th,
