@@ -793,12 +793,9 @@
 
 #profile-overlay .po-add-icon {
     position: relative;
-    width: 1rem;
-    height: 1rem;
-    flex: 0 0 1rem;
-    border: 0.0625rem solid currentColor;
-    border-radius: 50%;
-    opacity: 0.9;
+    width: 0.85rem;
+    height: 0.85rem;
+    flex: 0 0 0.85rem;
 }
 
 #profile-overlay .po-add-icon::before,
@@ -807,9 +804,9 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 0.5rem;
+    width: 0.65rem;
     height: 0.075rem;
-    border-radius: 999px;
+    border-radius: 99px;
     background: currentColor;
     transform: translate(-50%, -50%);
 }
