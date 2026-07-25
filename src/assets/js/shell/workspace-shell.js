@@ -20,7 +20,7 @@ const SIDEBAR_COLLAPSED_KEY = 'clashtools_workspace_sidebar_collapsed';
 const pageConfig = {
     dashboard: { key: 'nav.dashboard', fallback: 'Dashboard' },
     planner: { key: 'nav.cwl', fallback: 'CWL Planner' },
-    drafts: { key: 'nav.savedPlans', fallback: 'Opgeslagen plannen' },
+    drafts: { key: 'nav.savedPlans', fallback: 'Saved plans' },
     operation: { key: 'nav.operation', fallback: 'Operation Board' },
     groups: { key: 'nav.groups', fallback: 'Clan Family' },
     bracket: { key: 'nav.bracket', fallback: 'Bracket generator' }
@@ -127,7 +127,7 @@ function shellMarkup(currentPage) {
                     <section class="workspace-notifications-panel hidden" id="workspace-notifications-panel" aria-labelledby="workspace-notifications-title" aria-live="polite">
                         <div class="workspace-notifications-heading">
                             <strong id="workspace-notifications-title" data-i18n="notifications.title">Notificaties</strong>
-                            <button class="workspace-notifications-close" id="workspace-notifications-close" type="button" data-i18n-aria-label="common.close" aria-label="Sluiten">&times;</button>
+                            <button class="workspace-notifications-close" id="workspace-notifications-close" type="button" data-i18n-aria-label="common.close" aria-label="Close">&times;</button>
                         </div>
                         <div class="workspace-notifications-list" id="workspace-notifications-list"></div>
                     </section>

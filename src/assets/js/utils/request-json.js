@@ -1,4 +1,5 @@
 import { withGlobalLoading } from './loading-state.js';
+import { t } from '../i18n/i18n.js';
 
 export class HttpError extends Error {
     constructor(message, { status = 0, code = '', details = null } = {}) {
@@ -16,8 +17,8 @@ async function parseResponse(response) {
     try {
         return JSON.parse(text);
     } catch {
-        if (response.ok) throw new HttpError('De server gaf een ongeldig antwoord.', { status: response.status });
-        return { error: 'De server gaf een ongeldig antwoord.' };
+        if (response.ok) throw new HttpError(t('errors.invalidServerResponse'), { status: response.status });
+        return { error: t('errors.invalidServerResponse') };
     }
 }
 
@@ -55,7 +56,7 @@ export async function requestJson(url, {
     signal,
     timeoutMs = 20_000,
     loading = 'background',
-    loadingMessage = 'Laden...'
+    loadingMessage = t('common.loading')
 } = {}) {
     const execute = async () => {
         const requestHeaders = {
@@ -76,12 +77,12 @@ export async function requestJson(url, {
             });
         } catch (error) {
             if (requestSignal.timedOut()) {
-                throw new HttpError('De server antwoordde niet op tijd. Probeer opnieuw.', {
+                throw new HttpError(t('errors.requestTimeout'), {
                     code: 'REQUEST_TIMEOUT'
                 });
             }
             if (error?.name === 'AbortError') throw error;
-            throw new HttpError('De server is niet bereikbaar. Controleer je verbinding en probeer opnieuw.', {
+            throw new HttpError(t('errors.network'), {
                 code: 'NETWORK_ERROR',
                 details: error
             });
@@ -92,7 +93,7 @@ export async function requestJson(url, {
         const data = await parseResponse(response);
         if (!response.ok) {
             throw new HttpError(
-                data?.error || data?.message || `Request mislukt (${response.status})`,
+                data?.error || data?.message || t('errors.requestFailed', { status: response.status }),
                 { status: response.status, code: data?.code || '', details: data }
             );
         }

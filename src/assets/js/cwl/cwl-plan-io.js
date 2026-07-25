@@ -297,7 +297,7 @@ export async function loadPlanById(planId) {
             : normalizePlan(await getPlanFromDatabase(planId, { signal: activeLoadController.signal }));
         if (token !== activeLoadToken || !data) return;
         const normalized = normalizePlan(data);
-        if (!normalized?.info) throw new Error('Ongeldig plan');
+        if (!normalized?.info) throw new Error('Invalid plan');
         planCache.set(normalized.id, normalized);
         if (normalized.revision != null) planRevisions.set(normalized.id, normalized.revision);
         renderPlanSnapshot(normalized, token);

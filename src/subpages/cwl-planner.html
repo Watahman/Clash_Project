@@ -36,14 +36,14 @@
     <nav class="center">
         <a href="./cwl-planner.html" aria-current="page" data-i18n="nav.cwl">CWL planner</a>
         <a href="./cwl-operation-board.html" data-i18n="nav.operation">Operation board</a>
-        <a href="./groups.html" data-i18n="nav.groups">Clan Families</a>
+        <a href="./groups.html" data-i18n="nav.groups">Clan Family</a>
     </nav>
 
     <div class="right">
-        <button type="button" data-language-control data-i18n="header.language">Taal</button>
+        <button type="button" data-language-control data-i18n="header.language">Language</button>
         <button id="profile-btn">
             <img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt="profile">
-            <span data-i18n="header.user">Gebruiker</span>
+            <span data-i18n="header.user">User</span>
         </button>
     </div>
 </header>
@@ -53,41 +53,41 @@
         <div>
             <p class="cwl-page-kicker" data-i18n="planner.kicker">CWL Planner</p>
             <div class="cwl-title-row">
-                <h1 id="cwl-page-title" data-i18n="cwl.unnamedPlan">Naamloos plan</h1>
-                <span class="cwl-plan-state" data-i18n="planner.draft">Concept</span>
+                <h1 id="cwl-page-title" data-i18n="cwl.unnamedPlan">Untitled plan</h1>
+                <span class="cwl-plan-state" data-i18n="planner.draft">Draft</span>
             </div>
-            <p data-i18n="planner.description">Deze planning kan meerdere clans bevatten. Rosterformaat en limiet worden per clan ingesteld.</p>
+            <p data-i18n="planner.description">This plan can contain multiple clans. Roster format and limit are set per clan.</p>
         </div>
         <div class="cwl-header-actions">
-            <button class="button button-secondary" id="cwl-new-plan-button" type="button" data-i18n="cwl.newPlan">Nieuw plan</button>
-            <button class="button button-primary" id="cwl-save-plan-button" type="button" data-i18n="cwl.save">Opslaan</button>
+            <button class="button button-secondary" id="cwl-new-plan-button" type="button" data-i18n="cwl.newPlan">New plan</button>
+            <button class="button button-primary" id="cwl-save-plan-button" type="button" data-i18n="cwl.save">Save</button>
         </div>
     </header>
 
-    <section class="cwl-context-toolbar" aria-label="Planinstellingen" data-i18n-aria-label="planner.settings">
-        <label><span data-i18n="planner.plan">Plan</span><select id="cwl-load-plan" data-i18n-aria-label="cwl.loadPlan" aria-label="Plan laden"></select></label>
-        <label class="cwl-plan-name-field"><span data-i18n="planner.name">Naam</span><input type="text" id="cwl-plan-name" data-i18n-placeholder="cwl.planPlaceholder" placeholder="Plan naam..." maxlength="40"></label>
-        <button class="button button-secondary" id="cwl-add-clan-button" type="button"><span aria-hidden="true">+</span><span data-i18n="cwl.addClan">Clan toevoegen</span></button>
+    <section class="cwl-context-toolbar" aria-label="Plan settings" data-i18n-aria-label="planner.settings">
+        <label><span data-i18n="planner.plan">Plan</span><select id="cwl-load-plan" data-i18n-aria-label="cwl.loadPlan" aria-label="Load plan"></select></label>
+        <label class="cwl-plan-name-field"><span data-i18n="planner.name">Name</span><input type="text" id="cwl-plan-name" data-i18n-placeholder="cwl.planPlaceholder" placeholder="Plan name..." maxlength="40"></label>
+        <button class="button button-secondary" id="cwl-add-clan-button" type="button"><span aria-hidden="true">+</span><span data-i18n="cwl.addClan">Add clan</span></button>
         <button class="button button-secondary" id="cwl-import-spreadsheet-button" type="button"><span data-i18n="cwl.sheetImport">Import spreadsheet</span></button>
         <span class="cwl-toolbar-spacer"></span>
-        <span class="cwl-save-status" id="cwl-save-status" role="status" aria-live="polite" data-state="idle" data-i18n="cwl.saved">Opgeslagen</span>
+        <span class="cwl-save-status" id="cwl-save-status" role="status" aria-live="polite" data-state="idle" data-i18n="cwl.saved">Saved</span>
     </section>
 
     <div class="cwl-planner-layout">
         <aside class="cwl-sidebar cwl-roster-panel" aria-labelledby="cwl-free-roster-title">
             <div class="cwl-panel-heading">
-                <div><p data-i18n="planner.source">Planbron</p><h2 id="cwl-free-roster-title" data-i18n="cwl.playersSub">Vrij roster</h2></div>
+                <div><p data-i18n="planner.source">Plan source</p><h2 id="cwl-free-roster-title" data-i18n="cwl.playersSub">Free roster</h2></div>
                 <span id="cwl-total-player-amount">0</span>
             </div>
             <div class="cwl-roster-tools">
-                <label class="cwl-roster-search"><span data-i18n="planner.searchRoster">Vrij roster doorzoeken</span><input id="cwl-roster-search" type="search" autocomplete="off" aria-controls="cwl-available-players" data-i18n-placeholder="planner.searchRosterPlaceholder" placeholder="Zoek op naam of tag"></label>
+                <label class="cwl-roster-search"><span data-i18n="planner.searchRoster">Search free roster</span><input id="cwl-roster-search" type="search" autocomplete="off" aria-controls="cwl-available-players" data-i18n-placeholder="planner.searchRosterPlaceholder" placeholder="Search by name or tag"></label>
                 <div class="cwl-roster-select-row">
-                    <label><span data-i18n="cwl.sortPlayers">Spelers sorteren</span><select id="cwl-player-sorting" data-i18n-aria-label="cwl.sortPlayers" aria-label="Spelers sorteren"><option value="townhall" data-i18n="cwl.sortTownhall">Town Hall</option><option value="name" data-i18n="cwl.sortName">Naam</option></select></label>
-                    <label><span data-i18n="cwl.pollResults">Pollresultaat</span><select id="cwl-roster-poll-select" data-i18n-aria-label="cwl.pollResults" aria-label="Pollresultaat" disabled><option value="" data-i18n="cwl.pollSelectLoading">Polls laden...</option></select></label>
+                    <label><span data-i18n="cwl.sortPlayers">Sort players</span><select id="cwl-player-sorting" data-i18n-aria-label="cwl.sortPlayers" aria-label="Sort players"><option value="townhall" data-i18n="cwl.sortTownhall">Town Hall</option><option value="name" data-i18n="cwl.sortName">Name</option></select></label>
+                    <label><span data-i18n="cwl.pollResults">Poll result</span><select id="cwl-roster-poll-select" data-i18n-aria-label="cwl.pollResults" aria-label="Poll result" disabled><option value="" data-i18n="cwl.pollSelectLoading">Loading polls...</option></select></label>
                 </div>
                 <p class="cwl-roster-filter-status" id="cwl-roster-filter-status" role="status" aria-live="polite"></p>
             </div>
-            <button class="cwl-add-player-button" id="cwl-add-players-button" type="button"><span aria-hidden="true">+</span><span data-i18n="cwl.addPlayers">Spelers toevoegen</span></button>
+            <button class="cwl-add-player-button" id="cwl-add-players-button" type="button"><span aria-hidden="true">+</span><span data-i18n="cwl.addPlayers">Add players</span></button>
             <div id="cwl-available-players" aria-live="polite"></div>
         </aside>
 
@@ -104,48 +104,48 @@
     <div class="overlay-container" id="cwl-container-add-players">
 
         <div class="modal-header-row">
-            <span class="modal-title" data-i18n="cwl.addPlayers">Spelers toevoegen</span>
+            <span class="modal-title" data-i18n="cwl.addPlayers">Add players</span>
         </div>
 
         <div class="modal-tabs">
-            <button class="modal-tab-btn active" data-tab="tag" data-i18n="cwl.addByTag">Via tag</button>
-            <button class="modal-tab-btn" data-tab="accounts" data-i18n="cwl.myAccounts">Mijn accounts</button>
-            <button class="modal-tab-btn" data-tab="group" data-i18n="cwl.fromGroup">Uit Clan Family</button>
+            <button class="modal-tab-btn active" data-tab="tag" data-i18n="cwl.addByTag">By tag</button>
+            <button class="modal-tab-btn" data-tab="accounts" data-i18n="cwl.myAccounts">My accounts</button>
+            <button class="modal-tab-btn" data-tab="group" data-i18n="cwl.fromGroup">From Clan Family</button>
         </div>
 
         <!-- Tab 1: by tag -->
         <div class="modal-tab-panel" id="modal-tab-tag">
-            <p class="modal-field-label" data-i18n="cwl.tagLabel">Speler- of clantag</p>
+            <p class="modal-field-label" data-i18n="cwl.tagLabel">Player or clan tag</p>
             <input id="cwl-input-tag" type="text" placeholder="#TAG...">
-            <button id="cwl-overlay-confirm-tag-button" class="primary" data-i18n="cwl.confirm">Bevestigen</button>
+            <button id="cwl-overlay-confirm-tag-button" class="primary" data-i18n="cwl.confirm">Confirm</button>
         </div>
 
         <!-- Tab 2: my accounts -->
         <div class="modal-tab-panel hidden" id="modal-tab-accounts">
             <div class="modal-segment">
-                <button class="modal-seg-btn active" data-seg="mine" data-i18n="cwl.mine">Eigen</button>
-                <button class="modal-seg-btn" data-seg="friends" data-i18n="cwl.friends">Vrienden</button>
+                <button class="modal-seg-btn active" data-seg="mine" data-i18n="cwl.mine">Mine</button>
+                <button class="modal-seg-btn" data-seg="friends" data-i18n="cwl.friends">Friends</button>
             </div>
             <div class="modal-account-list" id="cwl-account-list">
-                <p id="modal-account-list-empty" data-i18n="cwl.noAccounts">Geen accounts gekoppeld</p>
+                <p id="modal-account-list-empty" data-i18n="cwl.noAccounts">No accounts connected</p>
             </div>
-            <button id="cwl-overlay-add-selected-button" class="modal-btn-add-selected" data-i18n="cwl.addSelected">Geselecteerde toevoegen (0)</button>
+            <button id="cwl-overlay-add-selected-button" class="modal-btn-add-selected" data-i18n="cwl.addSelected">Add selected (0)</button>
         </div>
 
         <!-- Tab 3: from group -->
         <div class="modal-tab-panel hidden" id="modal-tab-group">
             <p class="modal-field-label" data-i18n="cwl.group">Clan Family</p>
             <select id="cwl-select-group">
-                <option value="" data-i18n="cwl.selectGroup">— selecteer een Clan Family —</option>
+                <option value="" data-i18n="cwl.selectGroup">— select a Clan Family —</option>
             </select>
-            <p class="modal-field-label" data-i18n="cwl.pollResults">Pollresultaat</p>
+            <p class="modal-field-label" data-i18n="cwl.pollResults">Poll result</p>
             <select id="cwl-select-group-poll">
-                <option value="" data-i18n="cwl.noPollSelected">Geen poll geselecteerd</option>
+                <option value="" data-i18n="cwl.noPollSelected">No poll selected</option>
             </select>
             <div id="cwl-group-linked-clans" class="modal-linked-clans hidden"></div>
-            <div id="cwl-group-preview" class="modal-empty-state"><span data-i18n="cwl.previewGroup">Selecteer een Clan Family om leden te bekijken</span></div>
+            <div id="cwl-group-preview" class="modal-empty-state"><span data-i18n="cwl.previewGroup">Select a Clan Family to preview members</span></div>
             <div class="modal-group-preview-list hidden" id="cwl-group-preview-list"></div>
-            <button id="cwl-overlay-load-group-button" class="primary" data-i18n="cwl.loadGroup">Alles uit Clan Family laden</button>
+            <button id="cwl-overlay-load-group-button" class="primary" data-i18n="cwl.loadGroup">Load all from Clan Family</button>
         </div>
 
     </div>
@@ -156,7 +156,7 @@
         <div class="modal-header-row">
             <span class="modal-title" data-i18n="cwl.sheetImportTitle">Import spreadsheet</span>
         </div>
-        <p class="cwl-sheet-import-intro" data-i18n="cwl.sheetImportIntro">Upload an Excel or CSV file. ClashPanel scans all sheets for unique player and clan tags, validates them, and lets you review the result before importing.</p>
+        <p class="cwl-sheet-import-intro" data-i18n="cwl.sheetImportIntro">Upload an Excel or CSV file. ClashPanel scans every sheet for unique player and clan tags, validates them, and lets you review the result before importing.</p>
 
         <input id="cwl-spreadsheet-file-input" type="file" accept=".xlsx,.xls,.xlsm,.xlsb,.csv,.ods" hidden>
         <div class="cwl-sheet-dropzone" id="cwl-spreadsheet-dropzone" role="button" tabindex="0">
@@ -175,7 +175,7 @@
             <label class="cwl-sheet-scope-control" for="cwl-spreadsheet-import-scope">
                 <span data-i18n="cwl.sheetImportWhat">Import</span>
                 <select id="cwl-spreadsheet-import-scope">
-                    <option value="both" data-i18n="cwl.sheetImportBoth">Players & clans</option>
+                    <option value="both" data-i18n="cwl.sheetImportBoth">Players &amp; clans</option>
                     <option value="player" data-i18n="cwl.sheetImportPlayersOnly">Players only</option>
                     <option value="clan" data-i18n="cwl.sheetImportClansOnly">Clans only</option>
                 </select>
@@ -197,7 +197,7 @@
             <option value="15">15v15</option>
             <option value="30">30v30</option>
         </select>
-        <button id="cwl-overlay-add-clan-button" data-i18n="cwl.confirm">Bevestigen</button>
+        <button id="cwl-overlay-add-clan-button" data-i18n="cwl.confirm">Confirm</button>
     </div>
 </div>
 
@@ -219,7 +219,7 @@
         <div class="cwl-clan-info-card">
             <img src="../assets/css/pictures/default-clan-banner.png" alt="" class="cwl-clan-logo">
             <div class="cwl-clan-title"><h3 class="cwl-clan-name">Clan name</h3><p><span class="cwl-clan-tag"></span><span class="cwl-clan-league"></span></p></div>
-            <label class="cwl-clan-format"><span data-i18n="planner.format">Formaat</span><select class="cwl-clan-capacity" aria-label="Rosterformaat"><option value="15">15v15</option><option value="30">30v30</option></select></label>
+            <label class="cwl-clan-format"><span data-i18n="planner.format">Format</span><select class="cwl-clan-capacity" aria-label="Rosterformaat"><option value="15">15v15</option><option value="30">30v30</option></select></label>
             <p class="cwl-amount-of-players-in-clan">0/30</p>
             <button class="cwl-delete-clan" type="button"><img src="../assets/css/pictures/bin.svg" alt=""></button>
         </div>

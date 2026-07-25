@@ -20,7 +20,7 @@ export function initCopyFeedback({ trigger, copyIcon, checkIcon, getText, onCopi
             );
         } catch (error) {
             showCopyIcon(copyIcon, checkIcon, trigger);
-            console.error('Kopiëren naar het klembord is mislukt.', error);
+            console.error('Copying to the clipboard failed.', error);
         }
     });
 }

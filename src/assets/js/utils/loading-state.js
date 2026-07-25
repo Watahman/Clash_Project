@@ -1,3 +1,5 @@
+import { t } from '../i18n/i18n.js';
+
 let loadingCounter = 0;
 let overlay;
 let messageNode;
@@ -25,7 +27,7 @@ function ensureOverlay() {
     overlay.innerHTML = `
         <div class="global-loading-card">
             <div class="global-loading-spinner" aria-hidden="true"></div>
-            <p id="global-loading-message">Laden...</p>
+            <p id="global-loading-message">${t('common.loading')}</p>
         </div>`;
     messageNode = overlay.querySelector('#global-loading-message');
     document.body.appendChild(overlay);
@@ -43,10 +45,10 @@ function setInteractionLock(active) {
     document.body.setAttribute('aria-busy', active ? 'true' : 'false');
 }
 
-export function startGlobalLoading(message = 'Laden...') {
+export function startGlobalLoading(message = t('common.loading')) {
     loadingCounter += 1;
     const currentOverlay = ensureOverlay();
-    messageNode.textContent = message || 'Laden...';
+    messageNode.textContent = message || t('common.loading');
     if (showTimer || !currentOverlay.classList.contains('hidden')) return;
     showTimer = window.setTimeout(() => {
         showTimer = null;
@@ -68,7 +70,7 @@ export function stopGlobalLoading() {
     setInteractionLock(false);
 }
 
-export async function withGlobalLoading(asyncFn, message = 'Laden...') {
+export async function withGlobalLoading(asyncFn, message = t('common.loading')) {
     startGlobalLoading(message);
     try {
         return await asyncFn();

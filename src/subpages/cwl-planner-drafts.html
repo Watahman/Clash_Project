@@ -24,30 +24,30 @@
 <body class="workspace-app" data-workspace-page="drafts">
 <header>
     <div class="left"><a href="../index.html"><img src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="Tools for Clash logo"></a></div>
-    <nav class="center"><a href="./cwl-planner.html" aria-current="page" data-i18n="nav.cwl">CWL planner</a><a href="./cwl-operation-board.html" data-i18n="nav.operation">Operation board</a><a href="./groups.html" data-i18n="nav.groups">Clan Families</a></nav>
-    <div class="right"><button type="button" data-language-control data-i18n="header.language">Taal</button><button type="button">Instellingen</button><button id="profile-btn" type="button"><img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt=""><span data-i18n="header.user">Gebruiker</span></button></div>
+    <nav class="center"><a href="./cwl-planner.html" aria-current="page" data-i18n="nav.cwl">CWL planner</a><a href="./cwl-operation-board.html" data-i18n="nav.operation">Operation board</a><a href="./groups.html" data-i18n="nav.groups">Clan Family</a></nav>
+    <div class="right"><button type="button" data-language-control data-i18n="header.language">Language</button><button type="button" data-i18n="profile.settings">Settings</button><button id="profile-btn" type="button"><img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt=""><span data-i18n="header.user">User</span></button></div>
 </header>
 <main class="drafts-main" id="main-content">
     <section class="drafts-shell">
         <div class="drafts-header workspace-page-header-row">
             <div>
                 <div class="hero-eyebrow" data-i18n="drafts.eyebrow">CWL drafts</div>
-                <h1 data-i18n="drafts.title">Opgeslagen oorlogsplannen</h1>
-                <p data-i18n="drafts.subtitle">Open, hernoem, kopieer of verwijder je CWL-plannen.</p>
+                <h1 data-i18n="drafts.title">Saved war plans</h1>
+                <p data-i18n="drafts.subtitle">Open, rename, copy or delete your CWL plans.</p>
             </div>
-            <a class="button button-primary" href="./cwl-planner.html" data-i18n="drafts.new">Nieuw plan</a>
+            <a class="button button-primary" href="./cwl-planner.html" data-i18n="drafts.new">New plan</a>
         </div>
-        <p id="drafts-status" class="drafts-status" role="status" aria-live="polite" data-i18n="drafts.loading">Plannen laden...</p>
+        <p id="drafts-status" class="drafts-status" role="status" aria-live="polite" data-i18n="drafts.loading">Loading plans...</p>
         <section class="workspace-section-block drafts-table-block" aria-labelledby="drafts-table-title">
-            <h2 id="drafts-table-title" class="sr-only" data-i18n="drafts.title">Opgeslagen oorlogsplannen</h2>
-            <div class="drafts-controls" role="search" data-i18n-aria-label="drafts.controlsLabel" aria-label="Opgeslagen plannen zoeken en sorteren">
-                <label class="drafts-search-field"><span data-i18n="drafts.searchLabel">Plannen zoeken</span><input id="drafts-search" type="search" autocomplete="off" aria-controls="draft-cwl-container" data-i18n-placeholder="drafts.searchPlaceholder" placeholder="Zoek op plannaam"></label>
-                <label class="drafts-sort-field"><span data-i18n="drafts.sortLabel">Sorteren</span><select id="drafts-sort" aria-controls="draft-cwl-container"><option value="updated-desc" data-i18n="drafts.sortUpdatedDesc">Recent bijgewerkt</option><option value="updated-asc" data-i18n="drafts.sortUpdatedAsc">Oudst bijgewerkt</option><option value="name-asc" data-i18n="drafts.sortNameAsc">Naam A–Z</option><option value="name-desc" data-i18n="drafts.sortNameDesc">Naam Z–A</option></select></label>
+            <h2 id="drafts-table-title" class="sr-only" data-i18n="drafts.title">Saved war plans</h2>
+            <div class="drafts-controls" role="search" data-i18n-aria-label="drafts.controlsLabel" aria-label="Search and sort saved plans">
+                <label class="drafts-search-field"><span data-i18n="drafts.searchLabel">Search plans</span><input id="drafts-search" type="search" autocomplete="off" aria-controls="draft-cwl-container" data-i18n-placeholder="drafts.searchPlaceholder" placeholder="Search by plan name"></label>
+                <label class="drafts-sort-field"><span data-i18n="drafts.sortLabel">Sort</span><select id="drafts-sort" aria-controls="draft-cwl-container"><option value="updated-desc" data-i18n="drafts.sortUpdatedDesc">Recently updated</option><option value="updated-asc" data-i18n="drafts.sortUpdatedAsc">Least recently updated</option><option value="name-asc" data-i18n="drafts.sortNameAsc">Name A–Z</option><option value="name-desc" data-i18n="drafts.sortNameDesc">Name Z–A</option></select></label>
                 <p id="drafts-filter-status" class="drafts-filter-status" role="status" aria-live="polite" hidden></p>
             </div>
             <div class="workspace-table-wrap">
                 <table class="workspace-data-table drafts-table">
-                    <thead><tr><th data-i18n="plans.name">Naam</th><th data-i18n="plans.clans">Clans</th><th data-i18n="plans.freeRoster">Vrij roster</th><th data-i18n="plans.updated">Bijgewerkt</th><th><span class="sr-only" data-i18n="plans.actions">Acties</span></th></tr></thead>
+                    <thead><tr><th data-i18n="plans.name">Plan</th><th data-i18n="plans.clans">Clans</th><th data-i18n="plans.freeRoster">Free roster</th><th data-i18n="plans.updated">Updated</th><th><span class="sr-only" data-i18n="plans.actions">Actions</span></th></tr></thead>
                     <tbody id="draft-cwl-container" aria-live="polite"></tbody>
                 </table>
             </div>

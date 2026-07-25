@@ -1,6 +1,7 @@
 import { _BASE_URL } from '../Data/config.js';
 import { requestJson, HttpError } from '../utils/request-json.js';
 import { clearCachePrefix } from '../cache/local-cache.js';
+import { t } from '../i18n/i18n.js';
 
 const LEGACY_USER_ID_KEY = 'id';
 const listeners = new Set();
@@ -56,7 +57,7 @@ export async function signInWithPassword(email, password) {
             password
         },
         loading: 'blocking',
-        loadingMessage: 'Inloggen...'
+        loadingMessage: t('auth.signingIn')
     });
 
     await notify(data.session || null);
@@ -71,7 +72,7 @@ export async function signUpWithPassword(name, email, password) {
             password
         },
         loading: 'blocking',
-        loadingMessage: 'Account maken...'
+        loadingMessage: t('auth.creatingAccount')
     });
 
     await notify(data.session || null);
@@ -96,7 +97,7 @@ export async function changeAuthenticatedPassword(
             newPassword
         },
         loading: 'blocking',
-        loadingMessage: 'Wachtwoord wijzigen...'
+        loadingMessage: t('settings.changingPassword')
     });
 }
 
@@ -122,10 +123,10 @@ export async function getGoogleSignInUrl(next = '/subpages/dashboard.html') {
     const data = await requestJson(authEndpoint('/AuthGoogle'), {
         body: { next },
         loading: 'blocking',
-        loadingMessage: 'Doorsturen naar Google...'
+        loadingMessage: t('auth.redirecting')
     });
     if (!data?.url) {
-        throw new HttpError('Google-login gaf geen geldige doorstuur-URL.', {
+        throw new HttpError(t('auth.googleInvalidRedirect'), {
             code: 'INVALID_GOOGLE_AUTH_RESPONSE'
         });
     }

@@ -7,7 +7,7 @@
     <meta name="description" content="Sign in to ClashPanel to access your CWL plans, Clan Families and operation boards.">
     <link rel="stylesheet" href="../assets/css/workspace-loading.css">
     <script src="../assets/js/shell/workspace-bootstrap.js"></script>
-    <title>Inloggen · ClashPanel</title>
+    <title>Log in · ClashPanel</title>
     <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
     <script src="../assets/js/Data/runtime-config.js"></script>
@@ -17,32 +17,32 @@
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
 </head>
 <body class="auth-page">
-<a class="skip-link" href="#auth-form" data-i18n="a11y.skipForm">Ga naar formulier</a>
+<a class="skip-link" href="#auth-form" data-i18n="a11y.skipForm">Skip to form</a>
 <header class="auth-header">
     <a class="public-brand" href="../index.html"><img src="../assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a>
     <div class="auth-header-actions">
-        <button type="button" data-language-control data-i18n="header.language">Taal</button>
-        <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Thema wisselen"><span aria-hidden="true">◐</span></button>
-        <a class="link-button" href="../index.html" data-i18n="auth.backHome">← Terug naar home</a>
+        <button type="button" data-language-control data-i18n="header.language">Language</button>
+        <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme"><span aria-hidden="true">◐</span></button>
+        <a class="link-button" href="../index.html" data-i18n="auth.backHome">← Back to home</a>
     </div>
 </header>
 <main class="auth-layout">
     <section class="auth-context" aria-labelledby="auth-context-title">
-        <p class="eyebrow" data-i18n="auth.welcomeBack">Welkom terug</p>
-        <h1 id="auth-context-title" data-i18n="auth.plansReady">Je plannen staan klaar.</h1>
-        <p data-i18n="auth.loginContext">Log in om verder te werken in Planner, Operation Board en Clan Families.</p>
-        <div class="auth-proof"><span aria-hidden="true">✓</span><p><strong data-i18n="auth.noNewWorkflow">Geen nieuwe workflow leren</strong><small data-i18n="auth.dashboardDirect">Je komt rechtstreeks op je persoonlijke dashboard.</small></p></div>
-        <div class="auth-proof"><span aria-hidden="true">✓</span><p><strong data-i18n="auth.saveVisible">Opslagstatus blijft zichtbaar</strong><small data-i18n="auth.saveVisibleDesc">Je weet altijd welk plan geladen en opgeslagen is.</small></p></div>
+        <p class="eyebrow" data-i18n="auth.welcomeBack">Welcome back</p>
+        <h1 id="auth-context-title" data-i18n="auth.plansReady">Your plans are ready.</h1>
+        <p data-i18n="auth.loginContext">Log in to continue in Planner, Operation Board and Clan Families.</p>
+        <div class="auth-proof"><span aria-hidden="true">✓</span><p><strong data-i18n="auth.noNewWorkflow">No new workflow to learn</strong><small data-i18n="auth.dashboardDirect">Go straight to your personal dashboard.</small></p></div>
+        <div class="auth-proof"><span aria-hidden="true">✓</span><p><strong data-i18n="auth.saveVisible">Save status stays visible</strong><small data-i18n="auth.saveVisibleDesc">Always know which plan is loaded and saved.</small></p></div>
     </section>
     <section class="auth-form-wrap">
         <form class="auth-form" id="auth-form">
-            <header><p class="eyebrow" data-i18n="auth.account">Account</p><h2 data-i18n="auth.login">Inloggen</h2><p><span data-i18n="auth.loginSubtitle">Nog geen account?</span> <a href="register.html" data-i18n="auth.registerLink">Registreer gratis</a></p></header>
-            <label><span><span data-i18n="auth.email">E-mailadres</span></span><input type="email" id="email" data-i18n-placeholder="auth.emailPlaceholder" placeholder="jij@voorbeeld.com" autocomplete="email" required></label>
-            <label><span><span data-i18n="auth.password">Wachtwoord</span><button id="forgot-password" type="button" data-i18n="auth.forgot">Vergeten?</button></span><input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required></label>
-            <button id="submit-button" class="button button-primary button-full" type="submit" data-i18n="auth.login">Inloggen</button>
+            <header><p class="eyebrow" data-i18n="auth.account">Account</p><h2 data-i18n="auth.login">Log in</h2><p><span data-i18n="auth.loginSubtitle">No account yet?</span> <a href="register.html" data-i18n="auth.registerLink">Register</a></p></header>
+            <label><span><span data-i18n="auth.email">Email address</span></span><input type="email" id="email" data-i18n-placeholder="auth.emailPlaceholder" placeholder="you@example.com" autocomplete="email" required></label>
+            <label><span><span data-i18n="auth.password">Password</span><button id="forgot-password" type="button" data-i18n="auth.forgot">Forgot?</button></span><input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required></label>
+            <button id="submit-button" class="button button-primary button-full" type="submit" data-i18n="auth.login">Log in</button>
             <p id="auth-status" class="auth-status" role="status" aria-live="polite"></p>
-            <div class="auth-divider"><span data-i18n="auth.or">of</span></div>
-            <button id="google-login" class="button button-google button-full" type="button"><b aria-hidden="true">G</b><span data-i18n="auth.google">Verder met Google</span></button>
+            <div class="auth-divider"><span data-i18n="auth.or">or</span></div>
+            <button id="google-login" class="button button-google button-full" type="button"><b aria-hidden="true">G</b><span data-i18n="auth.google">Continue with Google</span></button>
         </form>
     </section>
 </main>

@@ -106,18 +106,18 @@ function propagateAutomaticWinners(bracket) {
 export function importBracket(value) {
     const parsed = typeof value === 'string' ? JSON.parse(value) : value;
     if (!parsed || parsed.schemaVersion !== BRACKET_SCHEMA_VERSION || !Array.isArray(parsed.rounds)) {
-        throw new Error('Ongeldig of niet-ondersteund bracketbestand.');
+        throw new Error('Invalid or unsupported bracket file.');
     }
     if (!Array.isArray(parsed.participants)
             || parsed.participants.length < 2
             || parsed.participants.length > BRACKET_MAX_PARTICIPANTS) {
-        throw new Error('Ongeldig aantal deelnemers.');
+        throw new Error('Invalid number of participants.');
     }
     parsed.rounds.forEach(round => {
-        if (!Array.isArray(round)) throw new Error('Ongeldige bracketstructuur.');
+        if (!Array.isArray(round)) throw new Error('Invalid bracket structure.');
         round.forEach(match => {
             if (!match?.id || !Array.isArray(match.players) || match.players.length !== 2) {
-                throw new Error('Ongeldige matchstructuur.');
+                throw new Error('Invalid match structure.');
             }
         });
     });

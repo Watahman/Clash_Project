@@ -26,15 +26,15 @@
 <body class="workspace-app" data-workspace-page="operation">
 <header>
     <div class="left"><a href="../index.html"><img src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="Tools for Clash logo"></a></div>
-    <nav class="center"><a href="./cwl-planner.html" data-i18n="nav.cwl">CWL planner</a><a href="./cwl-operation-board.html" aria-current="page" data-i18n="nav.operation">Operation board</a><a href="./groups.html" data-i18n="nav.groups">Clan Families</a></nav>
-    <div class="right"><button type="button" data-language-control data-i18n="header.language">Taal</button><button id="profile-btn"><img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt=""><span data-i18n="header.user">Gebruiker</span></button></div>
+    <nav class="center"><a href="./cwl-planner.html" data-i18n="nav.cwl">CWL planner</a><a href="./cwl-operation-board.html" aria-current="page" data-i18n="nav.operation">Operation board</a><a href="./groups.html" data-i18n="nav.groups">Clan Family</a></nav>
+    <div class="right"><button type="button" data-language-control data-i18n="header.language">Language</button><button id="profile-btn"><img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt=""><span data-i18n="header.user">User</span></button></div>
 </header>
 <main class="operation-main operation-live-main operation-workspace-page" id="main-content">
     <header class="op-page-header">
         <div>
             <p class="op-page-kicker" data-i18n="op.kicker">Live CWL tracker</p>
             <div class="op-title-row"><h1 data-i18n="op.title">CWL Operation Board</h1><span id="op-cwl-phase" class="op-phase-badge" data-state="unknown">-</span></div>
-            <p data-i18n="op.subtitle">Kies een opgeslagen CWL-planning, selecteer een clan en volg automatisch aanvallen, score en gemiste attacks op via de Clash API.</p>
+            <p data-i18n="op.subtitle">Track 7 war days, attacks, stars, destruction, rotation and bonus medals.</p>
         </div>
         <div class="operation-actions">
             <button id="op-import-json" class="button button-secondary" type="button" data-i18n="op.import">Import JSON</button>
@@ -44,33 +44,33 @@
         </div>
     </header>
 
-    <section class="op-context-toolbar" aria-label="Operation Board setup" data-i18n-aria-label="op.setup">
+    <section class="op-context-toolbar" aria-label="Setup" data-i18n-aria-label="op.setup">
         <label><span data-i18n="op.selectPlan">Planning</span><select id="op-plan-select"></select></label>
         <label><span data-i18n="op.selectClan">Clan</span><select id="op-clan-select" disabled></select></label>
-        <label class="op-standalone-control"><span data-i18n="op.standaloneClan">Losse clan</span><span class="op-inline-control"><input id="op-standalone-clan-tag" type="text" data-i18n-placeholder="op.standalonePlaceholder" placeholder="Clantag: #ABC123"><button id="op-standalone-load" type="button" class="button button-secondary" data-i18n="op.loadClan">Laad clan</button></span></label>
+        <label class="op-standalone-control"><span data-i18n="op.standaloneClan">Single clan</span><span class="op-inline-control"><input id="op-standalone-clan-tag" type="text" data-i18n-placeholder="op.standalonePlaceholder" placeholder="Clan tag: #ABC123"><button id="op-standalone-load" type="button" class="button button-secondary" data-i18n="op.loadClan">Load clan</button></span></label>
         <span class="op-toolbar-spacer"></span>
-        <span id="op-live-state" class="op-sync-state" role="status" aria-live="polite" data-state="idle" data-i18n="op.syncIdle">Nog niet gesynchroniseerd</span>
+        <span id="op-live-state" class="op-sync-state" role="status" aria-live="polite" data-state="idle" data-i18n="op.syncIdle">Not synchronized yet</span>
     </section>
-    <p class="operation-help" id="op-help" data-i18n="op.help">Selecteer eerst een planning en daarna een clan. De board haalt live data op zodra dat kan.</p>
+    <p class="operation-help" id="op-help" data-i18n="op.help">Select a planning first, then a clan. The board loads live data when possible.</p>
 
-    <section class="op-metrics-bar" aria-label="CWL statistieken" data-i18n-aria-label="op.scoreboard">
-        <div><span data-i18n="op.totalStars">Totaal sterren</span><strong id="op-total-stars">0</strong></div>
-        <div><span data-i18n="op.avgDestruction">Gem. destruction</span><strong id="op-avg-destruction">0%</strong></div>
-        <div><span data-i18n="op.attacksUsed">Attacks gebruikt</span><strong id="op-attacks-used">0/0</strong></div>
-        <div><span data-i18n="op.missed">Gemiste attacks</span><strong id="op-missed-attacks">0</strong></div>
-        <div><span data-i18n="op.currentPosition">Huidige positie</span><strong id="op-current-position">-</strong></div>
-        <div class="op-th-metric"><span data-i18n="op.thSpread">Town Hall verdeling</span><div id="op-th-list"></div></div>
+    <section class="op-metrics-bar" aria-label="Scoreboard" data-i18n-aria-label="op.scoreboard">
+        <div><span data-i18n="op.totalStars">Total stars</span><strong id="op-total-stars">0</strong></div>
+        <div><span data-i18n="op.avgDestruction">Avg. destruction</span><strong id="op-avg-destruction">0%</strong></div>
+        <div><span data-i18n="op.attacksUsed">Attacks used</span><strong id="op-attacks-used">0/0</strong></div>
+        <div><span data-i18n="op.missed">Missed attacks</span><strong id="op-missed-attacks">0</strong></div>
+        <div><span data-i18n="op.currentPosition">Current position</span><strong id="op-current-position">-</strong></div>
+        <div class="op-th-metric"><span data-i18n="op.thSpread">Town Hall spread</span><div id="op-th-list"></div></div>
     </section>
 
     <div class="op-history-grid">
         <section class="op-flat-section op-stars-chart-panel" aria-labelledby="op-stars-chart-title">
-            <div class="op-section-heading"><div><p data-i18n="op.warDayHistory">War day historie</p><h2 id="op-stars-chart-title" data-i18n="op.starsPerDay">Sterren per war day</h2></div><span id="op-stars-chart-state" role="status" aria-live="polite">0/7 dagen</span></div>
-            <p class="op-stars-chart-note" data-i18n="op.starsChartHelp">Live en afgeronde dagen gebruiken echte CWL-data. Toekomstige dagen blijven leeg.</p>
+            <div class="op-section-heading"><div><p data-i18n="op.warDayHistory">CWL progress</p><h2 id="op-stars-chart-title" data-i18n="op.starsPerDay">Stars per war day</h2></div><span id="op-stars-chart-state" role="status" aria-live="polite">0/7 days</span></div>
+            <p class="op-stars-chart-note" data-i18n="op.starsChartHelp">Live and completed days use real CWL data. The dotted line compares Town Hall, army progress, recent form and opponent strength.</p>
             <div class="op-stars-chart" id="op-stars-chart" role="group"></div>
         </section>
         <section class="op-flat-section op-position-chart-panel" aria-labelledby="op-position-chart-title">
-            <div class="op-section-heading"><div><p data-i18n="op.warDayHistory">CWL-verloop</p><h2 id="op-position-chart-title" data-i18n="op.positionPerDay">Positie per war day</h2></div><span id="op-position-chart-state" role="status" aria-live="polite">0/7 dagen</span></div>
-            <p class="op-stars-chart-note" data-i18n="op.positionChartHelp">Alleen volledig geladen en afgeronde league-dagen krijgen een positie. Positie 1 staat bovenaan.</p>
+            <div class="op-section-heading"><div><p data-i18n="op.warDayHistory">CWL progress</p><h2 id="op-position-chart-title" data-i18n="op.positionPerDay">Position per war day</h2></div><span id="op-position-chart-state" role="status" aria-live="polite">0/7 days</span></div>
+            <p class="op-stars-chart-note" data-i18n="op.positionChartHelp">Completed league days receive a position. The dotted line predicts future positions from recent performance.</p>
             <div class="op-stars-chart op-ranking-chart" id="op-position-chart" role="group"></div>
         </section>
     </div>
@@ -78,20 +78,20 @@
     <div class="op-operation-layout">
         <section class="op-operation-ledger">
             <section class="op-flat-section op-rounds-panel" aria-labelledby="op-rounds-title">
-                <div class="op-section-heading"><div><p data-i18n="op.rounds">War days</p><h2 id="op-rounds-title" data-i18n="op.dayOverview">Dagoverzicht</h2></div><span><span id="op-round-state">-</span> · <span id="op-round-count">7 rounds</span></span></div>
+                <div class="op-section-heading"><div><p data-i18n="op.rounds">War days</p><h2 id="op-rounds-title" data-i18n="op.dayOverview">Day overview</h2></div><span><span id="op-round-state">-</span> · <span id="op-round-count">7 rounds</span></span></div>
                 <div class="op-rounds-list" id="op-rounds-list"></div>
             </section>
 
             <section class="op-flat-section op-roster-panel" aria-labelledby="op-roster-title">
-                <div class="op-section-heading op-roster-heading"><div><p data-i18n="op.roster">Roster</p><h2 id="op-roster-title" data-i18n="op.players">Spelers</h2></div><div class="op-roster-summary"><span id="op-roster-count">0 spelers</span></div></div>
-                <div class="op-roster-filter-row"><input id="op-roster-filter" type="search" data-i18n-placeholder="op.filterPlaceholder" placeholder="Zoek speler of tag"><select id="op-roster-view"><option value="all" data-i18n="op.viewAll">Alles</option><option value="planned" data-i18n="op.viewPlanned">Gepland</option><option value="unplanned" data-i18n="op.viewUnplanned">Niet gepland</option><option value="missed" data-i18n="op.viewMissed">Gemiste attacks</option></select></div>
+                <div class="op-section-heading op-roster-heading"><div><p data-i18n="op.roster">Roster</p><h2 id="op-roster-title" data-i18n="op.players">players</h2></div><div class="op-roster-summary"><span id="op-roster-count">0 players</span></div></div>
+                <div class="op-roster-filter-row"><input id="op-roster-filter" type="search" data-i18n-placeholder="op.filterPlaceholder" placeholder="Search player or tag"><select id="op-roster-view"><option value="all" data-i18n="op.viewAll">All</option><option value="planned" data-i18n="op.viewPlanned">Planned</option><option value="unplanned" data-i18n="op.viewUnplanned">Not planned</option><option value="missed" data-i18n="op.viewMissed">Missed attacks</option></select></div>
                 <div class="op-table-wrap"><table class="op-table op-live-table"><thead><tr><th data-i18n="op.player">Player</th><th>TH</th><th data-i18n="op.planning">Planning</th><th>War</th><th data-i18n="op.attacks">Attacks</th><th data-i18n="op.stars">Stars</th><th>Destruction</th></tr></thead><tbody id="op-roster-body"></tbody></table></div>
             </section>
         </section>
 
         <aside class="op-operation-side">
-            <section class="op-flat-section op-standings-panel" aria-labelledby="op-standings-title"><div class="op-section-heading"><div><p data-i18n="op.standings">CWL stand</p><h2 id="op-standings-title" data-i18n="op.fullStandings">Volledige stand</h2></div><span id="op-standings-state">-</span></div><div class="op-standings-list" id="op-standings-list"></div><p class="op-standings-note" id="op-standings-note"></p></section>
-            <section class="op-flat-section op-bonus-panel" aria-labelledby="op-bonus-title"><div class="op-section-heading"><div><p data-i18n="op.bonus">Bonusadvies</p><h2 id="op-bonus-title" data-i18n="op.bonusMedals">Bonusmedals</h2></div><span data-i18n="op.auto">Automatisch</span></div><ol class="op-bonus-list" id="op-bonus-list"></ol><p class="op-advice-note" data-i18n="op.adviceOnly">Advies wordt niet automatisch toegepast.</p></section>
+            <section class="op-flat-section op-standings-panel" aria-labelledby="op-standings-title"><div class="op-section-heading"><div><p data-i18n="op.standings">CWL standings</p><h2 id="op-standings-title" data-i18n="op.fullStandings">Full standings</h2></div><span id="op-standings-state">-</span></div><div class="op-standings-list" id="op-standings-list"></div><p class="op-standings-note" id="op-standings-note"></p></section>
+            <section class="op-flat-section op-bonus-panel" aria-labelledby="op-bonus-title"><div class="op-section-heading"><div><p data-i18n="op.bonus">Bonus advice</p><h2 id="op-bonus-title" data-i18n="op.bonusMedals">Bonus medals</h2></div><span data-i18n="op.auto">Automatic</span></div><ol class="op-bonus-list" id="op-bonus-list"></ol><p class="op-advice-note" data-i18n="op.adviceOnly">Advice accounts for attack difficulty and defense and is not applied automatically.</p></section>
         </aside>
     </div>
 </main>

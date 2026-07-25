@@ -79,11 +79,11 @@
         <a href="#workflow" data-i18n="home.how">How it works</a>
         <a href="#features" data-i18n="public.features">Features</a>
         <a href="#preview" data-i18n="public.preview">Preview</a>
-        <a href="/subpages/contact.html" data-i18n="public.feedback">Bugs &amp; ideas</a>
+        <a href="/subpages/contact.html" data-i18n="public.feedback">Bugs &amp; feature requests</a>
     </nav>
     <div class="public-actions">
         <button type="button" data-language-control data-i18n="header.language">Language</button>
-        <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Toggle theme"><span aria-hidden="true">◐</span></button>
+        <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme"><span aria-hidden="true">◐</span></button>
         <a class="link-button" href="/subpages/login.html" data-i18n="auth.login">Log in</a>
         <a class="button button-primary" href="/subpages/register.html" data-i18n="public.startFree">Start for free</a>
     </div>
@@ -96,8 +96,8 @@
     <section class="landing-hero">
         <div class="landing-copy">
             <p class="eyebrow" data-i18n="home.eyebrow">CWL planning without spreadsheets</p>
-            <h1 data-i18n="home.title">Turn availability into a clear CWL plan.</h1>
-            <p class="hero-lead" data-i18n="home.desc">Collect accounts, build one plan for multiple clans, and track every clan live without important information getting lost across separate cards.</p>
+            <h1 data-i18n="home.title">From availability to a clear CWL week.</h1>
+            <p class="hero-lead" data-i18n="home.desc">Collect accounts, build one plan with multiple clans and track each clan live. Without burying important information in disconnected cards.</p>
             <div class="hero-actions">
                 <a class="button button-primary button-large" href="/subpages/register.html" data-i18n="public.createAccount">Create a free account</a>
                 <a class="button button-secondary button-large" href="/subpages/login.html" data-i18n="public.haveAccount">I already have an account</a>
@@ -105,25 +105,25 @@
             <p class="hero-footnote" data-i18n="public.freeNote">Free to use · no payment details required</p>
         </div>
 
-        <div class="product-window" id="preview" aria-label="CWL Planner preview" data-i18n-aria-label="public.previewLabel">
+        <div class="product-window" id="preview" aria-label="CWL Planner example" data-i18n-aria-label="public.previewLabel">
             <div class="window-top"><span></span><span></span><span></span><strong>CWL Planner</strong></div>
             <div class="preview-shell">
                 <div class="preview-toolbar">
-                    <span><small data-i18n="planner.plan">Plan</small><strong data-i18n="public.samplePlan">Main July plan</strong></span>
+                    <span><small data-i18n="planner.plan">Plan</small><strong data-i18n="public.samplePlan">July main plan</strong></span>
                     <span><small data-i18n="planner.name">Name</small><strong>July CWL</strong></span>
                     <span class="preview-add-clan"><b aria-hidden="true">+</b><span data-i18n="cwl.addClan">Add clan</span></span>
                     <em class="preview-save" data-i18n="public.saved">Saved</em>
                 </div>
                 <div class="preview-planner-layout">
                     <aside class="preview-sidebar">
-                        <header><span><small data-i18n="planner.source">Plan source</small><b data-i18n="cwl.playersSub">Unassigned roster</b></span><strong>3</strong></header>
+                        <header><span><small data-i18n="planner.source">Plan source</small><b data-i18n="cwl.playersSub">Free roster</b></span><strong>3</strong></header>
                         <div class="preview-roster-tools"><span data-i18n="planner.searchRosterPlaceholder">Search by name or tag</span><b>TH ↓</b></div>
                         <div class="preview-player preview-free-player"><img src="/assets/css/pictures/townhalls/Town_Hall16.png" alt=""><span><strong>Nova</strong><small>Belgian Warriors · #9UY8LCQ2</small></span></div>
                         <div class="preview-player preview-free-player"><img src="/assets/css/pictures/townhalls/Town_Hall15.png" alt=""><span><strong>Axel</strong><small>Belgian Academy · #Y0J2C8PL</small></span></div>
                         <div class="preview-player preview-free-player"><img src="/assets/css/pictures/townhalls/Town_Hall14.png" alt=""><span><strong>Raven</strong><small>Belgian Warriors · #J28QP0RY</small></span></div>
                     </aside>
                     <section class="preview-board">
-                        <header><span><small data-i18n="cwl.clansSub">Planning board</small><strong data-i18n="cwl.clansTitle">Clans</strong></span><b data-i18n="public.sampleSummary">2 clans · 3 unassigned players</b></header>
+                        <header><span><small data-i18n="cwl.clansSub">Planning board</small><strong data-i18n="cwl.clansTitle">Clans</strong></span><b data-i18n="public.sampleSummary">2 clans · 3 free players</b></header>
                         <article class="preview-clan">
                             <div class="preview-clan-head"><img src="/assets/css/pictures/default-clan-banner.png" alt=""><span><strong>Belgian Warriors</strong><small>#2P8JUCR9C · Crystal I</small></span><em><small data-i18n="planner.format">Format</small><b>15v15</b></em><b>13/15</b></div>
                             <div class="preview-player preview-clan-player is-core"><img src="/assets/css/pictures/townhalls/Town_Hall16.png" alt=""><span><strong>Orion</strong><small>Belgian Warriors · #LQURPQJ0Y</small></span><i aria-hidden="true"></i><em data-i18n="public.core">Core</em></div>
@@ -141,23 +141,23 @@
     </section>
 
     <section class="trust-line" aria-label="Who ClashPanel is for" data-i18n-aria-label="public.audienceLabel">
-        <span data-i18n="public.forLeaders">For clan leaders</span><span data-i18n="public.forCoLeaders">For co-leaders</span><span data-i18n="public.forOrganizers">For CWL organizers</span><span data-i18n="public.forMultipleClans">For multiple clans in one plan</span>
+        <span data-i18n="public.forLeaders">For clan leaders</span><span data-i18n="public.forCoLeaders">For co-leaders</span><span data-i18n="public.forOrganizers">For CWL organisers</span><span data-i18n="public.forMultipleClans">For multiple clans in one plan</span>
     </section>
 
     <section class="workflow" id="workflow">
         <header class="section-intro"><p class="eyebrow" data-i18n="public.oneWorkflow">One continuous workflow</p><h2 data-i18n="public.threeSteps">Three steps, without duplicate work.</h2></header>
         <ol class="workflow-list">
-            <li><span>01</span><div><h3 data-i18n="home.step1Title">Collect accounts and availability</h3><p data-i18n="home.step1Desc">Add players using tags, your own accounts, friends, or a group with poll results.</p></div></li>
-            <li><span>02</span><div><h3 data-i18n="home.step2Title">Build one plan for multiple clans</h3><p data-i18n="home.step2Desc">Each clan keeps its own league and roster format. Players can still be moved between clans.</p></div></li>
-            <li><span>03</span><div><h3 data-i18n="home.step3Title">Track every clan live</h3><p data-i18n="home.step3Desc">View stars, attacks, standings, war days, rotation, and bonus recommendations in the Operation Board.</p></div></li>
+            <li><span>01</span><div><h3 data-i18n="home.step1Title">Collect accounts and availability</h3><p data-i18n="home.step1Desc">Add players through tags, your own accounts, friends or a Clan Family with poll results.</p></div></li>
+            <li><span>02</span><div><h3 data-i18n="home.step2Title">Build one plan with multiple clans</h3><p data-i18n="home.step2Desc">Each clan keeps its own league and roster format. Players remain movable between clans.</p></div></li>
+            <li><span>03</span><div><h3 data-i18n="home.step3Title">Track every clan live</h3><p data-i18n="home.step3Desc">View stars, attacks, standings, war days, rotation and bonus advice in Operation Board.</p></div></li>
         </ol>
     </section>
 
     <section class="feature-ledger" id="features">
-        <header class="section-intro"><p class="eyebrow" data-i18n="public.coreFeatures">Kernfuncties</p><h2 data-i18n="public.realWork">Gemaakt voor het echte organisatiewerk.</h2></header>
-        <div class="feature-row"><span>01</span><div><h3>CWL Planner</h3><p data-i18n="public.plannerDesc">Vrij roster, meerdere clans, pollbeschikbaarheid, drag-and-drop en veilige autosave.</p></div><a href="subpages/login.html" data-i18n="public.viewAfterLogin">Bekijk na inloggen →</a></div>
-        <div class="feature-row"><span>02</span><div><h3>Operation Board</h3><p data-i18n="public.operationDesc">Live scores, war days, stand, rosterdetails en bonusadvies.</p></div><a href="subpages/login.html" data-i18n="public.viewAfterLogin">Bekijk na inloggen →</a></div>
-        <div class="feature-row"><span>03</span><div><h3 data-i18n="public.groupsPolls">Clan Families en polls</h3><p data-i18n="public.groupsDesc">Beheer leden, rollen, gekoppelde clans en beschikbaarheid per account.</p></div><a href="subpages/login.html" data-i18n="public.viewAfterLogin">Bekijk na inloggen →</a></div>
+        <header class="section-intro"><p class="eyebrow" data-i18n="public.coreFeatures">Core features</p><h2 data-i18n="public.realWork">Built for the real organising work.</h2></header>
+        <div class="feature-row"><span>01</span><div><h3>CWL Planner</h3><p data-i18n="public.plannerDesc">Free roster, multiple clans, poll availability, drag-and-drop and safe autosave.</p></div><a href="subpages/login.html" data-i18n="public.viewAfterLogin">View after login →</a></div>
+        <div class="feature-row"><span>02</span><div><h3>Operation Board</h3><p data-i18n="public.operationDesc">Live scores, war days, standings, roster details and bonus advice.</p></div><a href="subpages/login.html" data-i18n="public.viewAfterLogin">View after login →</a></div>
+        <div class="feature-row"><span>03</span><div><h3 data-i18n="public.groupsPolls">Clan Families and polls</h3><p data-i18n="public.groupsDesc">Manage members, roles, linked clans and availability per account.</p></div><a href="subpages/login.html" data-i18n="public.viewAfterLogin">View after login →</a></div>
     </section>
 
     <section class="landing-cta">

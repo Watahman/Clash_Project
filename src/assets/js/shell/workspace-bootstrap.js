@@ -241,7 +241,7 @@
             cache: 'force-cache'
         }).then(async response => {
             if (!response.ok) {
-                throw new Error(`Pagina kon niet vooraf geladen worden (${response.status})`);
+                throw new Error(`Page could not be preloaded (${response.status})`);
             }
 
             const source = await response.text();

@@ -24,27 +24,27 @@
 <main class="workspace-dashboard workspace-dashboard-overview" id="main-content">
     <header class="workspace-page-header">
         <p class="page-kicker" data-i18n="nav.dashboard">Dashboard</p>
-        <h1 id="dashboard-welcome" data-i18n="dashboard.welcome">Welkom terug.</h1>
-        <p data-i18n="dashboard.intro">Open een recent plan of ga rechtstreeks naar een tool.</p>
+        <h1 id="dashboard-welcome" data-i18n="dashboard.welcome">Welcome back.</h1>
+        <p data-i18n="dashboard.intro">Open a recent plan or go straight to a tool.</p>
     </header>
 
-    <nav class="workspace-launch-list" aria-label="Kernfuncties" data-i18n-aria-label="dashboard.coreFunctions">
-        <a href="./cwl-planner.html"><span>01</span><span><strong>CWL Planner</strong><small data-i18n="dashboard.plannerDesc">Maak of wijzig een plan met meerdere clans.</small></span><b data-i18n="dashboard.open">Open →</b></a>
-        <a href="./cwl-operation-board.html"><span>02</span><span><strong>Operation Board</strong><small data-i18n="dashboard.operationDesc">Volg één geselecteerde clan live op.</small></span><b data-i18n="dashboard.open">Open →</b></a>
-        <a href="./groups.html"><span>03</span><span><strong data-i18n="nav.groups">Clan Families</strong><small data-i18n="dashboard.groupsDesc">Beheer leden, polls en gekoppelde clans.</small></span><b data-i18n="dashboard.open">Open →</b></a>
-        <a class="workspace-launch-coming-soon" aria-disabled="true" tabindex="-1"><span>04</span><span><span class="workspace-launch-title-row"><strong data-i18n="nav.bracket">Bracket generator</strong><em class="workspace-coming-soon-badge" data-i18n="common.comingSoon">(Coming soon)</em></span><small data-i18n="dashboard.bracketDesc">Maak een lokaal toernooischema.</small></span><b data-i18n="common.comingSoon">(Coming soon)</b></a>
+    <nav class="workspace-launch-list" aria-label="Core tools" data-i18n-aria-label="dashboard.coreFunctions">
+        <a href="./cwl-planner.html"><span>01</span><span><strong>CWL Planner</strong><small data-i18n="dashboard.plannerDesc">Create or update a plan with multiple clans.</small></span><b data-i18n="dashboard.open">Open →</b></a>
+        <a href="./cwl-operation-board.html"><span>02</span><span><strong>Operation Board</strong><small data-i18n="dashboard.operationDesc">Track one selected clan live.</small></span><b data-i18n="dashboard.open">Open →</b></a>
+        <a href="./groups.html"><span>03</span><span><strong data-i18n="nav.groups">Clan Family</strong><small data-i18n="dashboard.groupsDesc">Manage members, polls and linked clans.</small></span><b data-i18n="dashboard.open">Open →</b></a>
+        <a class="workspace-launch-coming-soon" aria-disabled="true" tabindex="-1"><span>04</span><span><span class="workspace-launch-title-row"><strong data-i18n="nav.bracket">Bracket generator</strong><em class="workspace-coming-soon-badge" data-i18n="common.comingSoon">(Coming soon)</em></span><small data-i18n="dashboard.bracketDesc">Create a local tournament bracket.</small></span><b data-i18n="common.comingSoon">(Coming soon)</b></a>
     </nav>
 
     <div class="workspace-dashboard-split">
         <section class="workspace-section-block" aria-labelledby="recent-plans-title">
             <div class="workspace-section-heading">
-                <div><p class="page-kicker" data-i18n="dashboard.recent">Recent</p><h2 id="recent-plans-title" data-i18n="nav.savedPlans">Opgeslagen plannen</h2></div>
-                <a href="./cwl-planner-drafts.html" data-i18n="dashboard.allPlans">Alle plannen →</a>
+                <div><p class="page-kicker" data-i18n="dashboard.recent">Recent</p><h2 id="recent-plans-title" data-i18n="nav.savedPlans">Saved plans</h2></div>
+                <a href="./cwl-planner-drafts.html" data-i18n="dashboard.allPlans">All plans →</a>
             </div>
-            <p id="dashboard-plan-status" class="workspace-inline-status" role="status" aria-live="polite" data-i18n="dashboard.loadingPlans">Plannen laden…</p>
+            <p id="dashboard-plan-status" class="workspace-inline-status" role="status" aria-live="polite" data-i18n="dashboard.loadingPlans">Loading plans…</p>
             <div class="workspace-table-wrap">
                 <table class="workspace-data-table workspace-recent-plans">
-                    <thead><tr><th data-i18n="plans.name">Plan</th><th data-i18n="plans.clans">Clans</th><th data-i18n="plans.freeRoster">Vrij roster</th><th data-i18n="plans.updated">Bijgewerkt</th><th><span class="sr-only" data-i18n="plans.actions">Acties</span></th></tr></thead>
+                    <thead><tr><th data-i18n="plans.name">Plan</th><th data-i18n="plans.clans">Clans</th><th data-i18n="plans.freeRoster">Free roster</th><th data-i18n="plans.updated">Updated</th><th><span class="sr-only" data-i18n="plans.actions">Actions</span></th></tr></thead>
                     <tbody id="dashboard-plan-list"></tbody>
                 </table>
             </div>
@@ -52,14 +52,14 @@
 
         <aside class="workspace-section-block workspace-groups-summary" aria-labelledby="recent-groups-title">
             <div class="workspace-section-heading">
-                <div><p class="page-kicker" data-i18n="dashboard.recent">Recent</p><h2 id="recent-groups-title" data-i18n="nav.groups">Clan Families</h2></div>
-                <a href="./groups.html" data-i18n="dashboard.manageGroups">Beheer →</a>
+                <div><p class="page-kicker" data-i18n="dashboard.recent">Recent</p><h2 id="recent-groups-title" data-i18n="nav.groups">Clan Family</h2></div>
+                <a href="./groups.html" data-i18n="dashboard.manageGroups">Manage →</a>
             </div>
-            <p id="dashboard-group-status" class="workspace-inline-status" role="status" aria-live="polite" data-i18n="dashboard.loadingGroups">Clan Families laden…</p>
+            <p id="dashboard-group-status" class="workspace-inline-status" role="status" aria-live="polite" data-i18n="dashboard.loadingGroups">Loading Clan Families…</p>
             <div id="dashboard-group-list"></div>
             <button id="dashboard-account-line" class="workspace-account-line" type="button" hidden>
-                <span><strong id="dashboard-account-count">0</strong><small data-i18n="dashboard.linkedAccounts">gekoppelde accounts</small></span>
-                <span data-i18n="dashboard.openProfile">Profiel openen →</span>
+                <span><strong id="dashboard-account-count">0</strong><small data-i18n="dashboard.linkedAccounts">linked accounts</small></span>
+                <span data-i18n="dashboard.openProfile">Open profile →</span>
             </button>
         </aside>
     </div>

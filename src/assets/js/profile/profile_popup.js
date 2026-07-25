@@ -66,7 +66,7 @@ export function profileHTML(options = {}) {
 
     profileMarkupPromise = fetch(getProfilePopupPath())
         .then(res => {
-            if (!res.ok) throw new Error("Profile popup kon niet geladen worden");
+            if (!res.ok) throw new Error("Profile popup could not be loaded");
             return res.text();
         })
         .then(html => {
