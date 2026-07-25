@@ -109,29 +109,45 @@ public class SUPABASE_Group {
         server.createContext(conf._EXT_SUPA_GROUP_LEAVE, exchange -> utils.handlePost(exchange, ex -> {
             String userId = utils.requireAuthenticatedUser(ex);
             JsonObject json = utils.parseBody(ex);
-            String code     = utils.requireString(json, "groupCode").trim();
+            String code = utils.requireString(json, "groupCode").trim();
 
             JsonArray groupArray = JsonParser.parseString(
-                    SUPABASE_Client.getWithBody("groups", "code=" + SUPABASE_Client.eq(code))).getAsJsonArray();
+                    SUPABASE_Client.getWithBody(
+                            "groups",
+                            "code=" + SUPABASE_Client.eq(code)
+                    )
+            ).getAsJsonArray();
 
             if (groupArray.isEmpty()) {
-                utils.sendJsonResponse(ex, "{\"error\":\"Groep niet gevonden met code: " + API_Utils.escapeJson(code) + "\"}", 404);
+                utils.sendJsonResponse(
+                        ex,
+                        "{\"error\":\"Groep niet gevonden met code: "
+                                + API_Utils.escapeJson(code) + "\"}",
+                        404
+                );
                 return;
             }
 
-            JsonObject groupObj = groupArray.get(0).getAsJsonObject();
-            String groupId      = groupObj.get("id").getAsString();
-            JsonElement ownerEl = groupObj.get("owner_id");
-            boolean isOwner = ownerEl != null && Objects.equals(ownerEl.getAsString(), userId);
-            boolean isLeader = Objects.equals(getMemberRole(groupId, userId), "leader");
-            if (isOwner || isLeader) {
-                throw new HttpException(403, "{\"error\":\"Draag eerst leadership over voordat je de groep verlaat\"}");
-            }
+            String groupId = groupArray
+                    .get(0)
+                    .getAsJsonObject()
+                    .get("id")
+                    .getAsString();
 
-            String result = SUPABASE_Client.deleteColumn("group_members",
-                    "group_id=" + SUPABASE_Client.eq(groupId) + "&user_id=" + SUPABASE_Client.eq(userId));
+            JsonObject rpcBody = new JsonObject();
+            rpcBody.addProperty("p_actor_user_id", userId);
+            rpcBody.addProperty("p_group_id", groupId);
 
-            utils.sendJsonResponse(ex, result.isBlank() ? "{\"success\":true}" : result, 200);
+            String result = SUPABASE_Client.rpc(
+                    "leave_group_or_delete_if_last",
+                    rpcBody.toString()
+            );
+
+            utils.sendJsonResponse(
+                    ex,
+                    result.isBlank() ? "{\"success\":true}" : result,
+                    200
+            );
         }));
     }
 
