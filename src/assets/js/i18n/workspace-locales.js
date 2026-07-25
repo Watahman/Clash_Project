@@ -1084,10 +1084,86 @@ const part6 = Object.freeze({
     }
 });
 
+
+const part7En = Object.freeze({
+    "cwl.sheetImport": "Import spreadsheet",
+    "cwl.sheetImportTitle": "Import spreadsheet",
+    "cwl.sheetImportIntro": "Upload an Excel or CSV file. ClashPanel scans every sheet for unique player and clan tags, validates them, and lets you review the result before importing.",
+    "cwl.sheetDropFile": "Drop a spreadsheet here or choose a file",
+    "cwl.sheetSupportedFiles": "XLSX, XLS, XLSM, XLSB, CSV or ODS",
+    "cwl.sheetChooseAnother": "Choose another file",
+    "cwl.sheetImportSelected": "Import selected",
+    "cwl.sheetImportLibraryMissing": "The spreadsheet reader could not be loaded. Refresh the page and try again.",
+    "cwl.sheetReadingFile": "Reading spreadsheet...",
+    "cwl.sheetNoTags": "No Clash player or clan tags were found in this spreadsheet.",
+    "cwl.sheetTagLimit": "The first {count} unique Clash tags were loaded. Split very large spreadsheets before importing more.",
+    "cwl.sheetFoundTags": "Found {count} unique Clash tags. Validating them now...",
+    "cwl.sheetCheckingTags": "Checking tag {current} of {total}",
+    "cwl.sheetAnalysisComplete": "Spreadsheet analysis complete",
+    "cwl.sheetReadError": "This spreadsheet could not be read. Check the file format and try again.",
+    "cwl.sheetNothingSelected": "Select at least one valid player or clan to import.",
+    "cwl.sheetImporting": "Importing {current} of {total}",
+    "cwl.sheetImportedSummary": "Imported {players} players and {clans} clans. Skipped {skipped} duplicates.",
+    "cwl.sheetImportComplete": "Import complete",
+    "cwl.sheetImportError": "The import could not be completed.",
+    "cwl.sheetSummary": "Players: {players} · Clans: {clans} · Ambiguous: {ambiguous} · Invalid: {invalid} · Already in plan: {duplicates}",
+    "cwl.sheetImportSelectedCount": "Import selected ({count})",
+    "cwl.sheetSelectTag": "Select {tag} for import",
+    "cwl.sheetOccurrences": "Found {count} times",
+    "cwl.sheetAlreadyInPlan": "Already in this plan",
+    "cwl.sheetPlayer": "Player",
+    "cwl.sheetClan": "Clan",
+    "cwl.sheetInvalid": "Not found",
+    "cwl.sheetAmbiguous": "Player or clan",
+    "cwl.sheetChooseType": "Choose whether {tag} is a player or clan",
+    "cwl.sheetNotFound": "No matching player or clan found"
+});
+
+const part7 = Object.freeze({
+    en: part7En,
+    nl: Object.freeze({
+        ...part7En,
+        "cwl.sheetImport": "Spreadsheet importeren",
+        "cwl.sheetImportTitle": "Spreadsheet importeren",
+        "cwl.sheetImportIntro": "Upload een Excel- of CSV-bestand. ClashPanel scant alle tabbladen op unieke speler- en clantags, controleert ze en toont eerst een preview voordat je importeert.",
+        "cwl.sheetDropFile": "Sleep hier een spreadsheet of kies een bestand",
+        "cwl.sheetSupportedFiles": "XLSX, XLS, XLSM, XLSB, CSV of ODS",
+        "cwl.sheetChooseAnother": "Ander bestand kiezen",
+        "cwl.sheetImportSelected": "Selectie importeren",
+        "cwl.sheetImportLibraryMissing": "De spreadsheetlezer kon niet geladen worden. Vernieuw de pagina en probeer opnieuw.",
+        "cwl.sheetReadingFile": "Spreadsheet lezen...",
+        "cwl.sheetNoTags": "Er zijn geen Clash-speler- of clantags gevonden in deze spreadsheet.",
+        "cwl.sheetTagLimit": "De eerste {count} unieke Clash-tags zijn geladen. Splits zeer grote spreadsheets om meer te importeren.",
+        "cwl.sheetFoundTags": "{count} unieke Clash-tags gevonden. Ze worden nu gecontroleerd...",
+        "cwl.sheetCheckingTags": "Tag {current} van {total} controleren",
+        "cwl.sheetAnalysisComplete": "Analyse van spreadsheet voltooid",
+        "cwl.sheetReadError": "Deze spreadsheet kon niet gelezen worden. Controleer het bestandsformaat en probeer opnieuw.",
+        "cwl.sheetNothingSelected": "Selecteer minstens één geldige speler of clan om te importeren.",
+        "cwl.sheetImporting": "{current} van {total} importeren",
+        "cwl.sheetImportedSummary": "{players} spelers en {clans} clans geïmporteerd. {skipped} duplicaten overgeslagen.",
+        "cwl.sheetImportComplete": "Import voltooid",
+        "cwl.sheetImportError": "De import kon niet voltooid worden.",
+        "cwl.sheetSummary": "Spelers: {players} · Clans: {clans} · Onduidelijk: {ambiguous} · Ongeldig: {invalid} · Al in plan: {duplicates}",
+        "cwl.sheetImportSelectedCount": "Selectie importeren ({count})",
+        "cwl.sheetSelectTag": "Selecteer {tag} voor import",
+        "cwl.sheetOccurrences": "{count} keer gevonden",
+        "cwl.sheetAlreadyInPlan": "Staat al in deze planning",
+        "cwl.sheetPlayer": "Speler",
+        "cwl.sheetClan": "Clan",
+        "cwl.sheetInvalid": "Niet gevonden",
+        "cwl.sheetAmbiguous": "Speler of clan",
+        "cwl.sheetChooseType": "Kies of {tag} een speler of clan is",
+        "cwl.sheetNotFound": "Geen overeenkomende speler of clan gevonden"
+    }),
+    fr: part7En,
+    de: part7En,
+    es: part7En
+});
+
 export const workspaceLocales = Object.freeze({
-    nl: Object.freeze({ ...nl, ...part2.nl, ...part3.nl, ...part4.nl, ...part5.nl, ...part6.nl }),
-    en: Object.freeze({ ...en, ...part2.en, ...part3.en, ...part4.en, ...part5.en, ...part6.en }),
-    fr: Object.freeze({ ...fr, ...part2.fr, ...part3.fr, ...part4.fr, ...part5.fr, ...part6.fr }),
-    de: Object.freeze({ ...de, ...part2.de, ...part3.de, ...part4.de, ...part5.de, ...part6.de }),
-    es: Object.freeze({ ...es, ...part2.es, ...part3.es, ...part4.es, ...part5.es, ...part6.es })
+    nl: Object.freeze({ ...nl, ...part2.nl, ...part3.nl, ...part4.nl, ...part5.nl, ...part6.nl, ...part7.nl }),
+    en: Object.freeze({ ...en, ...part2.en, ...part3.en, ...part4.en, ...part5.en, ...part6.en, ...part7.en }),
+    fr: Object.freeze({ ...fr, ...part2.fr, ...part3.fr, ...part4.fr, ...part5.fr, ...part6.fr, ...part7.fr }),
+    de: Object.freeze({ ...de, ...part2.de, ...part3.de, ...part4.de, ...part5.de, ...part6.de, ...part7.de }),
+    es: Object.freeze({ ...es, ...part2.es, ...part3.es, ...part4.es, ...part5.es, ...part6.es, ...part7.es })
 });

@@ -4,6 +4,7 @@ import { syncAuthSession } from "../auth/auth-client.js";
 import { initOverlayHide, initAddPlayersOverlay, initAddClanButton, applyCwlSizeRestriction } from "../cwl/cwl-overlay.js";
 import { initPlanIO, savePlan, loadAllPlans, loadPlanListener, startNewPlan } from "../cwl/cwl-plan-io.js";
 import { initFreeRosterFilter } from "../cwl/cwl-roster-filter.js";
+import { initSpreadsheetImport } from "../cwl/cwl-spreadsheet-import.js";
 import { getClanInfoRequest } from "../API/API-Clan.js";
 import * as conf from "../Data/config.js";
 
@@ -64,6 +65,7 @@ async function init() {
         rosterPollSelect
     });
     initAddClanButton({ addClanBtn, overlayAddClanBtn, cwlInputClanCode, selectAmountPlayers });
+    initSpreadsheetImport();
     savePlanButton();
     initSaveButtonState();
     newPlanBtn?.addEventListener('click', startNewPlan);

@@ -14,8 +14,10 @@
     <link rel="stylesheet" href="../assets/css/profile-overlay.css">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
     <link rel="stylesheet" href="../assets/css/cwl-planner-workspace.css">
+    <link rel="stylesheet" href="../assets/css/cwl-spreadsheet-import.css">
     <script src="../assets/js/Data/runtime-config.js"></script>
     <script type="module" src="../assets/js/shell/workspace-shell.js"></script>
+    <script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script type="module" src="../assets/js/pages/cwl-planner.js"></script>
     <link rel="stylesheet" href="../assets/css/light-theme.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
@@ -66,6 +68,7 @@
         <label><span data-i18n="planner.plan">Plan</span><select id="cwl-load-plan" data-i18n-aria-label="cwl.loadPlan" aria-label="Plan laden"></select></label>
         <label class="cwl-plan-name-field"><span data-i18n="planner.name">Naam</span><input type="text" id="cwl-plan-name" data-i18n-placeholder="cwl.planPlaceholder" placeholder="Plan naam..." maxlength="40"></label>
         <button class="button button-secondary" id="cwl-add-clan-button" type="button"><span aria-hidden="true">+</span><span data-i18n="cwl.addClan">Clan toevoegen</span></button>
+        <button class="button button-secondary" id="cwl-import-spreadsheet-button" type="button"><span data-i18n="cwl.sheetImport">Import spreadsheet</span></button>
         <span class="cwl-toolbar-spacer"></span>
         <span class="cwl-save-status" id="cwl-save-status" role="status" aria-live="polite" data-state="idle" data-i18n="cwl.saved">Opgeslagen</span>
     </section>
@@ -145,6 +148,35 @@
             <button id="cwl-overlay-load-group-button" class="primary" data-i18n="cwl.loadGroup">Alles uit groep laden</button>
         </div>
 
+    </div>
+</div>
+
+<div class="overlay hidden" id="cwl-overlay-import-spreadsheet">
+    <div class="overlay-container" id="cwl-container-import-spreadsheet">
+        <div class="modal-header-row">
+            <span class="modal-title" data-i18n="cwl.sheetImportTitle">Import spreadsheet</span>
+        </div>
+        <p class="cwl-sheet-import-intro" data-i18n="cwl.sheetImportIntro">Upload an Excel or CSV file. ClashPanel scans all sheets for unique player and clan tags, validates them, and lets you review the result before importing.</p>
+
+        <input id="cwl-spreadsheet-file-input" type="file" accept=".xlsx,.xls,.xlsm,.xlsb,.csv,.ods" hidden>
+        <div class="cwl-sheet-dropzone" id="cwl-spreadsheet-dropzone" role="button" tabindex="0">
+            <strong id="cwl-spreadsheet-file-name" data-i18n="cwl.sheetDropFile">Drop a spreadsheet here or choose a file</strong>
+            <span data-i18n="cwl.sheetSupportedFiles">XLSX, XLS, XLSM, XLSB, CSV or ODS</span>
+        </div>
+
+        <p class="cwl-sheet-import-status hidden" id="cwl-spreadsheet-status" role="status" aria-live="polite"></p>
+        <div class="cwl-sheet-progress hidden" id="cwl-spreadsheet-progress" aria-live="polite">
+            <div class="cwl-sheet-progress-track"><div class="cwl-sheet-progress-fill" id="cwl-spreadsheet-progress-fill"></div></div>
+            <span class="cwl-sheet-progress-label" id="cwl-spreadsheet-progress-label"></span>
+        </div>
+
+        <p class="cwl-sheet-summary" id="cwl-spreadsheet-summary"></p>
+        <div class="cwl-sheet-preview" id="cwl-spreadsheet-preview"></div>
+
+        <div class="cwl-sheet-import-actions">
+            <button class="button button-secondary" id="cwl-spreadsheet-reset" type="button" data-i18n="cwl.sheetChooseAnother">Choose another file</button>
+            <button class="button button-primary" id="cwl-spreadsheet-import-selected" type="button" disabled data-i18n="cwl.sheetImportSelected">Import selected</button>
+        </div>
     </div>
 </div>
 
