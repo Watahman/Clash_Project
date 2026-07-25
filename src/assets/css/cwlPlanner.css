@@ -818,3 +818,7 @@
 :root[data-theme="light"] .cwl-operation-link {
     color: var(--purple);
 }
+
+#cwl-roster-search{
+    padding-left: 0.75rem;
+}
