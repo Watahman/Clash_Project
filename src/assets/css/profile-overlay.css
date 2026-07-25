@@ -580,7 +580,7 @@
 #profile-overlay .po-topbar {
     display: grid;
     min-height: 3.25rem;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 0.75rem;
     border-bottom: 0.0625rem solid var(--border, var(--border-subtle));
