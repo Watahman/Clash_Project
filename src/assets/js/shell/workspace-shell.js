@@ -22,7 +22,7 @@ const pageConfig = {
     planner: { key: 'nav.cwl', fallback: 'CWL Planner' },
     drafts: { key: 'nav.savedPlans', fallback: 'Opgeslagen plannen' },
     operation: { key: 'nav.operation', fallback: 'Operation Board' },
-    groups: { key: 'nav.groups', fallback: 'Groepen' },
+    groups: { key: 'nav.groups', fallback: 'Clan Family' },
     bracket: { key: 'nav.bracket', fallback: 'Bracket generator' }
 };
 

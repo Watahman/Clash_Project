@@ -8,7 +8,7 @@ const content = {
     privacy: {
         en: {
             title: 'Privacy policy',
-            description: 'How ClashPanel processes account, planner, group, advertising and technical data.',
+            description: 'How ClashPanel processes account, planner, Clan Family, advertising and technical data.',
             summary: 'This policy explains what personal data ClashPanel processes, why it is used, who may receive it and what choices and rights you have.',
             sections: [
                 ['Who is responsible', [
@@ -18,7 +18,7 @@ const content = {
                 ['Data we may process', [
                     'Account and authentication data, including your email address, display name, internal user identifiers and information required to maintain an authenticated session.',
                     'Clash of Clans data you provide or link, such as player tags and clan tags, together with public game information returned for those tags by the official Clash of Clans API.',
-                    'Content and settings you create in ClashPanel, such as CWL plans, groups, memberships, polls, reminders, planner drafts and related configuration.',
+                    'Content and settings you create in ClashPanel, such as CWL plans, Clan Families, memberships, polls, reminders, planner drafts and related configuration.',
                     'Device and technical information generated when you use the service, such as IP address, browser or device information, request metadata, security events and diagnostic logs produced by hosting or infrastructure providers.',
                     'Cookie, local-storage and similar-technology data used for authentication, preferences, caching, consent choices and, where advertising is enabled, ad delivery and measurement.'
                 ]],
@@ -28,7 +28,7 @@ const content = {
                     'Technical information may be collected automatically by your browser, ClashPanel infrastructure and service providers when you access the website.'
                 ]],
                 ['Why we use data and legal bases', [
-                    'We process account, planner and group data to provide the functions you request, maintain your account and deliver the ClashPanel service.',
+                    'We process account, planner and Clan Family data to provide the functions you request, maintain your account and deliver the ClashPanel service.',
                     'We may process limited technical and security data where necessary for legitimate interests such as protecting accounts, preventing abuse, troubleshooting failures and maintaining service reliability, while considering the rights and interests of users.',
                     'Where consent is legally required, consent is used for optional advertising cookies, local storage or related advertising purposes. You may withdraw consent through the available consent controls without affecting processing that occurred before withdrawal.',
                     'We may also process information where necessary to comply with applicable legal obligations or to establish, exercise or defend legal claims.'
@@ -71,7 +71,7 @@ const content = {
         },
         nl: {
             title: 'Privacybeleid',
-            description: 'Hoe ClashPanel account-, planner-, groeps-, advertentie- en technische gegevens verwerkt.',
+            description: 'Hoe ClashPanel account-, planner-, Clan Family-, advertentie- en technische gegevens verwerkt.',
             summary: 'Dit beleid legt uit welke persoonsgegevens ClashPanel verwerkt, waarom dat gebeurt, met wie gegevens kunnen worden gedeeld en welke keuzes en rechten je hebt.',
             sections: [
                 ['Wie verantwoordelijk is', [
@@ -81,7 +81,7 @@ const content = {
                 ['Gegevens die we kunnen verwerken', [
                     'Account- en authenticatiegegevens, waaronder je e-mailadres, weergavenaam, interne gebruikersidentificatoren en informatie die nodig is om een aangemelde sessie te onderhouden.',
                     'Clash of Clans-gegevens die je opgeeft of koppelt, zoals speler- en clantags, samen met openbare spelinformatie die voor die tags via de officiële Clash of Clans API wordt opgehaald.',
-                    'Inhoud en instellingen die je in ClashPanel maakt, zoals CWL-plannen, groepen, lidmaatschappen, polls, reminders, planner-drafts en bijhorende configuratie.',
+                    'Inhoud en instellingen die je in ClashPanel maakt, zoals CWL-plannen, Clan Families, lidmaatschappen, polls, reminders, planner-drafts en bijhorende configuratie.',
                     'Apparaat- en technische gegevens die bij gebruik van de dienst ontstaan, zoals IP-adres, browser- of apparaatinformatie, requestmetadata, beveiligingsgebeurtenissen en diagnostische logs van hosting- of infrastructuurproviders.',
                     'Cookie-, local-storage- en vergelijkbare gegevens voor authenticatie, voorkeuren, caching, toestemmingskeuzes en, waar advertenties actief zijn, advertentieweergave en -meting.'
                 ]],
@@ -91,7 +91,7 @@ const content = {
                     'Technische informatie kan automatisch worden verwerkt door je browser, de ClashPanel-infrastructuur en dienstverleners wanneer je de website gebruikt.'
                 ]],
                 ['Waarom we gegevens gebruiken en rechtsgronden', [
-                    'We verwerken account-, planner- en groepsgegevens om de functies te leveren die je vraagt, je account te beheren en de ClashPanel-dienst uit te voeren.',
+                    'We verwerken account-, planner- en Clan Family-gegevens om de functies te leveren die je vraagt, je account te beheren en de ClashPanel-dienst uit te voeren.',
                     'Beperkte technische en beveiligingsgegevens kunnen worden verwerkt op basis van gerechtvaardigde belangen, bijvoorbeeld om accounts te beschermen, misbruik te voorkomen, fouten te onderzoeken en de betrouwbaarheid van de dienst te behouden, met aandacht voor de rechten en belangen van gebruikers.',
                     'Waar toestemming wettelijk vereist is, gebruiken we toestemming voor optionele advertentiecookies, lokale opslag of bijhorende advertentiedoeleinden. Je kunt toestemming via de beschikbare toestemmingsinstellingen intrekken zonder dat dit eerdere rechtmatige verwerking ongeldig maakt.',
                     'Gegevens kunnen ook worden verwerkt wanneer dit nodig is om aan wettelijke verplichtingen te voldoen of om rechtsvorderingen vast te stellen, uit te oefenen of te verdedigen.'
@@ -234,8 +234,8 @@ const content = {
                     'You are responsible for providing accurate information where the service requires it and for maintaining control of your account. Never share authentication tokens or verification codes with other people.',
                     'ClashPanel may restrict, suspend or terminate access when reasonably necessary to protect users or infrastructure, investigate abuse, comply with law or address a serious breach of these terms.'
                 ]],
-                ['Your content and group data', [
-                    'You remain responsible for plan names, group content, polls, imported spreadsheet data and other information you submit. Do not submit confidential information you are not authorised to share, unlawful material or content that infringes another person’s rights.',
+                ['Your content and Clan Family data', [
+                    'You remain responsible for plan names, Clan Family content, polls, imported spreadsheet data and other information you submit. Do not submit confidential information you are not authorised to share, unlawful material or content that infringes another person’s rights.',
                     'You grant ClashPanel only the permission reasonably necessary to store, process, copy and display submitted content for operating, securing and improving the functions you choose to use.'
                 ]],
                 ['Game and third-party data', [
@@ -288,8 +288,8 @@ const content = {
                     'Je bent verantwoordelijk voor correcte informatie waar de dienst die nodig heeft en voor het behouden van controle over je account. Deel nooit authenticatietokens of verificatiecodes met anderen.',
                     'ClashPanel kan toegang redelijkerwijs beperken, opschorten of beëindigen om gebruikers of infrastructuur te beschermen, misbruik te onderzoeken, aan de wet te voldoen of een ernstige schending van deze voorwaarden aan te pakken.'
                 ]],
-                ['Jouw inhoud en groepsgegevens', [
-                    'Je blijft verantwoordelijk voor plannamen, groepsinhoud, polls, geïmporteerde spreadsheetgegevens en andere informatie die je indient. Deel geen vertrouwelijke informatie waarvoor je geen toestemming hebt, onwettige inhoud of materiaal dat rechten van anderen schendt.',
+                ['Jouw inhoud en Clan Family-gegevens', [
+                    'Je blijft verantwoordelijk voor plannamen, Clan Family-inhoud, polls, geïmporteerde spreadsheetgegevens en andere informatie die je indient. Deel geen vertrouwelijke informatie waarvoor je geen toestemming hebt, onwettige inhoud of materiaal dat rechten van anderen schendt.',
                     'Je geeft ClashPanel alleen de toestemming die redelijkerwijs nodig is om ingediende inhoud op te slaan, te verwerken, te kopiëren en te tonen voor het uitvoeren, beveiligen en verbeteren van de functies die je gebruikt.'
                 ]],
                 ['Gamegegevens en externe data', [

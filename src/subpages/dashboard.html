@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="robots" content="noindex">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Open your recent CWL plans, groups and linked Clash of Clans accounts.">
+    <meta name="description" content="Open your recent CWL plans, Clan Families and linked Clash of Clans accounts.">
     <link rel="stylesheet" href="../assets/css/workspace-loading.css">
     <script src="../assets/js/shell/workspace-bootstrap.js"></script>
     <title>Dashboard · ClashPanel</title>
@@ -31,7 +31,7 @@
     <nav class="workspace-launch-list" aria-label="Kernfuncties" data-i18n-aria-label="dashboard.coreFunctions">
         <a href="./cwl-planner.html"><span>01</span><span><strong>CWL Planner</strong><small data-i18n="dashboard.plannerDesc">Maak of wijzig een plan met meerdere clans.</small></span><b data-i18n="dashboard.open">Open →</b></a>
         <a href="./cwl-operation-board.html"><span>02</span><span><strong>Operation Board</strong><small data-i18n="dashboard.operationDesc">Volg één geselecteerde clan live op.</small></span><b data-i18n="dashboard.open">Open →</b></a>
-        <a href="./groups.html"><span>03</span><span><strong data-i18n="nav.groups">Groepen</strong><small data-i18n="dashboard.groupsDesc">Beheer leden, polls en gekoppelde clans.</small></span><b data-i18n="dashboard.open">Open →</b></a>
+        <a href="./groups.html"><span>03</span><span><strong data-i18n="nav.groups">Clan Families</strong><small data-i18n="dashboard.groupsDesc">Beheer leden, polls en gekoppelde clans.</small></span><b data-i18n="dashboard.open">Open →</b></a>
         <a class="workspace-launch-coming-soon" aria-disabled="true" tabindex="-1"><span>04</span><span><span class="workspace-launch-title-row"><strong data-i18n="nav.bracket">Bracket generator</strong><em class="workspace-coming-soon-badge" data-i18n="common.comingSoon">(Coming soon)</em></span><small data-i18n="dashboard.bracketDesc">Maak een lokaal toernooischema.</small></span><b data-i18n="common.comingSoon">(Coming soon)</b></a>
     </nav>
 
@@ -52,10 +52,10 @@
 
         <aside class="workspace-section-block workspace-groups-summary" aria-labelledby="recent-groups-title">
             <div class="workspace-section-heading">
-                <div><p class="page-kicker" data-i18n="dashboard.recent">Recent</p><h2 id="recent-groups-title" data-i18n="nav.groups">Groepen</h2></div>
+                <div><p class="page-kicker" data-i18n="dashboard.recent">Recent</p><h2 id="recent-groups-title" data-i18n="nav.groups">Clan Families</h2></div>
                 <a href="./groups.html" data-i18n="dashboard.manageGroups">Beheer →</a>
             </div>
-            <p id="dashboard-group-status" class="workspace-inline-status" role="status" aria-live="polite" data-i18n="dashboard.loadingGroups">Groepen laden…</p>
+            <p id="dashboard-group-status" class="workspace-inline-status" role="status" aria-live="polite" data-i18n="dashboard.loadingGroups">Clan Families laden…</p>
             <div id="dashboard-group-list"></div>
             <button id="dashboard-account-line" class="workspace-account-line" type="button" hidden>
                 <span><strong id="dashboard-account-count">0</strong><small data-i18n="dashboard.linkedAccounts">gekoppelde accounts</small></span>

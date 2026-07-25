@@ -36,7 +36,7 @@
     <nav class="center">
         <a href="./cwl-planner.html" aria-current="page" data-i18n="nav.cwl">CWL planner</a>
         <a href="./cwl-operation-board.html" data-i18n="nav.operation">Operation board</a>
-        <a href="./groups.html" data-i18n="nav.groups">Groepen</a>
+        <a href="./groups.html" data-i18n="nav.groups">Clan Families</a>
     </nav>
 
     <div class="right">
@@ -110,7 +110,7 @@
         <div class="modal-tabs">
             <button class="modal-tab-btn active" data-tab="tag" data-i18n="cwl.addByTag">Via tag</button>
             <button class="modal-tab-btn" data-tab="accounts" data-i18n="cwl.myAccounts">Mijn accounts</button>
-            <button class="modal-tab-btn" data-tab="group" data-i18n="cwl.fromGroup">Uit groep</button>
+            <button class="modal-tab-btn" data-tab="group" data-i18n="cwl.fromGroup">Uit Clan Family</button>
         </div>
 
         <!-- Tab 1: by tag -->
@@ -134,18 +134,18 @@
 
         <!-- Tab 3: from group -->
         <div class="modal-tab-panel hidden" id="modal-tab-group">
-            <p class="modal-field-label" data-i18n="cwl.group">Groep</p>
+            <p class="modal-field-label" data-i18n="cwl.group">Clan Family</p>
             <select id="cwl-select-group">
-                <option value="" data-i18n="cwl.selectGroup">— selecteer een groep —</option>
+                <option value="" data-i18n="cwl.selectGroup">— selecteer een Clan Family —</option>
             </select>
             <p class="modal-field-label" data-i18n="cwl.pollResults">Pollresultaat</p>
             <select id="cwl-select-group-poll">
                 <option value="" data-i18n="cwl.noPollSelected">Geen poll geselecteerd</option>
             </select>
             <div id="cwl-group-linked-clans" class="modal-linked-clans hidden"></div>
-            <div id="cwl-group-preview" class="modal-empty-state"><span data-i18n="cwl.previewGroup">Selecteer een groep om leden te bekijken</span></div>
+            <div id="cwl-group-preview" class="modal-empty-state"><span data-i18n="cwl.previewGroup">Selecteer een Clan Family om leden te bekijken</span></div>
             <div class="modal-group-preview-list hidden" id="cwl-group-preview-list"></div>
-            <button id="cwl-overlay-load-group-button" class="primary" data-i18n="cwl.loadGroup">Alles uit groep laden</button>
+            <button id="cwl-overlay-load-group-button" class="primary" data-i18n="cwl.loadGroup">Alles uit Clan Family laden</button>
         </div>
 
     </div>
