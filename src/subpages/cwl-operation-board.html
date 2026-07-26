@@ -102,7 +102,34 @@
     </section>
 
     <section class="op-tab-panel" id="op-panel-bonuses" role="tabpanel" aria-labelledby="op-tab-bonuses" tabindex="0" hidden>
-        <section class="op-flat-section op-bonus-panel" aria-labelledby="op-bonus-title"><div class="op-section-heading"><div><p data-i18n="op.bonus">Bonus advice</p><h2 id="op-bonus-title" data-i18n="op.bonusMedals">Bonus medals</h2></div><span data-i18n="op.auto">Automatic</span></div><ol class="op-bonus-list" id="op-bonus-list"></ol><p class="op-advice-note" data-i18n="op.adviceOnly">Advice accounts for attack difficulty and defense and is not applied automatically.</p></section>
+        <section class="op-flat-section op-bonus-panel" id="op-bonus-calculator" aria-labelledby="op-bonus-title">
+            <div class="op-section-heading op-bonus-heading">
+                <div><p data-i18n="op.bonusMedals">Bonus medals</p><h2 id="op-bonus-title" data-i18n="op.bonusCalculator">Bonus calculator</h2></div>
+                <label class="op-bonus-recipient-control"><span data-i18n="op.bonusRecommendedRecipients">Recommended recipients</span><input id="op-bonus-recipient-count" type="number" min="0" step="1" inputmode="numeric" aria-describedby="op-bonus-recipient-source"><small id="op-bonus-recipient-source"></small></label>
+            </div>
+            <div class="op-bonus-toolbar">
+                <span data-i18n="op.bonusStrategy">Strategy</span>
+                <div class="op-bonus-strategies" role="group" aria-label="Bonus strategy" data-i18n-aria-label="op.bonusStrategy">
+                    <button type="button" data-bonus-strategy="fair" aria-pressed="true" data-i18n="op.bonusFair">Fair</button>
+                    <button type="button" data-bonus-strategy="performance" aria-pressed="false" data-i18n="op.bonusPerformance">Performance</button>
+                    <button type="button" data-bonus-strategy="contribution" aria-pressed="false" data-i18n="op.bonusContribution">Contribution</button>
+                    <button type="button" data-bonus-strategy="custom" aria-pressed="false" data-i18n="op.bonusCustom">Custom</button>
+                </div>
+            </div>
+            <div class="op-bonus-custom-weights" id="op-bonus-custom-weights" hidden>
+                <label><span data-i18n="op.bonusPerformance">Performance</span><input type="number" min="0" max="100" step="1" data-bonus-weight="performance"><small>%</small></label>
+                <label><span data-i18n="op.bonusContribution">Contribution</span><input type="number" min="0" max="100" step="1" data-bonus-weight="contribution"><small>%</small></label>
+                <label><span data-i18n="op.bonusReliability">Reliability</span><input type="number" min="0" max="100" step="1" data-bonus-weight="reliability"><small>%</small></label>
+                <label><span data-i18n="op.bonusDefense">Defense</span><input type="number" min="0" max="100" step="1" data-bonus-weight="defense"><small>%</small></label>
+                <strong id="op-bonus-weight-total"></strong>
+            </div>
+            <p class="op-bonus-provisional" id="op-bonus-provisional" hidden><strong data-i18n="op.bonusProvisional">Provisional recommendation.</strong> <span data-i18n="op.bonusProvisionalDetail">Results may change after remaining rounds.</span></p>
+            <div class="op-bonus-layout">
+                <ol class="op-bonus-list" id="op-bonus-list"></ol>
+                <aside class="op-bonus-detail" id="op-bonus-detail" aria-live="polite" data-i18n="op.bonusSelectPlayer">Select a player to see the score breakdown.</aside>
+            </div>
+            <p class="op-advice-note" data-i18n="op.bonusAdviceOnly">Recommendations are advisory and are never applied in-game automatically.</p>
+        </section>
     </section>
 </main>
 <div class="profile-placeholder"></div>

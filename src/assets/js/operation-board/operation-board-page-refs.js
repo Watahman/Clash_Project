@@ -34,7 +34,14 @@ export function initOperationBoardRefs(root = document) {
         rosterPlanningHeader: '[data-op-roster-column="planning"]',
         rosterFilter: '#op-roster-filter',
         rosterView: '#op-roster-view',
-        bonusList: '#op-bonus-list'
+        bonusPanel: '#op-bonus-calculator',
+        bonusRecipientCount: '#op-bonus-recipient-count',
+        bonusRecipientSource: '#op-bonus-recipient-source',
+        bonusCustomWeights: '#op-bonus-custom-weights',
+        bonusWeightTotal: '#op-bonus-weight-total',
+        bonusProvisional: '#op-bonus-provisional',
+        bonusList: '#op-bonus-list',
+        bonusDetail: '#op-bonus-detail'
     };
     const refs = Object.fromEntries(
         Object.entries(selectors).map(([key, selector]) => [
@@ -43,6 +50,15 @@ export function initOperationBoardRefs(root = document) {
         ])
     );
     refs.tabButtons = Array.from(root.querySelectorAll('[data-op-tab]'));
+    refs.bonusStrategyButtons = Array.from(
+        root.querySelectorAll('[data-bonus-strategy]')
+    );
+    refs.bonusWeightInputs = Object.fromEntries(
+        Array.from(root.querySelectorAll('[data-bonus-weight]')).map(input => [
+            input.dataset.bonusWeight,
+            input
+        ])
+    );
     refs.tabPanels = Object.fromEntries(
         refs.tabButtons.map(button => [
             button.dataset.opTab,

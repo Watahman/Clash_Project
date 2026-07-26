@@ -1,5 +1,8 @@
 import { t } from '../i18n/i18n.js';
-import { renderBonusAdvice } from './operation-board-bonus-renderer.js';
+import {
+    clearBonusCalculator,
+    renderBonusCalculator
+} from './operation-board-bonus-renderer.js';
 import { renderBoardContext } from './operation-board-context-renderer.js';
 import {
     clearLeagueSections,
@@ -31,7 +34,7 @@ export function renderBoard(
     renderLiveTab(refs, report);
     renderLeagueSections(refs, report);
     renderRoster(refs, report, selectedClan);
-    renderBonusAdvice(refs, report.roster);
+    renderBonusCalculator(refs, report);
     renderBoardContext(
         refs,
         report,
@@ -46,7 +49,7 @@ export function clearBoard(refs, selectedClan = null, resetPhase = true) {
     clearLiveTab(refs);
     refs.rosterBody.replaceChildren();
     renderEmptyRoster(refs, selectedClan);
-    refs.bonusList.replaceChildren();
+    clearBonusCalculator(refs);
     refs.rosterCount.textContent = `0 ${t('op.players')}`;
     renderRosterViewOptions(refs, null, selectedClan);
     syncRosterMode(refs, null, selectedClan);

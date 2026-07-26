@@ -150,7 +150,7 @@ describe('CWL Operation Board', () => {
         expect(document.querySelectorAll('#op-roster-body tr')).toHaveLength(2);
         expect(document.querySelector('#op-roster-body tr').dataset.performanceCard).toBe('true');
         expect(document.querySelector('#op-roster-body .cwl-player-info')).not.toBeNull();
-        expect(document.querySelectorAll('#op-bonus-list li')).toHaveLength(2);
+        expect(document.querySelectorAll('#op-bonus-list li')).toHaveLength(1);
         expect(document.querySelector('#op-live-state').dataset.state).toBe('imported');
     });
 
