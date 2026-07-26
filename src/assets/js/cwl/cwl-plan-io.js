@@ -10,6 +10,7 @@ import { escapeCssIdentifier, getCardTag, normalizeTag } from './cwl-utils.js';
 import {
     CWL_PLAN_SCHEMA_VERSION,
     normalizePlanDocument,
+    normalizePlannedDays,
     normalizeRosterStatus,
     validatePlanDocument
 } from './cwl-plan-schema.js';
@@ -89,6 +90,8 @@ function readPlayerCard(player) {
     };
     const rosterStatus = normalizeRosterStatus(player.dataset.rosterStatus);
     if (rosterStatus) snapshot.rosterStatus = rosterStatus;
+    const plannedDays = normalizePlannedDays(player.dataset.plannedDays);
+    if (plannedDays.length) snapshot.plannedDays = plannedDays;
     return snapshot;
 }
 

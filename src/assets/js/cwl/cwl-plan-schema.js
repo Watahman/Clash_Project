@@ -1,12 +1,22 @@
 import { normalizeTag } from './cwl-utils.js';
 
-export const CWL_PLAN_SCHEMA_VERSION = 3;
+export const CWL_PLAN_SCHEMA_VERSION = 4;
 
 export const CWL_ROSTER_STATUSES = Object.freeze(['core', 'rotation', 'reserve']);
 
 export function normalizeRosterStatus(value, fallback = '') {
     const status = String(value || '').trim().toLowerCase();
     return CWL_ROSTER_STATUSES.includes(status) ? status : fallback;
+}
+
+export function normalizePlannedDays(value) {
+    const days = Array.isArray(value)
+        ? value
+        : String(value || '').split(',');
+    return [...new Set(days
+        .map(Number)
+        .filter(day => Number.isInteger(day) && day >= 1 && day <= 7)
+    )].sort((left, right) => left - right);
 }
 
 export function normalizePlayerSnapshot(player, fallbackClanName = '', fallbackRosterStatus = '') {
@@ -17,7 +27,8 @@ export function normalizePlayerSnapshot(player, fallbackClanName = '', fallbackR
             name: tag,
             townHallLevel: 1,
             clanName: fallbackClanName,
-            rosterStatus: normalizeRosterStatus('', fallbackRosterStatus)
+            rosterStatus: normalizeRosterStatus('', fallbackRosterStatus),
+            plannedDays: []
         } : null;
     }
     if (!player || typeof player !== 'object') return null;
@@ -32,6 +43,9 @@ export function normalizePlayerSnapshot(player, fallbackClanName = '', fallbackR
         rosterStatus: normalizeRosterStatus(
             player.rosterStatus || player.roster_status || player.status,
             fallbackRosterStatus
+        ),
+        plannedDays: normalizePlannedDays(
+            player.plannedDays || player.planned_days || player.days
         )
     };
 }

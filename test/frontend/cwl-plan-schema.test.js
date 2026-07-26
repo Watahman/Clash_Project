@@ -60,4 +60,19 @@ describe('CWL plan schema', () => {
 
         expect(document.clans[0].players.map(player => player.rosterStatus)).toEqual(['rotation', '']);
     });
+
+    it('persists normalized daily lineup assignments', () => {
+        const document = normalizePlanDocument({
+            clans: [{
+                tag: '#CLAN',
+                players: [{
+                    tag: '#AAA',
+                    rosterStatus: 'rotation',
+                    plannedDays: [7, 3, 3, 0, 9, 1]
+                }]
+            }]
+        });
+
+        expect(document.clans[0].players[0].plannedDays).toEqual([1, 3, 7]);
+    });
 });

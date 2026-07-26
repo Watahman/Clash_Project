@@ -9,6 +9,7 @@ import { getClanInfoRequest } from "../API/API-Clan.js";
 import * as conf from "../Data/config.js";
 import { initPlayerPerformanceClient } from "../cwl/player-performance-client.js";
 import { initPlayerPerformancePopover } from "../cwl/cwl-player-performance-popover.js";
+import { initAutoPlan } from "../cwl/auto-plan/cwl-auto-plan-ui.js";
 
 export { savePlan };
 
@@ -79,6 +80,7 @@ async function init() {
     initPlayerSorting();
     initPlayerPerformanceClient();
     initPlayerPerformancePopover();
+    initAutoPlan();
     initPlanNameSync();
     window.addEventListener('clashtools:cwl-active-poll-changed', () => savePlan());
     guessCwlSize();

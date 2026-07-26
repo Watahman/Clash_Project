@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="../assets/css/cwl-player-card.css">
     <link rel="stylesheet" href="../assets/css/cwl-player-performance-popover.css">
     <link rel="stylesheet" href="../assets/css/cwl-spreadsheet-import.css">
+    <link rel="stylesheet" href="../assets/css/cwl-auto-plan.css">
     <script src="../assets/js/Data/runtime-config.js"></script>
     <script type="module" src="../assets/js/shell/workspace-shell.js"></script>
     <script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
@@ -71,8 +72,31 @@
         <label class="cwl-plan-name-field"><span data-i18n="planner.name">Name</span><input type="text" id="cwl-plan-name" data-i18n-placeholder="cwl.planPlaceholder" placeholder="Plan name..." maxlength="40"></label>
         <button class="button button-secondary" id="cwl-add-clan-button" type="button"><span aria-hidden="true">+</span><span data-i18n="cwl.addClan">Add clan</span></button>
         <button class="button button-secondary" id="cwl-import-spreadsheet-button" type="button"><span data-i18n="cwl.sheetImport">Import spreadsheet</span></button>
+        <button class="button button-secondary" id="cwl-auto-plan-button" type="button" data-i18n="autoPlan.open">Auto Plan</button>
         <span class="cwl-toolbar-spacer"></span>
         <span class="cwl-save-status" id="cwl-save-status" role="status" aria-live="polite" data-state="idle" data-i18n="cwl.saved">Saved</span>
+    </section>
+
+    <section class="cwl-auto-plan-panel hidden" id="cwl-auto-plan-panel" aria-labelledby="cwl-auto-plan-title">
+        <header class="cwl-auto-plan-header">
+            <div>
+                <h2 id="cwl-auto-plan-title" data-i18n="autoPlan.title">Auto Plan preview</h2>
+                <p data-i18n="autoPlan.description">Review the global clan distribution and seven-day lineups before applying it.</p>
+            </div>
+            <label class="cwl-auto-plan-mode">
+                <span data-i18n="autoPlan.control">Planning control</span>
+                <select id="cwl-auto-plan-mode">
+                    <option value="automatic" data-i18n="autoPlan.automatic">Automatic</option>
+                    <option value="guided" data-i18n="autoPlan.guided">Guided</option>
+                </select>
+            </label>
+            <div class="cwl-auto-plan-actions">
+                <button class="button button-secondary" id="cwl-auto-plan-cancel" type="button" data-i18n="autoPlan.cancel">Cancel</button>
+                <button class="button button-primary" id="cwl-auto-plan-apply" type="button" disabled data-i18n="autoPlan.apply">Apply plan</button>
+            </div>
+        </header>
+        <p class="cwl-auto-plan-status" id="cwl-auto-plan-status" role="status" aria-live="polite"></p>
+        <div class="cwl-auto-plan-preview" id="cwl-auto-plan-preview"></div>
     </section>
 
     <div class="cwl-planner-layout">

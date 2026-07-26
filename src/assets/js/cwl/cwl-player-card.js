@@ -8,7 +8,12 @@ import {
 } from './cwl-utils.js';
 import { normalizeRosterStatus } from './cwl-plan-schema.js';
 import { t } from '../i18n/i18n.js';
-import { attachDeleteButton, attachMoveControl, syncPlayerRosterStatus } from './cwl-player-controls.js';
+import {
+    attachDeleteButton,
+    attachMoveControl,
+    syncPlayerPlannedDays,
+    syncPlayerRosterStatus
+} from './cwl-player-controls.js';
 import { makePlayerDraggable } from './cwl-player-drag.js';
 import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js';
 
@@ -41,6 +46,10 @@ export function createPlayerCard(playerInfo, clanUuid) {
             preferredStatus,
             autoReserve: !preferredStatus
         });
+        syncPlayerPlannedDays(
+            element,
+            player.plannedDays || player.planned_days || player.days || []
+        );
         applyAvailabilityToCard(element);
         plannerChanged = true;
     });

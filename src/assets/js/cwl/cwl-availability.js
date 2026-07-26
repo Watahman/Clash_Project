@@ -40,16 +40,38 @@ export function applyAvailabilityToCard(card) {
     card.appendChild(indicator);
 }
 
+export function getPlayerAvailability(tag) {
+    const status = getAvailabilityStatus(tag);
+    return {
+        state: status.state,
+        rounds: status.rounds,
+        availableDays: [...status.availableDays]
+    };
+}
+
 function getAvailabilityStatus(tag) {
     const answer = findPollAccount(tag);
+    const rounds = clampRounds(activePoll?.rounds);
+    const allDays = Array.from({ length: rounds }, (_, index) => index + 1);
     if (!activePoll || !answer) {
-        return { state: 'unknown', label: t('cwl.availabilityUnknown'), tooltip: t('cwl.noPollData') };
+        return {
+            state: 'unknown',
+            label: t('cwl.availabilityUnknown'),
+            tooltip: t('cwl.noPollData'),
+            rounds,
+            availableDays: allDays
+        };
     }
     if (answer.wantsCwl === false) {
-        return { state: 'no', label: t('cwl.availabilityNo'), tooltip: t('cwl.notAvailableCwl') };
+        return {
+            state: 'no',
+            label: t('cwl.availabilityNo'),
+            tooltip: t('cwl.notAvailableCwl'),
+            rounds,
+            availableDays: []
+        };
     }
 
-    const rounds = clampRounds(activePoll.rounds);
     const days = answer.days && typeof answer.days === 'object' ? answer.days : {};
     const unavailable = [];
     const available = [];
@@ -60,15 +82,29 @@ function getAvailabilityStatus(tag) {
     }
 
     if (unavailable.length === 0) {
-        return { state: 'yes', label: t('cwl.availabilityYes'), tooltip: t('cwl.availableAllDays', { rounds }) };
+        return {
+            state: 'yes',
+            label: t('cwl.availabilityYes'),
+            tooltip: t('cwl.availableAllDays', { rounds }),
+            rounds,
+            availableDays: available
+        };
     }
     if (available.length === 0) {
-        return { state: 'no', label: t('cwl.availabilityNo'), tooltip: t('cwl.notAvailableCwl') };
+        return {
+            state: 'no',
+            label: t('cwl.availabilityNo'),
+            tooltip: t('cwl.notAvailableCwl'),
+            rounds,
+            availableDays: []
+        };
     }
     return {
         state: 'partial',
         label: t('cwl.availabilityPartial'),
-        tooltip: t('cwl.partialAvailabilityTooltip', { available: available.join(', '), unavailable: unavailable.join(', ') })
+        tooltip: t('cwl.partialAvailabilityTooltip', { available: available.join(', '), unavailable: unavailable.join(', ') }),
+        rounds,
+        availableDays: available
     };
 }
 

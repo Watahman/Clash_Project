@@ -1,5 +1,5 @@
 import { getCardTag } from './cwl-utils.js';
-import { normalizeRosterStatus } from './cwl-plan-schema.js';
+import { normalizePlannedDays, normalizeRosterStatus } from './cwl-plan-schema.js';
 import { t } from '../i18n/i18n.js';
 
 export function rememberPlannerPlayers() {
@@ -10,7 +10,8 @@ export function rememberPlannerPlayers() {
         clanName: player.querySelector('.cwl-player-clan')?.textContent || '',
         tag: getCardTag(player),
         townHall: Number(player.dataset.townHall || 1),
-        rosterStatus: normalizeRosterStatus(player.dataset.rosterStatus)
+        rosterStatus: normalizeRosterStatus(player.dataset.rosterStatus),
+        plannedDays: normalizePlannedDays(player.dataset.plannedDays)
     })).filter(player => player.tag);
     localStorage.setItem('clashtools_last_planner_players', JSON.stringify(players));
 }
