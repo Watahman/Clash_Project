@@ -275,114 +275,6 @@
     align-items: stretch;
 }
 
-.operation-main {
-    min-height: calc(100vh - var(--header-h));
-    padding: clamp(1rem, 2.5vw, 2rem);
-    background:
-        radial-gradient(circle at 70% 10%, rgba(246,183,60,0.08), transparent 23rem),
-        radial-gradient(circle at 22% 90%, rgba(155,92,255,0.1), transparent 26rem);
-}
-.operation-hero {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 1rem;
-    margin: 0 auto 1rem;
-    max-width: 96rem;
-}
-.operation-hero h1 {
-    font-family: var(--font-heading);
-    font-size: clamp(2rem, 4vw, 4rem);
-    line-height: 0.95;
-    letter-spacing: -0.02em;
-    text-transform: uppercase;
-}
-.operation-hero p { color: var(--text-2); max-width: 46rem; }
-.operation-actions { display: flex; flex-wrap: wrap; gap: 0.55rem; justify-content: flex-end; }
-.operation-actions button, .op-import-label { min-height: 2.35rem; padding: 0.5rem 0.8rem; }
-.op-danger { color: var(--red) !important; border-color: rgba(255,91,74,0.3) !important; background: var(--red-dim) !important; }
-.operation-grid {
-    max-width: 96rem;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: minmax(19rem, 0.35fr) minmax(0, 0.65fr);
-    grid-template-areas:
-        "score roster"
-        "rounds roster"
-        "bonus roster";
-    gap: 1rem;
-}
-.operation-panel {
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    background: linear-gradient(180deg, rgba(18,24,36,0.96), rgba(9,13,20,0.96));
-    box-shadow: var(--shadow-sm), var(--inner-line);
-    overflow: hidden;
-}
-.op-score-panel { grid-area: score; }
-.op-roster-panel { grid-area: roster; }
-.op-rounds-panel { grid-area: rounds; }
-.op-bonus-panel { grid-area: bonus; }
-.operation-panel-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.85rem 1rem;
-    border-bottom: 1px solid var(--border-subtle);
-    background: rgba(255,255,255,0.025);
-}
-.operation-panel-head h2 {
-    font-family: var(--font-heading);
-    text-transform: uppercase;
-    font-size: 1.15rem;
-    letter-spacing: 0.06em;
-}
-.operation-panel-head span { color: var(--text-3); font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; }
-.op-score-cards {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0,1fr));
-    gap: 0.65rem;
-    padding: 1rem;
-}
-.op-score-card {
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: 0.8rem;
-    background: rgba(255,255,255,0.025);
-}
-.op-score-card span { display: block; color: var(--accent); font-family: var(--font-heading); font-size: 1.65rem; font-weight: 800; line-height: 1; }
-.op-score-card p { color: var(--text-3); font-size: 0.76rem; }
-.op-th-spread { padding: 0 1rem 1rem; }
-.op-th-spread h3 { font-family: var(--font-heading); color: var(--text-2); text-transform: uppercase; font-size: 0.88rem; margin-bottom: 0.5rem; }
-#op-th-list { display: flex; flex-wrap: wrap; gap: 0.35rem; }
-#op-th-list span { border: 1px solid rgba(246,183,60,0.2); border-radius: 999px; padding: 0.2rem 0.5rem; color: var(--accent); background: var(--accent-dim); font-family: var(--font-mono); font-size: 0.68rem; }
-.op-table-wrap { overflow: auto; }
-.op-table { width: 100%; border-collapse: collapse; min-width: 58rem; }
-.op-table th, .op-table td { padding: 0.5rem; border-bottom: 1px solid var(--border-subtle); text-align: left; vertical-align: middle; }
-.op-table th { color: var(--text-3); font-family: var(--font-mono); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; }
-.op-table input { min-height: 2.1rem; padding: 0.35rem 0.45rem; font-size: 0.76rem; }
-.op-player-name { margin-bottom: 0.25rem; font-family: var(--font-heading) !important; font-weight: 800; }
-.op-player-tag { color: var(--accent) !important; }
-.op-row-delete { width: 2rem; height: 2rem; padding: 0; color: var(--red); border-color: rgba(255,91,74,0.25); background: var(--red-dim); }
-.op-rounds-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 0.7rem; padding: 1rem; }
-.op-round-card { border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 0.75rem; background: rgba(255,255,255,0.025); }
-.op-round-title { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.55rem; }
-.op-round-title strong { font-family: var(--font-heading); font-size: 1.1rem; text-transform: uppercase; }
-.op-round-result { width: 6.8rem; min-height: 2rem; padding-block: 0.25rem; }
-.op-round-stats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 0.35rem; margin-block: 0.55rem; }
-.op-round-stats label { color: var(--text-3); font-size: 0.68rem; }
-.op-round-card textarea { min-height: 4.5rem; resize: vertical; }
-.op-bonus-list { display: flex; flex-direction: column; gap: 0.55rem; padding: 1rem 1rem 1rem 2.2rem; }
-.op-bonus-list li { padding: 0.6rem 0.75rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: rgba(255,255,255,0.025); }
-.op-bonus-list strong { display: block; font-family: var(--font-heading); text-transform: uppercase; }
-.op-bonus-list span { display: block; color: var(--text-3); font-size: 0.74rem; }
-@media (max-width: 78rem) {
-    .operation-hero { align-items: flex-start; flex-direction: column; }
-    .operation-actions { justify-content: flex-start; }
-    .operation-grid { grid-template-columns: 1fr; grid-template-areas: "score" "roster" "rounds" "bonus"; }
-    .op-table-wrap { max-height: none; }
-}
 @media (max-width: 62rem) {
     .cwl-main { --sidebar-w: 1fr; }
     .cwl-toolbar { align-items: flex-start; flex-direction: column; }
@@ -391,44 +283,15 @@
 }
 
 
-/* Iteration: compact CWL planner + live operation board */
+/* Iteration: compact CWL planner */
 .cwl-toolbar-board, .cwl-toolbar-players { min-height: 4.25rem; }
 .cwl-toolbar-title span { display: none; }
 .cwl-toolbar-title h3 { font-size: 1rem; letter-spacing: 0.08em; }
 #cwl-save-status, .cwl-operation-link { display: none !important; }
 #cwl-all-clans { grid-auto-rows: minmax(22rem, auto); align-items: start; }
 .cwl-clan-player-list { overflow-y: auto; align-content: start; }
-.operation-live-main { padding-top: clamp(1rem, 2vw, 1.6rem); }
-.operation-live-hero { align-items: center; margin-bottom: 1rem; }
-.operation-control-panel { max-width: 96rem; margin: 0 auto 1rem; }
-.operation-control-grid { display: grid; gap: 0.8rem; padding: 1rem; }
-.operation-control-grid label { display: grid; gap: 0.35rem; color: var(--text-3); font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; }
-.operation-help { padding: 0 1rem 1rem; color: var(--text-3); }
-#op-live-state[data-state="error"] { color: var(--red); }
-.op-roster-filter-row { display: grid; grid-template-columns: minmax(0, 1fr) 12rem; gap: 0.7rem; padding: 1rem; border-bottom: 1px solid var(--border-subtle); }
-.op-live-table td:first-child { display: grid; gap: 0.12rem; }
-.op-live-table td:first-child strong { color: var(--text-1); font-family: var(--font-heading); font-size: 0.96rem; text-transform: uppercase; }
-.op-live-table td:first-child span { color: var(--accent); font-family: var(--font-mono); font-size: 0.7rem; }
-.op-badge { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border-subtle); border-radius: 999px; padding: 0.16rem 0.5rem; font-family: var(--font-mono); font-size: 0.62rem; text-transform: uppercase; white-space: nowrap; }
-.op-badge-ok { border-color: rgba(56, 217, 138, 0.25); background: var(--green-dim); color: var(--green); }
-.op-badge-warn { border-color: rgba(246, 183, 60, 0.3); background: var(--accent-dim); color: var(--accent); }
-.op-badge-info { border-color: rgba(75, 183, 255, 0.28); background: var(--blue-dim); color: var(--blue); }
-.op-badge-muted { background: rgba(255, 255, 255, 0.035); color: var(--text-3); }
-.op-status-unplanned { box-shadow: inset 3px 0 0 var(--accent); }
-.op-status-plannedOnly { box-shadow: inset 3px 0 0 var(--blue); }
-.op-status-apiOnly { box-shadow: inset 3px 0 0 var(--text-4); }
-.op-round-opponent-name { margin: 0.2rem 0 0.65rem; color: var(--text-1); font-family: var(--font-heading); font-size: 1rem; text-transform: uppercase; }
-.op-status-pill { border: 1px solid var(--border-subtle); border-radius: 999px; padding: 0.12rem 0.45rem; color: var(--text-3); font-family: var(--font-mono); font-size: 0.6rem; }
-.op-result-text { color: var(--text-3); font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; }
-.op-round-stats span { display: grid; gap: 0.1rem; color: var(--text-3); font-size: 0.64rem; }
-.op-round-stats strong { color: var(--accent); font-family: var(--font-heading); font-size: 1.1rem; }
-@media (max-width: 78rem) {
-    .operation-control-grid { grid-template-columns: 1fr; }
-    .operation-live-grid { grid-template-areas: "score" "roster" "rounds" "bonus"; }
-}
 @media (max-width: 62rem) {
     #cwl-load-plan, #cwl-plan-name { width: 100%; max-width: none; }
-    .op-roster-filter-row { grid-template-columns: 1fr; }
 }
 
 
@@ -448,149 +311,9 @@
 .cwl-clan-info-card { min-height: 3.8rem !important; padding: .68rem .78rem !important; }
 .cwl-clan-logo { width: 2.55rem !important; height: 2.55rem !important; }
 .cwl-clan-player-list { max-height: 15.6rem; padding: .65rem; }
-.operation-help { min-height: 1.4rem; }
 @media (max-width: 62rem) {
   .cwl-toolbar, .cwl-plan-actions { align-items: stretch; }
   .cwl-plan-actions > * { width: 100% !important; max-width: none !important; }
-}
-
-/* Operation Board reliability pass */
-.op-phase-badge {
-    min-height: 2.35rem;
-    display: inline-flex;
-    align-items: center;
-    width: fit-content;
-    padding: 0.42rem 0.72rem;
-    border: 1px solid var(--border-subtle);
-    border-radius: 999px;
-    background: rgba(255,255,255,0.035);
-    color: var(--text-2);
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    user-select: text;
-}
-.op-phase-badge[data-state="live"] {
-    color: var(--green);
-    background: var(--green-dim);
-    border-color: rgba(56,217,138,0.26);
-}
-.op-phase-badge[data-state="preparation"],
-.op-phase-badge[data-state="notStarted"] {
-    color: var(--accent);
-    background: var(--accent-dim);
-    border-color: rgba(246,183,60,0.28);
-}
-.op-phase-badge[data-state="completed"] {
-    color: var(--blue);
-    background: var(--blue-dim);
-    border-color: rgba(75,183,255,0.28);
-}
-.operation-help[data-state="error"] { color: var(--red); }
-.op-table-wrap {
-    overflow-x: auto;
-    overflow-y: visible;
-    max-height: none !important;
-}
-.op-roster-panel { overflow: visible; }
-.op-status-pill[data-state="live"] {
-    color: var(--green);
-    background: var(--green-dim);
-    border-color: rgba(56,217,138,0.26);
-}
-.op-status-pill[data-state="completed"] {
-    color: var(--blue);
-    background: var(--blue-dim);
-    border-color: rgba(75,183,255,0.28);
-}
-.op-status-pill[data-state="preparation"],
-.op-status-pill[data-state="notStarted"] {
-    color: var(--accent);
-    background: var(--accent-dim);
-    border-color: rgba(246,183,60,0.28);
-}
-.op-round-notStarted,
-.op-round-notAvailable {
-    opacity: 0.78;
-}
-#op-import-file.hidden { display: none !important; }
-@media (max-width: 62rem) {
-    .operation-actions { width: 100%; }
-    .operation-actions .btn { flex: 1; }
-}
-
-/* Phase 2: standalone clan + compact CWL standings */
-.operation-control-grid {
-    grid-template-columns: 1.1fr 1fr 1.15fr .75fr !important;
-}
-.operation-live-grid {
-    grid-template-areas:
-        "score roster"
-        "standings roster"
-        "rounds roster"
-        "bonus roster" !important;
-}
-.op-standings-panel { grid-area: standings; }
-.op-inline-control {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: .45rem;
-}
-.op-inline-control input { min-width: 0; }
-.op-inline-control button { white-space: nowrap; }
-.op-standings-list {
-    display: grid;
-    gap: .45rem;
-    padding: 1rem 1rem .65rem;
-}
-.op-standing-row {
-    display: grid;
-    grid-template-columns: 2.5rem minmax(0, 1fr) auto auto;
-    align-items: center;
-    gap: .55rem;
-    padding: .55rem .65rem;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    background: rgba(255,255,255,.025);
-    color: var(--text-3);
-    font-family: var(--font-mono);
-    font-size: .7rem;
-}
-.op-standing-row strong {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: var(--text-1);
-    font-family: var(--font-heading);
-    font-size: .9rem;
-    text-transform: uppercase;
-}
-.op-standing-row.is-selected {
-    border-color: rgba(246,183,60,.32);
-    background: var(--accent-dim);
-}
-.op-standing-rank { color: var(--accent); font-weight: 800; }
-.op-standings-note {
-    padding: 0 1rem 1rem;
-    color: var(--text-4);
-    font-family: var(--font-mono);
-    font-size: .68rem;
-}
-@media (max-width: 78rem) {
-    .operation-control-grid { grid-template-columns: 1fr !important; }
-    .operation-live-grid {
-        grid-template-areas:
-            "score"
-            "standings"
-            "roster"
-            "rounds"
-            "bonus" !important;
-    }
-}
-@media (max-width: 62rem) {
-    .op-inline-control { grid-template-columns: 1fr; }
 }
 
 /* CWL planner group/poll integration */
@@ -618,9 +341,8 @@
 .cwl-overlay-message[data-state="error"] { color: var(--red); }
 .cwl-overlay-message[data-state="warning"] { color: var(--accent); }
 
-/* Global light-mode pass: CWL planner + Operation Board */
-:root[data-theme="light"] .cwl-main,
-:root[data-theme="light"] .operation-main {
+/* Global light-mode pass: CWL planner */
+:root[data-theme="light"] .cwl-main {
     background:
         radial-gradient(circle at 70% 10%, rgba(184,109,18,0.10), transparent 23rem),
         radial-gradient(circle at 22% 90%, rgba(111,70,216,0.09), transparent 26rem);
@@ -644,7 +366,6 @@
     background: rgba(255,255,255,0.36);
 }
 :root[data-theme="light"] .cwl-board .cwl-toolbar,
-:root[data-theme="light"] .operation-panel-head,
 :root[data-theme="light"] .modal-header-row,
 :root[data-theme="light"] .modal-tabs {
     background: rgba(255,255,255,0.82);
@@ -654,17 +375,12 @@
     background: rgba(255,255,255,0.78);
     border-color: var(--border-visible);
 }
-:root[data-theme="light"] .cwl-clan-article,
-:root[data-theme="light"] .operation-panel {
+:root[data-theme="light"] .cwl-clan-article {
     background: var(--surface-card);
     border-color: var(--border-visible);
     box-shadow: var(--card-shadow), var(--inner-line);
 }
 :root[data-theme="light"] .cwl-clan-info-card,
-:root[data-theme="light"] .op-score-card,
-:root[data-theme="light"] .op-round-card,
-:root[data-theme="light"] .op-bonus-list li,
-:root[data-theme="light"] .op-standing-row,
 :root[data-theme="light"] .cwl-save-status {
     background: var(--surface-2);
     border-color: var(--border-visible);
@@ -679,19 +395,6 @@
 :root[data-theme="light"] .modal-segment,
 :root[data-theme="light"] .modal-tabs {
     background: var(--surface-2);
-    border-color: var(--border-visible);
-}
-:root[data-theme="light"] .op-table th,
-:root[data-theme="light"] .op-table td {
-    border-color: var(--border-visible);
-}
-:root[data-theme="light"] .op-table tbody tr:hover {
-    background: rgba(184,109,18,0.045);
-}
-:root[data-theme="light"] .op-badge-muted,
-:root[data-theme="light"] .op-phase-badge {
-    color: var(--text-3);
-    background: var(--surface-3);
     border-color: var(--border-visible);
 }
 :root[data-theme="light"] .modal-linked-clan-option,

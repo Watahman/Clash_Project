@@ -1,0 +1,77 @@
+import { t } from '../i18n/i18n.js';
+import { renderBonusAdvice } from './operation-board-bonus-renderer.js';
+import {
+    clearLeagueSections,
+    renderLeagueSections
+} from './operation-board-league-renderer.js';
+import {
+    renderEmptyRoster,
+    renderRoster,
+    renderRosterViewOptions,
+    syncRosterMode
+} from './operation-board-roster-renderer.js';
+import { stateText } from './operation-board-render-utils.js';
+
+export function renderBoard(refs, report, selectedClan = null) {
+    syncRosterMode(refs, report, selectedClan);
+    renderPhase(refs, report.phase);
+    setHelp(refs, report.wars.length ? t('op.liveLoaded') : t('op.noLeagueData'));
+    renderRosterViewOptions(refs, report, selectedClan);
+    renderLeagueSections(refs, report);
+    renderRoster(refs, report, selectedClan);
+    renderBonusAdvice(refs, report.roster);
+}
+
+export function clearBoard(refs, selectedClan = null, resetPhase = true) {
+    clearLeagueSections(refs);
+    refs.rosterBody.replaceChildren();
+    renderEmptyRoster(refs, selectedClan);
+    refs.bonusList.replaceChildren();
+    refs.rosterCount.textContent = `0 ${t('op.players')}`;
+    renderRosterViewOptions(refs, null, selectedClan);
+    syncRosterMode(refs, null, selectedClan);
+    if (resetPhase) renderPhase(refs, 'unknown');
+}
+
+export function renderFilteredRoster(refs, report, selectedClan = null) {
+    renderRoster(refs, report, selectedClan);
+}
+
+export function renderPhase(refs, phase = 'unknown') {
+    refs.phase.textContent = stateText(phase);
+    refs.phase.dataset.state = phase;
+}
+
+export function setHelp(refs, text, isError = false) {
+    refs.help.textContent = text;
+    refs.help.dataset.state = isError ? 'error' : 'info';
+}
+
+export function renderSyncState(refs, syncState, lastSyncAt = null) {
+    refs.liveState.dataset.state = syncState;
+    refs.refresh.disabled = syncState === 'loading';
+    refs.refresh.setAttribute('aria-busy', String(syncState === 'loading'));
+    if (syncState === 'loading') refs.liveState.textContent = t('op.syncing');
+    else if (syncState === 'error') refs.liveState.textContent = t('op.syncError');
+    else if (syncState === 'imported') {
+        refs.liveState.textContent = t('op.importedState');
+    } else if (syncState === 'ready' && lastSyncAt) {
+        const time = new Intl.DateTimeFormat(
+            document.documentElement.lang || undefined,
+            { hour: '2-digit', minute: '2-digit' }
+        ).format(lastSyncAt);
+        refs.liveState.textContent = t('op.syncedAt', { time });
+    } else refs.liveState.textContent = t('op.syncIdle');
+}
+
+export function refreshBoardLabels(refs, report, selectedClan, syncState, lastSyncAt) {
+    refs.roundsList.dataset.emptyLabel = t('op.noPlayedRounds');
+    refs.standingsList.dataset.emptyLabel = t('op.standingsFallback');
+    refs.bonusList.dataset.emptyLabel = t('op.noRoster');
+    renderSyncState(refs, syncState, lastSyncAt);
+    if (report) renderBoard(refs, report, selectedClan);
+    else {
+        renderPhase(refs, 'unknown');
+        clearBoard(refs, selectedClan, false);
+    }
+}

@@ -18,70 +18,6 @@ function normalizeTag(tag = '') {
     return clean.startsWith('#') ? clean : `#${clean}`;
 }
 
-function isHomeVillage(item) {
-    const village = String(item?.village || 'home').toLowerCase();
-    return village === 'home' || village === 'homevillage';
-}
-
-function averageLevelProgress(items = []) {
-    const progress = items
-        .filter(item => isHomeVillage(item))
-        .map(item => ({ level: number(item?.level, 0), maxLevel: number(item?.maxLevel, 0) }))
-        .filter(item => item.level > 0 && item.maxLevel > 0)
-        .map(item => clamp(item.level / item.maxLevel, 0, 1));
-    return progress.length ? progress.reduce((sum, value) => sum + value, 0) / progress.length : null;
-}
-
-function weightedProgress(profile = {}) {
-    const buckets = [
-        { value: averageLevelProgress(profile.troops), weight: 0.35 },
-        { value: averageLevelProgress(profile.spells), weight: 0.15 },
-        { value: averageLevelProgress(profile.heroes), weight: 0.3 },
-        { value: averageLevelProgress(profile.heroEquipment), weight: 0.2 }
-    ].filter(bucket => bucket.value != null);
-    const weight = buckets.reduce((sum, bucket) => sum + bucket.weight, 0);
-    return weight ? buckets.reduce((sum, bucket) => sum + bucket.value * bucket.weight, 0) / weight : 0.5;
-}
-
-function isOwnAttack(item) {
-    return item?.attack === true || String(item?.attack).toLowerCase() === 'true';
-}
-
-function summarizeBattles(items = [], ownAttack) {
-    const battles = items.filter(item => isOwnAttack(item) === ownAttack);
-    return {
-        count: battles.length,
-        stars: battles.length ? battles.reduce((sum, item) => sum + number(item?.stars, 0), 0) / battles.length : null,
-        destruction: battles.length
-            ? battles.reduce((sum, item) => sum + number(item?.destructionPercentage, 0), 0) / battles.length
-            : null
-    };
-}
-
-function armyFamiliarity(items = []) {
-    const codes = items
-        .filter(item => isOwnAttack(item) && item?.armyShareCode)
-        .map(item => String(item.armyShareCode));
-    if (!codes.length) return { sampleSize: 0, share: 0.5 };
-    const counts = new Map();
-    codes.forEach(code => counts.set(code, (counts.get(code) || 0) + 1));
-    return {
-        sampleSize: codes.length,
-        share: Math.max(...counts.values()) / codes.length
-    };
-}
-
-function buildPlayerInsight(profile = {}, battleLog = {}) {
-    const battles = Array.isArray(battleLog?.items) ? battleLog.items : [];
-    return {
-        townHall: number(profile?.townHallLevel, 0),
-        progression: weightedProgress(profile),
-        offense: summarizeBattles(battles, true),
-        defense: summarizeBattles(battles, false),
-        army: armyFamiliarity(battles)
-    };
-}
-
 function getWarSide(war, clanTag) {
     const selected = normalizeTag(clanTag);
     if (normalizeTag(war?.clan?.tag) === selected) return { self: war.clan, opponent: war.opponent };
@@ -110,6 +46,17 @@ function playerForm(player = {}, insight = {}) {
     const warDestruction = attacks ? number(player.destruction, DEFAULT_DESTRUCTION) : null;
     const rankedStars = insight?.offense?.stars;
     const rankedDestruction = insight?.offense?.destruction;
+    const currentAttackRate = player.availableAttacks
+        ? clamp(number(player.attacksUsed, 0) / number(player.availableAttacks, 1), 0, 1)
+        : null;
+    const historicalAttackRate = insight?.historical?.reliability == null
+        ? null
+        : clamp(number(insight.historical.reliability, 0) / 100, 0, 1);
+    const attackRate = currentAttackRate == null
+        ? historicalAttackRate ?? 0.95
+        : historicalAttackRate == null
+            ? currentAttackRate
+            : currentAttackRate * 0.7 + historicalAttackRate * 0.3;
     return {
         stars: warStars == null
             ? number(rankedStars, DEFAULT_STARS)
@@ -117,9 +64,7 @@ function playerForm(player = {}, insight = {}) {
         destruction: warDestruction == null
             ? number(rankedDestruction, DEFAULT_DESTRUCTION)
             : rankedDestruction == null ? warDestruction : warDestruction * 0.72 + rankedDestruction * 0.28,
-        attackRate: player.availableAttacks
-            ? clamp(number(player.attacksUsed, 0) / number(player.availableAttacks, 1), 0, 1)
-            : 0.95
+        attackRate
     };
 }
 
@@ -296,6 +241,5 @@ function collectPredictionPlayerTags(report) {
 
 export {
     applyCwlPredictions,
-    buildPlayerInsight,
     collectPredictionPlayerTags
 };

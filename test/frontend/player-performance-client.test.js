@@ -78,4 +78,27 @@ describe('player performance batch client', () => {
         await runningBatch;
         expect(client.getPlayerPerformance('#P0L').performance).toBe(103);
     });
+
+    it('shares one request between concurrent batch consumers', async () => {
+        let resolveRequest;
+        requestMocks.requestJson.mockReturnValue(new Promise(resolve => {
+            resolveRequest = resolve;
+        }));
+        const client = await import('../../src/assets/js/cwl/player-performance-client.js');
+
+        const firstConsumer = client.loadPlayerPerformanceBatch(['#P0L']);
+        await vi.waitFor(() => expect(requestMocks.requestJson).toHaveBeenCalledTimes(1));
+        const secondConsumer = client.loadPlayerPerformanceBatch(['#P0L']);
+
+        resolveRequest({
+            results: {
+                '#P0L': { playerTag: '#P0L', status: 'ready', performance: 104 }
+            }
+        });
+
+        const [firstResult, secondResult] = await Promise.all([firstConsumer, secondConsumer]);
+        expect(firstResult['#P0L'].performance).toBe(104);
+        expect(secondResult['#P0L'].performance).toBe(104);
+        expect(requestMocks.requestJson).toHaveBeenCalledTimes(1);
+    });
 });

@@ -172,4 +172,42 @@ describe('CWL Operation Board', () => {
         expect(Array.from(document.querySelector('#op-roster-view').options).map(option => option.value)).not.toContain('unplanned');
     });
 
+    it('keeps the newest clan report when an earlier request finishes later', async () => {
+        let resolveFirstGroup;
+        clanApiMocks.getClanInfoRequest.mockImplementation(tag => Promise.resolve({
+            tag,
+            name: tag === '#PQL' ? 'First Clan' : 'Second Clan'
+        }));
+        clanApiMocks.getClanMembersRequest.mockImplementation(tag => Promise.resolve({
+            items: [{
+                tag: tag === '#PQL' ? '#P2Y' : '#P0L',
+                name: tag === '#PQL' ? 'First Player' : 'Second Player',
+                townHallLevel: 17
+            }]
+        }));
+        clanApiMocks.getClanCurrentWarLeagueGroupRequest
+            .mockImplementationOnce(() => new Promise(resolve => {
+                resolveFirstGroup = resolve;
+            }))
+            .mockResolvedValueOnce({ state: 'inWar', rounds: [{ warTags: ['#0'] }] });
+
+        await import('../../src/assets/js/pages/cwl-operation-board.js');
+        await vi.waitFor(() => expect(document.querySelector('#op-roster-body').children.length).toBe(1));
+
+        const clanInput = document.querySelector('#op-standalone-clan-tag');
+        clanInput.value = '#PQL';
+        document.querySelector('#op-standalone-load').click();
+        await vi.waitFor(() => expect(clanApiMocks.getClanCurrentWarLeagueGroupRequest).toHaveBeenCalledTimes(1));
+
+        clanInput.value = '#P0L';
+        document.querySelector('#op-standalone-load').click();
+        await vi.waitFor(() => expect(document.querySelector('#op-roster-body').textContent).toContain('Second Player'));
+
+        resolveFirstGroup({ state: 'inWar', rounds: [{ warTags: ['#0'] }] });
+        await vi.waitFor(() => expect(document.querySelector('#op-live-state').dataset.state).toBe('ready'));
+
+        expect(document.querySelector('#op-roster-body').textContent).toContain('Second Player');
+        expect(document.querySelector('#op-roster-body').textContent).not.toContain('First Player');
+    });
+
 });

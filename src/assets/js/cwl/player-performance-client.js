@@ -3,7 +3,7 @@ import * as config from '../Data/config.js';
 
 const performanceByTag = new Map();
 const pendingTags = new Set();
-const inFlightTags = new Set();
+const inFlightByTag = new Map();
 const MAX_BATCH_SIZE = 100;
 let batchTimer;
 let observer;
@@ -26,7 +26,7 @@ export function collectPlannerPlayerTags(root = document) {
 
 export function schedulePlayerPerformanceBatch(tags = collectPlannerPlayerTags()) {
     tags.map(normalizeTag).filter(Boolean).forEach(tag => {
-        if (!performanceByTag.has(tag) && !pendingTags.has(tag) && !inFlightTags.has(tag)) {
+        if (!performanceByTag.has(tag) && !pendingTags.has(tag) && !inFlightByTag.has(tag)) {
             pendingTags.add(tag);
         }
     });
@@ -40,36 +40,58 @@ export async function flushPlayerPerformanceBatch() {
     const tags = Array.from(pendingTags);
     if (!tags.length) return {};
     tags.forEach(tag => pendingTags.delete(tag));
-    tags.forEach(tag => inFlightTags.add(tag));
 
-    try {
-        const batches = [];
-        for (let index = 0; index < tags.length; index += MAX_BATCH_SIZE) {
-            batches.push(tags.slice(index, index + MAX_BATCH_SIZE));
-        }
-        const responses = await Promise.all(batches.map(playerTags => requestJson(
-            config._BASE_URL + config._EXT_PLAYER_PERFORMANCE,
-            {
-                body: { playerTags },
-                loading: 'background',
-                timeoutMs: 30_000
+    let requestPromise;
+    requestPromise = (async () => {
+        try {
+            const batches = [];
+            for (let index = 0; index < tags.length; index += MAX_BATCH_SIZE) {
+                batches.push(tags.slice(index, index + MAX_BATCH_SIZE));
             }
-        )));
-        const results = Object.assign({}, ...responses.map(response => response?.results || {}));
-        tags.forEach(tag => {
-            performanceByTag.set(tag, results[tag] || unavailableResult(tag));
-        });
-    } catch (error) {
-        tags.forEach(tag => performanceByTag.set(tag, unavailableResult(tag, error)));
-    } finally {
-        tags.forEach(tag => inFlightTags.delete(tag));
-    }
+            const responses = await Promise.all(batches.map(playerTags => requestJson(
+                config._BASE_URL + config._EXT_PLAYER_PERFORMANCE,
+                {
+                    body: { playerTags },
+                    loading: 'background',
+                    timeoutMs: 30_000
+                }
+            )));
+            const results = Object.assign(
+                {},
+                ...responses.map(response => response?.results || {})
+            );
+            tags.forEach(tag => {
+                performanceByTag.set(tag, results[tag] || unavailableResult(tag));
+            });
+        } catch (error) {
+            tags.forEach(tag => performanceByTag.set(tag, unavailableResult(tag, error)));
+        } finally {
+            tags.forEach(tag => {
+                if (inFlightByTag.get(tag) === requestPromise) inFlightByTag.delete(tag);
+            });
+        }
 
-    window.dispatchEvent(new CustomEvent(
-        'clashtools:player-performance-updated',
-        { detail: { tags } }
-    ));
-    return Object.fromEntries(tags.map(tag => [tag, performanceByTag.get(tag)]));
+        window.dispatchEvent(new CustomEvent(
+            'clashtools:player-performance-updated',
+            { detail: { tags } }
+        ));
+        return Object.fromEntries(tags.map(tag => [tag, performanceByTag.get(tag)]));
+    })();
+    tags.forEach(tag => inFlightByTag.set(tag, requestPromise));
+    return requestPromise;
+}
+
+export async function loadPlayerPerformanceBatch(tags = []) {
+    const normalized = Array.from(new Set(tags.map(normalizeTag).filter(Boolean)));
+    schedulePlayerPerformanceBatch(normalized);
+    const queuedRequest = flushPlayerPerformanceBatch();
+    const activeRequests = normalized
+        .map(tag => inFlightByTag.get(tag))
+        .filter(Boolean);
+    await Promise.all([queuedRequest, ...new Set(activeRequests)]);
+    return Object.fromEntries(
+        normalized.map(tag => [tag, performanceByTag.get(tag) || unavailableResult(tag)])
+    );
 }
 
 export function initPlayerPerformanceClient(root = document) {
@@ -91,7 +113,7 @@ export function initPlayerPerformanceClient(root = document) {
 export function clearPlayerPerformanceCache() {
     performanceByTag.clear();
     pendingTags.clear();
-    inFlightTags.clear();
+    inFlightByTag.clear();
 }
 
 function unavailableResult(tag, error = null) {
