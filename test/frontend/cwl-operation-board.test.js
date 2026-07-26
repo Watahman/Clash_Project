@@ -33,6 +33,9 @@ vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
         'op.viewUnplanned': 'Niet gepland',
         'op.viewMissed': 'Gemist',
         'op.viewAttention': 'Aandacht nodig',
+        'op.rank': 'Positie',
+        'op.clan': 'Clan',
+        'op.wins': 'Wins',
         'op.day': 'Dag',
         'op.dayShort': 'D',
         'op.starsChartLabel': 'Sterren per dag',
@@ -91,8 +94,7 @@ describe('CWL Operation Board', () => {
             </nav>
             <section id="op-panel-live" hidden><div id="op-live-content"></div></section>
             <section id="op-panel-league" hidden></section><section id="op-panel-roster" hidden></section><section id="op-panel-bonuses" hidden></section>
-            <strong id="op-total-stars"></strong><strong id="op-avg-destruction"></strong>
-            <strong id="op-current-position"></strong><strong id="op-projected-finish"></strong><strong id="op-completed-rounds"></strong>
+            <strong id="op-current-position"></strong><strong id="op-projected-finish"></strong><small id="op-finish-probabilities"></small><strong id="op-completed-rounds"></strong><strong id="op-record"></strong>
             <div id="op-rounds-list"></div><span id="op-round-state"></span><span id="op-round-count"></span>
             <div id="op-stars-chart"></div><span id="op-stars-chart-state"></span>
             <div id="op-position-chart"></div><span id="op-position-chart-state"></span>
@@ -134,10 +136,13 @@ describe('CWL Operation Board', () => {
             }
         });
 
-        expect(document.querySelectorAll('#op-standings-list .op-standing-row')).toHaveLength(4);
+        expect(document.querySelectorAll(
+            '#op-standings-list .op-standing-row:not(.op-standing-header)'
+        )).toHaveLength(4);
         expect(document.querySelector('#op-standings-list .is-selected strong').textContent).toBe('Belgian Warriors');
         expect(document.querySelector('#op-current-position').textContent).toBe('#2');
-        expect(document.querySelector('#op-total-stars').textContent).toBe('33');
+        expect(document.querySelector('#op-completed-rounds').textContent).toBe('1/1');
+        expect(document.querySelector('#op-record').textContent).toBe('1W · 0L');
         expect(document.querySelectorAll('#op-stars-chart .op-stars-point')).toHaveLength(1);
         expect(document.querySelectorAll('#op-stars-chart .op-stars-x-axis > span')).toHaveLength(7);
         expect(document.querySelectorAll('#op-position-chart .op-ranking-point')).toHaveLength(1);
@@ -161,7 +166,6 @@ describe('CWL Operation Board', () => {
 
         await vi.waitFor(() => expect(document.querySelector('#op-help').textContent).toBe('Geen actieve CWL'));
         expect(document.querySelector('#op-live-state').dataset.state).toBe('idle');
-        expect(document.querySelector('#op-total-stars').textContent).toBe('0');
         expect(document.querySelector('#op-roster-count').textContent).toBe('0 spelers');
         expect(document.querySelectorAll('#op-roster-body .op-player-row')).toHaveLength(0);
         expect(clanApiMocks.getClanWarLeagueWarRequest).not.toHaveBeenCalled();

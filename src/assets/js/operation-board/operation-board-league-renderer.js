@@ -1,6 +1,5 @@
 import { renderRankingHistoryChart } from '../cwl/cwl-ranking-history.js';
 import { renderStarsPerDayChart } from '../cwl/cwl-stars-chart.js';
-import { isAttackCountingState } from '../cwl/cwl-war-state.js';
 import { t } from '../i18n/i18n.js';
 import {
     escapeHtml,
@@ -11,17 +10,16 @@ import {
     resultText,
     stateText
 } from './operation-board-render-utils.js';
+import { buildLeagueModel } from './operation-board-league-model.js';
 
 export function renderLeagueSections(refs, report) {
+    const league = buildLeagueModel(report);
     refs.starsChart.setAttribute(
         'aria-busy',
         String(report.predictionState === 'loading')
     );
-    const countedRounds = report.rounds.filter(round =>
-        isAttackCountingState(round.state)
-    );
-    refs.roundState.textContent = countedRounds.length
-        ? `${countedRounds.length} ${t('op.roundsShort')}`
+    refs.roundState.textContent = league.completedRounds
+        ? `${league.completedRounds} ${t('op.roundsShort')}`
         : t('op.noPlayedRounds');
     refs.roundCount.textContent = `${report.rounds.length} ${t('op.roundsShort')}`;
     renderRounds(refs, report.rounds, report.predictionState);
@@ -29,18 +27,20 @@ export function renderLeagueSections(refs, report) {
     renderRankingHistoryChart(
         refs.positionChart,
         report.rankingHistory,
-        refs.positionChartState
+        refs.positionChartState,
+        league.forecast.history
     );
-    renderLeagueMetrics(refs, report);
+    renderLeagueMetrics(refs, league);
     renderStandings(refs, report);
 }
 
 export function clearLeagueSections(refs) {
-    refs.totalStars.textContent = '0';
-    refs.avgDestruction.textContent = '0%';
     refs.currentPosition.textContent = '-';
     refs.projectedFinish.textContent = '-';
     refs.completedRounds.textContent = '0/7';
+    refs.record.textContent = '0W · 0L';
+    refs.finishProbabilities.textContent = '';
+    refs.finishProbabilities.hidden = true;
     refs.starsChart.setAttribute('aria-busy', 'false');
     renderStarsPerDayChart(refs.starsChart, [], refs.starsChartState);
     renderRankingHistoryChart(refs.positionChart, [], refs.positionChartState);
@@ -50,25 +50,23 @@ export function clearLeagueSections(refs) {
     refs.standingsNote.textContent = '';
 }
 
-function renderLeagueMetrics(refs, report) {
-    const countedRounds = report.rounds.filter(round =>
-        isAttackCountingState(round.state)
-    );
-    const totalStars = countedRounds.reduce(
-        (sum, round) => sum + number(round.stars, 0),
-        0
-    );
-    const averageDestruction = countedRounds.length
-        ? countedRounds.reduce(
-            (sum, round) => sum + number(round.destruction, 0),
-            0
-        ) / countedRounds.length
-        : 0;
-    refs.totalStars.textContent = totalStars;
-    refs.avgDestruction.textContent = `${averageDestruction.toFixed(1)}%`;
+function renderLeagueMetrics(refs, league) {
     refs.completedRounds.textContent =
-        `${countedRounds.length}/${report.rounds.length || 7}`;
-    refs.projectedFinish.textContent = '-';
+        `${league.completedRounds}/${league.totalRounds}`;
+    refs.record.textContent = formatRecord(league.record);
+    refs.projectedFinish.textContent = league.forecast.available
+        ? formatProjectedFinish(league.forecast)
+        : '—';
+    refs.finishProbabilities.replaceChildren();
+    refs.finishProbabilities.hidden = !league.forecast.probabilities.length;
+    compactProbabilities(league.forecast.probabilities)
+        .filter(item => item.probability >= 0.01)
+        .forEach(item => {
+            const value = document.createElement('span');
+            value.textContent =
+                `${item.label} ${Math.round(item.probability * 100)}%`;
+            refs.finishProbabilities.appendChild(value);
+        });
 }
 
 function renderStandings(refs, report) {
@@ -84,12 +82,22 @@ function renderStandings(refs, report) {
     const selected = standings.rows[standings.selectedIndex];
     refs.standingsState.textContent = `#${selected.rank}/${standings.rows.length}`;
     refs.currentPosition.textContent = `#${selected.rank}`;
+    const header = document.createElement('div');
+    header.className = 'op-standing-row op-standing-header';
+    header.innerHTML = `
+        <span>${escapeHtml(t('op.rank'))}</span>
+        <strong>${escapeHtml(t('op.clan'))}</strong>
+        <span>${escapeHtml(t('op.wins'))}</span>
+        <span>${escapeHtml(t('op.stars'))}</span>
+        <span>${escapeHtml(t('op.destruction'))}</span>`;
+    refs.standingsList.appendChild(header);
     standings.rows.forEach(row => {
         const item = document.createElement('div');
         item.className = `op-standing-row${row.tag === selected.tag ? ' is-selected' : ''}`;
         item.innerHTML = `
             <span class="op-standing-rank">#${row.rank}</span>
             <strong>${escapeHtml(row.name)}</strong>
+            <span>${number(row.wins, 0)}W</span>
             <span>${number(row.stars, 0)}★</span>
             <span>${number(row.destruction, 0).toFixed(1)}%</span>`;
         refs.standingsList.appendChild(item);
@@ -119,6 +127,9 @@ function renderRounds(refs, rounds, predictionState = 'idle') {
                 <span><strong>${number(round.destruction, 0).toFixed(1)}%</strong>Dest</span>
                 <span><strong>${number(round.attacksUsed, 0)}/${number(round.availableAttacks, 0)}</strong>Atk</span>
             </div>
+            ${round.state === 'completed'
+                ? `<p class="op-result-text">${escapeHtml(resultText(round.result))}</p>`
+                : ''}
             ${predictionMarkup(round, predictionState)}`;
         refs.roundsList.appendChild(card);
     });
@@ -126,17 +137,22 @@ function renderRounds(refs, rounds, predictionState = 'idle') {
 
 function predictionMarkup(round, predictionState) {
     const prediction = round.prediction;
-    if (prediction) {
-        const maximumStars = number(prediction.availableAttacks, 0) * 3;
+    if (round.state === 'completed') return '';
+    if (prediction && prediction.confidence !== 'Low') {
+        const confidence = t(`performance.confidence${prediction.confidence}`);
         return `
-            <div class="op-round-prediction" data-state="ready">
-                <span class="op-round-prediction-label">${escapeHtml(t('op.chartPrediction'))}</span>
-                <div class="op-bonus-performance op-prediction-performance">
-                    <span title="${escapeHtml(t('op.predictedStars'))}"><strong>${number(prediction.stars, 0).toFixed(2)}/${maximumStars}</strong><small>${escapeHtml(t('op.stars'))}</small></span>
-                    <span title="${escapeHtml(t('op.predictedDestruction'))}"><strong>${number(prediction.destruction, 0).toFixed(2)}%</strong><small>Dest</small></span>
-                    <span title="${escapeHtml(t('op.predictedAttacks'))}"><strong>${number(prediction.attacksUsed, 0).toFixed(2)}/${number(prediction.availableAttacks, 0)}</strong><small>${escapeHtml(t('op.attacks'))}</small></span>
-                </div>
-            </div>`;
+            <details class="op-round-prediction" data-state="ready">
+                <summary>${escapeHtml(t('op.expectedCompact', {
+                    stars: number(prediction.stars, 0).toFixed(1),
+                    confidence
+                }))}</summary>
+                <p>${escapeHtml(t('op.predictionExplanation', {
+                    destruction: number(prediction.destruction, 0).toFixed(1),
+                    attacks: number(prediction.attacksUsed, 0).toFixed(1),
+                    available: number(prediction.availableAttacks, 0),
+                    coverage: Math.round(number(prediction.coverage, 0) * 100)
+                }))}</p>
+            </details>`;
     }
     const loading = predictionState === 'loading';
     return `
@@ -144,4 +160,25 @@ function predictionMarkup(round, predictionState) {
             <span class="op-round-prediction-label">${escapeHtml(t('op.chartPrediction'))}</span>
             <span class="op-prediction-state">${escapeHtml(t(loading ? 'op.predictionLoading' : 'op.predictionUnavailable'))}</span>
         </div>`;
+}
+
+function formatRecord(record) {
+    const draw = record.draws ? ` · ${record.draws}D` : '';
+    return `${record.wins}W · ${record.losses}L${draw}`;
+}
+
+function formatProjectedFinish(forecast) {
+    return forecast.minimum === forecast.maximum
+        ? `#${forecast.minimum}`
+        : `#${forecast.minimum}–#${forecast.maximum}`;
+}
+
+function compactProbabilities(probabilities) {
+    const top = probabilities
+        .filter(item => item.rank <= 3)
+        .map(item => ({ ...item, label: `#${item.rank}` }));
+    const lower = probabilities
+        .filter(item => item.rank >= 4)
+        .reduce((sum, item) => sum + item.probability, 0);
+    return lower ? [...top, { label: '#4+', probability: lower }] : top;
 }

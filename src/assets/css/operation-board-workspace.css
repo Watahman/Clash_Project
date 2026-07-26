@@ -290,6 +290,14 @@
 .op-tab-metrics > div:last-child { border-right: 0; }
 .op-tab-metrics span { color: var(--text-muted); font-size: 0.72rem; }
 .op-tab-metrics strong { color: var(--text); font-size: 1.55rem; line-height: 1; }
+.op-league-summary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.op-finish-metric small {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem var(--space-2);
+    color: var(--text-muted);
+    font-size: 0.62rem;
+}
 
 .op-league-layout {
     display: grid;
@@ -862,8 +870,7 @@
 .operation-workspace-page .op-result-text { color: var(--text-muted); font-size: 0.66rem; text-transform: none; }
 
 .operation-workspace-page .op-round-prediction {
-    display: none;
-    min-height: 3rem;
+    display: grid;
     gap: 0.4rem;
     margin-top: var(--space-3);
     padding-top: var(--space-3);
@@ -871,6 +878,18 @@
 }
 
 .operation-workspace-page .op-bonus-performance > .op-prediction-detail { display: none; }
+.operation-workspace-page details.op-round-prediction summary {
+    color: var(--accent-strong);
+    cursor: pointer;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+.operation-workspace-page details.op-round-prediction p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.64rem;
+    line-height: 1.45;
+}
 
 .operation-workspace-page .op-round-prediction-label {
     color: var(--accent-strong);
@@ -961,7 +980,7 @@
 
 .operation-workspace-page .op-standing-row {
     display: grid;
-    grid-template-columns: 2.25rem minmax(0, 1fr) auto auto;
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto auto auto;
     align-items: center;
     gap: var(--space-2);
     padding: 0.7rem var(--space-3);
@@ -976,6 +995,13 @@
 
 .operation-workspace-page .op-standing-row:last-child { border-bottom: 0; }
 .operation-workspace-page .op-standing-row strong { color: var(--text); font-size: 0.75rem; text-transform: none; }
+.operation-workspace-page .op-standing-header {
+    color: var(--text-subtle);
+    font-size: 0.6rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.operation-workspace-page .op-standing-header strong { color: var(--text-subtle); font-size: inherit; }
 .operation-workspace-page .op-standing-row.is-selected { border-color: var(--border); background: var(--accent-soft); }
 .operation-workspace-page .op-standing-rank { color: var(--accent); font-weight: 800; }
 .operation-workspace-page .op-standings-note { padding: var(--space-3); border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.68rem; }

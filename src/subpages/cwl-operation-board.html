@@ -66,12 +66,11 @@
     </section>
 
     <section class="op-tab-panel" id="op-panel-league" role="tabpanel" aria-labelledby="op-tab-league" tabindex="0" hidden>
-        <section class="op-tab-metrics" aria-label="League summary" data-i18n-aria-label="op.leagueSummary">
+        <section class="op-tab-metrics op-league-summary" aria-label="League summary" data-i18n-aria-label="op.leagueSummary">
             <div><span data-i18n="op.currentPosition">Current position</span><strong id="op-current-position">-</strong></div>
-            <div><span data-i18n="op.projectedFinish">Projected finish</span><strong id="op-projected-finish">-</strong></div>
-            <div><span data-i18n="op.totalStars">Total stars</span><strong id="op-total-stars">0</strong></div>
-            <div><span data-i18n="op.avgDestruction">Avg. destruction</span><strong id="op-avg-destruction">0%</strong></div>
+            <div class="op-finish-metric"><span data-i18n="op.projectedFinish">Projected finish</span><strong id="op-projected-finish">-</strong><small id="op-finish-probabilities" hidden></small></div>
             <div><span data-i18n="op.completedRounds">Completed rounds</span><strong id="op-completed-rounds">0/7</strong></div>
+            <div><span data-i18n="op.record">Record</span><strong id="op-record">0W · 0L</strong></div>
         </section>
         <div class="op-history-grid">
             <section class="op-flat-section op-stars-chart-panel" aria-labelledby="op-stars-chart-title">

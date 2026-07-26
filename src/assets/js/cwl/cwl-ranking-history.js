@@ -1,6 +1,5 @@
 import { normalizeWarState } from './cwl-war-state.js';
 import { t } from '../i18n/i18n.js';
-import { buildWeightedPrediction } from './cwl-chart-prediction.js';
 
 const DAY_COUNT = 7;
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -100,12 +99,12 @@ function getLineSegments(history) {
     return segments;
 }
 
-function renderRankingHistoryChart(container, history = [], status) {
+function renderRankingHistoryChart(container, history = [], status, forecast = []) {
     if (!container) return;
     const normalized = Array.from({ length: DAY_COUNT }, (_, index) => history[index] || emptyHistoryPoint(index + 1));
     const available = normalized.filter(point => point.rank != null);
     const clanCount = Math.max(2, ...available.map(point => Number(point.clanCount) || 0));
-    const prediction = buildWeightedPrediction(normalized, 'rank', { minimum: 1, maximum: clanCount });
+    const prediction = buildRankingPrediction(normalized, forecast);
     const xForDay = day => ((day - 1) / (DAY_COUNT - 1)) * 100;
     const yForRank = rank => ((rank - 1) / (clanCount - 1)) * 100;
 
@@ -210,15 +209,27 @@ function renderRankingHistoryChart(container, history = [], status) {
     spacer.setAttribute('aria-hidden', 'true');
     const xAxis = document.createElement('div');
     xAxis.className = 'op-stars-x-axis';
+    const forecastByDay = new Map(
+        forecast.map(point => [Number(point.day), point])
+    );
     normalized.forEach(point => {
+        const predicted = point.rank == null
+            ? forecastByDay.get(point.day)
+            : null;
         const label = document.createElement('span');
-        label.setAttribute('aria-label', point.rank == null
+        label.setAttribute('aria-label', point.rank == null && !predicted
             ? t('op.positionDayEmpty', { day: point.day })
-            : t('op.positionDayValue', { day: point.day, rank: point.rank, total: point.clanCount }));
+            : t('op.positionDayValue', {
+                day: point.day,
+                rank: point.rank ?? predicted.rank,
+                total: point.clanCount ?? predicted.clanCount
+            }));
         const day = document.createElement('small');
         day.textContent = `${t('op.dayShort')}${point.day}`;
         const value = document.createElement('strong');
-        value.textContent = point.rank == null ? '—' : `#${point.rank}`;
+        value.textContent = point.rank == null
+            ? predicted ? `~#${predicted.rank}` : '—'
+            : `#${point.rank}`;
         label.append(day, value);
         xAxis.appendChild(label);
     });
@@ -244,4 +255,24 @@ function renderRankingHistoryChart(container, history = [], status) {
     container.append(visual, xAxisRow, legend, summary);
 }
 
-export { buildRankingHistory, getLineSegments, renderRankingHistoryChart };
+function buildRankingPrediction(history, forecast) {
+    const future = (forecast || [])
+        .filter(point =>
+            Number.isFinite(Number(point.rank))
+            && history[Number(point.day) - 1]?.rank == null
+        )
+        .map(point => ({ day: Number(point.day), value: Number(point.rank) }))
+        .sort((a, b) => a.day - b.day);
+    if (!future.length) return [];
+    const lastActual = history.filter(point => point.rank != null).at(-1);
+    return lastActual
+        ? [{ day: lastActual.day, value: lastActual.rank }, ...future]
+        : future;
+}
+
+export {
+    buildRankingHistory,
+    buildRankingPrediction,
+    getLineSegments,
+    renderRankingHistoryChart
+};

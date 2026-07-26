@@ -120,4 +120,36 @@ describe('CWL ranking history', () => {
         expect(container.querySelectorAll('.op-stars-x-axis strong')[2].textContent).toBe('—');
         expect(document.querySelector('#status').textContent).toBe('2/7 dagen');
     });
+
+    it('renders only supplied League forecast positions as a dashed continuation', async () => {
+        const {
+            buildRankingPrediction,
+            renderRankingHistoryChart
+        } = await import('../../src/assets/js/cwl/cwl-ranking-history.js');
+        const history = [
+            { day: 1, rank: 3, clanCount: 4, stars: 31, destruction: 89.4 },
+            ...Array.from({ length: 6 }, (_, index) => ({
+                day: index + 2,
+                rank: null
+            }))
+        ];
+        const forecast = [
+            { day: 2, rank: 2, clanCount: 4 },
+            { day: 3, rank: 1, clanCount: 4 }
+        ];
+
+        expect(buildRankingPrediction(history, forecast)).toEqual([
+            { day: 1, value: 3 },
+            { day: 2, value: 2 },
+            { day: 3, value: 1 }
+        ]);
+        renderRankingHistoryChart(
+            document.querySelector('#chart'),
+            history,
+            document.querySelector('#status'),
+            forecast
+        );
+        expect(document.querySelectorAll('.op-ranking-prediction-line')).toHaveLength(1);
+        expect(document.querySelectorAll('.op-stars-x-axis strong')[1].textContent).toBe('~#2');
+    });
 });

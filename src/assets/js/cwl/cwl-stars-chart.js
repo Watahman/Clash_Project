@@ -35,10 +35,16 @@ function buildStarsPerDaySeries(rounds = []) {
 }
 
 function buildPredictionSeries(series) {
-    const actual = series.filter(point => point.stars != null);
-    const lastActual = actual.at(-1);
+    const completed = series.filter(
+        point => point.state === 'completed' && point.stars != null
+    );
+    const lastActual = completed.at(-1);
     const future = series
-        .filter(point => point.stars == null && point.predictedStars != null && (!lastActual || point.day > lastActual.day))
+        .filter(point =>
+            point.state !== 'completed'
+            && point.predictedStars != null
+            && (!lastActual || point.day > lastActual.day)
+        )
         .map(point => ({ day: point.day, value: point.predictedStars }));
     if (!future.length) return [];
     return lastActual ? [{ day: lastActual.day, value: lastActual.stars }, ...future] : future;
@@ -228,4 +234,10 @@ function createChartLegend(showPrediction) {
     return legend;
 }
 
-export { buildStarsPerDaySeries, getLineSegments, getStarsScaleMaximum, renderStarsPerDayChart };
+export {
+    buildPredictionSeries,
+    buildStarsPerDaySeries,
+    getLineSegments,
+    getStarsScaleMaximum,
+    renderStarsPerDayChart
+};

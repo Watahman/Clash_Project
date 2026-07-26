@@ -61,4 +61,36 @@ describe('stars per war day chart', () => {
         expect(getLineSegments(series)).toHaveLength(2);
         expect(getLineSegments(series).map(segment => segment.map(point => point.day))).toEqual([[1], [3]]);
     });
+
+    it('keeps completed points actual and uses the live expected final in prediction', async () => {
+        const {
+            buildPredictionSeries,
+            buildStarsPerDaySeries
+        } = await import('../../src/assets/js/cwl/cwl-stars-chart.js');
+        const series = buildStarsPerDaySeries([
+            {
+                day: 1,
+                state: 'completed',
+                stars: 31,
+                prediction: { stars: 36 }
+            },
+            {
+                day: 2,
+                state: 'live',
+                stars: 18,
+                prediction: { stars: 33.5 }
+            },
+            {
+                day: 3,
+                state: 'preparation',
+                prediction: { stars: 34 }
+            }
+        ]);
+
+        expect(buildPredictionSeries(series)).toEqual([
+            { day: 1, value: 31 },
+            { day: 2, value: 33.5 },
+            { day: 3, value: 34 }
+        ]);
+    });
 });
