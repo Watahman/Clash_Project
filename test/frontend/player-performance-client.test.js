@@ -41,6 +41,52 @@ describe('player performance batch client', () => {
         expect(requestMocks.requestJson).toHaveBeenCalledTimes(1);
     });
 
+    it('starts loading rendered planner players as soon as the client initializes', async () => {
+        requestMocks.requestJson.mockResolvedValue({
+            results: {
+                '#P0L': { playerTag: '#P0L', status: 'ready', performance: 101 },
+                '#P2Y': { playerTag: '#P2Y', status: 'ready', performance: 98 }
+            }
+        });
+        const client = await import('../../src/assets/js/cwl/player-performance-client.js');
+
+        client.initPlayerPerformanceClient();
+
+        await vi.waitFor(() => expect(requestMocks.requestJson).toHaveBeenCalledTimes(1));
+        expect(requestMocks.requestJson.mock.calls[0][1].body).toEqual({
+            playerTags: ['#P0L', '#P2Y']
+        });
+        await vi.waitFor(() =>
+            expect(client.getPlayerPerformance('#P2Y')?.performance).toBe(98)
+        );
+    });
+
+    it('starts the complete visible-player batch immediately after a plan loads', async () => {
+        requestMocks.requestJson.mockResolvedValue({
+            results: {
+                '#P0L': { playerTag: '#P0L', status: 'ready', performance: 101 },
+                '#P2Y': { playerTag: '#P2Y', status: 'ready', performance: 98 }
+            }
+        });
+        const planner = document.querySelector('.workspace-planner');
+        planner.replaceChildren();
+        const client = await import('../../src/assets/js/cwl/player-performance-client.js');
+        client.initPlayerPerformanceClient();
+        planner.innerHTML = `
+            <article class="cwl-player-article" data-planner-card="true"
+                     data-player-tag="#P0L"></article>
+            <article class="cwl-player-article" data-planner-card="true"
+                     data-player-tag="#P2Y"></article>`;
+
+        window.dispatchEvent(new CustomEvent('clashtools:cwl-plan-loaded'));
+
+        await vi.waitFor(() => expect(requestMocks.requestJson).toHaveBeenCalledTimes(1));
+        expect(requestMocks.requestJson.mock.calls[0][1].body.playerTags).toEqual([
+            '#P0L',
+            '#P2Y'
+        ]);
+    });
+
     it('stores neutral unavailable results when the batch fails', async () => {
         requestMocks.requestJson.mockRejectedValue(Object.assign(
             new Error('offline'),

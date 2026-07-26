@@ -94,9 +94,21 @@ export async function loadPlayerPerformanceBatch(tags = []) {
     );
 }
 
+export function primePlannerPlayerPerformance(root = document) {
+    const tags = collectPlannerPlayerTags(root);
+    if (!tags.length) return Promise.resolve({});
+    schedulePlayerPerformanceBatch(tags);
+    return flushPlayerPerformanceBatch();
+}
+
 export function initPlayerPerformanceClient(root = document) {
-    schedulePlayerPerformanceBatch(collectPlannerPlayerTags(root));
-    const refresh = () => schedulePlayerPerformanceBatch(collectPlannerPlayerTags(root));
+    void primePlannerPlayerPerformance(root);
+    const refresh = () => {
+        void primePlannerPlayerPerformance(root);
+    };
+    const queueRefresh = () => {
+        schedulePlayerPerformanceBatch(collectPlannerPlayerTags(root));
+    };
     for (const eventName of [
         'clashtools:cwl-player-added',
         'clashtools:cwl-player-removed',
@@ -105,12 +117,13 @@ export function initPlayerPerformanceClient(root = document) {
         window.addEventListener(eventName, refresh);
     }
     observer?.disconnect();
-    observer = new MutationObserver(refresh);
+    observer = new MutationObserver(queueRefresh);
     const planner = root.querySelector('.workspace-planner') || root.body;
     if (planner) observer.observe(planner, { childList: true, subtree: true });
 }
 
 export function clearPlayerPerformanceCache() {
+    window.clearTimeout(batchTimer);
     performanceByTag.clear();
     pendingTags.clear();
     inFlightByTag.clear();
