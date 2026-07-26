@@ -47,7 +47,16 @@ describe('CWL historical performance popover', () => {
         const { initPlayerPerformancePopover } = await import(
             '../../src/assets/js/cwl/cwl-player-performance-popover.js'
         );
-        const popover = initPlayerPerformancePopover();
+        const popover = initPlayerPerformancePopover({
+            getCurrentContext: () => ({
+                attacksUsed: 5,
+                availableAttacks: 5,
+                stars: 12,
+                avgDestruction: 91.4,
+                missed: 0,
+                roundsPlayed: 5
+            })
+        });
         const control = document.querySelector('.cwl-delete-player');
         const info = document.querySelector('.cwl-player-info');
 
@@ -62,6 +71,10 @@ describe('CWL historical performance popover', () => {
         expect(popover.classList.contains('hidden')).toBe(false);
         expect(popover.textContent).toContain('108');
         expect(popover.textContent).toContain('CWL');
+        expect(popover.textContent).toContain('Current CWL');
+        expect(popover.textContent).toContain('5 / 5');
+        expect(popover.textContent).toContain('91.4%');
+        expect(popover.textContent).toContain('Rounds played');
         expect(popover.textContent).toContain('Insufficient tracked war participation');
 
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));

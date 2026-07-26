@@ -14,6 +14,7 @@
 .cwl-performance-header,
 .cwl-performance-score,
 .cwl-performance-form,
+.cwl-performance-current,
 .cwl-performance-section,
 .cwl-performance-data,
 .cwl-performance-empty { padding: 0.75rem 0.9rem; }
@@ -28,6 +29,8 @@
 .cwl-performance-form strong { color: var(--text); }
 .cwl-performance-form .is-strong { color: var(--success); }
 .cwl-performance-form .is-declining { color: var(--danger); }
+.cwl-performance-current { border-block: 1px solid var(--border); background: var(--surface-subtle); }
+.cwl-performance-current h3 { margin: 0 0 0.45rem; color: var(--text); font-size: 0.72rem; }
 .cwl-performance-section { border-top: 1px solid var(--border); }
 .cwl-performance-section h3 { margin: 0 0 0.45rem; color: var(--text-muted); font-size: 0.66rem; }
 .cwl-performance-metrics { display: grid; grid-template-columns: 1fr auto; gap: 0.35rem 0.8rem; margin: 0; font-size: 0.72rem; }

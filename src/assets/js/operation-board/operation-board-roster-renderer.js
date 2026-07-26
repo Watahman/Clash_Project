@@ -9,6 +9,7 @@ import {
     option,
     stateText
 } from './operation-board-render-utils.js';
+import { matchesRosterView } from './operation-board-roster-filter.js';
 
 export function isStandaloneMode(report, selectedClan = null) {
     return Boolean(report?.clan?.standalone || (!report && selectedClan?.standalone));
@@ -17,7 +18,6 @@ export function isStandaloneMode(report, selectedClan = null) {
 export function syncRosterMode(refs, report, selectedClan = null) {
     const standalone = isStandaloneMode(report, selectedClan);
     if (refs.rosterPlanningHeader) refs.rosterPlanningHeader.hidden = standalone;
-    if (refs.rosterWarHeader) refs.rosterWarHeader.hidden = standalone;
 }
 
 export function renderRosterViewOptions(refs, report, selectedClan = null) {
@@ -26,16 +26,23 @@ export function renderRosterViewOptions(refs, report, selectedClan = null) {
     const baseOptions = standalone
         ? [
             option('all', t('op.viewAll')),
-            option('missed', t('op.viewMissed'))
+            option('missed', t('op.viewMissed')),
+            option('attention', t('op.viewAttention'))
         ]
         : [
             option('all', t('op.viewAll')),
             option('planned', t('op.viewPlanned')),
             option('unplanned', t('op.viewUnplanned')),
-            option('missed', t('op.viewMissed'))
+            option('missed', t('op.viewMissed')),
+            option('attention', t('op.viewAttention'))
         ];
     refs.rosterView.replaceChildren(...baseOptions);
-    (report?.rounds || []).forEach((round, index) => {
+    const rounds = (report?.rounds || []).filter(round =>
+        round.state !== 'notStarted'
+        || round.opponent !== '-'
+        || number(round.availableAttacks, 0) > 0
+    );
+    rounds.forEach((round, index) => {
         if (index === 0) {
             refs.rosterView.appendChild(option('', '──────────', { disabled: true }));
         }
@@ -63,13 +70,7 @@ export function renderRoster(refs, report, selectedClan = null) {
         const matchesSearch = !query
             || lower(player.name).includes(query)
             || lower(player.tag).includes(query);
-        if (!matchesSearch) return false;
-        if (view === 'planned') return player.planned;
-        if (view === 'unplanned') {
-            return player.status === 'unplanned' || player.status === 'apiOnly';
-        }
-        if (view === 'missed') return number(player.missed, 0) > 0;
-        return true;
+        return matchesSearch && matchesRosterView(player, view);
     });
 
     refs.rosterCount.textContent = `${roster.length} ${t('op.players')}`;
@@ -81,57 +82,14 @@ export function renderRoster(refs, report, selectedClan = null) {
         const display = day
             ? getPlayerDayDisplay(player, day)
             : {
-                warText: player.warParticipant ? t('op.inAnyWar') : t('op.notInWar'),
-                warKind: player.warParticipant ? 'ok' : 'muted',
                 attacksUsed: player.attacksUsed,
                 availableAttacks: player.availableAttacks,
                 stars: player.stars,
-                destruction: player.destruction
+                destruction: player.destruction,
+                missed: player.missed
             };
         refs.rosterBody.appendChild(renderPlayerRow(player, display, report));
     });
-}
-
-export function renderRosterMetrics(refs, report) {
-    const roster = report?.roster || [];
-    const attacksUsed = roster.reduce(
-        (sum, player) => sum + number(player.attacksUsed, 0),
-        0
-    );
-    const available = roster.reduce(
-        (sum, player) => sum + number(player.availableAttacks, 0),
-        0
-    );
-    refs.attacksUsed.textContent = `${attacksUsed}/${available}`;
-    refs.missed.textContent = roster.reduce(
-        (sum, player) => sum + number(player.missed, 0),
-        0
-    );
-    refs.thList.replaceChildren();
-    const distribution = roster.reduce((result, player) => {
-        if (player.townHall) {
-            result[player.townHall] = (result[player.townHall] || 0) + 1;
-        }
-        return result;
-    }, {});
-    Object.entries(distribution)
-        .sort((a, b) => Number(b[0]) - Number(a[0]))
-        .forEach(([townHall, amount]) => {
-            const item = document.createElement('span');
-            item.textContent = `TH${townHall}: ${amount}`;
-            refs.thList.appendChild(item);
-        });
-    if (!Object.keys(distribution).length) {
-        const empty = document.createElement('span');
-        empty.textContent = t('op.noRoster');
-        refs.thList.appendChild(empty);
-    }
-}
-
-export function clearRosterMetrics(refs) {
-    refs.attacksUsed.textContent = '0/0';
-    refs.missed.textContent = '0';
-    refs.thList.replaceChildren();
 }
 
 export function renderEmptyRoster(refs, selectedClan = null, report = null) {
@@ -139,7 +97,7 @@ export function renderEmptyRoster(refs, selectedClan = null, report = null) {
     const row = document.createElement('tr');
     row.className = 'op-table-empty';
     const cell = document.createElement('td');
-    cell.colSpan = isStandaloneMode(report, selectedClan) ? 5 : 7;
+    cell.colSpan = isStandaloneMode(report, selectedClan) ? 6 : 7;
     cell.textContent = t('op.noRoster');
     row.appendChild(cell);
     refs.rosterBody.appendChild(row);
@@ -149,26 +107,27 @@ function getPlayerDayDisplay(player, day) {
     const stat = player.dayStats?.[day];
     return stat
         ? {
-            warText: stat.warParticipant ? t('op.inThisWar') : t('op.notInThisWar'),
-            warKind: stat.warParticipant ? 'ok' : 'muted',
             attacksUsed: stat.attacksUsed,
             availableAttacks: stat.availableAttacks,
             stars: stat.stars,
-            destruction: stat.destruction
+            destruction: stat.destruction,
+            missed: stat.missed
         }
         : {
-            warText: t('op.notInThisWar'),
-            warKind: 'muted',
             attacksUsed: 0,
             availableAttacks: 0,
             stars: 0,
-            destruction: 0
+            destruction: 0,
+            missed: 0
         };
 }
 
 function renderPlayerRow(player, display, report) {
     const row = document.createElement('tr');
     row.className = `op-player-row op-status-${player.status}`;
+    row.dataset.performanceCard = 'true';
+    row.dataset.playerTag = player.tag;
+    row.dataset.townHall = player.townHall || '';
     const standalone = isStandaloneMode(report);
     const planningCell = standalone
         ? ''
@@ -176,16 +135,20 @@ function renderPlayerRow(player, display, report) {
             player.planned ? t('op.planned') : t('op.notPlanned'),
             player.planned ? 'ok' : 'warn'
         )}</td>`;
-    const warCell = standalone
-        ? ''
-        : `<td>${badge(display.warText, display.warKind)}</td>`;
     row.innerHTML = `
-        <td><strong>${escapeHtml(player.name)}</strong><span>${escapeHtml(player.tag)}</span></td>
+        <td><button type="button" class="op-player-info cwl-player-info"
+                data-performance-trigger aria-expanded="false"
+                aria-label="${escapeHtml(t('performance.openForPlayer', {
+                    player: player.name
+                }))}">
+            <strong class="cwl-player-name">${escapeHtml(player.name)}</strong>
+            <span>${escapeHtml(player.tag)}</span>
+        </button></td>
         <td>TH${player.townHall || '-'}</td>
         ${planningCell}
-        ${warCell}
         <td>${number(display.attacksUsed, 0)}/${number(display.availableAttacks, 0)}</td>
         <td>${number(display.stars, 0)}★</td>
-        <td>${number(display.destruction, 0).toFixed(1)}%</td>`;
+        <td>${number(display.destruction, 0).toFixed(1)}%</td>
+        <td>${number(display.missed, 0)}</td>`;
     return row;
 }

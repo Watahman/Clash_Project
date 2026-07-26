@@ -3,16 +3,20 @@ import {
     getPlayerPerformance,
     schedulePlayerPerformanceBatch
 } from './player-performance-client.js';
+import { renderCurrentCwlSection } from './cwl-player-performance-current.js';
 
 const OPEN_DELAY_MS = 300;
 const CLOSE_DELAY_MS = 140;
 const VIEWPORT_GAP = 12;
 let popover;
 let activeCard;
+let activeTrigger;
 let openTimer;
 let closeTimer;
+let currentContextResolver = () => null;
 
-export function initPlayerPerformancePopover() {
+export function initPlayerPerformancePopover({ getCurrentContext } = {}) {
+    if (getCurrentContext) currentContextResolver = getCurrentContext;
     if (popover) return popover;
     popover = document.createElement('section');
     popover.className = 'cwl-performance-popover hidden';
@@ -43,10 +47,10 @@ export function initPlayerPerformancePopover() {
 
 function triggerFromTarget(target) {
     const trigger = target?.closest?.(
-        '.cwl-player-info, .cwl-player-townhall-foto'
+        '[data-performance-trigger], .cwl-player-info, .cwl-player-townhall-foto'
     );
     const card = trigger?.closest?.(
-        '.cwl-player-article[data-planner-card="true"]'
+        '[data-performance-card="true"], .cwl-player-article[data-planner-card="true"]'
     );
     return card ? { trigger, card } : null;
 }
@@ -58,7 +62,10 @@ function onPointerOver(event) {
     if (!match || previous?.card === match.card) return;
     cancelClose();
     window.clearTimeout(openTimer);
-    openTimer = window.setTimeout(() => openForCard(match.card), OPEN_DELAY_MS);
+    openTimer = window.setTimeout(
+        () => openForCard(match.card, match.trigger),
+        OPEN_DELAY_MS
+    );
 }
 
 function onPointerOut(event) {
@@ -73,12 +80,12 @@ function onPointerOut(event) {
 function onPointerUp(event) {
     if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
     const match = triggerFromTarget(event.target);
-    if (match) openForCard(match.card, true);
+    if (match) openForCard(match.card, match.trigger, true);
 }
 
 function onFocusIn(event) {
     const match = triggerFromTarget(event.target);
-    if (match) openForCard(match.card);
+    if (match) openForCard(match.card, match.trigger);
 }
 
 function onFocusOut(event) {
@@ -96,14 +103,15 @@ function onKeyDown(event) {
     const match = triggerFromTarget(event.target);
     if (!match) return;
     event.preventDefault();
-    openForCard(match.card, true);
+    openForCard(match.card, match.trigger, true);
 }
 
-function openForCard(card, focus = false) {
+function openForCard(card, trigger, focus = false) {
     window.clearTimeout(openTimer);
     cancelClose();
     activeCard = card;
-    card.querySelector('.cwl-player-info')?.setAttribute('aria-expanded', 'true');
+    activeTrigger = trigger;
+    activeTrigger?.setAttribute('aria-expanded', 'true');
     popover.classList.remove('hidden');
     renderActiveCard();
     reposition();
@@ -123,9 +131,13 @@ function renderActiveCard() {
 }
 
 function renderLoading() {
-    popover.replaceChildren(headerForActiveCard(), element('div', 'cwl-performance-loading', [
-        element('span'), element('span'), element('span'), element('span')
-    ]));
+    popover.replaceChildren(
+        headerForActiveCard(),
+        ...currentCwlNodes(),
+        element('div', 'cwl-performance-loading', [
+            element('span'), element('span'), element('span'), element('span')
+        ])
+    );
 }
 
 function renderPerformance(data) {
@@ -140,7 +152,9 @@ function renderPerformance(data) {
                     : 'performance.needsMoreAttacks'
             ))
         );
-        popover.replaceChildren(header, empty, confidenceFooter(data));
+        popover.replaceChildren(
+            header, ...currentCwlNodes(), empty, confidenceFooter(data)
+        );
         return;
     }
 
@@ -181,8 +195,15 @@ function renderPerformance(data) {
         [t('performance.downHit'), String(data.downHitCount)]
     ]));
     popover.replaceChildren(
-        header, top, form, stats, reliability, matchups, confidenceFooter(data)
+        header, ...currentCwlNodes(), top, form, stats,
+        reliability, matchups, confidenceFooter(data)
     );
+}
+
+function currentCwlNodes() {
+    const context = currentContextResolver(activeCard?.dataset.playerTag || '');
+    const current = renderCurrentCwlSection(context);
+    return current ? [current] : [];
 }
 
 function headerForActiveCard() {
@@ -239,8 +260,8 @@ function element(tag, className = '', content = null) {
 }
 
 function reposition() {
-    if (!activeCard || popover?.classList.contains('hidden')) return;
-    const anchor = activeCard.getBoundingClientRect();
+    if (!activeTrigger || popover?.classList.contains('hidden')) return;
+    const anchor = activeTrigger.getBoundingClientRect();
     const popup = popover.getBoundingClientRect();
     const right = anchor.right + VIEWPORT_GAP;
     const left = anchor.left - popup.width - VIEWPORT_GAP;
@@ -267,8 +288,9 @@ function cancelClose() {
 function closePopover() {
     window.clearTimeout(openTimer);
     cancelClose();
-    activeCard?.querySelector('.cwl-player-info')?.setAttribute('aria-expanded', 'false');
+    activeTrigger?.setAttribute('aria-expanded', 'false');
     activeCard = null;
+    activeTrigger = null;
     popover?.classList.add('hidden');
 }
 

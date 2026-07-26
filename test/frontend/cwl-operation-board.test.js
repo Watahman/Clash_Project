@@ -32,6 +32,7 @@ vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
         'op.viewPlanned': 'Gepland',
         'op.viewUnplanned': 'Niet gepland',
         'op.viewMissed': 'Gemist',
+        'op.viewAttention': 'Aandacht nodig',
         'op.day': 'Dag',
         'op.dayShort': 'D',
         'op.starsChartLabel': 'Sterren per dag',
@@ -91,12 +92,12 @@ describe('CWL Operation Board', () => {
             <section id="op-panel-live" hidden><div id="op-live-content"></div></section>
             <section id="op-panel-league" hidden></section><section id="op-panel-roster" hidden></section><section id="op-panel-bonuses" hidden></section>
             <strong id="op-total-stars"></strong><strong id="op-avg-destruction"></strong>
-            <strong id="op-attacks-used"></strong><strong id="op-missed-attacks"></strong><strong id="op-current-position"></strong><strong id="op-projected-finish"></strong><strong id="op-completed-rounds"></strong>
-            <div id="op-th-list"></div><div id="op-rounds-list"></div><span id="op-round-state"></span><span id="op-round-count"></span>
+            <strong id="op-current-position"></strong><strong id="op-projected-finish"></strong><strong id="op-completed-rounds"></strong>
+            <div id="op-rounds-list"></div><span id="op-round-state"></span><span id="op-round-count"></span>
             <div id="op-stars-chart"></div><span id="op-stars-chart-state"></span>
             <div id="op-position-chart"></div><span id="op-position-chart-state"></span>
             <span id="op-standings-state"></span><div id="op-standings-list"></div><p id="op-standings-note"></p>
-            <span id="op-roster-count"></span><table><thead><tr><th>Player</th><th>TH</th><th data-op-roster-column="planning">Planning</th><th data-op-roster-column="war">War</th><th>Attacks</th><th>Stars</th><th>Destruction</th></tr></thead><tbody id="op-roster-body"></tbody></table><input id="op-roster-filter"><select id="op-roster-view"></select>
+            <span id="op-roster-count"></span><table><thead><tr><th>Player</th><th>TH</th><th data-op-roster-column="planning">Planning</th><th>Attacks</th><th>Stars</th><th>Avg. destruction</th><th>Missed</th></tr></thead><tbody id="op-roster-body"></tbody></table><input id="op-roster-filter"><select id="op-roster-view"></select>
             <ol id="op-bonus-list"></ol><div class="profile-placeholder"></div>`;
     });
 
@@ -142,6 +143,8 @@ describe('CWL Operation Board', () => {
         expect(document.querySelectorAll('#op-position-chart .op-ranking-point')).toHaveLength(1);
         expect(document.querySelector('#op-position-chart-state').textContent).toBe('1/7 dagen');
         expect(document.querySelectorAll('#op-roster-body tr')).toHaveLength(2);
+        expect(document.querySelector('#op-roster-body tr').dataset.performanceCard).toBe('true');
+        expect(document.querySelector('#op-roster-body .cwl-player-info')).not.toBeNull();
         expect(document.querySelectorAll('#op-bonus-list li')).toHaveLength(2);
         expect(document.querySelector('#op-live-state').dataset.state).toBe('imported');
     });
@@ -165,7 +168,7 @@ describe('CWL Operation Board', () => {
         expect(document.querySelector('#op-board-tabs').hidden).toBe(true);
     });
 
-    it('hides planning and war columns for a directly loaded clan tag', async () => {
+    it('hides planner-specific roster data for a directly loaded clan tag', async () => {
         clanApiMocks.getClanMembersRequest.mockResolvedValue({
             items: [{ tag: '#P0L', name: 'Emile', townHallLevel: 17 }]
         });
@@ -178,8 +181,8 @@ describe('CWL Operation Board', () => {
 
         await vi.waitFor(() => expect(document.querySelectorAll('#op-roster-body .op-player-row')).toHaveLength(1));
         expect(document.querySelector('[data-op-roster-column="planning"]').hidden).toBe(true);
-        expect(document.querySelector('[data-op-roster-column="war"]').hidden).toBe(true);
-        expect(document.querySelector('#op-roster-body .op-player-row').children).toHaveLength(5);
+        expect(document.querySelector('[data-op-roster-column="war"]')).toBeNull();
+        expect(document.querySelector('#op-roster-body .op-player-row').children).toHaveLength(6);
         expect(document.querySelector('#op-board-context').textContent).toContain('Single clan');
         expect(Array.from(document.querySelector('#op-roster-view').options).map(option => option.value)).not.toContain('planned');
         expect(Array.from(document.querySelector('#op-roster-view').options).map(option => option.value)).not.toContain('unplanned');

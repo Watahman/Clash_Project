@@ -10,10 +10,8 @@ import {
     renderLiveTab
 } from './operation-board-live-renderer.js';
 import {
-    clearRosterMetrics,
     renderEmptyRoster,
     renderRoster,
-    renderRosterMetrics,
     renderRosterViewOptions,
     syncRosterMode
 } from './operation-board-roster-renderer.js';
@@ -32,7 +30,6 @@ export function renderBoard(
     renderRosterViewOptions(refs, report, selectedClan);
     renderLiveTab(refs, report);
     renderLeagueSections(refs, report);
-    renderRosterMetrics(refs, report);
     renderRoster(refs, report, selectedClan);
     renderBonusAdvice(refs, report.roster);
     renderBoardContext(
@@ -47,7 +44,6 @@ export function renderBoard(
 export function clearBoard(refs, selectedClan = null, resetPhase = true) {
     clearLeagueSections(refs);
     clearLiveTab(refs);
-    clearRosterMetrics(refs);
     refs.rosterBody.replaceChildren();
     renderEmptyRoster(refs, selectedClan);
     refs.bonusList.replaceChildren();

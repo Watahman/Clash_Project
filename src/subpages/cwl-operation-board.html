@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="../assets/css/profile-overlay.css">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
     <link rel="stylesheet" href="../assets/css/operation-board-workspace.css">
+    <link rel="stylesheet" href="../assets/css/cwl-player-performance-popover.css">
     <script src="../assets/js/Data/runtime-config.js"></script>
     <script type="module" src="../assets/js/shell/workspace-shell.js"></script>
     <script type="module" src="../assets/js/pages/cwl-operation-board.js"></script>
@@ -94,16 +95,10 @@
     </section>
 
     <section class="op-tab-panel" id="op-panel-roster" role="tabpanel" aria-labelledby="op-tab-roster" tabindex="0" hidden>
-        <section class="op-tab-metrics op-roster-metrics" aria-label="Roster summary" data-i18n-aria-label="op.rosterSummary">
-            <div><span data-i18n="op.playerCount">Players</span><strong id="op-roster-count">0 players</strong></div>
-            <div><span data-i18n="op.attacksUsed">Attacks used</span><strong id="op-attacks-used">0/0</strong></div>
-            <div><span data-i18n="op.missed">Missed attacks</span><strong id="op-missed-attacks">0</strong></div>
-            <div class="op-th-metric"><span data-i18n="op.thSpread">Town Hall spread</span><div id="op-th-list"></div></div>
-        </section>
         <section class="op-flat-section op-roster-panel" aria-labelledby="op-roster-title">
-            <div class="op-section-heading op-roster-heading"><div><p data-i18n="op.roster">Roster</p><h2 id="op-roster-title" data-i18n="op.playerOverview">Player overview</h2></div></div>
+            <div class="op-section-heading op-roster-heading"><div><p data-i18n="op.roster">Roster</p><h2 id="op-roster-title" data-i18n="op.playerOverview">Player overview</h2></div><span id="op-roster-count">0 players</span></div>
             <div class="op-roster-filter-row"><input id="op-roster-filter" type="search" data-i18n-placeholder="op.filterPlaceholder" placeholder="Search player or tag"><select id="op-roster-view"><option value="all" data-i18n="op.viewAll">All</option><option value="planned" data-i18n="op.viewPlanned">Planned</option><option value="unplanned" data-i18n="op.viewUnplanned">Not planned</option><option value="missed" data-i18n="op.viewMissed">Missed attacks</option></select></div>
-            <div class="op-table-wrap"><table class="op-table op-live-table"><thead><tr><th data-i18n="op.player">Player</th><th>TH</th><th data-op-roster-column="planning" data-i18n="op.planning">Planning</th><th data-op-roster-column="war">War</th><th data-i18n="op.attacks">Attacks</th><th data-i18n="op.stars">Stars</th><th>Destruction</th></tr></thead><tbody id="op-roster-body"></tbody></table></div>
+            <div class="op-table-wrap"><table class="op-table op-live-table"><thead><tr><th data-i18n="op.player">Player</th><th>TH</th><th data-op-roster-column="planning" data-i18n="op.planning">Planning</th><th data-i18n="op.attacks">Attacks</th><th data-i18n="op.stars">Stars</th><th data-i18n="op.avgDestruction">Avg. destruction</th><th data-i18n="op.missed">Missed</th></tr></thead><tbody id="op-roster-body"></tbody></table></div>
         </section>
     </section>
 

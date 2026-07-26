@@ -291,30 +291,6 @@
 .op-tab-metrics span { color: var(--text-muted); font-size: 0.72rem; }
 .op-tab-metrics strong { color: var(--text); font-size: 1.55rem; line-height: 1; }
 
-.op-roster-metrics {
-    grid-template-columns: minmax(9rem, 0.8fr) minmax(9rem, 0.8fr)
-        minmax(9rem, 0.8fr) minmax(18rem, 1.6fr);
-}
-
-.op-tab-metrics .op-th-metric {
-    gap: var(--space-3);
-}
-
-.operation-workspace-page #op-th-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-}
-
-.operation-workspace-page #op-th-list span {
-    padding: 0.18rem 0.45rem;
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-small);
-    background: var(--surface-subtle);
-    color: var(--text);
-    font-size: 0.68rem;
-}
-
 .op-league-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(24rem, 28rem);
@@ -961,6 +937,23 @@
 .operation-workspace-page .op-live-table td:first-child { display: grid; gap: 0.15rem; }
 .operation-workspace-page .op-live-table td:first-child strong { color: var(--text); font-size: 0.8rem; text-transform: none; }
 .operation-workspace-page .op-live-table td:first-child span { color: var(--text-muted); font-size: 0.68rem; }
+.operation-workspace-page .op-player-info {
+    display: grid;
+    width: 100%;
+    gap: 0.15rem;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+}
+.operation-workspace-page .op-player-info:hover strong { color: var(--accent-strong); }
+.operation-workspace-page .op-player-info:focus-visible {
+    border-radius: var(--radius-small);
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
 .operation-workspace-page .op-table-empty td { padding: var(--space-6); color: var(--text-subtle); text-align: center; }
 
 .operation-workspace-page .op-standings-list,
@@ -1074,9 +1067,6 @@
     .op-context-toolbar { flex-wrap: wrap; }
     .op-toolbar-spacer { display: none; }
     .op-sync-state { margin-left: auto; }
-    .op-roster-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .op-roster-metrics > div:nth-child(2) { border-right: 0; }
-    .op-roster-metrics > div:nth-child(n + 3) { border-top: 1px solid var(--border); }
     .op-league-layout { grid-template-columns: 1fr; }
 }
 

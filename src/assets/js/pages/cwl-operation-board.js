@@ -1,9 +1,11 @@
 import { syncAuthSession } from '../auth/auth-client.js';
+import { initPlayerPerformancePopover } from '../cwl/cwl-player-performance-popover.js';
 import { initI18n, t } from '../i18n/i18n.js';
 import { exportOperationReport, normalizeImportedReport, readOperationReportFile } from '../operation-board/operation-board-import-export.js';
 import { renderBoardContext } from '../operation-board/operation-board-context-renderer.js';
 import { bindOperationBoardEvents } from '../operation-board/operation-board-page-events.js';
 import { enrichWithHistoricalPerformance } from '../operation-board/operation-board-performance.js';
+import { getCurrentCwlPlayerContext } from '../operation-board/operation-board-player-context.js';
 import { initOperationBoardRefs } from '../operation-board/operation-board-page-refs.js';
 import { createOperationPlanStore } from '../operation-board/operation-board-plan-store.js';
 import { getPlanClans, normalizePlan } from '../operation-board/operation-board-plan-model.js';
@@ -267,6 +269,9 @@ export function applyImportedJson(data) {
 async function init() {
     refs = initOperationBoardRefs();
     initI18n();
+    initPlayerPerformancePopover({
+        getCurrentContext: tag => getCurrentCwlPlayerContext(latestReport, tag)
+    });
     await Promise.resolve(syncAuthSession()).catch(() => null);
     profileHTML();
     bindOperationBoardEvents(refs, {
