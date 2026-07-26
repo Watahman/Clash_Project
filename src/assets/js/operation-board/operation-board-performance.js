@@ -22,7 +22,10 @@ export async function enrichWithHistoricalPerformance(report) {
             historicalInsight(historical, townHallByTag.get(tag))
         ];
     }));
-    return applyCwlPredictions(report, insights);
+    return {
+        ...applyCwlPredictions(report, insights),
+        historicalPerformance: results
+    };
 }
 
 function collectTownHalls(report) {

@@ -46,4 +46,37 @@ describe('Operation Board Live model', () => {
             }
         });
     });
+
+    it('derives the final result from stars and destruction', () => {
+        const live = buildLiveView({
+            clan: { tag: '#PQL', name: 'Belgian Warriors' },
+            rounds: [{ day: 7, state: 'completed' }],
+            wars: [{
+                _round: 7,
+                state: 'warEnded',
+                attacksPerMember: 1,
+                clan: {
+                    tag: '#PQL',
+                    stars: 31,
+                    destructionPercentage: 91.4,
+                    attacks: 15,
+                    members: Array.from({ length: 15 }, () => ({ attacks: [{}] }))
+                },
+                opponent: {
+                    tag: '#AAA',
+                    stars: 31,
+                    destructionPercentage: 90.8,
+                    attacks: 15,
+                    members: Array.from({ length: 15 }, () => ({ attacks: [{}] }))
+                }
+            }]
+        });
+
+        expect(live).toMatchObject({
+            state: 'completed',
+            result: 'win',
+            own: { remainingAttacks: 0 },
+            opponent: { remainingAttacks: 0 }
+        });
+    });
 });

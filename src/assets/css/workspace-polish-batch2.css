@@ -156,7 +156,7 @@ body.workspace-app[data-workspace-page="operation"] .op-tab-metrics > div {
 body.workspace-app[data-workspace-page="operation"] :is(
     .op-history-grid,
     .op-league-layout,
-    .op-live-followup
+    .op-live-analysis
 ) {
     gap: var(--workspace-section-gap);
 }

@@ -1,4 +1,7 @@
-import { normalizeWarState } from '../cwl/cwl-war-state.js';
+import {
+    decideWarResult,
+    normalizeWarState
+} from '../cwl/cwl-war-state.js';
 import {
     getWarSide,
     number
@@ -6,19 +9,28 @@ import {
 
 export function buildLiveView(report) {
     if (!report) return null;
-    const war = selectWar(report.wars || []);
-    const side = war ? getWarSide(war, report.clan?.tag) : null;
-    const round = selectRound(report.rounds || [], war?._round);
+    const context = getCurrentWarContext(report);
+    const { war, side, round } = context;
     if (!war && !round) return null;
 
-    const state = war ? normalizeWarState(war) : round.state;
+    const state = context.state;
     const own = sideStats(side?.self, war?.attacksPerMember);
     const opponent = sideStats(side?.opponent, war?.attacksPerMember);
+    const result = state === 'completed' && side
+        ? decideWarResult(
+            own.stars,
+            own.destruction,
+            opponent.stars,
+            opponent.destruction,
+            state
+        )
+        : round?.result || 'notAvailable';
     return {
-        day: number(war?._round || round?.day, 0),
+        day: context.day,
         state,
-        result: round?.result || 'notAvailable',
+        result,
         own: {
+            tag: side?.self?.tag || report.clan?.tag || '',
             name: side?.self?.name || report.clan?.name || report.clan?.tag || '-',
             stars: side ? own.stars : number(round?.stars, 0),
             destruction: side ? own.destruction : number(round?.destruction, 0),
@@ -35,6 +47,7 @@ export function buildLiveView(report) {
                 )
         },
         opponent: {
+            tag: side?.opponent?.tag || '',
             name: side?.opponent?.name || round?.opponent || '-',
             ...opponent
         },
@@ -45,6 +58,19 @@ export function buildLiveView(report) {
 
 export function getCurrentCwlDay(report) {
     return buildLiveView(report)?.day || null;
+}
+
+export function getCurrentWarContext(report) {
+    const war = selectWar(report?.wars || []);
+    const side = war ? getWarSide(war, report?.clan?.tag) : null;
+    const round = selectRound(report?.rounds || [], war?._round);
+    return {
+        war,
+        side,
+        round,
+        state: war ? normalizeWarState(war) : round?.state || 'unknown',
+        day: number(war?._round || round?.day, 0)
+    };
 }
 
 function selectWar(wars) {

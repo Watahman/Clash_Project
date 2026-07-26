@@ -19,6 +19,10 @@ export function number(value, fallback = 0) {
     return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+export function clamp(value, minimum, maximum) {
+    return Math.min(maximum, Math.max(minimum, value));
+}
+
 export function looksLikeClashTag(value = '') {
     const raw = String(value || '').trim().toUpperCase().replace(/^#/, '');
     return raw.length >= 3
