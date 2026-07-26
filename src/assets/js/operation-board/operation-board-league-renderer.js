@@ -31,18 +31,17 @@ export function renderLeagueSections(refs, report) {
         report.rankingHistory,
         refs.positionChartState
     );
-    renderScoreboard(refs, report);
+    renderLeagueMetrics(refs, report);
     renderStandings(refs, report);
 }
 
 export function clearLeagueSections(refs) {
     refs.totalStars.textContent = '0';
     refs.avgDestruction.textContent = '0%';
-    refs.attacksUsed.textContent = '0/0';
-    refs.missed.textContent = '0';
     refs.currentPosition.textContent = '-';
+    refs.projectedFinish.textContent = '-';
+    refs.completedRounds.textContent = '0/7';
     refs.starsChart.setAttribute('aria-busy', 'false');
-    refs.thList.replaceChildren();
     renderStarsPerDayChart(refs.starsChart, [], refs.starsChartState);
     renderRankingHistoryChart(refs.positionChart, [], refs.positionChartState);
     refs.roundsList.replaceChildren();
@@ -51,7 +50,7 @@ export function clearLeagueSections(refs) {
     refs.standingsNote.textContent = '';
 }
 
-function renderScoreboard(refs, report) {
+function renderLeagueMetrics(refs, report) {
     const countedRounds = report.rounds.filter(round =>
         isAttackCountingState(round.state)
     );
@@ -65,40 +64,11 @@ function renderScoreboard(refs, report) {
             0
         ) / countedRounds.length
         : 0;
-    const attacksUsed = report.roster.reduce(
-        (sum, player) => sum + number(player.attacksUsed, 0),
-        0
-    );
-    const available = report.roster.reduce(
-        (sum, player) => sum + number(player.availableAttacks, 0),
-        0
-    );
-    const missed = report.roster.reduce(
-        (sum, player) => sum + number(player.missed, 0),
-        0
-    );
     refs.totalStars.textContent = totalStars;
     refs.avgDestruction.textContent = `${averageDestruction.toFixed(1)}%`;
-    refs.attacksUsed.textContent = `${attacksUsed}/${available}`;
-    refs.missed.textContent = missed;
-
-    const distribution = report.roster.reduce((result, player) => {
-        if (player.townHall) {
-            result[player.townHall] = (result[player.townHall] || 0) + 1;
-        }
-        return result;
-    }, {});
-    refs.thList.replaceChildren();
-    Object.entries(distribution)
-        .sort((a, b) => Number(b[0]) - Number(a[0]))
-        .forEach(([townHall, amount]) => {
-            const item = document.createElement('span');
-            item.textContent = `TH${townHall}: ${amount}`;
-            refs.thList.appendChild(item);
-        });
-    if (!Object.keys(distribution).length) {
-        refs.thList.appendChild(chip(t('op.noRoster')));
-    }
+    refs.completedRounds.textContent =
+        `${countedRounds.length}/${report.rounds.length || 7}`;
+    refs.projectedFinish.textContent = '-';
 }
 
 function renderStandings(refs, report) {

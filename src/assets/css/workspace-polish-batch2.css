@@ -143,21 +143,20 @@ body.workspace-app[data-workspace-page="operation"] .operation-help {
     padding-inline: var(--workspace-panel-gutter);
 }
 
-body.workspace-app[data-workspace-page="operation"] .op-metrics-bar {
+body.workspace-app[data-workspace-page="operation"] .op-tab-metrics {
     overflow: clip;
     border: 0.0625rem solid var(--border-strong);
     background: var(--surface);
 }
 
-body.workspace-app[data-workspace-page="operation"] .op-metrics-bar > div {
+body.workspace-app[data-workspace-page="operation"] .op-tab-metrics > div {
     padding-inline: var(--workspace-panel-gutter);
 }
 
 body.workspace-app[data-workspace-page="operation"] :is(
     .op-history-grid,
-    .op-operation-layout,
-    .op-operation-ledger,
-    .op-operation-side
+    .op-league-layout,
+    .op-live-followup
 ) {
     gap: var(--workspace-section-gap);
 }
@@ -336,7 +335,7 @@ body.workspace-app[data-workspace-page="bracket"] .bracket-file-actions button:h
         display: none;
     }
 
-    body.workspace-app[data-workspace-page="operation"] .op-metrics-bar > div {
+    body.workspace-app[data-workspace-page="operation"] .op-tab-metrics > div {
         padding-inline: var(--workspace-panel-gutter);
     }
 }

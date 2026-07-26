@@ -60,6 +60,9 @@ vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
         'op.noRoster': 'Nog geen roster',
         'op.noActiveCwl': 'Geen actieve CWL',
         'op.syncIdle': 'Nog niet gesynchroniseerd',
+        'op.singleClanContext': 'Single clan',
+        'op.cwlDayContext': `CWL Day ${values.day || ''}`,
+        'op.syncedNow': 'Synced just now',
         'op.importedState': 'JSON geïmporteerd'
     })[key] || key
 }));
@@ -78,9 +81,17 @@ describe('CWL Operation Board', () => {
             <select id="op-plan-select"></select><select id="op-clan-select"></select>
             <button id="op-refresh"></button><button id="op-export"></button><button id="op-import-json"></button>
             <input id="op-import-file" type="file"><input id="op-standalone-clan-tag"><button id="op-standalone-load"></button>
-            <span id="op-live-state"></span><span id="op-cwl-phase"></span><p id="op-help"></p>
+            <span id="op-live-state"></span><span id="op-cwl-phase"></span><p id="op-help"></p><p id="op-board-context"></p>
+            <nav id="op-board-tabs" hidden>
+                <button data-op-tab="live" aria-controls="op-panel-live"></button>
+                <button data-op-tab="league" aria-controls="op-panel-league"></button>
+                <button data-op-tab="roster" aria-controls="op-panel-roster"></button>
+                <button data-op-tab="bonuses" aria-controls="op-panel-bonuses"></button>
+            </nav>
+            <section id="op-panel-live" hidden><div id="op-live-content"></div></section>
+            <section id="op-panel-league" hidden></section><section id="op-panel-roster" hidden></section><section id="op-panel-bonuses" hidden></section>
             <strong id="op-total-stars"></strong><strong id="op-avg-destruction"></strong>
-            <strong id="op-attacks-used"></strong><strong id="op-missed-attacks"></strong><strong id="op-current-position"></strong>
+            <strong id="op-attacks-used"></strong><strong id="op-missed-attacks"></strong><strong id="op-current-position"></strong><strong id="op-projected-finish"></strong><strong id="op-completed-rounds"></strong>
             <div id="op-th-list"></div><div id="op-rounds-list"></div><span id="op-round-state"></span><span id="op-round-count"></span>
             <div id="op-stars-chart"></div><span id="op-stars-chart-state"></span>
             <div id="op-position-chart"></div><span id="op-position-chart-state"></span>
@@ -151,10 +162,11 @@ describe('CWL Operation Board', () => {
         expect(document.querySelector('#op-roster-count').textContent).toBe('0 spelers');
         expect(document.querySelectorAll('#op-roster-body .op-player-row')).toHaveLength(0);
         expect(clanApiMocks.getClanWarLeagueWarRequest).not.toHaveBeenCalled();
+        expect(document.querySelector('#op-board-tabs').hidden).toBe(true);
     });
 
     it('hides planning and war columns for a directly loaded clan tag', async () => {
-        clanApiMocks.getClanMembersRequest.mockResolvedValueOnce({
+        clanApiMocks.getClanMembersRequest.mockResolvedValue({
             items: [{ tag: '#P0L', name: 'Emile', townHallLevel: 17 }]
         });
 
@@ -168,8 +180,27 @@ describe('CWL Operation Board', () => {
         expect(document.querySelector('[data-op-roster-column="planning"]').hidden).toBe(true);
         expect(document.querySelector('[data-op-roster-column="war"]').hidden).toBe(true);
         expect(document.querySelector('#op-roster-body .op-player-row').children).toHaveLength(5);
+        expect(document.querySelector('#op-board-context').textContent).toContain('Single clan');
         expect(Array.from(document.querySelector('#op-roster-view').options).map(option => option.value)).not.toContain('planned');
         expect(Array.from(document.querySelector('#op-roster-view').options).map(option => option.value)).not.toContain('unplanned');
+        expect(document.querySelector('[data-op-tab="roster"]').getAttribute('aria-selected')).toBe('true');
+
+        const leagueCalls = clanApiMocks.getClanCurrentWarLeagueGroupRequest.mock.calls.length;
+        document.querySelector('[data-op-tab="bonuses"]').click();
+        expect(document.querySelector('[data-op-tab="bonuses"]').getAttribute('aria-selected')).toBe('true');
+        expect(document.querySelector('#op-panel-bonuses').hidden).toBe(false);
+        expect(document.querySelector('#op-panel-roster').hidden).toBe(true);
+        expect(clanApiMocks.getClanCurrentWarLeagueGroupRequest).toHaveBeenCalledTimes(leagueCalls);
+
+        document.querySelector('#op-refresh').click();
+        await vi.waitFor(() =>
+            expect(clanApiMocks.getClanCurrentWarLeagueGroupRequest)
+                .toHaveBeenCalledTimes(leagueCalls + 1)
+        );
+        await vi.waitFor(() =>
+            expect(document.querySelector('#op-board-tabs').hidden).toBe(false)
+        );
+        expect(document.querySelector('[data-op-tab="bonuses"]').getAttribute('aria-selected')).toBe('true');
     });
 
     it('keeps the newest clan report when an earlier request finishes later', async () => {

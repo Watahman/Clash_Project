@@ -11,11 +11,16 @@ export function initOperationBoardRefs(root = document) {
         liveState: '#op-live-state',
         phase: '#op-cwl-phase',
         help: '#op-help',
+        boardContext: '#op-board-context',
+        boardTabs: '#op-board-tabs',
+        liveContent: '#op-live-content',
         totalStars: '#op-total-stars',
         avgDestruction: '#op-avg-destruction',
+        completedRounds: '#op-completed-rounds',
         attacksUsed: '#op-attacks-used',
         missed: '#op-missed-attacks',
         currentPosition: '#op-current-position',
+        projectedFinish: '#op-projected-finish',
         thList: '#op-th-list',
         starsChart: '#op-stars-chart',
         starsChartState: '#op-stars-chart-state',
@@ -35,10 +40,18 @@ export function initOperationBoardRefs(root = document) {
         rosterView: '#op-roster-view',
         bonusList: '#op-bonus-list'
     };
-    return Object.fromEntries(
+    const refs = Object.fromEntries(
         Object.entries(selectors).map(([key, selector]) => [
             key,
             root.querySelector(selector)
         ])
     );
+    refs.tabButtons = Array.from(root.querySelectorAll('[data-op-tab]'));
+    refs.tabPanels = Object.fromEntries(
+        refs.tabButtons.map(button => [
+            button.dataset.opTab,
+            root.querySelector(`#${button.getAttribute('aria-controls')}`)
+        ])
+    );
+    return refs;
 }

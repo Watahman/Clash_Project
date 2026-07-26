@@ -1,49 +1,28 @@
 import { syncAuthSession } from '../auth/auth-client.js';
 import { initI18n, t } from '../i18n/i18n.js';
-import {
-    exportOperationReport,
-    normalizeImportedReport,
-    readOperationReportFile
-} from '../operation-board/operation-board-import-export.js';
+import { exportOperationReport, normalizeImportedReport, readOperationReportFile } from '../operation-board/operation-board-import-export.js';
+import { renderBoardContext } from '../operation-board/operation-board-context-renderer.js';
+import { bindOperationBoardEvents } from '../operation-board/operation-board-page-events.js';
 import { enrichWithHistoricalPerformance } from '../operation-board/operation-board-performance.js';
 import { initOperationBoardRefs } from '../operation-board/operation-board-page-refs.js';
-import {
-    getPlanClans,
-    normalizePlan
-} from '../operation-board/operation-board-plan-model.js';
+import { createOperationPlanStore } from '../operation-board/operation-board-plan-store.js';
+import { getPlanClans, normalizePlan } from '../operation-board/operation-board-plan-model.js';
 import { buildReport } from '../operation-board/operation-board-report-model.js';
 import {
-    clearBoard,
-    refreshBoardLabels,
-    renderBoard,
-    renderFilteredRoster,
-    renderPhase,
-    renderSyncState,
-    setHelp
+    clearBoard, refreshBoardLabels, renderBoard, renderFilteredRoster,
+    renderPhase, renderSyncState, setHelp
 } from '../operation-board/operation-board-renderer.js';
 import {
-    renderClanLoading,
-    renderClanOptions,
-    renderPlanError,
-    renderPlanLoading,
-    renderPlanOptions,
-    renderPlanRequired,
-    renderStandaloneMode
+    renderClanLoading, renderClanOptions, renderPlanError, renderPlanLoading,
+    renderPlanOptions, renderPlanRequired, renderStandaloneMode
 } from '../operation-board/operation-board-source-controls.js';
-import {
-    fetchPlan,
-    fetchPlans,
-    loadOperationSource,
-    NoActiveCwlError
-} from '../operation-board/operation-board-source.js';
-import {
-    looksLikeClashTag,
-    normalizeTag
-} from '../operation-board/operation-board-utils.js';
+import { loadOperationSource, NoActiveCwlError } from '../operation-board/operation-board-source.js';
+import { applyOperationTabState, getBoardIdentity, getDefaultOperationTab, hasUsableBoardData } from '../operation-board/operation-board-tabs.js';
+import { looksLikeClashTag, normalizeTag } from '../operation-board/operation-board-utils.js';
 import { profileHTML } from '../profile/profile_popup.js';
 import { getCurrentUserId } from '../utils/user.js';
 let refs;
-const planCache = new Map();
+const planStore = createOperationPlanStore();
 let selectedPlan = null;
 let selectedClan = null;
 let latestReport = null;
@@ -52,32 +31,21 @@ let lastSyncAt = null;
 let requestToken = 0;
 let planSelectToken = 0;
 let reportController;
-
-function initEvents() {
-    refs.planSelect.onchange = () => selectPlan(refs.planSelect.value);
-    refs.clanSelect.onchange = () => selectClan(refs.clanSelect.value);
-    refs.refresh.onclick = () => selectedClan && refreshClanReport(selectedClan);
-    refs.rosterFilter.oninput = () =>
-        renderFilteredRoster(refs, latestReport, selectedClan);
-    refs.rosterView.onchange = () =>
-        renderFilteredRoster(refs, latestReport, selectedClan);
-    refs.exportBtn.onclick = () => exportOperationReport(latestReport);
-    refs.importBtn.onclick = () => refs.importFile.click();
-    refs.importFile.onchange = () => importJsonFile(refs.importFile.files?.[0]);
-    refs.standaloneLoad.onclick = loadStandaloneClan;
-    refs.standaloneInput.onkeydown = event => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            loadStandaloneClan();
-        }
-    };
-    window.addEventListener('clashtools:language-changed', refreshLabels);
-}
+let activeTab = null;
+let activeBoardKey = '';
 
 function setState(state, isError = false) {
     syncState = isError ? 'error' : state;
     if (syncState === 'ready' || syncState === 'imported') lastSyncAt = new Date();
     renderSyncState(refs, syncState, lastSyncAt);
+    if (latestReport) {
+        renderBoardContext(
+            refs,
+            latestReport,
+            selectedClan,
+            { lastSyncAt, syncState }
+        );
+    }
 }
 
 async function loadPlans() {
@@ -85,27 +53,11 @@ async function loadPlans() {
     renderPlanLoading(refs, userId);
     if (!userId) return;
     try {
-        const plans = await fetchPlans(userId);
+        const plans = await planStore.load(userId);
         renderPlanOptions(refs, plans);
-        plans.forEach(plan => {
-            planCache.set(plan.id, plan);
-            void prefetchPlan(plan);
-        });
     } catch (error) {
         console.error(error);
         renderPlanError(refs);
-    }
-}
-
-async function prefetchPlan(plan) {
-    if (!plan) return null;
-    try {
-        const full = await fetchPlan(plan);
-        planCache.set(plan.id, full);
-        return full;
-    } catch (error) {
-        console.error(error);
-        return plan;
     }
 }
 
@@ -120,7 +72,7 @@ async function selectPlan(planId) {
         renderPlanRequired(refs);
         return;
     }
-    const full = await prefetchPlan(planCache.get(planId));
+    const full = await planStore.resolve(planId);
     if (token !== planSelectToken) return;
     selectedPlan = normalizePlan(full);
     renderClanSelector(selectedPlan, token);
@@ -176,7 +128,7 @@ async function refreshClanReport(clan) {
         if (token !== requestToken || signal.aborted) return;
         selectedClan = raw.clan;
         latestReport = { ...buildReport(raw), predictionState: 'loading' };
-        renderBoard(refs, latestReport, selectedClan);
+        renderLatestReport();
         setState('ready');
         void enrichPredictions(latestReport, token, signal);
     } catch (error) {
@@ -196,13 +148,13 @@ async function enrichPredictions(report, token, signal) {
         const enriched = await enrichWithHistoricalPerformance(report);
         if (token !== requestToken || signal.aborted || latestReport !== report) return;
         latestReport = enriched;
-        renderBoard(refs, latestReport, selectedClan);
+        renderLatestReport();
     } catch (error) {
         if (token !== requestToken || signal.aborted) return;
         console.error(error);
         if (latestReport === report) {
             latestReport = { ...report, predictionState: 'unavailable' };
-            renderBoard(refs, latestReport, selectedClan);
+            renderLatestReport();
         }
     }
 }
@@ -224,13 +176,42 @@ function clearReport(resetPhase = true) {
     clearBoard(refs, selectedClan, resetPhase);
 }
 
+function renderLatestReport() {
+    if (!latestReport) return;
+    const boardKey = getBoardIdentity(latestReport, selectedClan);
+    if (!hasUsableBoardData(latestReport)) {
+        activeTab = null;
+    } else if (boardKey !== activeBoardKey) {
+        activeBoardKey = boardKey;
+        activeTab = getDefaultOperationTab(latestReport);
+    } else if (!activeTab) {
+        activeTab = getDefaultOperationTab(latestReport);
+    }
+    renderBoard(
+        refs,
+        latestReport,
+        selectedClan,
+        { activeTab, lastSyncAt, syncState }
+    );
+}
+
+function selectBoardTab(tab, focus = false) {
+    if (!latestReport) return;
+    activeTab = tab;
+    applyOperationTabState(refs, activeTab);
+    if (focus) {
+        refs.tabButtons.find(button => button.dataset.opTab === activeTab)?.focus();
+    }
+}
+
 function refreshLabels() {
     refreshBoardLabels(
         refs,
         latestReport,
         selectedClan,
         syncState,
-        lastSyncAt
+        lastSyncAt,
+        activeTab
     );
 }
 
@@ -254,7 +235,7 @@ export function applyImportedJson(data) {
         latestReport = report;
         selectedPlan = data.plan ? normalizePlan(data.plan) : selectedPlan;
         selectedClan = data.clan || selectedClan;
-        renderBoard(refs, latestReport, selectedClan);
+        renderLatestReport();
         setState('imported');
         return;
     }
@@ -262,7 +243,7 @@ export function applyImportedJson(data) {
     if (!importedPlan?.info) throw new Error('Unsupported JSON format');
     const id = importedPlan.id || 'imported-json-plan';
     const plan = { ...importedPlan, id };
-    planCache.set(id, plan);
+    planStore.add(plan);
     selectedPlan = plan;
     if (!Array.from(refs.planSelect.options).some(item => item.value === id)) {
         const importedOption = document.createElement('option');
@@ -288,7 +269,18 @@ async function init() {
     initI18n();
     await Promise.resolve(syncAuthSession()).catch(() => null);
     profileHTML();
-    initEvents();
+    bindOperationBoardEvents(refs, {
+        selectPlan,
+        selectClan,
+        refresh: () => selectedClan && refreshClanReport(selectedClan),
+        filterRoster: () =>
+            renderFilteredRoster(refs, latestReport, selectedClan),
+        exportReport: () => exportOperationReport(latestReport),
+        importFile: importJsonFile,
+        loadStandalone: loadStandaloneClan,
+        selectTab: selectBoardTab,
+        refreshLabels
+    });
     clearReport(false);
     refreshLabels();
     await loadPlans();

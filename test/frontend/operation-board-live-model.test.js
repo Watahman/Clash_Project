@@ -1,0 +1,49 @@
+import { describe, expect, it } from 'vitest';
+
+import { buildLiveView } from '../../src/assets/js/operation-board/operation-board-live-model.js';
+
+describe('Operation Board Live model', () => {
+    it('selects the active round and derives score and remaining attacks', () => {
+        const live = buildLiveView({
+            clan: { tag: '#PQL', name: 'Belgian Warriors' },
+            rounds: [{ day: 4, state: 'live', result: 'pending' }],
+            wars: [{
+                _round: 4,
+                state: 'inWar',
+                attacksPerMember: 1,
+                clan: {
+                    tag: '#PQL',
+                    name: 'Belgian Warriors',
+                    stars: 31,
+                    destructionPercentage: 82.4,
+                    attacks: 12,
+                    members: Array.from({ length: 15 }, () => ({ attacks: [] }))
+                },
+                opponent: {
+                    tag: '#AAA',
+                    name: 'Northern Kings',
+                    stars: 30,
+                    destructionPercentage: 83.1,
+                    attacks: 13,
+                    members: Array.from({ length: 15 }, () => ({ attacks: [] }))
+                }
+            }]
+        });
+
+        expect(live).toMatchObject({
+            day: 4,
+            state: 'live',
+            own: {
+                stars: 31,
+                attacksUsed: 12,
+                availableAttacks: 15,
+                remainingAttacks: 3
+            },
+            opponent: {
+                name: 'Northern Kings',
+                stars: 30,
+                remainingAttacks: 2
+            }
+        });
+    });
+});

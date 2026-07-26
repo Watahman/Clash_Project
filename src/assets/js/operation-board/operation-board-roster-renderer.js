@@ -92,6 +92,48 @@ export function renderRoster(refs, report, selectedClan = null) {
     });
 }
 
+export function renderRosterMetrics(refs, report) {
+    const roster = report?.roster || [];
+    const attacksUsed = roster.reduce(
+        (sum, player) => sum + number(player.attacksUsed, 0),
+        0
+    );
+    const available = roster.reduce(
+        (sum, player) => sum + number(player.availableAttacks, 0),
+        0
+    );
+    refs.attacksUsed.textContent = `${attacksUsed}/${available}`;
+    refs.missed.textContent = roster.reduce(
+        (sum, player) => sum + number(player.missed, 0),
+        0
+    );
+    refs.thList.replaceChildren();
+    const distribution = roster.reduce((result, player) => {
+        if (player.townHall) {
+            result[player.townHall] = (result[player.townHall] || 0) + 1;
+        }
+        return result;
+    }, {});
+    Object.entries(distribution)
+        .sort((a, b) => Number(b[0]) - Number(a[0]))
+        .forEach(([townHall, amount]) => {
+            const item = document.createElement('span');
+            item.textContent = `TH${townHall}: ${amount}`;
+            refs.thList.appendChild(item);
+        });
+    if (!Object.keys(distribution).length) {
+        const empty = document.createElement('span');
+        empty.textContent = t('op.noRoster');
+        refs.thList.appendChild(empty);
+    }
+}
+
+export function clearRosterMetrics(refs) {
+    refs.attacksUsed.textContent = '0/0';
+    refs.missed.textContent = '0';
+    refs.thList.replaceChildren();
+}
+
 export function renderEmptyRoster(refs, selectedClan = null, report = null) {
     if (refs.rosterBody.children.length) return;
     const row = document.createElement('tr');

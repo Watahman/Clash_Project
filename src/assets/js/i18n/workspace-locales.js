@@ -1170,10 +1170,78 @@ const part7 = Object.freeze({
     es: part7En
 });
 
+const part8En = Object.freeze({
+    "op.tabsLabel": "Operation Board views",
+    "op.tabLive": "Live",
+    "op.tabLeague": "League",
+    "op.tabRoster": "Roster",
+    "op.tabBonuses": "Bonuses",
+    "op.leagueSummary": "League summary",
+    "op.rosterSummary": "Roster summary",
+    "op.projectedFinish": "Projected finish",
+    "op.completedRounds": "Completed rounds",
+    "op.playerCount": "Players",
+    "op.playerOverview": "Player overview",
+    "op.singleClanContext": "Single clan",
+    "op.cwlDayContext": "CWL Day {day}",
+    "op.syncedNow": "Synced just now",
+    "op.syncedMinutesAgo": "Synced {count}m ago",
+    "op.syncedHoursAgo": "Synced {count}h ago",
+    "op.versus": "VS",
+    "op.remainingAttacks": "Remaining",
+    "op.winCondition": "Win condition",
+    "op.attackPriorities": "Attack priorities",
+    "op.liveAnalysisPending": "Live score analysis",
+    "op.finalWarResult": "This matchup is complete. The final result is shown above.",
+    "op.winConditionHelp": "The current score is ready for detailed win-condition analysis.",
+    "op.warCompleted": "War completed",
+    "op.prioritiesPending": "Priority analysis",
+    "op.noMoreRecommendations": "No further attack recommendations are needed.",
+    "op.prioritiesHelp": "Remaining attacks are ready for matchup-based prioritization.",
+    "op.noCurrentMatchup": "No current matchup",
+    "op.noCurrentMatchupHelp": "Open League for the season overview or Roster for player participation."
+});
+
+const part8 = Object.freeze({
+    en: part8En,
+    nl: Object.freeze({
+        ...part8En,
+        "op.tabsLabel": "Operation Board-weergaven",
+        "op.tabLeague": "Klassement",
+        "op.tabBonuses": "Bonussen",
+        "op.leagueSummary": "CWL-overzicht",
+        "op.rosterSummary": "Roster-overzicht",
+        "op.projectedFinish": "Verwachte eindpositie",
+        "op.completedRounds": "Afgeronde rondes",
+        "op.playerCount": "Spelers",
+        "op.playerOverview": "Spelersoverzicht",
+        "op.singleClanContext": "Losse clan",
+        "op.cwlDayContext": "CWL-dag {day}",
+        "op.syncedNow": "Zojuist gesynchroniseerd",
+        "op.syncedMinutesAgo": "{count}m geleden gesynchroniseerd",
+        "op.syncedHoursAgo": "{count}u geleden gesynchroniseerd",
+        "op.remainingAttacks": "Resterend",
+        "op.winCondition": "Winstvoorwaarde",
+        "op.attackPriorities": "Aanvalsprioriteiten",
+        "op.liveAnalysisPending": "Live scoreanalyse",
+        "op.finalWarResult": "Deze war is afgelopen. Het eindresultaat staat hierboven.",
+        "op.winConditionHelp": "De huidige score is klaar voor gedetailleerde win-condition-analyse.",
+        "op.warCompleted": "War afgelopen",
+        "op.prioritiesPending": "Prioriteitsanalyse",
+        "op.noMoreRecommendations": "Er zijn geen verdere aanvalsaanbevelingen nodig.",
+        "op.prioritiesHelp": "Resterende aanvallen zijn klaar voor matchup-prioritering.",
+        "op.noCurrentMatchup": "Geen huidige matchup",
+        "op.noCurrentMatchupHelp": "Open Klassement voor het seizoensoverzicht of Roster voor deelname per speler."
+    }),
+    fr: part8En,
+    de: part8En,
+    es: part8En
+});
+
 export const workspaceLocales = Object.freeze({
-    nl: Object.freeze({ ...nl, ...part2.nl, ...part3.nl, ...part4.nl, ...part5.nl, ...part6.nl, ...part7.nl }),
-    en: Object.freeze({ ...en, ...part2.en, ...part3.en, ...part4.en, ...part5.en, ...part6.en, ...part7.en }),
-    fr: Object.freeze({ ...fr, ...part2.fr, ...part3.fr, ...part4.fr, ...part5.fr, ...part6.fr, ...part7.fr }),
-    de: Object.freeze({ ...de, ...part2.de, ...part3.de, ...part4.de, ...part5.de, ...part6.de, ...part7.de }),
-    es: Object.freeze({ ...es, ...part2.es, ...part3.es, ...part4.es, ...part5.es, ...part6.es, ...part7.es })
+    nl: Object.freeze({ ...nl, ...part2.nl, ...part3.nl, ...part4.nl, ...part5.nl, ...part6.nl, ...part7.nl, ...part8.nl }),
+    en: Object.freeze({ ...en, ...part2.en, ...part3.en, ...part4.en, ...part5.en, ...part6.en, ...part7.en, ...part8.en }),
+    fr: Object.freeze({ ...fr, ...part2.fr, ...part3.fr, ...part4.fr, ...part5.fr, ...part6.fr, ...part7.fr, ...part8.fr }),
+    de: Object.freeze({ ...de, ...part2.de, ...part3.de, ...part4.de, ...part5.de, ...part6.de, ...part7.de, ...part8.de }),
+    es: Object.freeze({ ...es, ...part2.es, ...part3.es, ...part4.es, ...part5.es, ...part6.es, ...part7.es, ...part8.es })
 });
