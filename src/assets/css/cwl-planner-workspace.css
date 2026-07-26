@@ -194,8 +194,8 @@
 }
 
 .workspace-planner > .cwl-context-toolbar {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: minmax(10rem, 12rem) minmax(14rem, 1fr) auto auto;
     align-items: flex-end;
     gap: var(--space-3);
     min-height: 0;
@@ -215,10 +215,41 @@
     font-weight: 700;
 }
 
-.cwl-context-toolbar label { width: 12rem; flex: 0 1 12rem; }
-.cwl-context-toolbar .cwl-plan-name-field { width: auto; min-width: 12rem; flex: 1 1 18rem; }
+.cwl-context-toolbar label,
+.cwl-context-toolbar .cwl-plan-name-field {
+    width: 100%;
+    min-width: 0;
+}
+
+.cwl-toolbar-actions,
+.cwl-toolbar-action-group {
+    display: flex;
+    align-items: stretch;
+}
+
+.cwl-toolbar-actions {
+    gap: var(--space-3);
+}
+
+.cwl-toolbar-action-group {
+    gap: var(--space-2);
+}
+
+.workspace-planner .cwl-toolbar-action-group .button {
+    min-width: 0;
+    min-height: 2.55rem;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.78rem;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
 .workspace-planner #cwl-load-plan,
 .workspace-planner #cwl-plan-name { width: 100% !important; max-width: none !important; text-align: left; text-transform: none; letter-spacing: normal; }
+.workspace-planner #cwl-save-status {
+    align-self: end;
+    justify-self: end;
+}
 .cwl-toolbar-spacer { display: none; }
 
 .cwl-planner-layout {
@@ -443,6 +474,18 @@
 }
 
 @media (max-width: 76rem) {
+    .workspace-planner > .cwl-context-toolbar {
+        grid-template-columns: minmax(10rem, 0.8fr) minmax(14rem, 1.2fr) auto;
+    }
+    .cwl-toolbar-actions {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        justify-self: end;
+    }
+    .workspace-planner #cwl-save-status {
+        grid-column: 3;
+        grid-row: 1;
+    }
     .cwl-planner-layout { grid-template-columns: minmax(20rem, 40%) minmax(0, 1fr); }
     .workspace-planner .cwl-clan-info-card { grid-template-columns: 2.5rem minmax(7rem, 1fr) auto auto 2.25rem; }
     .cwl-clan-format > span { display: none; }
@@ -462,10 +505,32 @@
     .cwl-title-row { align-items: flex-start; flex-direction: column; gap: var(--space-2); }
     .cwl-title-row h1 { font-size: 2.25rem; white-space: normal; }
     .cwl-header-actions { display: grid; grid-template-columns: 1fr 1fr; }
-    .workspace-planner > .cwl-context-toolbar { align-items: stretch; flex-direction: column; border-bottom: 1px solid var(--border); }
+    .workspace-planner > .cwl-context-toolbar {
+        grid-template-columns: minmax(0, 1fr);
+        align-items: stretch;
+        border-bottom: 1px solid var(--border);
+    }
     .cwl-context-toolbar label,
-    .cwl-context-toolbar .cwl-plan-name-field { width: 100%; min-width: 0; flex: none; }
-    .workspace-planner #cwl-save-status { align-self: flex-start; }
+    .cwl-context-toolbar .cwl-plan-name-field { width: 100%; min-width: 0; }
+    .cwl-toolbar-actions {
+        display: grid;
+        grid-column: auto;
+        grid-row: auto;
+        grid-template-columns: minmax(0, 1fr);
+        width: 100%;
+        justify-self: stretch;
+    }
+    .cwl-toolbar-action-group {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .workspace-planner .cwl-toolbar-action-group .button { width: 100%; }
+    .workspace-planner #cwl-save-status {
+        grid-column: auto;
+        grid-row: auto;
+        align-self: start;
+        justify-self: start;
+    }
     .cwl-toolbar-spacer { display: none; }
     .cwl-planner-layout { display: grid; grid-template-columns: minmax(0, 1fr); margin-top: var(--space-4); border: 0; gap: var(--space-4); }
     .workspace-planner .cwl-sidebar { margin-bottom: 0; border: 1px solid var(--border); }

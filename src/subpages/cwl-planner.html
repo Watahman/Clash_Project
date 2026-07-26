@@ -71,10 +71,16 @@
     <section class="cwl-context-toolbar" aria-label="Plan settings" data-i18n-aria-label="planner.settings">
         <label><span data-i18n="planner.plan">Plan</span><select id="cwl-load-plan" data-i18n-aria-label="cwl.loadPlan" aria-label="Load plan"></select></label>
         <label class="cwl-plan-name-field"><span data-i18n="planner.name">Name</span><input type="text" id="cwl-plan-name" data-i18n-placeholder="cwl.planPlaceholder" placeholder="Plan name..." maxlength="40"></label>
-        <button class="button button-secondary" id="cwl-add-clan-button" type="button"><span aria-hidden="true">+</span><span data-i18n="cwl.addClan">Add clan</span></button>
-        <button class="button button-secondary" id="cwl-import-spreadsheet-button" type="button"><span data-i18n="cwl.sheetImport">Import spreadsheet</span></button>
-        <button class="button button-secondary" id="cwl-auto-plan-button" type="button" data-i18n="autoPlan.open">Auto Plan</button>
-        <button class="button button-secondary" id="cwl-optimize-plan-button" type="button" data-i18n="optimizePlan.open">Optimize Plan</button>
+        <div class="cwl-toolbar-actions">
+            <div class="cwl-toolbar-action-group">
+                <button class="button button-secondary" id="cwl-add-clan-button" type="button"><span aria-hidden="true">+</span><span data-i18n="cwl.addClan">Add clan</span></button>
+                <button class="button button-secondary" id="cwl-import-spreadsheet-button" type="button"><span data-i18n="cwl.sheetImport">Import spreadsheet</span></button>
+            </div>
+            <div class="cwl-toolbar-action-group">
+                <button class="button button-secondary" id="cwl-auto-plan-button" type="button" data-i18n="autoPlan.open">Auto Plan</button>
+                <button class="button button-secondary" id="cwl-optimize-plan-button" type="button" data-i18n="optimizePlan.open">Optimize Plan</button>
+            </div>
+        </div>
         <span class="cwl-toolbar-spacer"></span>
         <span class="cwl-save-status" id="cwl-save-status" role="status" aria-live="polite" data-state="idle" data-i18n="cwl.saved">Saved</span>
     </section>
