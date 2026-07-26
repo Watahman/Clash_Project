@@ -1,3 +1,5 @@
+import { compareMatchupStrength } from './cwl-matchup-difficulty.js';
+
 const DEFAULT_STARS = 2;
 const DEFAULT_DESTRUCTION = 70;
 
@@ -94,16 +96,6 @@ function strengthOf(member = {}, insight = {}, includeArmyProgress = false) {
     };
 }
 
-function compareStrength(attacker, defender) {
-    const townHallDelta = number(attacker?.townHall, 0) - number(defender?.townHall, 0);
-    const progressionDelta = number(attacker?.progression, 0.5) - number(defender?.progression, 0.5);
-    return {
-        starAdjustment: townHallDelta * 0.3 + progressionDelta * 0.65,
-        destructionAdjustment: townHallDelta * 6 + progressionDelta * 14,
-        difficultyMultiplier: clamp(1 - townHallDelta * 0.12 - progressionDelta * 0.3, 0.7, 1.35)
-    };
-}
-
 function findOpponent(member, opponents = []) {
     const position = number(member?.mapPosition, 0);
     return opponents.find(opponent => number(opponent?.mapPosition, 0) === position)
@@ -135,7 +127,7 @@ function predictMatchup(player, member, opponent, insight, opponentInsight) {
     const form = playerForm(player, insight);
     const attacker = strengthOf(member, insight, true);
     const defender = strengthOf(opponent, opponentInsight);
-    const comparison = compareStrength(attacker, defender);
+    const comparison = compareMatchupStrength(attacker, defender);
     const opponentDefenseStars = opponentInsight?.defense?.stars;
     const opponentDefenseDestruction = opponentInsight?.defense?.destruction;
     const familiarity = number(insight?.army?.share, 0.5);
@@ -186,7 +178,7 @@ function buildWarPerformance(report, insightByTag) {
             const player = ensure(member.tag);
             (member.attacks || []).forEach(attack => {
                 const defender = opponentByTag.get(normalizeTag(attack.defenderTag)) || {};
-                const comparison = compareStrength(
+                const comparison = compareMatchupStrength(
                     strengthOf(member, insightByTag.get(normalizeTag(member.tag)), true),
                     strengthOf(defender, insightByTag.get(normalizeTag(defender.tag)))
                 );

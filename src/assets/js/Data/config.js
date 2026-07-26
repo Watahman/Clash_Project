@@ -24,6 +24,7 @@ export const _EXT_PLAYER_INFO = "/Player";
 export const _EXT_PLAYER_BATTLE_LOG = "/PlayerBattleLog";
 export const _EXT_PLAYER_LEAGUE_HISTORY = "/PlayerLeagueHistory";
 export const _EXT_PLAYER_VERIFY_TOKEN = "/PlayerVerifyToken";
+export const _EXT_PLAYER_PERFORMANCE = "/PlayerPerformance";
 
 export const _EXT_LEAGUE_LEAGUETIERS_INFO = "/LeagueTierInfo"
 export const _EXT_LEAGUE_CAPITAL_LEAGUES = "/LeagueCapitalLeagues"

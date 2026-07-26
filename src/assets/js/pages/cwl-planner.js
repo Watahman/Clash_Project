@@ -7,6 +7,8 @@ import { initFreeRosterFilter } from "../cwl/cwl-roster-filter.js";
 import { initSpreadsheetImport } from "../cwl/cwl-spreadsheet-import.js";
 import { getClanInfoRequest } from "../API/API-Clan.js";
 import * as conf from "../Data/config.js";
+import { initPlayerPerformanceClient } from "../cwl/player-performance-client.js";
+import { initPlayerPerformancePopover } from "../cwl/cwl-player-performance-popover.js";
 
 export { savePlan };
 
@@ -75,6 +77,8 @@ async function init() {
         status: document.querySelector('#cwl-roster-filter-status')
     });
     initPlayerSorting();
+    initPlayerPerformanceClient();
+    initPlayerPerformancePopover();
     initPlanNameSync();
     window.addEventListener('clashtools:cwl-active-poll-changed', () => savePlan());
     guessCwlSize();

@@ -1,0 +1,319 @@
+/* Single styling owner for CWL player cards, their controls and performance popover. */
+.cwl-player-article {
+    position: relative;
+    display: flex;
+    width: 100%;
+    min-height: 4rem;
+    align-items: center;
+    gap: 0.72rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: linear-gradient(180deg, rgba(23, 31, 47, 0.95), rgba(13, 18, 28, 0.95));
+    padding: 0.68rem 0.78rem;
+    box-shadow: var(--inner-line);
+    cursor: pointer;
+    user-select: none;
+}
+
+.cwl-player-article::after {
+    content: none !important;
+    display: none !important;
+}
+
+.cwl-player-article.draggable:hover {
+    border-color: rgba(56, 217, 138, 0.35);
+    box-shadow: 0 0.9rem 1.8rem rgba(0, 0, 0, 0.24), 0 0 0 3px rgba(56, 217, 138, 0.055);
+    cursor: grab;
+    transform: translateY(-2px);
+}
+
+.cwl-player-townhall-foto {
+    width: 2.7rem;
+    height: 2.7rem;
+    flex: 0 0 auto;
+    border: 1px solid rgba(246, 183, 60, 0.16);
+    border-radius: var(--radius-sm);
+    background: rgba(0, 0, 0, 0.3);
+    object-fit: contain;
+}
+
+.cwl-player-info {
+    display: grid;
+    min-width: 0;
+    flex: 1;
+    gap: 0.05rem;
+    padding-right: 0.8rem;
+}
+
+.cwl-player-name,
+.cwl-player-clan,
+.cwl-player-hashtag {
+    overflow: hidden;
+    margin: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cwl-player-name {
+    color: var(--text-1);
+    font-family: var(--font-heading);
+    font-size: 0.98rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.cwl-player-clan,
+.cwl-player-hashtag {
+    color: var(--text-3);
+    font-size: 0.68rem;
+}
+
+.cwl-player-hashtag {
+    color: var(--accent);
+    font-family: var(--font-mono);
+}
+
+.cwl-availability-indicator {
+    display: inline-flex;
+    min-width: 1.85rem;
+    min-height: 1.35rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    padding: 0.12rem 0.42rem;
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.cwl-availability-yes { border-color: rgba(56, 217, 138, 0.3); background: var(--green-dim); color: var(--green); }
+.cwl-availability-partial { border-color: rgba(246, 183, 60, 0.32); background: var(--accent-dim); color: var(--accent); }
+.cwl-availability-no { border-color: rgba(255, 91, 74, 0.3); background: var(--red-dim); color: var(--red); }
+.cwl-availability-unknown { background: rgba(255, 255, 255, 0.04); color: var(--text-3); }
+
+.cwl-move-player,
+.cwl-roster-status {
+    min-height: 1.9rem;
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    background: var(--surface-subtle);
+    color: var(--text-muted);
+}
+
+.cwl-delete-player {
+    display: inline-grid;
+    width: 1.9rem;
+    height: 1.9rem;
+    min-height: 1.9rem;
+    place-items: center;
+    border: 1px solid transparent !important;
+    border-radius: var(--radius-small);
+    background: transparent !important;
+    padding: 0;
+    opacity: 0.55;
+}
+
+.cwl-delete-player img { width: 0.8rem; height: 0.8rem; object-fit: contain; }
+.cwl-delete-player:hover,
+.cwl-delete-player:focus-visible {
+    border-color: color-mix(in srgb, var(--danger) 30%, transparent) !important;
+    background: var(--danger-soft) !important;
+    opacity: 1;
+}
+
+.workspace-planner .cwl-player-article,
+.workspace-planner #cwl-available-players .cwl-player-article,
+.workspace-planner .cwl-clan-player-list .cwl-player-article {
+    display: grid !important;
+    grid-template-columns: clamp(2.35rem, 4vw, 2.75rem) minmax(0, 1fr) auto clamp(5.5rem, 9vw, 7rem) 1.9rem !important;
+    width: 100% !important;
+    min-height: 4rem !important;
+    align-items: center;
+    column-gap: clamp(0.45rem, 1vw, var(--space-3));
+    row-gap: 0.25rem;
+    border: 0 !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0;
+    background: transparent !important;
+    padding: 0.55rem clamp(0.6rem, 1.2vw, var(--space-3)) !important;
+    box-shadow: none;
+    transform: none !important;
+}
+
+.workspace-planner .cwl-clan-player-list .cwl-player-article {
+    grid-template-columns: 2.35rem minmax(0, 1fr) auto clamp(5.8rem, 8vw, 7.2rem) clamp(5.5rem, 9vw, 7rem) 1.9rem !important;
+}
+
+.workspace-planner #cwl-available-players .cwl-player-article:first-child {
+    border-top: 1px solid var(--border) !important;
+}
+
+.workspace-planner .cwl-player-townhall-foto {
+    grid-column: 1;
+    grid-row: 1;
+    width: clamp(2.35rem, 4vw, 2.75rem) !important;
+    height: clamp(2.35rem, 4vw, 2.75rem) !important;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.workspace-planner .cwl-clan-player-list .cwl-player-townhall-foto {
+    width: 2.35rem !important;
+    height: 2.35rem !important;
+}
+
+.workspace-planner .cwl-player-info {
+    grid-column: 2;
+    grid-row: 1;
+    align-items: baseline;
+    padding: 0;
+    row-gap: 0.1rem;
+}
+
+.workspace-planner .cwl-player-info:hover,
+.workspace-planner .cwl-player-info:focus-visible {
+    border-radius: var(--radius-small);
+    outline: none;
+    background: color-mix(in srgb, var(--surface-hover) 60%, transparent);
+}
+
+.workspace-planner .cwl-player-name {
+    color: var(--text) !important;
+    font-size: 0.9rem !important;
+    font-weight: 750;
+    line-height: 1.2;
+    text-transform: none;
+}
+
+.workspace-planner .cwl-player-clan,
+.workspace-planner .cwl-player-hashtag {
+    color: var(--text-muted) !important;
+    line-height: 1.25;
+}
+
+.workspace-planner .cwl-player-hashtag {
+    justify-self: start;
+    color: var(--text-subtle) !important;
+}
+
+.workspace-planner .cwl-roster-status {
+    grid-column: 4;
+    grid-row: 1;
+    width: clamp(5.8rem, 8vw, 7.2rem);
+    justify-self: end;
+    padding: 0.2rem 1.35rem 0.2rem 0.42rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+}
+
+.workspace-planner .cwl-player-article[data-roster-status="core"] .cwl-roster-status {
+    border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+    color: var(--accent-strong);
+}
+
+.workspace-planner .cwl-player-article[data-roster-status="rotation"] .cwl-roster-status {
+    border-color: color-mix(in srgb, var(--blue) 34%, var(--border));
+    color: var(--blue);
+}
+
+.workspace-planner .cwl-player-article[data-roster-status="reserve"] .cwl-roster-status {
+    color: var(--text-subtle);
+}
+
+.workspace-planner .cwl-availability-indicator {
+    grid-column: 3;
+    grid-row: 1;
+    max-width: 6rem;
+    justify-self: end;
+    overflow: hidden;
+    background: var(--surface-subtle);
+    cursor: help;
+    text-overflow: ellipsis;
+}
+
+.workspace-planner .cwl-availability-unknown {
+    width: 1.45rem;
+    min-width: 1.45rem;
+    height: 1.45rem;
+    min-height: 1.45rem;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0;
+}
+
+.workspace-planner .cwl-availability-unknown::before {
+    content: "i";
+    font-family: Georgia, serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.workspace-planner .cwl-move-player {
+    grid-column: 4;
+    grid-row: 1;
+    width: clamp(5.5rem, 9vw, 7rem);
+    justify-self: end;
+    padding-block: 0.2rem;
+    font-size: 0.68rem;
+}
+
+.workspace-planner .cwl-delete-player { grid-column: 5; grid-row: 1; justify-self: end; }
+.workspace-planner .cwl-clan-player-list .cwl-roster-status { grid-column: 4; }
+.workspace-planner .cwl-clan-player-list .cwl-move-player { grid-column: 5; }
+.workspace-planner .cwl-clan-player-list .cwl-delete-player { grid-column: 6; }
+
+.modal-account-list .cwl-player-article,
+.modal-group-preview-list .cwl-player-article { min-height: 5.1rem; cursor: pointer; }
+.modal-account-list .cwl-player-article.selected,
+.modal-group-preview-list .cwl-player-article.selected {
+    border-color: rgba(246, 183, 60, 0.42);
+    background: var(--accent-dim);
+}
+
+:root[data-theme="light"] .cwl-player-article {
+    border-color: var(--border-visible);
+    background: var(--surface-card);
+    box-shadow: var(--shadow-sm), var(--inner-line);
+}
+
+:root[data-theme="light"] .cwl-player-name,
+:root[data-theme="light"] .cwl-player-hashtag { color: var(--text-1) !important; }
+:root[data-theme="light"] .cwl-player-clan { color: var(--text-3) !important; }
+:root[data-theme="light"] .cwl-player-townhall-foto {
+    border-color: var(--border-visible);
+    background: rgba(255, 255, 255, 0.78);
+}
+:root[data-theme="light"] .cwl-sidebar .cwl-player-article:hover {
+    border-color: var(--border-focus);
+    background: var(--surface-elevated);
+}
+:root[data-theme="light"] .cwl-availability-unknown {
+    background: var(--surface-3);
+    color: var(--text-3);
+}
+
+@media (max-width: 46rem) {
+    .workspace-planner .cwl-player-article {
+        grid-template-columns: 2.35rem minmax(0, 1fr) auto 1.9rem !important;
+    }
+    .workspace-planner .cwl-delete-player { grid-column: 4; }
+    .workspace-planner .cwl-move-player,
+    .workspace-planner .cwl-clan-player-list .cwl-roster-status {
+        grid-column: 2 / -1;
+        grid-row: 2;
+        width: min(100%, 11rem);
+        justify-self: start;
+    }
+    .workspace-planner .cwl-clan-player-list .cwl-move-player {
+        grid-column: 2 / -1;
+        grid-row: 3;
+        width: min(100%, 11rem);
+        justify-self: start;
+    }
+    .workspace-planner .cwl-clan-player-list .cwl-delete-player { grid-column: 4; grid-row: 1; }
+}

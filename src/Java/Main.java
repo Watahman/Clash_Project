@@ -21,6 +21,7 @@ public class Main {
         SUPABASE_User supaUser;
         SUPABASE_Auth supaAuth;
         API_Player apiPlayer;
+        API_PlayerPerformance apiPlayerPerformance;
         API_Locations apiLocations;
         API_Leagues apiLeagues;
         API_Labels apiLabels;
@@ -40,6 +41,7 @@ public class Main {
         apiLeagues = new API_Leagues(server, conf);
         apiLocations = new API_Locations(server, conf);
         apiPlayer = new API_Player(server, conf);
+        apiPlayerPerformance = new API_PlayerPerformance(server, conf);
         supaUser = new SUPABASE_User(server, conf);
         supaAuth = new SUPABASE_Auth(server, conf);
         supaCWLPlanner = new SUPABASE_CWLPlanner(server, conf);
@@ -62,6 +64,7 @@ public class Main {
         apiPlayer.getPlayerBattleLog();
         apiPlayer.postPlayerVerifyToken();
         apiPlayer.getPlayerLeagueHistory();
+        apiPlayerPerformance.postPlayerPerformance();
 
         apiLeagues.getLeagueTierInfo();
         apiLeagues.getLeagueCapitalLeagues();
