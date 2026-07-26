@@ -5,14 +5,16 @@ import { de } from './locales/de.js';
 import { es } from './locales/es.js';
 import { workspaceLocales } from './workspace-locales.js';
 
-const autoPlanFallback = Object.fromEntries(
-    Object.entries(en).filter(([key]) => key.startsWith('autoPlan.'))
+const plannerToolFallback = Object.fromEntries(
+    Object.entries(en).filter(([key]) =>
+        key.startsWith('autoPlan.') || key.startsWith('optimizePlan.')
+    )
 );
 
 export const translations = Object.freeze({
     nl: Object.freeze({ ...nl, ...workspaceLocales.nl }),
     en: Object.freeze({ ...en, ...workspaceLocales.en }),
-    fr: Object.freeze({ ...autoPlanFallback, ...fr, ...workspaceLocales.fr }),
-    de: Object.freeze({ ...autoPlanFallback, ...de, ...workspaceLocales.de }),
-    es: Object.freeze({ ...autoPlanFallback, ...es, ...workspaceLocales.es })
+    fr: Object.freeze({ ...plannerToolFallback, ...fr, ...workspaceLocales.fr }),
+    de: Object.freeze({ ...plannerToolFallback, ...de, ...workspaceLocales.de }),
+    es: Object.freeze({ ...plannerToolFallback, ...es, ...workspaceLocales.es })
 });
