@@ -268,6 +268,27 @@
     align-self: end;
     justify-self: end;
 }
+
+.workspace-planner .cwl-plan-limit-feedback {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 100%;
+    margin: 0;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid color-mix(in srgb, var(--danger) 38%, var(--border));
+    border-radius: var(--radius-small);
+    background: var(--danger-soft);
+    color: var(--danger);
+    font-size: 0.82rem;
+    font-weight: 650;
+    line-height: 1.4;
+    text-wrap: pretty;
+}
+
+.workspace-planner .cwl-plan-limit-feedback[hidden] {
+    display: none;
+}
+
 .cwl-toolbar-spacer { display: none; }
 
 .cwl-planner-layout {
@@ -536,6 +557,10 @@
         grid-row: auto;
         align-self: start;
         justify-self: start;
+    }
+    .workspace-planner .cwl-plan-limit-feedback {
+        grid-column: auto;
+        grid-row: auto;
     }
     .cwl-toolbar-spacer { display: none; }
     .cwl-planner-layout { display: grid; grid-template-columns: minmax(0, 1fr); margin-top: var(--space-4); border: 0; gap: var(--space-4); }

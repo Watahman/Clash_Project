@@ -175,6 +175,7 @@ export const nl = Object.freeze({
   "cwl.saved": "Opgeslagen",
   "cwl.saving": "Opslaan...",
   "cwl.saveError": "Opslaan mislukt",
+  "cwl.planLimitReached": "Je kunt maximaal 3 planningen opslaan. Verwijder eerst een bestaande planning voordat je een nieuwe opslaat.",
   "cwl.noPlan": "Geen plannen",
   "cwl.selectPlan": "Selecteer plan",
   "cwl.loadPlan": "Plan laden",

@@ -6,6 +6,7 @@ import { getAllPlansFromDatabase, getPlanFromDatabase, setPlanToDatabase } from 
 import { getCurrentUserId } from '../utils/user.js';
 import { t } from '../i18n/i18n.js';
 import { getActiveCwlPollMeta } from './cwl-availability.js';
+import { hasReachedPlanLimit } from './cwl-plan-limits.js';
 import { escapeCssIdentifier, getCardTag, normalizeTag } from './cwl-utils.js';
 import {
     CWL_PLAN_SCHEMA_VERSION,
@@ -26,6 +27,7 @@ let totalPlayerAmount;
 let planName;
 let loadPlan;
 let saveStatus;
+let planLimitFeedback;
 const planCache = new Map();
 const planRevisions = new Map();
 let saveStatusTimer;
@@ -45,7 +47,9 @@ export function initPlanIO(refs) {
     planName = refs.planName;
     loadPlan = refs.loadPlan;
     saveStatus = document.querySelector('#cwl-save-status');
+    planLimitFeedback = document.querySelector('#cwl-plan-limit-feedback');
     activePlanId = cleanPlanId(localStorage.getItem(ACTIVE_PLAN_KEY));
+    hidePlanLimitFeedback();
     setSaveStatus('idle');
 }
 
@@ -79,6 +83,23 @@ function setSaveStatus(state) {
                 : state === 'conflict' ? 'cwl.saveConflict'
                     : 'cwl.saved'
     );
+}
+
+function showPlanLimitFeedback() {
+    clearTimeout(saveStatusTimer);
+    setSaveStatus('error');
+    if (!planLimitFeedback) return;
+    planLimitFeedback.textContent = t('cwl.planLimitReached');
+    planLimitFeedback.hidden = false;
+}
+
+function hidePlanLimitFeedback() {
+    if (!planLimitFeedback) return;
+    planLimitFeedback.hidden = true;
+}
+
+function isNewPlanAtLimit() {
+    return !activePlanId && hasReachedPlanLimit(planCache.values());
 }
 
 function readPlayerCard(player) {
@@ -137,6 +158,13 @@ export function savePlan(options = {}) {
         setSaveStatus('error');
         return Promise.resolve(null);
     }
+
+    if (isNewPlanAtLimit()) {
+        showPlanLimitFeedback();
+        return Promise.resolve(null);
+    }
+
+    hidePlanLimitFeedback();
 
     let info;
     try {
@@ -197,7 +225,8 @@ async function persistSave(job) {
                 uuid: savedId,
                 name: job.name,
                 info: job.info,
-                revision
+                revision,
+                isOwner: true
             };
             planCache.set(savedId, cached);
             upsertPlanOption(savedId, job.name);
@@ -210,7 +239,11 @@ async function persistSave(job) {
         saveStatusTimer = setTimeout(() => setSaveStatus('idle'), 700);
         return data;
     } catch (error) {
-        setSaveStatus(error?.status === 409 ? 'conflict' : 'error');
+        if (error?.code === 'PLAN_LIMIT_REACHED') {
+            showPlanLimitFeedback();
+        } else {
+            setSaveStatus(error?.status === 409 ? 'conflict' : 'error');
+        }
         return null;
     }
 }
@@ -290,6 +323,7 @@ export async function loadPlanById(planId) {
     suppressSave = true;
     setCanAutosave(false);
     setLoading(true);
+    hidePlanLimitFeedback();
     setSaveStatus('idle');
     setActivePlan(planId);
 
@@ -461,6 +495,7 @@ export function startNewPlan() {
     availablePlayers.replaceChildren();
     allClans.replaceChildren();
     totalPlayerAmount.textContent = '0';
+    hidePlanLimitFeedback();
     setSaveStatus('idle');
     suppressSave = false;
     setCanAutosave(false);

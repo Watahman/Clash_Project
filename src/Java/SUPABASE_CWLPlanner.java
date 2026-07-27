@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SUPABASE_CWLPlanner {
+    private static final int MAX_OWNED_PLANS = 3;
+
     private final HttpServer server;
     private final Config conf;
     private final API_Utils utils;
@@ -85,6 +87,7 @@ public class SUPABASE_CWLPlanner {
                         200);
                 return;
             } else {
+                requireAvailablePlanSlot(userId);
                 JsonObject plan = new JsonObject();
                 plan.addProperty("name",     planName);
                 plan.add("info",             planInfo);
@@ -218,6 +221,7 @@ public class SUPABASE_CWLPlanner {
             JsonObject json = utils.parseBody(ex);
             String planId = utils.requireString(json, "planId");
             requirePlanAccess(planId, userId);
+            requireAvailablePlanSlot(userId);
 
             JsonArray sourceRows = JsonParser.parseString(SUPABASE_Client.getWithBody(
                     "plans",
@@ -266,6 +270,19 @@ public class SUPABASE_CWLPlanner {
             throw new IllegalArgumentException("Plan naam moet tussen 1 en 40 tekens bevatten");
         }
         return trimmed;
+    }
+
+    private void requireAvailablePlanSlot(String userId) throws Exception {
+        JsonArray ownedPlans = JsonParser.parseString(SUPABASE_Client.getWithBody(
+                "plans",
+                "select=id&owner_id=" + SUPABASE_Client.eq(userId)
+        )).getAsJsonArray();
+        if (ownedPlans.size() >= MAX_OWNED_PLANS) {
+            throw new HttpException(
+                    409,
+                    "{\"error\":\"Maximaal 3 plannen toegestaan\",\"code\":\"PLAN_LIMIT_REACHED\"}"
+            );
+        }
     }
 
     private void requirePlanOwner(String planId, String userId) throws Exception {

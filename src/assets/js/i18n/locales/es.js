@@ -134,6 +134,7 @@ export const es = Object.freeze({
   "cwl.saved": "Guardado",
   "cwl.saving": "Guardando...",
   "cwl.saveError": "Error al guardar",
+  "cwl.planLimitReached": "Puedes guardar hasta 3 planes. Elimina primero un plan existente antes de guardar uno nuevo.",
   "cwl.noPlan": "Sin planes",
   "cwl.selectPlan": "Seleccionar plan",
   "cwl.loadPlan": "Cargar plan",

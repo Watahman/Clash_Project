@@ -4,6 +4,7 @@ import { syncAuthSession } from '../auth/auth-client.js';
 import { getCurrentUserId } from '../utils/user.js';
 import { summarizePlan } from '../cwl/cwl-plan-summary.js';
 import { filterAndSortPlans } from '../cwl/cwl-plan-list.js';
+import { hasReachedPlanLimit } from '../cwl/cwl-plan-limits.js';
 import {
     copyPlan,
     deletePlan,
@@ -200,6 +201,10 @@ function showRename(row, plan) {
 }
 
 async function copyExistingPlan(plan) {
+    if (hasReachedPlanLimit(plans.filter(item => item.isOwner))) {
+        setStatus(t('cwl.planLimitReached'), 'error');
+        return;
+    }
     setStatus(t('drafts.working'));
     try {
         const name = `${plan.name}${t('drafts.copySuffix')}`.slice(0, 40).trim();
@@ -207,7 +212,12 @@ async function copyExistingPlan(plan) {
         await loadPlans();
         setStatus(t('drafts.copied'), 'success');
     } catch (error) {
-        setStatus(error?.message || t('drafts.actionError'), 'error');
+        setStatus(
+            error?.code === 'PLAN_LIMIT_REACHED'
+                ? t('cwl.planLimitReached')
+                : error?.message || t('drafts.actionError'),
+            'error'
+        );
     }
 }
 
