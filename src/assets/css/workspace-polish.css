@@ -84,6 +84,29 @@ body.workspace-app[data-workspace-page="groups"] .group-index {
     padding-inline: var(--groups-column-gutter);
 }
 
+/* The family-list collapse handle intentionally sits across the divider.
+   groups.css still gives #groups-sidebar overflow:hidden, which clipped the
+   right half of the handle. Keep the index contents scrollable via #groups-list
+   while allowing the handle itself to extend into the detail column. */
+body.workspace-app[data-workspace-page="groups"] #groups-sidebar.group-index {
+    overflow: visible;
+}
+
+@media (min-width: 58.001rem) {
+    /* workspace-polish adds horizontal gutters after groups-workspace-v1.css.
+       Remove both gutters when the index track collapses, otherwise the zero-
+       width grid column still visually occupies space and the handle jumps. */
+    body.workspace-app[data-workspace-page="groups"]
+    .groups-workspace.is-group-index-collapsed #groups-sidebar.group-index {
+        border-right-color: transparent;
+        padding-inline: 0;
+    }
+
+    body.workspace-app[data-workspace-page="groups"] .groups-index-toggle {
+        z-index: 10;
+    }
+}
+
 body.workspace-app[data-workspace-page="groups"] .group-detail {
     padding-inline: var(--groups-detail-gutter);
 }
