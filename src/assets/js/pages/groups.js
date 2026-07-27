@@ -9,6 +9,7 @@ import { initCopyFeedback } from '../utils/copy-feedback.js';
 import { initGroupsAdminPanel } from '../groups/groups-admin-panel.js';
 import { initGroupPolls } from '../groups/groups-polls.js';
 import { activateGroupTab, bindGroupTabs } from '../groups/groups-tabs.js';
+import { initGroupIndexSlider } from '../groups/groups-index-slider.js';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { bindBackdropClick } from '../utils/backdrop-click.js';
 import {
@@ -50,6 +51,8 @@ const groupsLeaveCancelBtn = document.querySelector('#groups-leave-cancel-btn');
 const groupsLeaveConfirmBtn = document.querySelector('#groups-leave-confirm-btn');
 const groupsAdminOverlay = document.querySelector('#groups-admin-overlay');
 const groupsPageStatus = document.querySelector('#groups-page-status');
+const groupsWorkspace = document.querySelector('.groups-workspace');
+const groupsIndexToggle = document.querySelector('#groups-index-toggle');
 
 const SELECTED_GROUP_STORAGE_KEY = 'clashtoolsSelectedGroupId';
 let adminPanel;
@@ -60,6 +63,7 @@ let notificationItems = [];
 
 async function init() {
     initI18n();
+    initGroupIndexSlider(groupsWorkspace, groupsIndexToggle);
     stageRequestedPollTarget();
     await syncAuthSession().catch(() => null);
     initCreateJoinOverlay();

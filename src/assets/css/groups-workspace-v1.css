@@ -112,11 +112,64 @@ body.workspace-app[data-workspace-page="groups"] .groups-add-button:focus-visibl
 }
 
 .group-index {
+    position: relative;
     display: flex;
     min-width: 0;
     flex-direction: column;
     border-right: 0.0625rem solid var(--border);
     padding-right: 1.15rem;
+    transition: border-color 220ms ease-out, padding-right 220ms ease-out;
+}
+
+.groups-workspace {
+    transition: grid-template-columns 220ms ease-out;
+}
+
+.group-index-heading,
+body.workspace-app[data-workspace-page="groups"] #groups-list {
+    transition: opacity 160ms ease-out, visibility 160ms ease-out;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-index-toggle {
+    position: absolute;
+    top: 50%;
+    right: -0.85rem;
+    z-index: 3;
+    display: none;
+    width: 1.7rem;
+    height: 1.7rem;
+    place-items: center;
+    border: 0.0625rem solid var(--border-strong) !important;
+    border-radius: 50%;
+    background: var(--surface);
+    padding: 0;
+    color: var(--text-muted);
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.28) !important;
+    transform: translateY(-50%);
+    transition: background 180ms ease-out, border-color 180ms ease-out, color 180ms ease-out, transform 180ms ease-out;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-index-toggle:hover {
+    border-color: color-mix(in srgb, var(--accent) 55%, var(--border-strong)) !important;
+    background: var(--surface-raised);
+    color: var(--accent-strong);
+    transform: translateY(-50%) scale(1.05);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-index-toggle:active {
+    transform: translateY(-50%) scale(0.96);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-index-toggle:focus-visible {
+    outline: 0.125rem solid var(--accent);
+    outline-offset: 0.15rem;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-index-toggle svg {
+    width: 0.9rem;
+    height: 0.9rem;
+    stroke: currentColor;
+    transition: transform 220ms ease-out;
 }
 
 .group-index-heading {
@@ -755,6 +808,46 @@ body.workspace-app[data-workspace-page="groups"] .groups-admin-card { border: 0;
     }
 }
 
+@media (min-width: 82.001rem) {
+    .groups-workspace.is-group-index-collapsed {
+        grid-template-columns: 0 minmax(30rem, 1fr) 15rem;
+    }
+}
+
+@media (min-width: 58.001rem) and (max-width: 82rem) {
+    .groups-workspace.is-group-index-collapsed {
+        grid-template-columns: 0 minmax(30rem, 1fr);
+    }
+}
+
+@media (min-width: 58.001rem) {
+    body.workspace-app[data-workspace-page="groups"] .groups-index-toggle {
+        display: grid;
+    }
+
+    .groups-workspace.is-group-index-collapsed .group-index {
+        border-right-color: transparent;
+        padding-right: 0;
+    }
+
+    .groups-workspace.is-group-index-collapsed .group-index-heading,
+    body.workspace-app[data-workspace-page="groups"] .groups-workspace.is-group-index-collapsed #groups-list {
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .groups-workspace.is-group-index-collapsed .groups-index-toggle svg {
+        transform: rotate(180deg);
+    }
+}
+
+@media (max-width: 58rem) {
+    body.workspace-app[data-workspace-page="groups"] .groups-index-toggle {
+        display: none;
+    }
+}
+
 /* Group code copy feedback: exactly one icon is visible at every moment. */
 #groups-main #groups-detail-code[data-copy-state="idle"] #groups-detail-copy,
 #groups-main #groups-detail-code[data-copy-state="copied"] #groups-detail-checkmark {
@@ -788,6 +881,14 @@ body.workspace-app[data-workspace-page="groups"] .groups-code-pill #groups-detai
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .groups-workspace,
+    .group-index,
+    .group-index-heading,
+    body.workspace-app[data-workspace-page="groups"] #groups-list,
+    body.workspace-app[data-workspace-page="groups"] .groups-index-toggle svg {
+        transition-duration: 0.01ms;
+    }
+
     body.workspace-app[data-workspace-page="groups"] .groups-code-pill #groups-detail-checkmark.is-copy-feedback-active {
         animation: none;
     }

@@ -292,6 +292,8 @@ export const es = Object.freeze({
   "optimizePlan.reasonStabilityLoss": "Diferencia esperada de solo {value}★",
   "optimizePlan.reasonCrossClanSafe": "Ambos clanes permanecen completamente llenos",
   "groups.title": "Tus Clan Families",
+  "groups.collapseFamilyList": "Contraer Clan Families",
+  "groups.expandFamilyList": "Expandir Clan Families",
   "groups.new": "Nuevo",
   "groups.select": "Selecciona un Clan Family",
   "groups.openGroup": "Abrir Clan Family",

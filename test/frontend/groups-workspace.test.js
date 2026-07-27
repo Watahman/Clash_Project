@@ -5,6 +5,7 @@ import { canKickGroupMember, isGroupAdmin } from '../../src/assets/js/groups/gro
 import { activateGroupTab, bindGroupTabs } from '../../src/assets/js/groups/groups-tabs.js';
 import { renderBadge } from '../../src/assets/js/groups/groups-badges.js';
 import { createMemberRoleAdmin } from '../../src/assets/js/groups/groups-admin-members.js';
+import { initGroupIndexSlider } from '../../src/assets/js/groups/groups-index-slider.js';
 
 describe('Groups V1 workspace', () => {
     it('keeps the approved four real tabs and removes dead or broken controls', () => {
@@ -18,10 +19,36 @@ describe('Groups V1 workspace', () => {
         expect(html).toContain('id="groups-poll-reminder-btn"');
         expect(html).toContain('id="groups-detail-tab-availability-count"');
         expect(html).toContain('id="groups-admin-scan-unlinked"');
+        expect(html).toContain('id="groups-index-toggle"');
         expect(html).toContain('data-i18n="groups.clansSharedHelp"');
         expect(html).toContain('groups-inline-form groups-admin-only hidden');
         expect(html).not.toContain('groups-badge-picker');
         expect(html).not.toContain('groups-badge-options');
+    });
+
+    it('slides the Clan Family index closed, persists the choice and binds once', () => {
+        localStorage.clear();
+        document.body.innerHTML = `
+            <div class="groups-workspace">
+                <aside id="groups-sidebar"></aside>
+                <button id="groups-index-toggle" type="button" aria-expanded="true"></button>
+            </div>`;
+        const workspace = document.querySelector('.groups-workspace');
+        const toggle = document.querySelector('#groups-index-toggle');
+
+        expect(initGroupIndexSlider(workspace, toggle)).toBe(true);
+        expect(initGroupIndexSlider(workspace, toggle)).toBe(false);
+        toggle.click();
+
+        expect(workspace.classList.contains('is-group-index-collapsed')).toBe(true);
+        expect(toggle.getAttribute('aria-expanded')).toBe('false');
+        expect(toggle.getAttribute('aria-label')).toBe('Expand Clan Families');
+        expect(localStorage.getItem('clashtools_groups_index_collapsed')).toBe('true');
+
+        toggle.click();
+        expect(workspace.classList.contains('is-group-index-collapsed')).toBe(false);
+        expect(toggle.getAttribute('aria-expanded')).toBe('true');
+        expect(toggle.getAttribute('aria-label')).toBe('Collapse Clan Families');
     });
 
 

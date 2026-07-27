@@ -333,6 +333,8 @@ export const nl = Object.freeze({
   "optimizePlan.reasonStabilityLoss": "Verwacht verschil slechts {value}★",
   "optimizePlan.reasonCrossClanSafe": "Beide clans blijven volledig gevuld",
   "groups.title": "Jouw Clan Families",
+  "groups.collapseFamilyList": "Clan Families inklappen",
+  "groups.expandFamilyList": "Clan Families uitklappen",
   "groups.new": "Nieuw",
   "groups.select": "Selecteer een Clan Family",
   "groups.openGroup": "Clan Family openen",
