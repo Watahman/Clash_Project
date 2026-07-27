@@ -299,6 +299,8 @@ export const nl = Object.freeze({
   "optimizePlan.applying": "Geaccepteerde verbeteringen toepassen...",
   "optimizePlan.error": "Het huidige plan kon niet worden geanalyseerd.",
   "optimizePlan.applyError": "De geaccepteerde verbeteringen konden niet worden toegepast.",
+  "optimizePlan.needsClan": "Voeg minstens één clan toe voordat je het plan optimaliseert.",
+  "optimizePlan.needsPlayers": "Voeg spelers toe voordat je het plan optimaliseert.",
   "optimizePlan.ready": "{count} betekenisvolle verbetering(en) gevonden.",
   "optimizePlan.readyOne": "1 betekenisvolle verbetering gevonden.",
   "optimizePlan.found": "{count} verbeteringen gevonden",

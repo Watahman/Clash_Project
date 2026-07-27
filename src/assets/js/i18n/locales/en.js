@@ -258,6 +258,8 @@ export const en = Object.freeze({
   "optimizePlan.applying": "Applying accepted improvements...",
   "optimizePlan.error": "Optimize Plan could not analyze this plan.",
   "optimizePlan.applyError": "The accepted improvements could not be applied.",
+  "optimizePlan.needsClan": "Add at least one clan before using Optimize Plan.",
+  "optimizePlan.needsPlayers": "Add players to the planner before using Optimize Plan.",
   "optimizePlan.ready": "{count} meaningful improvement(s) found.",
   "optimizePlan.readyOne": "1 meaningful improvement found.",
   "optimizePlan.found": "{count} improvements found",
