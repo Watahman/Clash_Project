@@ -42,8 +42,8 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
                     "/clan/" + encoded(clanTag) + "/basic"
             );
         } catch (HttpException notFound) {
-            if (notFound.getStatusCode() == 404) return List.of();
-            throw notFound;
+            if (notFound.getStatusCode() == 404) basic = new JsonObject();
+            else throw notFound;
         }
         List<HistoricalCwlSeasonSummary> leagueChanges =
                 CwlHistoryIndexNormalizer.normalizeLegacy(
@@ -92,6 +92,14 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
         JsonObject response = client.get(
                 "/cwl/" + encoded(clanTag) + "/" + encoded(season)
         );
+        String responseSeason = CwlHistoryJson.string(response, "season");
+        if (!responseSeason.isBlank() && !season.equals(responseSeason)) {
+            throw HttpException.upstream(
+                    502,
+                    "{\"error\":\"ClashKing returned a different CWL season\"}",
+                    "ClashKing API"
+            );
+        }
         return CwlHistoryNormalizer.normalizeSeason(
                 clanTag, season, response, null, providerName()
         );

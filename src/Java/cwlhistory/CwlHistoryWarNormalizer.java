@@ -49,7 +49,7 @@ final class CwlHistoryWarNormalizer {
         return List.copyOf(result);
     }
 
-    private static JsonArray warItems(JsonObject source) {
+    static JsonArray warItems(JsonObject source) {
         JsonArray direct = CwlHistoryJson.array(
                 source, "items", "wars", "leagueWars"
         );

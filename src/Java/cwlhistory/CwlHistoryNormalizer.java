@@ -6,9 +6,11 @@ import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 final class CwlHistoryNormalizer {
     private CwlHistoryNormalizer() {}
@@ -71,7 +73,7 @@ final class CwlHistoryNormalizer {
         JsonArray rows = CwlHistoryJson.array(
                 group, "clan_rankings", "clanRankings", "standings", "rankings"
         );
-        if (rows == null) return List.of();
+        if (rows == null) return standingsFromWars(group);
         List<StandingCandidate> candidates = new ArrayList<>();
         for (JsonElement item : rows) {
             if (!item.isJsonObject()) continue;
@@ -102,6 +104,118 @@ final class CwlHistoryNormalizer {
         }
         result.sort(Comparator.comparingInt(HistoricalCwlSeason.Standing::rank));
         return List.copyOf(result);
+    }
+
+    private static List<HistoricalCwlSeason.Standing> standingsFromWars(
+            JsonObject group
+    ) {
+        Map<String, StandingAccumulator> scores = new LinkedHashMap<>();
+        JsonArray clans = CwlHistoryJson.array(group, "clans");
+        if (clans != null) {
+            for (JsonElement item : clans) {
+                if (!item.isJsonObject()) continue;
+                JsonObject clan = item.getAsJsonObject();
+                String tag = CwlHistoryJson.tag(
+                        CwlHistoryJson.string(clan, "tag", "clanTag")
+                );
+                if (tag.isBlank()) continue;
+                scores.put(tag, new StandingAccumulator(
+                        tag,
+                        CwlHistoryJson.string(clan, "name", "clanName")
+                ));
+            }
+        }
+        JsonArray wars = CwlHistoryWarNormalizer.warItems(group);
+        if (wars == null) return List.of();
+        Set<String> seenWars = new HashSet<>();
+        for (JsonElement item : wars) {
+            if (!item.isJsonObject()) continue;
+            JsonObject war = item.getAsJsonObject();
+            String state = CwlHistoryJson.string(war, "state", "status");
+            if (!completed(state)) continue;
+            String id = CwlHistoryJson.string(
+                    war, "tag", "warTag", "id", "_warTag"
+            );
+            if (!id.isBlank() && !seenWars.add(id)) continue;
+            JsonObject first = CwlHistoryJson.object(war, "clan");
+            JsonObject second = CwlHistoryJson.object(war, "opponent");
+            if (first == null || second == null) continue;
+            StandingAccumulator firstScore = score(scores, first);
+            StandingAccumulator secondScore = score(scores, second);
+            if (firstScore == null || secondScore == null) continue;
+            int firstStars = CwlHistoryJson.integer(first, 0, "stars");
+            int secondStars = CwlHistoryJson.integer(second, 0, "stars");
+            double firstDestruction = CwlHistoryJson.decimal(
+                    first, 0, "destructionPercentage", "destruction"
+            );
+            double secondDestruction = CwlHistoryJson.decimal(
+                    second, 0, "destructionPercentage", "destruction"
+            );
+            firstScore.stars += firstStars;
+            secondScore.stars += secondStars;
+            firstScore.destruction += firstDestruction;
+            secondScore.destruction += secondDestruction;
+            int result = Integer.compare(firstStars, secondStars);
+            if (result == 0) {
+                result = Double.compare(firstDestruction, secondDestruction);
+            }
+            if (result > 0) {
+                firstScore.win();
+                secondScore.loss();
+            } else if (result < 0) {
+                secondScore.win();
+                firstScore.loss();
+            } else {
+                firstScore.draw();
+                secondScore.draw();
+            }
+        }
+        List<StandingAccumulator> ranked = scores.values().stream()
+                .filter(score -> score.wins + score.losses + score.draws > 0)
+                .sorted(Comparator
+                        .comparingInt(StandingAccumulator::stars).reversed()
+                        .thenComparing(
+                                StandingAccumulator::destruction,
+                                Comparator.reverseOrder()
+                        )
+                        .thenComparing(StandingAccumulator::tag))
+                .toList();
+        List<HistoricalCwlSeason.Standing> result = new ArrayList<>();
+        for (int index = 0; index < ranked.size(); index++) {
+            StandingAccumulator score = ranked.get(index);
+            result.add(new HistoricalCwlSeason.Standing(
+                    index + 1,
+                    score.tag,
+                    score.name,
+                    score.wins,
+                    score.losses,
+                    score.draws,
+                    score.stars,
+                    score.destruction
+            ));
+        }
+        return List.copyOf(result);
+    }
+
+    private static StandingAccumulator score(
+            Map<String, StandingAccumulator> scores,
+            JsonObject side
+    ) {
+        String tag = CwlHistoryJson.tag(
+                CwlHistoryJson.string(side, "tag", "clanTag")
+        );
+        if (tag.isBlank()) return null;
+        return scores.computeIfAbsent(tag, ignored -> new StandingAccumulator(
+                tag,
+                CwlHistoryJson.string(side, "name", "clanName")
+        ));
+    }
+
+    private static boolean completed(String state) {
+        return switch (String.valueOf(state).trim().toLowerCase()) {
+            case "ended", "warended", "complete", "completed" -> true;
+            default -> false;
+        };
     }
 
     private static List<HistoricalCwlSeason.Player> normalizeRoster(
@@ -224,4 +338,44 @@ final class CwlHistoryNormalizer {
             int stars,
             Double destruction
     ) {}
+
+    private static final class StandingAccumulator {
+        private final String tag;
+        private final String name;
+        private int wins;
+        private int losses;
+        private int draws;
+        private int stars;
+        private double destruction;
+
+        private StandingAccumulator(String tag, String name) {
+            this.tag = tag;
+            this.name = name;
+        }
+
+        private void win() {
+            wins += 1;
+            stars += 10;
+        }
+
+        private void loss() {
+            losses += 1;
+        }
+
+        private void draw() {
+            draws += 1;
+        }
+
+        private String tag() {
+            return tag;
+        }
+
+        private int stars() {
+            return stars;
+        }
+
+        private Double destruction() {
+            return destruction;
+        }
+    }
 }

@@ -134,7 +134,11 @@ export function createOperationBoardHistoryController({
                 leagueChange: getLeagueChangeForSeason(
                     report.season,
                     report.league,
-                    seasonIndex
+                    seasonIndex,
+                    {
+                        position: report.position,
+                        groupSize: data.standings?.length
+                    }
                 )
             };
             mode = 'historical';

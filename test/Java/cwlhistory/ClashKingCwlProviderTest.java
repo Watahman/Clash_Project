@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ClashKingCwlProviderTest {
     private HttpServer server;
@@ -158,10 +159,36 @@ class ClashKingCwlProviderTest {
     }
 
     @Test
+    void rejectsAClashKingResponseForADifferentSeason() {
+        respond(
+                "/cwl/%23PQL/2025-06",
+                200,
+                season("2026-06", "ended")
+        );
+
+        Java.HttpException error = assertThrows(
+                Java.HttpException.class,
+                () -> provider.getSeason("#PQL", "2025-06")
+        );
+
+        assertEquals(502, error.getStatusCode());
+    }
+
+    @Test
     void returnsAnEmptyIndexWhenClashKingHasNoClanHistory()
             throws Exception {
         respond(
                 "/clan/%23PQL/basic",
+                404,
+                "{\"detail\":\"Not Found\"}"
+        );
+        respond(
+                "/list/seasons?last=24",
+                200,
+                "[\"2026-06\"]"
+        );
+        respond(
+                "/cwl/%23PQL/2026-06",
                 404,
                 "{\"detail\":\"Not Found\"}"
         );
@@ -170,7 +197,9 @@ class ClashKingCwlProviderTest {
                 provider.getAvailableSeasons("#PQL", 8);
 
         assertEquals(List.of(), seasons);
-        assertEquals(List.of("/clan/%23PQL/basic"), requests);
+        assertEquals("/clan/%23PQL/basic", requests.getFirst());
+        assertEquals("/list/seasons?last=24", requests.get(1));
+        assertEquals("/cwl/%23PQL/2026-06", requests.get(2));
     }
 
     private void respond(String target, int status, String body) {

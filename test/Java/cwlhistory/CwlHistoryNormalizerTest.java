@@ -118,5 +118,9 @@ class CwlHistoryNormalizerTest {
         assertEquals("#WAR", season.wars().getFirst().id());
         assertEquals("win", season.wars().getFirst().result());
         assertTrue(season.wars().getFirst().detailsComplete());
+        assertEquals(1, season.position());
+        assertEquals(2, season.standings().size());
+        assertEquals(13, season.standings().getFirst().stars());
+        assertEquals(1, season.record().wins());
     }
 }

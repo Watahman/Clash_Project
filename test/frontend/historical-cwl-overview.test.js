@@ -41,6 +41,35 @@ describe('Historical CWL overview', () => {
         )).toEqual({ state: 'unknown', nextLeague: null });
     });
 
+    it('derives promotion from the final group position without a next season', () => {
+        const latest = season(
+            '2026-06',
+            'Master League I',
+            2.5,
+            2.0,
+            0.99,
+            2
+        );
+        latest.standings = Array.from({ length: 8 }, (_, index) => ({
+            rank: index + 1,
+            tag: `#CLAN${index + 1}`
+        }));
+
+        const overview = buildHistoricalCwlOverview([latest]);
+
+        expect(overview.promotions).toBe(1);
+        expect(overview.chronological[0].change).toBe('promoted');
+        expect(getLeagueChangeForSeason(
+            latest.season,
+            latest.league,
+            [],
+            { position: latest.position, groupSize: latest.standings.length }
+        )).toEqual({
+            state: 'promoted',
+            nextLeague: { name: 'Champion League III' }
+        });
+    });
+
     it('treats higher conceded values as a negative comparison', () => {
         const [row] = compareHistoricalSeasons(
             { defense: { avgStars: 2.1 } },
