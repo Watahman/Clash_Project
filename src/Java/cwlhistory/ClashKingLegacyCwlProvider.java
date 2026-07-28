@@ -144,8 +144,8 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
             String season
     ) {
         return changes.stream()
-                .filter(change -> change.season().compareTo(season) <= 0)
-                .max(Comparator.comparing(HistoricalCwlSeasonSummary::season))
+                .filter(change -> change.season().equals(season))
+                .findFirst()
                 .map(HistoricalCwlSeasonSummary::league)
                 .orElse(null);
     }

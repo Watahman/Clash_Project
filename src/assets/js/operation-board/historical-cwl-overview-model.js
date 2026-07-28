@@ -54,6 +54,12 @@ export function getLeagueChangeForSeason(
         .sort((a, b) => a.season.localeCompare(b.season));
     const index = ordered.findIndex(item => item.season === season);
     const next = ordered[index + 1];
+    if (next && !consecutive(season, next.season)) {
+        return {
+            state: 'unknown',
+            nextLeague: null
+        };
+    }
     if (next && consecutive(season, next.season)) {
         const actualState = leagueChange(league, next.league);
         if (actualState !== 'unknown') {
@@ -173,6 +179,9 @@ function leagueChange(previous, current) {
 }
 
 function placementOutcome(item, next) {
+    if (next && !consecutive(item.data.season, next.data.season)) {
+        return 'unknown';
+    }
     if (next && consecutive(item.data.season, next.data.season)) {
         const actual = leagueChange(
             item.summary.league,

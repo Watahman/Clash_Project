@@ -41,7 +41,7 @@ class ClashKingCwlProviderTest {
     }
 
     @Test
-    void discoversCompletedSeasonsMostRecentFirstAndCachesDetails()
+    void doesNotCarryStaleLeagueHistoryIntoNewerSeasons()
             throws Exception {
         respond(
                 "/clan/%23PQL/basic",
@@ -85,8 +85,9 @@ class ClashKingCwlProviderTest {
                         .map(HistoricalCwlSeasonSummary::season)
                         .toList()
         );
-        assertEquals("Master League II", seasons.getFirst().league().name());
-        assertEquals("Master League II", cached.league().name());
+        assertEquals("", seasons.getFirst().league().name());
+        assertEquals("Master League II", seasons.get(1).league().name());
+        assertEquals("", cached.league().name());
         assertEquals(
                 List.of(
                         "/clan/%23PQL/basic",

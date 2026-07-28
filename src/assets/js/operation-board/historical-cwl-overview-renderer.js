@@ -24,7 +24,7 @@ export function renderHistoricalOverview(
             <span>ClashKing history · temporary cache</span>
         </section>
         <section class="op-flat-section op-history-progression">
-            ${heading('League progression', 'Actual league and final position per season')}
+            ${heading('League progression', 'Recorded league when available and final position per season')}
             <div class="op-history-timeline">
                 ${overview.chronological.map(timelineItem).join('')}
             </div>
@@ -109,7 +109,7 @@ function timelineItem(item) {
             : item.change === 'same' ? 'No league change' : 'Change unknown';
     return `<button type="button" data-history-season="${item.data.season}">
         <span>${escapeHtml(shortSeason(item.data.season))}</span>
-        <strong>${escapeHtml(item.summary.league?.name || 'League unknown')}</strong>
+        <strong>${escapeHtml(item.summary.league?.name || 'League unavailable')}</strong>
         <em>${item.summary.position ? `#${item.summary.position}` : '—'}</em>
         <small data-change="${item.change}">${escapeHtml(change)}</small>
     </button>`;
@@ -162,7 +162,7 @@ function seasonItem(item) {
         : `${(summary.attackUsage * 100).toFixed(0)}% attack usage`;
     return `<button type="button" data-history-season="${item.data.season}">
         <span><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(summary.dataQuality)}</small></span>
-        <span>${escapeHtml(summary.league?.name || 'League unknown')} · ${summary.position ? `#${summary.position}` : '—'}${change}</span>
+        <span>${escapeHtml(summary.league?.name || 'League unavailable')} · ${summary.position ? `#${summary.position}` : '—'}${change}</span>
         ${recordMarkup(summary.record)}
         <span>${summary.offense.starsPerWar == null ? '—' : `${summary.offense.starsPerWar.toFixed(1)}★ / war`}</span>
         <span>${usage}</span>

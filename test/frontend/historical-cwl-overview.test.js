@@ -37,7 +37,8 @@ describe('Historical CWL overview', () => {
             [
                 { season: '2026-05', league: { name: 'Master League II' } },
                 { season: '2026-07', league: { name: 'Master League I' } }
-            ]
+            ],
+            { position: 1, groupSize: 8 }
         )).toEqual({ state: 'unknown', nextLeague: null });
     });
 
