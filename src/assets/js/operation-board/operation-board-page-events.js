@@ -3,6 +3,10 @@ import { getAdjacentOperationTab } from './operation-board-tabs.js';
 export function bindOperationBoardEvents(refs, handlers) {
     refs.planSelect.onchange = () => handlers.selectPlan(refs.planSelect.value);
     refs.clanSelect.onchange = () => handlers.selectClan(refs.clanSelect.value);
+    if (refs.seasonSelect) {
+        refs.seasonSelect.onchange = () =>
+            handlers.selectSeason(refs.seasonSelect.value);
+    }
     refs.refresh.onclick = handlers.refresh;
     refs.rosterFilter.oninput = handlers.filterRoster;
     refs.rosterView.onchange = handlers.filterRoster;
@@ -18,7 +22,11 @@ export function bindOperationBoardEvents(refs, handlers) {
     refs.tabButtons.forEach(button => {
         button.onclick = () => handlers.selectTab(button.dataset.opTab);
         button.onkeydown = event => {
-            const tab = getAdjacentOperationTab(button.dataset.opTab, event.key);
+            const tab = getAdjacentOperationTab(
+                button.dataset.opTab,
+                event.key,
+                handlers.getMode?.() || 'current'
+            );
             if (!tab) return;
             event.preventDefault();
             handlers.selectTab(tab, true);

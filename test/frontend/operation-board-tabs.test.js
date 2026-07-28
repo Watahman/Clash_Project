@@ -66,4 +66,22 @@ describe('Operation Board tabs', () => {
         expect(getAdjacentOperationTab('roster', 'Home')).toBe('live');
         expect(getAdjacentOperationTab('roster', 'End')).toBe('bonuses');
     });
+
+    it('uses Summary, League and Roster only for historical seasons', () => {
+        const report = {
+            mode: 'historical',
+            season: '2026-06',
+            clan: { tag: '#PQL' },
+            roster: [],
+            standings: { rows: [] },
+            rounds: [],
+            wars: []
+        };
+        expect(getDefaultOperationTab(report)).toBe('summary');
+        expect(getBoardIdentity(report)).toContain('historical:2026-06');
+        expect(getAdjacentOperationTab('summary', 'ArrowLeft', 'historical'))
+            .toBe('roster');
+        expect(getAdjacentOperationTab('roster', 'ArrowRight', 'historical'))
+            .toBe('summary');
+    });
 });

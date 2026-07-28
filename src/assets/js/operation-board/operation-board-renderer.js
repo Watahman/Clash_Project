@@ -1,5 +1,10 @@
 import { t } from '../i18n/i18n.js';
 import {
+    clearHistoricalBoard,
+    renderHistoricalBoard,
+    renderOverviewBoard
+} from './historical-cwl-board-renderer.js';
+import {
     clearBonusCalculator,
     renderBonusCalculator
 } from './operation-board-bonus-renderer.js';
@@ -27,6 +32,16 @@ export function renderBoard(
     selectedClan = null,
     { activeTab = null, lastSyncAt = null, syncState = 'idle' } = {}
 ) {
+    if (report?.mode === 'historical') {
+        renderHistoricalBoard(
+            refs,
+            report,
+            selectedClan,
+            { activeTab, lastSyncAt, syncState }
+        );
+        return;
+    }
+    clearHistoricalBoard(refs);
     syncRosterMode(refs, report, selectedClan);
     renderPhase(refs, report.phase);
     setHelp(refs, report.wars.length ? t('op.liveLoaded') : t('op.noLeagueData'));
@@ -41,10 +56,20 @@ export function renderBoard(
         selectedClan,
         { lastSyncAt, syncState }
     );
-    applyOperationTabState(refs, activeTab);
+    applyOperationTabState(refs, activeTab, 'current');
+}
+
+export function renderHistoryOverview(
+    refs,
+    overview,
+    selectedClan,
+    handlers = {}
+) {
+    renderOverviewBoard(refs, overview, selectedClan, handlers);
 }
 
 export function clearBoard(refs, selectedClan = null, resetPhase = true) {
+    clearHistoricalBoard(refs);
     clearLeagueSections(refs);
     clearLiveTab(refs);
     refs.rosterBody.replaceChildren();
@@ -54,7 +79,7 @@ export function clearBoard(refs, selectedClan = null, resetPhase = true) {
     renderRosterViewOptions(refs, null, selectedClan);
     syncRosterMode(refs, null, selectedClan);
     renderBoardContext(refs, null, selectedClan);
-    applyOperationTabState(refs, null);
+    applyOperationTabState(refs, null, 'current');
     if (resetPhase) renderPhase(refs, 'unknown');
 }
 

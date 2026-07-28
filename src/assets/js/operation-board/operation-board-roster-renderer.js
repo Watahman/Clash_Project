@@ -12,12 +12,21 @@ import {
 import { matchesRosterView } from './operation-board-roster-filter.js';
 
 export function isStandaloneMode(report, selectedClan = null) {
-    return Boolean(report?.clan?.standalone || (!report && selectedClan?.standalone));
+    return Boolean(
+        report?.mode === 'historical'
+        || report?.clan?.standalone
+        || (!report && selectedClan?.standalone)
+    );
 }
 
 export function syncRosterMode(refs, report, selectedClan = null) {
+    const historical = report?.mode === 'historical';
     const standalone = isStandaloneMode(report, selectedClan);
-    if (refs.rosterPlanningHeader) refs.rosterPlanningHeader.hidden = standalone;
+    if (!refs.rosterPlanningHeader) return;
+    refs.rosterPlanningHeader.hidden = standalone && !historical;
+    refs.rosterPlanningHeader.textContent = historical
+        ? 'Participation'
+        : t('op.planning');
 }
 
 export function renderRosterViewOptions(refs, report, selectedClan = null) {
@@ -97,7 +106,9 @@ export function renderEmptyRoster(refs, selectedClan = null, report = null) {
     const row = document.createElement('tr');
     row.className = 'op-table-empty';
     const cell = document.createElement('td');
-    cell.colSpan = isStandaloneMode(report, selectedClan) ? 6 : 7;
+    cell.colSpan = report?.mode === 'historical'
+        ? 7
+        : isStandaloneMode(report, selectedClan) ? 6 : 7;
     cell.textContent = t('op.noRoster');
     row.appendChild(cell);
     refs.rosterBody.appendChild(row);
@@ -129,9 +140,9 @@ function renderPlayerRow(player, display, report) {
     row.dataset.playerTag = player.tag;
     row.dataset.townHall = player.townHall || '';
     const standalone = isStandaloneMode(report);
-    const planningCell = standalone
-        ? ''
-        : `<td>${badge(
+    const planningCell = report.mode === 'historical'
+        ? historicalParticipation(player, report.rounds?.length || 0)
+        : standalone ? '' : `<td>${badge(
             player.planned ? t('op.planned') : t('op.notPlanned'),
             player.planned ? 'ok' : 'warn'
         )}</td>`;
@@ -146,9 +157,29 @@ function renderPlayerRow(player, display, report) {
         </button></td>
         <td>TH${player.townHall || '-'}</td>
         ${planningCell}
-        <td>${number(display.attacksUsed, 0)}/${number(display.availableAttacks, 0)}</td>
+        <td>${attackFraction(display.attacksUsed, display.availableAttacks)}</td>
         <td>${number(display.stars, 0)}★</td>
         <td>${number(display.destruction, 0).toFixed(1)}%</td>
-        <td>${number(display.missed, 0)}</td>`;
+        <td>${display.missed == null ? '—' : number(display.missed, 0)}</td>`;
     return row;
+}
+
+function attackFraction(used, available) {
+    const availableValue = available == null ? '—' : number(available, 0);
+    return `${number(used, 0)}/${availableValue}`;
+}
+
+function historicalParticipation(player, totalRounds) {
+    const rounds = number(player.roundsPlayed, 0);
+    const status = rounds === 0
+        ? ['not-fielded', 'Not fielded']
+        : player.missed == null
+            ? ['unknown', 'Attack usage unknown']
+            : number(player.missed, 0) > 0
+                ? ['attention', 'Missed attacks']
+                : ['complete', 'Complete'];
+    return `<td><span class="op-history-participation" data-state="${status[0]}">
+        <strong>${rounds}/${number(totalRounds, 0)}</strong>
+        <small>${status[1]}</small>
+    </span></td>`;
 }

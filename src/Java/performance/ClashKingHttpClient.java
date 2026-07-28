@@ -10,12 +10,12 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
-final class ClashKingHttpClient {
+public final class ClashKingHttpClient {
     private final String baseUrl;
     private final String upstreamName;
     private final HttpClient client;
 
-    ClashKingHttpClient(String baseUrl, String upstreamName) {
+    public ClashKingHttpClient(String baseUrl, String upstreamName) {
         this.baseUrl = String.valueOf(baseUrl).replaceAll("/+$", "");
         this.upstreamName = upstreamName;
         this.client = HttpClient.newBuilder()
@@ -24,12 +24,12 @@ final class ClashKingHttpClient {
                 .build();
     }
 
-    JsonObject get(String path) throws Exception {
+    public JsonObject get(String path) throws Exception {
         HttpRequest request = request(path).GET().build();
         return send(request);
     }
 
-    JsonObject post(String path, JsonObject body) throws Exception {
+    public JsonObject post(String path, JsonObject body) throws Exception {
         HttpRequest request = request(path)
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(body.toString()))

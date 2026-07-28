@@ -1,5 +1,6 @@
 import { t } from '../i18n/i18n.js';
 import { getCurrentCwlDay } from './operation-board-live-model.js';
+import { formatSeason } from './historical-cwl-season-model.js';
 import { normalizeTag } from './operation-board-utils.js';
 
 export function renderBoardContext(
@@ -18,7 +19,12 @@ export function renderBoardContext(
         clan.name || normalizeTag(clan.tag),
         normalizeTag(clan.tag)
     ];
-    if (clan.standalone) {
+    if (report.mode === 'historical') {
+        parts.push(`${formatSeason(report.season)} CWL`);
+        parts.push(report.dataQuality || 'Historical');
+    } else if (report.mode === 'overview') {
+        parts.push('Multi-season overview');
+    } else if (clan.standalone) {
         parts.push(t('op.singleClanContext'));
     } else {
         const day = getCurrentCwlDay(report);

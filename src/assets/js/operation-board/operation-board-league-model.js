@@ -7,19 +7,38 @@ export function buildLeagueModel(report) {
     const rounds = report?.rounds || [];
     const completed = rounds.filter(round => round.state === 'completed');
     const selected = selectedStanding(report?.standings);
+    if (report?.mode === 'historical') {
+        return {
+            currentPosition: report.position ?? selected?.rank ?? null,
+            completedRounds: completed.length,
+            totalRounds: rounds.length,
+            record: report.record || completed.reduce(addRoundResult, {
+                wins: 0,
+                losses: 0,
+                draws: 0
+            }),
+            forecast: unavailableForecast('historical')
+        };
+    }
     const forecast = buildPositionForecast(report, selected);
     return {
         currentPosition: selected?.rank ?? null,
         completedRounds: completed.length,
         totalRounds: rounds.length || 7,
-        record: completed.reduce((value, round) => {
-            if (round.result === 'win') value.wins += 1;
-            else if (round.result === 'loss') value.losses += 1;
-            else if (round.result === 'draw') value.draws += 1;
-            return value;
-        }, { wins: 0, losses: 0, draws: 0 }),
+        record: completed.reduce(addRoundResult, {
+            wins: 0,
+            losses: 0,
+            draws: 0
+        }),
         forecast
     };
+}
+
+function addRoundResult(value, round) {
+    if (round.result === 'win') value.wins += 1;
+    else if (round.result === 'loss') value.losses += 1;
+    else if (round.result === 'draw') value.draws += 1;
+    return value;
 }
 
 function buildPositionForecast(report, selected) {

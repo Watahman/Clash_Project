@@ -14,6 +14,27 @@ import { buildLeagueModel } from './operation-board-league-model.js';
 
 export function renderLeagueSections(refs, report) {
     const league = buildLeagueModel(report);
+    const historical = report.mode === 'historical';
+    if (refs.finishMetric) refs.finishMetric.hidden = historical;
+    if (refs.positionLabel) {
+        refs.positionLabel.textContent = historical
+            ? 'Final position'
+            : t('op.currentPosition');
+    }
+    if (refs.starsChartNote) {
+        refs.starsChartNote.textContent = historical
+            ? 'Only completed war days from ClashKing history are shown.'
+            : t('op.starsChartHelp');
+    }
+    if (refs.positionChartNote) {
+        refs.positionChartNote.textContent = historical
+            ? 'Daily positions are shown only when historical snapshots exist.'
+            : t('op.positionChartHelp');
+    }
+    if (refs.positionChartPanel) {
+        refs.positionChartPanel.hidden = historical
+            && !(report.rankingHistory || []).length;
+    }
     refs.starsChart.setAttribute(
         'aria-busy',
         String(report.predictionState === 'loading')
@@ -35,6 +56,11 @@ export function renderLeagueSections(refs, report) {
 }
 
 export function clearLeagueSections(refs) {
+    if (refs.finishMetric) refs.finishMetric.hidden = false;
+    if (refs.positionChartPanel) refs.positionChartPanel.hidden = false;
+    if (refs.positionLabel) refs.positionLabel.textContent = t('op.currentPosition');
+    if (refs.starsChartNote) refs.starsChartNote.textContent = t('op.starsChartHelp');
+    if (refs.positionChartNote) refs.positionChartNote.textContent = t('op.positionChartHelp');
     refs.currentPosition.textContent = '-';
     refs.projectedFinish.textContent = '-';
     refs.completedRounds.textContent = '0/7';
@@ -116,7 +142,9 @@ function renderRounds(refs, rounds, predictionState = 'idle') {
             'aria-label',
             `${t('op.day')} ${round.day}: ${resultText(round.result)}`
         );
-        card.innerHTML = `
+        card.innerHTML = round.historical
+            ? historicalRoundMarkup(round)
+            : `
             <div class="op-round-title">
                 <strong>${t('op.day')} ${round.day}</strong>
                 <span class="op-status-pill" data-state="${escapeHtml(round.state)}">${escapeHtml(stateText(round.state))}</span>
@@ -133,6 +161,27 @@ function renderRounds(refs, rounds, predictionState = 'idle') {
             ${predictionMarkup(round, predictionState)}`;
         refs.roundsList.appendChild(card);
     });
+}
+
+function historicalRoundMarkup(round) {
+    const available = Number.isFinite(Number(round.availableAttacks))
+        ? `${number(round.attacksUsed, 0)}/${number(round.availableAttacks, 0)}`
+        : `${number(round.attacksUsed, 0)}/—`;
+    return `
+        <div class="op-round-title">
+            <strong>${t('op.day')} ${round.day}</strong>
+            <span class="op-result-text">${escapeHtml(resultText(round.result))}</span>
+        </div>
+        <p class="op-round-opponent-name">${escapeHtml(round.opponent || '-')}</p>
+        <p class="op-history-round-score">
+            <strong>${number(round.stars, 0)}–${number(round.starsConceded, 0)}</strong>
+            <span>earned – conceded</span>
+        </p>
+        <div class="op-round-stats">
+            <span><strong>${number(round.destruction, 0).toFixed(1)}%</strong>Earned</span>
+            <span><strong>${number(round.destructionConceded, 0).toFixed(1)}%</strong>Conceded</span>
+            <span><strong>${available}</strong>Atk</span>
+        </div>`;
 }
 
 function predictionMarkup(round, predictionState) {

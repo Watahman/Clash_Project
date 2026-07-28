@@ -97,6 +97,9 @@ public class Config {
     String _EXT_PLAYER_LEAGUE_HISTORY = "/PlayerLeagueHistory";
     String _EXT_PLAYER_VERIFY_TOKEN = "/PlayerVerifyToken";
     String _EXT_PLAYER_PERFORMANCE = "/PlayerPerformance";
+    String _EXT_CWL_HISTORY = "/CWLHistory";
+    String _EXT_CWL_HISTORY_SEASONS = "/CWLHistorySeasons";
+    String _EXT_CWL_HISTORY_OVERVIEW = "/CWLHistoryOverview";
 
     String _EXT_LEAGUE_LEAGUETIERS_INFO = "/LeagueTierInfo";
     String _EXT_LEAGUE_CAPITAL_LEAGUES = "/LeagueCapitalLeagues";

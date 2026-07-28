@@ -13,6 +13,9 @@
     <link rel="stylesheet" href="../assets/css/profile-overlay.css">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
     <link rel="stylesheet" href="../assets/css/operation-board-workspace.css">
+    <link rel="stylesheet" href="../assets/css/operation-board-history.css">
+    <link rel="stylesheet" href="../assets/css/operation-board-history-overview.css">
+    <link rel="stylesheet" href="../assets/css/operation-board-history-responsive.css">
     <link rel="stylesheet" href="../assets/css/cwl-player-performance-popover.css">
     <script src="../assets/js/Data/runtime-config.js"></script>
     <script type="module" src="../assets/js/shell/workspace-shell.js"></script>
@@ -47,6 +50,7 @@
     <section class="op-context-toolbar" aria-label="Setup" data-i18n-aria-label="op.setup">
         <label><span data-i18n="op.selectPlan">Planning</span><select id="op-plan-select"></select></label>
         <label><span data-i18n="op.selectClan">Clan</span><select id="op-clan-select" disabled></select></label>
+        <label class="op-season-control"><span>Season</span><select id="op-season-select" disabled><option value="current">Current CWL</option></select></label>
         <label class="op-standalone-control"><span data-i18n="op.standaloneClan">Single clan</span><span class="op-inline-control"><input id="op-standalone-clan-tag" type="text" data-i18n-placeholder="op.standalonePlaceholder" placeholder="Clan tag: #ABC123"><button id="op-standalone-load" type="button" class="button button-secondary" data-i18n="op.loadClan">Load clan</button></span></label>
         <span class="op-toolbar-spacer"></span>
         <span id="op-live-state" class="op-sync-state" role="status" aria-live="polite" data-state="idle" data-i18n="op.syncIdle">Not synchronized yet</span>
@@ -55,11 +59,18 @@
     <p class="op-board-context" id="op-board-context" hidden></p>
 
     <nav class="op-board-tabs" id="op-board-tabs" role="tablist" aria-label="Operation Board views" data-i18n-aria-label="op.tabsLabel" hidden>
+        <button id="op-tab-summary" type="button" role="tab" data-op-tab="summary" aria-controls="op-panel-summary" aria-selected="false" hidden>Summary</button>
         <button id="op-tab-live" type="button" role="tab" data-op-tab="live" aria-controls="op-panel-live" aria-selected="false" data-i18n="op.tabLive">Live</button>
         <button id="op-tab-league" type="button" role="tab" data-op-tab="league" aria-controls="op-panel-league" aria-selected="false" data-i18n="op.tabLeague">League</button>
         <button id="op-tab-roster" type="button" role="tab" data-op-tab="roster" aria-controls="op-panel-roster" aria-selected="false" data-i18n="op.tabRoster">Roster</button>
         <button id="op-tab-bonuses" type="button" role="tab" data-op-tab="bonuses" aria-controls="op-panel-bonuses" aria-selected="false" data-i18n="op.tabBonuses">Bonuses</button>
     </nav>
+
+    <section class="op-history-overview" id="op-history-overview" aria-label="CWL history overview" hidden></section>
+
+    <section class="op-tab-panel" id="op-panel-summary" role="tabpanel" aria-labelledby="op-tab-summary" tabindex="0" hidden>
+        <div id="op-history-summary"></div>
+    </section>
 
     <section class="op-tab-panel" id="op-panel-live" role="tabpanel" aria-labelledby="op-tab-live" tabindex="0" hidden>
         <div id="op-live-content"></div>
@@ -67,7 +78,7 @@
 
     <section class="op-tab-panel" id="op-panel-league" role="tabpanel" aria-labelledby="op-tab-league" tabindex="0" hidden>
         <section class="op-tab-metrics op-league-summary" aria-label="League summary" data-i18n-aria-label="op.leagueSummary">
-            <div><span data-i18n="op.currentPosition">Current position</span><strong id="op-current-position">-</strong></div>
+            <div><span id="op-position-label" data-i18n="op.currentPosition">Current position</span><strong id="op-current-position">-</strong></div>
             <div class="op-finish-metric"><span data-i18n="op.projectedFinish">Projected finish</span><strong id="op-projected-finish">-</strong><small id="op-finish-probabilities" hidden></small></div>
             <div><span data-i18n="op.completedRounds">Completed rounds</span><strong id="op-completed-rounds">0/7</strong></div>
             <div><span data-i18n="op.record">Record</span><strong id="op-record">0W · 0L</strong></div>
@@ -75,12 +86,12 @@
         <div class="op-history-grid">
             <section class="op-flat-section op-stars-chart-panel" aria-labelledby="op-stars-chart-title">
                 <div class="op-section-heading"><div><p data-i18n="op.warDayHistory">CWL progress</p><h2 id="op-stars-chart-title" data-i18n="op.starsPerDay">Stars per war day</h2></div><span id="op-stars-chart-state" role="status" aria-live="polite">0/7 days</span></div>
-                <p class="op-stars-chart-note" data-i18n="op.starsChartHelp">Live and completed days use real CWL data. The dotted line compares Town Hall, army progress, recent form and opponent strength.</p>
+                <p class="op-stars-chart-note" id="op-stars-chart-note" data-i18n="op.starsChartHelp">Live and completed days use real CWL data. The dotted line compares Town Hall, army progress, recent form and opponent strength.</p>
                 <div class="op-stars-chart" id="op-stars-chart" role="group"></div>
             </section>
             <section class="op-flat-section op-position-chart-panel" aria-labelledby="op-position-chart-title">
                 <div class="op-section-heading"><div><p data-i18n="op.warDayHistory">CWL progress</p><h2 id="op-position-chart-title" data-i18n="op.positionPerDay">Position per war day</h2></div><span id="op-position-chart-state" role="status" aria-live="polite">0/7 days</span></div>
-                <p class="op-stars-chart-note" data-i18n="op.positionChartHelp">Completed league days receive a position. The dotted line predicts future positions from recent performance.</p>
+                <p class="op-stars-chart-note" id="op-position-chart-note" data-i18n="op.positionChartHelp">Completed league days receive a position. The dotted line predicts future positions from recent performance.</p>
                 <div class="op-stars-chart op-ranking-chart" id="op-position-chart" role="group"></div>
             </section>
         </div>

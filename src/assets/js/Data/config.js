@@ -25,6 +25,9 @@ export const _EXT_PLAYER_BATTLE_LOG = "/PlayerBattleLog";
 export const _EXT_PLAYER_LEAGUE_HISTORY = "/PlayerLeagueHistory";
 export const _EXT_PLAYER_VERIFY_TOKEN = "/PlayerVerifyToken";
 export const _EXT_PLAYER_PERFORMANCE = "/PlayerPerformance";
+export const _EXT_CWL_HISTORY = "/CWLHistory";
+export const _EXT_CWL_HISTORY_SEASONS = "/CWLHistorySeasons";
+export const _EXT_CWL_HISTORY_OVERVIEW = "/CWLHistoryOverview";
 
 export const _EXT_LEAGUE_LEAGUETIERS_INFO = "/LeagueTierInfo"
 export const _EXT_LEAGUE_CAPITAL_LEAGUES = "/LeagueCapitalLeagues"

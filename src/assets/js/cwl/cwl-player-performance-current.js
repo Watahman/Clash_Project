@@ -5,17 +5,35 @@ export function renderCurrentCwlSection(context) {
     const section = document.createElement('div');
     section.className = 'cwl-performance-current';
     const heading = document.createElement('h3');
-    heading.textContent = t('performance.currentCwl');
-    section.append(heading, metrics([
+    heading.textContent = context.label
+        ? `${context.label} CWL`
+        : t('performance.currentCwl');
+    const rows = [
         [
             t('performance.attacksUsed'),
-            `${number(context.attacksUsed)} / ${number(context.availableAttacks)}`
+            `${number(context.attacksUsed)} / ${nullableNumber(context.availableAttacks)}`
         ],
         [t('op.stars'), `${number(context.stars)}★`],
         [t('performance.avgDestruction'), `${number(context.avgDestruction, 1)}%`],
-        [t('performance.missed'), number(context.missed)],
+        [t('performance.missed'), nullableNumber(context.missed)],
         [t('performance.roundsPlayed'), number(context.roundsPlayed)]
-    ]));
+    ];
+    if (context.avgStars != null) {
+        rows.splice(2, 0, ['Avg. stars', `${number(context.avgStars, 2)}★`]);
+    }
+    if (context.tripleRate != null) {
+        rows.push(['Triple rate', `${number(context.tripleRate * 100, 1)}%`]);
+    }
+    if (context.netStarsContributed != null) {
+        rows.push([
+            'Net stars contributed',
+            `+${number(context.netStarsContributed)}`
+        ]);
+    }
+    if (context.offensiveRank != null) {
+        rows.push(['Offensive rank', `#${number(context.offensiveRank)}`]);
+    }
+    section.append(heading, metrics(rows));
     return section;
 }
 
@@ -35,4 +53,8 @@ function metrics(rows) {
 function number(value, places = 0) {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed.toFixed(places) : '—';
+}
+
+function nullableNumber(value, places = 0) {
+    return value == null ? '—' : number(value, places);
 }
