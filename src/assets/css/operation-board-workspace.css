@@ -860,7 +860,7 @@
 
 .operation-workspace-page .op-round-stats {
     display: grid;
-    grid-template-columns: repeat(3, minmax(3.5rem, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-2);
     margin: var(--space-2) 0;
 }
@@ -872,8 +872,13 @@
     color: var(--text-muted);
     font-size: 0.66rem;
     line-height: 1.25;
+    overflow-wrap: anywhere;
 }
-.operation-workspace-page .op-round-stats strong { color: var(--text); font-size: 0.88rem; }
+.operation-workspace-page .op-round-stats strong {
+    color: var(--text);
+    font-size: 0.82rem;
+    white-space: nowrap;
+}
 .operation-workspace-page .op-result-text { color: var(--text-muted); font-size: 0.66rem; text-transform: none; }
 
 .operation-workspace-page .op-round-prediction {

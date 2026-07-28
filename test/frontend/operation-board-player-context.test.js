@@ -22,6 +22,7 @@ describe('Operation Board current CWL player context', () => {
         };
 
         expect(getCurrentCwlPlayerContext(report, 'p0l')).toEqual({
+            mode: 'current',
             attacksUsed: 4,
             availableAttacks: 5,
             stars: 10,

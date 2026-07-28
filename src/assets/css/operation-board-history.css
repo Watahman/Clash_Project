@@ -122,10 +122,12 @@
 
 .op-history-side header {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
     justify-items: start;
     gap: 0.2rem;
     margin-bottom: var(--space-4);
-    padding-bottom: var(--space-3);
+    padding: 0 0 var(--space-3);
     border-bottom: 1px solid var(--border);
 }
 
@@ -178,10 +180,8 @@
 }
 
 .op-history-round-score {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-2);
+    display: grid;
+    gap: 0.15rem;
 }
 
 .op-history-round-score strong {
@@ -191,7 +191,7 @@
 .op-history-round-score span {
     color: var(--text-muted);
     font-size: 0.68rem;
-    text-align: right;
+    line-height: 1.3;
 }
 
 .op-league-summary:has(.op-finish-metric[hidden]) {

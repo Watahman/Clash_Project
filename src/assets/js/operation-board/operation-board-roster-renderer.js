@@ -213,8 +213,8 @@ function syncRosterSortHeaders(refs, report, selectedClan) {
         );
         if (indicator) {
             indicator.textContent = active
-                ? activeDirection === 'asc' ? 'â†‘' : 'â†“'
-                : 'â†•';
+                ? activeDirection === 'asc' ? '↑' : '↓'
+                : '↕';
         }
         if (!button) return;
         button.disabled = !report;

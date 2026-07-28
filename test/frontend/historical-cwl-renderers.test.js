@@ -170,7 +170,9 @@ describe('Historical CWL renderers', () => {
         renderRoster(refs, report);
 
         expect(refs.rosterPlanningHeader.hidden).toBe(false);
-        expect(refs.rosterPlanningHeader.textContent).toBe('Participation');
+        expect(refs.rosterPlanningHeader
+            .querySelector('[data-op-roster-column-label]').textContent)
+            .toBe('Participation');
         expect(refs.rosterBody.textContent).toContain('1/2');
         expect(refs.rosterBody.textContent).toContain('Complete');
         expect(refs.rosterBody.querySelectorAll('td')).toHaveLength(14);
