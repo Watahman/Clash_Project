@@ -68,8 +68,7 @@ function leagueTransition(league, change) {
 function finishLine(summary) {
     const finish = summary.position ? `Finished #${summary.position}` : 'Final position unknown';
     const record = summary.record || {};
-    const draws = record.draws ? ` · ${record.draws}D` : '';
-    return `${finish} · ${record.wins || 0}W · ${record.losses || 0}L${draws}`;
+    return `${finish} · ${record.wins || 0}W · ${record.losses || 0}L · ${record.draws || 0}D`;
 }
 
 function metric(label, valueText) {

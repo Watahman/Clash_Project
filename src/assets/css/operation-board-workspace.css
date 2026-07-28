@@ -979,7 +979,7 @@
 
 .operation-workspace-page .op-standing-row {
     display: grid;
-    grid-template-columns: 2.25rem minmax(0, 1fr) auto auto auto;
+    grid-template-columns: 2.25rem minmax(0, 1fr) minmax(7.5rem, auto) auto auto;
     align-items: center;
     gap: var(--space-2);
     padding: 0.7rem var(--space-3);

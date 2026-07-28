@@ -2,17 +2,26 @@ const METRICS = {
     stars: {
         offense: item => item.summary.offense?.avgStars,
         defense: item => item.summary.defense?.avgStars,
-        format: value => `${value.toFixed(2)}★`
+        format: value => `${value.toFixed(2)}★`,
+        axisFormat: value => `${value.toFixed(0)}★`,
+        domain: [0, 3],
+        ticks: [0, 1, 2, 3]
     },
     destruction: {
         offense: item => item.summary.offense?.avgDestruction,
         defense: item => item.summary.defense?.avgDestruction,
-        format: value => `${value.toFixed(1)}%`
+        format: value => `${value.toFixed(1)}%`,
+        axisFormat: value => `${value.toFixed(0)}%`,
+        domain: [0, 100],
+        ticks: [0, 25, 50, 75, 100]
     },
     triples: {
         offense: item => rate(item.summary.offense?.tripleRate),
         defense: item => rate(item.summary.defense?.tripleRate),
-        format: value => `${value.toFixed(1)}%`
+        format: value => `${value.toFixed(1)}%`,
+        axisFormat: value => `${value.toFixed(0)}%`,
+        domain: [0, 100],
+        ticks: [0, 25, 50, 75, 100]
     }
 };
 
@@ -37,11 +46,7 @@ export function renderHistoricalTrendChart(container, seasons, metric = 'stars')
     const width = 760;
     const height = 250;
     const padding = { top: 24, right: 24, bottom: 50, left: 46 };
-    const min = Math.min(...values);
-    const max = Math.max(...values);
-    const span = Math.max(max - min, metric === 'stars' ? 0.3 : 5);
-    const low = Math.max(0, min - span * 0.18);
-    const high = max + span * 0.18;
+    const [low, high] = definition.domain;
     const x = index => padding.left
         + index * (width - padding.left - padding.right)
             / Math.max(1, points.length - 1);
@@ -56,11 +61,11 @@ export function renderHistoricalTrendChart(container, seasons, metric = 'stars')
         'Offense and defense performance by CWL season'
     );
     svg.classList.add('op-history-trend-svg');
-    [0, 0.5, 1].forEach(step => {
-        const value = low + (high - low) * step;
+    svg.dataset.metric = metric;
+    definition.ticks.forEach(value => {
         svg.append(
             line(padding.left, y(value), width - padding.right, y(value), 'grid'),
-            text(padding.left - 8, y(value) + 4, definition.format(value), 'axis-value')
+            text(padding.left - 8, y(value) + 4, definition.axisFormat(value), 'axis-value')
         );
     });
     svg.append(
@@ -105,6 +110,7 @@ function path(points, key, x, y, className) {
     });
     const node = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     node.setAttribute('d', commands.join(' '));
+    node.setAttribute('pathLength', '1');
     node.classList.add(`op-history-line-${className}`);
     return node;
 }
@@ -113,7 +119,7 @@ function dot(x, y, className, label) {
     const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     node.setAttribute('cx', x);
     node.setAttribute('cy', y);
-    node.setAttribute('r', 5);
+    node.setAttribute('r', 4);
     node.setAttribute('tabindex', '0');
     node.setAttribute('aria-label', label);
     node.classList.add(`op-history-dot-${className}`);

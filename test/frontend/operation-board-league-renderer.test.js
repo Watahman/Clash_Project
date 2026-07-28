@@ -81,6 +81,8 @@ describe('Operation Board League renderer', () => {
                     rank: 1,
                     wars: 1,
                     wins: 1,
+                    losses: 0,
+                    draws: 0,
                     stars: 34,
                     destruction: 94
                 }]
@@ -93,7 +95,7 @@ describe('Operation Board League renderer', () => {
         expect(document.querySelector('.op-result-text').textContent).toBeTruthy();
         expect(document.querySelector('.op-standing-header')).not.toBeNull();
         expect(document.querySelector('.op-standing-row.is-selected').textContent)
-            .toContain('1W');
-        expect(refs.record.textContent).toBe('1W · 0L');
+            .toContain('1W · 0L · 0D');
+        expect(refs.record.textContent).toBe('1W · 0L · 0D');
     });
 });

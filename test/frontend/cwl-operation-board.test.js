@@ -141,7 +141,7 @@ describe('CWL Operation Board', () => {
         expect(document.querySelector('#op-standings-list .is-selected strong').textContent).toBe('Belgian Warriors');
         expect(document.querySelector('#op-current-position').textContent).toBe('#2');
         expect(document.querySelector('#op-completed-rounds').textContent).toBe('1/1');
-        expect(document.querySelector('#op-record').textContent).toBe('1W · 0L');
+        expect(document.querySelector('#op-record').textContent).toBe('1W · 0L · 0D');
         expect(document.querySelectorAll('#op-stars-chart .op-stars-point')).toHaveLength(1);
         expect(document.querySelectorAll('#op-stars-chart .op-stars-x-axis > span')).toHaveLength(7);
         expect(document.querySelectorAll('#op-position-chart .op-ranking-point')).toHaveLength(1);

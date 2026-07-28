@@ -21,9 +21,9 @@ export function buildHistoricalCwlOverview(seasons = []) {
         }))
         .sort((a, b) => a.data.season.localeCompare(b.data.season));
     chronological.forEach((item, index) => {
-        const previous = chronological[index - 1];
-        item.change = previous && consecutive(previous.data.season, item.data.season)
-            ? leagueChange(previous.summary.league, item.summary.league)
+        const next = chronological[index + 1];
+        item.change = next && consecutive(item.data.season, next.data.season)
+            ? leagueChange(item.summary.league, next.summary.league)
             : 'unknown';
     });
     const rich = chronological.filter(item => item.summary.offense.avgStars != null);

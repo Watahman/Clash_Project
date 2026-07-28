@@ -64,7 +64,7 @@ export function clearLeagueSections(refs) {
     refs.currentPosition.textContent = '-';
     refs.projectedFinish.textContent = '-';
     refs.completedRounds.textContent = '0/7';
-    refs.record.textContent = '0W · 0L';
+    refs.record.textContent = '0W · 0L · 0D';
     refs.finishProbabilities.textContent = '';
     refs.finishProbabilities.hidden = true;
     refs.starsChart.setAttribute('aria-busy', 'false');
@@ -113,7 +113,7 @@ function renderStandings(refs, report) {
     header.innerHTML = `
         <span>${escapeHtml(t('op.rank'))}</span>
         <strong>${escapeHtml(t('op.clan'))}</strong>
-        <span>${escapeHtml(t('op.wins'))}</span>
+        <span>${escapeHtml(t('op.record'))}</span>
         <span>${escapeHtml(t('op.stars'))}</span>
         <span>${escapeHtml(t('op.destruction'))}</span>`;
     refs.standingsList.appendChild(header);
@@ -123,7 +123,7 @@ function renderStandings(refs, report) {
         item.innerHTML = `
             <span class="op-standing-rank">#${row.rank}</span>
             <strong>${escapeHtml(row.name)}</strong>
-            <span>${number(row.wins, 0)}W</span>
+            <span>${formatRecord(row)}</span>
             <span>${number(row.stars, 0)}★</span>
             <span>${number(row.destruction, 0).toFixed(1)}%</span>`;
         refs.standingsList.appendChild(item);
@@ -212,8 +212,7 @@ function predictionMarkup(round, predictionState) {
 }
 
 function formatRecord(record) {
-    const draw = record.draws ? ` · ${record.draws}D` : '';
-    return `${record.wins}W · ${record.losses}L${draw}`;
+    return `${number(record?.wins, 0)}W · ${number(record?.losses, 0)}L · ${number(record?.draws, 0)}D`;
 }
 
 function formatProjectedFinish(forecast) {

@@ -87,6 +87,11 @@ describe('Historical CWL renderers', () => {
         }, { selectSeason });
 
         expect(container.querySelector('.op-history-trend-svg')).not.toBeNull();
+        expect(Array.from(container.querySelectorAll('.op-history-axis-value'))
+            .map(node => node.textContent)).toEqual(['0★', '1★', '2★', '3★']);
+        expect(container.textContent).toContain('6W');
+        expect(container.textContent).toContain('1L');
+        expect(container.textContent).toContain('0D');
         expect(container.querySelectorAll('[data-history-season]')).toHaveLength(4);
         expect(container.querySelectorAll('.op-history-comparison-row').length)
             .toBeGreaterThan(1);

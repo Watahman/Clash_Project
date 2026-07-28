@@ -94,20 +94,20 @@
 
     .op-history-reliability-list > div,
     .op-history-results-list > div {
-        grid-template-columns: 1fr auto;
+        grid-template-columns: minmax(8rem, 1fr) minmax(8rem, 1fr);
     }
 
     .op-history-reliability-list small,
     .op-history-results-list small {
-        grid-column: 1 / -1;
+        grid-column: 2;
     }
 
     .op-history-insights article {
-        grid-template-columns: 1fr auto;
+        grid-template-columns: minmax(8rem, 1fr) minmax(8rem, 1fr);
     }
 
     .op-history-insights article em {
-        grid-column: 1 / -1;
+        grid-column: 2;
     }
 
     .op-history-compare-controls {
@@ -137,7 +137,14 @@
 
 @media (prefers-reduced-motion: reduce) {
     .operation-workspace-page .op-history-timeline button,
-    .operation-workspace-page .op-history-season-list button {
+    .operation-workspace-page .op-history-season-list button,
+    .op-history-trend-svg,
+    .op-history-line-offense,
+    .op-history-line-defense,
+    .op-history-dot-offense,
+    .op-history-dot-defense {
+        animation: none;
         transition: none;
     }
+
 }

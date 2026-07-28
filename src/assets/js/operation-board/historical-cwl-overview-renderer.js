@@ -78,6 +78,7 @@ export function renderHistoricalOverview(
         trendButtons.forEach(button =>
             button.setAttribute('aria-pressed', String(button.dataset.trend === metric))
         );
+        chart.dataset.trend = metric;
         renderHistoricalTrendChart(chart, overview.chronological, metric);
     };
     trendButtons.forEach(button => {
@@ -102,9 +103,9 @@ function heading(title, description) {
 
 function timelineItem(item) {
     const change = item.change === 'promoted'
-        ? '↑ Promoted'
+        ? '↑ Promoted next CWL'
         : item.change === 'relegated'
-            ? '↓ Relegated'
+            ? '↓ Relegated next CWL'
             : item.change === 'same' ? 'No league change' : 'Change unknown';
     return `<button type="button" data-history-season="${item.data.season}">
         <span>${escapeHtml(shortSeason(item.data.season))}</span>
@@ -121,10 +122,16 @@ function reliabilityItem(item) {
     const misses = item.summary.missedAttacks == null
         ? 'Misses unknown'
         : `${item.summary.missedAttacks} missed`;
+    const usageTone = item.summary.attackUsage == null
+        ? 'neutral'
+        : item.summary.attackUsage >= 0.95 ? 'good' : 'attention';
+    const missTone = item.summary.missedAttacks == null
+        ? 'neutral'
+        : item.summary.missedAttacks === 0 ? 'good' : 'attention';
     return `<div>
         <strong>${escapeHtml(item.label)}</strong>
-        <span>${usage} used</span>
-        <small>${misses}</small>
+        <span data-tone="${usageTone}">${usage} used</span>
+        <small data-tone="${missTone}">${misses}</small>
     </div>`;
 }
 
@@ -132,13 +139,13 @@ function resultItem(item) {
     const record = item.summary.record;
     return `<div>
         <strong>${escapeHtml(item.label)}</strong>
-        <span>${record.wins || 0}W · ${record.losses || 0}L${record.draws ? ` · ${record.draws}D` : ''}</span>
+        ${recordMarkup(record)}
         <small>${signed(item.summary.starDifferential, '★')} · ${signed(item.summary.destructionDifferential, '%')}</small>
     </div>`;
 }
 
 function insightItem(insight) {
-    return `<article>
+    return `<article data-insight="${escapeHtml(insight.type || 'neutral')}">
         <span>${escapeHtml(insight.title)}</span>
         <strong>${escapeHtml(insight.season)}</strong>
         <em>${escapeHtml(insight.value)}</em>
@@ -148,18 +155,26 @@ function insightItem(insight) {
 function seasonItem(item) {
     const summary = item.summary;
     const change = item.change === 'promoted'
-        ? ' · ↑ Promoted'
-        : item.change === 'relegated' ? ' · ↓ Relegated' : '';
+        ? ' · ↑ Promoted next CWL'
+        : item.change === 'relegated' ? ' · ↓ Relegated next CWL' : '';
     const usage = summary.attackUsage == null
         ? 'Attack usage unknown'
         : `${(summary.attackUsage * 100).toFixed(0)}% attack usage`;
     return `<button type="button" data-history-season="${item.data.season}">
         <span><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(summary.dataQuality)}</small></span>
         <span>${escapeHtml(summary.league?.name || 'League unknown')} · ${summary.position ? `#${summary.position}` : '—'}${change}</span>
-        <span>${summary.record.wins || 0}W ${summary.record.losses || 0}L</span>
+        ${recordMarkup(summary.record)}
         <span>${summary.offense.starsPerWar == null ? '—' : `${summary.offense.starsPerWar.toFixed(1)}★ / war`}</span>
         <span>${usage}</span>
     </button>`;
+}
+
+function recordMarkup(record = {}) {
+    return `<span class="op-history-record">
+        <b data-result="win">${record.wins || 0}W</b>
+        <b data-result="loss">${record.losses || 0}L</b>
+        <b data-result="draw">${record.draws || 0}D</b>
+    </span>`;
 }
 
 function bindSeasonButtons(container, selectSeason) {

@@ -20,9 +20,9 @@ describe('Historical CWL overview', () => {
         expect(overview.relegations).toBe(0);
         expect(overview.averageFinish).toBeCloseTo(8 / 3);
         expect(overview.chronological.map(item => item.change)).toEqual([
-            'unknown',
             'promoted',
-            'same'
+            'same',
+            'unknown'
         ]);
         expect(overview.insights.some(item =>
             item.title === 'Best offensive season'
