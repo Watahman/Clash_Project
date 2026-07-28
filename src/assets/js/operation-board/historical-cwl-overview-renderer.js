@@ -103,9 +103,9 @@ function heading(title, description) {
 
 function timelineItem(item) {
     const change = item.change === 'promoted'
-        ? '↑ Promoted next CWL'
+        ? '↑ Promoted'
         : item.change === 'relegated'
-            ? '↓ Relegated next CWL'
+            ? '↓ Relegated'
             : item.change === 'same' ? 'No league change' : 'Change unknown';
     return `<button type="button" data-history-season="${item.data.season}">
         <span>${escapeHtml(shortSeason(item.data.season))}</span>
@@ -124,10 +124,10 @@ function reliabilityItem(item) {
         : `${item.summary.missedAttacks} missed`;
     const usageTone = item.summary.attackUsage == null
         ? 'neutral'
-        : item.summary.attackUsage >= 0.95 ? 'good' : 'attention';
+        : item.summary.attackUsage >= 0.95 ? 'complete' : 'attention';
     const missTone = item.summary.missedAttacks == null
         ? 'neutral'
-        : item.summary.missedAttacks === 0 ? 'good' : 'attention';
+        : item.summary.missedAttacks === 0 ? 'complete' : 'attention';
     return `<div>
         <strong>${escapeHtml(item.label)}</strong>
         <span data-tone="${usageTone}">${usage} used</span>
@@ -155,8 +155,8 @@ function insightItem(insight) {
 function seasonItem(item) {
     const summary = item.summary;
     const change = item.change === 'promoted'
-        ? ' · ↑ Promoted next CWL'
-        : item.change === 'relegated' ? ' · ↓ Relegated next CWL' : '';
+        ? ' · ↑ Promoted'
+        : item.change === 'relegated' ? ' · ↓ Relegated' : '';
     const usage = summary.attackUsage == null
         ? 'Attack usage unknown'
         : `${(summary.attackUsage * 100).toFixed(0)}% attack usage`;

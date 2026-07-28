@@ -88,10 +88,18 @@ describe('Historical CWL renderers', () => {
 
         expect(container.querySelector('.op-history-trend-svg')).not.toBeNull();
         expect(Array.from(container.querySelectorAll('.op-history-axis-value'))
-            .map(node => node.textContent)).toEqual(['0★', '1★', '2★', '3★']);
+            .map(node => node.textContent))
+            .toEqual(['1.5★', '1.75★', '2★', '2.25★', '2.5★']);
+        expect(container.querySelectorAll('.op-history-point-value'))
+            .toHaveLength(2);
+        container.querySelector('[data-trend="destruction"]').click();
+        expect(Array.from(container.querySelectorAll('.op-history-axis-value'))
+            .map(node => node.textContent))
+            .toEqual(['50%', '62.5%', '75%', '87.5%', '100%']);
         expect(container.textContent).toContain('6W');
         expect(container.textContent).toContain('1L');
         expect(container.textContent).toContain('0D');
+        expect(container.textContent).not.toContain('next CWL');
         expect(container.querySelectorAll('[data-history-season]')).toHaveLength(4);
         expect(container.querySelectorAll('.op-history-comparison-row').length)
             .toBeGreaterThan(1);

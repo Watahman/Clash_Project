@@ -135,6 +135,24 @@
     text-anchor: middle;
 }
 
+.op-history-point-value {
+    fill: var(--text);
+    font-size: 10px;
+    font-weight: 750;
+    paint-order: stroke;
+    stroke: var(--surface);
+    stroke-width: 3px;
+    text-anchor: end;
+}
+
+.op-history-point-value[data-series="offense"] {
+    fill: var(--accent-strong);
+}
+
+.op-history-point-value[data-series="defense"] {
+    fill: var(--danger);
+}
+
 .op-history-line-offense,
 .op-history-line-defense {
     fill: none;
@@ -202,8 +220,8 @@
     color: var(--text-muted);
 }
 
-.op-history-reliability-list [data-tone="good"] {
-    color: var(--success);
+.op-history-reliability-list [data-tone="complete"] {
+    color: var(--accent-strong);
 }
 
 .op-history-reliability-list [data-tone="attention"] {

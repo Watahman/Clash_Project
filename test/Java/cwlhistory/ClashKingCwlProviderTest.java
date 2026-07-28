@@ -10,20 +10,22 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ClashKingCwlProviderTest {
     private HttpServer server;
-    private AtomicReference<String> lastRawPath;
-    private AtomicReference<Response> response;
+    private Map<String, Response> responses;
+    private List<String> requests;
     private ClashKingLegacyCwlProvider provider;
 
     @BeforeEach
     void startServer() throws IOException {
-        lastRawPath = new AtomicReference<>();
-        response = new AtomicReference<>(new Response(200, "{}"));
+        responses = new ConcurrentHashMap<>();
+        requests = new CopyOnWriteArrayList<>();
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext("/", this::handle);
         server.start();
@@ -38,67 +40,168 @@ class ClashKingCwlProviderTest {
     }
 
     @Test
-    void usesTheCurrentBasicEndpointForTheSeasonIndex() throws Exception {
-        response.set(new Response(
+    void discoversCompletedSeasonsMostRecentFirstAndCachesDetails()
+            throws Exception {
+        respond(
+                "/clan/%23PQL/basic",
                 200,
                 """
-                {
-                  "changes": {
-                    "clanWarLeague": {
-                      "2026-06": "Master League II"
-                    }
-                  }
-                }
+                {"changes":{"clanWarLeague":{
+                  "2026-05":"Master League II"
+                }}}
                 """
-        ));
+        );
+        respond(
+                "/list/seasons?last=24",
+                200,
+                "[\"2026-08\",\"2026-07\",\"2026-06\",\"2026-05\"]"
+        );
+        respond("/cwl/%23PQL/2026-08", 404, "{\"detail\":\"Not Found\"}");
+        respond(
+                "/cwl/%23PQL/2026-07",
+                200,
+                season("2026-07", "inWar")
+        );
+        respond(
+                "/cwl/%23PQL/2026-06",
+                200,
+                season("2026-06", "ended")
+        );
+        respond(
+                "/cwl/%23PQL/2026-05",
+                200,
+                season("2026-05", "ended")
+        );
 
         List<HistoricalCwlSeasonSummary> seasons =
-                provider.getAvailableSeasons("#PQL", 8);
+                provider.getAvailableSeasons("#PQL", 2);
+        HistoricalCwlSeason cached =
+                provider.getSeason("#PQL", "2026-06");
 
-        assertEquals("/clan/%23PQL/basic", lastRawPath.get());
-        assertEquals(1, seasons.size());
-        assertEquals("2026-06", seasons.getFirst().season());
+        assertEquals(
+                List.of("2026-06", "2026-05"),
+                seasons.stream()
+                        .map(HistoricalCwlSeasonSummary::season)
+                        .toList()
+        );
+        assertEquals("Master League II", seasons.getFirst().league().name());
+        assertEquals("Master League II", cached.league().name());
+        assertEquals(
+                List.of(
+                        "/clan/%23PQL/basic",
+                        "/list/seasons?last=24",
+                        "/cwl/%23PQL/2026-08",
+                        "/cwl/%23PQL/2026-07",
+                        "/cwl/%23PQL/2026-06",
+                        "/cwl/%23PQL/2026-05"
+                ),
+                requests
+        );
+    }
+
+    @Test
+    void expandsAClashKingSeasonPageWhenOnlyEightMonthsAreReturned()
+            throws Exception {
+        respond(
+                "/clan/%23PQL/basic",
+                200,
+                "{\"changes\":{\"clanWarLeague\":{}}}"
+        );
+        respond(
+                "/list/seasons?last=24",
+                200,
+                """
+                ["2026-08","2026-07","2026-06","2026-05",
+                 "2026-04","2026-03","2026-02","2026-01"]
+                """
+        );
+        for (String season : List.of(
+                "2026-08", "2026-07", "2026-06", "2026-05",
+                "2026-04", "2026-03", "2026-02", "2026-01"
+        )) {
+            respond(
+                    "/cwl/%23PQL/" + season,
+                    404,
+                    "{\"detail\":\"Not Found\"}"
+            );
+        }
+        respond(
+                "/cwl/%23PQL/2025-12",
+                200,
+                season("2025-12", "ended")
+        );
+
+        List<HistoricalCwlSeasonSummary> seasons =
+                provider.getAvailableSeasons("#PQL", 1);
+
+        assertEquals("2025-12", seasons.getFirst().season());
+        assertEquals(
+                "/cwl/%23PQL/2025-12",
+                requests.getLast()
+        );
     }
 
     @Test
     void usesTheDocumentedCwlSeasonEndpointAndEncoding() throws Exception {
-        response.set(new Response(
+        respond(
+                "/cwl/%23PQL/2026-06",
                 200,
-                """
-                {
-                  "season": "2026-06",
-                  "state": "ended",
-                  "clans": [{"tag": "#PQL", "name": "ClashPanel"}],
-                  "rounds": []
-                }
-                """
-        ));
+                season("2026-06", "ended")
+        );
 
         provider.getSeason("#PQL", "2026-06");
 
-        assertEquals("/cwl/%23PQL/2026-06", lastRawPath.get());
+        assertEquals(
+                List.of("/cwl/%23PQL/2026-06"),
+                requests
+        );
     }
 
     @Test
     void returnsAnEmptyIndexWhenClashKingHasNoClanHistory()
             throws Exception {
-        response.set(new Response(404, "{\"detail\":\"Not Found\"}"));
+        respond(
+                "/clan/%23PQL/basic",
+                404,
+                "{\"detail\":\"Not Found\"}"
+        );
 
         List<HistoricalCwlSeasonSummary> seasons =
                 provider.getAvailableSeasons("#PQL", 8);
 
         assertEquals(List.of(), seasons);
-        assertEquals("/clan/%23PQL/basic", lastRawPath.get());
+        assertEquals(List.of("/clan/%23PQL/basic"), requests);
+    }
+
+    private void respond(String target, int status, String body) {
+        responses.put(target, new Response(status, body));
     }
 
     private void handle(HttpExchange exchange) throws IOException {
-        lastRawPath.set(exchange.getRequestURI().getRawPath());
-        Response current = response.get();
+        String query = exchange.getRequestURI().getRawQuery();
+        String target = exchange.getRequestURI().getRawPath()
+                + (query == null ? "" : "?" + query);
+        requests.add(target);
+        Response current = responses.getOrDefault(
+                target,
+                new Response(404, "{\"detail\":\"Not Found\"}")
+        );
         byte[] body = current.body().getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-Type", "application/json");
         exchange.sendResponseHeaders(current.status(), body.length);
         exchange.getResponseBody().write(body);
         exchange.close();
+    }
+
+    private static String season(String season, String state) {
+        return """
+               {
+                 "season":"%s",
+                 "state":"%s",
+                 "clans":[{"tag":"#PQL","name":"ClashPanel"}],
+                 "rounds":[]
+               }
+               """.formatted(season, state);
     }
 
     private record Response(int status, String body) {}

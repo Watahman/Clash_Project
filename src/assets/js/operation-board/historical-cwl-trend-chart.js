@@ -3,7 +3,8 @@ const METRICS = {
         offense: item => item.summary.offense?.avgStars,
         defense: item => item.summary.defense?.avgStars,
         format: value => `${value.toFixed(2)}★`,
-        axisFormat: value => `${value.toFixed(0)}★`,
+        axisFormat: value => `${compact(value)}★`,
+        kind: 'stars',
         domain: [0, 3],
         ticks: [0, 1, 2, 3]
     },
@@ -11,7 +12,8 @@ const METRICS = {
         offense: item => item.summary.offense?.avgDestruction,
         defense: item => item.summary.defense?.avgDestruction,
         format: value => `${value.toFixed(1)}%`,
-        axisFormat: value => `${value.toFixed(0)}%`,
+        axisFormat: value => `${compact(value)}%`,
+        kind: 'percent',
         domain: [0, 100],
         ticks: [0, 25, 50, 75, 100]
     },
@@ -19,7 +21,8 @@ const METRICS = {
         offense: item => rate(item.summary.offense?.tripleRate),
         defense: item => rate(item.summary.defense?.tripleRate),
         format: value => `${value.toFixed(1)}%`,
-        axisFormat: value => `${value.toFixed(0)}%`,
+        axisFormat: value => `${compact(value)}%`,
+        kind: 'percent',
         domain: [0, 100],
         ticks: [0, 25, 50, 75, 100]
     }
@@ -46,7 +49,8 @@ export function renderHistoricalTrendChart(container, seasons, metric = 'stars')
     const width = 760;
     const height = 250;
     const padding = { top: 24, right: 24, bottom: 50, left: 46 };
-    const [low, high] = definition.domain;
+    const scale = chartScale(definition, values);
+    const [low, high] = scale.domain;
     const x = index => padding.left
         + index * (width - padding.left - padding.right)
             / Math.max(1, points.length - 1);
@@ -62,7 +66,7 @@ export function renderHistoricalTrendChart(container, seasons, metric = 'stars')
     );
     svg.classList.add('op-history-trend-svg');
     svg.dataset.metric = metric;
-    definition.ticks.forEach(value => {
+    scale.ticks.forEach(value => {
         svg.append(
             line(padding.left, y(value), width - padding.right, y(value), 'grid'),
             text(padding.left - 8, y(value) + 4, definition.axisFormat(value), 'axis-value')
@@ -92,7 +96,70 @@ export function renderHistoricalTrendChart(container, seasons, metric = 'stars')
             'axis-season'
         ));
     });
+    appendLatestValues(svg, points, definition, x, y);
     container.appendChild(svg);
+}
+
+function chartScale(definition, values) {
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const spread = max - min;
+    if (definition.kind === 'stars'
+            && min >= 1.5 && max <= 3 && spread >= 0.08) {
+        let low = Math.floor(min * 2) / 2;
+        let high = Math.ceil(max * 2) / 2;
+        if (high - low < 1) {
+            if (high + 0.5 <= 3) high += 0.5;
+            else low -= 0.5;
+        }
+        const step = (high - low) / 4;
+        return {
+            domain: [low, high],
+            ticks: Array.from(
+                    { length: 5 },
+                    (_, index) => low + step * index
+            )
+        };
+    }
+    if (definition.kind === 'percent' && spread >= 2) {
+        if (min >= 50 && max <= 100) {
+            return {
+                domain: [50, 100],
+                ticks: [50, 62.5, 75, 87.5, 100]
+            };
+        }
+        if (min >= 25 && max <= 75) {
+            return {
+                domain: [25, 75],
+                ticks: [25, 37.5, 50, 62.5, 75]
+            };
+        }
+        if (min >= 0 && max <= 50) {
+            return {
+                domain: [0, 50],
+                ticks: [0, 12.5, 25, 37.5, 50]
+            };
+        }
+    }
+    return {
+        domain: definition.domain,
+        ticks: definition.ticks
+    };
+}
+
+function appendLatestValues(svg, points, definition, x, y) {
+    ['offense', 'defense'].forEach((series, index) => {
+        const point = [...points].reverse().find(item => item[series] != null);
+        if (!point) return;
+        const label = text(
+                x(point.index) - 7,
+                y(point[series]) + (index === 0 ? -9 : 16),
+                definition.format(point[series]),
+                'point-value'
+        );
+        label.dataset.series = series;
+        svg.appendChild(label);
+    });
 }
 
 function path(points, key, x, y, className) {
@@ -164,4 +231,10 @@ function finite(value) {
 
 function rate(value) {
     return finite(value) == null ? null : Number(value) * 100;
+}
+
+function compact(value) {
+    return Number.isInteger(value)
+        ? value.toFixed(0)
+        : value.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
 }

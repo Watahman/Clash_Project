@@ -1,6 +1,8 @@
 package Java.performance;
 
 import Java.HttpException;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -26,7 +28,14 @@ public final class ClashKingHttpClient {
 
     public JsonObject get(String path) throws Exception {
         HttpRequest request = request(path).GET().build();
-        return send(request);
+        return object(send(request));
+    }
+
+    public JsonArray getArray(String path) throws Exception {
+        HttpRequest request = request(path).GET().build();
+        JsonElement response = send(request);
+        if (response.isJsonArray()) return response.getAsJsonArray();
+        throw invalidJson();
     }
 
     public JsonObject post(String path, JsonObject body) throws Exception {
@@ -34,7 +43,7 @@ public final class ClashKingHttpClient {
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
                 .build();
-        return send(request);
+        return object(send(request));
     }
 
     private HttpRequest.Builder request(String path) {
@@ -44,15 +53,28 @@ public final class ClashKingHttpClient {
                 .header("User-Agent", "ClashPanel/1.0");
     }
 
-    private JsonObject send(HttpRequest request) throws Exception {
+    private JsonElement send(HttpRequest request) throws Exception {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw HttpException.upstream(response.statusCode(), response.body(), upstreamName);
         }
         try {
-            return JsonParser.parseString(response.body()).getAsJsonObject();
+            return JsonParser.parseString(response.body());
         } catch (RuntimeException invalidJson) {
-            throw HttpException.upstream(502, "{\"error\":\"Invalid upstream JSON\"}", upstreamName);
+            throw invalidJson();
         }
+    }
+
+    private JsonObject object(JsonElement response) throws HttpException {
+        if (response.isJsonObject()) return response.getAsJsonObject();
+        throw invalidJson();
+    }
+
+    private HttpException invalidJson() {
+        return HttpException.upstream(
+                502,
+                "{\"error\":\"Invalid upstream JSON\"}",
+                upstreamName
+        );
     }
 }
