@@ -150,7 +150,7 @@ async function refreshClanReport(clan) {
     } catch (error) {
         if (error?.name === 'AbortError' || token !== requestToken) return;
         if (error instanceof NoActiveCwlError || error?.code === 'NO_ACTIVE_CWL') {
-            await showNoActiveCwl();
+            await openHistoryOverview();
             return;
         }
         console.error(error);
@@ -180,13 +180,16 @@ async function enrichPredictions(report, token, signal) {
     }
 }
 
-async function showNoActiveCwl() {
+async function openHistoryOverview() {
     clearReport(false);
     currentReport = null;
     renderPhase(refs, 'unknown');
     setState('idle');
-    setHelp(refs, t('op.noActiveCwl'), true);
-    await historyController?.syncForCurrentReport(null, { fallback: true });
+    setHelp(refs, 'Loading CWL history…');
+    await historyController?.syncForCurrentReport(
+        null,
+        { defaultToOverview: true }
+    );
 }
 
 function cancelReportLoad() {

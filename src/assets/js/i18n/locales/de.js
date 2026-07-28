@@ -30,7 +30,6 @@ export const de = Object.freeze({
   "op.predictionExplanation": "{destruction}% Zerstörung · {attacks}/{available} Angriffe · {coverage}% historische Abdeckung",
   "op.filterPlaceholder": "Spieler oder Tag suchen",
   "op.noLeagueData": "Keine aktiven oder verfuegbaren CWL-Daten gefunden. Planung und Clanmitglieder bleiben sichtbar.",
-  "op.noActiveCwl": "Für diesen Clan wurde aktuell keine aktive CWL gefunden. Es wurden keine Daten geladen.",
   "op.liveLoaded": "Live CWL-Daten geladen.",
   "op.noLiveWars": "Keine Live-Kriege",
   "op.noPlayedRounds": "Keine gespielten Runden",

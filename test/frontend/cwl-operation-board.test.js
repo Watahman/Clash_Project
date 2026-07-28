@@ -62,7 +62,6 @@ vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
         'op.apiOnly': 'Bench',
         'op.ok': 'Klaar',
         'op.noRoster': 'Nog geen roster',
-        'op.noActiveCwl': 'Geen actieve CWL',
         'op.syncIdle': 'Nog niet gesynchroniseerd',
         'op.singleClanContext': 'Single clan',
         'op.cwlDayContext': `CWL Day ${values.day || ''}`,
@@ -154,7 +153,7 @@ describe('CWL Operation Board', () => {
         expect(document.querySelector('#op-live-state').dataset.state).toBe('imported');
     });
 
-    it('keeps the board empty and shows a message when no active CWL exists', async () => {
+    it('moves into history without showing a no-active-CWL error', async () => {
         const noCwlError = Object.assign(new Error('notFound'), { status: 404 });
         clanApiMocks.getClanCurrentWarLeagueGroupRequest.mockRejectedValueOnce(noCwlError);
 
@@ -164,7 +163,12 @@ describe('CWL Operation Board', () => {
         document.querySelector('#op-standalone-clan-tag').value = '#PQL';
         document.querySelector('#op-standalone-load').click();
 
-        await vi.waitFor(() => expect(document.querySelector('#op-help').textContent).toBe('Geen actieve CWL'));
+        await vi.waitFor(() =>
+            expect(document.querySelector('#op-help').textContent)
+                .toBe('Loading CWL history…')
+        );
+        expect(document.querySelector('#op-help').textContent)
+            .not.toBe('Geen actieve CWL');
         expect(document.querySelector('#op-live-state').dataset.state).toBe('idle');
         expect(document.querySelector('#op-roster-count').textContent).toBe('0 spelers');
         expect(document.querySelectorAll('#op-roster-body .op-player-row')).toHaveLength(0);
