@@ -62,6 +62,7 @@ export function getHistoricalCwlPlayerContext(report, playerTag) {
     );
     if (!player) return null;
     return {
+        mode: 'historical',
         label: formatSeason(report.season),
         attacksUsed: player.attacksUsed,
         availableAttacks: player.availableAttacks,

@@ -108,7 +108,15 @@
         <section class="op-flat-section op-roster-panel" aria-labelledby="op-roster-title">
             <div class="op-section-heading op-roster-heading"><div><p data-i18n="op.roster">Roster</p><h2 id="op-roster-title" data-i18n="op.playerOverview">Player overview</h2></div><span id="op-roster-count">0 players</span></div>
             <div class="op-roster-filter-row"><input id="op-roster-filter" type="search" data-i18n-placeholder="op.filterPlaceholder" placeholder="Search player or tag"><select id="op-roster-view"><option value="all" data-i18n="op.viewAll">All</option><option value="planned" data-i18n="op.viewPlanned">Planned</option><option value="unplanned" data-i18n="op.viewUnplanned">Not planned</option><option value="missed" data-i18n="op.viewMissed">Missed attacks</option></select></div>
-            <div class="op-table-wrap"><table class="op-table op-live-table"><thead><tr><th data-i18n="op.player">Player</th><th>TH</th><th data-op-roster-column="planning" data-i18n="op.planning">Planning</th><th data-i18n="op.attacks">Attacks</th><th data-i18n="op.stars">Stars</th><th data-i18n="op.avgDestruction">Avg. destruction</th><th data-i18n="op.missed">Missed</th></tr></thead><tbody id="op-roster-body"></tbody></table></div>
+            <div class="op-table-wrap"><table class="op-table op-live-table"><thead><tr>
+                <th data-op-roster-sort="player" aria-sort="none"><button type="button" class="op-table-sort"><span data-i18n="op.player">Player</span><span class="op-sort-indicator" aria-hidden="true">â†•</span></button></th>
+                <th data-op-roster-sort="townHall" aria-sort="none"><button type="button" class="op-table-sort"><span>TH</span><span class="op-sort-indicator" aria-hidden="true">â†•</span></button></th>
+                <th data-op-roster-column="planning" data-op-roster-sort="participation" aria-sort="none"><button type="button" class="op-table-sort"><span data-op-roster-column-label data-i18n="op.planning">Planning</span><span class="op-sort-indicator" aria-hidden="true">â†•</span></button></th>
+                <th data-op-roster-sort="attacks" aria-sort="none"><button type="button" class="op-table-sort"><span data-i18n="op.attacks">Attacks</span><span class="op-sort-indicator" aria-hidden="true">â†•</span></button></th>
+                <th data-op-roster-sort="stars" aria-sort="none"><button type="button" class="op-table-sort"><span data-i18n="op.stars">Stars</span><span class="op-sort-indicator" aria-hidden="true">â†•</span></button></th>
+                <th data-op-roster-sort="destruction" aria-sort="none"><button type="button" class="op-table-sort"><span data-i18n="op.avgDestruction">Avg. destruction</span><span class="op-sort-indicator" aria-hidden="true">â†•</span></button></th>
+                <th data-op-roster-sort="missed" aria-sort="none"><button type="button" class="op-table-sort"><span data-i18n="op.missed">Missed</span><span class="op-sort-indicator" aria-hidden="true">â†•</span></button></th>
+            </tr></thead><tbody id="op-roster-body"></tbody></table></div>
         </section>
     </section>
 

@@ -7,6 +7,7 @@ export function getCurrentCwlPlayerContext(report, playerTag) {
     );
     if (!player) return null;
     return {
+        mode: 'current',
         attacksUsed: number(player.attacksUsed, 0),
         availableAttacks: number(player.availableAttacks, 0),
         stars: number(player.stars, 0),

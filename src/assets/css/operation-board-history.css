@@ -121,20 +121,34 @@
 }
 
 .op-history-side header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-3);
+    display: grid;
+    justify-items: start;
+    gap: 0.2rem;
     margin-bottom: var(--space-4);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--border);
 }
 
 .op-history-side h3 {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
     font-size: 1rem;
+}
+
+.op-history-side h3::before {
+    width: 0.45rem;
+    height: 0.45rem;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: currentColor;
+    content: "";
 }
 
 .op-history-side header span {
     color: var(--text-muted);
     font-size: 0.72rem;
+    line-height: 1.4;
 }
 
 .op-history-side dl {
@@ -177,6 +191,7 @@
 .op-history-round-score span {
     color: var(--text-muted);
     font-size: 0.68rem;
+    text-align: right;
 }
 
 .op-league-summary:has(.op-finish-metric[hidden]) {

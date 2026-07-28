@@ -61,6 +61,8 @@ describe('Historical CWL renderers', () => {
         expect(container.textContent).toContain(
             'Defense details are unavailable for this season.'
         );
+        expect(container.textContent).toContain('Average defense');
+        expect(container.textContent).not.toContain('Missed attacks');
     });
 
     it('renders the overview chart, comparisons and season actions', () => {
@@ -113,7 +115,15 @@ describe('Historical CWL renderers', () => {
 
     it('shows historical participation instead of planning state', () => {
         document.body.innerHTML = `
-            <table><thead><tr><th id="planning">Planning</th></tr></thead>
+            <table><thead><tr>
+                <th data-op-roster-sort="player"><button class="op-table-sort"><span>Player</span><span class="op-sort-indicator"></span></button></th>
+                <th data-op-roster-sort="townHall"><button class="op-table-sort"><span>TH</span><span class="op-sort-indicator"></span></button></th>
+                <th id="planning" data-op-roster-sort="participation"><button class="op-table-sort"><span data-op-roster-column-label>Planning</span><span class="op-sort-indicator"></span></button></th>
+                <th data-op-roster-sort="attacks"><button class="op-table-sort"><span>Attacks</span><span class="op-sort-indicator"></span></button></th>
+                <th data-op-roster-sort="stars"><button class="op-table-sort"><span>Stars</span><span class="op-sort-indicator"></span></button></th>
+                <th data-op-roster-sort="destruction"><button class="op-table-sort"><span>Destruction</span><span class="op-sort-indicator"></span></button></th>
+                <th data-op-roster-sort="missed"><button class="op-table-sort"><span>Missed</span><span class="op-sort-indicator"></span></button></th>
+            </tr></thead>
             <tbody id="roster"></tbody></table>
             <input id="filter">
             <select id="view"><option value="all">All</option></select>
@@ -128,18 +138,32 @@ describe('Historical CWL renderers', () => {
         const report = {
             mode: 'historical',
             rounds: [{ day: 1 }, { day: 2 }],
-            roster: [{
-                tag: '#P0L',
-                name: 'Orion',
-                townHall: 17,
-                roundsPlayed: 1,
-                attacksUsed: 1,
-                availableAttacks: 1,
-                stars: 3,
-                destruction: 100,
-                missed: 0,
-                status: 'ok'
-            }]
+            roster: [
+                {
+                    tag: '#P0L',
+                    name: 'Orion',
+                    townHall: 17,
+                    roundsPlayed: 1,
+                    attacksUsed: 1,
+                    availableAttacks: 1,
+                    stars: 3,
+                    destruction: 100,
+                    missed: 0,
+                    status: 'ok'
+                },
+                {
+                    tag: '#P2Y',
+                    name: 'Nova',
+                    townHall: 18,
+                    roundsPlayed: 2,
+                    attacksUsed: 2,
+                    availableAttacks: 2,
+                    stars: 5,
+                    destruction: 96,
+                    missed: 0,
+                    status: 'ok'
+                }
+            ]
         };
 
         syncRosterMode(refs, report);
@@ -149,7 +173,19 @@ describe('Historical CWL renderers', () => {
         expect(refs.rosterPlanningHeader.textContent).toBe('Participation');
         expect(refs.rosterBody.textContent).toContain('1/2');
         expect(refs.rosterBody.textContent).toContain('Complete');
-        expect(refs.rosterBody.querySelectorAll('td')).toHaveLength(7);
+        expect(refs.rosterBody.querySelectorAll('td')).toHaveLength(14);
+
+        document.querySelector('[data-op-roster-sort="townHall"] button').click();
+        expect(refs.rosterBody.querySelector('.cwl-player-name').textContent)
+            .toBe('Nova');
+        expect(document.querySelector('[data-op-roster-sort="townHall"]')
+            .getAttribute('aria-sort')).toBe('descending');
+
+        document.querySelector('[data-op-roster-sort="townHall"] button').click();
+        expect(refs.rosterBody.querySelector('.cwl-player-name').textContent)
+            .toBe('Orion');
+        expect(document.querySelector('[data-op-roster-sort="townHall"]')
+            .getAttribute('aria-sort')).toBe('ascending');
     });
 });
 

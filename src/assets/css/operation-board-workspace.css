@@ -860,12 +860,19 @@
 
 .operation-workspace-page .op-round-stats {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(3.5rem, 1fr));
     gap: var(--space-2);
     margin: var(--space-2) 0;
 }
 
-.operation-workspace-page .op-round-stats span { color: var(--text-muted); font-size: 0.66rem; }
+.operation-workspace-page .op-round-stats span {
+    display: grid;
+    min-width: 0;
+    gap: 0.15rem;
+    color: var(--text-muted);
+    font-size: 0.66rem;
+    line-height: 1.25;
+}
 .operation-workspace-page .op-round-stats strong { color: var(--text); font-size: 0.88rem; }
 .operation-workspace-page .op-result-text { color: var(--text-muted); font-size: 0.66rem; text-transform: none; }
 
@@ -952,6 +959,44 @@
 .operation-workspace-page .op-table th,
 .operation-workspace-page .op-table td { padding: 0.65rem; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
 .operation-workspace-page .op-table th { color: var(--text-muted); font-size: 0.65rem; letter-spacing: 0.04em; text-transform: uppercase; }
+.operation-workspace-page .op-table-sort {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.35rem;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 750;
+    letter-spacing: inherit;
+    text-align: left;
+    text-transform: inherit;
+}
+.operation-workspace-page .op-table-sort:hover:not(:disabled) {
+    color: var(--text);
+}
+.operation-workspace-page .op-table-sort:focus-visible {
+    border-radius: var(--radius-small);
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+.operation-workspace-page .op-table-sort:disabled {
+    cursor: default;
+}
+.operation-workspace-page .op-sort-indicator {
+    color: var(--text-subtle);
+    font-size: 0.72rem;
+    line-height: 1;
+}
+.operation-workspace-page .op-table th[aria-sort="ascending"] .op-table-sort,
+.operation-workspace-page .op-table th[aria-sort="descending"] .op-table-sort,
+.operation-workspace-page .op-table th[aria-sort="ascending"] .op-sort-indicator,
+.operation-workspace-page .op-table th[aria-sort="descending"] .op-sort-indicator {
+    color: var(--accent-strong);
+}
 .operation-workspace-page .op-table tbody tr:last-child td { border-bottom: 0; }
 .operation-workspace-page .op-live-table td:first-child { display: grid; gap: 0.15rem; }
 .operation-workspace-page .op-live-table td:first-child strong { color: var(--text); font-size: 0.8rem; text-transform: none; }

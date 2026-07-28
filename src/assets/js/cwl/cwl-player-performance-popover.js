@@ -120,6 +120,11 @@ function openForCard(card, trigger, focus = false) {
 
 function renderActiveCard() {
     if (!activeCard || !popover || popover.classList.contains('hidden')) return;
+    const context = activeContext();
+    if (context?.mode === 'historical') {
+        renderHistoricalCwl(context);
+        return;
+    }
     const tag = activeCard.dataset.playerTag || '';
     const performance = getPlayerPerformance(tag);
     if (!performance) {
@@ -200,8 +205,19 @@ function renderPerformance(data) {
     );
 }
 
-function currentCwlNodes() {
-    const context = currentContextResolver(activeCard?.dataset.playerTag || '');
+function renderHistoricalCwl(context) {
+    const current = renderCurrentCwlSection(context);
+    popover.replaceChildren(
+        headerForActiveCard(),
+        ...(current ? [current] : [])
+    );
+}
+
+function activeContext() {
+    return currentContextResolver(activeCard?.dataset.playerTag || '');
+}
+
+function currentCwlNodes(context = activeContext()) {
     const current = renderCurrentCwlSection(context);
     return current ? [current] : [];
 }

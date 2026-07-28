@@ -24,9 +24,16 @@ export function syncRosterMode(refs, report, selectedClan = null) {
     const standalone = isStandaloneMode(report, selectedClan);
     if (!refs.rosterPlanningHeader) return;
     refs.rosterPlanningHeader.hidden = standalone && !historical;
-    refs.rosterPlanningHeader.textContent = historical
-        ? 'Participation'
-        : t('op.planning');
+    const label = refs.rosterPlanningHeader.querySelector(
+        '[data-op-roster-column-label]'
+    );
+    if (label) {
+        label.textContent = historical ? 'Participation' : t('op.planning');
+    } else {
+        refs.rosterPlanningHeader.textContent = historical
+            ? 'Participation'
+            : t('op.planning');
+    }
 }
 
 export function renderRosterViewOptions(refs, report, selectedClan = null) {
@@ -68,6 +75,7 @@ export function renderRosterViewOptions(refs, report, selectedClan = null) {
 
 export function renderRoster(refs, report, selectedClan = null) {
     refs.rosterBody.replaceChildren();
+    syncRosterSortHeaders(refs, report, selectedClan);
     if (!report) {
         renderEmptyRoster(refs, selectedClan);
         return;
@@ -80,15 +88,9 @@ export function renderRoster(refs, report, selectedClan = null) {
             || lower(player.name).includes(query)
             || lower(player.tag).includes(query);
         return matchesSearch && matchesRosterView(player, view);
-    });
-
-    refs.rosterCount.textContent = `${roster.length} ${t('op.players')}`;
-    if (!roster.length) {
-        renderEmptyRoster(refs, selectedClan, report);
-        return;
-    }
-    roster.forEach(player => {
-        const display = day
+    }).map(player => ({
+        player,
+        display: day
             ? getPlayerDayDisplay(player, day)
             : {
                 attacksUsed: player.attacksUsed,
@@ -96,7 +98,16 @@ export function renderRoster(refs, report, selectedClan = null) {
                 stars: player.stars,
                 destruction: player.destruction,
                 missed: player.missed
-            };
+            }
+    }));
+    sortRoster(roster, refs);
+
+    refs.rosterCount.textContent = `${roster.length} ${t('op.players')}`;
+    if (!roster.length) {
+        renderEmptyRoster(refs, selectedClan, report);
+        return;
+    }
+    roster.forEach(({ player, display }) => {
         refs.rosterBody.appendChild(renderPlayerRow(player, display, report));
     });
 }
@@ -182,4 +193,83 @@ function historicalParticipation(player, totalRounds) {
         <strong>${rounds}/${number(totalRounds, 0)}</strong>
         <small>${status[1]}</small>
     </span></td>`;
+}
+
+function syncRosterSortHeaders(refs, report, selectedClan) {
+    const table = refs.rosterBody.closest('table');
+    if (!table) return;
+    const headers = Array.from(table.querySelectorAll('[data-op-roster-sort]'));
+    const activeKey = table.dataset.rosterSortKey || '';
+    const activeDirection = table.dataset.rosterSortDirection || '';
+    headers.forEach(header => {
+        const button = header.querySelector('.op-table-sort');
+        const indicator = header.querySelector('.op-sort-indicator');
+        const active = header.dataset.opRosterSort === activeKey;
+        header.setAttribute(
+            'aria-sort',
+            active
+                ? activeDirection === 'asc' ? 'ascending' : 'descending'
+                : 'none'
+        );
+        if (indicator) {
+            indicator.textContent = active
+                ? activeDirection === 'asc' ? 'â†‘' : 'â†“'
+                : 'â†•';
+        }
+        if (!button) return;
+        button.disabled = !report;
+        button.onclick = report ? () => {
+            const key = header.dataset.opRosterSort;
+            const currentKey = table.dataset.rosterSortKey;
+            const currentDirection = table.dataset.rosterSortDirection;
+            table.dataset.rosterSortKey = key;
+            table.dataset.rosterSortDirection = currentKey === key
+                ? currentDirection === 'desc' ? 'asc' : 'desc'
+                : key === 'player' ? 'asc' : 'desc';
+            renderRoster(refs, report, selectedClan);
+        } : null;
+    });
+}
+
+function sortRoster(rows, refs) {
+    const table = refs.rosterBody.closest('table');
+    const key = table?.dataset.rosterSortKey;
+    const direction = table?.dataset.rosterSortDirection;
+    if (!key || !['asc', 'desc'].includes(direction)) return;
+    const multiplier = direction === 'asc' ? 1 : -1;
+    rows.sort((left, right) => {
+        const first = rosterSortValue(left, key);
+        const second = rosterSortValue(right, key);
+        if (first == null && second != null) return 1;
+        if (first != null && second == null) return -1;
+        let result = 0;
+        if (typeof first === 'string' || typeof second === 'string') {
+            result = String(first).localeCompare(String(second), undefined, {
+                sensitivity: 'base'
+            });
+        } else {
+            result = number(first, 0) - number(second, 0);
+        }
+        return result * multiplier
+            || left.player.name.localeCompare(right.player.name);
+    });
+}
+
+function rosterSortValue(row, key) {
+    const { player, display } = row;
+    if (key === 'player') return player.name;
+    if (key === 'townHall') return finite(player.townHall);
+    if (key === 'participation') return finite(player.roundsPlayed)
+        ?? (player.planned ? 1 : 0);
+    if (key === 'attacks') return finite(display.attacksUsed);
+    if (key === 'stars') return finite(display.stars);
+    if (key === 'destruction') return finite(display.destruction);
+    if (key === 'missed') return finite(display.missed);
+    return null;
+}
+
+function finite(value) {
+    if (value == null || value === '') return null;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
 }

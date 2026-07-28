@@ -44,18 +44,20 @@ describe('CWL historical performance popover', () => {
     });
 
     it('opens only from player info after the hover delay and closes with Escape', async () => {
+        let currentContext = {
+            mode: 'current',
+            attacksUsed: 5,
+            availableAttacks: 5,
+            stars: 12,
+            avgDestruction: 91.4,
+            missed: 0,
+            roundsPlayed: 5
+        };
         const { initPlayerPerformancePopover } = await import(
             '../../src/assets/js/cwl/cwl-player-performance-popover.js'
         );
         const popover = initPlayerPerformancePopover({
-            getCurrentContext: () => ({
-                attacksUsed: 5,
-                availableAttacks: 5,
-                stars: 12,
-                avgDestruction: 91.4,
-                missed: 0,
-                roundsPlayed: 5
-            })
+            getCurrentContext: () => currentContext
         });
         const control = document.querySelector('.cwl-delete-player');
         const info = document.querySelector('.cwl-player-info');
@@ -84,6 +86,27 @@ describe('CWL historical performance popover', () => {
         expect(popover.classList.contains('hidden')).toBe(false);
         window.dispatchEvent(new CustomEvent('clashtools:cwl-player-drag-start'));
         expect(popover.classList.contains('hidden')).toBe(true);
+
+        currentContext = {
+            mode: 'historical',
+            label: 'June 2026',
+            attacksUsed: 6,
+            availableAttacks: 7,
+            stars: 15,
+            avgStars: 2.5,
+            avgDestruction: 93.1,
+            missed: 1,
+            roundsPlayed: 6,
+            tripleRate: 0.67,
+            offensiveRank: 2
+        };
+        info.dispatchEvent(pointerEvent('pointerup', 'touch'));
+
+        expect(popover.textContent).toContain('June 2026 CWL');
+        expect(popover.textContent).toContain('6 / 7');
+        expect(popover.textContent).toContain('Offensive rank');
+        expect(popover.textContent).not.toContain('108');
+        expect(popover.textContent).not.toContain('Matchups');
     });
 });
 

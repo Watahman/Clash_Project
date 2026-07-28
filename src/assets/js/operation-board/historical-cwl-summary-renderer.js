@@ -27,7 +27,7 @@ export function renderHistoricalSummary(container, report) {
             ${metric('Avg. stars / war', stars(summary.offense.starsPerWar, 1))}
             ${metric('Avg. star differential', signed(summary.starDifferential, '★'))}
             ${metric('Attacks used', percent(summary.attackUsage))}
-            ${metric('Missed attacks', value(summary.missedAttacks))}
+            ${metric('Average defense', stars(summary.defense?.avgStars, 2))}
         </dl>
         <section class="op-history-offense-defense" aria-label="Offense versus defense">
             <div class="op-history-side op-history-offense">
@@ -96,11 +96,6 @@ function signed(input, suffix) {
     if (parsed == null) return '—';
     const sign = parsed > 0 ? '+' : '';
     return `${sign}${parsed.toFixed(1)}${suffix}`;
-}
-
-function value(input) {
-    const parsed = finite(input);
-    return parsed == null ? '—' : parsed.toFixed(0);
 }
 
 function finite(input) {
