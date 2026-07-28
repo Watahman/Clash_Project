@@ -61,8 +61,8 @@ describe('Historical CWL renderers', () => {
         expect(container.textContent).toContain(
             'Defense details are unavailable for this season.'
         );
-        expect(container.textContent).toContain('Average defense');
-        expect(container.textContent).not.toContain('Missed attacks');
+        expect(container.textContent).toContain('Missed attacks');
+        expect(container.textContent).not.toContain('Average defense');
     });
 
     it('renders the overview chart, comparisons and season actions', () => {
@@ -122,7 +122,7 @@ describe('Historical CWL renderers', () => {
                 <th data-op-roster-sort="attacks"><button class="op-table-sort"><span>Attacks</span><span class="op-sort-indicator"></span></button></th>
                 <th data-op-roster-sort="stars"><button class="op-table-sort"><span>Stars</span><span class="op-sort-indicator"></span></button></th>
                 <th data-op-roster-sort="destruction"><button class="op-table-sort"><span>Destruction</span><span class="op-sort-indicator"></span></button></th>
-                <th data-op-roster-sort="missed"><button class="op-table-sort"><span>Missed</span><span class="op-sort-indicator"></span></button></th>
+                <th id="defense" data-op-roster-column="defense" data-op-roster-sort="missed"><button class="op-table-sort"><span data-op-roster-defense-label>Missed</span><span class="op-sort-indicator"></span></button></th>
             </tr></thead>
             <tbody id="roster"></tbody></table>
             <input id="filter">
@@ -130,6 +130,7 @@ describe('Historical CWL renderers', () => {
             <span id="count"></span>`;
         const refs = {
             rosterPlanningHeader: document.querySelector('#planning'),
+            rosterDefenseHeader: document.querySelector('#defense'),
             rosterBody: document.querySelector('#roster'),
             rosterFilter: document.querySelector('#filter'),
             rosterView: document.querySelector('#view'),
@@ -148,6 +149,7 @@ describe('Historical CWL renderers', () => {
                     availableAttacks: 1,
                     stars: 3,
                     destruction: 100,
+                    avgDefense: 1,
                     missed: 0,
                     status: 'ok'
                 },
@@ -160,6 +162,7 @@ describe('Historical CWL renderers', () => {
                     availableAttacks: 2,
                     stars: 5,
                     destruction: 96,
+                    avgDefense: 2.5,
                     missed: 0,
                     status: 'ok'
                 }
@@ -175,6 +178,11 @@ describe('Historical CWL renderers', () => {
             .toBe('Participation');
         expect(refs.rosterBody.textContent).toContain('1/2');
         expect(refs.rosterBody.textContent).toContain('Complete');
+        expect(refs.rosterDefenseHeader
+            .querySelector('[data-op-roster-defense-label]').textContent)
+            .toBe('Average defense');
+        expect(refs.rosterBody.textContent).toContain('1.00★');
+        expect(refs.rosterBody.textContent).toContain('2.50★');
         expect(refs.rosterBody.querySelectorAll('td')).toHaveLength(14);
 
         document.querySelector('[data-op-roster-sort="townHall"] button').click();
@@ -188,6 +196,18 @@ describe('Historical CWL renderers', () => {
             .toBe('Orion');
         expect(document.querySelector('[data-op-roster-sort="townHall"]')
             .getAttribute('aria-sort')).toBe('ascending');
+
+        refs.rosterDefenseHeader.querySelector('button').click();
+        expect(refs.rosterBody.querySelector('.cwl-player-name').textContent)
+            .toBe('Nova');
+        expect(refs.rosterDefenseHeader.getAttribute('aria-sort'))
+            .toBe('descending');
+
+        refs.rosterDefenseHeader.querySelector('button').click();
+        expect(refs.rosterBody.querySelector('.cwl-player-name').textContent)
+            .toBe('Orion');
+        expect(refs.rosterDefenseHeader.getAttribute('aria-sort'))
+            .toBe('ascending');
     });
 });
 

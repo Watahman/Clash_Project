@@ -40,6 +40,7 @@ export function initOperationBoardRefs(root = document) {
         rosterCount: '#op-roster-count',
         rosterBody: '#op-roster-body',
         rosterPlanningHeader: '[data-op-roster-column="planning"]',
+        rosterDefenseHeader: '[data-op-roster-column="defense"]',
         rosterFilter: '#op-roster-filter',
         rosterView: '#op-roster-view',
         bonusPanel: '#op-bonus-calculator',

@@ -22,12 +22,14 @@ describe('Historical CWL season calculations', () => {
             availableAttacks: 2,
             missed: 0,
             stars: 5,
+            avgDefense: 2,
             netStarsContributed: 5,
             offensiveRank: 1
         });
         expect(result.roster.find(player => player.tag === '#P2Y')).toMatchObject({
             availableAttacks: 2,
-            missed: 2
+            missed: 2,
+            avgDefense: 1
         });
     });
 
@@ -41,6 +43,8 @@ describe('Historical CWL season calculations', () => {
         expect(result.missedAttacks).toBeNull();
         expect(result.defense).toBeNull();
         expect(result.roster.find(player => player.tag === '#P0L').missed).toBeNull();
+        expect(result.roster.find(player => player.tag === '#P0L').avgDefense)
+            .toBeNull();
     });
 });
 

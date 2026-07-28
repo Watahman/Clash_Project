@@ -22,17 +22,36 @@ export function isStandaloneMode(report, selectedClan = null) {
 export function syncRosterMode(refs, report, selectedClan = null) {
     const historical = report?.mode === 'historical';
     const standalone = isStandaloneMode(report, selectedClan);
-    if (!refs.rosterPlanningHeader) return;
-    refs.rosterPlanningHeader.hidden = standalone && !historical;
-    const label = refs.rosterPlanningHeader.querySelector(
-        '[data-op-roster-column-label]'
-    );
-    if (label) {
-        label.textContent = historical ? 'Participation' : t('op.planning');
-    } else {
-        refs.rosterPlanningHeader.textContent = historical
-            ? 'Participation'
-            : t('op.planning');
+    if (refs.rosterPlanningHeader) {
+        refs.rosterPlanningHeader.hidden = standalone && !historical;
+        const label = refs.rosterPlanningHeader.querySelector(
+            '[data-op-roster-column-label]'
+        );
+        if (label) {
+            label.textContent = historical ? 'Participation' : t('op.planning');
+        } else {
+            refs.rosterPlanningHeader.textContent = historical
+                ? 'Participation'
+                : t('op.planning');
+        }
+    }
+    const defenseHeader = refs.rosterDefenseHeader
+        || refs.rosterBody?.closest('table')
+            ?.querySelector('[data-op-roster-column="defense"]');
+    if (defenseHeader) {
+        const label = defenseHeader.querySelector(
+            '[data-op-roster-defense-label]'
+        );
+        if (label) {
+            label.textContent = historical ? 'Average defense' : t('op.missed');
+        }
+        defenseHeader.dataset.opRosterSort = historical ? 'defense' : 'missed';
+        const table = defenseHeader.closest('table');
+        if (historical && table?.dataset.rosterSortKey === 'missed') {
+            table.dataset.rosterSortKey = 'defense';
+        } else if (!historical && table?.dataset.rosterSortKey === 'defense') {
+            table.dataset.rosterSortKey = 'missed';
+        }
     }
 }
 
@@ -97,7 +116,8 @@ export function renderRoster(refs, report, selectedClan = null) {
                 availableAttacks: player.availableAttacks,
                 stars: player.stars,
                 destruction: player.destruction,
-                missed: player.missed
+                missed: player.missed,
+                avgDefense: player.avgDefense
             }
     }));
     sortRoster(roster, refs);
@@ -133,14 +153,16 @@ function getPlayerDayDisplay(player, day) {
             availableAttacks: stat.availableAttacks,
             stars: stat.stars,
             destruction: stat.destruction,
-            missed: stat.missed
+            missed: stat.missed,
+            avgDefense: stat.avgDefense
         }
         : {
             attacksUsed: 0,
             availableAttacks: 0,
             stars: 0,
             destruction: 0,
-            missed: 0
+            missed: 0,
+            avgDefense: null
         };
 }
 
@@ -171,13 +193,20 @@ function renderPlayerRow(player, display, report) {
         <td>${attackFraction(display.attacksUsed, display.availableAttacks)}</td>
         <td>${number(display.stars, 0)}★</td>
         <td>${number(display.destruction, 0).toFixed(1)}%</td>
-        <td>${display.missed == null ? '—' : number(display.missed, 0)}</td>`;
+        <td>${report.mode === 'historical'
+            ? defenseValue(display.avgDefense)
+            : display.missed == null ? '—' : number(display.missed, 0)}</td>`;
     return row;
 }
 
 function attackFraction(used, available) {
     const availableValue = available == null ? '—' : number(available, 0);
     return `${number(used, 0)}/${availableValue}`;
+}
+
+function defenseValue(input) {
+    const parsed = finite(input);
+    return parsed == null ? '—' : `${parsed.toFixed(2)}★`;
 }
 
 function historicalParticipation(player, totalRounds) {
@@ -264,6 +293,7 @@ function rosterSortValue(row, key) {
     if (key === 'attacks') return finite(display.attacksUsed);
     if (key === 'stars') return finite(display.stars);
     if (key === 'destruction') return finite(display.destruction);
+    if (key === 'defense') return finite(display.avgDefense);
     if (key === 'missed') return finite(display.missed);
     return null;
 }

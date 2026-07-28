@@ -75,6 +75,8 @@ export function calculateHistoricalRoster(data, completedWars = null) {
                 destructionTotal: 0,
                 triples: 0,
                 missed: 0,
+                defenses: 0,
+                defenseStarsTotal: 0,
                 roundsPlayed: 0,
                 netStarsContributed: 0,
                 reliabilityKnown: true,
@@ -89,6 +91,18 @@ export function calculateHistoricalRoster(data, completedWars = null) {
     };
     (data?.roster || []).forEach(ensure);
     wars.forEach(war => {
+        const defensesByPlayer = new Map();
+        if (war.detailsComplete) {
+            (war.opponent?.members || []).forEach(member => {
+                (member.attacks || []).forEach(attack => {
+                    const defender = normalizeTag(attack.defenderTag);
+                    if (!defender) return;
+                    const defenses = defensesByPlayer.get(defender) || [];
+                    defenses.push(attack);
+                    defensesByPlayer.set(defender, defenses);
+                });
+            });
+        }
         const bestByDefender = new Map();
         const ordered = (war.clan?.members || []).flatMap(member =>
             (member.attacks || []).map(attack => ({ ...attack, member }))
@@ -119,6 +133,12 @@ export function calculateHistoricalRoster(data, completedWars = null) {
             player.triples += attacks.filter(attack =>
                 number(attack.stars, 0) === 3
             ).length;
+            const defenses = defensesByPlayer.get(player.tag) || [];
+            player.defenses += defenses.length;
+            player.defenseStarsTotal += sum(
+                defenses,
+                defense => number(defense.stars, 0)
+            );
             player.netStarsContributed += contribution.get(player.tag) || 0;
             if (war.detailsComplete) {
                 const available = number(war.attacksPerMember, 1);
@@ -127,7 +147,7 @@ export function calculateHistoricalRoster(data, completedWars = null) {
             } else {
                 player.reliabilityKnown = false;
             }
-            player.dayStats[war.day] = playerDayStat(war, attacks);
+            player.dayStats[war.day] = playerDayStat(war, attacks, defenses);
         });
     });
     const ranked = Array.from(players.values()).map(player => ({
@@ -139,6 +159,9 @@ export function calculateHistoricalRoster(data, completedWars = null) {
         tripleRate: player.attacksUsed
             ? player.triples / player.attacksUsed
             : 0,
+        avgDefense: player.defenses
+            ? player.defenseStarsTotal / player.defenses
+            : null,
         missed: player.reliabilityKnown ? player.missed : null,
         availableAttacks: player.reliabilityKnown
             ? player.availableAttacks
@@ -184,7 +207,7 @@ function attacksFrom(wars, side) {
     );
 }
 
-function playerDayStat(war, attacks) {
+function playerDayStat(war, attacks, defenses = []) {
     const available = war.detailsComplete
         ? number(war.attacksPerMember, 1)
         : null;
@@ -200,6 +223,10 @@ function playerDayStat(war, attacks) {
             ? sum(attacks, attack => number(attack.destruction, 0))
                 / attacks.length
             : 0,
+        avgDefense: defenses.length
+            ? sum(defenses, defense => number(defense.stars, 0))
+                / defenses.length
+            : null,
         missed: available == null ? null : Math.max(0, available - attacks.length),
         result: war.result
     };
