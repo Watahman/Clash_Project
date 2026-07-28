@@ -36,7 +36,10 @@ describe('Historical CWL renderers', () => {
             summary: {
                 season: '2026-06',
                 league: { name: 'Master League II' },
-                leagueChange: { state: 'unknown', nextLeague: null },
+                leagueChange: {
+                    state: 'same',
+                    nextLeague: { name: 'Master League II' }
+                },
                 position: null,
                 record: { wins: 0, losses: 0, draws: 0 },
                 offense: {
@@ -63,6 +66,8 @@ describe('Historical CWL renderers', () => {
         );
         expect(container.textContent).toContain('Missed attacks');
         expect(container.textContent).not.toContain('Average defense');
+        expect(container.querySelector('.op-history-season-head h2').textContent)
+            .toBe('Master League II');
     });
 
     it('renders the overview chart, comparisons and season actions', () => {
@@ -149,7 +154,7 @@ describe('Historical CWL renderers', () => {
                     availableAttacks: 1,
                     stars: 3,
                     destruction: 100,
-                    avgDefense: 1,
+                    avgDefense: 82.5,
                     missed: 0,
                     status: 'ok'
                 },
@@ -162,7 +167,7 @@ describe('Historical CWL renderers', () => {
                     availableAttacks: 2,
                     stars: 5,
                     destruction: 96,
-                    avgDefense: 2.5,
+                    avgDefense: 95,
                     missed: 0,
                     status: 'ok'
                 }
@@ -181,8 +186,8 @@ describe('Historical CWL renderers', () => {
         expect(refs.rosterDefenseHeader
             .querySelector('[data-op-roster-defense-label]').textContent)
             .toBe('Average defense');
-        expect(refs.rosterBody.textContent).toContain('1.00★');
-        expect(refs.rosterBody.textContent).toContain('2.50★');
+        expect(refs.rosterBody.textContent).toContain('82.5%');
+        expect(refs.rosterBody.textContent).toContain('95.0%');
         expect(refs.rosterBody.querySelectorAll('td')).toHaveLength(14);
 
         document.querySelector('[data-op-roster-sort="townHall"] button').click();

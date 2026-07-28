@@ -17,7 +17,9 @@ final class CwlHistoryIndexNormalizer {
             "Gold League III", "Gold League II", "Gold League I",
             "Crystal League III", "Crystal League II", "Crystal League I",
             "Master League III", "Master League II", "Master League I",
-            "Champion League III", "Champion League II", "Champion League I"
+            "Champion League III", "Champion League II", "Champion League I",
+            "Titan League III", "Titan League II", "Titan League I",
+            "Legend League"
     );
 
     private CwlHistoryIndexNormalizer() {}

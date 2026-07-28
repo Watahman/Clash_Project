@@ -54,6 +54,15 @@ export function getLeagueChangeForSeason(
         .sort((a, b) => a.season.localeCompare(b.season));
     const index = ordered.findIndex(item => item.season === season);
     const next = ordered[index + 1];
+    if (next && consecutive(season, next.season)) {
+        const actualState = leagueChange(league, next.league);
+        if (actualState !== 'unknown') {
+            return {
+                state: actualState,
+                nextLeague: next.league || null
+            };
+        }
+    }
     const state = outcomeFromPosition(
         season,
         league,
@@ -64,12 +73,6 @@ export function getLeagueChangeForSeason(
         return {
             state,
             nextLeague: adjacentLeague(league, state)
-        };
-    }
-    if (next && consecutive(season, next.season)) {
-        return {
-            state: leagueChange(league, next.league),
-            nextLeague: next.league || null
         };
     }
     return {
@@ -170,6 +173,13 @@ function leagueChange(previous, current) {
 }
 
 function placementOutcome(item, next) {
+    if (next && consecutive(item.data.season, next.data.season)) {
+        const actual = leagueChange(
+            item.summary.league,
+            next.summary.league
+        );
+        if (actual !== 'unknown') return actual;
+    }
     const inferred = outcomeFromPosition(
         item.data.season,
         item.summary.league,
@@ -177,9 +187,7 @@ function placementOutcome(item, next) {
         item.data.standings?.length
     );
     if (inferred !== 'unknown') return inferred;
-    return next && consecutive(item.data.season, next.data.season)
-        ? leagueChange(item.summary.league, next.summary.league)
-        : 'unknown';
+    return 'unknown';
 }
 
 function outcomeFromPosition(season, league, position, groupSize) {
@@ -213,8 +221,8 @@ function promotionSlots(league, season) {
         ].includes(league)) return 4;
         return 2;
     }
-    if (league === 'Champion League I') return 0;
     if ([
+        'Champion League I',
         'Champion League II',
         'Champion League III',
         'Master League I',

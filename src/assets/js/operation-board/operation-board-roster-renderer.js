@@ -206,7 +206,7 @@ function attackFraction(used, available) {
 
 function defenseValue(input) {
     const parsed = finite(input);
-    return parsed == null ? '—' : `${parsed.toFixed(2)}★`;
+    return parsed == null ? '—' : `${parsed.toFixed(1)}%`;
 }
 
 function historicalParticipation(player, totalRounds) {

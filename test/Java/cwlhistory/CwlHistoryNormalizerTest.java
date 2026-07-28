@@ -83,6 +83,18 @@ class CwlHistoryNormalizerTest {
     }
 
     @Test
+    void currentLeagueIdsIncludeTitanAndLegendCwlTiers() {
+        assertEquals("Titan League III",
+                CwlHistoryIndexNormalizer.leagueName(48_000_019));
+        assertEquals("Titan League II",
+                CwlHistoryIndexNormalizer.leagueName(48_000_020));
+        assertEquals("Titan League I",
+                CwlHistoryIndexNormalizer.leagueName(48_000_021));
+        assertEquals("Legend League",
+                CwlHistoryIndexNormalizer.leagueName(48_000_022));
+    }
+
+    @Test
     void currentApiNormalizesWarsNestedUnderRounds() {
         JsonObject group = JsonParser.parseString("""
                 {

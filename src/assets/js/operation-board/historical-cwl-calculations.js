@@ -76,7 +76,7 @@ export function calculateHistoricalRoster(data, completedWars = null) {
                 triples: 0,
                 missed: 0,
                 defenses: 0,
-                defenseStarsTotal: 0,
+                defenseDestructionTotal: 0,
                 roundsPlayed: 0,
                 netStarsContributed: 0,
                 reliabilityKnown: true,
@@ -135,9 +135,9 @@ export function calculateHistoricalRoster(data, completedWars = null) {
             ).length;
             const defenses = defensesByPlayer.get(player.tag) || [];
             player.defenses += defenses.length;
-            player.defenseStarsTotal += sum(
+            player.defenseDestructionTotal += sum(
                 defenses,
-                defense => number(defense.stars, 0)
+                defense => number(defense.destruction, 0)
             );
             player.netStarsContributed += contribution.get(player.tag) || 0;
             if (war.detailsComplete) {
@@ -160,7 +160,7 @@ export function calculateHistoricalRoster(data, completedWars = null) {
             ? player.triples / player.attacksUsed
             : 0,
         avgDefense: player.defenses
-            ? player.defenseStarsTotal / player.defenses
+            ? player.defenseDestructionTotal / player.defenses
             : null,
         missed: player.reliabilityKnown ? player.missed : null,
         availableAttacks: player.reliabilityKnown
@@ -224,7 +224,7 @@ function playerDayStat(war, attacks, defenses = []) {
                 / attacks.length
             : 0,
         avgDefense: defenses.length
-            ? sum(defenses, defense => number(defense.stars, 0))
+            ? sum(defenses, defense => number(defense.destruction, 0))
                 / defenses.length
             : null,
         missed: available == null ? null : Math.max(0, available - attacks.length),

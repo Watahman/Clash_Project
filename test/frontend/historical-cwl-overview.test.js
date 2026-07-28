@@ -70,6 +70,45 @@ describe('Historical CWL overview', () => {
         });
     });
 
+    it('trusts the actual next season over an estimated placement outcome', () => {
+        const overview = buildHistoricalCwlOverview([
+            season('2026-06', 'Master League I', 2.5, 2.0, 0.99, 1),
+            season('2026-07', 'Master League I', 2.4, 2.1, 0.98, 3)
+        ]);
+
+        expect(overview.chronological[0].change).toBe('same');
+        expect(getLeagueChangeForSeason(
+            '2026-06',
+            { name: 'Master League I' },
+            [
+                {
+                    season: '2026-06',
+                    league: { name: 'Master League I' }
+                },
+                {
+                    season: '2026-07',
+                    league: { name: 'Master League I' }
+                }
+            ],
+            { position: 1, groupSize: 8 }
+        )).toEqual({
+            state: 'same',
+            nextLeague: { name: 'Master League I' }
+        });
+    });
+
+    it('recognizes the expanded CWL leagues above Champion I', () => {
+        expect(getLeagueChangeForSeason(
+            '2026-07',
+            { name: 'Champion League I' },
+            [],
+            { position: 1, groupSize: 8 }
+        )).toEqual({
+            state: 'promoted',
+            nextLeague: { name: 'Titan League III' }
+        });
+    });
+
     it('treats higher conceded values as a negative comparison', () => {
         const [row] = compareHistoricalSeasons(
             { defense: { avgStars: 2.1 } },

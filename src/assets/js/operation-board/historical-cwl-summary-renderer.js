@@ -61,7 +61,7 @@ export function clearHistoricalSummary(container) {
 
 function leagueTransition(league, change) {
     const current = league?.name || 'League unknown';
-    if (!change?.nextLeague?.name) return current;
+    if (change?.state === 'same' || !change?.nextLeague?.name) return current;
     return `${current} → ${change.nextLeague.name}`;
 }
 
