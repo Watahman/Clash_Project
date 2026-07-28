@@ -1,0 +1,437 @@
+.workspace-planner > .cwl-auto-plan-panel {
+    border: 1px solid var(--border);
+    border-top: 0;
+    background: var(--surface);
+}
+
+.cwl-auto-plan-panel.hidden {
+    display: none;
+}
+
+.cwl-auto-plan-header {
+    position: static;
+    inset: auto;
+    display: flex;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    align-items: end;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-subtle);
+}
+
+.cwl-auto-plan-header > div:first-child {
+    min-width: 16rem;
+    flex: 1 1 26rem;
+}
+
+.cwl-auto-plan-header h2 {
+    color: var(--text);
+    font-size: 1rem;
+}
+
+.cwl-auto-plan-header p {
+    max-width: 62ch;
+    margin-top: var(--space-1) !important;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
+.cwl-auto-plan-mode {
+    display: grid;
+    width: min(12rem, 100%);
+    gap: 0.35rem;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.cwl-auto-plan-actions {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.cwl-auto-plan-status {
+    min-height: 2.75rem;
+    padding: 0.75rem var(--space-4);
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.78rem;
+}
+
+.cwl-auto-plan-status[data-state="warning"],
+.cwl-auto-plan-warnings {
+    color: var(--warning, #b46b12);
+    background: var(--warning-soft, color-mix(in srgb, #d58a22 10%, transparent));
+}
+
+.cwl-auto-plan-status[data-state="error"] {
+    color: var(--danger);
+    background: var(--danger-soft);
+}
+
+.cwl-auto-plan-preview {
+    display: grid;
+    align-items: start;
+    gap: var(--space-4);
+    padding: var(--space-4);
+}
+
+.cwl-auto-plan-fill-summary {
+    margin: 0;
+    color: var(--text);
+    font-size: 0.88rem;
+    font-weight: 750;
+}
+
+.cwl-auto-plan-group {
+    display: grid;
+    min-width: 0;
+    gap: var(--space-2);
+}
+
+.cwl-auto-plan-group-heading {
+    position: static;
+    inset: auto;
+    display: flex;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+
+.cwl-auto-plan-group-heading h3 {
+    color: var(--text);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.cwl-auto-plan-group-heading span {
+    display: inline-grid;
+    min-width: 1.5rem;
+    min-height: 1.5rem;
+    place-items: center;
+    border-radius: 999px;
+    color: var(--text-muted);
+    background: var(--surface-subtle);
+    font-size: 0.68rem;
+    font-weight: 750;
+}
+
+.cwl-auto-plan-group-content {
+    display: grid;
+    gap: var(--space-3);
+}
+
+.cwl-auto-plan-group.is-active .cwl-auto-plan-group-content {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr));
+    align-items: start;
+}
+
+.cwl-auto-plan-clan,
+.cwl-auto-plan-changes {
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    background: var(--surface);
+}
+
+.cwl-auto-plan-clan-heading {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--border);
+}
+
+.cwl-auto-plan-clan-heading h3 {
+    color: var(--text);
+    font-size: 0.92rem;
+}
+
+.cwl-auto-plan-clan-heading p {
+    margin-top: 0.2rem !important;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+}
+
+.cwl-auto-plan-clan-heading .cwl-auto-plan-format {
+    margin-top: 0.1rem !important;
+    font-size: 0.68rem;
+}
+
+.cwl-auto-plan-unused-clan {
+    display: grid;
+    grid-template-columns: minmax(10rem, 0.8fr) auto minmax(14rem, 1.2fr);
+    align-items: center;
+    gap: var(--space-3);
+    min-width: 0;
+    padding: 0.8rem var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    background: var(--surface);
+}
+
+.cwl-auto-plan-unused-clan h4 {
+    color: var(--text);
+    font-size: 0.8rem;
+}
+
+.cwl-auto-plan-unused-clan p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    line-height: 1.45;
+}
+
+.cwl-auto-plan-unused-clan div p {
+    margin-top: 0.15rem;
+}
+
+.cwl-auto-plan-unused-label {
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+    color: var(--text-muted);
+    background: var(--surface-subtle);
+    font-size: 0.66rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.cwl-auto-plan-readiness {
+    display: inline-flex;
+    min-height: 1.75rem;
+    align-items: center;
+    padding: 0.25rem 0.55rem;
+    border-radius: var(--radius-small);
+    color: var(--text-muted);
+    background: var(--surface-subtle);
+    font-size: 0.7rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.cwl-auto-plan-readiness.is-good {
+    color: var(--success);
+    background: var(--success-soft);
+}
+
+.cwl-auto-plan-readiness.is-risk {
+    color: var(--danger);
+    background: var(--danger-soft);
+}
+
+.cwl-auto-plan-metrics {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.45rem var(--space-4);
+    margin: 0;
+    padding: var(--space-4);
+}
+
+.cwl-auto-plan-metrics dt {
+    color: var(--text-muted);
+    font-size: 0.76rem;
+}
+
+.cwl-auto-plan-metrics dd {
+    margin: 0;
+    color: var(--text);
+    font-size: 0.78rem;
+    font-weight: 750;
+    text-align: right;
+}
+
+.cwl-auto-plan-readiness-text {
+    padding: 0 var(--space-4) var(--space-4);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    line-height: 1.5;
+}
+
+.cwl-auto-plan-warnings {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0.75rem var(--space-4) 0.75rem 2rem;
+    border-top: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+    font-size: 0.74rem;
+    line-height: 1.45;
+}
+
+.cwl-auto-plan-lineups,
+.cwl-auto-plan-guided {
+    border-top: 1px solid var(--border);
+}
+
+.cwl-auto-plan-lineups summary,
+.cwl-auto-plan-guided summary {
+    padding: 0.8rem var(--space-4);
+    color: var(--text);
+    font-size: 0.76rem;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.cwl-auto-plan-table-wrap {
+    max-height: 24rem;
+    overflow: auto;
+    border-top: 1px solid var(--border);
+}
+
+.cwl-auto-plan-table-wrap table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.7rem;
+}
+
+.cwl-auto-plan-table-wrap th,
+.cwl-auto-plan-table-wrap td {
+    min-width: 2.2rem;
+    padding: 0.5rem 0.4rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.cwl-auto-plan-table-wrap thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface-subtle);
+}
+
+.cwl-auto-plan-table-wrap tbody th {
+    min-width: 8rem;
+    color: var(--text);
+    text-align: left;
+}
+
+.cwl-auto-plan-table-wrap .is-planned {
+    color: var(--accent);
+}
+
+.cwl-auto-plan-guided-content {
+    display: grid;
+    gap: var(--space-3);
+    padding: 0 var(--space-4) var(--space-4);
+}
+
+.cwl-auto-plan-override-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    align-items: end;
+    gap: var(--space-2);
+}
+
+.cwl-auto-plan-override-row label {
+    display: grid;
+    min-width: 0;
+    gap: 0.35rem;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.cwl-auto-plan-override-row select {
+    min-width: 0;
+}
+
+.cwl-auto-plan-changes {
+    grid-column: 1 / -1;
+    padding: var(--space-4);
+}
+
+.cwl-auto-plan-changes h3 {
+    font-size: 0.9rem;
+}
+
+.cwl-auto-plan-changes p,
+.cwl-auto-plan-changes ul {
+    margin: var(--space-3) 0 0;
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    line-height: 1.55;
+}
+
+.cwl-auto-plan-changes ul {
+    columns: 2 18rem;
+    padding-left: 1.15rem;
+}
+
+@media (max-width: 64rem) {
+    .cwl-auto-plan-header {
+        align-items: stretch;
+        flex-wrap: wrap;
+    }
+
+    .cwl-auto-plan-mode {
+        flex: 1 1 12rem;
+    }
+}
+
+@media (max-width: 46rem) {
+    .workspace-planner > .cwl-auto-plan-panel {
+        margin-top: var(--space-4);
+        border-top: 1px solid var(--border);
+    }
+
+    .cwl-auto-plan-header {
+        flex-direction: column;
+    }
+
+    .cwl-auto-plan-header > div:first-child,
+    .cwl-auto-plan-mode {
+        width: 100%;
+        min-width: 0;
+        flex: none;
+    }
+
+    .cwl-auto-plan-actions {
+        display: grid;
+        width: 100%;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .cwl-auto-plan-preview {
+        grid-template-columns: minmax(0, 1fr);
+        padding: var(--space-3);
+    }
+
+    .cwl-auto-plan-override-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cwl-auto-plan-unused-clan {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .cwl-auto-plan-unused-reason {
+        grid-column: 1 / -1;
+    }
+
+    .cwl-auto-plan-clan-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .cwl-auto-plan-readiness {
+        align-self: flex-start;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cwl-auto-plan-panel {
+        scroll-behavior: auto;
+    }
+}

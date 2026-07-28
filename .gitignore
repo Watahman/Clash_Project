@@ -45,6 +45,7 @@ target/
 
 # Local runtime cache
 data/cache/
+.wrangler/
 
 # Generated builds, logs and discarded starter projects
 dist/

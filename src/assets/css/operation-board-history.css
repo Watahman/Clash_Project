@@ -1,0 +1,212 @@
+.op-season-control {
+    min-width: 10.5rem;
+}
+
+.op-history-overview[hidden],
+.op-tab-panel[hidden] {
+    display: none;
+}
+
+.op-history-season-head,
+.op-history-overview-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-5) 0;
+    border-block: 1px solid var(--border-strong);
+}
+
+.op-history-season-head p {
+    margin-bottom: var(--space-2) !important;
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.op-history-season-head h2,
+.op-history-overview-head h2 {
+    font-size: 1.35rem;
+    letter-spacing: -0.02em;
+}
+
+.op-history-season-head div > span,
+.op-history-overview-head p,
+.op-history-overview-head > span {
+    display: block;
+    margin-top: var(--space-2);
+    color: var(--text-muted);
+    font-size: 0.78rem;
+}
+
+.op-history-quality {
+    display: inline-flex;
+    min-height: 1.8rem;
+    align-items: center;
+    padding: 0.25rem 0.55rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-small);
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.op-history-quality[data-quality="complete"] {
+    border-color: var(--success);
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.op-history-quality[data-quality="partial-history"] {
+    border-color: var(--warning);
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.op-history-key-stats,
+.op-history-differentials {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0;
+    border-bottom: 1px solid var(--border-strong);
+}
+
+.op-history-key-stats > div,
+.op-history-differentials > div {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border-right: 1px solid var(--border);
+}
+
+.op-history-key-stats > div:last-child,
+.op-history-differentials > div:last-child {
+    border-right: 0;
+}
+
+.op-history-key-stats dt,
+.op-history-differentials dt,
+.op-history-side dt {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+}
+
+.op-history-key-stats dd,
+.op-history-differentials dd,
+.op-history-side dd {
+    margin: 0;
+    color: var(--text);
+    font-weight: 750;
+}
+
+.op-history-key-stats dd {
+    font-size: 1.2rem;
+}
+
+.op-history-offense-defense {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: var(--space-5);
+    border-block: 1px solid var(--border-strong);
+}
+
+.op-history-side {
+    min-width: 0;
+    padding: var(--space-5);
+}
+
+.op-history-side + .op-history-side {
+    border-left: 1px solid var(--border-strong);
+}
+
+.op-history-side header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.op-history-side h3 {
+    font-size: 1rem;
+}
+
+.op-history-side header span {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+}
+
+.op-history-side dl {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+    margin: 0;
+}
+
+.op-history-side dl > div {
+    display: grid;
+    gap: var(--space-1);
+}
+
+.op-history-differentials {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.op-history-offense h3,
+.op-history-chart-legend [data-series="offense"] {
+    color: var(--accent-strong);
+}
+
+.op-history-defense h3,
+.op-history-chart-legend [data-series="defense"] {
+    color: var(--danger);
+}
+
+.op-history-round-score {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2);
+}
+
+.op-history-round-score strong {
+    font-size: 1.1rem;
+}
+
+.op-history-round-score span {
+    color: var(--text-muted);
+    font-size: 0.68rem;
+}
+
+.op-league-summary:has(.op-finish-metric[hidden]) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.op-history-participation {
+    display: grid;
+    gap: var(--space-1);
+}
+
+.op-history-participation small {
+    color: var(--text-muted);
+    font-size: 0.68rem;
+}
+
+.op-history-participation small::before {
+    display: inline-block;
+    width: 0.42rem;
+    height: 0.42rem;
+    margin-right: var(--space-1);
+    border-radius: 50%;
+    background: currentColor;
+    content: "";
+}
+
+.op-history-participation[data-state="complete"] small {
+    color: var(--success);
+}
+
+.op-history-participation[data-state="attention"] small {
+    color: var(--warning);
+}

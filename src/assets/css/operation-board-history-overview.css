@@ -1,0 +1,302 @@
+.op-history-overview {
+    display: grid;
+    gap: var(--space-5);
+}
+
+.op-history-overview .op-flat-section {
+    margin: 0;
+}
+
+.op-history-overview-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+}
+
+.op-history-timeline {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    border-block: 1px solid var(--border);
+}
+
+.operation-workspace-page .op-history-timeline button {
+    display: grid;
+    min-width: 0;
+    min-height: 8.5rem;
+    align-content: start;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border: 0;
+    border-right: 1px solid var(--border);
+    background: transparent;
+    text-align: left;
+}
+
+.operation-workspace-page .op-history-timeline button:hover,
+.operation-workspace-page .op-history-season-list button:hover {
+    background: var(--surface-hover);
+}
+
+.op-history-timeline button > span,
+.op-history-timeline button > em,
+.op-history-timeline button > small {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-style: normal;
+}
+
+.op-history-timeline button > strong {
+    min-height: 2.2rem;
+    font-size: 0.82rem;
+}
+
+.op-history-timeline small[data-change="promoted"] {
+    color: var(--success);
+}
+
+.op-history-timeline small[data-change="relegated"] {
+    color: var(--danger);
+}
+
+.op-history-trend-heading {
+    align-items: center;
+}
+
+.op-history-trend-toggle {
+    display: flex;
+    gap: var(--space-1);
+}
+
+.operation-workspace-page .op-history-trend-toggle button {
+    min-height: 2rem;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.operation-workspace-page .op-history-trend-toggle button[aria-pressed="true"] {
+    border-color: var(--border-strong);
+    background: var(--surface-hover);
+    color: var(--text);
+}
+
+.op-history-chart-legend {
+    display: flex;
+    gap: var(--space-4);
+    margin-bottom: var(--space-2);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.op-history-chart-legend span::before {
+    display: inline-block;
+    width: 0.8rem;
+    height: 2px;
+    margin-right: var(--space-2);
+    background: currentColor;
+    vertical-align: middle;
+    content: "";
+}
+
+.op-history-trend-chart {
+    min-height: 14rem;
+}
+
+.op-history-trend-svg {
+    display: block;
+    width: 100%;
+    min-width: 34rem;
+    height: auto;
+    overflow: visible;
+}
+
+.op-history-grid {
+    stroke: var(--border);
+    stroke-width: 1;
+}
+
+.op-history-axis-value,
+.op-history-axis-season {
+    fill: var(--text-muted);
+    font-size: 11px;
+    text-anchor: end;
+}
+
+.op-history-axis-season {
+    text-anchor: middle;
+}
+
+.op-history-line-offense,
+.op-history-line-defense {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.op-history-line-offense {
+    stroke: var(--accent);
+}
+
+.op-history-line-defense {
+    stroke: var(--danger);
+}
+
+.op-history-dot-offense,
+.op-history-dot-defense {
+    stroke: var(--surface);
+    stroke-width: 3;
+}
+
+.op-history-dot-offense {
+    fill: var(--accent);
+}
+
+.op-history-dot-defense {
+    fill: var(--danger);
+}
+
+.op-history-reliability-list,
+.op-history-results-list,
+.op-history-insights > div {
+    display: grid;
+}
+
+.op-history-reliability-list > div,
+.op-history-results-list > div {
+    display: grid;
+    grid-template-columns: minmax(8rem, 1fr) auto auto;
+    gap: var(--space-3);
+    padding: 0.7rem 0;
+    border-top: 1px solid var(--border);
+    font-size: 0.76rem;
+}
+
+.op-history-reliability-list span,
+.op-history-results-list span {
+    color: var(--text);
+}
+
+.op-history-reliability-list small,
+.op-history-results-list small {
+    color: var(--text-muted);
+}
+
+.op-history-insights article {
+    display: grid;
+    grid-template-columns: minmax(10rem, 1fr) minmax(10rem, 1fr) auto;
+    gap: var(--space-4);
+    padding: var(--space-3) 0;
+    border-top: 1px solid var(--border);
+    font-size: 0.78rem;
+}
+
+.op-history-insights article span {
+    color: var(--text-muted);
+}
+
+.op-history-insights article em {
+    color: var(--accent-strong);
+    font-style: normal;
+    font-weight: 700;
+}
+
+.op-history-compare-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+}
+
+.op-history-compare-controls label {
+    width: min(15rem, 45%);
+}
+
+.op-history-comparison-table {
+    border-block: 1px solid var(--border);
+}
+
+.op-history-comparison-row {
+    display: grid;
+    grid-template-columns: minmax(9rem, 1.2fr) repeat(3, minmax(7rem, 1fr));
+    gap: var(--space-3);
+    align-items: center;
+    padding: 0.7rem var(--space-2);
+    border-top: 1px solid var(--border);
+    font-size: 0.76rem;
+}
+
+.op-history-comparison-row:first-child {
+    border-top: 0;
+}
+
+.op-history-comparison-head {
+    color: var(--text-muted);
+    font-size: 0.68rem;
+}
+
+.op-history-comparison-row em {
+    font-style: normal;
+    font-weight: 700;
+}
+
+.op-history-comparison-row em[data-direction="good"] {
+    color: var(--success);
+}
+
+.op-history-comparison-row em[data-direction="bad"] {
+    color: var(--danger);
+}
+
+.op-history-season-list > div {
+    display: grid;
+}
+
+.operation-workspace-page .op-history-season-list button {
+    display: grid;
+    grid-template-columns: minmax(11rem, 1.5fr) minmax(10rem, 1.2fr) repeat(3, minmax(7rem, 1fr));
+    gap: var(--space-3);
+    min-height: 3.5rem;
+    align-items: center;
+    padding: var(--space-3);
+    border: 0;
+    border-top: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+}
+
+.op-history-season-list button > span {
+    color: var(--text-muted);
+    font-size: 0.74rem;
+}
+
+.op-history-season-list button > span:first-child {
+    display: grid;
+    color: var(--text);
+}
+
+.op-history-season-list button small {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.op-history-empty,
+.op-history-empty-state p {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
+.op-history-empty-state {
+    padding: var(--space-6);
+    text-align: center;
+}
+
+.op-history-empty-state h2 {
+    margin-bottom: var(--space-2);
+    font-size: 1rem;
+}

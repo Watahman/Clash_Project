@@ -16,6 +16,7 @@ public final class CacheKeys {
     public static String normalizeTag(String value) {
         if (value == null) return "";
         String tag = value.trim().toUpperCase();
+        if (tag.startsWith("%23")) tag = "#" + tag.substring(3);
         if (tag.isBlank()) return "";
         return tag.startsWith("#") ? tag : "#" + tag;
     }

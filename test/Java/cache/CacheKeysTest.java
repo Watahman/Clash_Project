@@ -9,6 +9,7 @@ class CacheKeysTest {
     void normalizesTagsConsistently() {
         assertEquals("#ABC123", CacheKeys.normalizeTag("  abc123 "));
         assertEquals("#ABC123", CacheKeys.normalizeTag(" #AbC123 "));
+        assertEquals("#ABC123", CacheKeys.normalizeTag("%23abc123"));
     }
 
     @Test

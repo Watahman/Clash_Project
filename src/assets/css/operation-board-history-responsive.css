@@ -1,0 +1,143 @@
+@media (max-width: 900px) {
+    .op-history-overview-columns,
+    .op-history-offense-defense {
+        grid-template-columns: 1fr;
+    }
+
+    .op-history-side + .op-history-side {
+        border-top: 1px solid var(--border-strong);
+        border-left: 0;
+    }
+
+    .op-history-key-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .op-history-key-stats > div:nth-child(2) {
+        border-right: 0;
+    }
+
+    .op-history-key-stats > div:nth-child(-n + 2) {
+        border-bottom: 1px solid var(--border);
+    }
+
+    .operation-workspace-page .op-history-season-list button {
+        grid-template-columns: minmax(10rem, 1.5fr) repeat(2, minmax(7rem, 1fr));
+    }
+
+    .op-history-season-list button > span:nth-child(4),
+    .op-history-season-list button > span:nth-child(5) {
+        display: none;
+    }
+}
+
+@media (max-width: 700px) {
+    .op-season-control {
+        width: 100% !important;
+        flex-basis: 100% !important;
+    }
+
+    .op-history-season-head,
+    .op-history-overview-head,
+    .op-history-side header,
+    .op-history-trend-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .op-history-key-stats,
+    .op-history-differentials,
+    .op-history-side dl {
+        grid-template-columns: 1fr;
+    }
+
+    .op-history-key-stats > div,
+    .op-history-differentials > div {
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .op-history-key-stats > div:last-child,
+    .op-history-differentials > div:last-child {
+        border-bottom: 0;
+    }
+
+    .op-history-timeline {
+        grid-template-columns: 1fr;
+    }
+
+    .operation-workspace-page .op-history-timeline button {
+        grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+        min-height: 0;
+        align-items: center;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .op-history-timeline button > strong {
+        min-height: 0;
+    }
+
+    .op-history-timeline button > small {
+        grid-column: 2 / -1;
+    }
+
+    .op-history-trend-toggle {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .op-history-trend-chart {
+        overflow-x: auto;
+        overscroll-behavior-inline: contain;
+    }
+
+    .op-history-reliability-list > div,
+    .op-history-results-list > div {
+        grid-template-columns: 1fr auto;
+    }
+
+    .op-history-reliability-list small,
+    .op-history-results-list small {
+        grid-column: 1 / -1;
+    }
+
+    .op-history-insights article {
+        grid-template-columns: 1fr auto;
+    }
+
+    .op-history-insights article em {
+        grid-column: 1 / -1;
+    }
+
+    .op-history-compare-controls {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+    }
+
+    .op-history-compare-controls label {
+        width: auto;
+    }
+
+    .op-history-comparison-row {
+        grid-template-columns: minmax(8rem, 1.4fr) repeat(3, minmax(4.5rem, 1fr));
+        gap: var(--space-2);
+        padding-inline: 0;
+        font-size: 0.7rem;
+    }
+
+    .operation-workspace-page .op-history-season-list button {
+        grid-template-columns: 1fr auto;
+    }
+
+    .op-history-season-list button > span:nth-child(2) {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .operation-workspace-page .op-history-timeline button,
+    .operation-workspace-page .op-history-season-list button {
+        transition: none;
+    }
+}
