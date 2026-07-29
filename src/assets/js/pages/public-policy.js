@@ -5,59 +5,6 @@ const LAST_UPDATED_EN = '25 July 2026';
 const LAST_UPDATED_NL = '25 juli 2026';
 
 const content = {
-    about: {
-        showUpdated: false,
-        en: {
-            title: 'About ClashPanel',
-            description: 'Why ClashPanel exists and how it helps Clash of Clans leaders plan and run Clan War League.',
-            summary: 'ClashPanel is a focused workspace for clan leaders and CWL organisers who want clear decisions without rebuilding the same information in spreadsheets and chat.',
-            sections: [
-                ['Why it exists', [
-                    'Clan War League planning brings together player accounts, availability, clan sizes, daily lineups and live results. ClashPanel keeps those parts connected so organisers can spend less time maintaining the process.',
-                    'The goal is not to automate every clan decision. It is to provide a reliable starting point, visible context and tools that keep leaders in control.'
-                ]],
-                ['One connected workflow', [
-                    'CWL Planner turns a player pool into multi-clan rosters and seven-day lineups. Operation Board follows the active league, participation and season history. Clan Families connect the members, accounts, clans and availability behind both tools.'
-                ]],
-                ['Built for clarity', [
-                    'ClashPanel separates live facts from projections, keeps advisory recommendations visible as advice and treats unknown data as unknown.',
-                    'The interface is designed for desktop and mobile use with familiar controls, visible states and a calm visual hierarchy.'
-                ]],
-                ['Independent project', [
-                    'ClashPanel is an unofficial Clash of Clans fan project. It is not affiliated with, endorsed by or sponsored by Supercell.'
-                ]]
-            ],
-            links: [
-                ['Explore CWL Planner', '/cwl-planner'],
-                ['Contact ClashPanel', '/subpages/contact']
-            ]
-        },
-        nl: {
-            title: 'Over ClashPanel',
-            description: 'Waarom ClashPanel bestaat en hoe het Clash of Clans-leiders helpt om Clan War League te plannen en op te volgen.',
-            summary: 'ClashPanel is een gerichte werkruimte voor clanleiders en CWL-organisatoren die duidelijke beslissingen willen nemen zonder dezelfde informatie telkens opnieuw in spreadsheets en chat te bouwen.',
-            sections: [
-                ['Waarom het bestaat', [
-                    'Clan War League-planning brengt spelersaccounts, beschikbaarheid, clanguottes, dagelijkse line-ups en live resultaten samen. ClashPanel houdt die onderdelen verbonden zodat organisatoren minder tijd verliezen aan het onderhouden van hun proces.',
-                    'Het doel is niet om elke clanbeslissing te automatiseren. ClashPanel biedt een betrouwbaar startpunt, zichtbare context en hulpmiddelen waarbij leiders de controle behouden.'
-                ]],
-                ['Eén verbonden workflow', [
-                    'CWL Planner zet een spelerspool om in rosters voor meerdere clans en line-ups voor zeven dagen. Operation Board volgt de actieve league, deelname en seizoenshistoriek. Clan Families verbinden de leden, accounts, clans en beschikbaarheid achter beide tools.'
-                ]],
-                ['Gebouwd voor duidelijkheid', [
-                    'ClashPanel houdt live feiten gescheiden van voorspellingen, toont aanbevelingen duidelijk als advies en behandelt onbekende data als onbekend.',
-                    'De interface is ontworpen voor desktop en mobiel met herkenbare controls, zichtbare statussen en een rustige visuele hiërarchie.'
-                ]],
-                ['Onafhankelijk project', [
-                    'ClashPanel is een onofficieel Clash of Clans-fanproject. Het is niet verbonden met, goedgekeurd door of gesponsord door Supercell.'
-                ]]
-            ],
-            links: [
-                ['Bekijk CWL Planner', '/cwl-planner'],
-                ['Contacteer ClashPanel', '/subpages/contact']
-            ]
-        }
-    },
     privacy: {
         en: {
             title: 'Privacy policy',
@@ -379,7 +326,6 @@ const content = {
         }
     },
     contact: {
-        showUpdated: false,
         en: {
             title: 'Contact',
             description: 'Contact ClashPanel by email for support, privacy, security and general questions.',
@@ -446,18 +392,25 @@ function render() {
     title.textContent = copy.title;
     const summary = document.createElement('p');
     summary.textContent = copy.summary;
+    const updated = document.createElement('p');
+    updated.textContent = language === 'nl'
+        ? `Laatst bijgewerkt: ${LAST_UPDATED_NL}`
+        : `Last updated: ${LAST_UPDATED_EN}`;
     header.append(title, summary);
-    if (documentContent.showUpdated !== false) {
-        const updated = document.createElement('p');
-        updated.textContent = language === 'nl'
-            ? `Laatst bijgewerkt: ${LAST_UPDATED_NL}`
-            : `Last updated: ${LAST_UPDATED_EN}`;
-        header.append(updated);
-    }
+    if (root.dataset.policyDocument !== 'contact') header.append(updated);
     root.appendChild(header);
 
-    copy.sections.forEach(([heading, paragraphs]) => {
+    const toc = document.createElement('nav');
+    toc.className = 'policy-toc';
+    toc.setAttribute('aria-label', language === 'nl' ? 'Inhoud' : 'On this page');
+    const tocTitle = document.createElement('strong');
+    tocTitle.textContent = language === 'nl' ? 'Op deze pagina' : 'On this page';
+    toc.appendChild(tocTitle);
+    root.appendChild(toc);
+
+    copy.sections.forEach(([heading, paragraphs], index) => {
         const section = document.createElement('section');
+        section.id = `section-${index + 1}`;
         const sectionTitle = document.createElement('h2');
         sectionTitle.textContent = heading;
         const list = document.createElement('ul');
@@ -468,6 +421,11 @@ function render() {
         });
         section.append(sectionTitle, list);
         root.appendChild(section);
+
+        const tocLink = document.createElement('a');
+        tocLink.href = `#${section.id}`;
+        tocLink.textContent = heading;
+        toc.appendChild(tocLink);
     });
 
     const links = copy.links || [];

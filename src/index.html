@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Clash of Clans Clan Management, CWL Planner &amp; Tracker | ClashPanel</title>
     <meta name="description" content="Plan CWL rosters, track Clan War League stats and history, manage clans and members, and analyze Clash of Clans performance with ClashPanel.">
     <meta name="robots" content="index, follow">
     <meta name="application-name" content="ClashPanel">
     <meta name="theme-color" content="#0d1117">
     <link rel="canonical" href="https://clashpanel.com/">
+
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="ClashPanel">
     <meta property="og:url" content="https://clashpanel.com/">
@@ -16,10 +18,12 @@
     <meta property="og:description" content="Plan CWL rosters, track league stats and history, and manage members across one or multiple Clash of Clans clans.">
     <meta property="og:image" content="https://clashpanel.com/assets/social/clashpanel-home.png">
     <meta property="og:image:alt" content="ClashPanel Clash of Clans clan management, CWL planner and tracker">
+
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Clash of Clans Clan Management, CWL Planner &amp; Tracker">
     <meta name="twitter:description" content="Plan CWL rosters, track league stats and history, and manage members across one or multiple clans.">
     <meta name="twitter:image" content="https://clashpanel.com/assets/social/clashpanel-home.png">
+
     <script type="application/ld+json">
         {
             "@context": "https://schema.org",
@@ -42,6 +46,7 @@
             ]
         }
     </script>
+
     <link rel="icon" type="image/png" href="/assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="/assets/css/workspace-loading.css">
     <script src="/assets/js/shell/workspace-bootstrap.js"></script>
@@ -49,10 +54,13 @@
     <script src="/assets/js/Data/runtime-config.js"></script>
     <script type="module" src="/assets/js/pages/public-site.js"></script>
     <link rel="stylesheet" href="/assets/css/light-theme.css">
+    <link rel="stylesheet" href="/assets/css/workspace-polish.css">
     <link rel="stylesheet" href="/assets/css/public-marketing.css">
+    <link rel="stylesheet" href="/assets/css/public-home-v2.css">
+
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7361256415342967" crossorigin="anonymous"></script>
 </head>
-<body class="public-site public-marketing-home" data-redirect-authenticated="true">
+<body class="public-site public-home-v2" data-redirect-authenticated="true">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
 
 <header class="public-header">
@@ -61,14 +69,10 @@
         <span>ClashPanel</span>
     </a>
     <nav class="public-nav" id="public-nav" aria-label="Public navigation" data-i18n-aria-label="public.navigation">
-        <a href="/" aria-current="page">Home</a>
         <a href="/cwl-planner">CWL Planner</a>
-        <a href="/cwl-tracker">Operation Board</a>
+        <a href="/cwl-tracker">CWL Tracker</a>
         <a href="/clan-management">Clan Families</a>
-        <a href="/about" data-i18n="public.about">About</a>
-        <a href="/subpages/contact" data-i18n="public.contact">Contact</a>
-        <a class="public-nav-mobile-account" href="/subpages/login.html" data-i18n="auth.login">Log in</a>
-        <a class="public-nav-mobile-account" href="/subpages/register.html" data-i18n="public.startFree">Start for free</a>
+        <a href="/about">About</a>
     </nav>
     <div class="public-actions">
         <button type="button" data-language-control data-i18n="header.language">Language</button>
@@ -82,263 +86,167 @@
 </header>
 
 <main id="main-content">
-    <section class="marketing-hero">
-        <div class="marketing-container">
-            <div class="marketing-hero-copy">
-                <p class="marketing-label" data-i18n="home.eyebrow">CWL planning for organised clans</p>
-                <h1 data-i18n="home.title">Plan CWL without the spreadsheet chaos.</h1>
-                <p class="marketing-hero-lead" data-i18n="home.desc">Bring player availability, multi-clan rosters, seven-day lineups and live CWL decisions into one clear workflow.</p>
-                <div class="marketing-hero-actions">
-                    <a class="button button-primary button-large" href="/subpages/register.html" data-i18n="public.createAccount">Create a free account</a>
-                    <a class="button button-secondary button-large" href="#product-preview" data-i18n="public.previewProduct">See the product</a>
-                </div>
-                <ul class="marketing-proof" aria-label="Product highlights" data-i18n-aria-label="public.capabilitiesLabel">
-                    <li data-i18n="public.freeNote">Free to use · no payment details required</li>
-                    <li data-i18n="public.signalMultiClan">Multi-clan planning</li>
-                    <li data-i18n="public.signalSevenDay">7-day lineups</li>
-                </ul>
+    <section class="cp-home-hero" id="product" data-home-spotlight>
+        <div class="cp-home-hero-glow" aria-hidden="true"></div>
+        <div class="cp-home-copy" data-reveal>
+            <div class="cp-home-eyebrow"><span></span><p data-i18n="home.eyebrow">CWL command center</p></div>
+            <h1 data-i18n="home.title">Plan stronger CWL lineups. Run the week from one place.</h1>
+            <p class="cp-home-lead" data-i18n="home.desc">ClashPanel connects availability, player performance, multi-clan planning and live CWL decisions. Auto-build a plan, optimize it, then follow every round without returning to spreadsheets.</p>
+            <div class="cp-home-actions">
+                <a class="button button-primary button-large" href="/subpages/register.html" data-i18n="public.createAccount">Create a free account</a>
+                <a class="cp-text-link" href="/cwl-planner">Explore the planner <span aria-hidden="true">↗</span></a>
             </div>
+            <div class="cp-home-proof" aria-label="Product facts">
+                <span><b>Free</b><small>No payment details</small></span>
+                <span><b>7 days</b><small>Full CWL lineups</small></span>
+                <span><b>Multi-clan</b><small>One shared plan</small></span>
+            </div>
+        </div>
 
-            <div class="marketing-hero-preview" id="product-preview">
-                <div class="marketing-product-frame" aria-label="ClashPanel CWL Planner product preview" data-i18n-aria-label="public.previewLabel">
-                    <div class="marketing-frame-bar">
-                        <div class="marketing-frame-brand">
-                            <img src="/assets/css/pictures/clashtools-logo.png" alt="">
-                            <span><strong>ClashPanel</strong><small>CWL workspace</small></span>
-                        </div>
-                        <span class="marketing-frame-status" data-i18n="public.saved">Saved</span>
-                    </div>
-                    <div class="marketing-planner-preview">
-                        <aside class="marketing-preview-rail" aria-hidden="true">
-                            <span class="is-active">CWL</span>
-                            <span>OP</span>
-                            <span>CF</span>
+        <div class="cp-demo-wrap" data-reveal>
+            <div class="cp-demo-orbit cp-demo-orbit-one" aria-hidden="true"></div>
+            <div class="cp-demo-orbit cp-demo-orbit-two" aria-hidden="true"></div>
+            <div class="cp-product-demo" data-home-demo>
+                <div class="cp-demo-topbar">
+                    <div class="cp-demo-window-title"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span><strong>ClashPanel</strong><small>CWL workspace</small></span></div>
+                    <div class="cp-demo-status"><i aria-hidden="true"></i><span data-i18n="public.saved">Saved</span></div>
+                </div>
+                <div class="cp-demo-tabs" role="tablist" aria-label="ClashPanel product preview">
+                    <button class="is-active" type="button" role="tab" aria-selected="true" data-demo-tab="planner">Plan</button>
+                    <button type="button" role="tab" aria-selected="false" data-demo-tab="live">Run live</button>
+                    <button type="button" role="tab" aria-selected="false" data-demo-tab="family">Organise</button>
+                </div>
+
+                <div class="cp-demo-panel is-active" data-demo-panel="planner" role="tabpanel">
+                    <div class="cp-demo-heading"><div><small>CWL Planner</small><strong data-i18n="public.samplePlan">July main plan</strong></div><span>2 clans · 31 players</span></div>
+                    <div class="cp-demo-planner">
+                        <aside>
+                            <div class="cp-demo-subhead"><span><small>Free roster</small><strong>4 players</strong></span><b>+</b></div>
+                            <div class="cp-demo-player"><img src="/assets/css/pictures/townhalls/Town_Hall18.png" alt=""><span><strong>Nova</strong><small>91 performance · 7/7</small></span><em>Core</em></div>
+                            <div class="cp-demo-player"><img src="/assets/css/pictures/townhalls/Town_Hall17.png" alt=""><span><strong>Orion</strong><small>87 performance · 6/7</small></span><em>Core</em></div>
+                            <div class="cp-demo-player is-muted"><img src="/assets/css/pictures/townhalls/Town_Hall16.png" alt=""><span><strong>Raven</strong><small>Day 4–5 unavailable</small></span><em>Rotation</em></div>
                         </aside>
-                        <div class="marketing-preview-workspace">
-                            <div class="marketing-preview-heading">
-                                <div class="marketing-frame-title">
-                                    <span><small data-i18n="planner.kicker">CWL Planner</small><strong data-i18n="public.samplePlan">July main plan</strong></span>
-                                </div>
-                                <span>2 clans · 31 players</span>
-                            </div>
-                            <div class="marketing-preview-toolbar">
-                                <span data-i18n="cwl.sheetImport">Import spreadsheet</span>
-                                <span class="is-primary" data-i18n="autoPlan.open">Auto Plan</span>
-                                <span data-i18n="optimizePlan.open">Optimize Plan</span>
-                            </div>
-                            <div class="marketing-preview-columns">
-                                <section class="marketing-roster">
-                                    <div class="marketing-preview-panel-heading">
-                                        <span><small data-i18n="planner.source">Plan source</small><strong data-i18n="cwl.playersSub">Free roster</strong></span>
-                                        <b>3</b>
-                                    </div>
-                                    <div class="marketing-preview-row">
-                                        <img src="/assets/css/pictures/townhalls/Town_Hall18.png" alt="">
-                                        <span><strong>Nova</strong><small>Performance 91 · 7/7 days</small></span>
-                                        <em data-i18n="public.available">Available</em>
-                                    </div>
-                                    <div class="marketing-preview-row">
-                                        <img src="/assets/css/pictures/townhalls/Town_Hall17.png" alt="">
-                                        <span><strong>Orion</strong><small>Performance 87 · 6/7 days</small></span>
-                                        <em data-i18n="public.available">Available</em>
-                                    </div>
-                                    <div class="marketing-preview-row">
-                                        <img src="/assets/css/pictures/townhalls/Town_Hall16.png" alt="">
-                                        <span><strong>Raven</strong><small>Unavailable on day 5</small></span>
-                                        <em data-i18n="public.rotation">Rotation</em>
-                                    </div>
-                                </section>
-                                <section class="marketing-preview-clans">
-                                    <article class="marketing-clan-card">
-                                        <div>
-                                            <img src="/assets/css/pictures/default-clan-banner.png" alt="">
-                                            <span><strong>Belgian Warriors</strong><small>Master III · 15v15</small></span>
-                                            <b>15/15</b>
-                                        </div>
-                                        <div class="marketing-lineup-meter"><span></span></div>
-                                        <p><span data-i18n="public.core">Core</span> 12 · <span data-i18n="public.rotation">Rotation</span> 3 · Reserve 2</p>
-                                    </article>
-                                    <article class="marketing-clan-card">
-                                        <div>
-                                            <img src="/assets/css/pictures/default-clan-banner.png" alt="">
-                                            <span><strong>Belgian Academy</strong><small>Crystal I · 30v30</small></span>
-                                            <b>30/30</b>
-                                        </div>
-                                        <div class="marketing-lineup-meter"><span></span></div>
-                                        <p>Stable seven-day lineup · 2 reserves</p>
-                                    </article>
-                                    <div class="marketing-plan-ready">
-                                        <strong data-i18n="public.previewReady">Auto Plan ready</strong>
-                                        <small data-i18n="public.previewReadyDesc">Both active clans are filled with availability and performance taken into account.</small>
-                                    </div>
-                                </section>
-                            </div>
+                        <div class="cp-demo-clans">
+                            <div class="cp-demo-toolbar"><span>Import</span><span>Auto Plan</span><span>Optimize</span></div>
+                            <article><header><span><b>BW</b><i><strong>Belgian Warriors</strong><small>Master III · 15v15</small></i></span><em>15/15</em></header><div class="cp-demo-meter"><i style="--fill:92%"></i></div><footer><span>12 core</span><span>3 rotation</span><span>2 reserve</span></footer></article>
+                            <article><header><span><b>BA</b><i><strong>Belgian Academy</strong><small>Crystal I · 30v30</small></i></span><em>30/30</em></header><div class="cp-demo-meter"><i style="--fill:84%"></i></div><footer><span>Stable lineup</span><span>2 reserve</span></footer></article>
                         </div>
                     </div>
+                    <div class="cp-demo-insight"><span>✓</span><div><strong data-i18n="public.previewReady">Auto Plan ready</strong><small data-i18n="public.previewReadyDesc">Both active clans are filled with availability and performance taken into account.</small></div></div>
                 </div>
+
+                <div class="cp-demo-panel" data-demo-panel="live" role="tabpanel" hidden>
+                    <div class="cp-demo-heading"><div><small>Operation Board</small><strong>Round 5 · Live</strong></div><span class="cp-live-dot">War in progress</span></div>
+                    <div class="cp-live-score"><section><small>Belgian Warriors</small><strong>29<span>★</span></strong><em>94.8%</em></section><b>VS</b><section><small>Night Raiders</small><strong>27<span>★</span></strong><em>92.1%</em></section></div>
+                    <div class="cp-live-metrics"><div><small>Remaining attacks</small><strong>3</strong></div><div><small>Win condition</small><strong>+1★</strong></div><div><small data-i18n="public.winProbability">Win probability</small><strong>78%</strong></div></div>
+                    <div class="cp-live-callout"><span>TH18</span><div><strong>Nova → #4</strong><small data-i18n="public.priorityExample">Expected 2.7★ · favorable matchup · high confidence</small></div><em>High impact</em></div>
+                    <div class="cp-live-standings"><span><b>1</b> Iron Reign <em>190★</em></span><span class="is-you"><b>2</b> Belgian Warriors <em>184★</em></span><span><b>3</b> Night Raiders <em>181★</em></span></div>
+                </div>
+
+                <div class="cp-demo-panel" data-demo-panel="family" role="tabpanel" hidden>
+                    <div class="cp-demo-heading"><div><small data-i18n="public.groupsPolls">Clan Families and polls</small><strong>August CWL availability</strong></div><span>24 / 28 answered</span></div>
+                    <div class="cp-family-summary"><div><small>Linked clans</small><strong>3</strong></div><div><small>Members</small><strong>28</strong></div><div><small>Ready</small><strong>24</strong></div></div>
+                    <div class="cp-family-row"><span>N</span><div><strong>Nova</strong><small>#9UY8LCQ2 · TH18</small></div><div class="cp-day-dots"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i></div><em data-i18n="public.available">Available</em></div>
+                    <div class="cp-family-row"><span>R</span><div><strong>Raven</strong><small>#J28QP0RY · TH16</small></div><div class="cp-day-dots"><i>1</i><i>2</i><i>3</i><i class="is-out">4</i><i class="is-out">5</i><i>6</i><i>7</i></div><em data-i18n="public.rotation">Rotation</em></div>
+                    <div class="cp-family-row"><span>O</span><div><strong>Orion</strong><small>#20PL8V8Q · TH17</small></div><div class="cp-day-dots"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i></div><em data-i18n="public.available">Available</em></div>
+                    <div class="cp-family-push"><span data-i18n="public.familyToPlanner">Poll answers can be loaded into the CWL Planner</span><b aria-hidden="true">→</b></div>
+                </div>
+                <div class="cp-demo-caption"><span data-i18n="public.sampleData">Sample data</span><i></i><span>Interactive product preview</span></div>
             </div>
         </div>
     </section>
 
-    <section class="marketing-section" data-section="problem-solution">
-        <div class="marketing-container marketing-problem-grid">
-            <div class="marketing-problem-copy">
-                <p class="marketing-label" data-i18n="public.problemLabel">From scattered data to one plan</p>
-                <h2 data-i18n="public.problemTitle">CWL planning breaks when the information lives everywhere.</h2>
-                <p data-i18n="public.problemIntro">ClashPanel keeps the roster, availability and live league context connected from preparation to the final round.</p>
-            </div>
-            <div class="marketing-problem-list">
-                <article>
-                    <span data-i18n="public.problemBefore">Before</span>
-                    <div><strong data-i18n="public.problemSheetsTitle">Spreadsheets and chat messages</strong><p data-i18n="public.problemSheetsText">Availability changes are copied by hand and clan rosters drift out of sync.</p></div>
-                </article>
-                <article>
-                    <span data-i18n="public.problemDuring">During</span>
-                    <div><strong data-i18n="public.problemLiveTitle">No shared live picture</strong><p data-i18n="public.problemLiveText">Scores, attacks and participation need to be checked in separate places.</p></div>
-                </article>
-                <article>
-                    <span>ClashPanel</span>
-                    <div><strong data-i18n="public.problemSolutionTitle">One connected CWL workflow</strong><p data-i18n="public.problemSolutionText">Plan the roster, follow each round and keep the same trusted data throughout the season.</p></div>
-                </article>
-            </div>
+    <section class="cp-signal-rail" aria-label="ClashPanel capabilities" data-reveal>
+        <span data-i18n="public.signalMultiClan">Multi-clan planning</span>
+        <span data-i18n="public.signalSevenDay">7-day lineups</span>
+        <span data-i18n="public.signalPerformance">CWL season history</span>
+        <span data-i18n="public.signalStandings">Live standings &amp; projections</span>
+        <span data-i18n="public.signalBonus">Bonus medal advice</span>
+        <span data-i18n="public.signalFamily">Clan Family availability</span>
+    </section>
+
+    <section class="cp-workflow" id="workflow">
+        <div class="cp-section-intro" data-reveal>
+            <p class="eyebrow" data-i18n="public.oneWorkflow">One continuous workflow</p>
+            <h2 data-i18n="public.workflowTitle">Prepare the roster, make the plan, then run CWL from the same data.</h2>
+            <p data-i18n="public.workflowIntro">The Planner and Operation Board are built as one flow, while Clan Families keep availability and shared clan data connected before CWL starts.</p>
+        </div>
+        <div class="cp-workflow-track" data-reveal>
+            <article><span>01</span><div><small data-i18n="public.workflowPrepare">Prepare</small><h3 data-i18n="home.step1Title">Collect players and availability</h3><p data-i18n="home.step1Desc">Load players by tag, account, friend, spreadsheet or Clan Family. Pull CWL poll availability into the same free roster.</p></div></article>
+            <article><span>02</span><div><small data-i18n="public.workflowPlan">Plan</small><h3 data-i18n="home.step2Title">Build or optimize the multi-clan plan</h3><p data-i18n="home.step2Desc">Use Auto Plan for a complete distribution, Optimize Plan for targeted improvements, or keep full manual control over roles and daily lineups.</p></div></article>
+            <article><span>03</span><div><small data-i18n="public.workflowRun">Run</small><h3 data-i18n="home.step3Title">Follow every round live</h3><p data-i18n="home.step3Desc">Track the current war, league position, player participation, projected outcomes and bonus recommendations from Operation Board.</p></div></article>
         </div>
     </section>
 
-    <section class="marketing-section" id="features">
-        <div class="marketing-container">
-            <div class="marketing-section-heading">
-                <p class="marketing-label" data-i18n="public.coreFeatures">Core features</p>
-                <h2 data-i18n="public.planRunOrganiseTitle">Plan. Run. Organise.</h2>
-                <p data-i18n="public.planRunOrganiseIntro">Three focused tools cover the work before, during and around CWL.</p>
-            </div>
-            <div class="marketing-workflows">
-                <article class="marketing-workflow-row" data-workflow="plan">
-                    <div class="marketing-workflow-copy">
-                        <p class="marketing-label">Plan</p>
-                        <h3 data-i18n="public.plannerTitle">Go from a player pool to a usable 7-day plan.</h3>
-                        <p data-i18n="public.plannerLongDesc">Plan multiple clans together, use player availability and preview every lineup before applying changes.</p>
-                        <a class="marketing-text-link" href="/cwl-planner">Explore CWL Planner</a>
-                    </div>
-                    <div class="marketing-mini-ui" aria-label="CWL Planner optimization preview" data-i18n-aria-label="public.plannerVisualLabel">
-                        <div class="marketing-mini-tabs"><span class="is-active" data-i18n="public.planReview">Plan review</span><span data-i18n="public.twoImprovements">2 improvements found</span></div>
-                        <div class="marketing-mini-body">
-                            <div class="marketing-review-row"><b>18</b><span><strong>Move Nova to Belgian Warriors</strong><small data-i18n="public.exampleReasonFill">Completes the strongest active lineup while the other clan remains filled.</small></span><em data-i18n="optimizePlan.accept">Accept</em></div>
-                            <div class="marketing-review-row"><b>16</b><span><strong>Use Raven in rotation</strong><small data-i18n="public.exampleReasonStability">Reduces unnecessary daily lineup changes around limited availability.</small></span><em data-i18n="optimizePlan.accept">Accept</em></div>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="marketing-workflow-row" data-workflow="run">
-                    <div class="marketing-workflow-copy">
-                        <p class="marketing-label">Run</p>
-                        <h3 data-i18n="public.operationTitle">Know what is happening now, and what still matters.</h3>
-                        <p data-i18n="public.operationLongDesc">Follow the current matchup, league standings, participation, projections and bonus advice from one board.</p>
-                        <a class="marketing-text-link" href="/cwl-tracker">Explore Operation Board</a>
-                    </div>
-                    <div class="marketing-mini-ui" aria-label="Operation Board live preview" data-i18n-aria-label="public.operationVisualLabel">
-                        <div class="marketing-mini-tabs"><span class="is-active" data-i18n="op.tabLive">Live</span><span data-i18n="op.tabLeague">League</span><span data-i18n="op.tabRoster">Roster</span><span data-i18n="op.tabBonuses">Bonuses</span></div>
-                        <div class="marketing-mini-body">
-                            <div class="marketing-scoreboard"><div><small>Belgian Warriors</small><strong>29★</strong></div><b>VS</b><div><small>Night Raiders</small><strong>27★</strong></div></div>
-                            <div class="marketing-standing-row"><b>1</b><span><strong>Belgian Warriors</strong><small>3 attacks remaining · 94.8%</small></span><em>78% win</em></div>
-                            <div class="marketing-standing-row"><b>2</b><span><strong>Night Raiders</strong><small>1 attack remaining · 92.1%</small></span><em>Live</em></div>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="marketing-workflow-row" data-workflow="organise">
-                    <div class="marketing-workflow-copy">
-                        <p class="marketing-label">Organise</p>
-                        <h3 data-i18n="public.familyTitle">Keep the people behind multiple clans connected.</h3>
-                        <p data-i18n="public.familyLongDesc">Add members, link clans and start polls to collect CWL availability per account and day.</p>
-                        <a class="marketing-text-link" href="/clan-management">Explore Clan Families</a>
-                    </div>
-                    <div class="marketing-mini-ui" aria-label="Clan Family availability preview" data-i18n-aria-label="public.familyVisualLabel">
-                        <div class="marketing-mini-tabs"><span>Members</span><span class="is-active">Availability</span><span>Polls</span><span>Linked clans</span></div>
-                        <div class="marketing-mini-body">
-                            <div class="marketing-member-row"><b>NV</b><span><strong>Nova</strong><small>TH18 · all seven days</small></span><em data-i18n="public.available">Available</em></div>
-                            <div class="marketing-member-row"><b>OR</b><span><strong>Orion</strong><small>TH17 · six days</small></span><em data-i18n="public.available">Available</em></div>
-                            <div class="marketing-member-row"><b>RV</b><span><strong>Raven</strong><small>TH16 · day 5 unavailable</small></span><em data-i18n="public.rotation">Rotation</em></div>
-                        </div>
-                    </div>
-                </article>
-            </div>
+    <section class="cp-features" id="features">
+        <div class="cp-section-intro cp-section-intro-wide" data-reveal>
+            <p class="eyebrow" data-i18n="public.coreFeatures">Core features</p>
+            <h2>Everything around the CWL week, without turning the tool into the work.</h2>
+            <p>Use the parts you need. Planner, live tracking and Clan Families stay connected, but none of them force you into a fixed workflow.</p>
+        </div>
+        <div class="cp-bento">
+            <a class="cp-feature-card cp-feature-card-large" href="/cwl-planner" data-reveal>
+                <div class="cp-card-top"><span>01</span><small>CWL Planner</small></div>
+                <h3 data-i18n="public.plannerTitle">Go from a player pool to a usable 7-day plan.</h3>
+                <p data-i18n="public.plannerLongDesc">Plan multiple clans together instead of solving every roster separately. ClashPanel can build a starting plan, score player context and propose smaller improvements without taking manual control away.</p>
+                <div class="cp-card-chips"><span data-i18n="public.featureAutoPlan">Auto Plan</span><span data-i18n="public.featureOptimize">Optimize Plan</span><span data-i18n="public.featureImport">Spreadsheet import</span></div>
+                <div class="cp-mini-plan" aria-hidden="true"><span style="--w:92%"></span><span style="--w:78%"></span><span style="--w:86%"></span><span style="--w:62%"></span></div>
+                <b>Open planner <i>↗</i></b>
+            </a>
+            <a class="cp-feature-card cp-feature-card-large" href="/cwl-tracker" data-reveal>
+                <div class="cp-card-top"><span>02</span><small>Operation Board</small></div>
+                <h3 data-i18n="public.operationTitle">Know what is happening now, and what still matters.</h3>
+                <p data-i18n="public.operationLongDesc">The live board connects current wars, your plan and previous CWL seasons. Use it for the immediate matchup, the full league table, participation checks and transparent bonus advice.</p>
+                <div class="cp-card-chips"><span data-i18n="public.featureLive">Live war analysis</span><span data-i18n="public.featureLeague">League overview</span><span data-i18n="public.featureBonus">Bonus calculator</span></div>
+                <div class="cp-mini-live" aria-hidden="true"><strong>29★</strong><span><i style="--w:78%"></i></span><em>78%</em></div>
+                <b>Open tracker <i>↗</i></b>
+            </a>
+            <a class="cp-feature-card" href="/clan-management" data-reveal>
+                <div class="cp-card-top"><span>03</span><small>Clan Families</small></div>
+                <h3 data-i18n="public.familyTitle">Keep the people behind multiple clans connected.</h3>
+                <p data-i18n="public.groupsDesc">Manage members, roles, linked clans and availability per account.</p>
+                <div class="cp-family-stack" aria-hidden="true"><i>BW</i><i>BA</i><i>+</i></div>
+                <b>Explore Clan Families <i>↗</i></b>
+            </a>
+            <a class="cp-feature-card" href="/cwl-tracker#history" data-reveal>
+                <div class="cp-card-top"><span>04</span><small>CWL History</small></div>
+                <h3>Compare more than the current week.</h3>
+                <p>Review previous seasons, league movement, offense versus defense and participation trends when historical data is available.</p>
+                <div class="cp-trend" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <b>View CWL history <i>↗</i></b>
+            </a>
         </div>
     </section>
 
-    <section class="marketing-section" data-section="how-it-works">
-        <div class="marketing-container">
-            <div class="marketing-section-heading">
-                <p class="marketing-label" data-i18n="home.how">How it works</p>
-                <h2 data-i18n="public.threeSteps">Three steps, without duplicate work.</h2>
-            </div>
-            <ol class="marketing-steps">
-                <li><span>01</span><h3 data-i18n="home.step1Title">Collect players and availability</h3><p data-i18n="home.step1Desc">Load players by tag, account, spreadsheet or Clan Family and bring poll answers into the same roster.</p></li>
-                <li><span>02</span><h3 data-i18n="home.step2Title">Build or optimize the plan</h3><p data-i18n="home.step2Desc">Keep manual control or use Auto Plan and Optimize Plan to create a stronger starting point.</p></li>
-                <li><span>03</span><h3 data-i18n="home.step3Title">Follow every round live</h3><p data-i18n="home.step3Desc">Track the current war, league position, participation and bonus recommendations.</p></li>
-            </ol>
+    <section class="cp-control" data-reveal>
+        <div><p class="eyebrow">Built as decision support</p><h2>You stay in control of the clan.</h2><p>Automation should remove repetitive work, not make decisions invisible. Auto Plan previews changes, Optimize Plan proposes moves, and the live board stays advisory.</p></div>
+        <div class="cp-control-list">
+            <span><i>✓</i><b>Preview before apply</b><small>Automated planning does not silently replace your roster.</small></span>
+            <span><i>✓</i><b>Manual overrides stay available</b><small>Roles, daily lineups and clan assignments can still be edited directly.</small></span>
+            <span><i>✓</i><b>Live and historical data stay separate</b><small>Current war decisions are not disguised as historical certainty.</small></span>
         </div>
     </section>
 
-    <section class="marketing-section" data-section="other-tools">
-        <div class="marketing-container">
-            <div class="marketing-section-heading">
-                <p class="marketing-label" data-i18n="public.otherToolsLabel">More of the workspace</p>
-                <h2 data-i18n="public.otherToolsTitle">Useful tools around the main CWL flow.</h2>
-            </div>
-            <div class="marketing-tool-list">
-                <a href="/app/cwl-planner-drafts"><strong data-i18n="nav.savedPlans">Saved plans</strong><span data-i18n="public.savedPlansDesc">Find, sort and reopen your saved CWL plans.</span><b>Open →</b></a>
-                <a href="/cwl-tracker"><strong data-i18n="public.signalPerformance">CWL season history</strong><span data-i18n="public.historyToolDesc">Review earlier seasons, player results and league outcomes.</span><b>Explore →</b></a>
-                <a href="/clan-management"><strong data-i18n="public.pollsShort">Availability polls</strong><span data-i18n="public.pollToolDesc">Collect answers per member, account and CWL day.</span><b>Explore →</b></a>
-                <a href="/bracket-generator"><strong>Bracket Generator</strong><span>Create seeded or shuffled knockout brackets when the public tool launches.</span><b>Coming soon</b></a>
-            </div>
-        </div>
-    </section>
-
-    <section class="marketing-section" data-section="final-cta">
-        <div class="marketing-container marketing-final-cta">
-            <div>
-                <p class="marketing-label" data-i18n="public.readyForCwl">Ready for your next CWL?</p>
-                <h2 data-i18n="public.ctaTitle">Start with the roster you already have.</h2>
-                <p data-i18n="public.ctaDesc">Create a plan manually, import a spreadsheet or connect a Clan Family.</p>
-            </div>
-            <div class="marketing-hero-actions">
-                <a class="button button-primary button-large" href="/subpages/register.html" data-i18n="public.startFree">Start for free</a>
-                <a class="button button-secondary button-large" href="/subpages/login.html" data-i18n="auth.login">Log in</a>
-            </div>
-        </div>
+    <section class="cp-final-cta" data-reveal>
+        <div><p class="eyebrow" data-i18n="public.readyForCwl">Ready for your next CWL?</p><h2 data-i18n="public.ctaTitle">Start with the roster you already have. ClashPanel handles the workflow around it.</h2><p data-i18n="public.ctaDesc">Create a plan manually, import a spreadsheet or connect a Clan Family. You do not need to rebuild your process before trying it.</p></div>
+        <div><a class="button button-primary button-large" href="/subpages/register.html" data-i18n="public.startFree">Start for free</a><a class="cp-text-link" href="/about">Why ClashPanel exists <span aria-hidden="true">→</span></a></div>
     </section>
 </main>
 
 <footer class="public-footer">
-    <div class="public-footer-grid">
-        <div class="public-footer-brand">
-            <a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a>
-            <p>Focused tools for planning, running and organising Clan War League.</p>
-        </div>
-        <nav class="public-footer-column" aria-label="Product links">
-            <strong>Product</strong>
-            <a href="/cwl-planner">CWL Planner</a>
-            <a href="/cwl-tracker">Operation Board</a>
-            <a href="/clan-management">Clan Families</a>
-        </nav>
-        <nav class="public-footer-column" aria-label="Company links">
-            <strong>ClashPanel</strong>
-            <a href="/about" data-i18n="public.about">About</a>
-            <a href="/subpages/contact" data-i18n="public.contact">Contact</a>
-            <a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer" data-i18n="public.fanPolicy">Supercell Fan Content Policy</a>
-        </nav>
-        <nav class="public-footer-column" aria-label="Legal links" data-i18n-aria-label="public.footerNav">
-            <strong>Legal</strong>
+    <div class="public-footer-main">
+        <a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a>
+        <nav aria-label="Footer navigation" data-i18n-aria-label="public.footerNav">
+            <a href="/about">About</a>
             <a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a>
             <a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a>
             <a href="/subpages/terms" data-i18n="public.terms">Terms of use</a>
+            <a href="/subpages/contact" data-i18n="public.contact">Contact</a>
             <button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button>
         </nav>
     </div>
-    <div class="public-footer-bottom">
-        <p data-i18n="home.footer">© 2026 ClashPanel · Not affiliated with Supercell</p>
-        <p data-i18n="public.disclaimer">ClashPanel is unofficial and is not endorsed by Supercell.</p>
-    </div>
+    <p class="public-disclaimer" data-i18n="public.disclaimer">ClashPanel is unofficial and is not endorsed by Supercell. For more information, see Supercell's Fan Content Policy.</p>
+    <p class="public-footer-meta" data-i18n="home.footer">© 2026 ClashPanel · Not affiliated with Supercell</p>
 </footer>
 </body>
 </html>

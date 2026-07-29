@@ -7,9 +7,17 @@ const pages = [
         file: 'index.html',
         canonical: 'https://clashpanel.com/',
         title: 'Clash of Clans Clan Management, CWL Planner & Tracker | ClashPanel',
-        h1: 'Plan CWL without the spreadsheet chaos.',
+        h1: 'Plan stronger CWL lineups. Run the week from one place.',
         indexable: true,
-        links: ['/cwl-planner', '/cwl-tracker', '/clan-management', '/bracket-generator']
+        links: ['/cwl-planner', '/cwl-tracker', '/clan-management', '/about']
+    },
+    {
+        file: 'about.html',
+        canonical: 'https://clashpanel.com/about',
+        title: 'About ClashPanel | Clash of Clans Clan Management Toolkit',
+        h1: 'Built for the people doing the organising.',
+        indexable: true,
+        links: ['/cwl-planner']
     },
     {
         file: 'cwl-planner.html',
@@ -34,14 +42,6 @@ const pages = [
         h1: 'Clash of Clans Clan Management',
         indexable: true,
         links: ['/cwl-planner']
-    },
-    {
-        file: 'about.html',
-        canonical: 'https://clashpanel.com/about',
-        title: 'About ClashPanel | CWL Planning for Clan Leaders',
-        h1: 'About ClashPanel',
-        indexable: true,
-        links: ['/cwl-planner', '/subpages/contact']
     },
     {
         file: 'bracket-generator.html',

@@ -46,87 +46,74 @@
     <script src="/assets/js/shell/workspace-bootstrap.js"></script>
     <link rel="stylesheet" href="/assets/css/workspace-system.css">
     <link rel="stylesheet" href="/assets/css/light-theme.css">
+    <link rel="stylesheet" href="/assets/css/workspace-polish.css">
+    <link rel="stylesheet" href="/assets/css/public-home-v2.css">
     <link rel="stylesheet" href="/assets/css/public-marketing.css">
+    <link rel="stylesheet" href="/assets/css/public-tool-page.css">
     <script src="/assets/js/Data/runtime-config.js"></script>
     <script type="module" src="/assets/js/pages/public-site.js"></script>
 </head>
-<body class="public-site public-feature-page">
-<a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
+<body class="public-site public-tool-page">
+<a class="skip-link" href="#main-content">Skip to content</a>
 <header class="public-header">
     <a class="public-brand" href="/" aria-label="ClashPanel home"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a>
     <nav class="public-nav" id="public-nav" aria-label="Public navigation" data-i18n-aria-label="public.navigation">
-        <a href="/">Home</a><a href="/cwl-planner">CWL Planner</a><a href="/cwl-tracker">Operation Board</a><a href="/clan-management" aria-current="page">Clan Families</a><a href="/about" data-i18n="public.about">About</a><a href="/subpages/contact" data-i18n="public.contact">Contact</a>
-        <a class="public-nav-mobile-account" href="/subpages/login.html" data-i18n="auth.login">Log in</a><a class="public-nav-mobile-account" href="/subpages/register.html" data-i18n="public.startFree">Start for free</a>
+        <a href="/cwl-planner">CWL Planner</a>
+        <a href="/cwl-tracker">CWL Tracker</a>
+        <a href="/clan-management" aria-current="page">Clan Families</a>
+        <a href="/about">About</a>
     </nav>
-    <div class="public-actions"><button type="button" data-language-control data-i18n="header.language">Language</button><button class="theme-button" type="button" data-theme-toggle aria-label="Switch theme"><span aria-hidden="true">◐</span></button><a class="link-button" href="/subpages/login.html" data-i18n="auth.login">Log in</a><a class="button button-primary" href="/subpages/register.html" data-i18n="public.startFree">Start for free</a></div>
-    <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" aria-label="Open menu"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
+    <div class="public-actions">
+        <button type="button" data-language-control data-i18n="header.language">Language</button>
+        <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme"><span aria-hidden="true">◐</span></button>
+        <a class="link-button" href="/subpages/login.html" data-i18n="auth.login">Log in</a>
+        <a class="button button-primary" href="/subpages/register.html" data-i18n="public.startFree">Start for free</a>
+    </div>
+    <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" data-i18n-aria-label="public.openMenu" aria-label="Open menu"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
 </header>
-
-<main class="marketing-feature-main" id="main-content">
-    <nav class="marketing-breadcrumbs" aria-label="Breadcrumb"><a href="/">ClashPanel</a><span aria-hidden="true">/</span><span>Clan Families</span></nav>
-    <section class="marketing-feature-hero">
-        <div class="marketing-feature-copy">
-            <p class="marketing-label">Clan Families</p>
+<main class="public-tool-main" id="main-content">
+    <nav class="public-tool-breadcrumbs" aria-label="Breadcrumb"><a href="/">ClashPanel</a><span aria-hidden="true">/</span><span>Clan Management</span></nav>
+    <section class="public-tool-hero" data-reveal>
+        <div>
+            <p class="public-tool-kicker">Clan Family</p>
             <h1>Clash of Clans Clan Management</h1>
-            <p>Add members, connect player accounts, link the clans in your network and collect CWL availability without chasing answers through chat.</p>
-            <div class="marketing-hero-actions"><a class="button button-primary button-large" href="/subpages/register.html">Create a Clan Family</a><a class="button button-secondary button-large" href="/subpages/login.html">Open your Clan Family</a></div>
-            <ul class="marketing-proof"><li>Members and roles</li><li>Linked clans</li><li>Availability polls</li></ul>
+            <p class="public-tool-lead">Manage members, linked player accounts and multiple clans together in one ClashPanel Clan Family group.</p>
+            <div class="public-tool-actions"><a class="button button-primary button-large" href="/app/clan-management">Open Clan Family</a><a class="button button-secondary button-large" href="/cwl-planner">Use clans in CWL Planner</a></div>
+            <p class="public-tool-note">One shared workspace for leaders, co-leaders and members</p>
         </div>
-        <div class="marketing-feature-preview">
-            <div class="marketing-mini-ui" role="img" aria-label="Clan Family workspace showing linked accounts and CWL availability">
-                <div class="marketing-frame-bar"><div class="marketing-frame-brand"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span><strong>NL Warriors</strong><small>Clan Family · 3 linked clans</small></span></div><span class="marketing-frame-status">Poll open</span></div>
-                <div class="marketing-mini-tabs"><span>Members</span><span class="is-active">Availability</span><span>Polls</span><span>Linked clans</span></div>
-                <div class="marketing-mini-body">
-                    <div class="marketing-member-row"><b>NV</b><span><strong>Nova</strong><small>TH18 · 7/7 CWL days</small></span><em>Available</em></div>
-                    <div class="marketing-member-row"><b>OR</b><span><strong>Orion</strong><small>TH17 · 6/7 CWL days</small></span><em>Available</em></div>
-                    <div class="marketing-member-row"><b>RV</b><span><strong>Raven</strong><small>TH16 · day 5 unavailable</small></span><em>Rotation</em></div>
-                    <div class="marketing-member-row"><b>SK</b><span><strong>Skye</strong><small>TH15 · response pending</small></span><em>Remind</em></div>
+        <div class="public-tool-preview" role="img" aria-label="ClashPanel clan management workspace with linked clans and member availability">
+            <header><strong>Belgian Clan Family</strong><span>28 members</span></header>
+            <div class="public-tool-preview-body">
+                <div class="public-tool-preview-metrics"><div><small>Linked clans</small><strong>3</strong></div><div><small>Accounts</small><strong>41</strong></div><div><small>Available</small><strong>24</strong></div></div>
+                <div class="public-tool-preview-list">
+                    <div class="public-tool-preview-row"><b>EV</b><span><strong>Emile</strong><small>2 linked accounts</small></span><em>Leader</em></div>
+                    <div class="public-tool-preview-row"><b>N</b><span><strong>Nova</strong><small>TH18 · 7/7 CWL days</small></span><em>Ready</em></div>
+                    <div class="public-tool-preview-row"><b>R</b><span><strong>Raven</strong><small>TH16 · partial availability</small></span><em>Rotation</em></div>
                 </div>
             </div>
         </div>
     </section>
-
-    <section class="marketing-capabilities">
-        <div class="marketing-capabilities-heading"><p class="marketing-label">What it connects</p><h2>The people, accounts and clans behind your CWL.</h2></div>
-        <div class="marketing-capability-list">
-            <article><h3>Members</h3><p>Invite the people who help organise your network and give leaders the controls they need.</p></article>
-            <article><h3>Player accounts</h3><p>Connect multiple Clash of Clans accounts to the correct member instead of tracking identities manually.</p></article>
-            <article><h3>Linked clans</h3><p>Keep the clans in your network reusable across the shared ClashPanel workspace.</p></article>
-            <article><h3>Availability polls</h3><p>Collect a separate response for each account and CWL day, close finished polls and remove old ones.</p></article>
-            <article><h3>Planner handoff</h3><p>Load linked accounts and poll results directly into the CWL Planner when roster work begins.</p></article>
-        </div>
-    </section>
-
-    <section class="marketing-feature-how">
-        <div class="marketing-section-heading"><p class="marketing-label">How it works</p><h2>Set up the network once, reuse it every CWL.</h2></div>
-        <ol class="marketing-steps">
-            <li><span>01</span><h3>Create or join</h3><p>Start a Clan Family or join one with its invitation code.</p></li>
-            <li><span>02</span><h3>Connect the network</h3><p>Add members, link player accounts and connect the clans they organise.</p></li>
-            <li><span>03</span><h3>Collect availability</h3><p>Run a CWL poll and load the answers into the Planner.</p></li>
-        </ol>
-    </section>
-
-    <aside class="marketing-crosslink">
-        <div><h2>Turn availability into a complete CWL roster.</h2><p>Load Clan Family accounts and poll answers directly into the Planner.</p></div>
-        <a class="button button-secondary" href="/cwl-planner">Explore CWL Planner</a>
-    </aside>
-
-    <section class="marketing-section">
-        <div class="marketing-final-cta">
-            <div><p class="marketing-label">One shared clan network</p><h2>Organise members before roster planning starts.</h2></div>
-            <div class="marketing-hero-actions"><a class="button button-primary button-large" href="/subpages/register.html" data-i18n="public.startFree">Start for free</a><a class="button button-secondary button-large" href="/subpages/login.html" data-i18n="auth.login">Log in</a></div>
-        </div>
-    </section>
+    <section class="public-tool-section" data-reveal><h2>Manage Multiple Clans</h2><div class="public-tool-section-copy"><p>Clan Family keeps related Clash of Clans clans in one reusable group. Leaders can see which clans belong together and use those linked clans in other ClashPanel workflows.</p></div></section>
+    <section class="public-tool-section" data-reveal><h2>Clan Members and Linked Accounts</h2><div class="public-tool-section-copy"><p>Members can link multiple player accounts while leaders manage roles and compare the group with live clan rosters.</p><ul class="public-tool-feature-list"><li>Multiple linked clans</li><li>Clan members</li><li>Linked player accounts</li><li>Roles and permissions</li></ul></div></section>
+    <section class="public-tool-section" data-reveal><h2>Player Availability</h2><div class="public-tool-section-copy"><p>Create focused availability polls and collect answers per linked account and CWL day. Poll results can feed directly into roster planning instead of being copied from chat.</p></div></section>
+    <section class="public-tool-section" data-reveal><h2>Clan Family Coordination</h2><div class="public-tool-section-copy"><ul class="public-tool-feature-list"><li>Member availability</li><li>Shared clan coordination</li><li>Clan-family organization</li><li>Account audit</li></ul></div></section>
+    <section class="public-tool-section" data-reveal><h2>How it works</h2><div class="public-tool-section-copy"><ol class="public-tool-steps"><li>Create a Clan Family or join one with its invitation code.</li><li>Add members, link player accounts and connect the clans in your network.</li><li>Coordinate availability and reuse the same clan data in CWL planning.</li></ol></div></section>
+    <aside class="public-tool-crosslink" data-reveal><div><h2>Turn availability into a CWL roster</h2><p>Load linked clans and poll answers directly into the CWL Planner.</p></div><a href="/cwl-planner">Open CWL Planner →</a></aside>
 </main>
-
 <footer class="public-footer">
-    <div class="public-footer-grid">
-        <div class="public-footer-brand"><a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a><p>Focused tools for planning, running and organising Clan War League.</p></div>
-        <nav class="public-footer-column" aria-label="Product links"><strong>Product</strong><a href="/cwl-planner">CWL Planner</a><a href="/cwl-tracker">Operation Board</a><a href="/clan-management">Clan Families</a></nav>
-        <nav class="public-footer-column" aria-label="Company links"><strong>ClashPanel</strong><a href="/about" data-i18n="public.about">About</a><a href="/subpages/contact" data-i18n="public.contact">Contact</a><a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer" data-i18n="public.fanPolicy">Supercell Fan Content Policy</a></nav>
-        <nav class="public-footer-column" aria-label="Legal links" data-i18n-aria-label="public.footerNav"><strong>Legal</strong><a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a><a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a><a href="/subpages/terms" data-i18n="public.terms">Terms of use</a><button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button></nav>
+    <div class="public-footer-main">
+        <a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a>
+        <nav aria-label="Footer navigation" data-i18n-aria-label="public.footerNav">
+            <a href="/about">About</a>
+            <a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a>
+            <a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a>
+            <a href="/subpages/terms" data-i18n="public.terms">Terms of use</a>
+            <a href="/subpages/contact" data-i18n="public.contact">Contact</a>
+            <button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button>
+        </nav>
     </div>
-    <div class="public-footer-bottom"><p data-i18n="home.footer">© 2026 ClashPanel · Not affiliated with Supercell</p><p data-i18n="public.disclaimer">ClashPanel is unofficial and is not endorsed by Supercell.</p></div>
+    <p class="public-disclaimer" data-i18n="public.disclaimer">ClashPanel is unofficial and is not endorsed by Supercell. For more information, see Supercell's Fan Content Policy.</p>
+    <p class="public-footer-meta" data-i18n="home.footer">© 2026 ClashPanel · Not affiliated with Supercell</p>
 </footer>
 </body>
 </html>
