@@ -1,5 +1,7 @@
 # ClashPanel release-readiness audit
 
+> Historical audit from 16 July 2026. For the current checkout and verification evidence, use [`docs/prelaunch-audit.md`](docs/prelaunch-audit.md).
+
 Audit date: 2026-07-16  
 Audited base: `origin/codex/profile-settings-theme` (`541dce5`)  
 Working branch: `fix/release-readiness-functional`

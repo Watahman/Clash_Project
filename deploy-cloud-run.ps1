@@ -32,7 +32,8 @@ gcloud run deploy $ServiceName `
     --cpu-boost `
     --env-vars-file ./cloudrun-env.yaml
 
-Write-Host "Deploy klaar. Voeg daarna de drie secrets toe in Cloud Run / Secret Manager:" -ForegroundColor Green
+Write-Host "Deploy klaar. Voeg daarna de vier secrets toe in Cloud Run / Secret Manager:" -ForegroundColor Green
 Write-Host "  _API_KEY_ALL"
 Write-Host "  _API_KEY_SUPABASE"
 Write-Host "  SUPABASE_SERVICE_ROLE_KEY"
+Write-Host "  API_PROXY_SECRET (dezelfde waarde als de Cloudflare Worker secret)"

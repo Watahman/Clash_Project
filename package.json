@@ -9,7 +9,8 @@
     "test:watch": "vitest",
     "check:migrations": "node scripts/check-migrations.mjs",
     "check:endpoints": "node scripts/check-endpoints.mjs",
-    "check": "npm run check:migrations && npm run check:endpoints && npm test && npm run build"
+    "check:casing": "node scripts/check-filename-casing.mjs",
+    "check": "npm run check:migrations && npm run check:endpoints && npm run check:casing && npm test && npm run build"
   },
   "repository": {
     "type": "git",

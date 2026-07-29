@@ -9,7 +9,7 @@
     <script src="../assets/js/shell/workspace-bootstrap.js"></script>
     <title>CWL Planner · ClashPanel</title>
     <link rel="stylesheet" href="../assets/css/Main-css.css">
-    <link rel="icon" type="image/png" href="../assets/css/pictures/shield_with_hamer_logov2.png">
+    <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="../assets/css/cwlPlanner.css">
     <link rel="stylesheet" href="../assets/css/profile-overlay.css">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
@@ -33,7 +33,7 @@
 <header>
     <div class="left">
         <a href="../index.html">
-            <img src="../assets/css/pictures/shield_with_hamer_logov2.png" alt="ToolsforClash_logo">
+            <img src="../assets/css/pictures/clashtools-logo.png" alt="ToolsforClash_logo">
         </a>
     </div>
 
@@ -45,7 +45,7 @@
 
     <div class="right">
         <button type="button" data-language-control data-i18n="header.language">Language</button>
-        <button id="profile-btn">
+        <button id="profile-btn" type="button">
             <img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt="profile">
             <span data-i18n="header.user">User</span>
         </button>
@@ -159,28 +159,28 @@
         </div>
 
         <div class="modal-tabs">
-            <button class="modal-tab-btn active" data-tab="tag" data-i18n="cwl.addByTag">By tag</button>
-            <button class="modal-tab-btn" data-tab="accounts" data-i18n="cwl.myAccounts">My accounts</button>
-            <button class="modal-tab-btn" data-tab="group" data-i18n="cwl.fromGroup">From Clan Family</button>
+            <button class="modal-tab-btn active" type="button" data-tab="tag" data-i18n="cwl.addByTag">By tag</button>
+            <button class="modal-tab-btn" type="button" data-tab="accounts" data-i18n="cwl.myAccounts">My accounts</button>
+            <button class="modal-tab-btn" type="button" data-tab="group" data-i18n="cwl.fromGroup">From Clan Family</button>
         </div>
 
         <!-- Tab 1: by tag -->
         <div class="modal-tab-panel" id="modal-tab-tag">
             <p class="modal-field-label" data-i18n="cwl.tagLabel">Player or clan tag</p>
             <input id="cwl-input-tag" type="text" placeholder="#TAG...">
-            <button id="cwl-overlay-confirm-tag-button" class="primary" data-i18n="cwl.confirm">Confirm</button>
+            <button id="cwl-overlay-confirm-tag-button" class="primary" type="button" data-i18n="cwl.confirm">Confirm</button>
         </div>
 
         <!-- Tab 2: my accounts -->
         <div class="modal-tab-panel hidden" id="modal-tab-accounts">
             <div class="modal-segment">
-                <button class="modal-seg-btn active" data-seg="mine" data-i18n="cwl.mine">Mine</button>
-                <button class="modal-seg-btn" data-seg="friends" data-i18n="cwl.friends">Friends</button>
+                <button class="modal-seg-btn active" type="button" data-seg="mine" data-i18n="cwl.mine">Mine</button>
+                <button class="modal-seg-btn" type="button" data-seg="friends" data-i18n="cwl.friends">Friends</button>
             </div>
             <div class="modal-account-list" id="cwl-account-list">
                 <p id="modal-account-list-empty" data-i18n="cwl.noAccounts">No accounts connected</p>
             </div>
-            <button id="cwl-overlay-add-selected-button" class="modal-btn-add-selected" data-i18n="cwl.addSelected">Add selected (0)</button>
+            <button id="cwl-overlay-add-selected-button" class="modal-btn-add-selected" type="button" data-i18n="cwl.addSelected">Add selected (0)</button>
         </div>
 
         <!-- Tab 3: from group -->
@@ -196,7 +196,7 @@
             <div id="cwl-group-linked-clans" class="modal-linked-clans hidden"></div>
             <div id="cwl-group-preview" class="modal-empty-state"><span data-i18n="cwl.previewGroup">Select a Clan Family to preview members</span></div>
             <div class="modal-group-preview-list hidden" id="cwl-group-preview-list"></div>
-            <button id="cwl-overlay-load-group-button" class="primary" data-i18n="cwl.loadGroup">Load all from Clan Family</button>
+            <button id="cwl-overlay-load-group-button" class="primary" type="button" data-i18n="cwl.loadGroup">Load all from Clan Family</button>
         </div>
 
     </div>
@@ -248,7 +248,7 @@
             <option value="15">15v15</option>
             <option value="30">30v30</option>
         </select>
-        <button id="cwl-overlay-add-clan-button" data-i18n="cwl.confirm">Confirm</button>
+        <button id="cwl-overlay-add-clan-button" type="button" data-i18n="cwl.confirm">Confirm</button>
     </div>
 </div>
 

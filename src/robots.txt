@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /subpages/popup_htmls/
 
 Sitemap: https://replace-with-production-domain.invalid/sitemap.xml

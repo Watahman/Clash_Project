@@ -14,7 +14,7 @@
                 <span id="po-notifications-count" class="po-notifications-count hidden">0</span>
             </button>
 
-            <button id="po-close" aria-label="Close" data-i18n-aria-label="common.close">
+            <button id="po-close" type="button" aria-label="Close" data-i18n-aria-label="common.close">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
                      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <line x1="18" y1="6" x2="6" y2="18"/>
@@ -40,7 +40,7 @@
             </div>
             <div class="po-user-info">
                 <span id="po-username">User</span>
-                <button id="po-code-btn">
+                <button id="po-code-btn" type="button">
                     <span id="po-code">8K47TS</span>
                     <svg id="po-ico-copy" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="9" y="9" width="13" height="13" rx="2"/>
@@ -54,10 +54,10 @@
         </div>
 
         <div class="po-tabs">
-            <button class="po-tab po-tab-active" id="po-tab-bases" data-i18n="profile.accounts">Accounts</button>
-            <button class="po-tab" id="po-tab-friends" data-i18n="profile.friends">Friends</button>
-            <button class="po-tab" id="po-tab-clans" data-i18n="nav.groups">Clan Family</button>
-            <button class="po-tab" id="po-tab-settings" data-i18n="profile.settings">Settings</button>
+            <button class="po-tab po-tab-active" id="po-tab-bases" type="button" data-i18n="profile.accounts">Accounts</button>
+            <button class="po-tab" id="po-tab-friends" type="button" data-i18n="profile.friends">Friends</button>
+            <button class="po-tab" id="po-tab-clans" type="button" data-i18n="nav.groups">Clan Family</button>
+            <button class="po-tab" id="po-tab-settings" type="button" data-i18n="profile.settings">Settings</button>
         </div>
 
         <div class="po-panel">
@@ -141,15 +141,15 @@
             </div>
 
             <div id="po-add-container">
-                <button id="po-add">
+                <button id="po-add" type="button">
                     <span class="po-add-icon" aria-hidden="true"></span>
                     <span id="po-add-text" data-i18n="profile.addBase">Add base</span>
                 </button>
-                <button id="po-friend-requests-btn" class="hidden">
+                <button id="po-friend-requests-btn" class="hidden" type="button">
                     <span data-i18n="profile.requests">Requests</span>
                     <b id="po-friend-requests-count" class="po-request-count hidden" aria-live="polite">0</b>
                 </button>
-                <button id="po-friend-pending-btn" class="hidden"><span data-i18n="profile.pending">Pending</span></button>
+                <button id="po-friend-pending-btn" class="hidden" type="button"><span data-i18n="profile.pending">Pending</span></button>
             </div>
         </div>
 
@@ -165,7 +165,7 @@
         <input id="po-input-base-tag" type="text" placeholder="Tag: #">
         <input id="po-input-base-token" type="text" placeholder="Token: ">
         <br>
-        <button id="po-overlay-add-base-button" data-i18n="cwl.confirm">Confirm</button>
+        <button id="po-overlay-add-base-button" type="button" data-i18n="cwl.confirm">Confirm</button>
     </div>
 </div>
 
@@ -173,7 +173,7 @@
     <div class="overlay-container" id="po-container-add-clan">
         <input id="po-input-clan-tag" type="text" placeholder="Tag: #">
         <br>
-        <button id="po-overlay-add-clan-button" data-i18n="cwl.confirm">Confirm</button>
+        <button id="po-overlay-add-clan-button" type="button" data-i18n="cwl.confirm">Confirm</button>
     </div>
 </div>
 
@@ -207,12 +207,12 @@
             <span class="po-base-info">Friend code</span>
         </div>
         <div class="po-friend-actions">
-            <button class="po-friend-accept" aria-label="Accept" data-i18n-aria-label="profile.acceptFriend">
+            <button class="po-friend-accept" type="button" aria-label="Accept" data-i18n-aria-label="profile.acceptFriend">
                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="20 6 9 17 4 12"/>
                 </svg>
             </button>
-            <button class="po-friend-reject" aria-label="Reject" data-i18n-aria-label="profile.rejectFriend">
+            <button class="po-friend-reject" type="button" aria-label="Reject" data-i18n-aria-label="profile.rejectFriend">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <line x1="18" y1="6" x2="6" y2="18"/>
                     <line x1="6" y1="6" x2="18" y2="18"/>

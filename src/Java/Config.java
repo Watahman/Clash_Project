@@ -1,6 +1,8 @@
 package Java;
 
 import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.List;
 import io.github.cdimascio.dotenv.Dotenv;
 
@@ -54,6 +56,7 @@ public class Config {
     String _SENSITIVE_RATE_LIMIT = firstNonBlank(env("SENSITIVE_RATE_LIMIT_PER_MINUTE"), "10");
     String _DATA_RATE_LIMIT = firstNonBlank(env("DATA_RATE_LIMIT_PER_MINUTE"), "180");
     String _TRUST_PROXY_HEADERS = firstNonBlank(env("TRUST_PROXY_HEADERS"), "false");
+    String _API_PROXY_SECRET = env("API_PROXY_SECRET");
 
     String _AUTH_COOKIE_SECURE = firstNonBlank(env("AUTH_COOKIE_SECURE"), "false");
     String _AUTH_COOKIE_SAME_SITE = firstNonBlank(env("AUTH_COOKIE_SAME_SITE"), "Lax");
@@ -345,6 +348,18 @@ public class Config {
         return "true".equalsIgnoreCase(_TRUST_PROXY_HEADERS);
     }
 
+    boolean hasApiProxySecret() {
+        return _API_PROXY_SECRET != null && !_API_PROXY_SECRET.isBlank();
+    }
+
+    boolean isTrustedProxyRequest(String providedSecret) {
+        if (!hasApiProxySecret() || providedSecret == null) return false;
+        return MessageDigest.isEqual(
+                _API_PROXY_SECRET.getBytes(StandardCharsets.UTF_8),
+                providedSecret.getBytes(StandardCharsets.UTF_8)
+        );
+    }
+
     private int positiveInt(String value, int fallback) {
         return boundedInt(value, fallback, 1, 10_000);
     }
@@ -371,6 +386,7 @@ public class Config {
         if (_API_KEY_SUPABASE == null || _API_KEY_SUPABASE.isBlank()) missing.add("SUPABASE_PUBLISHABLE_KEY");
         if (_API_KEY_SECR_SUPABASE == null || _API_KEY_SECR_SUPABASE.isBlank()) missing.add("SUPABASE_SERVICE_ROLE_KEY");
         if (_API_KEY_ACTIVE == null || _API_KEY_ACTIVE.isBlank()) missing.add("CLASH_API_KEY");
+        if (trustsProxyHeaders() && !hasApiProxySecret()) missing.add("API_PROXY_SECRET");
         return List.copyOf(missing);
     }
 

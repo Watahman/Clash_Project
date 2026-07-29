@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class API_Utils {
+    static final String API_PROXY_SECRET_HEADER = "X-ClashPanel-Proxy-Secret";
     private static final Object CACHE_INIT_LOCK = new Object();
     private static volatile CacheStore L1_CACHE;
     private static volatile CacheStore L2_CACHE;
@@ -204,12 +205,23 @@ public class API_Utils {
                 sendJsonResponse(exchange, "{\"error\":\"Origin niet toegestaan\",\"code\":\"ORIGIN_DENIED\"}", 403);
                 return;
             }
+            if (conf.hasApiProxySecret() && !conf.isTrustedProxyRequest(
+                    exchange.getRequestHeaders().getFirst(API_PROXY_SECRET_HEADER)
+            )) {
+                sendJsonResponse(
+                        exchange,
+                        "{\"error\":\"API proxy authorization failed\",\"code\":\"PROXY_AUTH_REQUIRED\"}",
+                        403
+                );
+                return;
+            }
             if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
                 addSecurityHeaders(exchange);
                 exchange.sendResponseHeaders(204, -1);
                 return;
             }
             if (!expectedMethod.equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.getResponseHeaders().set("Allow", expectedMethod + ", OPTIONS");
                 sendJsonResponse(exchange, "{\"error\":\"Method not allowed\"}", 405);
                 return;
             }
@@ -368,7 +380,10 @@ public class API_Utils {
         String address = exchange.getRemoteAddress() == null
                 ? "unknown"
                 : exchange.getRemoteAddress().getAddress().getHostAddress();
-        if (conf.trustsProxyHeaders()) {
+        String providedProxySecret = exchange.getRequestHeaders().getFirst(API_PROXY_SECRET_HEADER);
+        boolean trustedProxy = !conf.hasApiProxySecret()
+                || conf.isTrustedProxyRequest(providedProxySecret);
+        if (conf.trustsProxyHeaders() && trustedProxy) {
             String forwarded = exchange.getRequestHeaders().getFirst("X-Forwarded-For");
             if (forwarded != null && !forwarded.isBlank()) {
                 String firstHop = forwarded.split(",", 2)[0].trim();
