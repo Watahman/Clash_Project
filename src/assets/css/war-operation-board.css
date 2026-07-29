@@ -36,6 +36,10 @@
     color: var(--war-text);
 }
 
+.war-board [hidden] {
+    display: none !important;
+}
+
 .war-board-header,
 .war-panel-heading,
 .war-roster-toolbar {
