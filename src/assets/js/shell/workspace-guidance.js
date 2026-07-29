@@ -295,7 +295,7 @@ function mountPlannerEmptyStates() {
                 empty = document.createElement('div');
                 empty.className = 'workspace-guidance-empty';
                 empty.dataset.guidanceEmpty = 'players';
-                empty.innerHTML = '<strong></strong><p></p><button type="button" data-guidance-action="add-players"></button>';
+                empty.innerHTML = '<strong></strong><p></p>';
                 players.appendChild(empty);
             }
             if (empty) {
@@ -306,7 +306,6 @@ function mountPlannerEmptyStates() {
                 setText(empty.querySelector('p'), t(hasAssignedPlayers
                     ? 'guidance.planner.emptyFreeText'
                     : 'guidance.planner.emptyPlayersText'));
-                setText(empty.querySelector('button'), t('cwl.addPlayers'));
             }
         }
         if (clans) {
@@ -317,21 +316,15 @@ function mountPlannerEmptyStates() {
                 empty = document.createElement('div');
                 empty.className = 'workspace-guidance-empty workspace-guidance-empty-board';
                 empty.dataset.guidanceEmpty = 'clans';
-                empty.innerHTML = '<strong></strong><p></p><button type="button" data-guidance-action="add-clan"></button>';
+                empty.innerHTML = '<strong></strong><p></p>';
                 clans.appendChild(empty);
             }
             if (empty) {
                 setText(empty.querySelector('strong'), t('guidance.planner.emptyClansTitle'));
                 setText(empty.querySelector('p'), t('guidance.planner.emptyClansText'));
-                setText(empty.querySelector('button'), t('cwl.addClan'));
             }
         }
     };
-    document.addEventListener('click', event => {
-        const action = event.target.closest('[data-guidance-action]')?.dataset.guidanceAction;
-        if (action === 'add-players') document.querySelector('#cwl-add-players-button')?.click();
-        if (action === 'add-clan') document.querySelector('#cwl-add-clan-button')?.click();
-    });
     window.addEventListener('clashtools:language-changed', render);
     const observer = new MutationObserver(render);
     ['#cwl-available-players', '#cwl-all-clans'].forEach(selector => {

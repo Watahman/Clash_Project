@@ -37,8 +37,7 @@
 .workspace-page-help-trigger:hover { color: var(--text); }
 .workspace-page-help-trigger:focus-visible,
 .workspace-help-close:focus-visible,
-.workspace-first-use-hint button:focus-visible,
-.workspace-guidance-empty button:focus-visible {
+.workspace-first-use-hint button:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
 }
@@ -262,8 +261,7 @@
 
 .workspace-first-use-hint strong { color: var(--text); font-size: .8rem; }
 .workspace-first-use-hint p { margin: .2rem 0 0; color: var(--text-muted); font-size: .73rem; line-height: 1.45; }
-.workspace-first-use-hint button,
-.workspace-guidance-empty button {
+.workspace-first-use-hint button {
     flex: 0 0 auto;
     border: 0;
     color: var(--accent);
@@ -283,7 +281,6 @@
 
 .workspace-guidance-empty strong { color: var(--text); font-size: .85rem; }
 .workspace-guidance-empty p { margin: .35rem 0 .7rem; font-size: .73rem; line-height: 1.45; }
-.workspace-guidance-empty button { padding: 0; }
 .workspace-guidance-empty-board { min-height: 8rem; align-content: center; }
 
 .workspace-setup-checklist { overflow: clip; }
