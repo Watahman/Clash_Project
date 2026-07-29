@@ -54,9 +54,9 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
                 "/list/seasons?last=" + SEASON_DISCOVERY_WINDOW
         );
         List<String> candidates = seasonCandidates(available);
-        List<HistoricalCwlSeasonSummary> result = new ArrayList<>();
+        List<HistoricalCwlSeason> details = new ArrayList<>();
         for (String season : candidates) {
-            if (result.size() >= limit) break;
+            if (details.size() >= limit) break;
             HistoricalCwlSeason detail;
             try {
                 detail = fetchSeason(clanTag, season);
@@ -65,11 +65,20 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
                 throw unavailable;
             }
             if (!completed(detail.state())) continue;
-            HistoricalCwlSeason.League league = leagueForSeason(
-                    leagueChanges, season
+            details.add(detail);
+        }
+        List<HistoricalCwlSeason> reconstructed =
+                CwlLeagueHistoryReconstructor.reconstruct(
+                        details,
+                        currentLeague(basic),
+                        leagueChanges
+                );
+        List<HistoricalCwlSeasonSummary> result = new ArrayList<>();
+        for (HistoricalCwlSeason enriched : reconstructed) {
+            prefetchedSeasons.put(
+                    cacheKey(clanTag, enriched.season()),
+                    enriched
             );
-            HistoricalCwlSeason enriched = withLeague(detail, league);
-            prefetchedSeasons.put(cacheKey(clanTag, season), enriched);
             result.add(summary(enriched));
         }
         return List.copyOf(result);
@@ -139,39 +148,21 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
                 .toList();
     }
 
-    private static HistoricalCwlSeason.League leagueForSeason(
-            List<HistoricalCwlSeasonSummary> changes,
-            String season
-    ) {
-        return changes.stream()
-                .filter(change -> change.season().equals(season))
-                .findFirst()
-                .map(HistoricalCwlSeasonSummary::league)
-                .orElse(null);
-    }
-
-    private static HistoricalCwlSeason withLeague(
-            HistoricalCwlSeason season,
-            HistoricalCwlSeason.League inferred
-    ) {
-        HistoricalCwlSeason.League current = season.league();
-        HistoricalCwlSeason.League league =
-                current != null && current.name() != null
-                        && !current.name().isBlank()
-                ? current : inferred != null ? inferred : current;
-        return new HistoricalCwlSeason(
-                season.season(),
-                season.clan(),
-                league,
-                season.position(),
-                season.record(),
-                season.standings(),
-                season.wars(),
-                season.roster(),
-                season.state(),
-                season.source(),
-                season.dataQuality(),
-                season.warDetailsComplete()
+    private static HistoricalCwlSeason.League currentLeague(JsonObject basic) {
+        JsonObject data = CwlHistoryJson.object(basic, "data");
+        JsonObject root = data == null ? basic : data;
+        JsonObject value = CwlHistoryJson.object(
+                root, "warLeague", "clanWarLeague"
+        );
+        int id = CwlHistoryJson.integer(value, 0, "id");
+        String name = CwlHistoryJson.string(
+                root, "warLeague", "clanWarLeague"
+        );
+        if (name.isBlank()) name = CwlHistoryJson.string(value, "name");
+        if (name.isBlank()) name = CwlHistoryIndexNormalizer.leagueName(id);
+        return new HistoricalCwlSeason.League(
+                id > 0 ? id : null,
+                name
         );
     }
 

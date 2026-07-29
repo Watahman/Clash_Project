@@ -30,7 +30,7 @@ describe('Historical CWL overview', () => {
         )).toBe(true);
     });
 
-    it('keeps league change unknown when the next real month is unavailable', () => {
+    it('uses the next played season when skipped months were not entered', () => {
         expect(getLeagueChangeForSeason(
             '2026-05',
             { name: 'Master League II' },
@@ -39,7 +39,10 @@ describe('Historical CWL overview', () => {
                 { season: '2026-07', league: { name: 'Master League I' } }
             ],
             { position: 1, groupSize: 8 }
-        )).toEqual({ state: 'unknown', nextLeague: null });
+        )).toEqual({
+            state: 'promoted',
+            nextLeague: { name: 'Master League I' }
+        });
     });
 
     it('derives promotion from the final group position without a next season', () => {
@@ -107,6 +110,30 @@ describe('Historical CWL overview', () => {
         )).toEqual({
             state: 'promoted',
             nextLeague: { name: 'Titan League III' }
+        });
+    });
+
+    it('does not place a clan in Titan before the May 2026 expansion', () => {
+        expect(getLeagueChangeForSeason(
+            '2026-03',
+            { name: 'Champion League I' },
+            [],
+            { position: 1, groupSize: 8 }
+        )).toEqual({
+            state: 'same',
+            nextLeague: null
+        });
+    });
+
+    it('counts seventh place as relegation after the expansion', () => {
+        expect(getLeagueChangeForSeason(
+            '2026-05',
+            { name: 'Champion League II' },
+            [],
+            { position: 7, groupSize: 8 }
+        )).toEqual({
+            state: 'relegated',
+            nextLeague: { name: 'Champion League III' }
         });
     });
 

@@ -24,7 +24,7 @@ export function renderHistoricalOverview(
             <span>ClashKing history · temporary cache</span>
         </section>
         <section class="op-flat-section op-history-progression">
-            ${heading('League progression', 'Recorded league when available and final position per season')}
+            ${heading('League progression', 'League and final position per season')}
             <div class="op-history-timeline">
                 ${overview.chronological.map(timelineItem).join('')}
             </div>

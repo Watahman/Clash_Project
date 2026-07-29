@@ -41,21 +41,25 @@ class ClashKingCwlProviderTest {
     }
 
     @Test
-    void doesNotCarryStaleLeagueHistoryIntoNewerSeasons()
+    void reconstructsMissingLeagueHistoryFromTheCurrentLeague()
             throws Exception {
         respond(
                 "/clan/%23PQL/basic",
                 200,
                 """
-                {"changes":{"clanWarLeague":{
-                  "2026-05":"Master League II"
+                {"warLeague":"Champion League III",
+                 "changes":{"clanWarLeague":{
+                  "2025-08":"Champion League III"
                 }}}
                 """
         );
         respond(
                 "/list/seasons?last=24",
                 200,
-                "[\"2026-08\",\"2026-07\",\"2026-06\",\"2026-05\"]"
+                """
+                ["2026-08","2026-07","2026-06",
+                 "2026-05","2026-04","2026-03"]
+                """
         );
         respond("/cwl/%23PQL/2026-08", 404, "{\"detail\":\"Not Found\"}");
         respond(
@@ -66,28 +70,42 @@ class ClashKingCwlProviderTest {
         respond(
                 "/cwl/%23PQL/2026-06",
                 200,
-                season("2026-06", "ended")
+                rankedSeason("2026-06", "ended", 3)
         );
         respond(
                 "/cwl/%23PQL/2026-05",
                 200,
-                season("2026-05", "ended")
+                rankedSeason("2026-05", "ended", 7)
+        );
+        respond("/cwl/%23PQL/2026-04", 404, "{\"detail\":\"Not Found\"}");
+        respond(
+                "/cwl/%23PQL/2026-03",
+                200,
+                rankedSeason("2026-03", "ended", 1)
         );
 
         List<HistoricalCwlSeasonSummary> seasons =
-                provider.getAvailableSeasons("#PQL", 2);
+                provider.getAvailableSeasons("#PQL", 3);
         HistoricalCwlSeason cached =
-                provider.getSeason("#PQL", "2026-06");
+                provider.getSeason("#PQL", "2026-05");
 
         assertEquals(
-                List.of("2026-06", "2026-05"),
+                List.of("2026-06", "2026-05", "2026-03"),
                 seasons.stream()
                         .map(HistoricalCwlSeasonSummary::season)
                         .toList()
         );
-        assertEquals("", seasons.getFirst().league().name());
-        assertEquals("Master League II", seasons.get(1).league().name());
-        assertEquals("", cached.league().name());
+        assertEquals(
+                List.of(
+                        "Champion League III",
+                        "Champion League II",
+                        "Champion League III"
+                ),
+                seasons.stream()
+                        .map(item -> item.league().name())
+                        .toList()
+        );
+        assertEquals("Champion League II", cached.league().name());
         assertEquals(
                 List.of(
                         "/clan/%23PQL/basic",
@@ -95,7 +113,9 @@ class ClashKingCwlProviderTest {
                         "/cwl/%23PQL/2026-08",
                         "/cwl/%23PQL/2026-07",
                         "/cwl/%23PQL/2026-06",
-                        "/cwl/%23PQL/2026-05"
+                        "/cwl/%23PQL/2026-05",
+                        "/cwl/%23PQL/2026-04",
+                        "/cwl/%23PQL/2026-03"
                 ),
                 requests
         );
@@ -232,6 +252,37 @@ class ClashKingCwlProviderTest {
                  "rounds":[]
                }
                """.formatted(season, state);
+    }
+
+    private static String rankedSeason(
+            String season,
+            String state,
+            int targetRank
+    ) {
+        StringBuilder standings = new StringBuilder();
+        for (int rank = 1; rank <= 8; rank++) {
+            if (rank > 1) standings.append(',');
+            String tag = rank == targetRank ? "#PQL" : "#CLAN" + rank;
+            standings.append("""
+                    {"rank":%d,"tag":"%s","name":"Clan %d",
+                     "stars":%d,"destruction":%d}
+                    """.formatted(
+                    rank,
+                    tag,
+                    rank,
+                    100 - rank,
+                    100 - rank
+            ));
+        }
+        return """
+               {
+                 "season":"%s",
+                 "state":"%s",
+                 "clans":[{"tag":"#PQL","name":"ClashPanel"}],
+                 "clan_rankings":[%s],
+                 "rounds":[]
+               }
+               """.formatted(season, state, standings);
     }
 
     private record Response(int status, String body) {}

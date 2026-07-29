@@ -54,13 +54,7 @@ export function getLeagueChangeForSeason(
         .sort((a, b) => a.season.localeCompare(b.season));
     const index = ordered.findIndex(item => item.season === season);
     const next = ordered[index + 1];
-    if (next && !consecutive(season, next.season)) {
-        return {
-            state: 'unknown',
-            nextLeague: null
-        };
-    }
-    if (next && consecutive(season, next.season)) {
+    if (next) {
         const actualState = leagueChange(league, next.league);
         if (actualState !== 'unknown') {
             return {
@@ -179,10 +173,7 @@ function leagueChange(previous, current) {
 }
 
 function placementOutcome(item, next) {
-    if (next && !consecutive(item.data.season, next.data.season)) {
-        return 'unknown';
-    }
-    if (next && consecutive(item.data.season, next.data.season)) {
+    if (next) {
         const actual = leagueChange(
             item.summary.league,
             next.summary.league
@@ -210,7 +201,7 @@ function outcomeFromPosition(season, league, position, groupSize) {
     }
     const promoted = promotionSlots(name, season);
     if (rank <= Math.min(promoted, size)) return 'promoted';
-    const baseDemoted = demotionSlots(name, season);
+    const baseDemoted = demotionSlots(name);
     const demoted = Math.min(
         baseDemoted,
         Math.max(0, size - (8 - baseDemoted))
@@ -221,35 +212,45 @@ function outcomeFromPosition(season, league, position, groupSize) {
 
 function promotionSlots(league, season) {
     if (league === 'Legend League') return 0;
-    if (transitionSeason(season)) {
+    if (expandedSeason(season)) {
         if ([
             'Champion League I',
             'Titan League III',
             'Titan League II',
             'Titan League I'
         ].includes(league)) return 4;
-        return 2;
+        if ([
+            'Master League I',
+            'Champion League III',
+            'Champion League II'
+        ].includes(league)) return 2;
     }
     if ([
-        'Champion League I',
-        'Champion League II',
-        'Champion League III',
+        'Bronze League III',
+        'Bronze League II',
+        'Bronze League I'
+    ].includes(league)) return 3;
+    if ([
         'Master League I',
-        'Titan League III',
-        'Titan League II',
-        'Titan League I'
+        'Champion League III',
+        'Champion League II'
+    ].includes(league)) return 1;
+    if (league === 'Champion League I') return 0;
+    return 2;
+}
+
+function demotionSlots(league) {
+    if (league === 'Bronze League III') return 0;
+    if ([
+        'Bronze League II',
+        'Bronze League I',
+        'Silver League III'
     ].includes(league)) return 1;
     return 2;
 }
 
-function demotionSlots(league, season) {
-    if (league === 'Bronze League III') return 0;
-    if (transitionSeason(season) && league === 'Champion League I') return 1;
-    return 2;
-}
-
-function transitionSeason(season) {
-    return season >= '2026-05' && season <= '2026-10';
+function expandedSeason(season) {
+    return season >= '2026-05';
 }
 
 function adjacentLeague(league, state) {
