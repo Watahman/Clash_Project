@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://replace-with-production-domain.invalid/</loc></url>
+  <url><loc>https://replace-with-production-domain.invalid/cwl-planner</loc></url>
+  <url><loc>https://replace-with-production-domain.invalid/cwl-tracker</loc></url>
+  <url><loc>https://replace-with-production-domain.invalid/clan-management</loc></url>
+  <url><loc>https://replace-with-production-domain.invalid/bracket-generator</loc></url>
   <url><loc>https://replace-with-production-domain.invalid/subpages/privacy</loc></url>
   <url><loc>https://replace-with-production-domain.invalid/subpages/cookies</loc></url>
   <url><loc>https://replace-with-production-domain.invalid/subpages/terms</loc></url>

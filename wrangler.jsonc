@@ -11,7 +11,14 @@
     "not_found_handling": "404-page",
     "run_worker_first": [
       "/api",
-      "/api/*"
+      "/api/*",
+      "/app/*",
+      "/subpages/*",
+      "/subPages/*",
+      "/cwl-planner*",
+      "/cwl-tracker*",
+      "/clan-management*",
+      "/bracket-generator*"
     ]
   },
 

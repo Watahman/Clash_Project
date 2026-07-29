@@ -4,6 +4,10 @@ import { describe, expect, it } from 'vitest';
 
 const publicPages = new Map([
     ['src/index.html', 'https://clashpanel.com/'],
+    ['src/cwl-planner.html', 'https://clashpanel.com/cwl-planner'],
+    ['src/cwl-tracker.html', 'https://clashpanel.com/cwl-tracker'],
+    ['src/clan-management.html', 'https://clashpanel.com/clan-management'],
+    ['src/bracket-generator.html', 'https://clashpanel.com/bracket-generator'],
     ['src/subpages/privacy.html', 'https://clashpanel.com/subpages/privacy'],
     ['src/subpages/cookies.html', 'https://clashpanel.com/subpages/cookies'],
     ['src/subpages/terms.html', 'https://clashpanel.com/subpages/terms'],
@@ -34,7 +38,7 @@ describe('Pre-launch static contract', () => {
         expect(document.querySelectorAll('h1')).toHaveLength(1);
         expect(document.querySelector('meta[property="og:title"]')?.content.trim()).not.toBe('');
         expect(document.querySelector('meta[property="og:url"]')?.content).toBe(canonical);
-        expect(document.querySelector('meta[name="twitter:card"]')?.content).toBe('summary');
+        expect(document.querySelector('meta[name="twitter:card"]')?.content).toMatch(/^summary/);
     });
 
     it.each(privatePages)('%s explicitly opts out of indexing', path => {
@@ -47,10 +51,11 @@ describe('Pre-launch static contract', () => {
         const sitemap = readFileSync('src/sitemap.xml', 'utf8');
 
         expect(robots).toContain('Disallow: /api/');
+        expect(robots).toContain('Disallow: /app/');
         expect(robots).toContain('Disallow: /subpages/popup_htmls/');
         expect(robots).toContain('https://replace-with-production-domain.invalid/sitemap.xml');
         expect(sitemap).not.toContain('https://clashpanel.com');
-        expect(sitemap.match(/https:\/\/replace-with-production-domain\.invalid/g)).toHaveLength(5);
+        expect(sitemap.match(/https:\/\/replace-with-production-domain\.invalid/g)).toHaveLength(9);
     });
 
     it('defines baseline static security and preview noindex headers', () => {

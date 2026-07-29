@@ -11,7 +11,8 @@
     "check:endpoints": "node scripts/check-endpoints.mjs",
     "check:casing": "node scripts/check-filename-casing.mjs",
     "check:static": "node scripts/check-static-output.mjs",
-    "check": "npm run check:migrations && npm run check:endpoints && npm run check:casing && npm test && npm run build && npm run check:static"
+    "check:seo": "node scripts/check-seo-output.mjs",
+    "check": "npm run check:migrations && npm run check:endpoints && npm run check:casing && npm test && npm run build && npm run check:static && npm run check:seo"
   },
   "repository": {
     "type": "git",

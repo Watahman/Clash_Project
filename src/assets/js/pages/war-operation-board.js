@@ -256,7 +256,7 @@ function selectTab(tab) {
 function setStatus(message, error = false, cwlLink = false) {
     refs.status.classList.toggle('is-error', error);
     refs.status.innerHTML = `${escapeOption(message)}${cwlLink
-        ? '<a href="./cwl-operation-board.html">Open CWL operation board →</a>'
+        ? '<a href="/app/cwl-tracker">Open CWL operation board →</a>'
         : ''}`;
 }
 

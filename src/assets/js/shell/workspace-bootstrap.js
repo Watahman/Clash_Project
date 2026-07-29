@@ -2,13 +2,13 @@
     'use strict';
 
     const html = document.documentElement;
-    const PAGE_NAMES = [
-        'dashboard.html',
-        'cwl-planner.html',
-        'cwl-planner-drafts.html',
-        'cwl-operation-board.html',
-        'war-operation-board.html',
-        'groups.html'
+    const PAGE_PATHS = [
+        '/app/dashboard',
+        '/app/cwl-planner',
+        '/app/cwl-planner-drafts',
+        '/app/cwl-tracker',
+        '/app/war-operation-board',
+        '/app/clan-management'
     ];
 
     const INITIAL_VISUAL_TIMEOUT_MS = 1800;
@@ -136,7 +136,9 @@
         html.classList.remove('workspace-page-loading');
         html.classList.add('workspace-page-ready');
         window.dispatchEvent(new CustomEvent('clashtools:page-ready'));
-        scheduleIdlePreload();
+        if (document.body?.classList.contains('workspace-app')) {
+            scheduleIdlePreload();
+        }
     }
 
     function installNavigationPreloading() {
@@ -208,8 +210,8 @@
     }
 
     function workspacePageUrls() {
-        return PAGE_NAMES.map(name =>
-            new URL(`/subpages/${name}`, window.location.origin)
+        return PAGE_PATHS.map(path =>
+            new URL(path, window.location.origin)
         );
     }
 
@@ -224,7 +226,7 @@
         try {
             const url = new URL(value, window.location.href);
             if (url.origin !== window.location.origin) return null;
-            if (!PAGE_NAMES.some(name => url.pathname.endsWith(`/subpages/${name}`))) {
+            if (!PAGE_PATHS.includes(url.pathname.replace(/\/+$/, ''))) {
                 return null;
             }
             return url;

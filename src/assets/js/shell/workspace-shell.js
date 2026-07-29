@@ -99,18 +99,18 @@ function shellMarkup(currentPage) {
     const current = pageConfig[currentPage] || pageConfig.dashboard;
     return {
         sidebar: `<aside class="workspace-sidebar" id="workspace-sidebar">
-            <a class="workspace-brand" href="./dashboard.html"><img src="../assets/css/pictures/clashtools-logo.png" alt=""><span><strong>ClashPanel</strong><small>CWL workspace</small></span></a>
+            <a class="workspace-brand" href="/app/dashboard"><img src="../assets/css/pictures/clashtools-logo.png" alt=""><span><strong>ClashPanel</strong><small>CWL workspace</small></span></a>
             <button class="workspace-sidebar-toggle" id="workspace-sidebar-toggle" type="button" aria-controls="workspace-sidebar" aria-expanded="true">${icons.collapse}</button>
             <nav class="workspace-nav" id="workspace-navigation" aria-label="Applicatienavigatie" data-i18n-aria-label="shell.navigation">
                 <p data-i18n="shell.overview">Overzicht</p>
-                ${navLink('dashboard', './dashboard.html')}
+                ${navLink('dashboard', '/app/dashboard')}
                 <p>CWL</p>
-                ${navLink('planner', './cwl-planner.html')}
-                ${navLink('drafts', './cwl-planner-drafts.html')}
-                ${navLink('operation', './cwl-operation-board.html')}
+                ${navLink('planner', '/app/cwl-planner')}
+                ${navLink('drafts', '/app/cwl-planner-drafts')}
+                ${navLink('operation', '/app/cwl-tracker')}
                 ${comingSoonNavItem('warOperation')}
                 <p data-i18n="shell.collaborate">Samenwerken</p>
-                ${navLink('groups', './groups.html')}
+                ${navLink('groups', '/app/clan-management')}
                 ${comingSoonNavItem('bracket')}
             </nav>
             <div class="workspace-sidebar-bottom"><button class="workspace-profile-button" id="profile-btn" type="button" data-i18n-aria-label="shell.openProfile"><span class="workspace-avatar" aria-hidden="true">CT</span><span class="workspace-profile-copy"><strong data-i18n="header.user">Gebruiker</strong><small data-i18n="shell.profileAccounts">Profiel & accounts</small></span><span class="workspace-profile-arrow" aria-hidden="true">›</span></button></div>
@@ -340,9 +340,7 @@ function renderNotifications(data) {
             if (notification.related_group_id) {
                 const pollHref = buildGroupPollHref(notification, window.location.href);
                 stageGroupPollNavigation(notification, sessionStorage, localStorage);
-                window.location.href = pollHref || (window.location.pathname.includes('/subpages/')
-                    ? './groups.html'
-                    : './subpages/groups.html');
+                window.location.href = pollHref || '/app/clan-management';
             }
         });
 

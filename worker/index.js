@@ -1,4 +1,46 @@
 const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
+const PERMANENT_REDIRECT_STATUS = 301;
+
+const PUBLIC_REDIRECTS = new Map([
+    ["/cwl-planner.html", "/cwl-planner"],
+    ["/cwl-tracker.html", "/cwl-tracker"],
+    ["/clan-management.html", "/clan-management"],
+    ["/bracket-generator.html", "/bracket-generator"],
+    ["/subpages/cwl-planner", "/cwl-planner"],
+    ["/subpages/cwl-planner.html", "/cwl-planner"],
+    ["/subpages/cwl-operation-board", "/cwl-tracker"],
+    ["/subpages/cwl-operation-board.html", "/cwl-tracker"],
+    ["/subpages/groups", "/clan-management"],
+    ["/subpages/groups.html", "/clan-management"],
+    ["/subpages/bracket-generator", "/bracket-generator"],
+    ["/subpages/bracket-generator.html", "/bracket-generator"],
+    ["/subpages/dashboard", "/app/dashboard"],
+    ["/subpages/dashboard.html", "/app/dashboard"],
+    ["/subpages/cwl-planner-drafts", "/app/cwl-planner-drafts"],
+    ["/subpages/cwl-planner-drafts.html", "/app/cwl-planner-drafts"]
+]);
+
+const APP_ASSETS = new Map([
+    ["/app/dashboard", "/subpages/dashboard"],
+    ["/app/cwl-planner", "/subpages/cwl-planner"],
+    ["/app/cwl-planner-drafts", "/subpages/cwl-planner-drafts"],
+    ["/app/cwl-tracker", "/subpages/cwl-operation-board"],
+    ["/app/clan-management", "/subpages/groups"],
+    ["/app/war-operation-board", "/subpages/war-operation-board"]
+]);
+
+const APP_ALIASES = new Map([
+    ["/app/dashboard.html", "/app/dashboard"],
+    ["/app/cwl-planner.html", "/app/cwl-planner"],
+    ["/app/cwl-planner-drafts.html", "/app/cwl-planner-drafts"],
+    ["/app/cwl-operation-board", "/app/cwl-tracker"],
+    ["/app/cwl-operation-board.html", "/app/cwl-tracker"],
+    ["/app/cwl-tracker.html", "/app/cwl-tracker"],
+    ["/app/groups", "/app/clan-management"],
+    ["/app/groups.html", "/app/clan-management"],
+    ["/app/clan-management.html", "/app/clan-management"],
+    ["/app/war-operation-board.html", "/app/war-operation-board"]
+]);
 
 function jsonError(status, code, error) {
     return new Response(JSON.stringify({ error, code }), {
@@ -13,6 +55,57 @@ function jsonError(status, code, error) {
 
 function isApiPath(pathname) {
     return pathname === "/api" || pathname.startsWith("/api/");
+}
+
+function normalizedPath(pathname) {
+    const normalized = pathname.replace(/\/+$/, "") || "/";
+    return normalized.toLowerCase();
+}
+
+function permanentRedirect(requestUrl, destination) {
+    const redirectUrl = new URL(destination, requestUrl);
+    redirectUrl.search = requestUrl.search;
+    return Response.redirect(redirectUrl.toString(), PERMANENT_REDIRECT_STATUS);
+}
+
+function routeRedirect(incomingUrl) {
+    const path = normalizedPath(incomingUrl.pathname);
+    const canonical = PUBLIC_REDIRECTS.get(path) || APP_ALIASES.get(path);
+    if (canonical) return canonical;
+
+    for (const publicPath of [
+        "/cwl-planner",
+        "/cwl-tracker",
+        "/clan-management",
+        "/bracket-generator"
+    ]) {
+        if (path === publicPath && incomingUrl.pathname !== publicPath) {
+            return publicPath;
+        }
+    }
+    return null;
+}
+
+async function serveAppAsset(request, env, incomingUrl) {
+    const path = normalizedPath(incomingUrl.pathname);
+    const assetPath = APP_ASSETS.get(path);
+    if (!assetPath) return null;
+
+    const assetUrl = new URL(incomingUrl);
+    assetUrl.pathname = assetPath;
+    const assetRequest = new Request(assetUrl.toString(), {
+        method: request.method,
+        headers: request.headers,
+        redirect: "manual"
+    });
+    const response = await env.ASSETS.fetch(assetRequest);
+    const headers = new Headers(response.headers);
+    headers.set("X-Robots-Tag", "noindex, nofollow");
+    return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers
+    });
 }
 
 function createBackendHeaders(request, incomingUrl, env) {
@@ -85,6 +178,12 @@ export default {
         if (isApiPath(incomingUrl.pathname)) {
             return proxyApiRequest(request, env, incomingUrl);
         }
+        const redirect = routeRedirect(incomingUrl);
+        if (redirect) return permanentRedirect(incomingUrl, redirect);
+
+        const appResponse = await serveAppAsset(request, env, incomingUrl);
+        if (appResponse) return appResponse;
+
         return env.ASSETS.fetch(request);
     }
 };

@@ -66,10 +66,7 @@ function openGroupPage(groupId) {
 }
 
 function getGroupsPagePath() {
-    const path = window.location.pathname;
-    if (path.endsWith('/groups.html') || path.endsWith('\\groups.html')) return window.location.href;
-    if (path.includes('/subpages/')) return './groups.html';
-    return './subpages/groups.html';
+    return '/app/clan-management';
 }
 
 function parsePolls(value) {

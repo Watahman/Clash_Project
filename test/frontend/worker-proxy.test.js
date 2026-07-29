@@ -22,6 +22,42 @@ describe('Cloudflare API proxy', () => {
         expect(bindings.ASSETS.fetch).toHaveBeenCalledWith(request);
     });
 
+    it.each([
+        ['/subpages/cwl-planner.html', '/cwl-planner'],
+        ['/subPages/cwl-operation-board', '/cwl-tracker'],
+        ['/subpages/groups/', '/clan-management'],
+        ['/subpages/bracket-generator.html', '/bracket-generator'],
+        ['/cwl-planner.html', '/cwl-planner']
+    ])('permanently redirects %s to its public canonical route', async (source, destination) => {
+        const response = await worker.fetch(
+            new Request(`https://clashpanel.com${source}?ref=legacy`),
+            env()
+        );
+
+        expect(response.status).toBe(301);
+        expect(response.headers.get('Location'))
+            .toBe(`https://clashpanel.com${destination}?ref=legacy`);
+    });
+
+    it('serves private app routes from the existing tool HTML with noindex headers', async () => {
+        const bindings = env({
+            ASSETS: {
+                fetch: vi.fn(async request => new Response(
+                    `asset:${new URL(request.url).pathname}`,
+                    { headers: { 'Content-Type': 'text/html' } }
+                ))
+            }
+        });
+
+        const response = await worker.fetch(
+            new Request('https://clashpanel.com/app/cwl-tracker'),
+            bindings
+        );
+
+        expect(await response.text()).toBe('asset:/subpages/cwl-operation-board');
+        expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
+    });
+
     it('maps API paths and replaces client-controlled forwarding headers', async () => {
         const upstream = vi.fn(async (_url, init) => {
             expect(_url).toBe('https://backend.example/Player?tag=%23ABC');

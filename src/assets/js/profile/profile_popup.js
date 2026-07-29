@@ -389,9 +389,7 @@ function renderNotifications(data) {
             if (notification.related_group_id) {
                 const pollHref = buildGroupPollHref(notification, window.location.href);
                 stageGroupPollNavigation(notification, sessionStorage, localStorage);
-                window.location.href = pollHref || (window.location.pathname.includes('/subpages/')
-                    ? './groups.html'
-                    : './subpages/groups.html');
+                window.location.href = pollHref || '/app/clan-management';
             } else if (isFriendNotification(notification)) {
                 notificationsPanel.classList.add('hidden');
                 const friendsTab = document.querySelector('#po-tab-friends');

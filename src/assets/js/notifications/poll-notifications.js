@@ -82,10 +82,7 @@ export function buildGroupPollHref(notification, currentHref) {
     const groupJoinNotification = isGroupMemberJoinedNotification(notification);
     if (!pollNotification && !groupJoinNotification) return '';
     const currentUrl = new URL(currentHref);
-    const groupsPath = currentUrl.pathname.includes('/subpages/')
-        ? './groups.html'
-        : './subpages/groups.html';
-    const destination = new URL(groupsPath, currentUrl);
+    const destination = new URL('/app/clan-management', currentUrl);
     destination.searchParams.set('groupId', notification.related_group_id);
     if (pollNotification) destination.searchParams.set('pollId', notification.related_poll_id);
     destination.searchParams.set('tab', pollNotification ? 'availability' : 'members');

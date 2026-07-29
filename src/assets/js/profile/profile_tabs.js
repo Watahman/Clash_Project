@@ -72,9 +72,7 @@ export function poTab(btn, refs) {
     if (isFriend) addBtn.onclick = () => openAddOverlay(addClan, overlayAddClanBtn, () => handleAddFriend(inputClanTag));
     if (isClan) {
         addBtn.onclick = () => {
-            window.location.href = window.location.pathname.includes('/subpages/')
-                ? './groups.html'
-                : './subpages/groups.html';
+            window.location.href = '/app/clan-management';
         };
     }
 }
