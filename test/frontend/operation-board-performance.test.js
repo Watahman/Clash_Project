@@ -6,7 +6,7 @@ const performanceMocks = vi.hoisted(() => ({
     loadPlayerPerformanceBatch: vi.fn()
 }));
 
-vi.mock('../../src/assets/js/cwl/cwl-performance-prediction.js', () => ({
+vi.mock('../../src/assets/js/cwl/cwl-performance-prediction.js?v=20260729-2', () => ({
     applyCwlPredictions: performanceMocks.applyCwlPredictions,
     collectPredictionPlayerTags: performanceMocks.collectPredictionPlayerTags
 }));

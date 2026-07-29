@@ -1,7 +1,7 @@
 import {
     applyCwlPredictions,
     collectPredictionPlayerTags
-} from '../cwl/cwl-performance-prediction.js';
+} from '../cwl/cwl-performance-prediction.js?v=20260729-2';
 import {
     loadPlayerPerformanceBatch
 } from '../cwl/player-performance-client.js';

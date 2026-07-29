@@ -1,6 +1,7 @@
 import {
     buildLeagueRoundPredictions
 } from './cwl-round-prediction.js';
+import { compareMatchupStrength } from './cwl-matchup-difficulty.js';
 
 function number(value, fallback = 0) {
     const parsed = Number(value);
@@ -15,6 +16,16 @@ function normalizeTag(tag = '') {
     const clean = String(tag || '').trim().toUpperCase();
     if (!clean || clean === '#0') return '';
     return clean.startsWith('#') ? clean : `#${clean}`;
+}
+
+function strengthOf(member = {}, insight = {}, includeProgress = false) {
+    return {
+        townHall: number(
+            member.townhallLevel || member.townHallLevel || insight.townHall,
+            0
+        ),
+        progression: includeProgress ? number(insight.progression, 0.5) : 0.5
+    };
 }
 
 function getWarSide(war, clanTag) {

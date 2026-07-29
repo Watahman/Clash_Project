@@ -2,7 +2,7 @@ import { getClanCurrentWarRequest, getClanWarLogRequest } from '../API/API-Clan.
 import { syncAuthSession } from '../auth/auth-client.js';
 import { initPlayerPerformancePopover } from '../cwl/cwl-player-performance-popover.js';
 import { initI18n } from '../i18n/i18n.js';
-import { enrichWithHistoricalPerformance } from '../operation-board/operation-board-performance.js';
+import { enrichWithHistoricalPerformance } from '../operation-board/operation-board-performance.js?v=20260729-2';
 import { looksLikeClashTag, normalizeTag } from '../operation-board/operation-board-utils.js';
 import { profileHTML } from '../profile/profile_popup.js';
 import {

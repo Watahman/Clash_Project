@@ -7,6 +7,7 @@ import {
 import { buildWarContributions } from '../../src/assets/js/war-operation-board/war-contribution.js';
 import { buildWarMap } from '../../src/assets/js/war-operation-board/war-map-model.js';
 import { buildMathematicalWarStatus } from '../../src/assets/js/war-operation-board/war-outcome-model.js';
+import { applyCwlPredictions } from '../../src/assets/js/cwl/cwl-performance-prediction.js';
 
 describe('regular Clan War operation board', () => {
     it('normalizes the selected clan and calculates net stars in attack order', () => {
@@ -53,6 +54,14 @@ describe('regular Clan War operation board', () => {
             ...warFixture(),
             tag: '#CWLWAR'
         }, '#AAA')).toThrow(ActiveCwlWarError);
+    });
+
+    it('can enrich a regular-war report without a missing matchup helper', () => {
+        const report = buildWarBoardReport(warFixture(), '#AAA');
+        const enriched = applyCwlPredictions(report, new Map());
+
+        expect(enriched.predictionState).toBe('ready');
+        expect(enriched.roster).toHaveLength(2);
     });
 });
 
