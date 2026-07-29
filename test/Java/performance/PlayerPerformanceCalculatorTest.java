@@ -46,7 +46,7 @@ class PlayerPerformanceCalculatorTest {
     }
 
     @Test
-    void rewardsUpHitsAndLeavesUnknownParticipationNeutral() {
+    void rewardsUpHitsWithoutExceedingTheNormalizedScale() {
         PlayerPerformanceResult result = calculator.calculate(new HistoricalPlayerData(
                 "#P0L",
                 List.of(attack(HistoricalWarType.REGULAR, NOW, 16, 17, 3, 100)),
@@ -55,7 +55,7 @@ class PlayerPerformanceCalculatorTest {
                 true
         ));
 
-        assertEquals(112.0, result.performance());
+        assertEquals(100.0, result.performance());
         assertEquals(1, result.upHitCount());
         assertNull(result.reliability());
         assertEquals(

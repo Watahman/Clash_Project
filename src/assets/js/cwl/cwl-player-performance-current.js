@@ -9,10 +9,6 @@ export function renderCurrentCwlSection(context) {
         ? `${context.label} CWL`
         : t('performance.currentCwl');
     const rows = [
-        [
-            t('performance.attacksUsed'),
-            `${number(context.attacksUsed)} / ${nullableNumber(context.availableAttacks)}`
-        ],
         [t('op.stars'), `${number(context.stars)}★`],
         [t('performance.avgDestruction'), `${number(context.avgDestruction, 1)}%`],
         [t('performance.missed'), nullableNumber(context.missed)],

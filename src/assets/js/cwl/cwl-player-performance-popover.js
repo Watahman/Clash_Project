@@ -166,7 +166,7 @@ function renderPerformance(data) {
     const top = element('div', 'cwl-performance-score');
     top.append(
         element('span', 'cwl-performance-label', t('performance.warPerformance')),
-        element('strong', '', number(data.performance, 0)),
+        element('strong', '', number(boundedPerformance(data.performance), 0)),
         element('em', '', data.scope === 'CWL' ? t('performance.cwl') : t('performance.allWars'))
     );
     const form = element('div', 'cwl-performance-form');
@@ -180,13 +180,7 @@ function renderPerformance(data) {
         [t('performance.avgDestruction'), percent(data.avgDestruction)],
         [t('performance.tripleRate'), percent(data.tripleRate)],
         [t('performance.twoStarRate'), percent(data.twoStarRate)],
-        [t('performance.lowStarRate'), percent(data.lowStarRate)],
-        [
-            t('performance.attacksUsed'),
-            data.availableAttacks == null
-                ? t('performance.insufficientParticipation')
-                : `${data.usedAttacks} / ${data.availableAttacks}`
-        ]
+        [t('performance.lowStarRate'), percent(data.lowStarRate)]
     ]);
     const matchups = section(t('performance.matchups'), metrics([
         [t('performance.sameTh'), String(data.sameThCount)],
@@ -306,6 +300,11 @@ function closePopover() {
 
 function number(value, places = 1) {
     return Number.isFinite(Number(value)) ? Number(value).toFixed(places) : '—';
+}
+
+function boundedPerformance(value) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? Math.min(100, Math.max(0, parsed)) : value;
 }
 
 function percent(value) {

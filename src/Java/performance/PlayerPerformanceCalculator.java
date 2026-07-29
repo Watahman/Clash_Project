@@ -46,8 +46,9 @@ public final class PlayerPerformanceCalculator {
             return emptyResult(data, scope, data.available() ? "not_enough_data" : "unavailable");
         }
 
-        double performance = weightedPerformance(baseline, now);
-        PlayerPerformanceResult.Form form = calculateForm(baseline, performance, now);
+        double rawPerformance = weightedPerformance(baseline, now);
+        double performance = clamp(rawPerformance, 0, 100);
+        PlayerPerformanceResult.Form form = calculateForm(baseline, rawPerformance, now);
         Reliability reliability = calculateReliability(data, useCwl, cutoff, now);
         long triples = baseline.stream().filter(attack -> attack.stars() == 3).count();
         long twoStars = baseline.stream().filter(attack -> attack.stars() == 2).count();
@@ -185,6 +186,10 @@ public final class PlayerPerformanceCalculator {
     private static double round(double value, int places) {
         double factor = Math.pow(10, places);
         return Math.round(value * factor) / factor;
+    }
+
+    private static double clamp(double value, double minimum, double maximum) {
+        return Math.min(maximum, Math.max(minimum, value));
     }
 
     private record Reliability(Double percentage, Integer used, Integer available, String message) {}

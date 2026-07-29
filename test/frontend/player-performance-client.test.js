@@ -34,7 +34,7 @@ describe('player performance batch client', () => {
         expect(requestMocks.requestJson.mock.calls[0][1].body).toEqual({
             playerTags: ['#P0L', '#P2Y']
         });
-        expect(client.getPlayerPerformance('#P0L').performance).toBe(101);
+        expect(client.getPlayerPerformance('#P0L').performance).toBe(100);
 
         client.schedulePlayerPerformanceBatch(['#P0L', '#P2Y']);
         await client.flushPlayerPerformanceBatch();
@@ -122,7 +122,7 @@ describe('player performance batch client', () => {
             }
         });
         await runningBatch;
-        expect(client.getPlayerPerformance('#P0L').performance).toBe(103);
+        expect(client.getPlayerPerformance('#P0L').performance).toBe(100);
     });
 
     it('shares one request between concurrent batch consumers', async () => {
@@ -143,8 +143,8 @@ describe('player performance batch client', () => {
         });
 
         const [firstResult, secondResult] = await Promise.all([firstConsumer, secondConsumer]);
-        expect(firstResult['#P0L'].performance).toBe(104);
-        expect(secondResult['#P0L'].performance).toBe(104);
+        expect(firstResult['#P0L'].performance).toBe(100);
+        expect(secondResult['#P0L'].performance).toBe(100);
         expect(requestMocks.requestJson).toHaveBeenCalledTimes(1);
     });
 });

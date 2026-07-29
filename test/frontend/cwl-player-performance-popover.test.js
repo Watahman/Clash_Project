@@ -71,14 +71,14 @@ describe('CWL historical performance popover', () => {
         expect(popover.classList.contains('hidden')).toBe(true);
         vi.advanceTimersByTime(1);
         expect(popover.classList.contains('hidden')).toBe(false);
-        expect(popover.textContent).toContain('108');
+        expect(popover.textContent).toContain('100');
+        expect(popover.textContent).not.toContain('108');
         expect(popover.textContent).toContain('CWL');
         expect(popover.textContent).toContain('Current CWL');
-        expect(popover.textContent).toContain('5 / 5');
         expect(popover.textContent).toContain('91.4%');
         expect(popover.textContent).toContain('Rounds played');
-        expect(popover.textContent).toContain('Insufficient tracked war participation');
         expect(popover.textContent).not.toContain('Reliability');
+        expect(popover.textContent).not.toContain('Attacks used');
 
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
         expect(popover.classList.contains('hidden')).toBe(true);
@@ -104,7 +104,7 @@ describe('CWL historical performance popover', () => {
         info.dispatchEvent(pointerEvent('pointerup', 'touch'));
 
         expect(popover.textContent).toContain('June 2026 CWL');
-        expect(popover.textContent).toContain('6 / 7');
+        expect(popover.textContent).not.toContain('6 / 7');
         expect(popover.textContent).toContain('Offensive rank');
         expect(popover.textContent).not.toContain('108');
         expect(popover.textContent).not.toContain('Matchups');

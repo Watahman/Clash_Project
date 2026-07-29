@@ -61,7 +61,10 @@ export async function flushPlayerPerformanceBatch() {
                 ...responses.map(response => response?.results || {})
             );
             tags.forEach(tag => {
-                performanceByTag.set(tag, results[tag] || unavailableResult(tag));
+                performanceByTag.set(
+                    tag,
+                    normalizePerformanceResult(results[tag], tag)
+                );
             });
         } catch (error) {
             tags.forEach(tag => performanceByTag.set(tag, unavailableResult(tag, error)));
@@ -127,6 +130,18 @@ export function clearPlayerPerformanceCache() {
     performanceByTag.clear();
     pendingTags.clear();
     inFlightByTag.clear();
+}
+
+function normalizePerformanceResult(result, tag) {
+    if (!result || typeof result !== 'object') return unavailableResult(tag);
+    const value = Number(result.performance);
+    return {
+        ...result,
+        playerTag: result.playerTag || tag,
+        performance: Number.isFinite(value)
+            ? Math.min(100, Math.max(0, value))
+            : result.performance
+    };
 }
 
 function unavailableResult(tag, error = null) {
