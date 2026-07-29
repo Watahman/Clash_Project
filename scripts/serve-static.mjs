@@ -5,7 +5,7 @@ import { request as httpRequest } from 'node:http';
 import { request as httpsRequest } from 'node:https';
 import { extname, resolve, sep } from 'node:path';
 
-const root = resolve('src');
+const root = resolve(process.env.STATIC_ROOT || 'src');
 const port = Number(process.env.STATIC_PORT || 5173);
 const apiTarget = new URL(process.env.DEV_API_TARGET || 'http://localhost:8080');
 const mimeTypes = new Map([

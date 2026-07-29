@@ -100,4 +100,42 @@ class ProtectedRoutesTest {
         assertEquals(401, response.statusCode());
         assertFalse(response.body().contains("spoofed"));
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "/SupabaseWarAssignmentsGet",
+            "/SupabaseWarAssignmentSave",
+            "/SupabaseWarAssignmentDelete"
+    })
+    void regularWarAssignmentsRequireAnAuthenticatedSession(String path)
+            throws Exception {
+        Config config = new Config();
+        server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        SUPABASE_WarAssignments assignments =
+                new SUPABASE_WarAssignments(server, config);
+        assignments.getAssignments();
+        assignments.saveAssignment();
+        assignments.deleteAssignment();
+        server.start();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(
+                        "http://127.0.0.1:"
+                                + server.getAddress().getPort()
+                                + path
+                ))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(
+                        "{\"userId\":\"spoofed\",\"warKey\":\"spoofed\"}",
+                        StandardCharsets.UTF_8
+                ))
+                .build();
+        HttpResponse<String> response = HttpClient.newHttpClient().send(
+                request,
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        assertEquals(401, response.statusCode());
+        assertFalse(response.body().contains("spoofed"));
+    }
 }

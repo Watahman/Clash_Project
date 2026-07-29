@@ -21,7 +21,8 @@ const pageConfig = {
     dashboard: { key: 'nav.dashboard', fallback: 'Dashboard' },
     planner: { key: 'nav.cwl', fallback: 'CWL Planner' },
     drafts: { key: 'nav.savedPlans', fallback: 'Saved plans' },
-    operation: { key: 'nav.operation', fallback: 'Operation Board' },
+    operation: { key: 'nav.operation', fallback: 'CWL operation board' },
+    warOperation: { key: 'nav.warOperation', fallback: 'WAR operation board' },
     groups: { key: 'nav.groups', fallback: 'Clan Family' },
     bracket: { key: 'nav.bracket', fallback: 'Bracket generator' }
 };
@@ -76,6 +77,7 @@ const icons = {
     planner: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 6.5h14M5 12h14M5 17.5h14" stroke-width="1.7" stroke-linecap="round"/></svg>',
     drafts: '<svg viewBox="0 0 24 24" fill="none"><path d="M6 4.5h9l3 3v12H6v-15Z" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 11h6M9 15h6" stroke-width="1.7" stroke-linecap="round"/></svg>',
     operation: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 19V9m5 10V5m5 14v-7m4 7V7" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    warOperation: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3 5.5 6v5.2c0 4.2 2.7 7.8 6.5 9.8 3.8-2 6.5-5.6 6.5-9.8V6L12 3Z" stroke-width="1.7" stroke-linejoin="round"/><path d="m9 14 6-6m-5.5.5 5 5" stroke-width="1.7" stroke-linecap="round"/></svg>',
     groups: '<svg viewBox="0 0 24 24" fill="none"><path d="M8.5 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm7 1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM3.5 19v-1.5A3.5 3.5 0 0 1 7 14h3a3.5 3.5 0 0 1 3.5 3.5V19m0-4h2.5a3 3 0 0 1 3 3v1" stroke-width="1.7" stroke-linecap="round"/></svg>',
     bracket: '<svg viewBox="0 0 24 24" fill="none"><path d="M6 5h4v4H6V5Zm8 10h4v4h-4v-4Zm0-10h4v4h-4V5ZM10 7h2v10h2M12 7h2" stroke-width="1.7" stroke-linejoin="round"/></svg>',
     menu: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke-width="1.8" stroke-linecap="round"/></svg>',
@@ -106,6 +108,7 @@ function shellMarkup(currentPage) {
                 ${navLink('planner', './cwl-planner.html')}
                 ${navLink('drafts', './cwl-planner-drafts.html')}
                 ${navLink('operation', './cwl-operation-board.html')}
+                ${navLink('warOperation', './war-operation-board.html')}
                 <p data-i18n="shell.collaborate">Samenwerken</p>
                 ${navLink('groups', './groups.html')}
                 ${comingSoonNavItem('bracket')}

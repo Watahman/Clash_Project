@@ -174,6 +174,9 @@ public class Config {
     String _EXT_SUPA_GROUP_POLL_DELETE = "/SupabaseGroupPollDelete";
     String _EXT_SUPA_NOTIFICATIONS_GET = "/SupabaseNotificationsGet";
     String _EXT_SUPA_NOTIFICATION_READ = "/SupabaseNotificationRead";
+    String _EXT_SUPA_WAR_ASSIGNMENTS_GET = "/SupabaseWarAssignmentsGet";
+    String _EXT_SUPA_WAR_ASSIGNMENT_SAVE = "/SupabaseWarAssignmentSave";
+    String _EXT_SUPA_WAR_ASSIGNMENT_DELETE = "/SupabaseWarAssignmentDelete";
 
     static String firstNonBlank(String... values) {
         if (values == null) return "";

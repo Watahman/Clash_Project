@@ -81,6 +81,7 @@ export const fr = Object.freeze({
   "op.standingsNote": "{count} guerres terminees comptees. Classement provisoire.",
   "nav.cwl": "Planificateur CWL",
   "nav.operation": "Tableau operation",
+  "nav.warOperation": "Tableau operation WAR",
   "nav.groups": "Clan Family",
   "header.user": "Utilisateur",
   "language.label": "FR",

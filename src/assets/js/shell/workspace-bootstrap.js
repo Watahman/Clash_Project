@@ -7,6 +7,7 @@
         'cwl-planner.html',
         'cwl-planner-drafts.html',
         'cwl-operation-board.html',
+        'war-operation-board.html',
         'groups.html'
     ];
 

@@ -1,0 +1,132 @@
+import { describe, expect, it } from 'vitest';
+import {
+    ActiveCwlWarError,
+    buildWarBoardReport,
+    currentWarPlayerContext
+} from '../../src/assets/js/war-operation-board/war-report-model.js';
+import { buildWarContributions } from '../../src/assets/js/war-operation-board/war-contribution.js';
+import { buildWarMap } from '../../src/assets/js/war-operation-board/war-map-model.js';
+import { buildMathematicalWarStatus } from '../../src/assets/js/war-operation-board/war-outcome-model.js';
+
+describe('regular Clan War operation board', () => {
+    it('normalizes the selected clan and calculates net stars in attack order', () => {
+        const report = buildWarBoardReport(warFixture(), '#AAA');
+        const contributions = buildWarContributions(report);
+        const first = contributions.find(player => player.tag === '#P1');
+        const second = contributions.find(player => player.tag === '#P2');
+
+        expect(report.kind).toBe('regular-war');
+        expect(report.clan.name).toBe('Own clan');
+        expect(report.roster.map(player => player.name)).toEqual(['Alpha', 'Bravo']);
+        expect(first.netStars).toBe(2);
+        expect(second.netStars).toBe(1);
+        expect(buildWarMap(report, 'enemy')[0]).toMatchObject({
+            name: 'Enemy one',
+            stars: 3,
+            destruction: 100,
+            state: 'cleared'
+        });
+    });
+
+    it('keeps missed attacks hidden until the regular war has ended', () => {
+        const live = buildWarBoardReport(warFixture(), '#AAA');
+        const ended = buildWarBoardReport({
+            ...warFixture(),
+            state: 'warEnded'
+        }, '#AAA');
+
+        expect(currentWarPlayerContext(live, '#P1').missed).toBeNull();
+        expect(currentWarPlayerContext(ended, '#P1').missed).toBe(1);
+    });
+
+    it('uses per-base remaining star potential for the mathematical status', () => {
+        const report = buildWarBoardReport(warFixture(), '#AAA');
+        const status = buildMathematicalWarStatus(report);
+
+        expect(status.ownPotential).toBe(3);
+        expect(status.opponentPotential).toBe(4);
+        expect(status.status).toBe('open');
+    });
+
+    it('rejects a CWL war instead of leaking it into the regular-war board', () => {
+        expect(() => buildWarBoardReport({
+            ...warFixture(),
+            tag: '#CWLWAR'
+        }, '#AAA')).toThrow(ActiveCwlWarError);
+    });
+});
+
+function warFixture() {
+    return {
+        state: 'inWar',
+        teamSize: 2,
+        attacksPerMember: 2,
+        preparationStartTime: '20990101T000000.000Z',
+        startTime: '20990102T000000.000Z',
+        endTime: '20990103T000000.000Z',
+        clan: {
+            tag: '#AAA',
+            name: 'Own clan',
+            stars: 3,
+            destructionPercentage: 75,
+            attacks: 2,
+            members: [
+                {
+                    tag: '#P1',
+                    name: 'Alpha',
+                    townhallLevel: 16,
+                    mapPosition: 1,
+                    attacks: [{
+                        attackerTag: '#P1',
+                        defenderTag: '#E1',
+                        stars: 2,
+                        destructionPercentage: 80,
+                        order: 1
+                    }]
+                },
+                {
+                    tag: '#P2',
+                    name: 'Bravo',
+                    townhallLevel: 15,
+                    mapPosition: 2,
+                    attacks: [{
+                        attackerTag: '#P2',
+                        defenderTag: '#E1',
+                        stars: 3,
+                        destructionPercentage: 100,
+                        order: 2
+                    }]
+                }
+            ]
+        },
+        opponent: {
+            tag: '#BBB',
+            name: 'Opponent',
+            stars: 2,
+            destructionPercentage: 60,
+            attacks: 1,
+            members: [
+                {
+                    tag: '#E1',
+                    name: 'Enemy one',
+                    townhallLevel: 16,
+                    mapPosition: 1,
+                    attacks: [{
+                        attackerTag: '#E1',
+                        defenderTag: '#P1',
+                        stars: 2,
+                        destructionPercentage: 80,
+                        order: 1
+                    }]
+                },
+                {
+                    tag: '#E2',
+                    name: 'Enemy two',
+                    townhallLevel: 15,
+                    mapPosition: 2,
+                    attacks: []
+                }
+            ]
+        }
+    };
+}
