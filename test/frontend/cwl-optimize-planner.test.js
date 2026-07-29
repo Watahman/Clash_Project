@@ -112,6 +112,91 @@ describe('CWL Optimize Plan', () => {
             .some(action => action.type === 'free' || action.type === 'move')).toBe(false);
     });
 
+    it.each([
+        { capacity: 15, reserveCount: 4 },
+        { capacity: 30, reserveCount: 5 }
+    ])('keeps at least $capacity active players while removing excess depth', ({
+        capacity,
+        reserveCount
+    }) => {
+        const roster = playersForClan('alpha', capacity + reserveCount)
+            .map((player, index) => ({
+                ...player,
+                currentRole: index < capacity ? 'core' : 'reserve'
+            }));
+        roster[capacity - 1].performance.performance = 20;
+        roster.slice(capacity).forEach(player => {
+            player.performance.performance = 150;
+        });
+        const result = buildOptimizePlan(planInput({
+            clans: [{
+                ...clan('alpha', '#ALPHA', 'Master League I'),
+                capacity
+            }],
+            players: roster
+        }));
+        const optimizedClan = result.optimized.clans.find(item => item.id === 'alpha');
+
+        expect(optimizedClan.players.filter(player => player.role !== 'reserve'))
+            .toHaveLength(capacity);
+        expect(optimizedClan.warnings).not.toContainEqual(expect.objectContaining({
+            code: 'incomplete_roster'
+        }));
+    });
+
+    it('fills a 30v30 clan without taking a 15v15 source below its minimum', () => {
+        const source = playersForClan('alpha', 17).map((player, index) => ({
+            ...player,
+            currentRole: index < 15 ? 'core' : 'reserve'
+        }));
+        const target = playersForClan('large', 29, { offset: 40 });
+        const result = buildOptimizePlan(planInput({
+            clans: [
+                clan('alpha', '#ALPHA', 'Master League I'),
+                { ...clan('large', '#LARGE', 'Crystal League I'), capacity: 30 }
+            ],
+            players: [...source, ...target]
+        }));
+        const sourceClan = result.optimized.clans.find(item => item.id === 'alpha');
+        const targetClan = result.optimized.clans.find(item => item.id === 'large');
+
+        expect(sourceClan.players.filter(player => player.role !== 'reserve')).toHaveLength(15);
+        expect(targetClan.players.filter(player => player.role !== 'reserve')).toHaveLength(30);
+    });
+
+    it('promotes depth when it is needed to cover all seven CWL days', () => {
+        const roster = playersForClan('alpha', 16).map((player, index) => ({
+            ...player,
+            currentRole: index < 15 ? 'core' : 'reserve'
+        }));
+        roster[14].availability = {
+            state: 'partial',
+            availableDays: [1, 2, 3, 4, 5, 6]
+        };
+        roster[15].availability = {
+            state: 'partial',
+            availableDays: [7]
+        };
+        const result = buildOptimizePlan(planInput({
+            clans: [clan('alpha', '#ALPHA', 'Master League I')],
+            players: roster
+        }));
+
+        expect(result.suggestions).toContainEqual(expect.objectContaining({
+            type: 'structural',
+            actions: expect.arrayContaining([
+                expect.objectContaining({
+                    type: 'role',
+                    playerTag: '#P015',
+                    role: 'rotation'
+                })
+            ])
+        }));
+        expect(result.optimized.clans[0].warnings).not.toContainEqual(expect.objectContaining({
+            code: 'incomplete_day'
+        }));
+    });
+
     it('suggests a local role swap only when the improvement is meaningful', () => {
         const roster = playersForClan('alpha', 16, { equalScores: true })
             .map((player, index) => ({
@@ -202,6 +287,35 @@ describe('CWL Optimize Plan', () => {
             .toHaveLength(14);
         expect(applied.state.clans.find(item => item.id === 'beta').players)
             .toHaveLength(15);
+    });
+
+    it('rejects an accepted suggestion that would break a complete minimum roster', () => {
+        const result = buildOptimizePlan(planInput({
+            clans: [clan('alpha', '#ALPHA', 'Master League I')],
+            players: playersForClan('alpha', 15)
+        }));
+        const unsafeSuggestion = {
+            id: 'unsafe-role-change',
+            type: 'role-swap',
+            clanIds: ['alpha'],
+            actions: [{
+                type: 'role',
+                playerTag: '#P000',
+                clanId: 'alpha',
+                fromRole: 'core',
+                role: 'reserve'
+            }]
+        };
+        const accepted = buildAcceptedOptimization({
+            ...result,
+            suggestions: [unsafeSuggestion]
+        }, [unsafeSuggestion.id]);
+
+        expect(accepted.state.clans[0].players.filter(player => player.role !== 'reserve'))
+            .toHaveLength(15);
+        expect(accepted.state.clans[0].warnings).not.toContainEqual(expect.objectContaining({
+            code: 'incomplete_roster'
+        }));
     });
 
     it('is deterministic for the same plan input', () => {

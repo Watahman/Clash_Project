@@ -13,6 +13,7 @@ import {
     normalizeRosterStatus
 } from '../cwl-plan-schema.js';
 import { normalizeTag } from '../cwl-utils.js';
+import { preservesRequiredClanCoverage } from './cwl-optimize-plan-coverage.js';
 
 export function normalizeOptimizationInput(input) {
     const playersByTag = new Map();
@@ -98,10 +99,18 @@ export function recommendClanRoles(clan, players, roleLocks = {}) {
 export function applySuggestionActions(input, suggestions, selectedIds) {
     const normalized = normalizeOptimizationInput(input);
     const selected = new Set(selectedIds);
-    const actions = suggestions
-        .filter(suggestion => selected.has(suggestion.id))
-        .flatMap(suggestion => suggestion.actions);
-    const players = normalized.players.map(player => applyPlayerActions(player, actions));
+    let players = normalized.players.map(player => ({
+        ...player,
+        plannedDays: [...player.plannedDays]
+    }));
+    suggestions.filter(suggestion => selected.has(suggestion.id)).forEach(suggestion => {
+        const candidate = players.map(player =>
+            applyPlayerActions(player, suggestion.actions)
+        );
+        if (preservesRequiredClanCoverage(normalized, players, candidate)) {
+            players = candidate;
+        }
+    });
     return buildPlanState({ ...normalized, players });
 }
 

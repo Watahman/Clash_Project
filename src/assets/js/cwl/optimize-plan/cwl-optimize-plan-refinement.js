@@ -8,6 +8,7 @@ import {
     recommendClanRoles
 } from './cwl-optimize-plan-model.js';
 import { calculateChangeCost } from './cwl-optimize-plan-cost.js';
+import { hasRequiredClanCoverage } from './cwl-optimize-plan-coverage.js';
 
 export function generateRefinementSuggestions(input, players, add) {
     improveLocalRoles(input, players, add);
@@ -19,7 +20,7 @@ export function generateRefinementSuggestions(input, players, add) {
 function improveLocalRoles(input, players, add) {
     for (const clan of input.clans) {
         const assigned = clanPlayers(players, clan.id);
-        if (assigned.length < clan.capacity) continue;
+        if (!hasRequiredClanCoverage(clan, players, input.locks.roles)) continue;
         const recommendations = recommendClanRoles(clan, assigned, input.locks.roles);
         const cores = rankedForClan(assigned.filter(player =>
             player.currentRole === 'core'
@@ -92,7 +93,7 @@ function roleSwapActions(clan, outgoing, incoming) {
 function findCrossClanSwap(input, players) {
     const availableClans = input.clans.filter(clan =>
         !input.locks.startedClanIds.includes(clan.id)
-        && clanPlayers(players, clan.id).length >= clan.capacity
+        && hasRequiredClanCoverage(clan, players, input.locks.roles)
     );
     let best = null;
     for (let leftIndex = 0; leftIndex < availableClans.length; leftIndex += 1) {
@@ -148,6 +149,7 @@ function crossClanSuggestion(leftClan, rightClan, left, right, benefit) {
 function cleanSchedules(input, players, add) {
     const currentState = buildPlanState({ ...input, players });
     for (const clan of input.clans) {
+        if (!hasRequiredClanCoverage(clan, players, input.locks.roles)) continue;
         const current = currentState.clans.find(item => item.id === clan.id);
         const assigned = clanPlayers(players, clan.id);
         if (!assigned.some(player => player.hasPlannedDays)) continue;

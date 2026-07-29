@@ -3,20 +3,37 @@ import {
     scorePlayerForClan
 } from '../auto-plan/cwl-auto-plan-scoring.js';
 import {
+    buildPlanState,
     normalizeOptimizationInput,
     recommendClanRoles
 } from './cwl-optimize-plan-model.js';
+import {
+    activePlayerCount,
+    coverageGain,
+    hasRequiredClanCoverage,
+    preservesRequiredClanCoverage
+} from './cwl-optimize-plan-coverage.js';
 import { generateRefinementSuggestions } from './cwl-optimize-plan-refinement.js';
 
 export function generateOptimizationSuggestions(input) {
     const normalized = normalizeOptimizationInput(input);
+    const effectiveRoles = new Map(buildPlanState(normalized).clans.flatMap(clan =>
+        clan.players.map(player => [player.tag, player.role])
+    ));
     const working = normalized.players.map(player => ({
         ...player,
+        currentRole: effectiveRoles.get(player.tag) || player.currentRole,
         plannedDays: [...player.plannedDays]
     }));
     const suggestions = [];
     let sequence = 0;
     const add = suggestion => {
+        const candidate = working.map(player => ({
+            ...player,
+            plannedDays: [...player.plannedDays]
+        }));
+        applyActions(candidate, suggestion.actions);
+        if (!preservesRequiredClanCoverage(normalized, working, candidate)) return false;
         sequence += 1;
         const complete = {
             ...suggestion,
@@ -24,6 +41,7 @@ export function generateOptimizationSuggestions(input) {
         };
         suggestions.push(complete);
         applyActions(working, complete.actions);
+        return true;
     };
 
     fillIncompleteClans(normalized, working, add);
@@ -34,26 +52,26 @@ export function generateOptimizationSuggestions(input) {
 
 function fillIncompleteClans(input, players, add) {
     for (const clan of input.clans) {
-        let active = clanPlayers(players, clan.id)
-            .filter(player => player.currentRole !== 'reserve').length;
-        while (active < clan.capacity) {
-            const localReserve = rankedForClan(
-                clanPlayers(players, clan.id).filter(player =>
+        while (!hasRequiredClanCoverage(clan, players, input.locks.roles)) {
+            const assigned = clanPlayers(players, clan.id);
+            const active = activePlayerCount(players, clan.id, input.locks.roles);
+            const localReserve = rankedForCoverage(
+                assigned.filter(player =>
                     player.currentRole === 'reserve'
                     && !input.locks.roles[player.tag]
                     && isEligible(player)
                 ),
-                clan
+                clan,
+                assigned,
+                input.locks.roles
             )[0];
             if (localReserve) {
-                add(rolePromotion(clan, localReserve, active));
-                active += 1;
+                if (!add(rolePromotion(clan, localReserve, active))) break;
                 continue;
             }
             const candidate = bestStructuralMove(input, players, clan);
             if (!candidate) break;
-            add(moveToIncompleteClan(input, clan, candidate, active));
-            active += 1;
+            if (!add(moveToIncompleteClan(input, clan, candidate, active))) break;
         }
     }
 }
@@ -77,20 +95,31 @@ function rolePromotion(clan, player, activeCount) {
 
 function bestStructuralMove(input, players, target) {
     if (input.locks.startedClanIds.includes(target.id)) return null;
+    const targetPlayers = clanPlayers(players, target.id);
     const candidates = players.filter(player => {
         if (Object.hasOwn(input.locks.assignments, player.tag)) return false;
-        if (!player.currentClanId) return isEligible(player);
+        if (!isEligible(player)
+            || coverageGain(target, targetPlayers, player, input.locks.roles) <= 0) {
+            return false;
+        }
+        if (!player.currentClanId) return true;
         if (input.locks.startedClanIds.includes(player.currentClanId)) return false;
         const source = input.clans.find(clan => clan.id === player.currentClanId);
         if (!source) return false;
         const sourcePlayers = clanPlayers(players, source.id);
-        const sourceActive = sourcePlayers.filter(item => item.currentRole !== 'reserve');
         return sourcePlayers.length > source.capacity
-            && sourceActive.length >= source.capacity
-            && (player.currentRole === 'reserve' || sourceActive.length > source.capacity)
-            && isEligible(player);
+            && hasRequiredClanCoverage(
+                source,
+                players.filter(item => item.tag !== player.tag),
+                input.locks.roles
+            );
     });
-    return rankedForClan(candidates, target)[0] || null;
+    return rankedForCoverage(
+        candidates,
+        target,
+        targetPlayers,
+        input.locks.roles
+    )[0] || null;
 }
 
 function moveToIncompleteClan(input, clan, player, activeCount) {
@@ -133,13 +162,24 @@ function removeExcessDepth(input, players, add) {
         );
         if (!overflowCount) continue;
         const recommendations = recommendClanRoles(clan, assigned, input.locks.roles);
-        const excess = rankedForClan(
+        const candidates = rankedForClan(
             assigned.filter(player =>
                 recommendations.get(player.tag) === 'free'
                 && !Object.hasOwn(input.locks.assignments, player.tag)
             ),
             clan
-        ).reverse().slice(0, overflowCount);
+        ).reverse().sort((left, right) =>
+            Number(left.currentRole !== 'reserve') - Number(right.currentRole !== 'reserve')
+        );
+        const excess = [];
+        for (const player of candidates) {
+            if (excess.length >= overflowCount) break;
+            const remaining = players.filter(item =>
+                item.tag !== player.tag && !excess.some(entry => entry.tag === item.tag)
+            );
+            if (!hasRequiredClanCoverage(clan, remaining, input.locks.roles)) continue;
+            excess.push(player);
+        }
         excess.forEach(player => add({
             type: 'depth-cleanup',
             clanIds: [clan.id],
@@ -187,6 +227,15 @@ function rankedForClan(players, clan) {
             - scorePlayerForClan(left, clan).fit;
         return difference || left.tag.localeCompare(right.tag);
     });
+}
+
+function rankedForCoverage(players, clan, assigned, roleLocks) {
+    return [...players].sort((left, right) =>
+        coverageGain(clan, assigned, right, roleLocks)
+        - coverageGain(clan, assigned, left, roleLocks)
+        || scorePlayerForClan(right, clan).fit - scorePlayerForClan(left, clan).fit
+        || left.tag.localeCompare(right.tag)
+    ).filter(player => coverageGain(clan, assigned, player, roleLocks) > 0);
 }
 
 function isEligible(player) {
