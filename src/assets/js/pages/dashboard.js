@@ -185,6 +185,15 @@ function renderAll() {
     renderUser();
     renderPlans();
     renderGroups();
+    window.dispatchEvent(new CustomEvent('clashtools:dashboard-state', {
+        detail: {
+            loggedIn: state.loggedIn,
+            plans: state.plans.length,
+            groups: state.groups.length,
+            accounts: Array.isArray(state.user?.accounts) ? state.user.accounts.length : 0,
+            hasErrors: state.plansError || state.groupsError
+        }
+    }));
 }
 
 async function loadRecentGroups(userId) {

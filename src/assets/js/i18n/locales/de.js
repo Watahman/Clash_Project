@@ -80,7 +80,7 @@ export const de = Object.freeze({
   "op.standingsFallback": "Noch keine verlaessliche Tabelle aus beendeten Kriegen.",
   "op.standingsNote": "{count} beendete Kriege gezaehlt. Tabelle ist vorlaeufig.",
   "nav.cwl": "CWL Planer",
-  "nav.operation": "Operation Board",
+  "nav.operation": "CWL Operation Board",
   "nav.warOperation": "WAR Operation Board",
   "nav.groups": "Clan Family",
   "header.user": "Benutzer",

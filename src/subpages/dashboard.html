@@ -25,17 +25,39 @@
     <header class="workspace-page-header">
         <p class="page-kicker" data-i18n="nav.dashboard">Dashboard</p>
         <h1 id="dashboard-welcome" data-i18n="dashboard.welcome">Welcome back.</h1>
-        <p data-i18n="dashboard.intro">Open a recent plan or go straight to a tool.</p>
+        <p data-i18n="guidance.dashboard.hero">Choose an outcome, or continue with something you already started.</p>
     </header>
 
-    <nav class="workspace-launch-list" aria-label="Core tools" data-i18n-aria-label="dashboard.coreFunctions">
-        <a href="/app/cwl-planner"><span>01</span><span><strong>CWL Planner</strong><small data-i18n="dashboard.plannerDesc">Create or update a plan with multiple clans.</small></span><b data-i18n="dashboard.open">Open →</b></a>
-        <a href="/app/cwl-tracker"><span>02</span><span><strong>Operation Board</strong><small data-i18n="dashboard.operationDesc">Track one selected clan live.</small></span><b data-i18n="dashboard.open">Open →</b></a>
-        <a href="/app/clan-management"><span>03</span><span><strong data-i18n="nav.groups">Clan Family</strong><small data-i18n="dashboard.groupsDesc">Manage members, polls and linked clans.</small></span><b data-i18n="dashboard.open">Open →</b></a>
-        <a class="workspace-launch-coming-soon" aria-disabled="true" tabindex="-1"><span>04</span><span><span class="workspace-launch-title-row"><strong data-i18n="nav.bracket">Bracket generator</strong><em class="workspace-coming-soon-badge" data-i18n="common.comingSoon">(Coming soon)</em></span><small data-i18n="dashboard.bracketDesc">Create a local tournament bracket.</small></span><b data-i18n="common.comingSoon">(Coming soon)</b></a>
-    </nav>
+    <section class="workspace-dashboard-actions" aria-labelledby="dashboard-actions-title">
+        <div class="workspace-dashboard-actions-heading">
+            <p class="page-kicker" data-i18n="guidance.dashboard.chooseKicker">Start here</p>
+            <h2 id="dashboard-actions-title" data-i18n="guidance.dashboard.chooseTitle">What do you want to do?</h2>
+        </div>
+        <nav aria-label="Core tools" data-i18n-aria-label="dashboard.coreFunctions">
+            <a href="/app/cwl-planner">
+                <span class="workspace-dashboard-action-mark" aria-hidden="true">P</span>
+                <span><strong data-i18n="guidance.dashboard.planTitle">Plan a CWL</strong><small data-i18n="guidance.dashboard.planText">Build multi-clan rosters, use availability and create seven-day lineups.</small></span>
+                <b data-i18n="guidance.dashboard.planAction">Open Planner →</b>
+            </a>
+            <a href="/app/cwl-tracker">
+                <span class="workspace-dashboard-action-mark" aria-hidden="true">C</span>
+                <span><strong data-i18n="guidance.dashboard.runTitle">Run a CWL</strong><small data-i18n="guidance.dashboard.runText">Follow live wars, league standings, roster performance, bonuses and CWL history.</small></span>
+                <b data-i18n="guidance.dashboard.runAction">Open CWL Operation Board →</b>
+            </a>
+            <a href="/app/clan-management">
+                <span class="workspace-dashboard-action-mark" aria-hidden="true">F</span>
+                <span><strong data-i18n="guidance.dashboard.familyTitle">Manage a Clan Family</strong><small data-i18n="guidance.dashboard.familyText">Organize members, player accounts, linked clans and availability polls.</small></span>
+                <b data-i18n="guidance.dashboard.familyAction">Open Clan Family →</b>
+            </a>
+        </nav>
+    </section>
 
-    <div class="workspace-dashboard-split">
+    <section class="workspace-dashboard-continue" aria-labelledby="dashboard-continue-title">
+        <div class="workspace-dashboard-actions-heading">
+            <p class="page-kicker" data-i18n="guidance.dashboard.continueKicker">Your work</p>
+            <h2 id="dashboard-continue-title" data-i18n="guidance.dashboard.continueTitle">Continue where you left off</h2>
+        </div>
+        <div class="workspace-dashboard-split">
         <section class="workspace-section-block" aria-labelledby="recent-plans-title">
             <div class="workspace-section-heading">
                 <div><p class="page-kicker" data-i18n="dashboard.recent">Recent</p><h2 id="recent-plans-title" data-i18n="nav.savedPlans">Saved plans</h2></div>
@@ -62,7 +84,8 @@
                 <span data-i18n="dashboard.openProfile">Open profile →</span>
             </button>
         </aside>
-    </div>
+        </div>
+    </section>
 </main>
 <div class="profile-placeholder"></div>
 </body>

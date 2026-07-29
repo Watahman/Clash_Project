@@ -11,18 +11,20 @@ import {
     pollNotificationCopy,
     stageGroupPollNavigation
 } from '../notifications/poll-notifications.js';
+import { initWorkspaceGuidance } from './workspace-guidance.js';
 
 let notificationsData = null;
 let notificationsRequestId = 0;
 
 const SIDEBAR_COLLAPSED_KEY = 'clashtools_workspace_sidebar_collapsed';
+const GUIDANCE_STYLESHEET = '../assets/css/workspace-guidance.css';
 
 const pageConfig = {
     dashboard: { key: 'nav.dashboard', fallback: 'Dashboard' },
     planner: { key: 'nav.cwl', fallback: 'CWL Planner' },
     drafts: { key: 'nav.savedPlans', fallback: 'Saved plans' },
-    operation: { key: 'nav.operation', fallback: 'CWL operation board' },
-    warOperation: { key: 'nav.warOperation', fallback: 'WAR operation board' },
+    operation: { key: 'nav.operation', fallback: 'CWL Operation Board' },
+    warOperation: { key: 'nav.warOperation', fallback: 'WAR Operation Board' },
     groups: { key: 'nav.groups', fallback: 'Clan Family' },
     bracket: { key: 'nav.bracket', fallback: 'Bracket generator' }
 };
@@ -480,6 +482,8 @@ function initWorkspaceShell() {
 
     document.querySelector(`[data-workspace-nav="${currentPage}"]`)?.setAttribute('aria-current', 'page');
     initI18n(body);
+    const guidanceStyles = ensureGuidanceStyles();
+    initWorkspaceGuidance(currentPage);
     initThemeButton();
     initDesktopSidebar(sidebar);
     initMobileSidebar(sidebar, backdrop);
@@ -493,7 +497,18 @@ function initWorkspaceShell() {
         updateThemeButton
     );
 
-    return loadInitialWorkspaceData();
+    return Promise.all([loadInitialWorkspaceData(), guidanceStyles]);
+}
+
+function ensureGuidanceStyles() {
+    const existing = document.querySelector('link[data-workspace-guidance]');
+    if (existing) return Promise.resolve();
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = GUIDANCE_STYLESHEET;
+    link.dataset.workspaceGuidance = 'true';
+    document.head.appendChild(link);
+    return Promise.resolve();
 }
 
 const initialWorkspaceLoad = initWorkspaceShell();
