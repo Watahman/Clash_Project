@@ -39,7 +39,7 @@ describe('central JSON request errors', () => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('not-json', { status: 200 })));
         await expect(requestJson('/test')).rejects.toMatchObject({
             status: 200,
-            message: 'De server gaf een ongeldig antwoord.'
+            message: 'The server returned an invalid response.'
         });
     });
 

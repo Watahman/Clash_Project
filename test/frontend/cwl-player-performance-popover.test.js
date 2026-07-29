@@ -78,6 +78,7 @@ describe('CWL historical performance popover', () => {
         expect(popover.textContent).toContain('91.4%');
         expect(popover.textContent).toContain('Rounds played');
         expect(popover.textContent).toContain('Insufficient tracked war participation');
+        expect(popover.textContent).not.toContain('Reliability');
 
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
         expect(popover.classList.contains('hidden')).toBe(true);

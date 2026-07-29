@@ -124,6 +124,30 @@ describe('CWL planner clan rows', () => {
         const player = document.querySelector('#cwl-available-players .cwl-player-article');
         expect(player.querySelector('.cwl-roster-status')).toBeNull();
         expect(player.dataset.rosterStatus).toBeUndefined();
+        expect(player.querySelector('.cwl-move-player')?.value).toBe('free');
+    });
+
+    it("keeps the move selector aligned with the player's current clan", async () => {
+        const { createClanCard, createPlayerCard } = await import(
+            '../../src/assets/js/templates/CWLTemplates.js'
+        );
+        const { syncPlayerRosterStatus } = await import(
+            '../../src/assets/js/cwl/cwl-player-controls.js'
+        );
+        createClanCard({ tag: '#AAA111', name: 'North Guard' }, 15, 'north');
+        createPlayerCard({ tag: '#FREE1', name: 'Free player', townHallLevel: 16 }, null);
+        const player = document.querySelector('#cwl-available-players .cwl-player-article');
+        const clanList = document.querySelector('#cwl-clan-template_north .cwl-clan-player-list');
+
+        clanList.appendChild(player);
+        syncPlayerRosterStatus(player);
+
+        expect(player.querySelector('.cwl-move-player')?.value)
+            .toBe('cwl-clan-template_north');
+
+        document.querySelector('#cwl-available-players').appendChild(player);
+        syncPlayerRosterStatus(player);
+        expect(player.querySelector('.cwl-move-player')?.value).toBe('free');
     });
 
 });

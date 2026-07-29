@@ -81,8 +81,12 @@ export function collectWorkbookCandidates(workbook, XLSX) {
                 const tags = extractTagsFromCell(row[colIndex]);
                 if (!tags.length) continue;
 
-                const contextText = buildContextText(rows, rowIndex, colIndex, sheetName);
-                const inferredType = inferTagContext(contextText);
+                const inferredType = inferCellContext(
+                    rows,
+                    rowIndex,
+                    colIndex,
+                    sheetName
+                );
                 const cellAddress = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
 
                 for (const tag of tags) {
@@ -108,6 +112,15 @@ export function collectWorkbookCandidates(workbook, XLSX) {
     }
 
     return Array.from(byTag.values());
+}
+
+function inferCellContext(rows, rowIndex, colIndex, sheetName) {
+    for (let row = rowIndex - 1; row >= Math.max(0, rowIndex - 4); row -= 1) {
+        const above = Array.isArray(rows[row]) ? rows[row][colIndex] : '';
+        const directType = inferTagContext(above);
+        if (directType !== 'unknown') return directType;
+    }
+    return inferTagContext(buildContextText(rows, rowIndex, colIndex, sheetName));
 }
 
 function buildContextText(rows, rowIndex, colIndex, sheetName) {

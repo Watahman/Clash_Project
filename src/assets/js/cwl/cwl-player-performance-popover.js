@@ -180,20 +180,14 @@ function renderPerformance(data) {
         [t('performance.avgDestruction'), percent(data.avgDestruction)],
         [t('performance.tripleRate'), percent(data.tripleRate)],
         [t('performance.twoStarRate'), percent(data.twoStarRate)],
-        [t('performance.lowStarRate'), percent(data.lowStarRate)]
-    ]);
-    const reliability = section(t('performance.reliability'), metrics([
-        [
-            t('performance.reliability'),
-            data.reliability == null ? '—' : percent(data.reliability)
-        ],
+        [t('performance.lowStarRate'), percent(data.lowStarRate)],
         [
             t('performance.attacksUsed'),
             data.availableAttacks == null
                 ? t('performance.insufficientParticipation')
                 : `${data.usedAttacks} / ${data.availableAttacks}`
         ]
-    ]));
+    ]);
     const matchups = section(t('performance.matchups'), metrics([
         [t('performance.sameTh'), String(data.sameThCount)],
         [t('performance.upHit'), String(data.upHitCount)],
@@ -201,7 +195,7 @@ function renderPerformance(data) {
     ]));
     popover.replaceChildren(
         header, ...currentCwlNodes(), top, form, stats,
-        reliability, matchups, confidenceFooter(data)
+        matchups, confidenceFooter(data)
     );
 }
 

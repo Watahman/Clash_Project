@@ -4,6 +4,8 @@ import { normalizePlannedDays, normalizeRosterStatus } from './cwl-plan-schema.j
 import { t } from '../i18n/i18n.js';
 import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js';
 
+const moveControlRefreshers = new WeakMap();
+
 function clanCapacity(clan) {
     return Number(
         clan?.querySelector('.cwl-clan-capacity')?.value
@@ -61,6 +63,7 @@ function attachRosterStatusControl(element) {
 }
 
 export function syncPlayerRosterStatus(element, options = {}) {
+    syncPlayerMoveControl(element);
     const clan = element.closest('.cwl-clan-article');
     if (!clan) {
         delete element.dataset.rosterStatus;
@@ -147,6 +150,7 @@ export function attachMoveControl(element) {
         });
         select.value = currentContainer?.closest('.cwl-clan-article')?.id || 'free';
     };
+    moveControlRefreshers.set(element, refreshOptions);
 
     select.addEventListener('focus', refreshOptions);
     select.addEventListener('pointerdown', event => event.stopPropagation());
@@ -173,4 +177,11 @@ export function attachMoveControl(element) {
     });
     refreshOptions();
     element.appendChild(select);
+}
+
+export function syncPlayerMoveControl(element) {
+    const refresh = moveControlRefreshers.get(element);
+    if (!refresh) return '';
+    refresh();
+    return element.querySelector('.cwl-move-player')?.value || '';
 }
