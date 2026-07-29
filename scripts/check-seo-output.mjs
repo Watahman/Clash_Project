@@ -7,7 +7,7 @@ const pages = [
         file: 'index.html',
         canonical: 'https://clashpanel.com/',
         title: 'Clash of Clans Clan Management, CWL Planner & Tracker | ClashPanel',
-        h1: 'Plan stronger CWL lineups. Run the week from one place.',
+        h1: 'Run CWL without running a spreadsheet.',
         indexable: true,
         links: ['/cwl-planner', '/cwl-tracker', '/clan-management', '/about']
     },
@@ -23,7 +23,7 @@ const pages = [
         file: 'cwl-planner.html',
         canonical: 'https://clashpanel.com/cwl-planner',
         title: 'Free Clash of Clans CWL Planner & Roster Optimizer | ClashPanel',
-        h1: 'Clash of Clans CWL Planner',
+        h1: 'Plan every lineup. Across every clan.',
         indexable: true,
         links: ['/cwl-tracker']
     },
@@ -31,7 +31,7 @@ const pages = [
         file: 'cwl-tracker.html',
         canonical: 'https://clashpanel.com/cwl-tracker',
         title: 'Clash of Clans CWL Tracker, Stats & History | ClashPanel',
-        h1: 'Clash of Clans CWL Tracker & Operation Board',
+        h1: 'Run CWL with the full picture.',
         indexable: true,
         links: ['/cwl-planner']
     },
@@ -39,7 +39,7 @@ const pages = [
         file: 'clan-management.html',
         canonical: 'https://clashpanel.com/clan-management',
         title: 'Clash of Clans Clan Management & Clan Family Tool | ClashPanel',
-        h1: 'Clash of Clans Clan Management',
+        h1: 'Organise the clan network behind your CWL.',
         indexable: true,
         links: ['/cwl-planner']
     },

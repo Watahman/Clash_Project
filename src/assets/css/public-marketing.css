@@ -17,12 +17,7 @@ body.public-site::before {
     z-index: -2;
     inset: 0;
     pointer-events: none;
-    background:
-            linear-gradient(var(--marketing-grid) 1px, transparent 1px),
-            linear-gradient(90deg, var(--marketing-grid) 1px, transparent 1px);
-    background-size: 4rem 4rem;
-    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,.65), transparent 58%);
-    mask-image: linear-gradient(to bottom, rgba(0,0,0,.65), transparent 58%);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--surface-subtle) 18%, transparent), transparent 28rem);
 }
 
 body.public-site::after {

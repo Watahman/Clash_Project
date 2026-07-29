@@ -36,7 +36,7 @@
     <link rel="stylesheet" href="/assets/css/public-info.css">
 </head>
 <body class="public-site">
-<a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
+<a class="skip-link" href="#main-content">Skip to content</a>
 <header class="public-header">
     <a class="public-brand" href="/" aria-label="ClashPanel home"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a>
     <nav class="public-nav" id="public-nav" aria-label="Public navigation" data-i18n-aria-label="public.navigation">
@@ -53,62 +53,18 @@
     </div>
     <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" data-i18n-aria-label="public.openMenu" aria-label="Open menu"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
 </header>
-
-<main id="main-content" class="about-page">
-    <section class="about-hero" data-reveal>
-        <h1>Built for the people doing the organising.</h1>
-        <p>ClashPanel is a free, independent Clash of Clans toolkit for leaders and co-leaders who want to plan CWL, follow the week live and keep multiple clans organised without stitching together spreadsheets, notes and separate trackers.</p>
-        <div class="about-hero-actions">
-            <a class="button button-primary button-large" href="/subpages/register.html">Start for free</a>
-            <a class="button button-secondary button-large" href="/cwl-planner">See the CWL Planner</a>
-        </div>
-    </section>
-
-    <section class="about-grid">
-        <article class="about-card" data-reveal>
-            <small>01 / WHY</small>
-            <h2>One workflow instead of scattered admin.</h2>
-            <p>CWL planning gets complicated quickly when availability, player accounts, clan lineups, live wars and bonus decisions all live in different places. ClashPanel is built to keep those steps connected.</p>
-        </article>
-        <article class="about-card" data-reveal>
-            <small>02 / FOCUS</small>
-            <h2>Decision support, not fake automation.</h2>
-            <p>Auto Plan and optimization are meant to remove repetitive work. They preview and explain suggestions so the clan leadership still decides what actually happens.</p>
-        </article>
-        <article class="about-card about-card-wide" data-reveal>
-            <div>
-                <small>03 / BUILT AROUND</small>
-                <h2>The parts of clan management that are easy to lose track of.</h2>
-            </div>
-            <ul>
-                <li>Multi-clan CWL rosters, rotations and seven-day lineups.</li>
-                <li>Live league context, missed attacks, standings and bonus analysis.</li>
-                <li>Clan Families, linked accounts, member roles and availability polls.</li>
-                <li>Historical CWL context and performance information when reliable data is available.</li>
-            </ul>
-        </article>
-        <article class="about-card" data-reveal>
-            <small>04 / PRINCIPLE</small>
-            <h2>Useful before impressive.</h2>
-            <p>ClashPanel is intentionally built around practical clan workflows. Features should solve a real planning or coordination problem before they earn space in the product.</p>
-        </article>
-        <article class="about-card" data-reveal>
-            <small>05 / INDEPENDENT</small>
-            <h2>A fan-made project, not a Supercell product.</h2>
-            <p>ClashPanel is unofficial and independent. Clash of Clans, Supercell and related game content belong to their respective owners and are used subject to the applicable fan-content rules.</p>
-        </article>
-    </section>
+<main class="about-page" id="main-content">
+    <section class="about-hero" data-reveal><p class="about-label">ABOUT CLASHPANEL</p><h1>Built for the people doing the organising.</h1><p>Running CWL gets messy fast when rosters, availability, attacks and multiple clans all live in different places. ClashPanel exists to keep that workflow connected.</p><div class="about-hero-actions"><a class="button button-primary button-large" href="/subpages/register.html">Start for free</a><a class="button button-secondary button-large" href="/cwl-planner">See the CWL Planner</a></div></section>
+    <section class="about-story" data-reveal><div><span>01 / THE PROBLEM</span><h2>Clan leadership is mostly context switching.</h2></div><p>A CWL plan can start in a spreadsheet, availability in Discord, player history in another tool and the live league somewhere else. None of those pieces are individually difficult; keeping them consistent is.</p></section>
+    <section class="about-flow" data-reveal><article><span>PLAN</span><strong>Prepare the roster</strong><p>Players, clans, availability, roles and all seven lineups.</p></article><i>→</i><article><span>RUN</span><strong>Follow league week</strong><p>Current wars, standings, participation and decisions that still matter.</p></article><i>→</i><article><span>REVIEW</span><strong>Keep the context</strong><p>Historical CWL seasons and player performance when reliable data is available.</p></article></section>
+    <section class="about-story is-reverse" data-reveal><div><span>02 / THE PRODUCT</span><h2>Useful first. Connected second.</h2></div><p>Each ClashPanel tool should solve a real clan workflow on its own. The extra value comes from reusing the same roster, clan relationships and availability across planning, live CWL and review instead of entering everything again.</p></section>
+    <section class="about-independent" data-reveal><div><span>INDEPENDENT PROJECT</span><h2>ClashPanel is fan-made and not a Supercell product.</h2></div><p>ClashPanel is an independent Clash of Clans community project. Game names, assets and related content belong to their respective owners and are used subject to the applicable fan-content rules.</p></section>
 </main>
-
 <footer class="public-footer">
     <div class="public-footer-main">
         <a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a>
         <nav aria-label="Footer navigation" data-i18n-aria-label="public.footerNav">
-            <a href="/about" aria-current="page">About</a>
-            <a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a>
-            <a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a>
-            <a href="/subpages/terms" data-i18n="public.terms">Terms of use</a>
-            <a href="/subpages/contact" data-i18n="public.contact">Contact</a>
+            <a href="/about">About</a><a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a><a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a><a href="/subpages/terms" data-i18n="public.terms">Terms of use</a><a href="/subpages/contact" data-i18n="public.contact">Contact</a>
             <button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button>
         </nav>
     </div>

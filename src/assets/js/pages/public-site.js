@@ -182,6 +182,43 @@ function initHomepageDemo() {
     restart();
 }
 
+
+function initProductFlow() {
+    document.querySelectorAll('[data-product-flow]').forEach(root => {
+        const tabs = Array.from(root.querySelectorAll('[data-flow-tab]'));
+        const panels = Array.from(root.querySelectorAll('[data-flow-panel]'));
+        if (!tabs.length || !panels.length) return;
+
+        const activate = key => {
+            tabs.forEach(tab => {
+                const active = tab.dataset.flowTab === key;
+                tab.classList.toggle('is-active', active);
+                tab.setAttribute('aria-selected', String(active));
+                tab.tabIndex = active ? 0 : -1;
+            });
+            panels.forEach(panel => {
+                const active = panel.dataset.flowPanel === key;
+                panel.hidden = !active;
+                panel.classList.toggle('is-active', active);
+            });
+        };
+
+        tabs.forEach((tab, index) => {
+            tab.addEventListener('click', () => activate(tab.dataset.flowTab));
+            tab.addEventListener('keydown', event => {
+                if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+                event.preventDefault();
+                const nextIndex = event.key === 'Home' ? 0
+                    : event.key === 'End' ? tabs.length - 1
+                        : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+                const next = tabs[nextIndex];
+                activate(next.dataset.flowTab);
+                next.focus();
+            });
+        });
+    });
+}
+
 async function redirectReturningUser() {
     if (document.body.dataset.redirectAuthenticated !== 'true') return;
     const session = await syncAuthSession().catch(() => null);
@@ -196,6 +233,7 @@ async function init() {
     initHomepageReveal();
     initHomepageSpotlight();
     initHomepageDemo();
+    initProductFlow();
     window.addEventListener('clashtools:language-changed', updateThemeButtons);
     await redirectReturningUser();
 }
