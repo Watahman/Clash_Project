@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import {
     ActiveCwlWarError,
     buildWarBoardReport,
@@ -10,6 +11,18 @@ import { buildMathematicalWarStatus } from '../../src/assets/js/war-operation-bo
 import { applyCwlPredictions } from '../../src/assets/js/cwl/cwl-performance-prediction.js';
 
 describe('regular Clan War operation board', () => {
+    it('keeps the WAR operation board unavailable behind the shared coming-soon navigation state', () => {
+        const shell = readFileSync(
+            'src/assets/js/shell/workspace-shell.js',
+            'utf8'
+        );
+
+        expect(shell).toContain("comingSoonNavItem('warOperation')");
+        expect(shell).not.toContain(
+            "navLink('warOperation', './war-operation-board.html')"
+        );
+    });
+
     it('normalizes the selected clan and calculates net stars in attack order', () => {
         const report = buildWarBoardReport(warFixture(), '#AAA');
         const contributions = buildWarContributions(report);

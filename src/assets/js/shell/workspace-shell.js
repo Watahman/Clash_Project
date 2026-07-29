@@ -108,7 +108,7 @@ function shellMarkup(currentPage) {
                 ${navLink('planner', './cwl-planner.html')}
                 ${navLink('drafts', './cwl-planner-drafts.html')}
                 ${navLink('operation', './cwl-operation-board.html')}
-                ${navLink('warOperation', './war-operation-board.html')}
+                ${comingSoonNavItem('warOperation')}
                 <p data-i18n="shell.collaborate">Samenwerken</p>
                 ${navLink('groups', './groups.html')}
                 ${comingSoonNavItem('bracket')}
