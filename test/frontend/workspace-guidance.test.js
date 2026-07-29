@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { initWorkspaceGuidance } from '../../src/assets/js/shell/workspace-guidance.js';
 import { initI18n } from '../../src/assets/js/i18n/i18n.js';
+
+const guidanceCss = readFileSync(
+    'src/assets/css/workspace-guidance.css',
+    'utf8'
+);
 
 function shell(page, content) {
     document.body.removeAttribute('data-guidance-ready');
@@ -98,5 +104,19 @@ describe('workspace guidance', () => {
 
         expect(document.querySelectorAll('.workspace-help-list li')).toHaveLength(2);
         expect(document.querySelector('.workspace-help-list')?.textContent).not.toContain('three plans');
+    });
+
+    it('isolates the help header from legacy page-wide header styles', () => {
+        const isolatedHeader = guidanceCss.match(
+            /body\.workspace-app \.workspace-help-drawer \.workspace-help-drawer-panel > header\s*\{([^}]+)}/
+        )?.[1] || '';
+
+        expect(isolatedHeader).toContain('position: static');
+        expect(isolatedHeader).toContain('grid-template-columns: none');
+        expect(isolatedHeader).toContain('height: auto');
+        expect(isolatedHeader).toContain('padding: 0');
+        expect(isolatedHeader).toContain('background: transparent');
+        expect(isolatedHeader).toContain('backdrop-filter: none');
+        expect(isolatedHeader).toContain('box-shadow: none');
     });
 });

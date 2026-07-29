@@ -90,11 +90,30 @@ body.workspace-app .workspace-content .workspace-page-help-trigger:hover {
     padding: clamp(1.25rem, 4vw, 2rem);
 }
 
-.workspace-help-drawer-panel > header {
+body.workspace-app .workspace-help-drawer .workspace-help-drawer-panel > header {
+    position: static;
+    inset: auto;
+    z-index: auto;
     display: flex;
+    grid-template-columns: none;
+    width: 100%;
+    height: auto;
+    min-height: 0;
     align-items: flex-start;
     justify-content: space-between;
     gap: 1rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+body.workspace-app .workspace-help-drawer .workspace-help-drawer-panel > header > div {
+    min-width: 0;
+    flex: 1 1 auto;
 }
 
 .workspace-help-drawer h2 {
