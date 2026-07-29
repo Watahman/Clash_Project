@@ -60,7 +60,7 @@ const pageHelp = Object.freeze({
     drafts: {
         title: 'guidance.drafts.title',
         intro: 'guidance.drafts.intro',
-        items: ['guidance.drafts.itemOpen', 'guidance.drafts.itemSearch', 'guidance.drafts.itemLimit']
+        items: ['guidance.drafts.itemOpen', 'guidance.drafts.itemSearch']
     },
     bracket: {
         title: 'guidance.bracket.title',
@@ -124,36 +124,54 @@ function createHelpDrawer(page) {
                 </div>
                 <button class="workspace-help-close" type="button" aria-label="Close">&times;</button>
             </header>
-            <p class="workspace-help-intro"></p>
-            <ul class="workspace-help-list"></ul>
-            <nav class="workspace-help-links" aria-label="ClashPanel tools">
-                <a href="/dashboard" data-guidance-link="dashboard"></a>
-                <a href="/app/cwl-planner" data-guidance-link="planner"></a>
-                <a href="/app/cwl-tracker" data-guidance-link="operation"></a>
-                <a href="/app/clan-management" data-guidance-link="groups"></a>
-            </nav>
+            <div class="workspace-help-tabs" role="tablist" data-guidance-tabs-label>
+                <button type="button" role="tab" data-guidance-view="page" aria-controls="workspace-help-content" aria-selected="true"></button>
+                <button type="button" role="tab" data-guidance-view="profile" aria-controls="workspace-help-content" aria-selected="false"></button>
+            </div>
+            <section id="workspace-help-content" class="workspace-help-content" role="tabpanel">
+                <p class="workspace-help-intro"></p>
+                <ul class="workspace-help-list"></ul>
+            </section>
         </div>`;
     document.body.appendChild(dialog);
 
     let activePage = page;
+    let activeView = 'page';
     let returnFocus = null;
 
     const render = () => {
-        const config = pageHelp[activePage] || pageHelp.dashboard;
-        dialog.querySelector('[data-guidance-help-kicker]').textContent = t('guidance.help.kicker');
+        const config = activeView === 'profile'
+            ? {
+                title: 'guidance.profile.title',
+                intro: 'guidance.profile.intro',
+                items: [
+                    'guidance.profile.itemAccounts',
+                    'guidance.profile.itemFriends',
+                    'guidance.profile.itemFamily',
+                    'guidance.profile.itemSettings'
+                ]
+            }
+            : pageHelp[activePage] || pageHelp.dashboard;
+        dialog.querySelector('[data-guidance-help-kicker]').textContent = t(
+            activeView === 'profile' ? 'guidance.profile.kicker' : 'guidance.help.kicker'
+        );
         dialog.querySelector('#workspace-help-title').textContent = t(config.title);
         dialog.querySelector('.workspace-help-intro').textContent = t(config.intro);
         dialog.querySelector('.workspace-help-close').setAttribute('aria-label', t('common.close'));
+        dialog.querySelector('[data-guidance-tabs-label]').setAttribute('aria-label', t('guidance.help.sections'));
+        dialog.querySelector('[data-guidance-view="page"]').textContent = t('guidance.help.pageTab');
+        dialog.querySelector('[data-guidance-view="profile"]').textContent = t('guidance.help.profileTab');
+        dialog.querySelectorAll('[data-guidance-view]').forEach(button => {
+            const selected = button.dataset.guidanceView === activeView;
+            button.setAttribute('aria-selected', String(selected));
+            button.tabIndex = selected ? 0 : -1;
+        });
         const list = dialog.querySelector('.workspace-help-list');
         list.replaceChildren(...config.items.map(key => {
             const item = document.createElement('li');
             item.textContent = t(key);
             return item;
         }));
-        dialog.querySelector('[data-guidance-link="dashboard"]').textContent = t('nav.dashboard');
-        dialog.querySelector('[data-guidance-link="planner"]').textContent = t('nav.cwl');
-        dialog.querySelector('[data-guidance-link="operation"]').textContent = t('nav.operation');
-        dialog.querySelector('[data-guidance-link="groups"]').textContent = t('nav.groups');
     };
 
     const close = () => {
@@ -163,6 +181,7 @@ function createHelpDrawer(page) {
     };
     const open = (requestedPage = page, trigger = document.activeElement) => {
         activePage = pageHelp[requestedPage] ? requestedPage : page;
+        activeView = 'page';
         returnFocus = trigger;
         render();
         if (typeof dialog.showModal === 'function') dialog.showModal();
@@ -171,6 +190,19 @@ function createHelpDrawer(page) {
     };
 
     dialog.querySelector('.workspace-help-close').addEventListener('click', close);
+    dialog.querySelector('.workspace-help-tabs').addEventListener('click', event => {
+        const button = event.target.closest('[data-guidance-view]');
+        if (!button) return;
+        activeView = button.dataset.guidanceView;
+        render();
+    });
+    dialog.querySelector('.workspace-help-tabs').addEventListener('keydown', event => {
+        if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+        event.preventDefault();
+        activeView = activeView === 'page' ? 'profile' : 'page';
+        render();
+        dialog.querySelector(`[data-guidance-view="${activeView}"]`)?.focus();
+    });
     dialog.addEventListener('cancel', event => {
         event.preventDefault();
         close();
@@ -217,6 +249,7 @@ function pageHeader(page) {
 function mountPageHelp(page, drawer) {
     const header = pageHeader(page);
     if (!header || header.querySelector('.workspace-page-help-trigger')) return;
+    header.classList.add('workspace-page-guidance-copy');
     const button = document.createElement('button');
     button.className = 'workspace-page-help-trigger';
     button.type = 'button';

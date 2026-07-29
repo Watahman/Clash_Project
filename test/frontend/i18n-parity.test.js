@@ -57,4 +57,15 @@ describe('translation dictionaries', () => {
             }
         }
     });
+
+    it('keeps guidance copy free of semicolons and redundant Untitled instructions', () => {
+        for (const [locale, dictionary] of Object.entries(translations)) {
+            const guidanceCopy = Object.entries(dictionary)
+                .filter(([key]) => key.startsWith('guidance.'))
+                .map(([, value]) => String(value));
+
+            expect(guidanceCopy.some(value => value.includes(';')), locale).toBe(false);
+            expect(dictionary['guidance.planner.itemSave'], locale).not.toContain('Untitled');
+        }
+    });
 });

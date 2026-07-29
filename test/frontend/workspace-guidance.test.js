@@ -35,6 +35,16 @@ describe('workspace guidance', () => {
         document.querySelector('.workspace-page-help-trigger').click();
         expect(document.querySelector('#workspace-help-title')?.textContent).toBe('Follow a CWL');
         expect(document.querySelector('#workspace-help-drawer')?.hasAttribute('open')).toBe(true);
+        expect(document.querySelector('.workspace-help-links')).toBeNull();
+
+        const tabs = document.querySelectorAll('.workspace-help-tabs [role="tab"]');
+        expect(tabs).toHaveLength(2);
+        expect(tabs[0].textContent).toBe('This page');
+        expect(tabs[1].textContent).toBe('Profile');
+        tabs[1].click();
+        expect(document.querySelector('#workspace-help-title')?.textContent).toBe('Your profile is useful too');
+        expect(document.querySelectorAll('.workspace-help-list li')).toHaveLength(4);
+        expect(document.querySelector('.workspace-help-list')?.textContent).toContain('Add and verify');
     });
 
     it('derives planner progress from the real roster, poll, lineups and saved-plan state', () => {
@@ -76,5 +86,17 @@ describe('workspace guidance', () => {
         expect(checklist.open).toBe(false);
         expect(checklist.querySelectorAll('li.is-complete')).toHaveLength(4);
         expect(checklist.querySelector('summary strong').textContent).toBe('Clan Family is ready');
+    });
+
+    it('keeps saved-plan help concise without a trailing plan-limit line', () => {
+        shell('drafts', `
+            <header class="drafts-header"><div><h1>Saved plans</h1><p>Intro</p></div></header>`);
+
+        initWorkspaceGuidance('drafts');
+        initI18n(document.body);
+        document.querySelector('.workspace-page-help-trigger').click();
+
+        expect(document.querySelectorAll('.workspace-help-list li')).toHaveLength(2);
+        expect(document.querySelector('.workspace-help-list')?.textContent).not.toContain('three plans');
     });
 });
