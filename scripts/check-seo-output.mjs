@@ -124,6 +124,14 @@ assert(
     'robots.txt must reference the production sitemap'
 );
 
+const redirects = await readFile(resolve('dist', '_redirects'), 'utf8');
+for (const name of ['privacy', 'cookies', 'terms', 'contact']) {
+    assert(
+        redirects.includes(`/subpages/${name}.html /subpages/${name} 301`),
+        `_redirects must permanently canonicalize ${name}.html`
+    );
+}
+
 const legalPaths = [
     '/subpages/privacy',
     '/subpages/cookies',

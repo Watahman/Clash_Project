@@ -75,6 +75,16 @@ describe('Pre-launch static contract', () => {
         expect(sitemap.match(/https:\/\/replace-with-production-domain\.invalid/g)).toHaveLength(8);
     });
 
+    it('defines permanent static fallbacks for legacy legal URLs', () => {
+        const redirects = readFileSync('src/_redirects', 'utf8');
+
+        for (const name of ['privacy', 'cookies', 'terms', 'contact']) {
+            expect(redirects).toContain(
+                `/subpages/${name}.html /subpages/${name} 301`
+            );
+        }
+    });
+
     it('defines baseline static security and preview noindex headers', () => {
         const headers = readFileSync('src/_headers', 'utf8');
 
