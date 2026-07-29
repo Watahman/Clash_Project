@@ -18,14 +18,14 @@ const PUBLIC_REDIRECTS = new Map([
     ["/subpages/cookies.html", "/subpages/cookies"],
     ["/subpages/terms.html", "/subpages/terms"],
     ["/subpages/contact.html", "/subpages/contact"],
-    ["/subpages/dashboard", "/app/dashboard"],
-    ["/subpages/dashboard.html", "/app/dashboard"],
+    ["/subpages/dashboard", "/dashboard"],
+    ["/subpages/dashboard.html", "/dashboard"],
     ["/subpages/cwl-planner-drafts", "/app/cwl-planner-drafts"],
     ["/subpages/cwl-planner-drafts.html", "/app/cwl-planner-drafts"]
 ]);
 
 const APP_ASSETS = new Map([
-    ["/app/dashboard", "/subpages/dashboard"],
+    ["/dashboard", "/subpages/dashboard"],
     ["/app/cwl-planner", "/subpages/cwl-planner"],
     ["/app/cwl-planner-drafts", "/subpages/cwl-planner-drafts"],
     ["/app/cwl-tracker", "/subpages/cwl-operation-board"],
@@ -34,7 +34,9 @@ const APP_ASSETS = new Map([
 ]);
 
 const APP_ALIASES = new Map([
-    ["/app/dashboard.html", "/app/dashboard"],
+    ["/dashboard.html", "/dashboard"],
+    ["/app/dashboard", "/dashboard"],
+    ["/app/dashboard.html", "/dashboard"],
     ["/app/cwl-planner.html", "/app/cwl-planner"],
     ["/app/cwl-planner-drafts.html", "/app/cwl-planner-drafts"],
     ["/app/cwl-operation-board", "/app/cwl-tracker"],

@@ -82,7 +82,7 @@ function render() {
     refs.container.replaceChildren();
     if (!userId) {
         updateFilterStatus(0, 0);
-        refs.container.appendChild(emptyRow('drafts.loginRequired', 'auth.login', './login.html'));
+        refs.container.appendChild(emptyRow('drafts.loginRequired', 'auth.login', '/subpages/login.html'));
         return;
     }
     if (!plans.length) {

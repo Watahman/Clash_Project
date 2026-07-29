@@ -31,6 +31,8 @@ describe('Cloudflare API proxy', () => {
         ['/subpages/cookies.html', '/subpages/cookies'],
         ['/subpages/terms.html', '/subpages/terms'],
         ['/subpages/contact.html', '/subpages/contact'],
+        ['/subpages/dashboard.html', '/dashboard'],
+        ['/app/dashboard', '/dashboard'],
         ['/cwl-planner.html', '/cwl-planner']
     ])('permanently redirects %s to its public canonical route', async (source, destination) => {
         const response = await worker.fetch(
@@ -59,6 +61,25 @@ describe('Cloudflare API proxy', () => {
         );
 
         expect(await response.text()).toBe('asset:/subpages/cwl-operation-board');
+        expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
+    });
+
+    it('serves the dashboard on the clean top-level route', async () => {
+        const bindings = env({
+            ASSETS: {
+                fetch: vi.fn(async request => new Response(
+                    `asset:${new URL(request.url).pathname}`,
+                    { headers: { 'Content-Type': 'text/html' } }
+                ))
+            }
+        });
+
+        const response = await worker.fetch(
+            new Request('https://clashpanel.com/dashboard'),
+            bindings
+        );
+
+        expect(await response.text()).toBe('asset:/subpages/dashboard');
         expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
     });
 

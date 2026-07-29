@@ -484,12 +484,7 @@ function trapProfileFocus(event) {
 }
 
 function redirectToLogin() {
-    const path = window.location.pathname;
-    if (path.includes('/subpages/')) {
-        window.location.href = './login.html';
-    } else {
-        window.location.href = './subpages/login.html';
-    }
+    window.location.href = '/subpages/login.html';
 }
 
 function clickToCloseOverlays(){

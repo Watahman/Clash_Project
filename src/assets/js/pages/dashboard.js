@@ -90,7 +90,7 @@ function planRow(plan) {
     const actions = document.createElement('td');
     actions.className = 'workspace-row-actions';
     const open = document.createElement('a');
-    open.href = './cwl-planner.html';
+    open.href = '/app/cwl-planner';
     open.className = 'workspace-row-link';
     open.textContent = t('drafts.open');
     open.addEventListener('click', () => selectPlan(plan.id));
@@ -108,11 +108,11 @@ function renderPlans() {
     }
     setStatus(refs.planStatus);
     if (!state.loggedIn) {
-        refs.planList.appendChild(tableMessage('dashboard.loginRequired', 'auth.login', './login.html'));
+        refs.planList.appendChild(tableMessage('dashboard.loginRequired', 'auth.login', '/subpages/login.html'));
         return;
     }
     if (!state.plans.length) {
-        refs.planList.appendChild(tableMessage('dashboard.noPlans', 'dashboard.createFirstPlan', './cwl-planner.html'));
+        refs.planList.appendChild(tableMessage('dashboard.noPlans', 'dashboard.createFirstPlan', '/app/cwl-planner'));
         return;
     }
     state.plans.slice(0, 3).forEach(plan => refs.planList.appendChild(planRow(plan)));
@@ -121,7 +121,7 @@ function renderPlans() {
 function groupRow(entry) {
     const link = document.createElement('a');
     link.className = 'workspace-summary-row';
-    link.href = './groups.html';
+    link.href = '/app/clan-management';
     link.addEventListener('click', () => sessionStorage.setItem('clashtoolsOpenGroupId', entry.group.id));
     const mark = document.createElement('span');
     mark.className = 'workspace-group-mark';
@@ -167,7 +167,7 @@ function renderGroups() {
         return;
     }
     if (!state.groups.length) {
-        refs.groupList.appendChild(groupMessage('dashboard.noGroups', 'dashboard.openGroups', './groups.html'));
+        refs.groupList.appendChild(groupMessage('dashboard.noGroups', 'dashboard.openGroups', '/app/clan-management'));
         return;
     }
     state.groups.forEach(group => refs.groupList.appendChild(groupRow(group)));

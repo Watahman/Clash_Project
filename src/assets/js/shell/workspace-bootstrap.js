@@ -3,7 +3,7 @@
 
     const html = document.documentElement;
     const PAGE_PATHS = [
-        '/app/dashboard',
+        '/dashboard',
         '/app/cwl-planner',
         '/app/cwl-planner-drafts',
         '/app/cwl-tracker',

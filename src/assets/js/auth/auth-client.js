@@ -119,7 +119,7 @@ export function onAuthStateChange(callback) {
     return () => listeners.delete(callback);
 }
 
-export async function getGoogleSignInUrl(next = '/app/dashboard') {
+export async function getGoogleSignInUrl(next = '/dashboard') {
     const data = await requestJson(authEndpoint('/AuthGoogle'), {
         body: { next },
         loading: 'blocking',
@@ -133,6 +133,6 @@ export async function getGoogleSignInUrl(next = '/app/dashboard') {
     return data.url;
 }
 
-export async function signInWithGoogle(next = '/app/dashboard') {
+export async function signInWithGoogle(next = '/dashboard') {
     window.location.assign(await getGoogleSignInUrl(next));
 }

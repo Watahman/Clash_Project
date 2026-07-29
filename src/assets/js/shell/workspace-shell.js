@@ -99,11 +99,11 @@ function shellMarkup(currentPage) {
     const current = pageConfig[currentPage] || pageConfig.dashboard;
     return {
         sidebar: `<aside class="workspace-sidebar" id="workspace-sidebar">
-            <a class="workspace-brand" href="/app/dashboard"><img src="../assets/css/pictures/clashtools-logo.png" alt=""><span><strong>ClashPanel</strong><small>CWL workspace</small></span></a>
+            <a class="workspace-brand" href="/dashboard"><img src="../assets/css/pictures/clashtools-logo.png" alt=""><span><strong>ClashPanel</strong><small>CWL workspace</small></span></a>
             <button class="workspace-sidebar-toggle" id="workspace-sidebar-toggle" type="button" aria-controls="workspace-sidebar" aria-expanded="true">${icons.collapse}</button>
             <nav class="workspace-nav" id="workspace-navigation" aria-label="Applicatienavigatie" data-i18n-aria-label="shell.navigation">
                 <p data-i18n="shell.overview">Overzicht</p>
-                ${navLink('dashboard', '/app/dashboard')}
+                ${navLink('dashboard', '/dashboard')}
                 <p>CWL</p>
                 ${navLink('planner', '/app/cwl-planner')}
                 ${navLink('drafts', '/app/cwl-planner-drafts')}
@@ -439,7 +439,7 @@ async function protectRoute() {
     const session = await syncAuthSession().catch(() => null);
     if (session) return true;
     const next = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-    window.location.replace(`./login.html?next=${encodeURIComponent(next)}`);
+    window.location.replace(`/subpages/login.html?next=${encodeURIComponent(next)}`);
     return false;
 }
 

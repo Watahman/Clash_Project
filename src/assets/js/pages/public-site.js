@@ -84,7 +84,7 @@ function initCookiePreferencesControls() {
 async function redirectReturningUser() {
     if (document.body.dataset.redirectAuthenticated !== 'true') return;
     const session = await syncAuthSession().catch(() => null);
-    if (session) window.location.replace('/app/dashboard');
+    if (session) window.location.replace('/dashboard');
 }
 
 async function init() {

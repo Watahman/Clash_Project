@@ -16,17 +16,18 @@ const status = document.querySelector('#auth-status');
 
 function destinationAfterLogin() {
     const requested = new URLSearchParams(window.location.search).get('next');
-    if (!requested) return '/app/dashboard';
+    if (!requested) return '/dashboard';
     try {
         const destination = new URL(requested, window.location.origin);
         if (destination.origin !== window.location.origin
-            || (!destination.pathname.startsWith('/app/')
+            || (destination.pathname !== '/dashboard'
+                && !destination.pathname.startsWith('/app/')
                 && !destination.pathname.startsWith('/subpages/'))) {
-            return '/app/dashboard';
+            return '/dashboard';
         }
         return `${destination.pathname}${destination.search}${destination.hash}`;
     } catch {
-        return '/app/dashboard';
+        return '/dashboard';
     }
 }
 

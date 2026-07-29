@@ -26,14 +26,16 @@ class OAuthPkceTest {
     }
 
     @Test
-    void onlyAllowsInternalSubPageDestinations() {
+    void onlyAllowsInternalAppDestinations() {
+        assertEquals("/dashboard", OAuthPkce.sanitizeNext("/dashboard"));
+        assertEquals("/app/cwl-planner?plan=active", OAuthPkce.sanitizeNext("/app/cwl-planner?plan=active"));
         assertEquals(
                 "/subpages/groups.html?tab=polls#active",
                 OAuthPkce.sanitizeNext("/subpages/groups.html?tab=polls#active")
         );
-        assertEquals("/subpages/dashboard.html", OAuthPkce.sanitizeNext("https://evil.example/subpages/groups.html"));
-        assertEquals("/subpages/dashboard.html", OAuthPkce.sanitizeNext("//evil.example/subpages/groups.html"));
-        assertEquals("/subpages/dashboard.html", OAuthPkce.sanitizeNext("/subpages/../../index.html"));
-        assertEquals("/subpages/dashboard.html", OAuthPkce.sanitizeNext("/subpages/groups.html\r\nLocation:https://evil.example"));
+        assertEquals("/dashboard", OAuthPkce.sanitizeNext("https://evil.example/subpages/groups.html"));
+        assertEquals("/dashboard", OAuthPkce.sanitizeNext("//evil.example/subpages/groups.html"));
+        assertEquals("/dashboard", OAuthPkce.sanitizeNext("/subpages/../../index.html"));
+        assertEquals("/dashboard", OAuthPkce.sanitizeNext("/subpages/groups.html\r\nLocation:https://evil.example"));
     }
 }
