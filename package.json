@@ -10,7 +10,8 @@
     "check:migrations": "node scripts/check-migrations.mjs",
     "check:endpoints": "node scripts/check-endpoints.mjs",
     "check:casing": "node scripts/check-filename-casing.mjs",
-    "check": "npm run check:migrations && npm run check:endpoints && npm run check:casing && npm test && npm run build"
+    "check:static": "node scripts/check-static-output.mjs",
+    "check": "npm run check:migrations && npm run check:endpoints && npm run check:casing && npm test && npm run build && npm run check:static"
   },
   "repository": {
     "type": "git",

@@ -23,6 +23,7 @@ jobs:
       - run: npm run check:casing
       - run: npm test
       - run: npm run build
+      - run: npm run check:static
 
   backend:
     runs-on: ubuntu-latest

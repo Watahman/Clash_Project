@@ -5,7 +5,17 @@ Audited checkout: `C:\Users\Emile\IdeaProjects\Clash_Project`
 Branch and starting revision: `Development` at `501eded`
 Decision: **CONDITIONAL GO**
 
-The code is ready for a controlled staging release. Production is not yet a GO because the audited changes have not been deployed, the new database migration has not been applied, shared proxy authentication still needs matching secrets, and several external/manual controls remain open.
+The audited release is deployed to production and its automated, infrastructure and live smoke checks pass. The decision remains CONDITIONAL GO because leaked-password protection requires a paid Supabase plan, destructive account lifecycle tests and two-user authorization tests were not run against real production users, monitoring alerts are not configured, and AdSense is still reviewing the site.
+
+## Production release
+
+- GitHub release branch: `Development`; draft PR: [#2](https://github.com/Watahman/Clash_Project/pull/2).
+- GitHub CI passes for both the branch push and pull request at `9185b85`.
+- Cloudflare Worker/static release: version `1e0b40aa-b7fe-4b2b-8ae0-245fe31847a4`.
+- Cloud Run backend: revision `clashpanel-api-00022-cas`, serving 100% of production traffic.
+- Supabase migration file `20260729121006_harden_database_access_and_indexes.sql` was validated on the existing test project and applied to production as migration `20260729131503`.
+- A shared `API_PROXY_SECRET` is present in Cloudflare and Google Secret Manager. The Cloud Run runtime service account has access only to that secret, and direct application API requests without it return `403 PROXY_AUTH_REQUIRED`.
+- The Cloudflare rule `Redirect www to apex` is active as a `301` and preserves the complete path and query string.
 
 ## Fixed
 
@@ -34,7 +44,7 @@ The code is ready for a controlled staging release. Production is not yet a GO b
   - missing pages and assets return `404`;
   - missing API routes return a structured JSON `404`.
 - This matches Cloudflare's documented static-site routing and HTML handling behavior: [Static site generation](https://developers.cloudflare.com/workers/static-assets/routing/static-site-generation/) and [HTML handling](https://developers.cloudflare.com/workers/static-assets/routing/advanced/html-handling/).
-- `www.clashpanel.com` currently returns `200` instead of redirecting to the canonical apex host. Configure a Cloudflare Bulk Redirect; static `_redirects` rules do not support domain-level redirects ([Cloudflare redirects](https://developers.cloudflare.com/workers/static-assets/redirects/)).
+- `www.clashpanel.com` now permanently redirects to the canonical apex host while preserving path and query string.
 
 ## Error handling
 
@@ -54,11 +64,13 @@ The code is ready for a controlled staging release. Production is not yet a GO b
   - removes browser-role access from trigger-only helpers and reminder-delivery storage;
   - adds the twelve foreign-key indexes flagged by the live performance advisor.
 - Authenticated execution on the three read-only identity helpers remains intentional because current RLS policies depend on it. Their results are tied to the authenticated identity.
+- The post-migration security advisor no longer reports anonymous SECURITY DEFINER access. Its remaining leaked-password warning cannot be enabled on the current Free plan.
 
 ## Performance
 
 - Removed approximately 3.8 MB of proven-unused or duplicate image assets.
 - Removed six JavaScript modules that were absent from every HTML entry point and the complete static import graph.
+- The static build now removes the backend `Java` source tree and internal `REDESIGN_NOTES.txt` before deployment. CI rejects any `.java`, `.env`, backend folder or design note found in `dist`.
 - No long immutable cache lifetime was added because asset filenames are not content-versioned. Cloudflare can safely revalidate current static assets with ETags.
 - Town Hall images remain a measurable optimization opportunity; resizing them was left out to avoid an unreviewed visual asset change.
 
@@ -74,9 +86,13 @@ Verification after the changes:
 - `npm run check`: **58 files, 224 tests passed**; migration, route, casing and production build checks passed.
 - `mvn test`: **42 tests passed**.
 - `mvn package -DskipTests`: shaded production JAR built successfully.
-- Build mirror: **298 source files and 298 dist files**, no unexpected mismatches, and no production-domain placeholder remained.
+- Static output validation: **237 public files**, with no backend source, environment file or internal design note.
 - `npm audit --audit-level=high`: **0 vulnerabilities**.
-- Local browser smoke test: homepage, public policy rendering and authenticated-route redirect passed with no browser-console messages.
+- Live browser smoke test: homepage, public policy rendering, unauthenticated-route redirect, authenticated saved-plans and planner loading passed without application browser-console warnings.
+- Live proxy checks: invalid `/api/Player` requests reach the backend and return the expected structured `400`; missing API routes return structured JSON `404`; direct Cloud Run application requests without the proxy secret return `403`.
+- Cloud Run logs for the new revision show successful authenticated app requests and no error-level entries during the release window.
+- Supabase performance advisors no longer report the twelve missing foreign-key indexes.
+- AdSense reports `ads.txt` as **Authorized**, European regulations as **1 active**, and **No current issues** in Policy Center. Site approval remains **Getting ready**.
 
 ## Removed code
 
@@ -99,7 +115,7 @@ The following images had no source, CSS, JavaScript or HTML references, or were 
 
 - No redesign, navigation change, application workflow change or broad refactor.
 - No Content Security Policy yet: current inline bootstrapping, JSON-LD, AdSense, Google sign-in and SheetJS require a tested nonce/hash and consent-aware policy first.
-- No HSTS in the static file because it should be configured and verified at the canonical domain level.
+- No HSTS change: this should be staged separately because browsers cache the policy and subdomain coverage must be intentional.
 - No speculative removal of Supabase “unused” indexes; low traffic is not proof that an index is obsolete.
 - No primary-key or permissive-policy restructuring; those changes need staged data and authorization validation.
 - No removal of the bracket module; it is an explicit future/disabled feature with tests.
@@ -107,14 +123,13 @@ The following images had no source, CSS, JavaScript or HTML references, or were 
 
 ## Remaining risks
 
-Release blockers:
+Required follow-up:
 
-1. Configure the same strong `API_PROXY_SECRET` in the Cloudflare Worker and Cloud Run before enabling the new backend verification in production.
-2. Apply `20260729121006_harden_database_access_and_indexes.sql` to staging, run authorization tests and Supabase advisors, then apply it to production with a backup.
-3. Configure a permanent `www.clashpanel.com` to `https://clashpanel.com` redirect.
-4. Enable Supabase leaked-password protection.
-5. Complete live register/login/reset/logout/Google sign-in, AdSense consent, two-user RLS and core planner/operation/poll workflows.
-6. Configure production monitoring and alerting for `401`, `403`, `429`, `5xx`, upstream failures and readiness.
+1. Enable Supabase leaked-password protection after upgrading from the Free plan, or keep the current application-side password checks until an upgrade is justified.
+2. Run controlled register/confirm/reset/logout/Google sign-in and two-user RLS tests with dedicated production test accounts.
+3. Complete mutation-based browser tests for save/rename/copy/delete plans and multi-user operation/poll workflows using disposable data.
+4. Configure production monitoring and alerting for `401`, `403`, `429`, `5xx`, upstream failures and readiness.
+5. Wait for AdSense site approval; the current status is **Getting ready**.
 
 Non-blocking follow-up:
 
@@ -125,28 +140,21 @@ Non-blocking follow-up:
 
 ## Production checks
 
-Observed before deployment:
+Observed after deployment:
 
-| URL | Current result | Required after release |
-| --- | --- | --- |
-| `https://clashpanel.com/` | `200`, canonical homepage | `200` plus static security headers |
-| `https://www.clashpanel.com/` | `200` duplicate host | permanent redirect to apex |
-| `https://clashpanel.com/subpages/privacy` | `200` | `200` with canonical/social metadata |
-| `https://clashpanel.com/subpages/privacy.html` | `307` to clean route | keep |
-| `https://clashpanel.com/definitely-missing-page-audit` | `404` | keep |
-| `https://clashpanel.com/assets/definitely-missing-audit.js` | `404` | keep |
-| `https://clashpanel.com/api/definitely-missing-audit` | `404 text/html` | `404 application/json` |
-| `https://clashpanel.com/robots.txt` | `200` | updated rules and production sitemap URL |
-| `https://clashpanel.com/sitemap.xml` | `200` | five canonical public URLs |
-| `https://clashpanel.com/ads.txt` | `200` | keep and verify publisher ID in AdSense |
+| URL | Production result |
+| --- | --- |
+| `https://clashpanel.com/` | `200` with static security headers |
+| `https://www.clashpanel.com/subpages/privacy?release=audit` | `301` to the identical apex path and query |
+| `https://clashpanel.com/subpages/privacy` | `200` with canonical/social metadata |
+| `https://clashpanel.com/subpages/privacy.html` | `307` to the clean route |
+| `https://clashpanel.com/definitely-missing-page-audit` | `404` |
+| `https://clashpanel.com/assets/definitely-missing-audit.js` | `404` |
+| `https://clashpanel.com/api/definitely-missing-audit` | `404 application/json` |
+| `https://clashpanel.com/Java/Config.java` | `404` |
+| `https://clashpanel.com/REDESIGN_NOTES.txt` | `404` |
+| `https://clashpanel.com/robots.txt` | `200` with production sitemap URL |
+| `https://clashpanel.com/sitemap.xml` | `200` with five canonical public URLs |
+| `https://clashpanel.com/ads.txt` | `200`; AdSense reports **Authorized** |
 
-Safe release order:
-
-1. Create the same secret value in Cloudflare and Cloud Run while the old code still ignores it.
-2. Apply and validate the database migration in staging.
-3. Deploy the Worker/static build, then deploy the backend.
-4. Apply the validated migration to production.
-5. Configure the apex-host redirect and leaked-password protection.
-6. Run every URL and manual control above, rerun Supabase advisors, and only then change the decision to **GO**.
-
-No commits, pushes, merges, deployments, secret changes or live database writes were performed during this audit.
+The release was deployed in the documented order: shared secret, test migration, production database migration, Worker/static assets, no-traffic backend revision, tagged health/readiness tests, 100% backend traffic, canonical redirect, advisors and live smoke tests. No merge to `master` was performed.
