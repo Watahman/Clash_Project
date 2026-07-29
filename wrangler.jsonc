@@ -3,6 +3,14 @@
   "name": "clashpanel",
   "compatibility_date": "2026-07-24",
   "main": "./worker/index.js",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    {
+      "pattern": "clashpanel.com",
+      "custom_domain": true
+    }
+  ],
 
   "assets": {
     "directory": "./dist",
