@@ -16,6 +16,13 @@
     cursor: pointer;
 }
 
+.workspace-page-subtitle {
+    max-width: 48rem;
+    margin: .65rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.55;
+}
+
 .workspace-page-help-trigger::before {
     display: grid;
     width: 1.15rem;

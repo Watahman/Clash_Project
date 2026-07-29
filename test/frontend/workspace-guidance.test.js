@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { initWorkspaceGuidance } from '../../src/assets/js/shell/workspace-guidance.js';
+import { initI18n } from '../../src/assets/js/i18n/i18n.js';
 
 function shell(page, content) {
     document.body.removeAttribute('data-guidance-ready');
@@ -25,6 +26,7 @@ describe('workspace guidance', () => {
             <section id="op-panel-summary"></section>`);
 
         initWorkspaceGuidance('operation');
+        initI18n(document.body);
 
         expect(document.querySelector('#workspace-help-button')).toBeTruthy();
         expect(document.querySelector('.workspace-page-help-trigger')).toBeTruthy();

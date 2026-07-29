@@ -226,11 +226,8 @@ function mountPageHelp(page, drawer) {
     };
     button.addEventListener('click', () => drawer.open(page, button));
     const subtitle = header.querySelector(':scope > p:last-of-type');
-    if (subtitle) {
-        subtitle.append(document.createElement('br'), button);
-    } else {
-        header.appendChild(button);
-    }
+    subtitle?.classList.add('workspace-page-subtitle');
+    header.appendChild(button);
     window.addEventListener('clashtools:language-changed', render);
     render();
 }
