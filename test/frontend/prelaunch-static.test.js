@@ -7,6 +7,7 @@ const publicPages = new Map([
     ['src/cwl-planner.html', 'https://clashpanel.com/cwl-planner'],
     ['src/cwl-tracker.html', 'https://clashpanel.com/cwl-tracker'],
     ['src/clan-management.html', 'https://clashpanel.com/clan-management'],
+    ['src/about.html', 'https://clashpanel.com/about'],
     ['src/subpages/privacy.html', 'https://clashpanel.com/subpages/privacy'],
     ['src/subpages/cookies.html', 'https://clashpanel.com/subpages/cookies'],
     ['src/subpages/terms.html', 'https://clashpanel.com/subpages/terms'],
@@ -72,7 +73,7 @@ describe('Pre-launch static contract', () => {
         expect(robots).toContain('https://replace-with-production-domain.invalid/sitemap.xml');
         expect(sitemap).not.toContain('https://clashpanel.com');
         expect(sitemap).not.toContain('/bracket-generator');
-        expect(sitemap.match(/https:\/\/replace-with-production-domain\.invalid/g)).toHaveLength(8);
+        expect(sitemap.match(/https:\/\/replace-with-production-domain\.invalid/g)).toHaveLength(9);
     });
 
     it('defines permanent static fallbacks for legacy legal URLs', () => {
@@ -83,6 +84,7 @@ describe('Pre-launch static contract', () => {
                 `/subpages/${name}.html /subpages/${name} 301`
             );
         }
+        expect(redirects).toContain('/about.html /about 301');
     });
 
     it('defines baseline static security and preview noindex headers', () => {

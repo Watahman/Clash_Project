@@ -7,7 +7,7 @@ const pages = [
         file: 'index.html',
         canonical: 'https://clashpanel.com/',
         title: 'Clash of Clans Clan Management, CWL Planner & Tracker | ClashPanel',
-        h1: 'Plan, track and manage your Clash of Clans clan',
+        h1: 'Plan CWL without the spreadsheet chaos.',
         indexable: true,
         links: ['/cwl-planner', '/cwl-tracker', '/clan-management', '/bracket-generator']
     },
@@ -34,6 +34,14 @@ const pages = [
         h1: 'Clash of Clans Clan Management',
         indexable: true,
         links: ['/cwl-planner']
+    },
+    {
+        file: 'about.html',
+        canonical: 'https://clashpanel.com/about',
+        title: 'About ClashPanel | CWL Planning for Clan Leaders',
+        h1: 'About ClashPanel',
+        indexable: true,
+        links: ['/cwl-planner', '/subpages/contact']
     },
     {
         file: 'bracket-generator.html',
@@ -153,7 +161,7 @@ for (const file of publicHtmlFiles) {
     }
 }
 
-console.log('Validated SEO metadata, crawl controls, sitemap and canonical links for 4 indexable pages and 1 coming-soon page.');
+console.log('Validated SEO metadata, crawl controls, sitemap and canonical links for 5 indexable pages and 1 coming-soon page.');
 
 function assert(condition, message) {
     if (!condition) throw new Error(message);

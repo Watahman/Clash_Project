@@ -33,47 +33,51 @@
     <script src="/assets/js/shell/workspace-bootstrap.js"></script>
     <link rel="stylesheet" href="/assets/css/workspace-system.css">
     <link rel="stylesheet" href="/assets/css/light-theme.css">
-    <link rel="stylesheet" href="/assets/css/workspace-polish.css">
-    <link rel="stylesheet" href="/assets/css/public-home-v2.css">
-    <link rel="stylesheet" href="/assets/css/public-tool-page.css">
+    <link rel="stylesheet" href="/assets/css/public-marketing.css">
     <script src="/assets/js/Data/runtime-config.js"></script>
     <script type="module" src="/assets/js/pages/public-site.js"></script>
 </head>
-<body class="public-site public-tool-page">
-<a class="skip-link" href="#main-content">Skip to content</a>
+<body class="public-site public-feature-page">
+<a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
 <header class="public-header">
     <a class="public-brand" href="/" aria-label="ClashPanel home"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a>
-    <nav class="public-nav" id="public-nav" aria-label="Public navigation"><a href="/cwl-planner">CWL Planner</a><a href="/cwl-tracker">CWL Tracker</a><a href="/clan-management">Clan Management</a><a href="/bracket-generator" aria-current="page">Bracket Generator</a></nav>
-    <div class="public-actions"><button type="button" data-language-control>Language</button><button class="theme-button" type="button" data-theme-toggle aria-label="Switch theme"><span aria-hidden="true">◐</span></button><a class="link-button" href="/subpages/login.html">Log in</a><a class="button button-primary" href="/subpages/register.html">Start for free</a></div>
-    <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" aria-label="Open menu"><span></span><span></span><span></span></button>
+    <nav class="public-nav" id="public-nav" aria-label="Public navigation" data-i18n-aria-label="public.navigation"><a href="/">Home</a><a href="/cwl-planner">CWL Planner</a><a href="/cwl-tracker">Operation Board</a><a href="/clan-management">Clan Families</a><a href="/about" data-i18n="public.about">About</a><a href="/subpages/contact" data-i18n="public.contact">Contact</a><a class="public-nav-mobile-account" href="/subpages/login.html" data-i18n="auth.login">Log in</a><a class="public-nav-mobile-account" href="/subpages/register.html" data-i18n="public.startFree">Start for free</a></nav>
+    <div class="public-actions"><button type="button" data-language-control data-i18n="header.language">Language</button><button class="theme-button" type="button" data-theme-toggle aria-label="Switch theme"><span aria-hidden="true">◐</span></button><a class="link-button" href="/subpages/login.html" data-i18n="auth.login">Log in</a><a class="button button-primary" href="/subpages/register.html" data-i18n="public.startFree">Start for free</a></div>
+    <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" aria-label="Open menu"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
 </header>
-<main class="public-tool-main" id="main-content">
-    <nav class="public-tool-breadcrumbs" aria-label="Breadcrumb"><a href="/">ClashPanel</a><span aria-hidden="true">/</span><span>Bracket Generator</span></nav>
-    <section class="public-tool-hero">
-        <div>
-            <p class="public-tool-kicker">Community tournaments</p>
+
+<main class="marketing-feature-main" id="main-content">
+    <nav class="marketing-breadcrumbs" aria-label="Breadcrumb"><a href="/">ClashPanel</a><span aria-hidden="true">/</span><span>Bracket Generator</span></nav>
+    <section class="marketing-feature-hero">
+        <div class="marketing-feature-copy">
+            <p class="marketing-label">Coming soon</p>
             <h1>Clash of Clans Bracket Generator</h1>
-            <p class="public-tool-lead">Create a seeded or shuffled knockout bracket, choose each match winner and follow participants through every tournament round.</p>
-            <div class="public-tool-actions"><span class="button button-primary button-large" aria-disabled="true">Coming soon</span><a class="button button-secondary button-large" href="/">Explore ClashPanel</a></div>
-            <p class="public-tool-note">The generator is being prepared for public release</p>
+            <p>A focused knockout bracket for seeded or shuffled participants is planned for ClashPanel. The public tool is not available yet.</p>
+            <div class="marketing-hero-actions"><a class="button button-primary button-large" href="/cwl-planner">Use CWL Planner</a><a class="button button-secondary button-large" href="/">Back to homepage</a></div>
         </div>
-        <div class="public-tool-preview" role="img" aria-label="ClashPanel knockout bracket generator with seeded Clash of Clans participants">
-            <header><strong>Clan tournament</strong><span>8 participants</span></header>
-            <div class="public-tool-preview-body">
-                <div class="public-tool-preview-metrics"><div><small>Round</small><strong>Final</strong></div><div><small>Matches</small><strong>7</strong></div><div><small>Champion</small><strong>—</strong></div></div>
-                <div class="public-tool-preview-list">
-                    <div class="public-tool-preview-row"><b>1</b><span><strong>Belgian Warriors</strong><small>Seeded participant</small></span><em>Advanced</em></div>
-                    <div class="public-tool-preview-row"><b>4</b><span><strong>Night Raiders</strong><small>Quarter-final winner</small></span><em>Final</em></div>
-                    <div class="public-tool-preview-row"><b>8</b><span><strong>Crystal Guard</strong><small>Knockout bracket</small></span><em>Ready</em></div>
+        <div class="marketing-feature-preview">
+            <div class="marketing-mini-ui" role="img" aria-label="Preview of a future ClashPanel knockout bracket">
+                <div class="marketing-frame-bar"><div class="marketing-frame-brand"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span><strong>Knockout bracket</strong><small>8 participants · preview</small></span></div><span>Coming soon</span></div>
+                <div class="marketing-mini-tabs"><span class="is-active">Quarter-finals</span><span>Semi-finals</span><span>Final</span></div>
+                <div class="marketing-mini-body">
+                    <div class="marketing-standing-row"><b>1</b><span><strong>Belgian Warriors</strong><small>Seeded participant</small></span><em>Advanced</em></div>
+                    <div class="marketing-standing-row"><b>4</b><span><strong>Night Raiders</strong><small>Quarter-final winner</small></span><em>Final</em></div>
+                    <div class="marketing-standing-row"><b>8</b><span><strong>Crystal Guard</strong><small>Knockout bracket</small></span><em>Ready</em></div>
                 </div>
             </div>
         </div>
     </section>
-    <section class="public-tool-section"><h2>What the bracket generator does</h2><div class="public-tool-section-copy"><p>Enter a list of Clash of Clans players or clans, keep the given order for a seeded bracket or shuffle the participants. Selecting a winner automatically advances that participant to the next round.</p></div></section>
-    <section class="public-tool-section"><h2>Key bracket features</h2><div class="public-tool-section-copy"><ul class="public-tool-feature-list"><li>Seeded knockout brackets</li><li>Shuffled brackets</li><li>Automatic round progression</li><li>JSON import and export</li></ul></div></section>
-    <section class="public-tool-section"><h2>How it works</h2><div class="public-tool-section-copy"><ol class="public-tool-steps"><li>Add one tournament participant per line.</li><li>Generate the bracket in order or shuffle the initial matchups.</li><li>Choose each match winner until the bracket produces a champion.</li></ol></div></section>
-    <aside class="public-tool-crosslink"><div><h2>Organizing Clan War League instead?</h2><p>Build multi-clan lineups and seven-day rotations with the CWL Planner.</p></div><a href="/cwl-planner">Explore CWL Planner →</a></aside>
+    <aside class="marketing-crosslink"><div><h2>Planning Clan War League instead?</h2><p>Build multi-clan lineups and seven-day rotations with the live CWL Planner.</p></div><a class="button button-secondary" href="/cwl-planner">Explore CWL Planner</a></aside>
 </main>
-<footer class="public-footer"><div class="public-footer-main"><a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a><nav aria-label="Footer navigation"><a href="/subpages/privacy">Privacy</a><a href="/subpages/cookies">Cookies</a><a href="/subpages/terms">Terms of use</a><a href="/subpages/contact">Contact</a></nav></div><p class="public-disclaimer">ClashPanel is unofficial and is not endorsed by Supercell.</p></footer>
+
+<footer class="public-footer">
+    <div class="public-footer-grid">
+        <div class="public-footer-brand"><a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a><p>Focused tools for planning, running and organising Clan War League.</p></div>
+        <nav class="public-footer-column" aria-label="Product links"><strong>Product</strong><a href="/cwl-planner">CWL Planner</a><a href="/cwl-tracker">Operation Board</a><a href="/clan-management">Clan Families</a></nav>
+        <nav class="public-footer-column" aria-label="Company links"><strong>ClashPanel</strong><a href="/about" data-i18n="public.about">About</a><a href="/subpages/contact" data-i18n="public.contact">Contact</a><a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer" data-i18n="public.fanPolicy">Supercell Fan Content Policy</a></nav>
+        <nav class="public-footer-column" aria-label="Legal links" data-i18n-aria-label="public.footerNav"><strong>Legal</strong><a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a><a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a><a href="/subpages/terms" data-i18n="public.terms">Terms of use</a><button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button></nav>
+    </div>
+    <div class="public-footer-bottom"><p data-i18n="home.footer">© 2026 ClashPanel · Not affiliated with Supercell</p><p data-i18n="public.disclaimer">ClashPanel is unofficial and is not endorsed by Supercell.</p></div>
+</footer>
 </body>
 </html>
