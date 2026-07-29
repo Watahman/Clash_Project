@@ -8,6 +8,7 @@ const pages = [
         canonical: 'https://clashpanel.com/',
         title: 'Clash of Clans Clan Management, CWL Planner & Tracker | ClashPanel',
         h1: 'Plan, track and manage your Clash of Clans clan',
+        indexable: true,
         links: ['/cwl-planner', '/cwl-tracker', '/clan-management', '/bracket-generator']
     },
     {
@@ -15,6 +16,7 @@ const pages = [
         canonical: 'https://clashpanel.com/cwl-planner',
         title: 'Free Clash of Clans CWL Planner & Roster Optimizer | ClashPanel',
         h1: 'Clash of Clans CWL Planner',
+        indexable: true,
         links: ['/cwl-tracker']
     },
     {
@@ -22,6 +24,7 @@ const pages = [
         canonical: 'https://clashpanel.com/cwl-tracker',
         title: 'Clash of Clans CWL Tracker, Stats & History | ClashPanel',
         h1: 'Clash of Clans CWL Tracker & Operation Board',
+        indexable: true,
         links: ['/cwl-planner']
     },
     {
@@ -29,6 +32,7 @@ const pages = [
         canonical: 'https://clashpanel.com/clan-management',
         title: 'Clash of Clans Clan Management & Clan Family Tool | ClashPanel',
         h1: 'Clash of Clans Clan Management',
+        indexable: true,
         links: ['/cwl-planner']
     },
     {
@@ -36,6 +40,8 @@ const pages = [
         canonical: 'https://clashpanel.com/bracket-generator',
         title: 'Clash of Clans Bracket Generator | ClashPanel',
         h1: 'Clash of Clans Bracket Generator',
+        indexable: false,
+        comingSoon: true,
         links: ['/cwl-planner']
     }
 ];
@@ -66,7 +72,12 @@ for (const page of pages) {
     assert(!canonicalLinks[0].href.includes('/subpages/'), `${page.file}: legacy canonical`);
     assert(h1s.length === 1, `${page.file}: expected exactly one H1`);
     assert(h1s[0].textContent.trim() === page.h1, `${page.file}: incorrect H1`);
-    assert(/\bindex\b/i.test(robots) && !/\bnoindex\b/i.test(robots), `${page.file}: not indexable`);
+    if (page.indexable) {
+        assert(/\bindex\b/i.test(robots) && !/\bnoindex\b/i.test(robots), `${page.file}: not indexable`);
+    } else {
+        assert(/\bnoindex\b/i.test(robots), `${page.file}: unavailable page must be noindex`);
+        assert(/\bfollow\b/i.test(robots), `${page.file}: unavailable page should keep link discovery`);
+    }
     assert(ogUrl === page.canonical, `${page.file}: og:url differs from canonical`);
     assert(ogImage?.startsWith('https://clashpanel.com/assets/social/'), `${page.file}: missing social image`);
     assert(twitterCard === 'summary_large_image', `${page.file}: expected large Twitter card`);
@@ -79,10 +90,16 @@ for (const page of pages) {
 
     const structuredData = [...document.querySelectorAll('script[type="application/ld+json"]')];
     assert(structuredData.length === 1, `${page.file}: expected one JSON-LD block`);
-    structuredData.forEach(script => JSON.parse(script.textContent));
+    const parsedStructuredData = structuredData.map(script => JSON.parse(script.textContent));
+    if (page.comingSoon) {
+        assert(
+            !JSON.stringify(parsedStructuredData).includes('"WebApplication"'),
+            `${page.file}: coming-soon page must not claim to be a live WebApplication`
+        );
+    }
 }
 
-const expectedSitemapUrls = pages.map(page => page.canonical).concat([
+const expectedSitemapUrls = pages.filter(page => page.indexable).map(page => page.canonical).concat([
     'https://clashpanel.com/subpages/privacy',
     'https://clashpanel.com/subpages/cookies',
     'https://clashpanel.com/subpages/terms',
@@ -94,16 +111,41 @@ assert(
     JSON.stringify(sitemapUrls) === JSON.stringify(expectedSitemapUrls),
     'sitemap.xml does not contain only the canonical public URLs'
 );
+assert(!sitemap.includes('/bracket-generator'), 'Coming-soon Bracket Generator must not be in sitemap.xml');
 assert(!sitemap.includes('/war-tracker'), 'Future War Tracker must not be in sitemap.xml');
 
 const robots = await readFile(resolve('dist', 'robots.txt'), 'utf8');
-assert(robots.includes('Disallow: /app/'), 'robots.txt must keep private app routes out of crawl');
+assert(
+    !robots.includes('Disallow: /app/'),
+    'robots.txt must allow crawlers to see X-Robots-Tag noindex on private app routes'
+);
 assert(
     robots.includes('Sitemap: https://clashpanel.com/sitemap.xml'),
     'robots.txt must reference the production sitemap'
 );
 
-console.log(`Validated SEO metadata, content and links for ${pages.length} canonical pages.`);
+const legalPaths = [
+    '/subpages/privacy',
+    '/subpages/cookies',
+    '/subpages/terms',
+    '/subpages/contact'
+];
+const publicHtmlFiles = pages.map(page => page.file).concat([
+    'subpages/privacy.html',
+    'subpages/cookies.html',
+    'subpages/terms.html',
+    'subpages/contact.html'
+]);
+for (const file of publicHtmlFiles) {
+    const source = await readFile(resolve('dist', file), 'utf8');
+    const document = new JSDOM(source).window.document;
+    for (const path of legalPaths) {
+        assert(document.querySelector(`a[href="${path}"]`), `${file}: missing canonical legal link to ${path}`);
+        assert(!document.querySelector(`a[href="${path}.html"]`), `${file}: links to non-canonical ${path}.html`);
+    }
+}
+
+console.log('Validated SEO metadata, crawl controls, sitemap and canonical links for 4 indexable pages and 1 coming-soon page.');
 
 function assert(condition, message) {
     if (!condition) throw new Error(message);

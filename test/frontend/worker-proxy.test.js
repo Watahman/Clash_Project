@@ -27,6 +27,10 @@ describe('Cloudflare API proxy', () => {
         ['/subPages/cwl-operation-board', '/cwl-tracker'],
         ['/subpages/groups/', '/clan-management'],
         ['/subpages/bracket-generator.html', '/bracket-generator'],
+        ['/subpages/privacy.html', '/subpages/privacy'],
+        ['/subpages/cookies.html', '/subpages/cookies'],
+        ['/subpages/terms.html', '/subpages/terms'],
+        ['/subpages/contact.html', '/subpages/contact'],
         ['/cwl-planner.html', '/cwl-planner']
     ])('permanently redirects %s to its public canonical route', async (source, destination) => {
         const response = await worker.fetch(

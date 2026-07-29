@@ -7,11 +7,14 @@ const publicPages = new Map([
     ['src/cwl-planner.html', 'https://clashpanel.com/cwl-planner'],
     ['src/cwl-tracker.html', 'https://clashpanel.com/cwl-tracker'],
     ['src/clan-management.html', 'https://clashpanel.com/clan-management'],
-    ['src/bracket-generator.html', 'https://clashpanel.com/bracket-generator'],
     ['src/subpages/privacy.html', 'https://clashpanel.com/subpages/privacy'],
     ['src/subpages/cookies.html', 'https://clashpanel.com/subpages/cookies'],
     ['src/subpages/terms.html', 'https://clashpanel.com/subpages/terms'],
     ['src/subpages/contact.html', 'https://clashpanel.com/subpages/contact']
+]);
+
+const comingSoonPages = new Map([
+    ['src/bracket-generator.html', 'https://clashpanel.com/bracket-generator']
 ]);
 
 const privatePages = [
@@ -41,6 +44,19 @@ describe('Pre-launch static contract', () => {
         expect(document.querySelector('meta[name="twitter:card"]')?.content).toMatch(/^summary/);
     });
 
+    it.each([...comingSoonPages])('%s remains discoverable but not indexable before launch', (path, canonical) => {
+        const document = documentFor(path);
+        expect(document.querySelector('meta[name="robots"]')?.content).toMatch(/\bnoindex\b/i);
+        expect(document.querySelector('meta[name="robots"]')?.content).toMatch(/\bfollow\b/i);
+        expect(document.querySelector('link[rel="canonical"]')?.href).toBe(canonical);
+        expect(document.body.textContent).toContain('Coming soon');
+        expect(
+            [...document.querySelectorAll('script[type="application/ld+json"]')]
+                .map(script => script.textContent)
+                .join('')
+        ).not.toContain('WebApplication');
+    });
+
     it.each(privatePages)('%s explicitly opts out of indexing', path => {
         const robots = documentFor(path).querySelector('meta[name="robots"]')?.content || '';
         expect(robots).toMatch(/\bnoindex\b/i);
@@ -51,11 +67,12 @@ describe('Pre-launch static contract', () => {
         const sitemap = readFileSync('src/sitemap.xml', 'utf8');
 
         expect(robots).toContain('Disallow: /api/');
-        expect(robots).toContain('Disallow: /app/');
+        expect(robots).not.toContain('Disallow: /app/');
         expect(robots).toContain('Disallow: /subpages/popup_htmls/');
         expect(robots).toContain('https://replace-with-production-domain.invalid/sitemap.xml');
         expect(sitemap).not.toContain('https://clashpanel.com');
-        expect(sitemap.match(/https:\/\/replace-with-production-domain\.invalid/g)).toHaveLength(9);
+        expect(sitemap).not.toContain('/bracket-generator');
+        expect(sitemap.match(/https:\/\/replace-with-production-domain\.invalid/g)).toHaveLength(8);
     });
 
     it('defines baseline static security and preview noindex headers', () => {
@@ -70,7 +87,12 @@ describe('Pre-launch static contract', () => {
     });
 
     it('uses explicit button types in every HTML source', () => {
-        const pages = [...publicPages.keys(), ...privatePages, 'src/subpages/popup_htmls/profile_popup.html'];
+        const pages = [
+            ...publicPages.keys(),
+            ...comingSoonPages.keys(),
+            ...privatePages,
+            'src/subpages/popup_htmls/profile_popup.html'
+        ];
         for (const path of new Set(pages)) {
             const buttonsWithoutType = [...documentFor(path).querySelectorAll('button:not([type])')];
             expect(buttonsWithoutType, path).toHaveLength(0);
