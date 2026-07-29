@@ -171,6 +171,7 @@ public class Config {
     String _EXT_SUPA_GROUP_POLL_ANSWER = "/SupabaseGroupPollAnswer";
     String _EXT_SUPA_GROUP_POLL_STATUS = "/SupabaseGroupPollStatus";
     String _EXT_SUPA_GROUP_POLL_REMIND = "/SupabaseGroupPollRemind";
+    String _EXT_SUPA_GROUP_POLL_DELETE = "/SupabaseGroupPollDelete";
     String _EXT_SUPA_NOTIFICATIONS_GET = "/SupabaseNotificationsGet";
     String _EXT_SUPA_NOTIFICATION_READ = "/SupabaseNotificationRead";
 

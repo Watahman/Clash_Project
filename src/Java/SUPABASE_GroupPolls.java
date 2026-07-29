@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public final class SUPABASE_GroupPolls {
+    private static final int MAX_POLLS_PER_GROUP = 3;
     private final HttpServer server;
     private final Config config;
     private final API_Utils utils;
@@ -55,6 +56,7 @@ public final class SUPABASE_GroupPolls {
             if (title.isBlank() || title.length() > 120) throw new IllegalArgumentException("Ongeldige poll titel");
             if (rounds < 1 || rounds > 7) throw new IllegalArgumentException("Rounds moet tussen 1 en 7 liggen");
             access.requireAdmin(groupId, actorId);
+            requirePollCapacity(groupId);
 
             JsonObject rpcBody = new JsonObject();
             rpcBody.addProperty("p_actor_user_id", actorId);
@@ -71,6 +73,9 @@ public final class SUPABASE_GroupPolls {
             try {
                 result = SUPABASE_Client.rpc("create_group_poll_with_notifications", rpcBody.toString());
             } catch (HttpException conflict) {
+                if (conflict.getResponseBody().contains("POLL_LIMIT_REACHED")) {
+                    throw pollLimitReached();
+                }
                 if (conflict.getStatusCode() == 409) {
                     throw new HttpException(409, "{\"error\":\"Er is al een open CWL poll\",\"code\":\"OPEN_POLL_EXISTS\"}");
                 }
@@ -149,6 +154,23 @@ public final class SUPABASE_GroupPolls {
             rpcBody.addProperty("p_actor_user_id", actorId);
             rpcBody.addProperty("p_poll_id", pollId);
             String result = SUPABASE_Client.rpc("send_group_poll_reminders", rpcBody.toString());
+            utils.sendJsonResponse(ex, result, 200);
+        }));
+    }
+
+    public void deleteGroupPoll() {
+        server.createContext(config._EXT_SUPA_GROUP_POLL_DELETE, exchange -> utils.handlePost(exchange, ex -> {
+            String actorId = utils.requireAuthenticatedUser(ex);
+            JsonObject request = utils.parseBody(ex);
+            String groupId = utils.requireString(request, "groupId");
+            String pollId = utils.requireString(request, "pollId");
+            access.requireAdmin(groupId, actorId);
+            requirePollInGroup(pollId, groupId);
+
+            String result = SUPABASE_Client.deleteColumn(
+                    "group_polls",
+                    "id=" + SUPABASE_Client.eq(pollId) + "&group_id=" + SUPABASE_Client.eq(groupId)
+            );
             utils.sendJsonResponse(ex, result, 200);
         }));
     }
@@ -255,6 +277,22 @@ public final class SUPABASE_GroupPolls {
                         + "&limit=1"
         )).getAsJsonArray();
         if (rows.isEmpty()) throw new HttpException(404, "{\"error\":\"Poll niet gevonden\"}");
+    }
+
+    private void requirePollCapacity(String groupId) throws Exception {
+        JsonArray rows = JsonParser.parseString(SUPABASE_Client.getWithBody(
+                "group_polls",
+                "select=id&group_id=" + SUPABASE_Client.eq(groupId)
+                        + "&limit=" + MAX_POLLS_PER_GROUP
+        )).getAsJsonArray();
+        if (rows.size() >= MAX_POLLS_PER_GROUP) throw pollLimitReached();
+    }
+
+    private HttpException pollLimitReached() {
+        return new HttpException(
+                409,
+                "{\"error\":\"Een Clan Family kan maximaal 3 polls hebben\",\"code\":\"POLL_LIMIT_REACHED\"}"
+        );
     }
 
     private List<String> strings(JsonArray rows, String field) {

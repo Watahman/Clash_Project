@@ -1,4 +1,4 @@
-import { answerGroupPoll, createGroupPoll, getGroupPolls, setGroupPollStatus, sendGroupPollReminder } from "../Supabase/Supabase-GroupPolls.js";
+import { answerGroupPoll, createGroupPoll, deleteGroupPoll, getGroupPolls, setGroupPollStatus, sendGroupPollReminder } from "../Supabase/Supabase-GroupPolls.js";
 import { checkUserId } from "../Supabase/Supabase-User.js";
 import { t } from "../i18n/i18n.js";
 import { getCurrentUserId } from "../utils/user.js";
@@ -6,6 +6,8 @@ import { withGlobalLoading } from "../utils/loading-state.js";
 import { bindBackdropClick } from "../utils/backdrop-click.js";
 import { isGroupAdmin } from "./groups-roles.js";
 import { OPEN_POLL_STORAGE_KEY } from "../notifications/poll-notifications.js";
+
+const MAX_POLLS_PER_GROUP = 3;
 
 export function initGroupPolls(emptyMessage) {
     const el = query();
@@ -16,6 +18,8 @@ export function initGroupPolls(emptyMessage) {
     let activePoll = null;
     let selectedResultPoll = null;
     let currentUser = null;
+    let pollsLoaded = false;
+    let pollLimitBlocked = false;
 
     window.addEventListener('clashtools:group-opened', event => {
         group = event.detail?.group || null;
@@ -34,18 +38,23 @@ export function initGroupPolls(emptyMessage) {
 
     async function loadPolls() {
         const userId = getCurrentUserId();
+        pollsLoaded = false;
+        pollLimitBlocked = false;
         resetView();
         if (!group || !userId) return;
         const requestedGroupId = group.id;
-        getGroupPolls(requestedGroupId, userId)
+        return getGroupPolls(requestedGroupId, userId)
             .then(data => {
                 if (group?.id !== requestedGroupId) return;
                 polls = Array.isArray(data) ? data : [];
+                pollsLoaded = true;
+                pollLimitBlocked = polls.length >= MAX_POLLS_PER_GROUP;
                 activePoll = findLatestOpenCwlPoll(polls);
                 const requestedPollId = sessionStorage.getItem(OPEN_POLL_STORAGE_KEY) || '';
                 const requestedPoll = polls.find(poll => poll.id === requestedPollId) || null;
                 renderNotice();
                 if (isAdmin()) {
+                    syncCreatePollState();
                     renderAdminPolls();
                     renderResults(requestedPoll || activePoll || polls[0] || null);
                 }
@@ -61,6 +70,7 @@ export function initGroupPolls(emptyMessage) {
             })
             .catch(() => {
                 if (group?.id !== requestedGroupId) return;
+                pollsLoaded = false;
                 el.results?.replaceChildren(emptyMessage(t('groups.pollLoadError')));
             });
     }
@@ -73,6 +83,7 @@ export function initGroupPolls(emptyMessage) {
         el.availabilityEmpty?.classList.remove('hidden');
         el.pollsList?.replaceChildren(emptyMessage(t('groups.noPolls')));
         el.results?.replaceChildren(emptyMessage(t('groups.noPollSelected')));
+        syncCreatePollState();
     }
 
     function renderNotice() {
@@ -102,12 +113,17 @@ export function initGroupPolls(emptyMessage) {
         actions.className = 'groups-admin-member-actions';
         actions.append(actionButton(t('groups.viewResults'), () => openResults(poll), 'btn-groups-default'));
         actions.append(actionButton(poll.status === 'open' ? t('groups.closePoll') : t('groups.openPoll'), () => toggleStatus(poll)));
+        actions.append(actionButton(t('groups.deletePoll'), () => removePoll(poll), 'btn-groups-danger'));
         item.append(info, actions);
         return item;
     }
 
     function createPoll() {
         if (!group || !isAdmin()) return;
+        if (polls.length >= MAX_POLLS_PER_GROUP) {
+            syncCreatePollState();
+            return;
+        }
         const title = el.titleInput?.value?.trim() || t('groups.defaultPollTitle');
         const rounds = Math.max(1, Math.min(7, Number(el.roundsInput?.value || 7)));
         withGlobalLoading(() => createGroupPoll(group.id, getCurrentUserId(), title, rounds)
@@ -116,7 +132,14 @@ export function initGroupPolls(emptyMessage) {
                 window.dispatchEvent(new CustomEvent('clashtools:notifications-refresh-requested'));
                 loadPolls();
             })
-            .catch(error => showPollError(error)), t('groups.loading'));
+            .catch(error => {
+                if (error?.code === 'POLL_LIMIT_REACHED') {
+                    pollLimitBlocked = true;
+                    syncCreatePollState();
+                    return;
+                }
+                showPollError(error);
+            }), t('groups.loading'));
     }
 
     function toggleStatus(poll) {
@@ -125,6 +148,24 @@ export function initGroupPolls(emptyMessage) {
         withGlobalLoading(() => setGroupPollStatus(group.id, getCurrentUserId(), poll.id, status)
             .then(loadPolls)
             .catch(error => showPollError(error)), t('groups.loading'));
+    }
+
+    function removePoll(poll) {
+        if (!group || !isAdmin()) return;
+        if (!window.confirm(t('groups.deletePollConfirm', { title: poll.title }))) return;
+        withGlobalLoading(() => deleteGroupPoll(group.id, getCurrentUserId(), poll.id)
+            .then(() => {
+                if (selectedResultPoll?.id === poll.id) selectedResultPoll = null;
+                window.dispatchEvent(new CustomEvent('clashtools:notifications-refresh-requested'));
+                return loadPolls();
+            })
+            .catch(error => showPollError(error)), t('groups.loading'));
+    }
+
+    function syncCreatePollState() {
+        const limitReached = Boolean(group && isAdmin() && (pollLimitBlocked || polls.length >= MAX_POLLS_PER_GROUP));
+        if (el.createBtn) el.createBtn.disabled = Boolean(group && isAdmin() && (!pollsLoaded || limitReached));
+        if (el.limitFeedback) el.limitFeedback.hidden = !limitReached;
     }
 
     async function openAnswerOverlay() {
@@ -355,6 +396,7 @@ function query() {
         noticeTitle: document.querySelector('#groups-poll-notice-title'),
         answerBtn: document.querySelector('#groups-poll-answer-btn'),
         createBtn: document.querySelector('#groups-poll-create-btn'),
+        limitFeedback: document.querySelector('#groups-poll-limit-feedback'),
         titleInput: document.querySelector('#groups-poll-title-input'),
         roundsInput: document.querySelector('#groups-poll-rounds-input'),
         pollsList: document.querySelector('#groups-admin-polls-list'),

@@ -77,4 +77,27 @@ class ProtectedRoutesTest {
         assertEquals(401, response.statusCode());
         assertFalse(response.body().contains("spoofed"));
     }
+
+    @Test
+    void pollDeleteRequiresAnAuthenticatedSession() throws Exception {
+        Config config = new Config();
+        server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        new SUPABASE_GroupPolls(server, config).deleteGroupPoll();
+        server.start();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(
+                        "http://127.0.0.1:" + server.getAddress().getPort() + config._EXT_SUPA_GROUP_POLL_DELETE
+                ))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(
+                        "{\"userId\":\"spoofed\",\"groupId\":\"spoofed\",\"pollId\":\"spoofed\"}",
+                        StandardCharsets.UTF_8
+                ))
+                .build();
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(401, response.statusCode());
+        assertFalse(response.body().contains("spoofed"));
+    }
 }

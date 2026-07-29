@@ -136,6 +136,7 @@ public class Main {
         supaGroupPolls.answerGroupPoll();
         supaGroupPolls.setGroupPollStatus();
         supaGroupPolls.sendPollReminders();
+        supaGroupPolls.deleteGroupPoll();
         supaNotifications.getNotifications();
         supaNotifications.markNotificationRead();
 

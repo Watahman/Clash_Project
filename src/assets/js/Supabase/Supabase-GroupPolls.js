@@ -51,3 +51,12 @@ export async function sendGroupPollReminder(groupId, pollId, userId) {
         return result;
     });
 }
+
+export async function deleteGroupPoll(groupId, userId, pollId) {
+    const path = config._BASE_URL + config._EXT_SUPA_GROUP_POLL_DELETE;
+    return databaseRequestWithBody(path, { groupId, pollId }).then(result => {
+        invalidatePollCaches(groupId, userId);
+        if (userId) removeCached(cacheKeys.notifications(userId));
+        return result;
+    });
+}

@@ -96,5 +96,6 @@ export const _EXT_SUPA_GROUP_POLL_CREATE = "/SupabaseGroupPollCreate";
 export const _EXT_SUPA_GROUP_POLL_ANSWER = "/SupabaseGroupPollAnswer";
 export const _EXT_SUPA_GROUP_POLL_STATUS = "/SupabaseGroupPollStatus";
 export const _EXT_SUPA_GROUP_POLL_REMIND = "/SupabaseGroupPollRemind";
+export const _EXT_SUPA_GROUP_POLL_DELETE = "/SupabaseGroupPollDelete";
 export const _EXT_SUPA_NOTIFICATIONS_GET = "/SupabaseNotificationsGet";
 export const _EXT_SUPA_NOTIFICATION_READ = "/SupabaseNotificationRead";
