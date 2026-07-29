@@ -101,6 +101,10 @@ function initPlanNameSync() {
         syncPlanTitle();
         updateSaveButtonState();
     });
+    window.addEventListener('clashtools:cwl-plan-name-defaulted', () => {
+        syncPlanTitle();
+        updateSaveButtonState();
+    });
     window.addEventListener('clashtools:language-changed', refreshPlannerLabels);
     refreshPlannerLabels();
     syncPlanTitle();
@@ -200,10 +204,9 @@ function initSaveButtonState() {
 
 function updateSaveButtonState() {
     if (!savePlanBtn || !planName) return;
-    const hasName = planName.value.trim().length > 0;
     const hasPlayers = Boolean(availablePlayers?.querySelector('.cwl-player-article'));
     const hasClans = Boolean(allClans?.querySelector('.cwl-clan-article'));
-    const canSave = hasName && (hasPlayers || hasClans);
+    const canSave = hasPlayers || hasClans;
     savePlanBtn.disabled = !canSave;
     savePlanBtn.title = canSave ? t('cwl.save') : t('cwl.saveDisabledReason');
 }

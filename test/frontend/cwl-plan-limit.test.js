@@ -25,7 +25,9 @@ vi.mock('../../src/assets/js/Supabase/Supabase-Plan.js', () => ({
 vi.mock('../../src/assets/js/API/API-Clan.js', () => ({ getClanInfoRequest: vi.fn() }));
 vi.mock('../../src/assets/js/API/API-Functions.js', () => ({ getPlayerBasicData: vi.fn() }));
 vi.mock('../../src/assets/js/utils/user.js', () => ({ getCurrentUserId: () => 'user-1' }));
-vi.mock('../../src/assets/js/i18n/i18n.js', () => ({ t: key => key }));
+vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
+    t: key => key === 'cwl.defaultPlanName' ? 'Untitled' : key
+}));
 vi.mock('../../src/assets/js/cwl/cwl-availability.js', () => ({
     getActiveCwlPollMeta: () => ({ groupId: '', pollId: '' })
 }));
@@ -146,4 +148,34 @@ describe('CWL saved plan limit', () => {
         expect(result).toEqual({ uuid: 'plan-4', revision: 1 });
         expect(mocks.setPlanToDatabase).toHaveBeenCalledOnce();
     });
+
+    it.each(['', '   '])(
+        'saves an unnamed plan as Untitled for input %j',
+        async enteredName => {
+            mocks.getAllPlansFromDatabase.mockResolvedValue(plans.slice(0, 2));
+            mocks.setPlanToDatabase.mockResolvedValue({
+                uuid: 'plan-3',
+                revision: 1
+            });
+            const { initPlanIO, loadAllPlans, savePlan } = await import(
+                '../../src/assets/js/cwl/cwl-plan-io.js'
+            );
+            const refs = plannerRefs();
+            refs.planName.value = enteredName;
+            initPlanIO(refs);
+            await loadAllPlans();
+
+            const result = await savePlan({ immediate: true });
+
+            expect(result).toEqual({ uuid: 'plan-3', revision: 1 });
+            expect(refs.planName.value).toBe('Untitled');
+            expect(mocks.setPlanToDatabase).toHaveBeenCalledWith(
+                'user-1',
+                null,
+                'Untitled',
+                expect.any(Object),
+                null
+            );
+        }
+    );
 });

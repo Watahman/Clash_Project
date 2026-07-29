@@ -153,10 +153,18 @@ export function savePlan(options = {}) {
     const userId = getCurrentUserId();
     if (isLoading || suppressSave || !canAutosave || !userId) return Promise.resolve(null);
 
-    const name = planName.value.trim();
-    if (!name || name.length > 40) {
+    const enteredName = planName.value.trim();
+    const name = enteredName || t('cwl.defaultPlanName');
+    if (name.length > 40) {
         setSaveStatus('error');
         return Promise.resolve(null);
+    }
+    if (!enteredName) {
+        planName.value = name;
+        window.dispatchEvent(new CustomEvent(
+            'clashtools:cwl-plan-name-defaulted',
+            { detail: { name } }
+        ));
     }
 
     if (isNewPlanAtLimit()) {
