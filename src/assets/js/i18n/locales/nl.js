@@ -122,7 +122,7 @@ export const nl = Object.freeze({
   "performance.confidenceLow": "Laag",
   "language.label": "NL",
   "nav.cwl": "CWL planner",
-  "nav.operation": "Operation board",
+  "nav.operation": "CWL operation board",
   "nav.groups": "Clan Family",
   "header.user": "Gebruiker",
   "header.language": "Taal",

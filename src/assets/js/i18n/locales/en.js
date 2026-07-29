@@ -80,7 +80,7 @@ export const en = Object.freeze({
   "op.standingsFallback": "No reliable standings from completed wars yet.",
   "op.standingsNote": "{count} completed wars counted. Standings are provisional.",
   "nav.cwl": "CWL planner",
-  "nav.operation": "Operation board",
+  "nav.operation": "CWL operation board",
   "nav.groups": "Clan Family",
   "header.user": "User",
   "language.label": "EN",
