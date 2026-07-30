@@ -198,6 +198,16 @@ body.public-home-v2 {
     }
 }
 
+@keyframes heroBackgroundDrift {
+    from {
+        transform: scaleX(-1) scale(1.04) translate3d(0, 0, 0);
+    }
+
+    to {
+        transform: scaleX(-1) scale(1.08) translate3d(-.7%, -.3%, 0);
+    }
+}
+
 .home-v2-product-window,
 .home-v2-feature-visual {
     min-width: 0;
