@@ -23,7 +23,7 @@ const pages = [
         file: 'cwl-planner.html',
         canonical: 'https://clashpanel.com/cwl-planner',
         title: 'Free Clash of Clans CWL Planner & Roster Optimizer | ClashPanel',
-        h1: 'Plan every CWL lineup.',
+        h1: 'Build your CWL roster plan.',
         indexable: true,
         links: ['/cwl-tracker']
     },
