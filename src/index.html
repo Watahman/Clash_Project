@@ -125,7 +125,7 @@
 
     </section>
 
-    <section class="home-v2-signal-strip" aria-label="ClashPanel capabilities" data-i18n-aria-label="public.capabilitiesLabel">
+    <section class="home-v2-signal-strip" aria-label="ClashPanel capabilities" data-i18n-aria-label="public.capabilitiesLabel" data-reveal>
         <span data-i18n="public.signalMultiClan">Multi-clan planning</span>
         <span data-i18n="public.signalSevenDay">7-day lineups</span>
         <span data-i18n="public.signalPerformance">CWL season history</span>
@@ -135,23 +135,27 @@
     </section>
 
     <section class="home-v2-workflow" id="workflow">
-        <div class="home-v2-section-head">
+        <div class="home-v2-section-head" data-reveal="left">
             <p class="eyebrow" data-i18n="public.oneWorkflow">One continuous workflow</p>
-            <h2 data-i18n="public.workflowTitle">Prepare the roster, make the plan, then run CWL from the same data.</h2>
+            <h2 data-i18n="public.workflowTitle">From roster to war day.</h2>
             <p data-i18n="public.workflowIntro">The Planner and Operation Board are built as one flow, while Clan Families keep availability and shared clan data connected before CWL starts.</p>
+            <figure class="home-v2-workflow-art" data-reveal="image">
+                <img src="/assets/css/pictures/home/barbarian-strategy.jpg" alt="Clash of Clans Barbarian studying a war map" loading="lazy" decoding="async">
+                <figcaption data-i18n="public.workflowArtCaption">Plan first. Adapt when the war changes.</figcaption>
+            </figure>
         </div>
         <ol class="home-v2-workflow-list">
-            <li><span>01</span><div><p class="home-v2-step-label" data-i18n="public.workflowPrepare">Prepare</p><h3 data-i18n="home.step1Title">Collect players and availability</h3><p data-i18n="home.step1Desc">Load players by tag, account, friend, spreadsheet or Clan Family. Pull CWL poll availability into the same free roster.</p></div></li>
-            <li><span>02</span><div><p class="home-v2-step-label" data-i18n="public.workflowPlan">Plan</p><h3 data-i18n="home.step2Title">Build or optimize the multi-clan plan</h3><p data-i18n="home.step2Desc">Use Auto Plan for a complete distribution, Optimize Plan for targeted improvements, or keep full manual control over roles and daily lineups.</p></div></li>
-            <li><span>03</span><div><p class="home-v2-step-label" data-i18n="public.workflowRun">Run</p><h3 data-i18n="home.step3Title">Follow every round live</h3><p data-i18n="home.step3Desc">Track the current war, league position, player participation, projected outcomes and bonus recommendations from Operation Board.</p></div></li>
+            <li data-reveal style="--reveal-delay: 60ms"><span>01</span><div><p class="home-v2-step-label" data-i18n="public.workflowPrepare">Prepare</p><h3 data-i18n="home.step1Title">Collect players and availability</h3><p data-i18n="home.step1Desc">Load players by tag, account, friend, spreadsheet or Clan Family. Pull CWL poll availability into the same free roster.</p></div></li>
+            <li data-reveal style="--reveal-delay: 130ms"><span>02</span><div><p class="home-v2-step-label" data-i18n="public.workflowPlan">Plan</p><h3 data-i18n="home.step2Title">Build or optimize the multi-clan plan</h3><p data-i18n="home.step2Desc">Use Auto Plan for a complete distribution, Optimize Plan for targeted improvements, or keep full manual control over roles and daily lineups.</p></div></li>
+            <li data-reveal style="--reveal-delay: 200ms"><span>03</span><div><p class="home-v2-step-label" data-i18n="public.workflowRun">Run</p><h3 data-i18n="home.step3Title">Follow every round live</h3><p data-i18n="home.step3Desc">Track the current war, league position, player participation, projected outcomes and bonus recommendations from Operation Board.</p></div></li>
         </ol>
     </section>
 
     <section class="home-v2-products" id="features">
         <article class="home-v2-product-section">
-            <div class="home-v2-product-copy">
+            <div class="home-v2-product-copy" data-reveal="left">
                 <p class="eyebrow">CWL Planner</p>
-                <h2 data-i18n="public.plannerTitle">Go from a player pool to a usable 7-day plan.</h2>
+                <h2 data-i18n="public.plannerTitle">Build a 7-day CWL plan.</h2>
                 <p data-i18n="public.plannerLongDesc">Plan multiple clans together instead of solving every roster separately. ClashPanel can build a starting plan, score player context and propose smaller improvements without taking manual control away.</p>
                 <div class="home-v2-feature-lines">
                     <div><strong data-i18n="public.featureAutoPlan">Auto Plan</strong><span data-i18n="public.featureAutoPlanDesc">Distributes players across clans and previews seven daily lineups before anything is applied.</span></div>
@@ -161,19 +165,17 @@
                 </div>
                 <a class="home-v2-product-seo-link" href="/cwl-planner">Open the Clash of Clans CWL Planner →</a>
             </div>
-            <div class="home-v2-feature-visual home-v2-plan-visual" aria-label="Planner feature example" data-i18n-aria-label="public.plannerVisualLabel">
-                <header><span data-i18n="public.planReview">Plan review</span><strong data-i18n="public.twoImprovements">2 improvements found</strong></header>
-                <div class="home-v2-review-row"><span class="home-v2-review-state" data-i18n="optimizePlan.statusGood">Good</span><div><strong>Belgian Warriors</strong><small>15/15 active · 2 reserve</small></div><b>+0.7★</b></div>
-                <div class="home-v2-review-change"><span>01</span><div><strong>Move Nova → Belgian Warriors</strong><small data-i18n="public.exampleReasonFill">Completes the strongest active lineup while the other clan remains filled.</small></div><em data-i18n="optimizePlan.accept">Accept</em></div>
-                <div class="home-v2-review-change"><span>02</span><div><strong>Raven → Rotation</strong><small data-i18n="public.exampleReasonStability">Reduces unnecessary daily lineup changes around limited availability.</small></div><em data-i18n="optimizePlan.accept">Accept</em></div>
-                <footer><span data-i18n="public.previewOnly">Preview first · nothing changes until you apply it</span><b data-i18n="optimizePlan.applyAccepted">Apply accepted</b></footer>
+            <div class="home-v2-artwork home-v2-artwork-planner" data-reveal="right" aria-label="CWL planning artwork" data-i18n-aria-label="public.plannerVisualLabel">
+                <img class="home-v2-artwork-main" src="/assets/css/pictures/home/cwl-battle.jpg" alt="Clash of Clans troops advancing through a CWL battle" loading="lazy" decoding="async">
+                <span class="home-v2-artwork-label" data-i18n="public.plannerArtLabel">Plan every war day</span>
+                <img class="home-v2-artwork-inset" src="/assets/css/pictures/home/cwl-trophy.jpg" alt="Clash of Clans Clan War League trophy" loading="lazy" decoding="async">
             </div>
         </article>
 
         <article class="home-v2-product-section home-v2-product-operation">
-            <div class="home-v2-product-copy">
+            <div class="home-v2-product-copy" data-reveal="right">
                 <p class="eyebrow">Operation Board</p>
-                <h2 data-i18n="public.operationTitle">Know what is happening now, and what still matters.</h2>
+                <h2 data-i18n="public.operationTitle">Run CWL with live context.</h2>
                 <p data-i18n="public.operationLongDesc">The live board connects current wars, your plan and previous CWL seasons. Use it for the immediate matchup, the full league table, participation checks and transparent bonus advice.</p>
                 <div class="home-v2-feature-lines">
                     <div><strong data-i18n="public.featureLive">Live war analysis</strong><span data-i18n="public.featureLiveDesc">Current score, remaining attacks, win condition and high-impact attack opportunities.</span></div>
@@ -183,19 +185,17 @@
                 </div>
                 <a class="home-v2-product-seo-link" href="/cwl-tracker">Open the CWL Tracker &amp; History →</a>
             </div>
-            <div class="home-v2-feature-visual home-v2-operation-visual" aria-label="Operation Board feature example" data-i18n-aria-label="public.operationVisualLabel">
-                <nav><span class="is-active" data-i18n="op.tabLive">Live</span><span data-i18n="op.tabLeague">League</span><span data-i18n="op.tabRoster">Roster</span><span data-i18n="op.tabBonuses">Bonuses</span></nav>
-                <div class="home-v2-war-score"><div><small>Belgian Warriors</small><strong>29★</strong><span>94.8%</span></div><b>VS</b><div><small>Night Raiders</small><strong>27★</strong><span>92.1%</span></div></div>
-                <div class="home-v2-operation-grid"><div><small data-i18n="op.remainingAttacks">Remaining</small><strong>3</strong></div><div><small data-i18n="op.winCondition">Win condition</small><strong>+1★</strong></div><div><small data-i18n="public.winProbability">Win probability</small><strong>78%</strong></div></div>
-                <div class="home-v2-priority-line"><span>TH18</span><div><strong>Nova → #4</strong><small data-i18n="public.priorityExample">Expected 2.7★ · favorable matchup · high confidence</small></div><b data-i18n="op.reasonHighImpact">High impact</b></div>
-                <p data-i18n="op.advisoryOnly">Advisory only. No attack is assigned automatically.</p>
+            <div class="home-v2-artwork home-v2-artwork-operation" data-reveal="left" aria-label="Live war tracking artwork" data-i18n-aria-label="public.operationVisualLabel">
+                <img class="home-v2-artwork-main" src="/assets/css/pictures/home/war-battlefield.jpg" alt="Clash of Clans war battlefield during an attack" loading="lazy" decoding="async">
+                <span class="home-v2-artwork-label" data-i18n="public.operationArtLabel">See what matters now</span>
+                <img class="home-v2-artwork-inset" src="/assets/css/pictures/home/barbarian-charge.jpg" alt="Clash of Clans Barbarians charging into battle" loading="lazy" decoding="async">
             </div>
         </article>
 
         <article class="home-v2-product-section">
-            <div class="home-v2-product-copy">
+            <div class="home-v2-product-copy" data-reveal="left">
                 <p class="eyebrow" data-i18n="public.groupsPolls">Clan Families and polls</p>
-                <h2 data-i18n="public.familyTitle">Keep the people behind multiple clans connected.</h2>
+                <h2 data-i18n="public.familyTitle">Keep every clan connected.</h2>
                 <p data-i18n="public.familyLongDesc">Clan Families give leaders a shared layer above individual clans. Manage members and roles, link clans, collect CWL availability per account and feed those answers directly into planning.</p>
                 <div class="home-v2-feature-lines">
                     <div><strong data-i18n="public.featureAvailability">CWL availability</strong><span data-i18n="public.featureAvailabilityDesc">Ask each linked account whether it plays and on which CWL days it is available.</span></div>
@@ -205,17 +205,15 @@
                 </div>
                 <a class="home-v2-product-seo-link" href="/clan-management">Explore Clan Management &amp; Clan Family →</a>
             </div>
-            <div class="home-v2-feature-visual home-v2-family-visual" aria-label="Clan Family feature example" data-i18n-aria-label="public.familyVisualLabel">
-                <header><div><small data-i18n="groups.pollTypeCwl">CWL availability</small><strong>August CWL</strong></div><span data-i18n="public.pollOpen">Open poll</span></header>
-                <div class="home-v2-poll-summary"><div><small data-i18n="groups.pollMembersTotal">Clan Family members</small><strong>28</strong></div><div><small data-i18n="groups.pollAnswered">Answered</small><strong>24</strong></div><div><small data-i18n="groups.pollMissing">Not answered</small><strong>4</strong></div></div>
-                <div class="home-v2-availability-row"><span>N</span><div><strong>Nova</strong><small>#9UY8LCQ2 · TH18</small></div><div class="home-v2-days"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i></div><b data-i18n="public.available">Available</b></div>
-                <div class="home-v2-availability-row"><span>R</span><div><strong>Raven</strong><small>#J28QP0RY · TH16</small></div><div class="home-v2-days"><i>1</i><i>2</i><i>3</i><i class="is-out">4</i><i class="is-out">5</i><i>6</i><i>7</i></div><b data-i18n="public.rotation">Rotation</b></div>
-                <footer><span data-i18n="public.familyToPlanner">Poll answers can be loaded into the CWL Planner</span><b>→</b></footer>
+            <div class="home-v2-artwork home-v2-artwork-family" data-reveal="right" aria-label="Clan Family artwork" data-i18n-aria-label="public.familyVisualLabel">
+                <img class="home-v2-artwork-main" src="/assets/css/pictures/home/clan-war-camp.jpg" alt="Two Clash of Clans Barbarians representing connected clans" loading="lazy" decoding="async">
+                <span class="home-v2-artwork-label" data-i18n="public.familyArtLabel">One place for every clan</span>
+                <img class="home-v2-artwork-inset" src="/assets/css/pictures/home/dark-army.jpg" alt="Clash of Clans troops gathered together" loading="lazy" decoding="async">
             </div>
         </article>
     </section>
 
-    <nav class="home-v2-tool-links" aria-label="ClashPanel tools">
+    <nav class="home-v2-tool-links" aria-label="ClashPanel tools" data-reveal>
         <span>Explore ClashPanel tools</span>
         <a href="/cwl-planner">CWL Planner &amp; Roster Optimizer</a>
         <a href="/cwl-tracker">Live CWL Tracker &amp; History</a>
@@ -223,8 +221,8 @@
         <a href="/bracket-generator">Clash of Clans Bracket Generator (Coming soon)</a>
     </nav>
 
-    <section class="home-v2-bottom-cta">
-        <div><p class="eyebrow" data-i18n="public.readyForCwl">Ready for your next CWL?</p><h2 data-i18n="public.ctaTitle">Start with the roster you already have. ClashPanel handles the workflow around it.</h2><p data-i18n="public.ctaDesc">Create a plan manually, import a spreadsheet or connect a Clan Family. You do not need to rebuild your process before trying it.</p></div>
+    <section class="home-v2-bottom-cta" data-reveal>
+        <div><p class="eyebrow" data-i18n="public.readyForCwl">Ready for your next CWL?</p><h2 data-i18n="public.ctaTitle">Plan your next CWL in one place.</h2><p data-i18n="public.ctaDesc">Create a plan manually, import a spreadsheet or connect a Clan Family. You do not need to rebuild your process before trying it.</p></div>
         <a class="button button-primary button-large" href="/subpages/register.html" data-i18n="public.startFree">Start for free</a>
     </section>
 </main>

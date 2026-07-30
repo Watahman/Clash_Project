@@ -366,7 +366,7 @@ body.public-home-v2 {
 .home-v2-products { border-top: .0625rem solid var(--border-strong); }
 .home-v2-product-section { display: grid; grid-template-columns: minmax(20rem,.78fr) minmax(31rem,1.22fr); gap: clamp(3rem,7vw,7.5rem); align-items: center; border-bottom: .0625rem solid var(--border-strong); padding: clamp(5.5rem,9vw,9rem) 0; }
 .home-v2-product-operation .home-v2-product-copy { order: 2; }
-.home-v2-product-operation .home-v2-feature-visual { order: 1; }
+.home-v2-product-operation .home-v2-artwork { order: 1; }
 .home-v2-product-copy { min-width: 0; }
 .home-v2-product-copy h2 { max-width: 13ch; margin-bottom: 1.15rem !important; font-size: clamp(2.25rem,3.7vw,4rem); line-height: 1.04; }
 .home-v2-product-copy > p:not(.eyebrow) { max-width: 42rem; margin-bottom: 0; }
@@ -438,6 +438,150 @@ body.public-home-v2 {
 .home-v2-availability-row > b { color: var(--text-muted); font-size: .53rem; }
 .home-v2-family-visual footer b { color: var(--accent-strong); }
 
+/* Real Clash of Clans artwork replaces the old interface mockup cards. */
+.home-v2-workflow-art {
+    position: relative;
+    overflow: hidden;
+    margin: 2.2rem 0 0;
+    border: .0625rem solid var(--border-strong);
+    border-radius: 1rem;
+    background: var(--surface);
+    box-shadow: 0 1.4rem 3rem rgba(0, 0, 0, .2);
+}
+.home-v2-workflow-art::after {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 45%, rgba(4, 7, 12, .76) 100%);
+    content: "";
+    pointer-events: none;
+}
+.home-v2-workflow-art img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1.55 / 1;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 650ms cubic-bezier(.2, .75, .2, 1);
+}
+.home-v2-workflow-art figcaption {
+    position: absolute;
+    z-index: 1;
+    right: 1rem;
+    bottom: .85rem;
+    left: 1rem;
+    margin: 0;
+    color: rgba(255, 255, 255, .82);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: -.01em;
+}
+.home-v2-workflow-art:hover img { transform: scale(1.035); }
+
+.home-v2-artwork {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    min-height: clamp(24rem, 40vw, 34rem);
+    overflow: hidden;
+    border: .0625rem solid rgba(255, 255, 255, .11);
+    border-radius: 1.15rem;
+    background: #0a0d12;
+    box-shadow:
+            0 1.7rem 4.6rem rgba(0, 0, 0, .28),
+            0 .35rem 1rem rgba(0, 0, 0, .22);
+}
+.home-v2-artwork::before,
+.home-v2-artwork::after {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    content: "";
+    pointer-events: none;
+}
+.home-v2-artwork::before {
+    background:
+            linear-gradient(180deg, rgba(5, 8, 13, .03) 35%, rgba(5, 8, 13, .74) 100%),
+            linear-gradient(90deg, rgba(5, 8, 13, .22), transparent 45%);
+}
+.home-v2-artwork::after {
+    inset: .55rem;
+    border: .0625rem solid rgba(255, 255, 255, .12);
+    border-radius: .82rem;
+}
+.home-v2-artwork-main {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 900ms cubic-bezier(.2, .75, .2, 1), filter 350ms ease;
+}
+.home-v2-artwork-planner .home-v2-artwork-main { object-position: 45% center; }
+.home-v2-artwork-operation .home-v2-artwork-main { object-position: center; }
+.home-v2-artwork-family .home-v2-artwork-main { object-position: center; }
+.home-v2-artwork-label {
+    position: absolute;
+    z-index: 3;
+    left: clamp(1rem, 2.5vw, 1.6rem);
+    bottom: clamp(1rem, 2.5vw, 1.6rem);
+    max-width: 18rem;
+    color: #fff;
+    font-family: "Manrope", "Inter", "Segoe UI", sans-serif;
+    font-size: clamp(1rem, 1.6vw, 1.35rem);
+    font-weight: 800;
+    letter-spacing: -.035em;
+    line-height: 1.1;
+    text-shadow: 0 .15rem .8rem rgba(0, 0, 0, .45);
+}
+.home-v2-artwork-label::before {
+    display: block;
+    width: 2rem;
+    height: .13rem;
+    margin-bottom: .62rem;
+    border-radius: 99rem;
+    background: #e4bd6b;
+    content: "";
+}
+.home-v2-artwork-inset {
+    position: absolute;
+    z-index: 4;
+    top: clamp(1rem, 2.8vw, 1.8rem);
+    right: clamp(1rem, 2.8vw, 1.8rem);
+    width: clamp(9.5rem, 28%, 13.5rem);
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border: .14rem solid rgba(255, 255, 255, .78);
+    border-radius: .75rem;
+    background: #11161d;
+    box-shadow: 0 1rem 2.4rem rgba(0, 0, 0, .38);
+    transform: rotate(1.8deg);
+    transition: transform 450ms cubic-bezier(.2, .75, .2, 1), box-shadow 450ms ease;
+}
+.home-v2-artwork-operation .home-v2-artwork-inset { transform: rotate(-1.8deg); }
+.home-v2-artwork-family .home-v2-artwork-inset { object-position: center 35%; }
+.home-v2-artwork:hover .home-v2-artwork-main { transform: scale(1.035); }
+.home-v2-artwork:hover .home-v2-artwork-inset {
+    transform: translateY(-.28rem) rotate(0deg);
+    box-shadow: 0 1.35rem 3rem rgba(0, 0, 0, .44);
+}
+
+/* Scroll reveals share the same understated movement language as the hero. */
+html.has-reveal body.public-home-v2 [data-reveal] {
+    opacity: 0;
+    transform: translateY(1.4rem);
+    transition:
+            opacity 720ms cubic-bezier(.2, .8, .2, 1),
+            transform 720ms cubic-bezier(.2, .8, .2, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+}
+html.has-reveal body.public-home-v2 [data-reveal="left"] { transform: translateX(-2rem); }
+html.has-reveal body.public-home-v2 [data-reveal="right"] { transform: translateX(2rem); }
+html.has-reveal body.public-home-v2 [data-reveal="image"] { transform: translateY(1.1rem) scale(.985); }
+html.has-reveal body.public-home-v2 [data-reveal].is-visible {
+    opacity: 1;
+    transform: none;
+}
+
 .home-v2-product-seo-link {
     display: inline-flex;
     margin-top: 1.4rem;
@@ -492,9 +636,9 @@ body.public-home-v2 {
     .home-v2-section-head { position: static; max-width: 48rem; }
     .home-v2-product-section { grid-template-columns: 1fr; gap: 3rem; }
     .home-v2-product-operation .home-v2-product-copy,
-    .home-v2-product-operation .home-v2-feature-visual { order: initial; }
+    .home-v2-product-operation .home-v2-artwork { order: initial; }
     .home-v2-product-copy { max-width: 48rem; }
-    .home-v2-feature-visual { max-width: 58rem; }
+    .home-v2-artwork { max-width: 58rem; min-height: clamp(23rem, 62vw, 32rem); }
     .home-v2-tool-links { align-items: flex-start; flex-wrap: wrap; }
     .home-v2-tool-links span { width: 100%; }
 }
@@ -537,6 +681,8 @@ body.public-home-v2 {
     .home-v2-workflow { padding: 5rem 0; }
     .home-v2-workflow-list li { grid-template-columns: 2.5rem minmax(0,1fr); gap: .75rem; }
     .home-v2-product-section { padding: 4.5rem 0; }
+    .home-v2-artwork { min-height: clamp(20rem, 86vw, 29rem); border-radius: .9rem; }
+    .home-v2-artwork-inset { width: clamp(8.5rem, 38%, 11rem); }
     .home-v2-product-copy h2,
     .home-v2-bottom-cta h2 { font-size: clamp(2rem,10vw,3rem); }
     .home-v2-feature-lines > div { grid-template-columns: 1fr; gap: .35rem; }
@@ -565,7 +711,17 @@ body.public-home-v2 {
     }
 
     .home-v2-actions .button,
-    .home-v2-actions .button-primary::after {
+    .home-v2-actions .button-primary::after,
+    .home-v2-workflow-art img,
+    .home-v2-artwork-main,
+    .home-v2-artwork-inset,
+    [data-reveal] {
         transition: none !important;
+        animation: none !important;
+    }
+
+    html.has-reveal body.public-home-v2 [data-reveal] {
+        opacity: 1 !important;
+        transform: none !important;
     }
 }
