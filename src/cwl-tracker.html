@@ -4,40 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clash of Clans CWL Tracker, Stats &amp; History | ClashPanel</title>
-    <meta name="description" content="Track live CWL attacks, missed attacks, stars, destruction, standings, player performance and previous Clan War League seasons with ClashPanel.">
+    <meta name="description" content="Track live Clash of Clans CWL wars, standings, attacks, missed hits, player performance, bonus medals and historical Clan War League seasons.">
     <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#0d1117">
     <link rel="canonical" href="https://clashpanel.com/cwl-tracker">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="ClashPanel">
-    <meta property="og:title" content="Clash of Clans CWL Tracker, Stats &amp; History">
-    <meta property="og:description" content="Track live CWL attacks, standings, player performance, missed hits and previous league seasons.">
     <meta property="og:url" content="https://clashpanel.com/cwl-tracker">
+    <meta property="og:title" content="Clash of Clans CWL Tracker, Stats &amp; History">
+    <meta property="og:description" content="Follow live CWL wars, standings, attacks, missed hits, player performance and previous league seasons in one tracker.">
     <meta property="og:image" content="https://clashpanel.com/assets/social/cwl-tracker.png">
-    <meta property="og:image:alt" content="ClashPanel CWL tracker with live standings and player performance">
+    <meta property="og:image:alt" content="ClashPanel CWL tracker with live stats, standings and season history">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Clash of Clans CWL Tracker, Stats &amp; History">
-    <meta name="twitter:description" content="Track live CWL attacks, standings, player performance, missed hits and previous league seasons.">
+    <meta name="twitter:description" content="Follow live CWL wars, standings, attacks, missed hits, player performance and previous league seasons in one tracker.">
     <meta name="twitter:image" content="https://clashpanel.com/assets/social/cwl-tracker.png">
     <script type="application/ld+json">
         {
             "@context": "https://schema.org",
             "@graph": [
-                {
-                    "@type": "WebApplication",
-                    "name": "ClashPanel CWL Tracker",
-                    "url": "https://clashpanel.com/cwl-tracker",
-                    "description": "A Clash of Clans CWL tracker for live attacks, standings, player performance and season history.",
-                    "operatingSystem": "Any",
-                    "applicationCategory": "GameApplication",
-                    "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}
-                },
-                {
-                    "@type": "BreadcrumbList",
-                    "itemListElement": [
-                        {"@type": "ListItem", "position": 1, "name": "ClashPanel", "item": "https://clashpanel.com/"},
-                        {"@type": "ListItem", "position": 2, "name": "CWL Tracker", "item": "https://clashpanel.com/cwl-tracker"}
-                    ]
-                }
+                {"@type":"WebApplication","name":"ClashPanel CWL Tracker","url":"https://clashpanel.com/cwl-tracker","description":"A Clash of Clans CWL tracker for live wars, standings, roster participation, bonus advice and historical seasons.","operatingSystem":"Any","applicationCategory":"GameApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}},
+                {"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ClashPanel","item":"https://clashpanel.com/"},{"@type":"ListItem","position":2,"name":"CWL Tracker","item":"https://clashpanel.com/cwl-tracker"}]}
             ]
         }
     </script>
@@ -45,23 +32,23 @@
     <link rel="stylesheet" href="/assets/css/workspace-loading.css">
     <script src="/assets/js/shell/workspace-bootstrap.js"></script>
     <link rel="stylesheet" href="/assets/css/workspace-system.css">
-    <link rel="stylesheet" href="/assets/css/light-theme.css">
-    <link rel="stylesheet" href="/assets/css/workspace-polish.css">
-    <link rel="stylesheet" href="/assets/css/public-home-v2.css">
-    <link rel="stylesheet" href="/assets/css/public-marketing.css">
-    <link rel="stylesheet" href="/assets/css/public-tool-page.css">
     <script src="/assets/js/Data/runtime-config.js"></script>
     <script type="module" src="/assets/js/pages/public-site.js"></script>
+    <link rel="stylesheet" href="/assets/css/light-theme.css">
+    <link rel="stylesheet" href="/assets/css/workspace-polish.css">
+    <link rel="stylesheet" href="/assets/css/public-marketing.css">
+    <link rel="stylesheet" href="/assets/css/public-home-v2.css">
+    <link rel="stylesheet" href="/assets/css/public-feature-v2.css">
 </head>
-<body class="public-site public-tool-page">
-<a class="skip-link" href="#main-content">Skip to content</a>
+<body class="public-site public-home-v2 public-feature-v2 public-feature-tracker">
+<a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
 <header class="public-header">
     <a class="public-brand" href="/" aria-label="ClashPanel home"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a>
     <nav class="public-nav" id="public-nav" aria-label="Public navigation" data-i18n-aria-label="public.navigation">
-        <a href="/cwl-planner">CWL Planner</a>
-        <a href="/cwl-tracker" aria-current="page">CWL Tracker</a>
-        <a href="/clan-management">Clan Families</a>
-        <a href="/about">About</a>
+        <a href="/cwl-planner" data-i18n="publicPages.navPlanner">CWL Planner</a>
+        <a href="/cwl-tracker" aria-current="page" data-i18n="publicPages.navTracker">CWL Tracker</a>
+        <a href="/clan-management" data-i18n="publicPages.navFamily">Clan Management</a>
+        <a href="/about" data-i18n="publicPages.navAbout">About</a>
     </nav>
     <div class="public-actions">
         <button type="button" data-language-control data-i18n="header.language">Language</button>
@@ -71,28 +58,81 @@
     </div>
     <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" data-i18n-aria-label="public.openMenu" aria-label="Open menu"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
 </header>
-<main class="public-tool-main" id="main-content"><nav class="public-tool-breadcrumbs" aria-label="Breadcrumb"><a href="/">ClashPanel</a><span>/</span><span>CWL Tracker</span></nav>
-    <section class="public-tool-hero"><div data-reveal><p class="public-tool-kicker">CWL Tracker & Operation Board</p><h1>Run CWL with the full picture.</h1><p class="public-tool-lead">Follow attacks, standings, missed hits, player performance and previous seasons across the entire league week.</p><div class="public-tool-actions"><a class="button button-primary button-large" href="/app/cwl-tracker">Open CWL Tracker</a><a class="button button-secondary button-large" href="/cwl-planner">Plan a CWL roster</a></div><p class="public-tool-note">Free to use · sign in to save and manage your own data</p></div><div data-reveal><div class="tool-product-scene tracker-scene" aria-label="CWL Operation Board preview"><div class="tool-window"><div class="tool-window-bar"><strong>CWL Operation Board · Round 5</strong><span>Live</span></div><div class="tool-window-body">
-        <div class="scene-stats"><div><small>League</small><strong>Master III</strong></div><div><small>Position</small><strong>2nd</strong></div><div><small>Stars</small><strong>184</strong></div><div><small>Record</small><strong>4–1</strong></div></div>
-        <div class="scene-live-grid"><section class="scene-live-panel"><h3>Current war</h3><div class="scene-war"><span><strong>Belgian Warriors</strong><small>12 / 15 attacks · 94.8%</small></span><b>31★</b></div><div class="scene-war"><span><strong>Night Raiders</strong><small>13 / 15 attacks · 91.4%</small></span><b>29★</b></div><div class="scene-war"><span><strong>Projected finish</strong><small>2 attacks remaining with TH18 matchups</small></span><b>+3★</b></div></section>
-            <aside class="scene-live-panel"><h3>Needs attention</h3><div class="scene-alert"><span>Missed attacks</span><b>2</b></div><div class="scene-alert"><span>Players not used</span><b>3</b></div><div class="scene-alert"><span>Bonus candidates</span><b>8</b></div><div class="scene-alert"><span>League movement</span><b>↑ 1</b></div></aside></div>
-    </div></div></div></div></section>
-    <section class="tool-story" data-reveal><div class="tool-story-copy"><span>LIVE CONTEXT</span><h2>See the current war without losing the league.</h2><p>The Operation Board combines the immediate matchup with standings, remaining attacks and the rest of the seven-day context.</p><div class="tool-story-points"><div><b>01</b><span><strong>Live war state</strong><small>Stars, destruction, attacks used and what remains.</small></span></div><div><b>02</b><span><strong>League standings</strong><small>Know what the current result means for the table.</small></span></div><div><b>03</b><span><strong>Projected outcomes</strong><small>Use remaining attacks and matchup context as decision support.</small></span></div></div></div><div class="tool-story-visual"><div class="tool-product-scene tracker-scene" aria-label="CWL Operation Board preview"><div class="tool-window"><div class="tool-window-bar"><strong>CWL Operation Board · Round 5</strong><span>Live</span></div><div class="tool-window-body">
-        <div class="scene-stats"><div><small>League</small><strong>Master III</strong></div><div><small>Position</small><strong>2nd</strong></div><div><small>Stars</small><strong>184</strong></div><div><small>Record</small><strong>4–1</strong></div></div>
-        <div class="scene-live-grid"><section class="scene-live-panel"><h3>Current war</h3><div class="scene-war"><span><strong>Belgian Warriors</strong><small>12 / 15 attacks · 94.8%</small></span><b>31★</b></div><div class="scene-war"><span><strong>Night Raiders</strong><small>13 / 15 attacks · 91.4%</small></span><b>29★</b></div><div class="scene-war"><span><strong>Projected finish</strong><small>2 attacks remaining with TH18 matchups</small></span><b>+3★</b></div></section>
-            <aside class="scene-live-panel"><h3>Needs attention</h3><div class="scene-alert"><span>Missed attacks</span><b>2</b></div><div class="scene-alert"><span>Players not used</span><b>3</b></div><div class="scene-alert"><span>Bonus candidates</span><b>8</b></div><div class="scene-alert"><span>League movement</span><b>↑ 1</b></div></aside></div>
-    </div></div></div></div></section><section class="tool-story is-reverse" data-reveal><div class="tool-story-copy"><span>PLAYER CONTEXT</span><h2>Participation matters beyond one attack.</h2><p>Open roster context to review who attacked, who missed, recent performance and the history available for that player.</p><div class="tool-story-points"><div><b>01</b><span><strong>Missed attack visibility</strong><small>See participation issues without checking every war manually.</small></span></div><div><b>02</b><span><strong>Player performance</strong><small>Review recent historical context separately from current CWL results.</small></span></div><div><b>03</b><span><strong>Bonus support</strong><small>Compare transparent contribution signals before choosing medals.</small></span></div></div></div><div class="tool-story-visual"><div class="tool-product-scene tracker-scene" aria-label="CWL Operation Board preview"><div class="tool-window"><div class="tool-window-bar"><strong>CWL Operation Board · Round 5</strong><span>Live</span></div><div class="tool-window-body">
-        <div class="scene-stats"><div><small>League</small><strong>Master III</strong></div><div><small>Position</small><strong>2nd</strong></div><div><small>Stars</small><strong>184</strong></div><div><small>Record</small><strong>4–1</strong></div></div>
-        <div class="scene-live-grid"><section class="scene-live-panel"><h3>Current war</h3><div class="scene-war"><span><strong>Belgian Warriors</strong><small>12 / 15 attacks · 94.8%</small></span><b>31★</b></div><div class="scene-war"><span><strong>Night Raiders</strong><small>13 / 15 attacks · 91.4%</small></span><b>29★</b></div><div class="scene-war"><span><strong>Projected finish</strong><small>2 attacks remaining with TH18 matchups</small></span><b>+3★</b></div></section>
-            <aside class="scene-live-panel"><h3>Needs attention</h3><div class="scene-alert"><span>Missed attacks</span><b>2</b></div><div class="scene-alert"><span>Players not used</span><b>3</b></div><div class="scene-alert"><span>Bonus candidates</span><b>8</b></div><div class="scene-alert"><span>League movement</span><b>↑ 1</b></div></aside></div>
-    </div></div></div></div></section><section class="tool-story" data-reveal><div class="tool-story-copy"><span>SEASON HISTORY</span><h2>Compare the week with what came before.</h2><p>When reliable historical data exists, ClashPanel can show league movement, offense versus defense and participation trends across previous CWL seasons.</p><div class="tool-story-points"><div><b>01</b><span><strong>League movement</strong><small>See promotion and demotion history over time.</small></span></div><div><b>02</b><span><strong>Attack vs defense</strong><small>Compare how the clan performs on both sides of CWL.</small></span></div><div><b>03</b><span><strong>Season trends</strong><small>Spot recurring participation and performance patterns.</small></span></div></div></div><div class="tool-story-visual"><div class="tool-product-scene"><div class="cp-history-frame"><div class="cp-history-top"><h3>CWL season overview</h3><span>7 seasons</span></div><div class="cp-chart"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="cp-history-stats"><div><small>League</small><strong>Master III</strong></div><div><small>Attack efficiency</small><strong>+7.4%</strong></div><div><small>Missed attacks</small><strong>−41%</strong></div></div></div></div></div></section>
-    <section class="tool-steps" data-reveal><div class="tool-steps-header"><h2>From empty workspace to something useful.</h2><p>No long setup flow. Start from the clan data you already have and add structure only where it helps.</p></div><div class="tool-steps-grid"><article class="tool-step"><span>01</span><h3>Open a clan or saved plan</h3><p>Load the CWL source you want to follow. ClashPanel separates live state from historical context.</p></article><article class="tool-step"><span>02</span><h3>Follow each round</h3><p>Use the live board for current war state, standings, remaining attacks and participation.</p></article><article class="tool-step"><span>03</span><h3>Review the season</h3><p>Move into historical seasons and player context when you need more than the current scoreboard.</p></article></div></section>
-    <aside class="public-tool-crosslink" data-reveal><div><h2>Planning the next CWL already?</h2><p>Build the roster, rotations and all seven lineups before league week begins.</p></div><a href="/cwl-planner">Open CWL Planner →</a></aside></main>
+<main id="main-content">
+    <section class="home-v2-hero feature-v2-hero" id="product">
+        <div class="feature-v2-hero-media" aria-hidden="true">
+            <!-- IMAGE TIP: Wide active Clan War / CWL battlefield. Prefer action on the right and open/darker space on the left. Replace only the src below. -->
+            <img src="/assets/css/pictures/home/war-battlefield.jpg" alt="">
+        </div>
+        <div class="home-v2-hero-copy">
+            <p class="eyebrow" data-i18n="tracker.kicker">Clash of Clans CWL Tracker</p>
+            <h1 data-i18n="tracker.h1">See the whole CWL.</h1>
+            <p class="home-v2-lead" data-i18n="tracker.lead">Track live CWL wars, attacks, missed hits, league standings, player performance and previous Clan War League seasons in one view.</p>
+            <div class="hero-actions home-v2-actions"><a class="button button-primary button-large" href="/app/cwl-operation-board" data-i18n="tracker.primary">Open CWL Tracker</a>
+                <a class="button button-secondary button-large" href="/cwl-planner" data-i18n="tracker.secondary">Plan a CWL roster</a></div>
+            <p class="hero-footnote" data-i18n="tracker.note">Use a clan tag or saved plan to load the current CWL context</p>
+        </div>
+    </section>
+    <section class="home-v2-signal-strip" aria-label="Clash of Clans CWL Tracker capabilities" data-reveal><span data-i18n="tracker.signal.liveWar">Live war scores</span><span data-i18n="tracker.signal.remaining">Remaining attacks</span><span data-i18n="tracker.signal.missed">Missed attacks</span><span data-i18n="tracker.signal.standings">League standings</span><span data-i18n="tracker.signal.history">CWL season history</span><span data-i18n="tracker.signal.bonus">Bonus medal advice</span></section>
+    <section class="home-v2-workflow feature-v2-workflow">
+        <div class="home-v2-section-head" data-reveal="left">
+            <p class="eyebrow" data-i18n="tracker.workflow.kicker">Live to historical</p>
+            <h2 data-i18n="tracker.workflow.title">From current war to full season.</h2>
+            <p data-i18n="tracker.workflow.intro">Use the Operation Board for what matters now, then zoom out to standings, participation and previous seasons without switching tools.</p>
+            <figure class="home-v2-workflow-art" data-reveal="image">
+                <!-- IMAGE TIP: Action-focused war image that suggests following a live round or adapting during battle. Replace only the src below. -->
+                <img src="/assets/css/pictures/home/barbarian-charge.jpg" alt="Clash of Clans battle action representing live CWL tracking" loading="lazy" decoding="async">
+                <figcaption data-i18n="tracker.workflow.caption">Follow the round now. Keep the season context later.</figcaption>
+            </figure>
+        </div>
+        <ol class="home-v2-workflow-list">
+            <li data-reveal style="--reveal-delay:60ms"><span>01</span><div><h3 data-i18n="tracker.workflow.step1.title">Load the CWL context</h3><p data-i18n="tracker.workflow.step1.desc">Open a clan directly or use a saved CWL plan to connect the roster with the active league week.</p></div></li>
+            <li data-reveal style="--reveal-delay:130ms"><span>02</span><div><h3 data-i18n="tracker.workflow.step2.title">Follow every round live</h3><p data-i18n="tracker.workflow.step2.desc">Watch scores, remaining attacks, win conditions and participation while the war is still active.</p></div></li>
+            <li data-reveal style="--reveal-delay:200ms"><span>03</span><div><h3 data-i18n="tracker.workflow.step3.title">Review the season</h3><p data-i18n="tracker.workflow.step3.desc">Compare standings, player results and historical CWL seasons when the live round is over.</p></div></li>
+        </ol>
+    </section>
+    <section class="home-v2-products"><article class="home-v2-product-section">
+        <div class="home-v2-product-copy" data-reveal="left">
+            <p class="eyebrow" data-i18n="tracker.live.kicker">Live CWL tracking</p>
+            <h2 data-i18n="tracker.live.title">Know what matters now.</h2>
+            <p data-i18n="tracker.live.copy">A live war is more useful when the score, remaining attacks and roster context sit together. Focus on the decisions that can still change the result.</p>
+            <div class="home-v2-feature-lines"><div><strong data-i18n="tracker.live.f1.title">Current war picture</strong><span data-i18n="tracker.live.f1.desc">See stars, destruction and remaining attacks for both clans in one current-war view.</span></div><div><strong data-i18n="tracker.live.f2.title">Missed attack checks</strong><span data-i18n="tracker.live.f2.desc">Spot players who still need to attack and review missed participation across the roster.</span></div><div><strong data-i18n="tracker.live.f3.title">Standings and projections</strong><span data-i18n="tracker.live.f3.desc">Follow the league table, completed rounds and projected finish without leaving the CWL board.</span></div></div>
+        </div>
+        <div class="home-v2-artwork home-v2-artwork-planner" data-reveal="right">
+            <!-- IMAGE TIP: Main: active war battlefield or attack scene. Inset: close-up action, star/trophy or result moment. Replace only the two src values below. -->
+            <img class="home-v2-artwork-main" src="/assets/css/pictures/home/war-battlefield.jpg" alt="Clash of Clans live war battlefield" loading="lazy" decoding="async">
+            <span class="home-v2-artwork-label" data-i18n="tracker.live.artLabel">See what still matters</span>
+            <img class="home-v2-artwork-inset" src="/assets/css/pictures/home/barbarian-charge.jpg" alt="Clash of Clans attack in progress" loading="lazy" decoding="async">
+        </div>
+    </article><article class="home-v2-product-section home-v2-product-operation">
+        <div class="home-v2-product-copy" data-reveal="right">
+            <p class="eyebrow" data-i18n="tracker.history.kicker">CWL history</p>
+            <h2 data-i18n="tracker.history.title">Keep the season in context.</h2>
+            <p data-i18n="tracker.history.copy">Live results explain today; history explains the pattern. Compare previous seasons and player performance instead of judging one round alone.</p>
+            <div class="home-v2-feature-lines"><div><strong data-i18n="tracker.history.f1.title">Previous CWL seasons</strong><span data-i18n="tracker.history.f1.desc">Review earlier league outcomes, standings and season summaries when historical data is available.</span></div><div><strong data-i18n="tracker.history.f2.title">Offense vs defense</strong><span data-i18n="tracker.history.f2.desc">Compare attacking and defensive results to see where performance changed across league weeks.</span></div><div><strong data-i18n="tracker.history.f3.title">Bonus medal advice</strong><span data-i18n="tracker.history.f3.desc">Use visible contribution and performance context to support more transparent bonus decisions.</span></div></div>
+        </div>
+        <div class="home-v2-artwork home-v2-artwork-operation" data-reveal="left">
+            <!-- IMAGE TIP: Main: CWL trophy/league image. Inset: clan army or competitive scene suggesting season comparison. Replace only the two src values below. -->
+            <img class="home-v2-artwork-main" src="/assets/css/pictures/home/cwl-trophy.jpg" alt="Clan War League trophy" loading="lazy" decoding="async">
+            <span class="home-v2-artwork-label" data-i18n="tracker.history.artLabel">Compare season to season</span>
+            <img class="home-v2-artwork-inset" src="/assets/css/pictures/home/dark-army.jpg" alt="Clash of Clans army for historical performance" loading="lazy" decoding="async">
+        </div>
+    </article></section>
+    <section class="home-v2-bottom-cta" data-reveal>
+        <div><p class="eyebrow" data-i18n="tracker.cta.kicker">League week in progress?</p><h2 data-i18n="tracker.cta.title">Track every CWL round.</h2><p data-i18n="tracker.cta.desc">Load the current CWL, follow the live war and keep the full season history connected.</p></div>
+        <a class="button button-primary button-large" href="/app/cwl-operation-board" data-i18n="tracker.cta.button">Open CWL Tracker</a>
+    </section>
+</main>
 <footer class="public-footer">
     <div class="public-footer-main">
         <a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a>
         <nav aria-label="Footer navigation" data-i18n-aria-label="public.footerNav">
-            <a href="/about">About</a><a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a><a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a><a href="/subpages/terms" data-i18n="public.terms">Terms of use</a><a href="/subpages/contact" data-i18n="public.contact">Contact</a>
+            <a href="/about" data-i18n="public.about">About</a>
+            <a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a>
+            <a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a>
+            <a href="/subpages/terms" data-i18n="public.terms">Terms of use</a>
+            <a href="/subpages/contact" data-i18n="public.contact">Contact</a>
+            <a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer" data-i18n="public.fanPolicy">Supercell Fan Content Policy</a>
             <button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button>
         </nav>
     </div>

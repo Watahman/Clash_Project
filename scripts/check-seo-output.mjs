@@ -7,15 +7,15 @@ const pages = [
         file: 'index.html',
         canonical: 'https://clashpanel.com/',
         title: 'Clash of Clans Clan Management, CWL Planner & Tracker | ClashPanel',
-        h1: 'Run CWL without running a spreadsheet.',
+        h1: 'Plan better. Win more wars.',
         indexable: true,
-        links: ['/cwl-planner', '/cwl-tracker', '/clan-management', '/about']
+        links: ['/cwl-planner', '/cwl-tracker', '/clan-management']
     },
     {
         file: 'about.html',
         canonical: 'https://clashpanel.com/about',
         title: 'About ClashPanel | Clash of Clans Clan Management Toolkit',
-        h1: 'Built for the people doing the organising.',
+        h1: 'Built for clan leaders.',
         indexable: true,
         links: ['/cwl-planner']
     },
@@ -23,7 +23,7 @@ const pages = [
         file: 'cwl-planner.html',
         canonical: 'https://clashpanel.com/cwl-planner',
         title: 'Free Clash of Clans CWL Planner & Roster Optimizer | ClashPanel',
-        h1: 'Plan every lineup. Across every clan.',
+        h1: 'Plan every CWL lineup.',
         indexable: true,
         links: ['/cwl-tracker']
     },
@@ -31,7 +31,7 @@ const pages = [
         file: 'cwl-tracker.html',
         canonical: 'https://clashpanel.com/cwl-tracker',
         title: 'Clash of Clans CWL Tracker, Stats & History | ClashPanel',
-        h1: 'Run CWL with the full picture.',
+        h1: 'See the whole CWL.',
         indexable: true,
         links: ['/cwl-planner']
     },
@@ -39,7 +39,7 @@ const pages = [
         file: 'clan-management.html',
         canonical: 'https://clashpanel.com/clan-management',
         title: 'Clash of Clans Clan Management & Clan Family Tool | ClashPanel',
-        h1: 'Organise the clan network behind your CWL.',
+        h1: 'Run every clan together.',
         indexable: true,
         links: ['/cwl-planner']
     },
@@ -47,7 +47,7 @@ const pages = [
         file: 'bracket-generator.html',
         canonical: 'https://clashpanel.com/bracket-generator',
         title: 'Clash of Clans Bracket Generator | ClashPanel',
-        h1: 'Clash of Clans Bracket Generator',
+        h1: 'Build a better bracket.',
         indexable: false,
         comingSoon: true,
         links: ['/cwl-planner']
@@ -79,7 +79,8 @@ for (const page of pages) {
     assert(canonicalLinks[0].href === page.canonical, `${page.file}: incorrect canonical`);
     assert(!canonicalLinks[0].href.includes('/subpages/'), `${page.file}: legacy canonical`);
     assert(h1s.length === 1, `${page.file}: expected exactly one H1`);
-    assert(h1s[0].textContent.trim() === page.h1, `${page.file}: incorrect H1`);
+    const h1Text = h1s[0].textContent.replace(/\s+/g, ' ').trim();
+    assert(h1Text === page.h1, `${page.file}: incorrect H1`);
     if (page.indexable) {
         assert(/\bindex\b/i.test(robots) && !/\bnoindex\b/i.test(robots), `${page.file}: not indexable`);
     } else {

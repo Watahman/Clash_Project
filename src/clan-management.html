@@ -4,40 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clash of Clans Clan Management &amp; Clan Family Tool | ClashPanel</title>
-    <meta name="description" content="Manage Clash of Clans members across one or multiple clans, link player accounts, coordinate availability and organize your clan family.">
+    <meta name="description" content="Manage multiple Clash of Clans clans, members, linked player accounts, roles and CWL availability from one Clan Family workspace.">
     <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#0d1117">
     <link rel="canonical" href="https://clashpanel.com/clan-management">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="ClashPanel">
-    <meta property="og:title" content="Clash of Clans Clan Management &amp; Clan Family Tool">
-    <meta property="og:description" content="Manage members, linked player accounts, availability and multiple Clash of Clans clans together.">
     <meta property="og:url" content="https://clashpanel.com/clan-management">
+    <meta property="og:title" content="Clash of Clans Clan Management &amp; Clan Family Tool">
+    <meta property="og:description" content="Connect multiple clans, members, player accounts, roles and CWL availability in one shared Clan Family workspace.">
     <meta property="og:image" content="https://clashpanel.com/assets/social/clan-management.png">
-    <meta property="og:image:alt" content="ClashPanel clan management workspace with linked clans and members">
+    <meta property="og:image:alt" content="ClashPanel Clan Family management for multiple Clash of Clans clans">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Clash of Clans Clan Management &amp; Clan Family Tool">
-    <meta name="twitter:description" content="Manage members, linked player accounts, availability and multiple Clash of Clans clans together.">
+    <meta name="twitter:description" content="Connect multiple clans, members, player accounts, roles and CWL availability in one shared Clan Family workspace.">
     <meta name="twitter:image" content="https://clashpanel.com/assets/social/clan-management.png">
     <script type="application/ld+json">
         {
             "@context": "https://schema.org",
             "@graph": [
-                {
-                    "@type": "WebApplication",
-                    "name": "ClashPanel Clan Family",
-                    "url": "https://clashpanel.com/clan-management",
-                    "description": "A Clash of Clans clan management tool for linked clans, members, player accounts and availability.",
-                    "operatingSystem": "Any",
-                    "applicationCategory": "GameApplication",
-                    "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}
-                },
-                {
-                    "@type": "BreadcrumbList",
-                    "itemListElement": [
-                        {"@type": "ListItem", "position": 1, "name": "ClashPanel", "item": "https://clashpanel.com/"},
-                        {"@type": "ListItem", "position": 2, "name": "Clan Management", "item": "https://clashpanel.com/clan-management"}
-                    ]
-                }
+                {"@type":"WebApplication","name":"ClashPanel Clan Family","url":"https://clashpanel.com/clan-management","description":"A multi-clan management workspace for Clash of Clans leaders, members, linked accounts and CWL availability.","operatingSystem":"Any","applicationCategory":"GameApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}},
+                {"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ClashPanel","item":"https://clashpanel.com/"},{"@type":"ListItem","position":2,"name":"Clan Management","item":"https://clashpanel.com/clan-management"}]}
             ]
         }
     </script>
@@ -45,23 +32,23 @@
     <link rel="stylesheet" href="/assets/css/workspace-loading.css">
     <script src="/assets/js/shell/workspace-bootstrap.js"></script>
     <link rel="stylesheet" href="/assets/css/workspace-system.css">
-    <link rel="stylesheet" href="/assets/css/light-theme.css">
-    <link rel="stylesheet" href="/assets/css/workspace-polish.css">
-    <link rel="stylesheet" href="/assets/css/public-home-v2.css">
-    <link rel="stylesheet" href="/assets/css/public-marketing.css">
-    <link rel="stylesheet" href="/assets/css/public-tool-page.css">
     <script src="/assets/js/Data/runtime-config.js"></script>
     <script type="module" src="/assets/js/pages/public-site.js"></script>
+    <link rel="stylesheet" href="/assets/css/light-theme.css">
+    <link rel="stylesheet" href="/assets/css/workspace-polish.css">
+    <link rel="stylesheet" href="/assets/css/public-marketing.css">
+    <link rel="stylesheet" href="/assets/css/public-home-v2.css">
+    <link rel="stylesheet" href="/assets/css/public-feature-v2.css">
 </head>
-<body class="public-site public-tool-page">
-<a class="skip-link" href="#main-content">Skip to content</a>
+<body class="public-site public-home-v2 public-feature-v2 public-feature-family">
+<a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
 <header class="public-header">
     <a class="public-brand" href="/" aria-label="ClashPanel home"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a>
     <nav class="public-nav" id="public-nav" aria-label="Public navigation" data-i18n-aria-label="public.navigation">
-        <a href="/cwl-planner">CWL Planner</a>
-        <a href="/cwl-tracker">CWL Tracker</a>
-        <a href="/clan-management" aria-current="page">Clan Families</a>
-        <a href="/about">About</a>
+        <a href="/cwl-planner" data-i18n="publicPages.navPlanner">CWL Planner</a>
+        <a href="/cwl-tracker" data-i18n="publicPages.navTracker">CWL Tracker</a>
+        <a href="/clan-management" aria-current="page" data-i18n="publicPages.navFamily">Clan Management</a>
+        <a href="/about" data-i18n="publicPages.navAbout">About</a>
     </nav>
     <div class="public-actions">
         <button type="button" data-language-control data-i18n="header.language">Language</button>
@@ -71,62 +58,81 @@
     </div>
     <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" data-i18n-aria-label="public.openMenu" aria-label="Open menu"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
 </header>
-<main class="public-tool-main" id="main-content"><nav class="public-tool-breadcrumbs" aria-label="Breadcrumb"><a href="/">ClashPanel</a><span>/</span><span>Clan Families</span></nav>
-    <section class="public-tool-hero"><div data-reveal><p class="public-tool-kicker">Clan Families</p><h1>Organise the clan network behind your CWL.</h1><p class="public-tool-lead">Connect clans, members, player accounts and availability so planning starts with clean information instead of scattered messages.</p><div class="public-tool-actions"><a class="button button-primary button-large" href="/app/clan-management">Open Clan Family</a><a class="button button-secondary button-large" href="/cwl-planner">Use clans in CWL Planner</a></div><p class="public-tool-note">Free to use · sign in to save and manage your own data</p></div><div data-reveal><div class="tool-product-scene family-scene" aria-label="Clan Family workspace preview"><div class="tool-window"><div class="tool-window-bar"><strong>Belgian Clan Family</strong><span>28 members</span></div><div class="tool-window-body">
-        <aside class="scene-family-side"><strong>Linked clans</strong><span class="is-active"><i>BW</i>Belgian Warriors</span><span><i>BA</i>Belgian Academy</span><span><i>B2</i>Belgian 2</span></aside>
-        <section class="scene-family-main"><header><div><h3>CWL availability</h3><small>Answers per linked player account</small></div><span>New poll</span></header>
-            <div class="scene-member"><span><strong>Nova</strong><small>TH18 · Belgian Warriors</small></span><div class="scene-member-dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><em>7/7</em></div>
-            <div class="scene-member"><span><strong>Orion</strong><small>TH17 · Belgian Warriors</small></span><div class="scene-member-dots"><i></i><i></i><i></i><i class="is-out"></i><i></i><i></i><i></i></div><em>6/7</em></div>
-            <div class="scene-member"><span><strong>Raven</strong><small>TH16 · Belgian Academy</small></span><div class="scene-member-dots"><i></i><i></i><i></i><i class="is-out"></i><i class="is-out"></i><i></i><i></i></div><em>5/7</em></div>
-            <div class="scene-member"><span><strong>Atlas</strong><small>TH18 · Belgian Warriors</small></span><div class="scene-member-dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><em>7/7</em></div>
-        </section>
-    </div></div></div></div></section>
-    <section class="tool-story" data-reveal><div class="tool-story-copy"><span>LINKED CLANS</span><h2>Keep related clans in one reusable group.</h2><p>Clan Families connect the clans that already work together so you do not need to rebuild that relationship in every ClashPanel workflow.</p><div class="tool-story-points"><div><b>01</b><span><strong>Multiple clans</strong><small>Keep main, academy and feeder clans together.</small></span></div><div><b>02</b><span><strong>Member roles</strong><small>Give leaders and members the access their role needs.</small></span></div><div><b>03</b><span><strong>Reusable context</strong><small>Use the same linked clans in planning and coordination.</small></span></div></div></div><div class="tool-story-visual"><div class="tool-product-scene family-scene" aria-label="Clan Family workspace preview"><div class="tool-window"><div class="tool-window-bar"><strong>Belgian Clan Family</strong><span>28 members</span></div><div class="tool-window-body">
-        <aside class="scene-family-side"><strong>Linked clans</strong><span class="is-active"><i>BW</i>Belgian Warriors</span><span><i>BA</i>Belgian Academy</span><span><i>B2</i>Belgian 2</span></aside>
-        <section class="scene-family-main"><header><div><h3>CWL availability</h3><small>Answers per linked player account</small></div><span>New poll</span></header>
-            <div class="scene-member"><span><strong>Nova</strong><small>TH18 · Belgian Warriors</small></span><div class="scene-member-dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><em>7/7</em></div>
-            <div class="scene-member"><span><strong>Orion</strong><small>TH17 · Belgian Warriors</small></span><div class="scene-member-dots"><i></i><i></i><i></i><i class="is-out"></i><i></i><i></i><i></i></div><em>6/7</em></div>
-            <div class="scene-member"><span><strong>Raven</strong><small>TH16 · Belgian Academy</small></span><div class="scene-member-dots"><i></i><i></i><i></i><i class="is-out"></i><i class="is-out"></i><i></i><i></i></div><em>5/7</em></div>
-            <div class="scene-member"><span><strong>Atlas</strong><small>TH18 · Belgian Warriors</small></span><div class="scene-member-dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><em>7/7</em></div>
-        </section>
-    </div></div></div></div></section><section class="tool-story is-reverse" data-reveal><div class="tool-story-copy"><span>REAL PLAYERS</span><h2>Connect people to the accounts they actually use.</h2><p>One person can link multiple Clash of Clans accounts. Leaders see members and player accounts without treating every tag as a separate person.</p><div class="tool-story-points"><div><b>01</b><span><strong>Linked accounts</strong><small>Keep multiple player tags attached to one member.</small></span></div><div><b>02</b><span><strong>Roster comparison</strong><small>Compare family members with live clan rosters.</small></span></div><div><b>03</b><span><strong>Account audit</strong><small>Spot missing or outdated account links.</small></span></div></div></div><div class="tool-story-visual"><div class="tool-product-scene family-scene" aria-label="Clan Family workspace preview"><div class="tool-window"><div class="tool-window-bar"><strong>Belgian Clan Family</strong><span>28 members</span></div><div class="tool-window-body">
-        <aside class="scene-family-side"><strong>Linked clans</strong><span class="is-active"><i>BW</i>Belgian Warriors</span><span><i>BA</i>Belgian Academy</span><span><i>B2</i>Belgian 2</span></aside>
-        <section class="scene-family-main"><header><div><h3>CWL availability</h3><small>Answers per linked player account</small></div><span>New poll</span></header>
-            <div class="scene-member"><span><strong>Nova</strong><small>TH18 · Belgian Warriors</small></span><div class="scene-member-dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><em>7/7</em></div>
-            <div class="scene-member"><span><strong>Orion</strong><small>TH17 · Belgian Warriors</small></span><div class="scene-member-dots"><i></i><i></i><i></i><i class="is-out"></i><i></i><i></i><i></i></div><em>6/7</em></div>
-            <div class="scene-member"><span><strong>Raven</strong><small>TH16 · Belgian Academy</small></span><div class="scene-member-dots"><i></i><i></i><i></i><i class="is-out"></i><i class="is-out"></i><i></i><i></i></div><em>5/7</em></div>
-            <div class="scene-member"><span><strong>Atlas</strong><small>TH18 · Belgian Warriors</small></span><div class="scene-member-dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><em>7/7</em></div>
-        </section>
-    </div></div></div></div></section><section class="tool-story" data-reveal><div class="tool-story-copy"><span>AVAILABILITY</span><h2>Collect CWL answers where you can actually reuse them.</h2><p>Create availability polls per linked account and CWL day, then load those answers into roster planning instead of copying them from chat.</p><div class="tool-story-points"><div><b>01</b><span><strong>Per-day answers</strong><small>Availability can differ across the seven CWL rounds.</small></span></div><div><b>02</b><span><strong>Per-account answers</strong><small>A member can answer differently for each linked player account.</small></span></div><div><b>03</b><span><strong>Planner handoff</strong><small>Load poll answers directly into a CWL planning workflow.</small></span></div></div></div><div class="tool-story-visual"><div class="tool-product-scene planner-scene" aria-label="CWL Planner workspace preview">
-        <div class="tool-window">
-            <div class="tool-window-bar"><strong>August CWL · Main roster</strong><span>Saved</span></div>
-            <div class="tool-window-body">
-                <aside class="scene-roster"><div class="scene-panel-head"><strong>Free roster</strong><b>+ player</b></div><div class="scene-search">Search name or #tag</div>
-                    <div class="scene-player"><img src="/assets/css/pictures/townhalls/Town_Hall18.png" alt=""><span><strong>Nova</strong><small>TH18 · available 7/7</small></span></div>
-                    <div class="scene-player"><img src="/assets/css/pictures/townhalls/Town_Hall17.png" alt=""><span><strong>Orion</strong><small>TH17 · available 6/7</small></span></div>
-                    <div class="scene-player"><img src="/assets/css/pictures/townhalls/Town_Hall16.png" alt=""><span><strong>Raven</strong><small>TH16 · rotation</small></span></div>
-                    <div class="scene-player"><img src="/assets/css/pictures/townhalls/Town_Hall18.png" alt=""><span><strong>Atlas</strong><small>TH18 · core</small></span></div>
-                </aside>
-                <div class="scene-board"><div class="scene-board-toolbar"><span>Import</span><span>Auto Plan</span><span>Optimize</span></div>
-                    <article class="scene-clan"><header><div><strong>Belgian Warriors</strong><small>Master III · 15v15</small></div><em>15 / 15</em></header>
-                        <div class="scene-days"><i class="is-on">D1</i><i class="is-on">D2</i><i class="is-on">D3</i><i>D4</i><i>D5</i><i>D6</i><i>D7</i></div>
-                        <div class="scene-line"><span><b>18</b><strong>Nova</strong></span><i class="is-in">IN</i><i class="is-in">IN</i><i class="is-in">IN</i></div>
-                        <div class="scene-line"><span><b>18</b><strong>Atlas</strong></span><i class="is-in">IN</i><i class="is-in">IN</i><i class="is-in">IN</i></div>
-                        <div class="scene-line"><span><b>17</b><strong>Orion</strong></span><i class="is-in">IN</i><i>—</i><i class="is-in">IN</i></div>
-                        <div class="scene-line"><span><b>16</b><strong>Raven</strong></span><i>—</i><i class="is-in">IN</i><i>—</i></div>
-                    </article>
-                    <article class="scene-clan" style="margin-top:.5rem"><header><div><strong>Belgian Academy</strong><small>Crystal I · 30v30</small></div><em>28 / 30</em></header><div class="scene-days"><i>D1</i><i>D2</i><i>D3</i><i>D4</i><i>D5</i><i>D6</i><i>D7</i></div></article>
-                </div>
-            </div>
+<main id="main-content">
+    <section class="home-v2-hero feature-v2-hero" id="product">
+        <div class="feature-v2-hero-media" aria-hidden="true">
+            <!-- IMAGE TIP: Wide group/clan camp image with several characters or banners. Leave visual breathing room behind the text on the left. Replace only the src below. -->
+            <img src="/assets/css/pictures/home/clan-war-camp.jpg" alt="">
         </div>
-    </div></div></section>
-    <section class="tool-steps" data-reveal><div class="tool-steps-header"><h2>From empty workspace to something useful.</h2><p>No long setup flow. Start from the clan data you already have and add structure only where it helps.</p></div><div class="tool-steps-grid"><article class="tool-step"><span>01</span><h3>Create or join a Clan Family</h3><p>Start a group for related clans or join one with its invitation code.</p></article><article class="tool-step"><span>02</span><h3>Connect people and clans</h3><p>Add members, link player accounts and attach the clans in your network.</p></article><article class="tool-step"><span>03</span><h3>Reuse the same context</h3><p>Collect availability and load linked clans into CWL planning when you need them.</p></article></div></section>
-    <aside class="public-tool-crosslink" data-reveal><div><h2>Turn availability into a real CWL plan</h2><p>Bring linked clans and poll answers straight into the roster workflow.</p></div><a href="/cwl-planner">Open CWL Planner →</a></aside></main>
+        <div class="home-v2-hero-copy">
+            <p class="eyebrow" data-i18n="family.kicker">Clash of Clans Clan Management</p>
+            <h1 data-i18n="family.h1">Run every clan together.</h1>
+            <p class="home-v2-lead" data-i18n="family.lead">Connect multiple clans, members, player accounts and CWL availability in one Clan Family workspace built for shared clan management.</p>
+            <div class="hero-actions home-v2-actions"><a class="button button-primary button-large" href="/app/groups" data-i18n="family.primary">Open Clan Families</a>
+                <a class="button button-secondary button-large" href="/cwl-planner" data-i18n="family.secondary">Explore CWL Planner</a></div>
+            <p class="hero-footnote" data-i18n="family.note">Built for clan leaders and co-leaders managing related clans</p>
+        </div>
+    </section>
+    <section class="home-v2-signal-strip" aria-label="Clash of Clans Clan Management capabilities" data-reveal><span data-i18n="family.signal.multiClan">Multi-clan management</span><span data-i18n="family.signal.linkedClans">Linked clans</span><span data-i18n="family.signal.roles">Roles & permissions</span><span data-i18n="family.signal.accounts">Linked accounts</span><span data-i18n="family.signal.availability">CWL availability</span><span data-i18n="family.signal.audit">Account audit</span></section>
+    <section class="home-v2-workflow feature-v2-workflow">
+        <div class="home-v2-section-head" data-reveal="left">
+            <p class="eyebrow" data-i18n="family.workflow.kicker">Shared clan context</p>
+            <h2 data-i18n="family.workflow.title">One family. Shared context.</h2>
+            <p data-i18n="family.workflow.intro">Keep the relationships between clans, members and player accounts intact so the same information can be reused when CWL planning starts.</p>
+            <figure class="home-v2-workflow-art" data-reveal="image">
+                <!-- IMAGE TIP: Group army / clan gathering image that communicates many members acting as one network. Replace only the src below. -->
+                <img src="/assets/css/pictures/home/dark-army.jpg" alt="Clash of Clans army representing a connected Clan Family" loading="lazy" decoding="async">
+                <figcaption data-i18n="family.workflow.caption">Several clans can still work from one shared structure.</figcaption>
+            </figure>
+        </div>
+        <ol class="home-v2-workflow-list">
+            <li data-reveal style="--reveal-delay:60ms"><span>01</span><div><h3 data-i18n="family.workflow.step1.title">Create or join a Clan Family</h3><p data-i18n="family.workflow.step1.desc">Build a shared space for related clans or join an existing family with its invitation code.</p></div></li>
+            <li data-reveal style="--reveal-delay:130ms"><span>02</span><div><h3 data-i18n="family.workflow.step2.title">Link clans and player accounts</h3><p data-i18n="family.workflow.step2.desc">Connect the clans in your network and keep multiple Clash of Clans accounts attached to the right member.</p></div></li>
+            <li data-reveal style="--reveal-delay:200ms"><span>03</span><div><h3 data-i18n="family.workflow.step3.title">Reuse it in CWL planning</h3><p data-i18n="family.workflow.step3.desc">Collect availability per account and load linked clans into the CWL Planner without copying everything again.</p></div></li>
+        </ol>
+    </section>
+    <section class="home-v2-products"><article class="home-v2-product-section">
+        <div class="home-v2-product-copy" data-reveal="left">
+            <p class="eyebrow" data-i18n="family.network.kicker">Multi-clan management</p>
+            <h2 data-i18n="family.network.title">Keep connected clans in one place.</h2>
+            <p data-i18n="family.network.copy">A Clan Family adds a shared layer above individual clans so leaders can manage the network without flattening everything into one roster.</p>
+            <div class="home-v2-feature-lines"><div><strong data-i18n="family.network.f1.title">Linked clans</strong><span data-i18n="family.network.f1.desc">Keep every clan in the family visible and reusable across the same workspace.</span></div><div><strong data-i18n="family.network.f2.title">Roles and permissions</strong><span data-i18n="family.network.f2.desc">Give leaders and co-leaders the controls they need for shared family administration.</span></div><div><strong data-i18n="family.network.f3.title">Live roster comparison</strong><span data-i18n="family.network.f3.desc">Compare connected member accounts with clan rosters to spot missing or outdated links.</span></div></div>
+        </div>
+        <div class="home-v2-artwork home-v2-artwork-planner" data-reveal="right">
+            <!-- IMAGE TIP: Main: several troops, banners or clan camp. Inset: second clan/group image to reinforce a multi-clan network. Replace only the two src values below. -->
+            <img class="home-v2-artwork-main" src="/assets/css/pictures/home/clan-war-camp.jpg" alt="Clash of Clans clan camp" loading="lazy" decoding="async">
+            <span class="home-v2-artwork-label" data-i18n="family.network.artLabel">One place for every clan</span>
+            <img class="home-v2-artwork-inset" src="/assets/css/pictures/home/dark-army.jpg" alt="Clash of Clans army representing linked clans" loading="lazy" decoding="async">
+        </div>
+    </article><article class="home-v2-product-section home-v2-product-operation">
+        <div class="home-v2-product-copy" data-reveal="right">
+            <p class="eyebrow" data-i18n="family.people.kicker">Members and accounts</p>
+            <h2 data-i18n="family.people.title">Connect people to every account.</h2>
+            <p data-i18n="family.people.copy">One person can use several Clash of Clans accounts. Keep those tags attached to the real member so availability and planning stay accurate.</p>
+            <div class="home-v2-feature-lines"><div><strong data-i18n="family.people.f1.title">Multiple player accounts</strong><span data-i18n="family.people.f1.desc">Link several player tags to one member instead of treating every account as a separate person.</span></div><div><strong data-i18n="family.people.f2.title">Per-account availability</strong><span data-i18n="family.people.f2.desc">Collect CWL availability separately for each linked account and each league day.</span></div><div><strong data-i18n="family.people.f3.title">Planner handoff</strong><span data-i18n="family.people.f3.desc">Load linked clans and poll answers directly into the CWL planning workflow when you need them.</span></div></div>
+        </div>
+        <div class="home-v2-artwork home-v2-artwork-operation" data-reveal="left">
+            <!-- IMAGE TIP: Main: member/leadership/strategy scene. Inset: account, clan badge or CWL-related detail. Replace only the two src values below. -->
+            <img class="home-v2-artwork-main" src="/assets/css/pictures/home/barbarian-strategy.jpg" alt="Clash of Clans strategy scene" loading="lazy" decoding="async">
+            <span class="home-v2-artwork-label" data-i18n="family.people.artLabel">People first, accounts connected</span>
+            <img class="home-v2-artwork-inset" src="/assets/css/pictures/home/cwl-trophy.jpg" alt="Clan War League trophy representing linked CWL context" loading="lazy" decoding="async">
+        </div>
+    </article></section>
+    <section class="home-v2-bottom-cta" data-reveal>
+        <div><p class="eyebrow" data-i18n="family.cta.kicker">Managing more than one clan?</p><h2 data-i18n="family.cta.title">Organize your Clan Family.</h2><p data-i18n="family.cta.desc">Connect the clans, members and accounts you already manage and reuse that context across ClashPanel.</p></div>
+        <a class="button button-primary button-large" href="/app/groups" data-i18n="family.cta.button">Open Clan Families</a>
+    </section>
+</main>
 <footer class="public-footer">
     <div class="public-footer-main">
         <a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a>
         <nav aria-label="Footer navigation" data-i18n-aria-label="public.footerNav">
-            <a href="/about">About</a><a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a><a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a><a href="/subpages/terms" data-i18n="public.terms">Terms of use</a><a href="/subpages/contact" data-i18n="public.contact">Contact</a>
+            <a href="/about" data-i18n="public.about">About</a>
+            <a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a>
+            <a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a>
+            <a href="/subpages/terms" data-i18n="public.terms">Terms of use</a>
+            <a href="/subpages/contact" data-i18n="public.contact">Contact</a>
+            <a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer" data-i18n="public.fanPolicy">Supercell Fan Content Policy</a>
             <button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button>
         </nav>
     </div>
