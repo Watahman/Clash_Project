@@ -1,8 +1,10 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&display=swap");
+
 /* Homepage only. Shared header, footer, buttons and theme tokens stay in workspace-system.css. */
 body.public-home-v2 {
     background:
-        radial-gradient(circle at 73% 4%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 27rem),
-        linear-gradient(180deg, color-mix(in srgb, var(--surface-subtle) 42%, var(--bg)) 0, var(--bg) 43rem);
+            radial-gradient(circle at 73% 4%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 27rem),
+            linear-gradient(180deg, color-mix(in srgb, var(--surface-subtle) 42%, var(--bg)) 0, var(--bg) 43rem);
 }
 .public-home-v2 main { overflow: hidden; }
 .public-home-v2 .public-header { background: color-mix(in srgb, var(--bg) 90%, transparent); }
@@ -84,36 +86,49 @@ body.public-home-v2 {
 
 
 .home-v2-hero-copy .eyebrow {
-    margin-bottom: 1rem;
+    margin-bottom: .9rem;
+
+    color: var(--accent-strong) !important;
+    font-family: "Rajdhani", "Inter", "Segoe UI", sans-serif;
+    font-size: .82rem;
+    font-weight: 700;
+    letter-spacing: .15em;
+    line-height: 1.2;
+    text-transform: uppercase;
 
     animation: heroItemEnter .7s ease-out .05s both;
 }
 
 
 .home-v2-hero-copy h1 {
-    max-width: 12ch;
-
+    max-width: 11ch;
     margin: 0 0 1.35rem !important;
 
-    font-size: clamp(3.2rem, 6vw, 6.2rem);
-    line-height: .95;
+    color: #fff;
+    font-family: "Manrope", "Inter", "Segoe UI", sans-serif;
+    font-size: clamp(3.4rem, 6vw, 6.4rem);
+    font-weight: 800;
+    line-height: .94;
     letter-spacing: -.055em !important;
-
     text-wrap: balance;
+
+    text-shadow: 0 .15rem 1.1rem rgba(0, 0, 0, .22);
 
     animation: heroItemEnter .8s ease-out .12s both;
 }
 
 
 .home-v2-lead {
-    max-width: 38rem;
-
+    max-width: 36rem;
     margin: 0;
 
-    color: var(--text-muted);
+    color: rgba(237, 242, 247, .78);
+    font-family: "Inter", "Segoe UI", sans-serif;
+    font-size: clamp(1rem, 1.2vw, 1.15rem);
+    font-weight: 400;
+    line-height: 1.65 !important;
 
-    font-size: clamp(1rem, 1.3vw, 1.18rem);
-    line-height: 1.7 !important;
+    text-shadow: 0 .08rem .7rem rgba(0, 0, 0, .22);
 
     animation: heroItemEnter .8s ease-out .22s both;
 }
@@ -123,36 +138,94 @@ body.public-home-v2 {
 .home-v2-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: .75rem;
-
-    margin-top: 2rem;
+    gap: .8rem;
+    margin-top: 2.1rem;
 
     animation: heroItemEnter .8s ease-out .32s both;
 }
 
 
 .home-v2-actions .button {
-    transition:
-            transform .22s ease,
-            box-shadow .22s ease,
-            border-color .22s ease;
-}
+    min-height: 3.35rem;
+    padding: .8rem 1.45rem;
 
+    border-radius: .65rem;
+
+    font-family: "Inter", "Segoe UI", sans-serif;
+    font-size: .88rem;
+    font-weight: 750;
+    letter-spacing: -.01em;
+
+    transition:
+            transform 180ms ease,
+            background 180ms ease,
+            border-color 180ms ease,
+            box-shadow 180ms ease,
+            color 180ms ease;
+}
 
 .home-v2-actions .button:hover {
-    transform: translateY(-.18rem);
+    transform: translateY(-.12rem);
 }
 
+.home-v2-actions .button-primary {
+    border: .0625rem solid #e2ba68;
+    background: linear-gradient(180deg, #e4bd6b 0%, #d2a64e 100%);
+    color: #171208 !important;
+
+    box-shadow:
+            0 .45rem 1.4rem rgba(0, 0, 0, .24),
+            inset 0 .0625rem rgba(255, 255, 255, .22);
+}
+
+.home-v2-actions .button-primary::after {
+    margin-left: .42rem;
+    content: "→";
+
+    font-size: 1.05em;
+    line-height: 1;
+
+    transition: transform 180ms ease;
+}
 
 .home-v2-actions .button-primary:hover {
+    border-color: #f0d28f;
+    background: linear-gradient(180deg, #edca7c 0%, #ddb359 100%);
+
     box-shadow:
-            0 .8rem 2rem
-            color-mix(in srgb, var(--accent) 24%, transparent);
+            0 .7rem 1.8rem rgba(0, 0, 0, .30),
+            0 0 1.8rem rgba(215, 173, 85, .13),
+            inset 0 .0625rem rgba(255, 255, 255, .25);
+}
+
+.home-v2-actions .button-primary:hover::after {
+    transform: translateX(.2rem);
+}
+
+.home-v2-actions .button-secondary {
+    border: .0625rem solid rgba(255, 255, 255, .17);
+    background: rgba(16, 21, 28, .58);
+    color: rgba(255, 255, 255, .90) !important;
+
+    -webkit-backdrop-filter: blur(.6rem);
+    backdrop-filter: blur(.6rem);
+}
+
+.home-v2-actions .button-secondary:hover {
+    border-color: rgba(255, 255, 255, .30);
+    background: rgba(30, 38, 49, .72);
+    color: #fff !important;
 }
 
 
 .home-v2-hero .hero-footnote {
     margin-top: 1rem;
+
+    color: rgba(237, 242, 247, .56) !important;
+    font-family: "Inter", "Segoe UI", sans-serif;
+    font-size: .76rem;
+    font-weight: 500;
+    letter-spacing: .01em;
 
     animation: heroItemEnter .8s ease-out .42s both;
 }
@@ -404,16 +477,16 @@ body.public-home-v2 {
 .home-v2-bottom-cta p:last-child { max-width: 43rem; margin-bottom: 0; }
 
 @media (max-width: 88rem) {
-    .home-v2-hero { grid-template-columns: minmax(0,.9fr) minmax(34rem,1.1fr); gap: 3.5rem; }
-    .home-v2-hero-copy h1 { font-size: 3.8rem; }
+    .home-v2-hero { width: 100%; }
+    .home-v2-hero-copy h1 { font-size: clamp(3.4rem, 6vw, 5.4rem); }
     .home-v2-signal-strip { grid-template-columns: repeat(3,1fr); }
     .home-v2-signal-strip span:nth-child(4)::before { display: none; }
     .home-v2-signal-strip span:nth-child(-n+3) { border-bottom: .0625rem solid var(--border); }
 }
 @media (max-width: 76rem) {
-    .home-v2-hero { grid-template-columns: 1fr; width: min(100% - 2rem,58rem); gap: 3rem; padding: 4.5rem 0; }
+    .home-v2-hero { width: 100%; min-height: 44rem; padding: 5.5rem clamp(1.5rem, 6vw, 4rem); }
     .home-v2-hero-copy { max-width: 44rem; }
-    .home-v2-hero-copy h1 { max-width: 13ch; font-size: 3.6rem; }
+    .home-v2-hero-copy h1 { max-width: 11ch; font-size: clamp(3.2rem, 8vw, 4.8rem); }
     .home-v2-product-window { max-width: 54rem; justify-self: start; }
     .home-v2-workflow { grid-template-columns: 1fr; gap: 2.5rem; }
     .home-v2-section-head { position: static; max-width: 48rem; }
@@ -437,13 +510,22 @@ body.public-home-v2 {
     .home-v2-bottom-cta { grid-template-columns: 1fr; align-items: start; gap: 2rem; }
 }
 @media (max-width: 46rem) {
-    .home-v2-hero,
     .home-v2-workflow,
     .home-v2-products,
     .home-v2-bottom-cta,
     .home-v2-tool-links { width: min(100% - 1.5rem,94rem); }
-    .home-v2-hero { padding-top: 3.25rem; padding-bottom: 3.5rem; }
-    .home-v2-hero-copy h1 { max-width: 14ch; font-size: 2.75rem; }
+
+    .home-v2-hero {
+        width: 100%;
+        min-height: calc(100svh - var(--topbar-height));
+        align-items: end;
+        padding: 7rem 1.25rem 4rem;
+    }
+
+    .home-v2-hero-copy h1 {
+        max-width: 11ch;
+        font-size: clamp(3rem, 14vw, 4.5rem);
+    }
     .home-v2-actions { display: grid; }
     .home-v2-actions .button { width: 100%; }
     .home-v2-capabilities { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
@@ -468,4 +550,22 @@ body.public-home-v2 {
     .home-v2-bottom-cta { padding: 4.5rem 0 5rem; }
     .home-v2-bottom-cta .button { width: 100%; }
     .home-v2-tool-links { align-items: flex-start; flex-direction: column; gap: .8rem; }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+    .home-v2-hero-background,
+    .home-v2-hero-copy,
+    .home-v2-hero-copy .eyebrow,
+    .home-v2-hero-copy h1,
+    .home-v2-lead,
+    .home-v2-actions,
+    .home-v2-hero .hero-footnote {
+        animation: none !important;
+    }
+
+    .home-v2-actions .button,
+    .home-v2-actions .button-primary::after {
+        transition: none !important;
+    }
 }
