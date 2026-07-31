@@ -208,9 +208,8 @@ function profileInit() {
                 localStorage.removeItem(key);
                 sessionStorage.removeItem(key);
             });
-            window.location.href = window.location.pathname.includes('/subpages/')
-                ? '../index.html'
-                : './index.html';
+
+            window.location.replace('/');
         }
     };
 
