@@ -22,10 +22,15 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
 
     private final ClashKingHttpClient client;
     private final Cache<String, HistoricalCwlSeason> prefetchedSeasons;
+    private final Cache<String, HistoryContext> historyContexts;
 
     public ClashKingLegacyCwlProvider(String baseUrl) {
         client = new ClashKingHttpClient(baseUrl, "ClashKing API");
         prefetchedSeasons = Caffeine.newBuilder()
+                .maximumSize(500)
+                .expireAfterWrite(Duration.ofMinutes(30))
+                .build();
+        historyContexts = Caffeine.newBuilder()
                 .maximumSize(500)
                 .expireAfterWrite(Duration.ofMinutes(30))
                 .build();
@@ -36,20 +41,7 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
             String clanTag,
             int limit
     ) throws Exception {
-        JsonObject basic;
-        try {
-            basic = client.get(
-                    "/clan/" + encoded(clanTag) + "/basic"
-            );
-        } catch (HttpException notFound) {
-            if (notFound.getStatusCode() == 404) basic = new JsonObject();
-            else throw notFound;
-        }
-        List<HistoricalCwlSeasonSummary> leagueChanges =
-                CwlHistoryIndexNormalizer.normalizeLegacy(
-                        basic, HistoricalCwlService.MAX_SEASON_LIMIT,
-                        providerName()
-                );
+        HistoryContext context = historyContext(clanTag);
         JsonArray available = client.getArray(
                 "/list/seasons?last=" + SEASON_DISCOVERY_WINDOW
         );
@@ -59,8 +51,37 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
                         HistoricalCwlService.MAX_SEASON_LIMIT,
                         limit
                 )))
-                .map(season -> indexSummary(season, leagueChanges))
+                .map(season -> indexSummary(
+                        season,
+                        context.recordedLeagues()
+                ))
                 .toList();
+    }
+
+    @Override
+    public List<HistoricalCwlSeason> enrichOverview(
+            String clanTag,
+            List<HistoricalCwlSeason> seasons
+    ) throws Exception {
+        if (seasons == null || seasons.isEmpty()) return List.of();
+        HistoryContext context = historyContext(clanTag);
+        List<HistoricalCwlSeason> newestFirst = seasons.stream()
+                .sorted(Comparator.comparing(
+                        HistoricalCwlSeason::season,
+                        Comparator.reverseOrder()
+                ))
+                .toList();
+        List<HistoricalCwlSeason> reconstructed =
+                CwlLeagueHistoryReconstructor.reconstruct(
+                        newestFirst,
+                        context.currentLeague(),
+                        context.recordedLeagues()
+                );
+        reconstructed.forEach(season -> prefetchedSeasons.put(
+                cacheKey(clanTag, season.season()),
+                season
+        ));
+        return reconstructed;
     }
 
     @Override
@@ -96,6 +117,50 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
     @Override
     public String providerName() {
         return "api";
+    }
+
+    private HistoryContext historyContext(String clanTag) throws Exception {
+        String key = Objects.toString(clanTag, "");
+        HistoryContext cached = historyContexts.getIfPresent(key);
+        if (cached != null) return cached;
+
+        JsonObject basic;
+        try {
+            basic = client.get(
+                    "/clan/" + encoded(clanTag) + "/basic"
+            );
+        } catch (HttpException notFound) {
+            if (notFound.getStatusCode() == 404) basic = new JsonObject();
+            else throw notFound;
+        }
+        HistoryContext context = new HistoryContext(
+                currentLeague(basic),
+                CwlHistoryIndexNormalizer.normalizeLegacy(
+                        basic,
+                        HistoricalCwlService.MAX_SEASON_LIMIT,
+                        providerName()
+                )
+        );
+        historyContexts.put(key, context);
+        return context;
+    }
+
+    private static HistoricalCwlSeason.League currentLeague(JsonObject basic) {
+        JsonObject data = CwlHistoryJson.object(basic, "data");
+        JsonObject root = data == null ? basic : data;
+        JsonObject value = CwlHistoryJson.object(
+                root, "warLeague", "clanWarLeague"
+        );
+        int id = CwlHistoryJson.integer(value, 0, "id");
+        String name = CwlHistoryJson.string(
+                root, "warLeague", "clanWarLeague"
+        );
+        if (name.isBlank()) name = CwlHistoryJson.string(value, "name");
+        if (name.isBlank()) name = CwlHistoryIndexNormalizer.leagueName(id);
+        return new HistoricalCwlSeason.League(
+                id > 0 ? id : null,
+                name
+        );
     }
 
     private static String encoded(String value) {
@@ -156,4 +221,9 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
     private static String cacheKey(String clanTag, String season) {
         return Objects.toString(clanTag, "") + ":" + season;
     }
+
+    private record HistoryContext(
+            HistoricalCwlSeason.League currentLeague,
+            List<HistoricalCwlSeasonSummary> recordedLeagues
+    ) {}
 }

@@ -14,14 +14,20 @@
 }
 
 .op-history-timeline {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
     border-block: 1px solid var(--border);
 }
 
 .operation-workspace-page .op-history-timeline button {
     display: grid;
-    min-width: 0;
+    flex: 1 0 9.5rem;
+    min-width: 9.5rem;
     min-height: 8.5rem;
     align-content: start;
     gap: var(--space-2);
@@ -161,7 +167,7 @@
     stroke-linejoin: round;
     vector-effect: non-scaling-stroke;
     animation: op-history-line-draw 380ms 40ms
-        cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .op-history-line-offense {
@@ -179,7 +185,7 @@
     transform-box: fill-box;
     transform-origin: center;
     animation: op-history-dot-in 220ms 150ms
-        cubic-bezier(0.22, 1, 0.36, 1) both;
+    cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .op-history-dot-offense {

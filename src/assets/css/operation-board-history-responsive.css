@@ -62,16 +62,12 @@
         border-bottom: 0;
     }
 
-    .op-history-timeline {
-        grid-template-columns: 1fr;
-    }
-
     .operation-workspace-page .op-history-timeline button {
+        flex-basis: 17rem;
+        min-width: 17rem;
         grid-template-columns: 4.5rem minmax(0, 1fr) auto;
         min-height: 0;
         align-items: center;
-        border-right: 0;
-        border-bottom: 1px solid var(--border);
     }
 
     .op-history-timeline button > strong {

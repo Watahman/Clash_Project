@@ -114,6 +114,60 @@ class ClashKingCwlProviderTest {
     }
 
     @Test
+    void overviewRestoresLeagueCountBackAfterDeepIndexDiscovery()
+            throws Exception {
+        respond(
+                "/clan/%23PQL/basic",
+                200,
+                """
+                {"warLeague":"Champion League III",
+                 "changes":{"clanWarLeague":{}}}
+                """
+        );
+        respond(
+                "/list/seasons?last=48",
+                200,
+                "[\"2026-06\",\"2026-05\",\"2026-03\"]"
+        );
+        respond(
+                "/cwl/%23PQL/2026-06",
+                200,
+                rankedSeason("2026-06", "ended", 3)
+        );
+        respond(
+                "/cwl/%23PQL/2026-05",
+                200,
+                rankedSeason("2026-05", "ended", 7)
+        );
+        respond(
+                "/cwl/%23PQL/2026-03",
+                200,
+                rankedSeason("2026-03", "ended", 1)
+        );
+
+        List<HistoricalCwlSeason> seasons =
+                new HistoricalCwlService(provider).getOverview("#PQL", 3);
+
+        assertEquals(
+                List.of("2026-06", "2026-05", "2026-03"),
+                seasons.stream().map(HistoricalCwlSeason::season).toList()
+        );
+        assertEquals(
+                List.of(
+                        "Champion League III",
+                        "Champion League II",
+                        "Champion League III"
+                ),
+                seasons.stream()
+                        .map(item -> item.league().name())
+                        .toList()
+        );
+        assertEquals(1, requests.stream()
+                .filter("/clan/%23PQL/basic"::equals)
+                .count());
+    }
+
+    @Test
     void usesTheDocumentedCwlSeasonEndpointAndEncoding() throws Exception {
         respond(
                 "/cwl/%23PQL/2026-06",

@@ -155,9 +155,13 @@ public final class HistoricalCwlService {
                 if (seasons.size() < limit) seasons.add(attempt.season());
             }
         }
+        List<HistoricalCwlSeason> enriched = source.enrichOverview(
+                clanTag,
+                List.copyOf(seasons)
+        );
         return new BatchAttempt(
-                List.copyOf(seasons),
-                seasons.size() >= limit || failures == 0
+                List.copyOf(enriched),
+                enriched.size() >= limit || failures == 0
         );
     }
 

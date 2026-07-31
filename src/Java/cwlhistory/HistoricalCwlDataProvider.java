@@ -8,5 +8,12 @@ public interface HistoricalCwlDataProvider {
 
     HistoricalCwlSeason getSeason(String clanTag, String season) throws Exception;
 
+    default List<HistoricalCwlSeason> enrichOverview(
+            String clanTag,
+            List<HistoricalCwlSeason> seasons
+    ) throws Exception {
+        return seasons;
+    }
+
     String providerName();
 }
