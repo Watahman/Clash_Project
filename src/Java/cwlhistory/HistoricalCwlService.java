@@ -13,8 +13,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class HistoricalCwlService {
-    public static final int DEFAULT_SEASON_LIMIT = 8;
-    public static final int MAX_SEASON_LIMIT = 12;
+    public static final int DEFAULT_SEASON_LIMIT = 12;
+    public static final int MAX_SEASON_LIMIT = 48;
 
     private final HistoricalCwlDataProvider provider;
     private final Cache<String, List<HistoricalCwlSeasonSummary>> seasonCache;
@@ -126,24 +126,38 @@ public final class HistoricalCwlService {
             String clanTag,
             int limit
     ) throws Exception {
+        // The legacy season index is intentionally cheap and may contain months
+        // in which this clan did not participate. Resolve details only when the
+        // overview is explicitly opened, and stop once enough real CWLs exist.
         List<HistoricalCwlSeasonSummary> summaries =
-                source.getAvailableSeasons(clanTag, limit);
-        List<CompletableFuture<SeasonAttempt>> pending = summaries.stream()
-                .map(summary -> CompletableFuture.supplyAsync(
-                        () -> loadSeason(source, clanTag, summary),
-                        overviewPool
-                ))
-                .toList();
+                source.getAvailableSeasons(clanTag, MAX_SEASON_LIMIT);
         List<HistoricalCwlSeason> seasons = new ArrayList<>();
         int failures = 0;
-        for (CompletableFuture<SeasonAttempt> future : pending) {
-            SeasonAttempt attempt = future.join();
-            if (attempt.season() == null) failures += 1;
-            else seasons.add(attempt.season());
+        final int batchSize = 3;
+
+        for (int start = 0; start < summaries.size() && seasons.size() < limit;
+             start += batchSize) {
+            int end = Math.min(start + batchSize, summaries.size());
+            List<CompletableFuture<SeasonAttempt>> pending = summaries
+                    .subList(start, end)
+                    .stream()
+                    .map(summary -> CompletableFuture.supplyAsync(
+                            () -> loadSeason(source, clanTag, summary),
+                            overviewPool
+                    ))
+                    .toList();
+            for (CompletableFuture<SeasonAttempt> future : pending) {
+                SeasonAttempt attempt = future.join();
+                if (attempt.season() == null) {
+                    failures += 1;
+                    continue;
+                }
+                if (seasons.size() < limit) seasons.add(attempt.season());
+            }
         }
         return new BatchAttempt(
                 List.copyOf(seasons),
-                failures == 0 && seasons.size() == summaries.size()
+                seasons.size() >= limit || failures == 0
         );
     }
 

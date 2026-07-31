@@ -8,7 +8,7 @@ const overviewCache = new Map();
 
 export async function loadHistoricalCwlSeasons(
     clanTag,
-    { limit = 8, signal, forceRefresh = false } = {}
+    { limit = 48, signal, forceRefresh = false } = {}
 ) {
     const tag = normalizeTag(clanTag);
     const key = `${tag}:${limit}`;
@@ -45,7 +45,7 @@ export async function loadHistoricalCwlSeason(
 
 export async function loadHistoricalCwlOverview(
     clanTag,
-    { limit = 8, signal, forceRefresh = false } = {}
+    { limit = 12, signal, forceRefresh = false } = {}
 ) {
     const tag = normalizeTag(clanTag);
     const key = `${tag}:${limit}`;

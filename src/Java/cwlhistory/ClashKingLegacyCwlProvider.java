@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Objects;
 
 public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvider {
-    private static final int SEASON_DISCOVERY_WINDOW = 24;
+    private static final int SEASON_DISCOVERY_WINDOW = 48;
 
     private final ClashKingHttpClient client;
     private final Cache<String, HistoricalCwlSeason> prefetchedSeasons;
@@ -54,34 +54,13 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
                 "/list/seasons?last=" + SEASON_DISCOVERY_WINDOW
         );
         List<String> candidates = seasonCandidates(available);
-        List<HistoricalCwlSeason> details = new ArrayList<>();
-        for (String season : candidates) {
-            if (details.size() >= limit) break;
-            HistoricalCwlSeason detail;
-            try {
-                detail = fetchSeason(clanTag, season);
-            } catch (HttpException unavailable) {
-                if (unavailable.getStatusCode() == 404) continue;
-                throw unavailable;
-            }
-            if (!completed(detail.state())) continue;
-            details.add(detail);
-        }
-        List<HistoricalCwlSeason> reconstructed =
-                CwlLeagueHistoryReconstructor.reconstruct(
-                        details,
-                        currentLeague(basic),
-                        leagueChanges
-                );
-        List<HistoricalCwlSeasonSummary> result = new ArrayList<>();
-        for (HistoricalCwlSeason enriched : reconstructed) {
-            prefetchedSeasons.put(
-                    cacheKey(clanTag, enriched.season()),
-                    enriched
-            );
-            result.add(summary(enriched));
-        }
-        return List.copyOf(result);
+        return candidates.stream()
+                .limit(Math.max(1, Math.min(
+                        HistoricalCwlService.MAX_SEASON_LIMIT,
+                        limit
+                )))
+                .map(season -> indexSummary(season, leagueChanges))
+                .toList();
     }
 
     @Override
@@ -148,46 +127,30 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
                 .toList();
     }
 
-    private static HistoricalCwlSeason.League currentLeague(JsonObject basic) {
-        JsonObject data = CwlHistoryJson.object(basic, "data");
-        JsonObject root = data == null ? basic : data;
-        JsonObject value = CwlHistoryJson.object(
-                root, "warLeague", "clanWarLeague"
-        );
-        int id = CwlHistoryJson.integer(value, 0, "id");
-        String name = CwlHistoryJson.string(
-                root, "warLeague", "clanWarLeague"
-        );
-        if (name.isBlank()) name = CwlHistoryJson.string(value, "name");
-        if (name.isBlank()) name = CwlHistoryIndexNormalizer.leagueName(id);
-        return new HistoricalCwlSeason.League(
-                id > 0 ? id : null,
-                name
-        );
-    }
-
-    private HistoricalCwlSeasonSummary summary(HistoricalCwlSeason season) {
-        HistoricalCwlSeason.Record record = season.record();
+    private HistoricalCwlSeasonSummary indexSummary(
+            String season,
+            List<HistoricalCwlSeasonSummary> leagueChanges
+    ) {
+        HistoricalCwlSeasonSummary recorded = leagueChanges.stream()
+                .filter(item -> season.equals(item.season()))
+                .findFirst()
+                .orElse(null);
+        HistoricalCwlSeason.League league = recorded == null
+                ? new HistoricalCwlSeason.League(null, "")
+                : recorded.league();
         return new HistoricalCwlSeasonSummary(
-                season.season(),
-                season.league(),
-                season.position(),
-                record == null ? 0 : record.wins(),
-                record == null ? 0 : record.losses(),
-                record == null ? 0 : record.draws(),
+                season,
+                league,
+                null,
+                0,
+                0,
+                0,
                 0,
                 null,
-                season.state(),
+                "unknown",
                 providerName(),
-                season.dataQuality()
+                recorded == null ? "Season index" : "Partial history"
         );
-    }
-
-    private static boolean completed(String state) {
-        return switch (String.valueOf(state).trim().toLowerCase()) {
-            case "ended", "warended", "complete", "completed" -> true;
-            default -> false;
-        };
     }
 
     private static String cacheKey(String clanTag, String season) {

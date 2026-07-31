@@ -41,7 +41,7 @@ class ClashKingCwlProviderTest {
     }
 
     @Test
-    void reconstructsMissingLeagueHistoryFromTheCurrentLeague()
+    void buildsADeepSeasonIndexWithoutPrefetchingCwlDetails()
             throws Exception {
         respond(
                 "/clan/%23PQL/basic",
@@ -49,80 +49,40 @@ class ClashKingCwlProviderTest {
                 """
                 {"warLeague":"Champion League III",
                  "changes":{"clanWarLeague":{
-                  "2025-08":"Champion League III"
+                  "2026-07":"Champion League II"
                 }}}
                 """
         );
         respond(
-                "/list/seasons?last=24",
+                "/list/seasons?last=48",
                 200,
                 """
                 ["2026-08","2026-07","2026-06",
                  "2026-05","2026-04","2026-03"]
                 """
         );
-        respond("/cwl/%23PQL/2026-08", 404, "{\"detail\":\"Not Found\"}");
-        respond(
-                "/cwl/%23PQL/2026-07",
-                200,
-                season("2026-07", "inWar")
-        );
-        respond(
-                "/cwl/%23PQL/2026-06",
-                200,
-                rankedSeason("2026-06", "ended", 3)
-        );
-        respond(
-                "/cwl/%23PQL/2026-05",
-                200,
-                rankedSeason("2026-05", "ended", 7)
-        );
-        respond("/cwl/%23PQL/2026-04", 404, "{\"detail\":\"Not Found\"}");
-        respond(
-                "/cwl/%23PQL/2026-03",
-                200,
-                rankedSeason("2026-03", "ended", 1)
-        );
 
         List<HistoricalCwlSeasonSummary> seasons =
                 provider.getAvailableSeasons("#PQL", 3);
-        HistoricalCwlSeason cached =
-                provider.getSeason("#PQL", "2026-05");
 
         assertEquals(
-                List.of("2026-06", "2026-05", "2026-03"),
+                List.of("2026-08", "2026-07", "2026-06"),
                 seasons.stream()
                         .map(HistoricalCwlSeasonSummary::season)
                         .toList()
         );
-        assertEquals(
-                List.of(
-                        "Champion League III",
-                        "Champion League II",
-                        "Champion League III"
-                ),
-                seasons.stream()
-                        .map(item -> item.league().name())
-                        .toList()
-        );
-        assertEquals("Champion League II", cached.league().name());
+        assertEquals("Champion League II", seasons.get(1).league().name());
         assertEquals(
                 List.of(
                         "/clan/%23PQL/basic",
-                        "/list/seasons?last=24",
-                        "/cwl/%23PQL/2026-08",
-                        "/cwl/%23PQL/2026-07",
-                        "/cwl/%23PQL/2026-06",
-                        "/cwl/%23PQL/2026-05",
-                        "/cwl/%23PQL/2026-04",
-                        "/cwl/%23PQL/2026-03"
+                        "/list/seasons?last=48"
                 ),
                 requests
         );
     }
 
     @Test
-    void expandsAClashKingSeasonPageWhenOnlyEightMonthsAreReturned()
+    void expandsAClashKingSeasonPageAcrossTheFortyEightMonthWindow()
             throws Exception {
         respond(
                 "/clan/%23PQL/basic",
@@ -130,36 +90,26 @@ class ClashKingCwlProviderTest {
                 "{\"changes\":{\"clanWarLeague\":{}}}"
         );
         respond(
-                "/list/seasons?last=24",
+                "/list/seasons?last=48",
                 200,
                 """
                 ["2026-08","2026-07","2026-06","2026-05",
                  "2026-04","2026-03","2026-02","2026-01"]
                 """
         );
-        for (String season : List.of(
-                "2026-08", "2026-07", "2026-06", "2026-05",
-                "2026-04", "2026-03", "2026-02", "2026-01"
-        )) {
-            respond(
-                    "/cwl/%23PQL/" + season,
-                    404,
-                    "{\"detail\":\"Not Found\"}"
-            );
-        }
-        respond(
-                "/cwl/%23PQL/2025-12",
-                200,
-                season("2025-12", "ended")
-        );
 
         List<HistoricalCwlSeasonSummary> seasons =
-                provider.getAvailableSeasons("#PQL", 1);
+                provider.getAvailableSeasons("#PQL", 12);
 
-        assertEquals("2025-12", seasons.getFirst().season());
+        assertEquals(12, seasons.size());
+        assertEquals("2026-08", seasons.getFirst().season());
+        assertEquals("2025-09", seasons.getLast().season());
         assertEquals(
-                "/cwl/%23PQL/2025-12",
-                requests.getLast()
+                List.of(
+                        "/clan/%23PQL/basic",
+                        "/list/seasons?last=48"
+                ),
+                requests
         );
     }
 
@@ -196,7 +146,7 @@ class ClashKingCwlProviderTest {
     }
 
     @Test
-    void returnsAnEmptyIndexWhenClashKingHasNoClanHistory()
+    void stillReturnsSeasonCandidatesWhenBasicClanHistoryIsMissing()
             throws Exception {
         respond(
                 "/clan/%23PQL/basic",
@@ -204,23 +154,24 @@ class ClashKingCwlProviderTest {
                 "{\"detail\":\"Not Found\"}"
         );
         respond(
-                "/list/seasons?last=24",
+                "/list/seasons?last=48",
                 200,
                 "[\"2026-06\"]"
-        );
-        respond(
-                "/cwl/%23PQL/2026-06",
-                404,
-                "{\"detail\":\"Not Found\"}"
         );
 
         List<HistoricalCwlSeasonSummary> seasons =
                 provider.getAvailableSeasons("#PQL", 8);
 
-        assertEquals(List.of(), seasons);
-        assertEquals("/clan/%23PQL/basic", requests.getFirst());
-        assertEquals("/list/seasons?last=24", requests.get(1));
-        assertEquals("/cwl/%23PQL/2026-06", requests.get(2));
+        assertEquals(8, seasons.size());
+        assertEquals("2026-06", seasons.getFirst().season());
+        assertEquals("2025-11", seasons.getLast().season());
+        assertEquals(
+                List.of(
+                        "/clan/%23PQL/basic",
+                        "/list/seasons?last=48"
+                ),
+                requests
+        );
     }
 
     private void respond(String target, int status, String body) {

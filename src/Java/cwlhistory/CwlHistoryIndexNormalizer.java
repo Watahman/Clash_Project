@@ -109,7 +109,7 @@ final class CwlHistoryIndexNormalizer {
                 .sorted(Comparator.comparing(
                         HistoricalCwlSeasonSummary::season
                 ).reversed())
-                .limit(Math.max(1, Math.min(12, limit)))
+                .limit(Math.max(1, Math.min(HistoricalCwlService.MAX_SEASON_LIMIT, limit)))
                 .toList();
     }
 

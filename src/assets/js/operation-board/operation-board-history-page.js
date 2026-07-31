@@ -4,17 +4,17 @@ import { getHistoricalCwlPlayerContext } from './historical-cwl-season-model.js'
 import { renderHistoryOverview } from './operation-board-renderer.js';
 
 export function createOperationBoardHistoryPage({
-    refs,
-    getClan,
-    getCurrentReport,
-    getLatestReport,
-    setLatestReport,
-    renderLatestReport,
-    setActiveTab,
-    setState,
-    setHelp,
-    clearBoard
-}) {
+                                                    refs,
+                                                    getClan,
+                                                    getCurrentReport,
+                                                    getLatestReport,
+                                                    setLatestReport,
+                                                    renderLatestReport,
+                                                    setActiveTab,
+                                                    setState,
+                                                    setHelp,
+                                                    clearBoard
+                                                }) {
     let latestOverview = null;
     let controller;
     const renderOverview = overview => {
@@ -57,7 +57,7 @@ export function createOperationBoardHistoryPage({
                     : 'Loading the selected CWL season…'
             );
         },
-        onError: error => {
+        onError: (error, mode) => {
             console.error(error);
             const current = getCurrentReport();
             if (current) {
@@ -65,7 +65,12 @@ export function createOperationBoardHistoryPage({
                 renderLatestReport();
             }
             setState('error', true);
-            setHelp('Historical CWL data is currently unavailable.', true);
+            setHelp(
+                mode === 'historical' && Number(error?.status) === 404
+                    ? 'No retrievable CWL data exists for this clan in that season.'
+                    : 'Historical CWL data is currently unavailable.',
+                true
+            );
         }
     });
     return {

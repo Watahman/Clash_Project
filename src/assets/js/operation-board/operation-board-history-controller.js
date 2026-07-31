@@ -13,15 +13,15 @@ import {
 } from './historical-cwl-season-model.js';
 
 export function createOperationBoardHistoryController({
-    refs,
-    getClan,
-    getCurrentReport,
-    onCurrent,
-    onHistorical,
-    onOverview,
-    onLoading,
-    onError
-}) {
+                                                          refs,
+                                                          getClan,
+                                                          getCurrentReport,
+                                                          onCurrent,
+                                                          onHistorical,
+                                                          onOverview,
+                                                          onLoading,
+                                                          onError
+                                                      }) {
     let mode = 'current';
     let seasonIndex = [];
     let selectedSeason = 'current';
@@ -58,7 +58,7 @@ export function createOperationBoardHistoryController({
         try {
             seasonIndex = await loadHistoricalCwlSeasons(
                 clan.tag,
-                { limit: 12, signal: controller.signal }
+                { limit: 48, signal: controller.signal }
             );
             if (token !== requestToken) return;
             renderOptions(Boolean(report));
@@ -107,7 +107,7 @@ export function createOperationBoardHistoryController({
                 const seasons = await loadHistoricalCwlOverview(
                     clan.tag,
                     {
-                        limit: 8,
+                        limit: 12,
                         signal: controller.signal,
                         forceRefresh
                     }
@@ -145,6 +145,12 @@ export function createOperationBoardHistoryController({
             onHistorical(report);
         } catch (error) {
             if (error?.name === 'AbortError' || token !== requestToken) return;
+            if (targetMode === 'historical' && Number(error?.status) === 404) {
+                seasonIndex = seasonIndex.filter(
+                    item => item.season !== value
+                );
+                renderOptions(Boolean(getCurrentReport()));
+            }
             if (getCurrentReport()) {
                 selectedSeason = 'current';
                 mode = 'current';
