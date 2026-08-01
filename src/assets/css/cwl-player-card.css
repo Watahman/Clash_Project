@@ -104,6 +104,8 @@
     color: var(--text-muted);
 }
 
+.cwl-player-control-group { display: contents; }
+
 .cwl-delete-player {
     display: inline-grid;
     width: 1.9rem;
@@ -298,22 +300,41 @@
 }
 
 @media (max-width: 46rem) {
-    .workspace-planner .cwl-player-article {
-        grid-template-columns: 2.35rem minmax(0, 1fr) auto 1.9rem !important;
+    .workspace-planner .cwl-player-article,
+    .workspace-planner #cwl-available-players .cwl-player-article,
+    .workspace-planner .cwl-clan-player-list .cwl-player-article {
+        grid-template-columns: 2.35rem minmax(0, 1fr) auto 2.75rem !important;
     }
-    .workspace-planner .cwl-delete-player { grid-column: 4; }
-    .workspace-planner .cwl-move-player,
-    .workspace-planner .cwl-clan-player-list .cwl-roster-status {
+
+    .workspace-planner .cwl-player-control-group {
+        display: grid;
         grid-column: 2 / -1;
         grid-row: 2;
-        width: min(100%, 11rem);
-        justify-self: start;
+        min-width: 0;
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--space-2);
     }
-    .workspace-planner .cwl-clan-player-list .cwl-move-player {
-        grid-column: 2 / -1;
-        grid-row: 3;
-        width: min(100%, 11rem);
-        justify-self: start;
+
+    .workspace-planner .cwl-clan-player-list .cwl-player-control-group {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    .workspace-planner .cwl-clan-player-list .cwl-delete-player { grid-column: 4; grid-row: 1; }
+
+    .workspace-planner .cwl-player-control-group .cwl-move-player,
+    .workspace-planner .cwl-player-control-group .cwl-roster-status {
+        grid-column: auto;
+        grid-row: auto;
+        width: 100%;
+        min-width: 0;
+        min-height: 2.75rem;
+        justify-self: stretch;
+    }
+
+    .workspace-planner .cwl-delete-player,
+    .workspace-planner .cwl-clan-player-list .cwl-delete-player {
+        grid-column: 4;
+        grid-row: 1;
+        width: 2.75rem;
+        height: 2.75rem;
+        min-height: 2.75rem;
+    }
 }

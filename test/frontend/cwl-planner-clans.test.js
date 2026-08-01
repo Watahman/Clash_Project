@@ -125,6 +125,7 @@ describe('CWL planner clan rows', () => {
         expect(player.querySelector('.cwl-roster-status')).toBeNull();
         expect(player.dataset.rosterStatus).toBeUndefined();
         expect(player.querySelector('.cwl-move-player')?.value).toBe('free');
+        expect(player.querySelector('.cwl-player-control-group > .cwl-move-player')).not.toBeNull();
     });
 
     it("keeps the move selector aligned with the player's current clan", async () => {
@@ -144,10 +145,12 @@ describe('CWL planner clan rows', () => {
 
         expect(player.querySelector('.cwl-move-player')?.value)
             .toBe('cwl-clan-template_north');
+        expect(player.querySelectorAll('.cwl-player-control-group > select')).toHaveLength(2);
 
         document.querySelector('#cwl-available-players').appendChild(player);
         syncPlayerRosterStatus(player);
         expect(player.querySelector('.cwl-move-player')?.value).toBe('free');
+        expect(player.querySelectorAll('.cwl-player-control-group > select')).toHaveLength(1);
     });
 
 });

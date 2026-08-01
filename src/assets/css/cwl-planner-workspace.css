@@ -58,6 +58,8 @@
     -webkit-backdrop-filter: none;
 }
 
+.cwl-page-header > div:first-child { min-width: 0; }
+
 .cwl-page-kicker,
 .cwl-panel-heading p,
 .cwl-board-heading p {
@@ -535,6 +537,9 @@
 
 @media (max-width: 46rem) {
     .workspace-planner { padding: var(--space-4); }
+    .workspace-planner button,
+    .workspace-planner input,
+    .workspace-planner select { min-height: 2.75rem; }
     .cwl-page-header { align-items: stretch; flex-direction: column; }
     .cwl-title-row { align-items: flex-start; flex-direction: column; gap: var(--space-2); }
     .cwl-title-row h1 { font-size: 2.25rem; white-space: normal; }
@@ -567,10 +572,10 @@
     .workspace-planner .cwl-sidebar { margin-bottom: 0; border: 1px solid var(--border); }
     .workspace-planner .cwl-board { border: 1px solid var(--border); }
     .workspace-planner #cwl-all-clans { padding: var(--space-3); }
-    .workspace-planner .cwl-clan-info-card { grid-template-columns: 2.5rem minmax(0, 1fr) auto 2.5rem; }
+    .workspace-planner .cwl-clan-info-card { grid-template-columns: 2.5rem minmax(0, 1fr) auto 2.75rem; }
     .cwl-clan-format { grid-column: 2 / 3; grid-row: 2; }
     .workspace-planner .cwl-amount-of-players-in-clan { grid-column: 3; }
-    .workspace-planner .cwl-delete-clan { grid-column: 4; grid-row: 1; }
+    .workspace-planner .cwl-delete-clan { grid-column: 4; grid-row: 1; width: 2.75rem; height: 2.75rem; }
 }
 
 @media (max-width: 34rem) {

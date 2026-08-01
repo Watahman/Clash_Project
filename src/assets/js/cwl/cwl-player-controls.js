@@ -6,6 +6,18 @@ import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-c
 
 const moveControlRefreshers = new WeakMap();
 
+function ensurePlayerControlGroup(element) {
+    let group = element.querySelector('.cwl-player-control-group');
+    if (group) return group;
+
+    group = document.createElement('div');
+    group.className = 'cwl-player-control-group';
+    const deleteButton = element.querySelector('.cwl-delete-player');
+    if (deleteButton) element.insertBefore(group, deleteButton);
+    else element.appendChild(group);
+    return group;
+}
+
 function clanCapacity(clan) {
     return Number(
         clan?.querySelector('.cwl-clan-capacity')?.value
@@ -33,7 +45,10 @@ function statusOption(value, labelKey) {
 
 function attachRosterStatusControl(element) {
     let select = element.querySelector('.cwl-roster-status');
-    if (select) return select;
+    if (select) {
+        ensurePlayerControlGroup(element).appendChild(select);
+        return select;
+    }
 
     select = document.createElement('select');
     select.className = 'cwl-roster-status';
@@ -53,11 +68,11 @@ function attachRosterStatusControl(element) {
         savePlan();
     });
 
+    const controlGroup = ensurePlayerControlGroup(element);
     const moveSelect = element.querySelector('.cwl-move-player');
     const deleteButton = element.querySelector('.cwl-delete-player');
-    if (moveSelect) element.insertBefore(select, moveSelect);
-    else if (deleteButton) element.insertBefore(select, deleteButton);
-    else element.appendChild(select);
+    if (moveSelect) controlGroup.insertBefore(select, moveSelect);
+    else controlGroup.appendChild(select);
     if (deleteButton) element.appendChild(deleteButton);
     return select;
 }
@@ -127,7 +142,11 @@ export function attachDeleteButton(element) {
 }
 
 export function attachMoveControl(element) {
-    if (element.querySelector('.cwl-move-player')) return;
+    const existing = element.querySelector('.cwl-move-player');
+    if (existing) {
+        ensurePlayerControlGroup(element).appendChild(existing);
+        return;
+    }
     const select = document.createElement('select');
     select.className = 'cwl-move-player';
     select.setAttribute('aria-label', t('cwl.movePlayer'));
@@ -176,7 +195,7 @@ export function attachMoveControl(element) {
         savePlan();
     });
     refreshOptions();
-    element.appendChild(select);
+    ensurePlayerControlGroup(element).appendChild(select);
 }
 
 export function syncPlayerMoveControl(element) {
