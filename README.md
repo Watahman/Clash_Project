@@ -42,7 +42,8 @@ Open `http://localhost:5173`. Set `DEV_API_TARGET` only when the Java API runs e
 | `_BASE_URL_SUPABASE` or `SUPABASE_URL` | yes | Supabase project URL |
 | `_API_KEY_SUPABASE` | yes | Supabase publishable/anon key used for server-side token validation |
 | `_API_KEY_SECR_SUPABASE` or `SUPABASE_SERVICE_ROLE_KEY` | yes | Server-only service-role key |
-| `_API_KEY_ALL` | yes | Clash API authorization value, including `Bearer ` |
+| `_API_KEY_ALL` | yes | Primary Clash API authorization value, with or without `Bearer ` |
+| `_API_KEY_ALL2`, `_API_KEY_ALL3` | no | Additional Clash API keys; requests rotate across all configured keys and retry another key after 401, 403 or 429 |
 | `_BASE_URL_CLASH` | no | Clash API base URL |
 | `CLASHKING_API_VERSION` | no | Historical provider: `legacy` (default) or `v2` |
 | `CLASHKING_LEGACY_BASE_URL`, `CLASHKING_V2_BASE_URL` | no | ClashKing provider base URLs |

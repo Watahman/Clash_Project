@@ -1,9 +1,12 @@
 package Java;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class Config {
@@ -13,8 +16,9 @@ public class Config {
             env("SUPABASE_SERVICE_ROLE_KEY")
     );
     String _API_KEY_ALL = env("_API_KEY_ALL");
-
-    String _API_KEY_ACTIVE = _API_KEY_ALL;
+    String _API_KEY_ALL2 = env("_API_KEY_ALL2");
+    String _API_KEY_ALL3 = env("_API_KEY_ALL3");
+    private final AtomicInteger clashApiKeyCursor = new AtomicInteger();
 
     String _BASE_URL_SUPABASE = firstNonBlank(env("_BASE_URL_SUPABASE"), env("SUPABASE_URL"));
     String _BASE_URL_CLASH = firstNonBlank(env("_BASE_URL_CLASH"), "https://cocproxy.royaleapi.dev/v1");
@@ -208,19 +212,46 @@ public class Config {
     }
 
     String getClashApiKey() {
-        if (_API_KEY_ACTIVE == null || _API_KEY_ACTIVE.isBlank()) {
+        List<String> keys = normalizedClashApiKeys();
+        if (keys.isEmpty()) {
+            throw new IllegalStateException(
+                    "Ontbrekende Clash API key env var, bv. _API_KEY_ALL"
+            );
+        }
+        return keys.getFirst();
+    }
+
+    List<String> getClashApiKeysForRequest() {
+        List<String> keys = normalizedClashApiKeys();
+        if (keys.isEmpty()) {
             throw new IllegalStateException(
                     "Ontbrekende Clash API key env var, bv. _API_KEY_ALL"
             );
         }
 
-        String key = _API_KEY_ACTIVE.trim();
-
-        if (key.regionMatches(true, 0, "Bearer ", 0, 7)) {
-            return key;
+        int start = Math.floorMod(clashApiKeyCursor.getAndIncrement(), keys.size());
+        List<String> rotated = new ArrayList<>(keys.size());
+        for (int offset = 0; offset < keys.size(); offset++) {
+            rotated.add(keys.get((start + offset) % keys.size()));
         }
+        return List.copyOf(rotated);
+    }
 
-        return "Bearer " + key;
+    private List<String> normalizedClashApiKeys() {
+        Set<String> uniqueKeys = new LinkedHashSet<>();
+        addNormalizedClashApiKey(uniqueKeys, _API_KEY_ALL);
+        addNormalizedClashApiKey(uniqueKeys, _API_KEY_ALL2);
+        addNormalizedClashApiKey(uniqueKeys, _API_KEY_ALL3);
+        return List.copyOf(uniqueKeys);
+    }
+
+    private void addNormalizedClashApiKey(Set<String> keys, String value) {
+        if (value == null || value.isBlank()) return;
+        String key = value.trim();
+        if (key.regionMatches(true, 0, "Bearer ", 0, 7)) {
+            key = key.substring(7).trim();
+        }
+        if (!key.isBlank()) keys.add("Bearer " + key);
     }
 
     String getClashBaseUrl() {
@@ -389,7 +420,7 @@ public class Config {
         if (_BASE_URL_SUPABASE == null || _BASE_URL_SUPABASE.isBlank()) missing.add("SUPABASE_URL");
         if (_API_KEY_SUPABASE == null || _API_KEY_SUPABASE.isBlank()) missing.add("SUPABASE_PUBLISHABLE_KEY");
         if (_API_KEY_SECR_SUPABASE == null || _API_KEY_SECR_SUPABASE.isBlank()) missing.add("SUPABASE_SERVICE_ROLE_KEY");
-        if (_API_KEY_ACTIVE == null || _API_KEY_ACTIVE.isBlank()) missing.add("CLASH_API_KEY");
+        if (normalizedClashApiKeys().isEmpty()) missing.add("CLASH_API_KEY");
         if (trustsProxyHeaders() && !hasApiProxySecret()) missing.add("API_PROXY_SECRET");
         return List.copyOf(missing);
     }
