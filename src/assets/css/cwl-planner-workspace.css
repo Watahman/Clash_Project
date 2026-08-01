@@ -533,6 +533,14 @@
         border-right: 0;
         border-bottom: 1px solid var(--border);
     }
+
+    .workspace-planner #cwl-available-players {
+        max-height: min(60dvh, 40rem);
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
+    }
 }
 
 @media (max-width: 46rem) {

@@ -2,6 +2,10 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 const css = readFileSync('src/assets/css/cwl-player-card.css', 'utf8').replaceAll('\r\n', '\n');
+const workspaceCss = readFileSync(
+    'src/assets/css/cwl-planner-workspace.css',
+    'utf8'
+).replaceAll('\r\n', '\n');
 const mobileCss = css.slice(css.indexOf('@media (max-width: 46rem)'));
 
 describe('CWL player card responsive contract', () => {
@@ -21,5 +25,11 @@ describe('CWL player card responsive contract', () => {
 
     it('stacks both clan controls at narrow phone widths', () => {
         expect(mobileCss).toContain('@media (max-width: 34rem) {\n    .workspace-planner .cwl-clan-player-list .cwl-player-control-group {\n        grid-template-columns: minmax(0, 1fr);');
+    });
+
+    it('contains a long free roster before the stacked clan board', () => {
+        expect(workspaceCss).toContain('@media (max-width: 64rem) {');
+        expect(workspaceCss).toContain('.workspace-planner #cwl-available-players {\n        max-height: min(60dvh, 40rem);\n        overflow-x: hidden;\n        overflow-y: auto;');
+        expect(workspaceCss).toContain('overscroll-behavior: contain;\n        scrollbar-gutter: stable;');
     });
 });
