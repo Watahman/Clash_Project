@@ -43,4 +43,33 @@ describe('CWL spreadsheet import', () => {
         expect(result.find(item => item.tag === '#2PYLQG9')?.occurrences).toHaveLength(2);
         expect(result.find(item => item.tag === '#JCUV89')?.inferredType).toBe('clan');
     });
+
+    it('collects more than 500 unique tags without truncating the import', () => {
+        const tagChars = '0289PYLQGRJCUV';
+        const encodeTag = value => {
+            let remaining = value;
+            let encoded = '';
+            do {
+                encoded = tagChars[remaining % tagChars.length] + encoded;
+                remaining = Math.floor(remaining / tagChars.length);
+            } while (remaining > 0);
+            return `#P${encoded.padStart(2, '0')}`;
+        };
+        const rows = [
+            ['Player Tag'],
+            ...Array.from({ length: 501 }, (_, index) => [encodeTag(index)])
+        ];
+        const XLSX = {
+            utils: {
+                sheet_to_json: () => rows,
+                encode_cell: ({ r }) => `A${r + 1}`
+            }
+        };
+        const workbook = { SheetNames: ['Roster'], Sheets: { Roster: {} } };
+
+        const result = collectWorkbookCandidates(workbook, XLSX);
+
+        expect(result).toHaveLength(501);
+        expect(result.at(-1)?.tag).toBe(encodeTag(500));
+    });
 });

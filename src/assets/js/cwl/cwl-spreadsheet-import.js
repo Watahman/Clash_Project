@@ -8,7 +8,7 @@ import { bindBackdropClick } from '../utils/backdrop-click.js';
 const TAG_CHARS = '0289PYLQGRJCUV';
 const HASH_TAG_PATTERN = new RegExp(`#([${TAG_CHARS}]{3,15})(?![A-Z0-9])`, 'gi');
 const BARE_TAG_PATTERN = new RegExp(`^[${TAG_CHARS}]{3,15}$`, 'i');
-const MAX_UNIQUE_TAGS = 500;
+const LARGE_IMPORT_WARNING_THRESHOLD = 500;
 const LOOKUP_CONCURRENCY = 4;
 const IMPORT_CONCURRENCY = 4;
 
@@ -99,7 +99,7 @@ export function collectWorkbookCandidates(workbook, XLSX) {
                         } else if (existing.inferredType !== inferredType && inferredType !== 'unknown') {
                             existing.inferredType = 'unknown';
                         }
-                    } else if (byTag.size < MAX_UNIQUE_TAGS) {
+                    } else {
                         byTag.set(tag, {
                             tag,
                             inferredType,
@@ -226,22 +226,22 @@ async function analyzeFile(file) {
             return;
         }
 
-        if (state.candidates.length >= MAX_UNIQUE_TAGS) {
-            setStatus(t('cwl.sheetTagLimit', { count: MAX_UNIQUE_TAGS }), 'warning');
+        if (state.candidates.length > LARGE_IMPORT_WARNING_THRESHOLD) {
+            setStatus(t('cwl.sheetLargeImport', { count: state.candidates.length }), 'warning');
         } else {
             setStatus(t('cwl.sheetFoundTags', { count: state.candidates.length }), '');
         }
 
         state.results = new Array(state.candidates.length);
+        let completed = 0;
         await runWithConcurrency(state.candidates, LOOKUP_CONCURRENCY, async (candidate, index) => {
             if (token !== state.analysisToken) return;
             state.results[index] = await classifyCandidate(candidate);
-            const completed = state.results.filter(Boolean).length;
+            completed += 1;
             setProgress(completed / state.candidates.length, t('cwl.sheetCheckingTags', {
                 current: completed,
                 total: state.candidates.length
             }));
-            renderResults();
         });
 
         if (token !== state.analysisToken) return;
