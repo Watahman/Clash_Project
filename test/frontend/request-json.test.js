@@ -13,8 +13,8 @@ afterEach(() => {
 describe('central JSON request errors', () => {
     it('preserves safe backend status, code and details', async () => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(
-            JSON.stringify({ error: 'Te veel aanvragen', code: 'RATE_LIMITED', retryAfter: 30 }),
-            { status: 429, headers: { 'Content-Type': 'application/json' } }
+            JSON.stringify({ error: 'Te veel aanvragen', code: 'RATE_LIMITED' }),
+            { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': '30' } }
         )));
 
         const error = await requestJson('/test', { body: {} }).catch(value => value);

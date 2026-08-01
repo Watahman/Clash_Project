@@ -92,9 +92,16 @@ export async function requestJson(url, {
 
         const data = await parseResponse(response);
         if (!response.ok) {
+            const retryAfterSeconds = Number(response.headers.get('Retry-After'));
+            let details = data;
+            if (response.status === 429 && Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
+                details = data && typeof data === 'object' && !Array.isArray(data)
+                    ? { ...data, retryAfter: retryAfterSeconds }
+                    : { retryAfter: retryAfterSeconds };
+            }
             throw new HttpError(
                 data?.error || data?.message || t('errors.requestFailed', { status: response.status }),
-                { status: response.status, code: data?.code || '', details: data }
+                { status: response.status, code: data?.code || '', details }
             );
         }
         return data;

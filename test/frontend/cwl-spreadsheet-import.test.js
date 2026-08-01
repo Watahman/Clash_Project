@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
     collectWorkbookCandidates,
     extractTagsFromCell,
-    inferTagContext
+    inferTagContext,
+    lookupWithRateLimitRetry
 } from '../../src/assets/js/cwl/cwl-spreadsheet-import.js';
 
 describe('CWL spreadsheet import', () => {
@@ -16,6 +17,7 @@ describe('CWL spreadsheet import', () => {
     it('accepts a bare tag when the entire cell is a tag', () => {
         expect(extractTagsFromCell('  2PYLQG9  ')).toEqual(['#2PYLQG9']);
         expect(extractTagsFromCell('player 2PYLQG9')).toEqual([]);
+        expect(extractTagsFromCell('299')).toEqual([]);
     });
 
     it('infers player and clan context', () => {
@@ -42,6 +44,54 @@ describe('CWL spreadsheet import', () => {
         expect(result).toHaveLength(2);
         expect(result.find(item => item.tag === '#2PYLQG9')?.occurrences).toHaveLength(2);
         expect(result.find(item => item.tag === '#JCUV89')?.inferredType).toBe('clan');
+    });
+
+    it('uses explicit tag columns across multiple sheets and distant rows', () => {
+        const sheets = {
+            Players: [
+                ['PlayerTag', 'PlayerName', 'ClanTag'],
+                ...Array.from({ length: 8 }, (_, index) => [
+                    index === 7 ? '#2PYLQG9' : '',
+                    `Player ${index + 1}`,
+                    index === 7 ? '#JCUV89' : ''
+                ])
+            ],
+            Clans: [
+                ['ClanTag', 'ClanName'],
+                ['#JCUV89', 'Example clan']
+            ]
+        };
+        const XLSX = {
+            utils: {
+                sheet_to_json: sheet => sheet,
+                encode_cell: ({ r, c }) => `${String.fromCharCode(65 + c)}${r + 1}`
+            }
+        };
+        const workbook = { SheetNames: Object.keys(sheets), Sheets: sheets };
+
+        const result = collectWorkbookCandidates(workbook, XLSX);
+
+        expect(result.find(item => item.tag === '#2PYLQG9')?.inferredType).toBe('player');
+        expect(result.find(item => item.tag === '#JCUV89')?.inferredType).toBe('clan');
+        expect(result.find(item => item.tag === '#JCUV89')?.occurrences).toHaveLength(2);
+    });
+
+    it('waits and retries a rate-limited lookup instead of dropping the tag', async () => {
+        const rateLimitError = Object.assign(new Error('Too many requests'), {
+            status: 429,
+            code: 'RATE_LIMITED',
+            details: { retryAfter: 2 }
+        });
+        const request = vi.fn()
+            .mockRejectedValueOnce(rateLimitError)
+            .mockResolvedValue({ tag: '#2PYLQG9', name: 'Player' });
+        const wait = vi.fn().mockResolvedValue();
+
+        const result = await lookupWithRateLimitRetry(request, { wait });
+
+        expect(result).toEqual({ ok: true, data: { tag: '#2PYLQG9', name: 'Player' } });
+        expect(request).toHaveBeenCalledTimes(2);
+        expect(wait).toHaveBeenCalledWith(2_000);
     });
 
     it('collects more than 500 unique tags without truncating the import', () => {

@@ -7,10 +7,13 @@ import { bindBackdropClick } from '../utils/backdrop-click.js';
 
 const TAG_CHARS = '0289PYLQGRJCUV';
 const HASH_TAG_PATTERN = new RegExp(`#([${TAG_CHARS}]{3,15})(?![A-Z0-9])`, 'gi');
-const BARE_TAG_PATTERN = new RegExp(`^[${TAG_CHARS}]{3,15}$`, 'i');
+const BARE_TAG_PATTERN = new RegExp(`^(?=.*[PYLQGRJCUV])[${TAG_CHARS}]{3,15}$`, 'i');
 const LARGE_IMPORT_WARNING_THRESHOLD = 500;
 const LOOKUP_CONCURRENCY = 4;
 const IMPORT_CONCURRENCY = 4;
+const MAX_RATE_LIMIT_RETRIES = 5;
+const DEFAULT_RATE_LIMIT_DELAY_MS = 60_000;
+const DEFAULT_UPSTREAM_RATE_LIMIT_DELAY_MS = 10_000;
 
 const PLAYER_CONTEXT_WORDS = [
     'player', 'players', 'speler', 'spelers', 'member', 'members', 'lid', 'leden',
@@ -62,6 +65,27 @@ export function inferTagContext(contextText = '') {
     return playerScore > clanScore ? 'player' : 'clan';
 }
 
+function inferExplicitTagContext(contextText = '') {
+    const compact = String(contextText).toLowerCase().replace(/[ _-]+/g, '');
+    if (/(player|member|account|speler|lid)tag/.test(compact)) return 'player';
+    if (/clantag/.test(compact)) return 'clan';
+    return 'unknown';
+}
+
+function inferColumnContexts(rows) {
+    const maxColumns = rows.reduce(
+        (count, row) => Math.max(count, Array.isArray(row) ? row.length : 0),
+        0
+    );
+    return Array.from({ length: maxColumns }, (_, colIndex) => {
+        for (let rowIndex = 0; rowIndex < Math.min(rows.length, 12); rowIndex += 1) {
+            const type = inferExplicitTagContext(rows[rowIndex]?.[colIndex]);
+            if (type !== 'unknown') return type;
+        }
+        return 'unknown';
+    });
+}
+
 export function collectWorkbookCandidates(workbook, XLSX) {
     const byTag = new Map();
 
@@ -74,6 +98,7 @@ export function collectWorkbookCandidates(workbook, XLSX) {
             raw: false,
             blankrows: false
         });
+        const columnContexts = inferColumnContexts(rows);
 
         for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
             const row = Array.isArray(rows[rowIndex]) ? rows[rowIndex] : [];
@@ -85,7 +110,8 @@ export function collectWorkbookCandidates(workbook, XLSX) {
                     rows,
                     rowIndex,
                     colIndex,
-                    sheetName
+                    sheetName,
+                    columnContexts
                 );
                 const cellAddress = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
 
@@ -94,15 +120,17 @@ export function collectWorkbookCandidates(workbook, XLSX) {
                     const occurrence = { sheet: sheetName, cell: cellAddress, inferredType };
                     if (existing) {
                         existing.occurrences.push(occurrence);
-                        if (existing.inferredType === 'unknown' && inferredType !== 'unknown') {
-                            existing.inferredType = inferredType;
-                        } else if (existing.inferredType !== inferredType && inferredType !== 'unknown') {
-                            existing.inferredType = 'unknown';
+                        if (inferredType !== 'unknown') {
+                            existing.inferredTypes.add(inferredType);
+                            existing.inferredType = existing.inferredTypes.size === 1
+                                ? inferredType
+                                : 'unknown';
                         }
                     } else {
                         byTag.set(tag, {
                             tag,
                             inferredType,
+                            inferredTypes: new Set(inferredType === 'unknown' ? [] : [inferredType]),
                             occurrences: [occurrence]
                         });
                     }
@@ -111,10 +139,15 @@ export function collectWorkbookCandidates(workbook, XLSX) {
         }
     }
 
-    return Array.from(byTag.values());
+    return Array.from(byTag.values(), candidate => {
+        const { inferredTypes, ...result } = candidate;
+        return result;
+    });
 }
 
-function inferCellContext(rows, rowIndex, colIndex, sheetName) {
+function inferCellContext(rows, rowIndex, colIndex, sheetName, columnContexts) {
+    const columnType = columnContexts[colIndex] || 'unknown';
+    if (columnType !== 'unknown') return columnType;
     for (let row = rowIndex - 1; row >= Math.max(0, rowIndex - 4); row -= 1) {
         const above = Array.isArray(rows[row]) ? rows[row][colIndex] : '';
         const directType = inferTagContext(above);
@@ -214,6 +247,7 @@ async function analyzeFile(file) {
     setProgress(0, t('cwl.sheetReadingFile'));
     clearResults();
 
+    let stage = 'reading';
     try {
         const buffer = await file.arrayBuffer();
         if (token !== state.analysisToken) return;
@@ -225,6 +259,7 @@ async function analyzeFile(file) {
             setProgress(0, '');
             return;
         }
+        stage = 'validation';
 
         if (state.candidates.length > LARGE_IMPORT_WARNING_THRESHOLD) {
             setStatus(t('cwl.sheetLargeImport', { count: state.candidates.length }), 'warning');
@@ -250,7 +285,7 @@ async function analyzeFile(file) {
         setPreviewMode(true);
     } catch (error) {
         console.error('Spreadsheet import failed', error);
-        setStatus(t('cwl.sheetReadError'), 'error');
+        setStatus(t(stage === 'validation' ? 'cwl.sheetValidationError' : 'cwl.sheetReadError'), 'error');
         setProgress(0, '');
     } finally {
         if (token === state.analysisToken) setBusy(false);
@@ -302,16 +337,43 @@ async function classifyCandidate(candidate) {
     };
 }
 
+function rateLimitDelayMs(error) {
+    const retryAfterSeconds = Number(error?.details?.retryAfter);
+    if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
+        return Math.max(1_000, Math.ceil(retryAfterSeconds * 1_000));
+    }
+    return error?.code === 'UPSTREAM_RATE_LIMITED'
+        ? DEFAULT_UPSTREAM_RATE_LIMIT_DELAY_MS
+        : DEFAULT_RATE_LIMIT_DELAY_MS;
+}
+
+function delay(milliseconds) {
+    return new Promise(resolve => globalThis.setTimeout(resolve, milliseconds));
+}
+
+export async function lookupWithRateLimitRetry(request, {
+    wait = delay,
+    maxRetries = MAX_RATE_LIMIT_RETRIES
+} = {}) {
+    let retries = 0;
+    while (true) {
+        try {
+            return { ok: true, data: await request() };
+        } catch (error) {
+            if (error?.status === 404) return { ok: false, error, data: null };
+            if (error?.status !== 429 || retries >= maxRetries) throw error;
+            retries += 1;
+            await wait(rateLimitDelayMs(error));
+        }
+    }
+}
+
 function lookupPlayer(tag) {
-    return getPlayerBasicData(tag)
-        .then(data => ({ ok: true, data }))
-        .catch(error => ({ ok: false, error, data: null }));
+    return lookupWithRateLimitRetry(() => getPlayerBasicData(tag));
 }
 
 function lookupClan(tag) {
-    return getClanInfoRequest(tag)
-        .then(data => ({ ok: true, data }))
-        .catch(error => ({ ok: false, error, data: null }));
+    return lookupWithRateLimitRetry(() => getClanInfoRequest(tag));
 }
 
 function plannerHasClan(tag) {
