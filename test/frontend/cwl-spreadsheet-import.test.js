@@ -3,7 +3,8 @@ import {
     collectWorkbookCandidates,
     extractTagsFromCell,
     inferTagContext,
-    lookupWithRateLimitRetry
+    lookupWithRateLimitRetry,
+    runWithConcurrency
 } from '../../src/assets/js/cwl/cwl-spreadsheet-import.js';
 
 describe('CWL spreadsheet import', () => {
@@ -92,6 +93,24 @@ describe('CWL spreadsheet import', () => {
         expect(result).toEqual({ ok: true, data: { tag: '#2PYLQG9', name: 'Player' } });
         expect(request).toHaveBeenCalledTimes(2);
         expect(wait).toHaveBeenCalledWith(2_000);
+    });
+
+    it('uses the configured number of workers without losing result order', async () => {
+        const items = Array.from({ length: 9 }, (_, index) => index + 1);
+        const results = new Array(items.length);
+        let active = 0;
+        let peakActive = 0;
+
+        await runWithConcurrency(items, 3, async (item, index) => {
+            active += 1;
+            peakActive = Math.max(peakActive, active);
+            await Promise.resolve();
+            results[index] = item * 2;
+            active -= 1;
+        });
+
+        expect(peakActive).toBe(3);
+        expect(results).toEqual(items.map(item => item * 2));
     });
 
     it('collects more than 500 unique tags without truncating the import', () => {

@@ -9,7 +9,9 @@ const TAG_CHARS = '0289PYLQGRJCUV';
 const HASH_TAG_PATTERN = new RegExp(`#([${TAG_CHARS}]{3,15})(?![A-Z0-9])`, 'gi');
 const BARE_TAG_PATTERN = new RegExp(`^(?=.*[PYLQGRJCUV])[${TAG_CHARS}]{3,15}$`, 'i');
 const LARGE_IMPORT_WARNING_THRESHOLD = 500;
-const LOOKUP_CONCURRENCY = 4;
+const CLASH_API_KEY_POOL_SIZE = 3;
+const LOOKUPS_PER_API_KEY = 4;
+const LOOKUP_CONCURRENCY = CLASH_API_KEY_POOL_SIZE * LOOKUPS_PER_API_KEY;
 const IMPORT_CONCURRENCY = 4;
 const MAX_RATE_LIMIT_RETRIES = 5;
 const DEFAULT_RATE_LIMIT_DELAY_MS = 60_000;
@@ -674,7 +676,7 @@ function setBusy(busy) {
     renderResults();
 }
 
-async function runWithConcurrency(items, concurrency, worker) {
+export async function runWithConcurrency(items, concurrency, worker) {
     let nextIndex = 0;
     const runners = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
         while (nextIndex < items.length) {
