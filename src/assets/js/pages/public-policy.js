@@ -414,7 +414,7 @@ function createFeedbackForm(language) {
         if (!form.reportValidity()) return;
         const button = form.querySelector('button[type="submit"]');
         button.disabled = true;
-        status.textContent = isNl ? 'Bezig met versturenâ€¦' : 'Sendingâ€¦';
+        status.textContent = isNl ? 'Bezig met versturen...' : 'Sending...';
         try {
             const screenshotData = await readScreenshot(form.elements.screenshot.files?.[0]);
             const response = await fetch(`${_BASE_URL}/Feedback`, {
