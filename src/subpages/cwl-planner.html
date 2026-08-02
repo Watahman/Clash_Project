@@ -63,6 +63,7 @@
             <p data-i18n="planner.description">This plan can contain multiple clans. Roster format and limit are set per clan.</p>
         </div>
         <div class="cwl-header-actions">
+            <button class="button button-secondary" id="cwl-undo-plan-button" type="button" disabled data-i18n="cwl.undo">Undo last change</button>
             <button class="button button-secondary" id="cwl-new-plan-button" type="button" data-i18n="cwl.newPlan">New plan</button>
             <button class="button button-primary" id="cwl-save-plan-button" type="button" data-i18n="cwl.save">Save</button>
         </div>
@@ -167,7 +168,7 @@
         <!-- Tab 1: by tag -->
         <div class="modal-tab-panel" id="modal-tab-tag">
             <p class="modal-field-label" data-i18n="cwl.tagLabel">Player or clan tag</p>
-            <input id="cwl-input-tag" type="text" placeholder="#TAG...">
+            <input id="cwl-input-tag" type="text" placeholder="#TAG..." aria-label="Player or clan tag">
             <button id="cwl-overlay-confirm-tag-button" class="primary" type="button" data-i18n="cwl.confirm">Confirm</button>
         </div>
 
@@ -186,11 +187,11 @@
         <!-- Tab 3: from group -->
         <div class="modal-tab-panel hidden" id="modal-tab-group">
             <p class="modal-field-label" data-i18n="cwl.group">Clan Family</p>
-            <select id="cwl-select-group">
+            <select id="cwl-select-group" aria-label="Clan Family">
                 <option value="" data-i18n="cwl.selectGroup">— select a Clan Family —</option>
             </select>
             <p class="modal-field-label" data-i18n="cwl.pollResults">Poll result</p>
-            <select id="cwl-select-group-poll">
+            <select id="cwl-select-group-poll" aria-label="Clan Family poll result">
                 <option value="" data-i18n="cwl.noPollSelected">No poll selected</option>
             </select>
             <div id="cwl-group-linked-clans" class="modal-linked-clans hidden"></div>
@@ -209,7 +210,7 @@
         </div>
         <p class="cwl-sheet-import-intro" data-i18n="cwl.sheetImportIntro">Upload an Excel or CSV file. ClashPanel scans every sheet for unique player and clan tags, validates them, and lets you review the result before importing.</p>
 
-        <input id="cwl-spreadsheet-file-input" type="file" accept=".xlsx,.xls,.xlsm,.xlsb,.csv,.ods" hidden>
+        <input id="cwl-spreadsheet-file-input" type="file" accept=".xlsx,.xls,.xlsm,.xlsb,.csv,.ods" aria-label="Choose roster spreadsheet" hidden>
         <div class="cwl-sheet-dropzone" id="cwl-spreadsheet-dropzone" role="button" tabindex="0">
             <strong id="cwl-spreadsheet-file-name" data-i18n="cwl.sheetDropFile">Drop a spreadsheet here or choose a file</strong>
             <span data-i18n="cwl.sheetSupportedFiles">XLSX, XLS, XLSM, XLSB, CSV or ODS</span>
@@ -243,8 +244,8 @@
 
 <div class="overlay hidden" id="cwl-overlay-add-clan">
     <div class="overlay-container" id="cwl-container-add-clan">
-        <input id="cwl-input-clan-clancode" type="text" placeholder="Clancode: #">
-        <select id="cwl-overlay-select-amount-players-in-clan">
+        <input id="cwl-input-clan-clancode" type="text" placeholder="Clancode: #" aria-label="Clan tag">
+        <select id="cwl-overlay-select-amount-players-in-clan" aria-label="CWL roster size">
             <option value="15">15v15</option>
             <option value="30">30v30</option>
         </select>

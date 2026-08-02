@@ -43,6 +43,14 @@ const groupsClanHint = document.querySelector('#groups-clan-hint');
 const groupsOverlayCreateBtn = document.querySelector('#groups-overlay-create-btn');
 const groupsInputJoinCode = document.querySelector('#groups-input-join-code');
 const groupsOverlayJoinBtn = document.querySelector('#groups-overlay-join-btn');
+
+[
+    ['#groups-poll-title-input', 'Poll title'],
+    ['#groups-admin-clan-tag', 'Clan tag'],
+    ['#groups-input-name', 'Clan Family name'],
+    ['#groups-input-clan-tag', 'Clan tag'],
+    ['#groups-input-join-code', 'Clan Family join code']
+].forEach(([selector, label]) => document.querySelector(selector)?.setAttribute('aria-label', label));
 const groupsDetailCheckmark = document.querySelector('#groups-detail-checkmark');
 const groupsDetailCopy = document.querySelector('#groups-detail-copy');
 const groupOverlayLeave = document.querySelector('#groups-overlay-leave');

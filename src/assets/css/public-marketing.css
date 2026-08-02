@@ -118,7 +118,7 @@ body.public-site::after {
 .public-footer-main { align-items: flex-start; }
 .public-footer nav { gap: .65rem 1.25rem; }
 .public-footer nav a,
-.public-footer-link { font-size: .72rem; }
+.public-footer-link { min-height: 2.75rem; display: inline-flex; align-items: center; font-size: .72rem; }
 .public-disclaimer,
 .public-footer-meta { max-width: 78ch !important; font-size: .68rem !important; }
 .public-footer-meta { margin-top: -.35rem !important; }
@@ -130,7 +130,10 @@ body.public-site::after {
 }
 
 @media (max-width: 70rem) {
-    .public-header { grid-template-columns: 1fr auto; }
+    .public-header { grid-template-columns: minmax(0, 1fr) auto auto; }
+    .public-brand { grid-column: 1; }
+    .public-actions { grid-column: 2; }
+    .public-menu { grid-column: 3; }
     .public-nav {
         top: calc(var(--marketing-header) - .2rem);
         right: var(--marketing-pad);
@@ -150,7 +153,7 @@ body.public-site::after {
     .public-header { min-height: 4rem; }
     .public-brand img { width: 1.8rem; height: 1.8rem; }
     .public-brand { font-size: .9rem; }
-    .public-actions .theme-button { width: 2.25rem; height: 2.25rem; }
+    .public-actions .theme-button { width: 2.75rem; height: 2.75rem; }
     .public-footer { padding-top: 2rem; }
 }
 

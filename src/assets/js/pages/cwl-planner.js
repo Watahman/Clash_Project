@@ -2,7 +2,7 @@ import { initI18n, t } from '../i18n/i18n.js';
 import { profileHTML } from "../profile/profile_popup.js";
 import { syncAuthSession } from "../auth/auth-client.js";
 import { initOverlayHide, initAddPlayersOverlay, initAddClanButton, applyCwlSizeRestriction } from "../cwl/cwl-overlay.js";
-import { initPlanIO, savePlan, loadAllPlans, loadPlanListener, startNewPlan } from "../cwl/cwl-plan-io.js";
+import { initPlanIO, savePlan, loadAllPlans, loadPlanListener, startNewPlan, undoLastPlanChange } from "../cwl/cwl-plan-io.js";
 import { initFreeRosterFilter } from "../cwl/cwl-roster-filter.js";
 import { initSpreadsheetImport } from "../cwl/cwl-spreadsheet-import.js";
 import { getClanInfoRequest } from "../API/API-Clan.js";
@@ -16,7 +16,7 @@ export { savePlan };
 
 let addClanBtn, overlayAddClanBtn;
 let cwlInputTag, cwlInputClanCode, selectAmountPlayers;
-let savePlanBtn, newPlanBtn, planName, loadPlan;
+let savePlanBtn, newPlanBtn, undoPlanBtn, planName, loadPlan;
 let manualSaveInFlight = false;
 let saveFeedbackTimer;
 let availablePlayers, allClans, totalPlayerAmount;
@@ -34,6 +34,7 @@ function labelInit() {
     selectAmountPlayers    = document.querySelector("#cwl-overlay-select-amount-players-in-clan");
     savePlanBtn            = document.querySelector("#cwl-save-plan-button");
     newPlanBtn             = document.querySelector("#cwl-new-plan-button");
+    undoPlanBtn            = document.querySelector("#cwl-undo-plan-button");
     planName               = document.querySelector("#cwl-plan-name");
     loadPlan               = document.querySelector("#cwl-load-plan");
     availablePlayers       = document.querySelector("#cwl-available-players");
@@ -73,6 +74,10 @@ async function init() {
     savePlanButton();
     initSaveButtonState();
     newPlanBtn?.addEventListener('click', startNewPlan);
+    undoPlanBtn?.addEventListener('click', () => void undoLastPlanChange());
+    window.addEventListener('clashtools:cwl-undo-state', event => {
+        if (undoPlanBtn) undoPlanBtn.disabled = !event.detail?.canUndo;
+    });
     initFreeRosterFilter({
         container: availablePlayers,
         input: document.querySelector('#cwl-roster-search'),

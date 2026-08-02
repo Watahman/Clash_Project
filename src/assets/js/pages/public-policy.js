@@ -1,4 +1,5 @@
 import { getLanguage, initI18n } from '../i18n/i18n.js';
+import { _BASE_URL } from '../Data/config.js';
 
 const SUPPORT_EMAIL = 'support.clashpanel@gmail.com';
 const LAST_UPDATED_EN = '25 July 2026';
@@ -375,6 +376,73 @@ function languageFor(documentContent) {
     return getLanguage() === 'nl' ? 'nl' : 'en';
 }
 
+function readScreenshot(file) {
+    if (!file) return Promise.resolve('');
+    if (!file.type.startsWith('image/') || file.size > 500_000) {
+        return Promise.reject(new Error('Please choose an image smaller than 500 KB.'));
+    }
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = () => reject(new Error('The screenshot could not be read.'));
+        reader.readAsDataURL(file);
+    });
+}
+
+function createFeedbackForm(language) {
+    const isNl = language === 'nl';
+    const section = document.createElement('section');
+    section.className = 'feedback-form-section';
+    section.innerHTML = `
+        <h2>${isNl ? 'Stuur feedback' : 'Send feedback'}</h2>
+        <form class="feedback-form" novalidate>
+            <input class="feedback-honeypot" name="website" tabindex="-1" autocomplete="off" aria-label="Leave this field blank">
+            <label>${isNl ? 'Categorie' : 'Category'}<select name="category" required><option value="bug">Bug</option><option value="feature">${isNl ? 'Functie-idee' : 'Feature request'}</option><option value="account">Account</option><option value="privacy">Privacy</option><option value="other">${isNl ? 'Andere' : 'Other'}</option></select></label>
+            <label>${isNl ? 'Pagina' : 'Page'}<input name="pagePath" value="${location.pathname}" maxlength="300"></label>
+            <label>${isNl ? 'Beschrijving' : 'Description'}<textarea name="description" minlength="10" maxlength="4000" rows="7" required></textarea></label>
+            <label>${isNl ? 'E-mail voor antwoord (optioneel)' : 'Reply email (optional)'}<input name="contactEmail" type="email" maxlength="254" autocomplete="email"></label>
+            <label>${isNl ? 'Screenshot (optioneel, max. 500 KB)' : 'Screenshot (optional, max 500 KB)'}<input name="screenshot" type="file" accept="image/png,image/jpeg,image/webp"></label>
+            <p class="feedback-privacy">${isNl ? 'We gebruiken deze gegevens alleen om je melding te behandelen. Deel geen wachtwoorden, tokens of andere geheimen.' : 'We use this data only to handle your report. Do not include passwords, tokens or other secrets.'}</p>
+            <button class="button button-primary" type="submit">${isNl ? 'Versturen' : 'Send feedback'}</button>
+            <p class="feedback-status" role="status" aria-live="polite"></p>
+        </form>`;
+    const form = section.querySelector('form');
+    const status = section.querySelector('.feedback-status');
+    const startedAt = Date.now();
+    form.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!form.reportValidity()) return;
+        const button = form.querySelector('button[type="submit"]');
+        button.disabled = true;
+        status.textContent = isNl ? 'Bezig met versturenâ€¦' : 'Sendingâ€¦';
+        try {
+            const screenshotData = await readScreenshot(form.elements.screenshot.files?.[0]);
+            const response = await fetch(`${_BASE_URL}/Feedback`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    category: form.elements.category.value,
+                    pagePath: form.elements.pagePath.value,
+                    description: form.elements.description.value,
+                    contactEmail: form.elements.contactEmail.value,
+                    website: form.elements.website.value,
+                    screenshotData,
+                    startedAt
+                })
+            });
+            if (!response.ok) throw new Error(isNl ? 'Versturen mislukt.' : 'Could not send feedback.');
+            form.reset();
+            status.textContent = isNl ? 'Bedankt. Je melding is ontvangen.' : 'Thank you. Your report was received.';
+        } catch (error) {
+            status.textContent = error.message;
+        } finally {
+            button.disabled = false;
+        }
+    });
+    return section;
+}
+
 function render() {
     const root = document.querySelector('[data-policy-document]');
     if (!root) return;
@@ -443,6 +511,7 @@ function render() {
         actions.appendChild(link);
     });
     if (links.length) root.appendChild(actions);
+    if (root.dataset.policyDocument === 'contact') root.appendChild(createFeedbackForm(language));
 }
 
 initI18n();

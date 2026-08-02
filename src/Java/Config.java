@@ -89,6 +89,9 @@ public class Config {
     String _AUTH_LOGOUT = "/AuthLogout";
     String _AUTH_GOOGLE = "/AuthGoogle";
     String _AUTH_GOOGLE_CALLBACK = "/AuthGoogleCallback";
+    String _PUBLIC_FEEDBACK = "/Feedback";
+    String _CLIENT_ERROR = "/ClientError";
+    String _CSP_REPORT = "/CspReport";
 
     String _EXT_CLAN_CURRENTWAR_LEAGUEGROUP = "/ClanCurrentWarLeagueGroup";
     String _EXT_CLAN_WARLEAGUES_WARS = "/ClanWarLeaguesWars";
@@ -364,6 +367,9 @@ public class Config {
                 || _AUTH_GOOGLE.equals(path)
                 || _AUTH_GOOGLE_CALLBACK.equals(path)
                 || _EXT_PLAYER_VERIFY_TOKEN.equals(path)) {
+            return positiveInt(_SENSITIVE_RATE_LIMIT, 10);
+        }
+        if (_PUBLIC_FEEDBACK.equals(path) || _CLIENT_ERROR.equals(path) || _CSP_REPORT.equals(path)) {
             return positiveInt(_SENSITIVE_RATE_LIMIT, 10);
         }
         if (_AUTH_SESSION.equals(path)

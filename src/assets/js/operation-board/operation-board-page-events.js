@@ -8,6 +8,7 @@ export function bindOperationBoardEvents(refs, handlers) {
             handlers.selectSeason(refs.seasonSelect.value);
     }
     refs.refresh.onclick = handlers.refresh;
+    if (refs.autoRefresh) refs.autoRefresh.onclick = handlers.toggleAutoRefresh;
     refs.rosterFilter.oninput = handlers.filterRoster;
     refs.rosterView.onchange = handlers.filterRoster;
     refs.exportBtn.onclick = handlers.exportReport;

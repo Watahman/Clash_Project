@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "node scripts/serve-static.mjs",
     "build": "node scripts/build-static.mjs",
+    "generate:i18n": "node scripts/generate-runtime-locales.mjs",
+    "optimize:images": "node scripts/optimize-images.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "check:migrations": "node scripts/check-migrations.mjs",
@@ -32,6 +34,7 @@
   "devDependencies": {
     "fake-indexeddb": "^6.2.2",
     "jsdom": "^26.1.0",
+    "sharp": "^0.35.3",
     "vitest": "^3.2.6",
     "wrangler": "^4.114.0"
   }

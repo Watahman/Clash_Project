@@ -39,6 +39,27 @@ let activeTab = null;
 let activeBoardKey = '';
 let historyController;
 let importController;
+const AUTO_REFRESH_INTERVAL_MS = 60_000;
+const AUTO_REFRESH_STORAGE_KEY = 'clashtools_op_auto_refresh_paused';
+let autoRefreshPaused = localStorage.getItem(AUTO_REFRESH_STORAGE_KEY) === 'true';
+
+function syncAutoRefreshControl() {
+    if (!refs?.autoRefresh) return;
+    refs.autoRefresh.setAttribute('aria-pressed', String(autoRefreshPaused));
+    refs.autoRefresh.textContent = t(autoRefreshPaused ? 'op.resumeAutoRefresh' : 'op.pauseAutoRefresh');
+}
+
+function toggleAutoRefresh() {
+    autoRefreshPaused = !autoRefreshPaused;
+    localStorage.setItem(AUTO_REFRESH_STORAGE_KEY, String(autoRefreshPaused));
+    syncAutoRefreshControl();
+}
+
+function refreshLiveDataIfEligible() {
+    if (autoRefreshPaused || document.visibilityState !== 'visible' || syncState === 'loading') return;
+    if (!selectedClan || historyController?.getMode() !== 'current') return;
+    void refreshClanReport(selectedClan);
+}
 
 function setState(state, isError = false) {
     syncState = isError ? 'error' : state;
@@ -235,6 +256,7 @@ function selectBoardTab(tab, focus = false) {
 }
 
 function refreshLabels() {
+    syncAutoRefreshControl();
     if (historyController?.refreshLabels()) return;
     refreshBoardLabels(
         refs,
@@ -297,6 +319,7 @@ async function init() {
                 void historyController.refresh();
             }
         },
+        toggleAutoRefresh,
         filterRoster: () =>
             renderFilteredRoster(refs, latestReport, selectedClan),
         exportReport: () => exportOperationReport(latestReport),
@@ -310,6 +333,12 @@ async function init() {
     await loadPlans();
     renderPhase(refs, 'unknown');
     setState('idle');
+    syncAutoRefreshControl();
+    window.setInterval(refreshLiveDataIfEligible, AUTO_REFRESH_INTERVAL_MS);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState !== 'visible' || !lastSyncAt) return;
+        if (Date.now() - lastSyncAt.getTime() >= AUTO_REFRESH_INTERVAL_MS) refreshLiveDataIfEligible();
+    });
 }
 
 const initialPageLoad = init();

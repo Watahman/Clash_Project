@@ -41,9 +41,10 @@
         </div>
         <div class="operation-actions">
             <button id="op-import-json" class="button button-secondary" type="button" data-i18n="op.import">Import JSON</button>
-            <input id="op-import-file" class="hidden" type="file" accept="application/json,.json">
+            <input id="op-import-file" class="hidden" type="file" accept="application/json,.json" aria-label="Choose Operation Board JSON file">
             <button id="op-export" class="button button-secondary" type="button" data-i18n="op.export">Export JSON</button>
             <button id="op-refresh" class="button button-primary" type="button" data-i18n="op.refresh">Refresh live data</button>
+            <button id="op-auto-refresh" class="button button-secondary" type="button" aria-pressed="false">Pause auto refresh</button>
         </div>
     </header>
 
@@ -107,7 +108,7 @@
     <section class="op-tab-panel" id="op-panel-roster" role="tabpanel" aria-labelledby="op-tab-roster" tabindex="0" hidden>
         <section class="op-flat-section op-roster-panel" aria-labelledby="op-roster-title">
             <div class="op-section-heading op-roster-heading"><div><p data-i18n="op.roster">Roster</p><h2 id="op-roster-title" data-i18n="op.playerOverview">Player overview</h2></div><span id="op-roster-count">0 players</span></div>
-            <div class="op-roster-filter-row"><input id="op-roster-filter" type="search" data-i18n-placeholder="op.filterPlaceholder" placeholder="Search player or tag"><select id="op-roster-view"><option value="all" data-i18n="op.viewAll">All</option><option value="planned" data-i18n="op.viewPlanned">Planned</option><option value="unplanned" data-i18n="op.viewUnplanned">Not planned</option><option value="missed" data-i18n="op.viewMissed">Missed attacks</option></select></div>
+            <div class="op-roster-filter-row"><input id="op-roster-filter" type="search" data-i18n-placeholder="op.filterPlaceholder" placeholder="Search player or tag" aria-label="Search roster"><select id="op-roster-view" aria-label="Filter roster status"><option value="all" data-i18n="op.viewAll">All</option><option value="planned" data-i18n="op.viewPlanned">Planned</option><option value="unplanned" data-i18n="op.viewUnplanned">Not planned</option><option value="missed" data-i18n="op.viewMissed">Missed attacks</option></select></div>
             <div class="op-table-wrap"><table class="op-table op-live-table"><thead><tr>
                 <th data-op-roster-sort="player" aria-sort="none"><button type="button" class="op-table-sort"><span data-i18n="op.player">Player</span><span class="op-sort-indicator" aria-hidden="true">↕</span></button></th>
                 <th data-op-roster-sort="townHall" aria-sort="none"><button type="button" class="op-table-sort"><span>TH</span><span class="op-sort-indicator" aria-hidden="true">↕</span></button></th>

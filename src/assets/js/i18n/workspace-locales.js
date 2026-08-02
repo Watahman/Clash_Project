@@ -8,6 +8,21 @@ const en = Object.freeze({
     "public.feedback": "Bugs & feature requests",
     "public.startFree": "Start for free",
     "public.openMenu": "Open menu",
+    "public.closeMenu": "Close menu",
+    "op.pauseAutoRefresh": "Pause auto refresh",
+    "op.resumeAutoRefresh": "Resume auto refresh",
+    "cwl.undo": "Undo last change",
+    "drafts.export": "Export JSON",
+    "drafts.exported": "Plan exported.",
+    "groups.memberSearchPlaceholder": "Search name, tag or clan",
+    "groups.memberSearchLabel": "Search members",
+    "groups.memberRoleFilter": "Filter by role",
+    "groups.memberAccountFilter": "Filter by linked account",
+    "groups.allRoles": "All roles",
+    "groups.allAccounts": "All accounts",
+    "groups.linkedAccounts": "Linked account",
+    "groups.unlinkedAccounts": "No linked account",
+    "groups.noMemberMatches": "No members match these filters.",
     "public.createAccount": "Create a free account",
     "public.haveAccount": "I already have an account",
     "public.freeNote": "Free to use · no payment details required",
@@ -1892,9 +1907,9 @@ const part10 = Object.freeze({
 });
 
 export const workspaceLocales = Object.freeze({
-    nl: Object.freeze({ ...nl, ...part2.nl, ...part3.nl, ...part4.nl, ...part5.nl, ...part6.nl, ...part7.nl, ...part8.nl, ...part9.nl, ...part10.nl }),
+    nl: Object.freeze({ ...nl, ...part2.nl, ...part3.nl, ...part4.nl, ...part5.nl, ...part6.nl, ...part7.nl, ...part8.nl, ...part9.nl, ...part10.nl, "public.closeMenu": "Menu sluiten" }),
     en: Object.freeze({ ...en, ...part2.en, ...part3.en, ...part4.en, ...part5.en, ...part6.en, ...part7.en, ...part8.en, ...part9.en, ...part10.en }),
-    fr: Object.freeze({ ...fr, ...part2.fr, ...part3.fr, ...part4.fr, ...part5.fr, ...part6.fr, ...part7.fr, ...part8.fr, ...part9.fr, ...part10.fr }),
-    de: Object.freeze({ ...de, ...part2.de, ...part3.de, ...part4.de, ...part5.de, ...part6.de, ...part7.de, ...part8.de, ...part9.de, ...part10.de }),
-    es: Object.freeze({ ...es, ...part2.es, ...part3.es, ...part4.es, ...part5.es, ...part6.es, ...part7.es, ...part8.es, ...part9.es, ...part10.es })
+    fr: Object.freeze({ ...fr, ...part2.fr, ...part3.fr, ...part4.fr, ...part5.fr, ...part6.fr, ...part7.fr, ...part8.fr, ...part9.fr, ...part10.fr, "public.closeMenu": "Fermer le menu" }),
+    de: Object.freeze({ ...de, ...part2.de, ...part3.de, ...part4.de, ...part5.de, ...part6.de, ...part7.de, ...part8.de, ...part9.de, ...part10.de, "public.closeMenu": "Menü schließen" }),
+    es: Object.freeze({ ...es, ...part2.es, ...part3.es, ...part4.es, ...part5.es, ...part6.es, ...part7.es, ...part8.es, ...part9.es, ...part10.es, "public.closeMenu": "Cerrar menú" })
 });

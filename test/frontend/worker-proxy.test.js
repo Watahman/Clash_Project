@@ -12,6 +12,19 @@ afterEach(() => {
 });
 
 describe('Cloudflare API proxy', () => {
+    it('checks backend health and readiness from the scheduled monitor', async () => {
+        vi.stubGlobal('fetch', vi.fn(async () => Response.json({ status: 'ok' })));
+        let scheduledPromise;
+
+        worker.scheduled({}, env(), { waitUntil: promise => { scheduledPromise = promise; } });
+        await scheduledPromise;
+
+        expect(fetch).toHaveBeenCalledTimes(2);
+        expect(fetch.mock.calls.map(([url]) => String(url))).toEqual([
+            'https://backend.example/health',
+            'https://backend.example/ready'
+        ]);
+    });
     it('leaves non-API requests with the static asset binding', async () => {
         const bindings = env();
         const request = new Request('https://clashpanel.com/subpages/privacy');

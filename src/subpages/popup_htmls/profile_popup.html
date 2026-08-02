@@ -111,9 +111,9 @@
                         <small data-i18n="settings.passwordRules">Min. 8 characters with uppercase, lowercase, number and symbol.</small>
                     </div>
                     <div class="po-password-grid">
-                        <input id="po-current-password" type="password" autocomplete="current-password" data-i18n-placeholder="settings.currentPassword" placeholder="Current password">
-                        <input id="po-new-password" type="password" autocomplete="new-password" data-i18n-placeholder="settings.newPassword" placeholder="New password">
-                        <input id="po-confirm-password" type="password" autocomplete="new-password" data-i18n-placeholder="settings.confirmPassword" placeholder="Confirm password">
+                        <input id="po-current-password" type="password" autocomplete="current-password" data-i18n-placeholder="settings.currentPassword" placeholder="Current password" aria-label="Current password">
+                        <input id="po-new-password" type="password" autocomplete="new-password" data-i18n-placeholder="settings.newPassword" placeholder="New password" aria-label="New password">
+                        <input id="po-confirm-password" type="password" autocomplete="new-password" data-i18n-placeholder="settings.confirmPassword" placeholder="Confirm password" aria-label="Confirm new password">
                     </div>
                     <button id="po-save-password" type="button" data-i18n="settings.changePassword">Change password</button>
                 </section>
@@ -162,8 +162,8 @@
 
 <div class="overlay hidden" id="po-add-base">
     <div class="overlay-container" id="po-container-add-base">
-        <input id="po-input-base-tag" type="text" placeholder="Tag: #">
-        <input id="po-input-base-token" type="text" placeholder="Token: ">
+        <input id="po-input-base-tag" type="text" placeholder="Tag: #" aria-label="Player tag">
+        <input id="po-input-base-token" type="text" placeholder="Token: " aria-label="Player API token">
         <br>
         <button id="po-overlay-add-base-button" type="button" data-i18n="cwl.confirm">Confirm</button>
     </div>
@@ -171,7 +171,7 @@
 
 <div class="overlay hidden" id="po-add-clan">
     <div class="overlay-container" id="po-container-add-clan">
-        <input id="po-input-clan-tag" type="text" placeholder="Tag: #">
+        <input id="po-input-clan-tag" type="text" placeholder="Tag: #" aria-label="Clan tag">
         <br>
         <button id="po-overlay-add-clan-button" type="button" data-i18n="cwl.confirm">Confirm</button>
     </div>

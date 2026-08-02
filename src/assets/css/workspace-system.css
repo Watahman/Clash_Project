@@ -316,6 +316,13 @@ body.auth-page { background: radial-gradient(circle at 17% 20%, rgba(215, 173, 8
 .auth-form header p { margin: 0; font-size: 0.8rem; }
 .auth-form header a,
 .auth-form label button { background: none; color: var(--accent-strong); }
+.auth-password-field { display: grid; gap: 0.45rem; margin-bottom: 1rem; }
+.auth-field-heading { display: flex; align-items: center; justify-content: space-between; color: var(--text-muted); font-size: 0.75rem; font-weight: 680; }
+.auth-field-heading label { margin: 0; }
+.auth-field-heading button { min-height: 2.75rem; background: none; color: var(--accent-strong); }
+.groups-member-filters { display: grid; grid-template-columns: minmax(12rem, 1fr) repeat(2, minmax(9rem, auto)); gap: 0.65rem; margin-block: 0.8rem; }
+.groups-member-filters input, .groups-member-filters select { min-height: 2.75rem; }
+@media (max-width: 42rem) { .groups-member-filters { grid-template-columns: 1fr; } }
 .auth-form label { display: grid; gap: 0.45rem; margin-bottom: 1rem; color: var(--text-muted); font-size: 0.75rem; font-weight: 680; }
 .auth-form label > span { display: flex; justify-content: space-between; }
 .auth-form input { width: 100%; min-height: 2.8rem; border: 0.0625rem solid var(--border-strong); border-radius: var(--radius-small); background: var(--surface-raised); padding: 0.7rem 0.8rem; color: var(--text); }

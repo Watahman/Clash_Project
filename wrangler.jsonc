@@ -33,5 +33,9 @@
 
   "vars": {
     "CLOUD_RUN_ORIGIN": "https://clashpanel-api-982136486076.europe-west1.run.app"
+  },
+
+  "triggers": {
+    "crons": ["*/10 * * * *"]
   }
 }

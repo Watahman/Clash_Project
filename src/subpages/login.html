@@ -39,7 +39,7 @@
         <form class="auth-form" id="auth-form">
             <header><p class="eyebrow" data-i18n="auth.account">Account</p><h2 data-i18n="auth.login">Log in</h2><p><span data-i18n="auth.loginSubtitle">No account yet?</span> <a href="register.html" data-i18n="auth.registerLink">Register</a></p></header>
             <label><span><span data-i18n="auth.email">Email address</span></span><input type="email" id="email" data-i18n-placeholder="auth.emailPlaceholder" placeholder="you@example.com" autocomplete="email" required></label>
-            <label><span><span data-i18n="auth.password">Password</span><button id="forgot-password" type="button" data-i18n="auth.forgot">Forgot?</button></span><input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required></label>
+            <div class="auth-password-field"><div class="auth-field-heading"><label for="password" data-i18n="auth.password">Password</label><button id="forgot-password" type="button" data-i18n="auth.forgot">Forgot?</button></div><input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required></div>
             <button id="submit-button" class="button button-primary button-full" type="submit" data-i18n="auth.login">Log in</button>
             <p id="auth-status" class="auth-status" role="status" aria-live="polite"></p>
             <div class="auth-divider"><span data-i18n="auth.or">or</span></div>

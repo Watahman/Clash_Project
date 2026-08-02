@@ -21,6 +21,7 @@ const PLAN_RECOVERY_KEY = 'clashtools_planner_recovery_v1';
 const ACTIVE_PLAN_KEY = 'planner_id';
 const AUTOSAVE_DELAY_MS = 500;
 const ENRICH_CONCURRENCY = 6;
+const UNDO_HISTORY_LIMIT = 20;
 
 let availablePlayers;
 let allClans;
@@ -42,6 +43,33 @@ let activePlanId = null;
 let suppressSave = false;
 let saveSequence = 0;
 let lifecycleInstalled = false;
+let undoHistory = [];
+let lastUndoSnapshot = null;
+
+function syncUndoState() {
+    window.dispatchEvent(new CustomEvent('clashtools:cwl-undo-state', {
+        detail: { canUndo: undoHistory.length > 0 }
+    }));
+}
+
+function snapshotFingerprint(snapshot) {
+    return JSON.stringify(snapshot);
+}
+
+function resetUndoHistory(snapshot = null) {
+    undoHistory = [];
+    lastUndoSnapshot = snapshot;
+    syncUndoState();
+}
+
+function recordUndoSnapshot(snapshot, skipHistory = false) {
+    if (lastUndoSnapshot && snapshotFingerprint(lastUndoSnapshot) !== snapshotFingerprint(snapshot) && !skipHistory) {
+        undoHistory.push(lastUndoSnapshot);
+        if (undoHistory.length > UNDO_HISTORY_LIMIT) undoHistory.shift();
+    }
+    lastUndoSnapshot = snapshot;
+    syncUndoState();
+}
 
 export function initPlanIO(refs) {
     availablePlayers = refs.availablePlayers;
@@ -55,6 +83,7 @@ export function initPlanIO(refs) {
     hidePlanLimitFeedback();
     setSaveStatus('idle');
     installAutosaveLifecycle();
+    resetUndoHistory({ name: '', info: serializePlan() });
 }
 
 function installAutosaveLifecycle() {
@@ -216,6 +245,7 @@ export function savePlan(options = {}) {
     if (!pendingSave) {
         pendingSave = { resolvers: [] };
     }
+    recordUndoSnapshot({ name, info }, options.skipHistory === true);
     pendingSave.job = job;
     const promise = new Promise(resolve => pendingSave.resolvers.push(resolve));
     debounceTimer = setTimeout(flushPendingSave, immediate ? 0 : AUTOSAVE_DELAY_MS);
@@ -462,6 +492,7 @@ export async function loadPlanById(planId) {
         planCache.set(normalized.id, normalized);
         if (normalized.revision != null) planRevisions.set(normalized.id, normalized.revision);
         renderPlanSnapshot(normalized, token);
+        resetUndoHistory({ name: normalized.name, info: normalizePlanDocument(normalized.info) });
         loadSucceeded = true;
         void enrichPlanSnapshot(normalized.info, token, activeLoadController.signal);
     } catch (error) {
@@ -623,7 +654,23 @@ export function startNewPlan() {
     setSaveStatus('idle');
     suppressSave = false;
     setCanAutosave(false);
+    resetUndoHistory({ name: '', info: serializePlan() });
     window.dispatchEvent(new CustomEvent('clashtools:cwl-plan-loaded'));
+}
+
+export function undoLastPlanChange() {
+    if (!undoHistory.length || isLoading) return Promise.resolve(false);
+    flushPendingSave();
+    const snapshot = undoHistory.pop();
+    const token = ++activeLoadToken;
+    suppressSave = true;
+    renderPlanSnapshot(snapshot, token);
+    suppressSave = false;
+    setCanAutosave(true);
+    lastUndoSnapshot = snapshot;
+    syncUndoState();
+    window.dispatchEvent(new CustomEvent('clashtools:cwl-plan-loaded'));
+    return savePlan({ immediate: true, skipHistory: true }).then(() => true);
 }
 
 function setActivePlan(planId) {

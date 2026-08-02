@@ -178,6 +178,17 @@ async function proxyApiRequest(request, env, incomingUrl) {
     return upstreamResponse;
 }
 
+async function checkBackendHealth(env) {
+    if (!env.CLOUD_RUN_ORIGIN) throw new Error('CLOUD_RUN_ORIGIN is not configured');
+    const origin = new URL(env.CLOUD_RUN_ORIGIN);
+    const checks = await Promise.all(['/health', '/ready'].map(async path => {
+        const response = await fetch(new URL(path, origin), { signal: AbortSignal.timeout(10_000) });
+        if (!response.ok) throw new Error(`${path} returned ${response.status}`);
+        return path;
+    }));
+    console.log(`Backend health checks passed: ${checks.join(', ')}`);
+}
+
 export default {
     async fetch(request, env) {
         const incomingUrl = new URL(request.url);
@@ -191,5 +202,8 @@ export default {
         if (appResponse) return appResponse;
 
         return env.ASSETS.fetch(request);
+    },
+    scheduled(_controller, env, ctx) {
+        ctx.waitUntil(checkBackendHealth(env));
     }
 };

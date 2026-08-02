@@ -1,5 +1,11 @@
 import '../theme/theme-manager.js';
-import { translations } from './translations.js';
+import {
+    ensureLanguage,
+    isLanguageLoaded,
+    isSupportedLanguage,
+    supportedLanguages,
+    translations
+} from './runtime-translations.js';
 
 const STORAGE_KEY = 'clashtools_language';
 const DEFAULT_LANG = 'en';
@@ -19,15 +25,17 @@ const languageChangeHandlers = new WeakMap();
 
 export function getLanguage() {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return translations[stored] ? stored : DEFAULT_LANG;
+    return isSupportedLanguage(stored) ? stored : DEFAULT_LANG;
 }
 
 export function setLanguage(language) {
-    const safeLanguage = translations[language] ? language : DEFAULT_LANG;
+    const safeLanguage = isSupportedLanguage(language) ? language : DEFAULT_LANG;
     localStorage.setItem(STORAGE_KEY, safeLanguage);
     document.documentElement.lang = safeLanguage;
-    applyI18n(document);
-    window.dispatchEvent(new CustomEvent('clashtools:language-changed', { detail: { language: safeLanguage } }));
+    void ensureLanguage(safeLanguage).then(() => {
+        applyI18n(document);
+        window.dispatchEvent(new CustomEvent('clashtools:language-changed', { detail: { language: safeLanguage } }));
+    });
 }
 
 export function t(key, params = {}) {
@@ -150,7 +158,7 @@ export function mountLanguageSwitcher(control, { variant = '', onChange = null }
     if (control.id) switcher.id = control.id;
     if (typeof onChange === 'function') languageChangeHandlers.set(switcher, onChange);
 
-    const options = Object.keys(translations).map(language => {
+    const options = supportedLanguages.map(language => {
         const metadata = getLanguageMeta(language);
         return `<button class="language-switcher-option" type="button" role="option" data-language-option="${language}" aria-selected="false" tabindex="-1">
             <span class="language-switcher-code" aria-hidden="true">${metadata.code}</span>
@@ -252,4 +260,11 @@ export function initLanguageSwitcher(root = document) {
 export function initI18n(root = document) {
     initLanguageSwitcher(root);
     applyI18n(root);
+    const language = getLanguage();
+    if (!isLanguageLoaded(language)) {
+        void ensureLanguage(language).then(() => {
+            applyI18n(root);
+            window.dispatchEvent(new CustomEvent('clashtools:language-changed', { detail: { language } }));
+        });
+    }
 }

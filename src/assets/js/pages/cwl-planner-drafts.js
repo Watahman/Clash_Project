@@ -50,6 +50,23 @@ function actionButton(label, className, handler) {
     return element;
 }
 
+function exportPlan(plan) {
+    const safeName = String(plan.name || 'cwl-plan').trim().replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'cwl-plan';
+    const payload = {
+        format: 'clashpanel-cwl-plan',
+        exportedAt: new Date().toISOString(),
+        name: plan.name || t('plans.unnamed'),
+        info: plan.info ?? plan.planInfo ?? null
+    };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${safeName}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setStatus(t('drafts.exported'), 'success');
+}
+
 function formatUpdatedAt(value) {
     if (!value) return t('plans.unknownDate');
     const date = new Date(value);
@@ -146,6 +163,7 @@ function renderPlan(plan) {
         actions.appendChild(actionButton(t('drafts.rename'), 'button button-small', () => showRename(row, plan)));
     }
     actions.appendChild(actionButton(t('drafts.copy'), 'button button-small', () => void copyExistingPlan(plan)));
+    actions.appendChild(actionButton(t('drafts.export'), 'button button-small', () => exportPlan(plan)));
     if (plan.isOwner) {
         actions.appendChild(actionButton(t('drafts.delete'), 'button button-small draft-delete', () => void removePlan(plan)));
     }

@@ -15,6 +15,9 @@ import {
 
 export function createMemberRoleAdmin(elements, getState, setMessage, emptyMessage, refreshMembers) {
     let pendingAction = null;
+    const filters = { query: '', role: 'all', linked: 'all' };
+    const filterBar = createFilterBar();
+    if (elements.members && filterBar) elements.members.before(filterBar);
 
     async function render() {
         const { members, currentRole } = getState();
@@ -22,7 +25,50 @@ export function createMemberRoleAdmin(elements, getState, setMessage, emptyMessa
         setRoleHelp(currentRole);
         if (!members?.length) return elements.members?.appendChild(emptyMessage(t('groups.noMembers')));
 
-        members.forEach(member => elements.members?.appendChild(memberNode(member, member.profile)));
+        const visibleMembers = members.filter(matchesFilters);
+        if (!visibleMembers.length) return elements.members?.appendChild(emptyMessage(t('groups.noMemberMatches')));
+        visibleMembers.forEach(member => elements.members?.appendChild(memberNode(member, member.profile)));
+    }
+
+    function hasLinkedAccount(member) {
+        const profile = Array.isArray(member.profile) ? member.profile[0] : member.profile;
+        return Boolean(
+            member.account_id || member.player_tag || member.clan_tag ||
+            profile?.account_id || profile?.player_tag || profile?.clan_tag ||
+            profile?.accounts?.length || member.accounts?.length
+        );
+    }
+
+    function matchesFilters(member) {
+        if (filters.role !== 'all' && normalizeGroupRole(member.role) !== filters.role) return false;
+        const linked = hasLinkedAccount(member);
+        if (filters.linked === 'linked' && !linked) return false;
+        if (filters.linked === 'unlinked' && linked) return false;
+        if (!filters.query) return true;
+        return JSON.stringify(member).toLowerCase().includes(filters.query);
+    }
+
+    function createFilterBar() {
+        if (!elements.members) return null;
+        const bar = document.createElement('div');
+        bar.className = 'groups-member-filters';
+        const search = document.createElement('input');
+        search.type = 'search';
+        search.placeholder = t('groups.memberSearchPlaceholder');
+        search.setAttribute('aria-label', t('groups.memberSearchLabel'));
+        const role = document.createElement('select');
+        role.setAttribute('aria-label', t('groups.memberRoleFilter'));
+        [['all', 'groups.allRoles'], [ROLE_LEADER, 'groups.leader'], [ROLE_CO_LEADER, 'groups.coLeader'], [ROLE_MEMBER, 'groups.member']]
+            .forEach(([value, key]) => role.appendChild(new Option(t(key), value)));
+        const linked = document.createElement('select');
+        linked.setAttribute('aria-label', t('groups.memberAccountFilter'));
+        [['all', 'groups.allAccounts'], ['linked', 'groups.linkedAccounts'], ['unlinked', 'groups.unlinkedAccounts']]
+            .forEach(([value, key]) => linked.appendChild(new Option(t(key), value)));
+        search.addEventListener('input', () => { filters.query = search.value.trim().toLowerCase(); render(); });
+        role.addEventListener('change', () => { filters.role = role.value; render(); });
+        linked.addEventListener('change', () => { filters.linked = linked.value; render(); });
+        bar.append(search, role, linked);
+        return bar;
     }
 
     function setRoleHelp(role) {

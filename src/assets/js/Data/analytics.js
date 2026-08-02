@@ -1,6 +1,8 @@
 (() => {
     'use strict';
 
+    void import('/assets/js/monitoring/error-monitor.js').catch(() => {});
+
     const MEASUREMENT_ID = 'G-78TY2WB7CS';
     const SCRIPT_ID = 'clashtools-google-analytics';
 

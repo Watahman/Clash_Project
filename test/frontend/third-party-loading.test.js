@@ -72,8 +72,8 @@ describe('Privacy-aware third-party loading', () => {
 
     it('preloads the homepage LCP artwork with high priority', () => {
         const homepage = readFileSync('src/index.html', 'utf8');
-        expect(homepage).toContain(
-            '<link rel="preload" as="image" href="/assets/css/pictures/hero.jpg" fetchpriority="high">'
+        expect(homepage).toMatch(
+            /<link rel="preload" as="image" href="\/assets\/css\/pictures\/hero\.[a-f0-9]{10}\.avif" fetchpriority="high">/
         );
     });
 });

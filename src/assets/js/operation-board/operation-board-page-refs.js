@@ -4,6 +4,7 @@ export function initOperationBoardRefs(root = document) {
         clanSelect: '#op-clan-select',
         seasonSelect: '#op-season-select',
         refresh: '#op-refresh',
+        autoRefresh: '#op-auto-refresh',
         exportBtn: '#op-export',
         importBtn: '#op-import-json',
         importFile: '#op-import-file',

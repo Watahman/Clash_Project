@@ -46,11 +46,15 @@ function initPublicMenu() {
 
     const close = () => {
         button.setAttribute('aria-expanded', 'false');
+        button.setAttribute('aria-label', t('public.openMenu'));
+        button.title = t('public.openMenu');
         nav.classList.remove('is-open');
     };
     button.addEventListener('click', () => {
         const open = button.getAttribute('aria-expanded') !== 'true';
         button.setAttribute('aria-expanded', String(open));
+        button.setAttribute('aria-label', t(open ? 'public.closeMenu' : 'public.openMenu'));
+        button.title = t(open ? 'public.closeMenu' : 'public.openMenu');
         nav.classList.toggle('is-open', open);
     });
     nav.addEventListener('click', event => {
@@ -62,6 +66,11 @@ function initPublicMenu() {
 
     syncLanguageControl();
     window.addEventListener('resize', syncLanguageControl, { passive: true });
+    window.addEventListener('clashtools:language-changed', () => {
+        const open = button.getAttribute('aria-expanded') === 'true';
+        button.setAttribute('aria-label', t(open ? 'public.closeMenu' : 'public.openMenu'));
+        button.title = t(open ? 'public.closeMenu' : 'public.openMenu');
+    });
 }
 
 function initCookiePreferencesControls() {
