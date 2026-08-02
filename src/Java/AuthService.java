@@ -85,8 +85,15 @@ public final class AuthService {
     }
 
     public JsonObject currentSession(HttpExchange exchange) throws Exception {
-        SessionData session = resolveSession(exchange, true);
-        return publicAuthResponse(session.user(), session.expiresAt());
+        try {
+            SessionData session = resolveSession(exchange, true);
+            return publicAuthResponse(session.user(), session.expiresAt());
+        } catch (HttpException authFailure) {
+            if (authFailure.getStatusCode() != 401) throw authFailure;
+            JsonObject result = new JsonObject();
+            result.add("session", JsonNull.INSTANCE);
+            return result;
+        }
     }
 
     public void requestPasswordReset(String email) throws Exception {

@@ -22,46 +22,56 @@ const applicationPages = [
     'src/subpages/groups.html'
 ];
 
+const cinematicPages = [
+    'src/index.html',
+    'src/cwl-planner.html',
+    'src/cwl-tracker.html',
+    'src/clan-management.html',
+    'src/bracket-generator.html',
+    'src/about.html'
+];
+
+const featurePages = cinematicPages.filter(path => path !== 'src/index.html');
+
 const documentFor = path => new JSDOM(readFileSync(path, 'utf8')).window.document;
 
 describe('Public marketing shell', () => {
-    it.each(publicPages)('%s uses the isolated public design system', path => {
+    it.each(publicPages)('%s keeps the shared public shell', path => {
         const document = documentFor(path);
-        const stylesheets = [...document.querySelectorAll('link[rel="stylesheet"]')]
-            .map(link => link.getAttribute('href'));
 
-        expect(stylesheets).toContain('/assets/css/public-marketing.css');
-        expect(stylesheets).not.toContain('/assets/css/public-home-v2.css');
-        expect(stylesheets).not.toContain('/assets/css/public-tool-page.css');
         expect(document.querySelector('body.public-site')).not.toBeNull();
         expect(document.querySelector('.public-header')).not.toBeNull();
         expect(document.querySelector('.public-footer')).not.toBeNull();
-        expect(document.querySelector('script[src="/assets/js/pages/public-site.js"]')).not.toBeNull();
+        expect(document.querySelector('script[src$="/assets/js/pages/public-site.js"]')).not.toBeNull();
     });
 
     it('keeps the homepage product-led and follows the requested story', () => {
         const document = documentFor('src/index.html');
 
-        expect(document.querySelector('h1')?.textContent.trim())
-            .toBe('Plan CWL without the spreadsheet chaos.');
-        expect(document.querySelector('#product-preview')).not.toBeNull();
-        expect(document.querySelector('[data-section="problem-solution"]')).not.toBeNull();
-        expect(document.querySelectorAll('[data-workflow]')).toHaveLength(3);
-        expect(document.querySelector('[data-section="how-it-works"]')).not.toBeNull();
-        expect(document.querySelector('[data-section="other-tools"]')).not.toBeNull();
-        expect(document.querySelector('[data-section="final-cta"]')).not.toBeNull();
+        expect(document.querySelector('h1')?.textContent.replace(/\s+/g, ' ').trim())
+            .toBe('Plan better. Win more wars.');
+        expect(document.querySelector('#workflow')).not.toBeNull();
+        expect(document.querySelector('#features')).not.toBeNull();
+        expect(document.querySelectorAll('.home-v2-product-section')).toHaveLength(3);
+        expect(document.querySelector('.home-v2-tool-links')).not.toBeNull();
+        expect(document.querySelector('.home-v2-bottom-cta')).not.toBeNull();
     });
 
-    it.each([
-        'src/cwl-planner.html',
-        'src/cwl-tracker.html',
-        'src/clan-management.html'
-    ])('%s explains the feature with a preview, capabilities and a CTA', path => {
+    it.each(cinematicPages)('%s loads the approved cinematic public theme', path => {
+        const document = documentFor(path);
+        const stylesheets = [...document.querySelectorAll('link[rel="stylesheet"]')]
+            .map(link => link.getAttribute('href'));
+
+        expect(stylesheets).toContain('/assets/css/public-home-v2.css');
+        expect(document.querySelector('body.public-home-v2')).not.toBeNull();
+    });
+
+    it.each(featurePages)('%s explains the feature with workflow, detail and a CTA', path => {
         const document = documentFor(path);
 
-        expect(document.querySelector('.marketing-feature-preview')).not.toBeNull();
-        expect(document.querySelector('.marketing-capabilities')).not.toBeNull();
-        expect(document.querySelector('.marketing-final-cta')).not.toBeNull();
+        expect(document.querySelector('.feature-v2-workflow')).not.toBeNull();
+        expect(document.querySelector('.home-v2-products')).not.toBeNull();
+        expect(document.querySelector('.home-v2-bottom-cta')).not.toBeNull();
     });
 
     it.each(applicationPages)('%s does not load the public redesign', path => {
@@ -69,8 +79,12 @@ describe('Public marketing shell', () => {
         const publicStylesheet = document.querySelector(
             'link[href="/assets/css/public-marketing.css"]'
         );
+        const cinematicStylesheet = document.querySelector(
+            'link[href="/assets/css/public-home-v2.css"]'
+        );
 
         expect(publicStylesheet).toBeNull();
+        expect(cinematicStylesheet).toBeNull();
     });
 
     it('scopes the design system to public pages', () => {

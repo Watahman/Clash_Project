@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&display=swap");
-
 /* Homepage only. Shared header, footer, buttons and theme tokens stay in workspace-system.css. */
 body.public-home-v2 {
     background:

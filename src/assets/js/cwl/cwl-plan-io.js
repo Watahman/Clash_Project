@@ -17,6 +17,7 @@ import {
 } from './cwl-plan-schema.js';
 
 const PLAN_CACHE_KEY = 'clashtools_planner_cache';
+const PLAN_RECOVERY_KEY = 'clashtools_planner_recovery_v1';
 const ACTIVE_PLAN_KEY = 'planner_id';
 const AUTOSAVE_DELAY_MS = 500;
 const ENRICH_CONCURRENCY = 6;
@@ -39,6 +40,8 @@ let planContextToken = 0;
 let activeLoadController;
 let activePlanId = null;
 let suppressSave = false;
+let saveSequence = 0;
+let lifecycleInstalled = false;
 
 export function initPlanIO(refs) {
     availablePlayers = refs.availablePlayers;
@@ -51,6 +54,22 @@ export function initPlanIO(refs) {
     activePlanId = cleanPlanId(localStorage.getItem(ACTIVE_PLAN_KEY));
     hidePlanLimitFeedback();
     setSaveStatus('idle');
+    installAutosaveLifecycle();
+}
+
+function installAutosaveLifecycle() {
+    if (lifecycleInstalled) return;
+    lifecycleInstalled = true;
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') flushPendingSave();
+    });
+    window.addEventListener('pagehide', flushPendingSave);
+    window.addEventListener('beforeunload', event => {
+        if (!readPlanRecovery(getCurrentUserId())) return;
+        event.preventDefault();
+        event.returnValue = '';
+    });
 }
 
 function cleanPlanId(value) {
@@ -182,18 +201,22 @@ export function savePlan(options = {}) {
         return Promise.resolve(null);
     }
 
-    if (debounceTimer) clearTimeout(debounceTimer);
-    if (!pendingSave) {
-        pendingSave = { resolvers: [] };
-    }
-    pendingSave.job = {
+    const job = {
         userId,
         planId: activePlanId,
         name,
         info,
         revision: activePlanId ? planRevisions.get(activePlanId) ?? null : null,
-        contextToken: planContextToken
+        contextToken: planContextToken,
+        recoveryId: `${Date.now()}-${++saveSequence}`
     };
+    persistPlanRecovery(job);
+
+    if (debounceTimer) clearTimeout(debounceTimer);
+    if (!pendingSave) {
+        pendingSave = { resolvers: [] };
+    }
+    pendingSave.job = job;
     const promise = new Promise(resolve => pendingSave.resolvers.push(resolve));
     debounceTimer = setTimeout(flushPendingSave, immediate ? 0 : AUTOSAVE_DELAY_MS);
     return promise;
@@ -243,6 +266,7 @@ async function persistSave(job) {
                 setActivePlan(savedId);
             }
         }
+        clearPlanRecovery(job.recoveryId);
         clearTimeout(saveStatusTimer);
         saveStatusTimer = setTimeout(() => setSaveStatus('idle'), 700);
         return data;
@@ -260,7 +284,8 @@ export function loadAllPlans() {
     const userId = getCurrentUserId();
     planCache.clear();
     planRevisions.clear();
-    const cachedPlans = readPlanCache();
+    const recovery = readPlanRecovery(userId);
+    const cachedPlans = mergePlanRecovery(readPlanCache(), recovery);
     renderPlanOptions(cachedPlans, true);
 
     if (!userId) {
@@ -272,7 +297,10 @@ export function loadAllPlans() {
     loadPlan.disabled = false;
     return getAllPlansFromDatabase(userId)
         .then(data => {
-            const plans = Array.isArray(data) ? data.map(normalizePlan).filter(Boolean) : [];
+            const plans = mergePlanRecovery(
+                Array.isArray(data) ? data.map(normalizePlan).filter(Boolean) : [],
+                recovery
+            );
             renderPlanOptions(plans, false);
             persistPlanCache();
             const selected = activePlanId && planCache.has(activePlanId) ? activePlanId : null;
@@ -281,12 +309,53 @@ export function loadAllPlans() {
                 return loadPlanById(selected).then(() => plans);
             }
             if (activePlanId) setActivePlan(null);
+            if (recovery && !recovery.planId) restoreNewPlanRecovery(recovery);
             return plans;
         })
         .catch(() => {
             if (!cachedPlans.length) loadPlan.replaceChildren(option('', t('cwl.noPlan')));
+            if (recovery && !recovery.planId) restoreNewPlanRecovery(recovery);
             return cachedPlans;
         });
+}
+
+function mergePlanRecovery(plans, recovery) {
+    if (!recovery?.planId) return plans;
+    let found = false;
+    const merged = plans.map(plan => {
+        if (cleanPlanId(plan.id || plan.uuid) !== recovery.planId) return plan;
+        found = true;
+        return {
+            ...plan,
+            id: recovery.planId,
+            uuid: recovery.planId,
+            name: recovery.name,
+            info: recovery.info,
+            revision: recovery.revision ?? plan.revision,
+            isOwner: true
+        };
+    });
+    if (!found) {
+        merged.push({
+            id: recovery.planId,
+            uuid: recovery.planId,
+            name: recovery.name,
+            info: recovery.info,
+            revision: recovery.revision,
+            isOwner: true
+        });
+    }
+    return merged;
+}
+
+function restoreNewPlanRecovery(recovery) {
+    suppressSave = true;
+    setActivePlan(null);
+    loadPlan.value = '';
+    renderPlanSnapshot({ name: recovery.name, info: recovery.info }, ++activeLoadToken);
+    suppressSave = false;
+    setCanAutosave(true);
+    window.dispatchEvent(new CustomEvent('clashtools:cwl-plan-loaded'));
 }
 
 function renderPlanOptions(plans, isSnapshot) {
@@ -311,6 +380,53 @@ function readPlanCache() {
 
 function persistPlanCache() {
     localStorage.setItem(PLAN_CACHE_KEY, JSON.stringify([...planCache.values()]));
+}
+
+function persistPlanRecovery(job) {
+    try {
+        localStorage.setItem(PLAN_RECOVERY_KEY, JSON.stringify({
+            version: 1,
+            recoveryId: job.recoveryId,
+            userId: job.userId,
+            planId: job.planId,
+            name: job.name,
+            info: job.info,
+            revision: job.revision,
+            savedAt: new Date().toISOString()
+        }));
+    } catch {
+        // The normal server save still proceeds if browser storage is unavailable.
+    }
+}
+
+function readPlanRecovery(userId) {
+    if (!userId) return null;
+    try {
+        const recovery = JSON.parse(localStorage.getItem(PLAN_RECOVERY_KEY) || 'null');
+        if (!recovery || recovery.version !== 1 || recovery.userId !== userId) return null;
+        if (!recovery.info || typeof recovery.info !== 'object') return null;
+        return {
+            ...recovery,
+            planId: cleanPlanId(recovery.planId),
+            name: String(recovery.name || t('cwl.defaultPlanName')).trim(),
+            info: normalizePlanDocument(recovery.info),
+            revision: Number.isFinite(Number(recovery.revision)) ? Number(recovery.revision) : null
+        };
+    } catch {
+        return null;
+    }
+}
+
+function clearPlanRecovery(recoveryId = null) {
+    try {
+        if (recoveryId) {
+            const current = JSON.parse(localStorage.getItem(PLAN_RECOVERY_KEY) || 'null');
+            if (current?.recoveryId !== recoveryId) return;
+        }
+        localStorage.removeItem(PLAN_RECOVERY_KEY);
+    } catch {
+        // Ignore unavailable or malformed browser storage.
+    }
 }
 
 export function loadPlanListener() {

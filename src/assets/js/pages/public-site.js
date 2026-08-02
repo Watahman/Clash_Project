@@ -225,7 +225,7 @@ async function redirectReturningUser() {
     if (session) window.location.replace('/dashboard');
 }
 
-async function init() {
+function init() {
     initI18n();
     initThemeButtons();
     initPublicMenu();
@@ -235,8 +235,7 @@ async function init() {
     initHomepageDemo();
     initProductFlow();
     window.addEventListener('clashtools:language-changed', updateThemeButtons);
-    await redirectReturningUser();
+    void redirectReturningUser();
 }
 
-const initialPublicSiteLoad = init();
-window.clashtoolsRegisterInitialLoad?.(initialPublicSiteLoad);
+init();

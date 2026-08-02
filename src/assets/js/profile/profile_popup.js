@@ -203,6 +203,7 @@ function profileInit() {
             [
                 'planner_id',
                 'clashtools_planner_cache',
+                'clashtools_planner_recovery_v1',
                 'clashtoolsOpenGroupId'
             ].forEach(key => {
                 localStorage.removeItem(key);

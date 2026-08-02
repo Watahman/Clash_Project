@@ -22,6 +22,7 @@
     const originalFetch = window.fetch.bind(window);
 
     let pageRevealed = false;
+    let productFontsScheduled = false;
 
     applyStoredThemeImmediately();
     installNavigationPreloading();
@@ -55,7 +56,22 @@
     }
 
     async function revealWhenVisualsAreReady() {
+        // Public HTML is already meaningful without JavaScript. Reveal it before
+        // DOMContentLoaded so large translations or session checks cannot delay FCP.
+        if (html.classList.contains('public-page')) {
+            await nextPaint();
+            revealPage();
+            return;
+        }
+
         await domReady();
+
+        // Backward-compatible fallback for public pages without the HTML marker.
+        if (document.body?.classList.contains('public-site')) {
+            await nextPaint();
+            revealPage();
+            return;
+        }
 
         await Promise.allSettled([
             Promise.race([
@@ -136,9 +152,31 @@
         html.classList.remove('workspace-page-loading');
         html.classList.add('workspace-page-ready');
         window.dispatchEvent(new CustomEvent('clashtools:page-ready'));
+        scheduleProductFonts();
         if (document.body?.classList.contains('workspace-app')) {
             scheduleIdlePreload();
         }
+    }
+
+    function scheduleProductFonts() {
+        if (productFontsScheduled) return;
+        productFontsScheduled = true;
+
+        const load = () => {
+            if (document.querySelector('link[data-clashtools-fonts]')) return;
+            const stylesheet = document.createElement('link');
+            stylesheet.rel = 'stylesheet';
+            stylesheet.dataset.clashtoolsFonts = 'true';
+            stylesheet.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@500;600;700;800&family=Rajdhani:wght@500;600;700&display=optional';
+            document.head.append(stylesheet);
+        };
+        const loadWhenIdle = () => {
+            if ('requestIdleCallback' in window) window.requestIdleCallback(load, { timeout: 1200 });
+            else window.setTimeout(load, 250);
+        };
+
+        if (document.readyState === 'complete') loadWhenIdle();
+        else window.addEventListener('load', loadWhenIdle, { once: true });
     }
 
     function installNavigationPreloading() {

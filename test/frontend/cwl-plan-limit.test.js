@@ -3,13 +3,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
     getAllPlansFromDatabase: vi.fn(),
     getPlanFromDatabase: vi.fn(),
-    setPlanToDatabase: vi.fn()
+    setPlanToDatabase: vi.fn(),
+    setCanAutosave: vi.fn()
 }));
 
 vi.mock('../../src/assets/js/Data/config.js', () => ({
     canAutosave: true,
     isLoading: false,
-    setCanAutosave: vi.fn(),
+    setCanAutosave: mocks.setCanAutosave,
     setLoading: vi.fn()
 }));
 vi.mock('../../src/assets/js/templates/CWLTemplates.js', () => ({
@@ -73,6 +74,7 @@ describe('CWL saved plan limit', () => {
         mocks.getAllPlansFromDatabase.mockReset().mockResolvedValue(plans);
         mocks.getPlanFromDatabase.mockReset();
         mocks.setPlanToDatabase.mockReset();
+        mocks.setCanAutosave.mockReset();
         document.body.innerHTML = `
             <div id="available"></div>
             <div id="clans"></div>
@@ -178,4 +180,67 @@ describe('CWL saved plan limit', () => {
             );
         }
     );
+
+    it('stores edits immediately and flushes the pending save when the page is left', async () => {
+        localStorage.setItem('planner_id', 'plan-1');
+        mocks.setPlanToDatabase.mockResolvedValue({ uuid: 'plan-1', revision: 2 });
+        const { initPlanIO, loadAllPlans, savePlan } = await import(
+            '../../src/assets/js/cwl/cwl-plan-io.js'
+        );
+        const refs = plannerRefs();
+        initPlanIO(refs);
+        await loadAllPlans();
+        refs.planName.value = 'Protected edit';
+
+        const saving = savePlan();
+        const recovery = JSON.parse(localStorage.getItem('clashtools_planner_recovery_v1'));
+
+        expect(recovery).toMatchObject({
+            userId: 'user-1',
+            planId: 'plan-1',
+            name: 'Protected edit'
+        });
+        expect(mocks.setPlanToDatabase).not.toHaveBeenCalled();
+
+        window.dispatchEvent(new Event('pagehide'));
+        await saving;
+
+        expect(mocks.setPlanToDatabase).toHaveBeenCalledOnce();
+        expect(localStorage.getItem('clashtools_planner_recovery_v1')).toBeNull();
+    });
+
+    it('restores an unsaved new plan from the local recovery copy', async () => {
+        localStorage.setItem('clashtools_planner_recovery_v1', JSON.stringify({
+            version: 1,
+            recoveryId: 'recovery-1',
+            userId: 'user-1',
+            planId: null,
+            name: 'Recovered draft',
+            info: {
+                schemaVersion: 2,
+                freePlayers: [{ name: 'Recovered', tag: '#RECOVER', townHallLevel: 16 }],
+                clans: [],
+                pollMeta: { groupId: '', pollId: '' }
+            },
+            revision: null,
+            savedAt: new Date().toISOString()
+        }));
+        mocks.getAllPlansFromDatabase.mockResolvedValue([]);
+        const templates = await import('../../src/assets/js/templates/CWLTemplates.js');
+        templates.createPlayerCard.mockClear();
+        const { initPlanIO, loadAllPlans } = await import(
+            '../../src/assets/js/cwl/cwl-plan-io.js'
+        );
+        const refs = plannerRefs();
+        initPlanIO(refs);
+
+        await loadAllPlans();
+
+        expect(refs.planName.value).toBe('Recovered draft');
+        expect(templates.createPlayerCard).toHaveBeenCalledWith(
+            expect.objectContaining({ tag: '#RECOVER' }),
+            null
+        );
+        expect(mocks.setCanAutosave).toHaveBeenCalledWith(true);
+    });
 });
