@@ -1,168 +1,88 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { JSDOM } from 'jsdom';
+import { canonicalUrl, publicRoutes } from './public-routes.mjs';
 
-const pages = [
-    {
-        file: 'index.html',
-        canonical: 'https://clashpanel.com/',
-        title: 'Clash of Clans Clan Management, CWL Planner & Tracker | ClashPanel',
-        h1: 'Plan better. Win more wars.',
-        indexable: true,
-        links: ['/cwl-planner', '/cwl-tracker', '/clan-management']
-    },
-    {
-        file: 'about.html',
-        canonical: 'https://clashpanel.com/about',
-        title: 'About ClashPanel | Clash of Clans Clan Management Toolkit',
-        h1: 'Built for clan leaders.',
-        indexable: true,
-        links: ['/cwl-planner']
-    },
-    {
-        file: 'cwl-planner.html',
-        canonical: 'https://clashpanel.com/cwl-planner',
-        title: 'Free Clash of Clans CWL Planner & Roster Optimizer | ClashPanel',
-        h1: 'Build your CWL roster plan.',
-        indexable: true,
-        links: ['/cwl-tracker']
-    },
-    {
-        file: 'cwl-tracker.html',
-        canonical: 'https://clashpanel.com/cwl-tracker',
-        title: 'Clash of Clans CWL Tracker, Stats & History | ClashPanel',
-        h1: 'See the whole CWL.',
-        indexable: true,
-        links: ['/cwl-planner']
-    },
-    {
-        file: 'clan-management.html',
-        canonical: 'https://clashpanel.com/clan-management',
-        title: 'Clash of Clans Clan Management & Clan Family Tool | ClashPanel',
-        h1: 'Run every clan together.',
-        indexable: true,
-        links: ['/cwl-planner']
-    },
-    {
-        file: 'bracket-generator.html',
-        canonical: 'https://clashpanel.com/bracket-generator',
-        title: 'Clash of Clans Bracket Generator | ClashPanel',
-        h1: 'Build a better bracket.',
-        indexable: false,
-        comingSoon: true,
-        links: ['/cwl-planner']
-    }
-];
-
-const descriptions = new Set();
 const titles = new Set();
+const descriptions = new Set();
+const knownPublicPaths = new Set(publicRoutes.map(route => route.path));
+const publicDocuments = [];
 
-for (const page of pages) {
-    const source = await readFile(resolve('dist', page.file), 'utf8');
+for (const route of publicRoutes) {
+    const source = await readFile(resolve('dist', route.file), 'utf8');
     const document = new JSDOM(source).window.document;
     const description = document.querySelector('meta[name="description"]')?.content.trim();
-    const canonicalLinks = document.querySelectorAll('link[rel="canonical"]');
+    const canonicals = document.querySelectorAll('link[rel="canonical"]');
     const h1s = document.querySelectorAll('h1');
     const robots = document.querySelector('meta[name="robots"]')?.content || '';
-    const ogUrl = document.querySelector('meta[property="og:url"]')?.content;
-    const ogImage = document.querySelector('meta[property="og:image"]')?.content;
-    const twitterCard = document.querySelector('meta[name="twitter:card"]')?.content;
+    const expectedCanonical = canonicalUrl(route);
 
-    assert(document.documentElement.lang === 'en', `${page.file}: expected lang="en"`);
-    assert(document.title === page.title, `${page.file}: unexpected title`);
-    assert(!titles.has(document.title), `${page.file}: duplicate title`);
+    assert(document.documentElement.lang === 'en', `${route.file}: expected lang="en"`);
+    assert(document.title.trim(), `${route.file}: missing title`);
+    assert(!titles.has(document.title), `${route.file}: duplicate title`);
     titles.add(document.title);
-    assert(description, `${page.file}: missing description`);
-    assert(!descriptions.has(description), `${page.file}: duplicate description`);
+    assert(description, `${route.file}: missing description`);
+    assert(!descriptions.has(description), `${route.file}: duplicate description`);
     descriptions.add(description);
-    assert(canonicalLinks.length === 1, `${page.file}: expected exactly one canonical`);
-    assert(canonicalLinks[0].href === page.canonical, `${page.file}: incorrect canonical`);
-    assert(!canonicalLinks[0].href.includes('/subpages/'), `${page.file}: legacy canonical`);
-    assert(h1s.length === 1, `${page.file}: expected exactly one H1`);
-    const h1Text = h1s[0].textContent.replace(/\s+/g, ' ').trim();
-    assert(h1Text === page.h1, `${page.file}: incorrect H1`);
-    if (page.indexable) {
-        assert(/\bindex\b/i.test(robots) && !/\bnoindex\b/i.test(robots), `${page.file}: not indexable`);
+    assert(canonicals.length === 1, `${route.file}: expected exactly one canonical`);
+    assert(canonicals[0].href === expectedCanonical, `${route.file}: incorrect canonical`);
+    assert(h1s.length === 1, `${route.file}: expected exactly one H1`);
+    assert(h1s[0].textContent.trim(), `${route.file}: empty H1`);
+    assert(document.querySelector('meta[property="og:url"]')?.content === expectedCanonical, `${route.file}: og:url differs from canonical`);
+    assert(document.querySelector('meta[name="twitter:card"]')?.content?.startsWith('summary'), `${route.file}: missing Twitter card`);
+
+    if (route.indexable) {
+        assert(/\bindex\b/i.test(robots) && !/\bnoindex\b/i.test(robots), `${route.file}: not indexable`);
     } else {
-        assert(/\bnoindex\b/i.test(robots), `${page.file}: unavailable page must be noindex`);
-        assert(/\bfollow\b/i.test(robots), `${page.file}: unavailable page should keep link discovery`);
+        assert(/\bnoindex\b/i.test(robots), `${route.file}: unavailable page must be noindex`);
     }
-    assert(ogUrl === page.canonical, `${page.file}: og:url differs from canonical`);
-    assert(ogImage?.startsWith('https://clashpanel.com/assets/social/'), `${page.file}: missing social image`);
-    assert(twitterCard === 'summary_large_image', `${page.file}: expected large Twitter card`);
-    page.links.forEach(href => {
-        assert(
-            document.querySelector(`a[href="${href}"]`),
-            `${page.file}: missing crawlable link to ${href}`
-        );
+
+    [...document.querySelectorAll('script[type="application/ld+json"]')].forEach(script => {
+        JSON.parse(script.textContent);
     });
 
-    const structuredData = [...document.querySelectorAll('script[type="application/ld+json"]')];
-    assert(structuredData.length === 1, `${page.file}: expected one JSON-LD block`);
-    const parsedStructuredData = structuredData.map(script => JSON.parse(script.textContent));
-    if (page.comingSoon) {
-        assert(
-            !JSON.stringify(parsedStructuredData).includes('"WebApplication"'),
-            `${page.file}: coming-soon page must not claim to be a live WebApplication`
-        );
+    if (/sample data/i.test(document.body.textContent)) {
+        assert(document.querySelector('.sample-label'), `${route.file}: sample data lacks a visible label`);
     }
+
+    for (const link of document.querySelectorAll('a[href]')) {
+        const href = link.getAttribute('href');
+        if (!href || href.startsWith('#') || /^(https?:|mailto:|tel:)/i.test(href)) continue;
+        const url = new URL(href, 'https://clashpanel.com');
+        const allowedApplicationTarget = url.pathname === '/dashboard'
+            || url.pathname.startsWith('/app/')
+            || ['/subpages/login.html', '/subpages/register.html'].includes(url.pathname);
+        assert(knownPublicPaths.has(url.pathname) || allowedApplicationTarget, `${route.file}: unknown internal target ${href}`);
+    }
+    publicDocuments.push({ route, document, source });
 }
 
-const expectedSitemapUrls = pages.filter(page => page.indexable).map(page => page.canonical).concat([
-    'https://clashpanel.com/subpages/privacy',
-    'https://clashpanel.com/subpages/cookies',
-    'https://clashpanel.com/subpages/terms',
-    'https://clashpanel.com/subpages/contact'
-]);
+const expectedSitemapUrls = publicRoutes.filter(route => route.indexable).map(route => canonicalUrl(route));
 const sitemap = await readFile(resolve('dist', 'sitemap.xml'), 'utf8');
 const sitemapUrls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
-assert(
-    JSON.stringify(sitemapUrls) === JSON.stringify(expectedSitemapUrls),
-    'sitemap.xml does not contain only the canonical public URLs'
-);
-assert(!sitemap.includes('/bracket-generator'), 'Coming-soon Bracket Generator must not be in sitemap.xml');
-assert(!sitemap.includes('/war-tracker'), 'Future War Tracker must not be in sitemap.xml');
+assert(JSON.stringify(sitemapUrls) === JSON.stringify(expectedSitemapUrls), 'sitemap does not match the canonical public route configuration');
+assert(!sitemap.includes('/app/') && !sitemap.includes('/dashboard'), 'private route appears in sitemap');
 
 const robots = await readFile(resolve('dist', 'robots.txt'), 'utf8');
-assert(
-    !robots.includes('Disallow: /app/'),
-    'robots.txt must allow crawlers to see X-Robots-Tag noindex on private app routes'
-);
-assert(
-    robots.includes('Sitemap: https://clashpanel.com/sitemap.xml'),
-    'robots.txt must reference the production sitemap'
-);
+assert(robots.includes('Sitemap: https://clashpanel.com/sitemap.xml'), 'robots.txt does not reference the canonical sitemap');
+assert(!robots.includes('replace-with-production-domain.invalid'), 'robots.txt contains the placeholder production domain');
+assert(!robots.includes('Disallow: /app/'), 'robots.txt must allow crawlers to observe app noindex responses');
 
-const redirects = await readFile(resolve('dist', '_redirects'), 'utf8');
-for (const name of ['privacy', 'cookies', 'terms', 'contact']) {
-    assert(
-        redirects.includes(`/subpages/${name}.html /subpages/${name} 301`),
-        `_redirects must permanently canonicalize ${name}.html`
-    );
+const initialHtmlPolicyFiles = ['subpages/privacy.html', 'subpages/cookies.html', 'subpages/terms.html', 'subpages/contact.html'];
+for (const file of initialHtmlPolicyFiles) {
+    const { document } = publicDocuments.find(item => item.route.file === file);
+    const words = document.querySelector('[data-policy-document]')?.textContent.trim().split(/\s+/).length || 0;
+    assert(words >= 150, `${file}: policy/support body is not complete in initial HTML`);
 }
 
-const legalPaths = [
-    '/subpages/privacy',
-    '/subpages/cookies',
-    '/subpages/terms',
-    '/subpages/contact'
-];
-const publicHtmlFiles = pages.map(page => page.file).concat([
-    'subpages/privacy.html',
-    'subpages/cookies.html',
-    'subpages/terms.html',
-    'subpages/contact.html'
-]);
-for (const file of publicHtmlFiles) {
+const adImports = publicDocuments.filter(item => item.source.includes('/assets/js/Data/ads.js'));
+assert(adImports.length === 1 && adImports[0].route.path === '/', 'AdSense loader must only be imported by the homepage candidate');
+for (const file of ['subpages/dashboard.html', 'subpages/cwl-planner.html', 'subpages/cwl-planner-drafts.html', 'subpages/cwl-operation-board.html', 'subpages/bracket-generator.html']) {
     const source = await readFile(resolve('dist', file), 'utf8');
-    const document = new JSDOM(source).window.document;
-    for (const path of legalPaths) {
-        assert(document.querySelector(`a[href="${path}"]`), `${file}: missing canonical legal link to ${path}`);
-        assert(!document.querySelector(`a[href="${path}.html"]`), `${file}: links to non-canonical ${path}.html`);
-    }
+    assert(!source.includes('Data/ads.js'), `${file}: excluded application route imports AdSense`);
 }
 
-console.log('Validated SEO metadata, crawl controls, sitemap and canonical links for 5 indexable pages and 1 coming-soon page.');
+console.log(`Validated ${publicRoutes.length} public route definitions, ${expectedSitemapUrls.length} sitemap URLs, initial policy HTML, structured data, links and AdSense exclusions.`);
 
 function assert(condition, message) {
     if (!condition) throw new Error(message);

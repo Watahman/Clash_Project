@@ -1,5 +1,6 @@
 import { cp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { renderRobots, renderSitemap } from './public-routes.mjs';
 
 const source = resolve('src');
 const output = resolve('dist');
@@ -24,17 +25,17 @@ if (publicSiteUrl) {
     if (!['http:', 'https:'].includes(parsedUrl.protocol) || !parsedUrl.hostname) {
         throw new Error('PUBLIC_SITE_URL must be an absolute HTTP(S) URL.');
     }
-    for (const name of ['robots.txt', 'sitemap.xml']) {
-        const file = resolve(output, name);
-        const content = await readFile(file, 'utf8');
-        await writeFile(
-            file,
-            content.replaceAll('https://replace-with-production-domain.invalid', publicSiteUrl),
-            'utf8'
-        );
-    }
+    await writeFile(resolve(output, 'robots.txt'), renderRobots(publicSiteUrl), 'utf8');
+    await writeFile(resolve(output, 'sitemap.xml'), renderSitemap(publicSiteUrl), 'utf8');
 } else {
-    console.warn('PUBLIC_SITE_URL is not set; robots.txt and sitemap.xml retain the non-production placeholder.');
+    throw new Error('PUBLIC_SITE_URL must resolve to the canonical production origin.');
+}
+
+for (const name of ['robots.txt', 'sitemap.xml']) {
+    const content = await readFile(resolve(output, name), 'utf8');
+    if (content.includes('replace-with-production-domain.invalid')) {
+        throw new Error(`${name} contains a placeholder production domain.`);
+    }
 }
 
 console.log(`Copied the complete static application from ${source} to ${output}.`);

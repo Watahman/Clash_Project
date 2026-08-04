@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark" class="workspace-page-loading public-page">
+<html lang="en" data-theme="dark" class="public-page">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -58,6 +58,7 @@
     <link rel="stylesheet" href="/assets/css/light-theme.css">
     <link rel="stylesheet" href="/assets/css/workspace-polish.css">
     <link rel="stylesheet" href="/assets/css/public-home-v2.css">
+    <link rel="stylesheet" href="/assets/css/public-resources.css">
 
     <script src="/assets/js/Data/ads.js"></script>
 </head>
@@ -69,12 +70,7 @@
         <img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160">
         <span>ClashPanel</span>
     </a>
-    <nav class="public-nav" id="public-nav" aria-label="Public navigation" data-i18n-aria-label="public.navigation">
-        <a href="/cwl-planner">CWL Planner</a>
-        <a href="/cwl-tracker">CWL Tracker</a>
-        <a href="/clan-management">Clan Management</a>
-        <a href="/subpages/contact" data-i18n="public.feedback">Bugs &amp; feature requests</a>
-    </nav>
+    <nav class="public-nav" id="public-nav" aria-label="Public navigation"><a href="#features">Tools</a><a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about">About</a><a href="/changelog">Changelog</a></nav>
     <div class="public-actions">
         <button type="button" data-language-control data-i18n="header.language">Language</button>
         <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme"><span aria-hidden="true">◐</span></button>
@@ -220,9 +216,9 @@
         <a href="/cwl-planner">CWL Planner &amp; Roster Optimizer</a>
         <a href="/cwl-tracker">Live CWL Tracker &amp; History</a>
         <a href="/clan-management">Clan Management &amp; Clan Family</a>
-        <a href="/bracket-generator">Clash of Clans Bracket Generator (Coming soon)</a>
     </nav>
 
+    <section class="resource-page" aria-labelledby="home-resources-title"><article class="resource-article"><p class="resource-kicker">Public resources</p><h2 id="home-resources-title">Evaluate the method before opening a tool.</h2><p>Read the decision rules, limitations and practical workflows without signing in or submitting a clan tag.</p><div class="resource-links"><a class="button button-secondary" href="/methodology">How recommendations work</a><a class="button button-secondary" href="/guides">Practical CWL guides</a><a class="button button-secondary" href="/changelog">What changed</a></div></article></section>
     <section class="home-v2-bottom-cta" data-reveal>
         <div><p class="eyebrow" data-i18n="public.readyForCwl">Ready for your next CWL?</p><h2 data-i18n="public.ctaTitle">Plan your next CWL in one place.</h2><p data-i18n="public.ctaDesc">Create a plan manually, import a spreadsheet or connect a Clan Family. You do not need to rebuild your process before trying it.</p></div>
         <a class="button button-primary button-large" href="/subpages/register.html" data-i18n="public.startFree">Start for free</a>
@@ -233,6 +229,10 @@
     <div class="public-footer-main">
         <a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
         <nav aria-label="Footer navigation" data-i18n-aria-label="public.footerNav">
+            <a href="/guides">Guides</a>
+            <a href="/methodology">Methodology</a>
+            <a href="/about">About</a>
+            <a href="/changelog">Changelog</a>
             <a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a>
             <a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a>
             <a href="/subpages/terms" data-i18n="public.terms">Terms of use</a>

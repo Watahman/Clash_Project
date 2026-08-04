@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark" class="workspace-page-loading public-page">
+<html lang="en" data-theme="dark" class="public-page">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,17 +40,13 @@
     <link rel="stylesheet" href="/assets/css/public-marketing.css">
     <link rel="stylesheet" href="/assets/css/public-home-v2.css">
     <link rel="stylesheet" href="/assets/css/public-feature-v2.css">
+    <link rel="stylesheet" href="/assets/css/public-resources.css">
 </head>
 <body class="public-site public-home-v2 public-feature-v2 public-feature-tracker">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
 <header class="public-header">
     <a class="public-brand" href="/" aria-label="ClashPanel home"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
-    <nav class="public-nav" id="public-nav" aria-label="Public navigation" data-i18n-aria-label="public.navigation">
-        <a href="/cwl-planner" data-i18n="publicPages.navPlanner">CWL Planner</a>
-        <a href="/cwl-tracker" aria-current="page" data-i18n="publicPages.navTracker">CWL Tracker</a>
-        <a href="/clan-management" data-i18n="publicPages.navFamily">Clan Management</a>
-        <a href="/about" data-i18n="publicPages.navAbout">About</a>
-    </nav>
+    <nav class="public-nav" id="public-nav" aria-label="Public navigation"><a href="/#features" aria-current="page">Tools</a><a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about">About</a><a href="/changelog">Changelog</a></nav>
     <div class="public-actions">
         <button type="button" data-language-control data-i18n="header.language">Language</button>
         <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme"><span aria-hidden="true">◐</span></button>
@@ -119,6 +115,15 @@
             <img class="home-v2-artwork-inset" src="/assets/css/pictures/public-pages/clan-campfire.0d358ff2d8.avif" alt="Clash of Clans troops gathered together between battles" loading="lazy" decoding="async" width="736" height="736">
         </div>
     </article></section>
+    <section class="resource-page" aria-labelledby="tracker-sample-title">
+        <article class="resource-article">
+            <p class="resource-kicker">Read-only product example</p>
+            <h2 id="tracker-sample-title">Separate the live action from the review.</h2>
+            <p>This sample is invented and does not identify a real clan. It demonstrates how the Operation Board turns available war details into follow-up decisions.</p>
+            <figure class="sample-panel"><span class="sample-label">Sample data — not a live clan</span><table><thead><tr><th>Signal</th><th>Sample value</th><th>What the organiser learns</th></tr></thead><tbody><tr><td>Current score</td><td>31–29, two attacks left</td><td class="status-watch">The round can still change</td></tr><tr><td>Missed attacks</td><td>Sample Orion: 1</td><td>Confirm the completed-war details and ask privately</td></tr><tr><td>Attack vs defence</td><td>2.4 adjusted / 1.8 conceded</td><td>Review both sides; do not rank from stars alone</td></tr><tr><td>History quality</td><td>Partial</td><td class="status-risk">Do not infer missing seasons</td></tr></tbody></table><figcaption>Live score supports the next attack decision. Missed attacks, performance and history belong in a later review with their data quality visible.</figcaption></figure>
+            <div class="resource-links"><a class="button button-secondary" href="/methodology#missed">Missed-attack method</a><a class="button button-secondary" href="/methodology#bonus">Bonus recommendation method</a><a class="button button-secondary" href="/guides#seasons">Review several seasons</a></div>
+        </article>
+    </section>
     <section class="home-v2-bottom-cta" data-reveal>
         <div><p class="eyebrow" data-i18n="tracker.cta.kicker">League week in progress?</p><h2 data-i18n="tracker.cta.title">Track every CWL round.</h2><p data-i18n="tracker.cta.desc">Load the current CWL, follow the live war and keep the full season history connected.</p></div>
         <a class="button button-primary button-large" href="/app/cwl-operation-board" data-i18n="tracker.cta.button">Open CWL Tracker</a>
@@ -128,7 +133,7 @@
     <div class="public-footer-main">
         <a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
         <nav aria-label="Footer navigation" data-i18n-aria-label="public.footerNav">
-            <a href="/about" data-i18n="public.about">About</a>
+            <a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about" data-i18n="public.about">About</a><a href="/changelog">Changelog</a>
             <a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a>
             <a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a>
             <a href="/subpages/terms" data-i18n="public.terms">Terms of use</a>

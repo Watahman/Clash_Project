@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark" class="workspace-page-loading public-page">
+<html lang="en" data-theme="dark" class="public-page">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,17 +40,13 @@
     <link rel="stylesheet" href="/assets/css/public-marketing.css">
     <link rel="stylesheet" href="/assets/css/public-home-v2.css">
     <link rel="stylesheet" href="/assets/css/public-feature-v2.css">
+    <link rel="stylesheet" href="/assets/css/public-resources.css">
 </head>
 <body class="public-site public-home-v2 public-feature-v2 public-feature-family">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
 <header class="public-header">
     <a class="public-brand" href="/" aria-label="ClashPanel home"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
-    <nav class="public-nav" id="public-nav" aria-label="Public navigation" data-i18n-aria-label="public.navigation">
-        <a href="/cwl-planner" data-i18n="publicPages.navPlanner">CWL Planner</a>
-        <a href="/cwl-tracker" data-i18n="publicPages.navTracker">CWL Tracker</a>
-        <a href="/clan-management" aria-current="page" data-i18n="publicPages.navFamily">Clan Management</a>
-        <a href="/about" data-i18n="publicPages.navAbout">About</a>
-    </nav>
+    <nav class="public-nav" id="public-nav" aria-label="Public navigation"><a href="/#features" aria-current="page">Tools</a><a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about">About</a><a href="/changelog">Changelog</a></nav>
     <div class="public-actions">
         <button type="button" data-language-control data-i18n="header.language">Language</button>
         <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme"><span aria-hidden="true">◐</span></button>
@@ -119,6 +115,15 @@
             <img class="home-v2-artwork-inset" src="/assets/css/pictures/public-pages/barbarian-forest.367d8efcfc.avif" alt="Individual Clash of Clans Barbarian representing a member account" loading="lazy" decoding="async" width="720" height="405">
         </div>
     </article></section>
+    <section class="resource-page" aria-labelledby="family-sample-title">
+        <article class="resource-article">
+            <p class="resource-kicker">Read-only product example</p>
+            <h2 id="family-sample-title">Find the coordination gap before planning.</h2>
+            <p>This controlled example uses invented names and counts. It demonstrates released Clan Family relationships and availability handoff, not a public clan directory or health ranking.</p>
+            <figure class="sample-panel"><span class="sample-label">Sample data — not a live Clan Family</span><table><thead><tr><th>Coordination check</th><th>Sample result</th><th>Next action</th></tr></thead><tbody><tr><td>Linked clans</td><td>2</td><td class="status-ok">Both available to the shared planner</td></tr><tr><td>Member accounts</td><td>28 linked, 3 unmatched</td><td class="status-watch">Review the three account links</td></tr><tr><td>CWL poll</td><td>25 answered, 6 pending</td><td class="status-risk">Do not treat pending as available</td></tr><tr><td>Planner handoff</td><td>2 clans + answered accounts</td><td>Load only reviewed context</td></tr></tbody></table><figcaption>The useful output is the gap: six pending answers and three unmatched accounts should be resolved before the roster is treated as complete.</figcaption></figure>
+            <div class="resource-links"><a class="button button-secondary" href="/guides#availability">Plan changing availability</a><a class="button button-secondary" href="/cwl-planner">Planner overview</a><a class="button button-secondary" href="/methodology#limitations">Data limitations</a></div>
+        </article>
+    </section>
     <section class="home-v2-bottom-cta" data-reveal>
         <div><p class="eyebrow" data-i18n="family.cta.kicker">Managing more than one clan?</p><h2 data-i18n="family.cta.title">Organize your Clan Family.</h2><p data-i18n="family.cta.desc">Connect the clans, members and accounts you already manage and reuse that context across ClashPanel.</p></div>
         <a class="button button-primary button-large" href="/app/groups" data-i18n="family.cta.button">Open Clan Families</a>
@@ -128,7 +133,7 @@
     <div class="public-footer-main">
         <a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
         <nav aria-label="Footer navigation" data-i18n-aria-label="public.footerNav">
-            <a href="/about" data-i18n="public.about">About</a>
+            <a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about" data-i18n="public.about">About</a><a href="/changelog">Changelog</a>
             <a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a>
             <a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a>
             <a href="/subpages/terms" data-i18n="public.terms">Terms of use</a>

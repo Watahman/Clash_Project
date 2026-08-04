@@ -1,11 +1,15 @@
 const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 const PERMANENT_REDIRECT_STATUS = 301;
+const CANONICAL_HOST = "clashpanel.com";
 
 const PUBLIC_REDIRECTS = new Map([
     ["/cwl-planner.html", "/cwl-planner"],
     ["/cwl-tracker.html", "/cwl-tracker"],
     ["/clan-management.html", "/clan-management"],
     ["/bracket-generator.html", "/bracket-generator"],
+    ["/guides.html", "/guides"],
+    ["/methodology.html", "/methodology"],
+    ["/changelog.html", "/changelog"],
     ["/subpages/cwl-planner", "/cwl-planner"],
     ["/subpages/cwl-planner.html", "/cwl-planner"],
     ["/subpages/cwl-operation-board", "/cwl-tracker"],
@@ -74,6 +78,15 @@ function permanentRedirect(requestUrl, destination) {
     return Response.redirect(redirectUrl.toString(), PERMANENT_REDIRECT_STATUS);
 }
 
+function canonicalOriginRedirect(incomingUrl, canonicalPath = null) {
+    if (incomingUrl.protocol === "https:" && incomingUrl.hostname === CANONICAL_HOST) return null;
+    const canonicalUrl = new URL(incomingUrl);
+    canonicalUrl.protocol = "https:";
+    canonicalUrl.host = CANONICAL_HOST;
+    if (canonicalPath) canonicalUrl.pathname = canonicalPath;
+    return Response.redirect(canonicalUrl.toString(), PERMANENT_REDIRECT_STATUS);
+}
+
 function routeRedirect(incomingUrl) {
     const path = normalizedPath(incomingUrl.pathname);
     const canonical = PUBLIC_REDIRECTS.get(path) || APP_ALIASES.get(path);
@@ -83,7 +96,10 @@ function routeRedirect(incomingUrl) {
         "/cwl-planner",
         "/cwl-tracker",
         "/clan-management",
-        "/bracket-generator"
+        "/bracket-generator",
+        "/guides",
+        "/methodology",
+        "/changelog"
     ]) {
         if (path === publicPath && incomingUrl.pathname !== publicPath) {
             return publicPath;
@@ -192,10 +208,12 @@ async function checkBackendHealth(env) {
 export default {
     async fetch(request, env) {
         const incomingUrl = new URL(request.url);
+        const redirect = routeRedirect(incomingUrl);
+        const originRedirect = canonicalOriginRedirect(incomingUrl, redirect);
+        if (originRedirect) return originRedirect;
         if (isApiPath(incomingUrl.pathname)) {
             return proxyApiRequest(request, env, incomingUrl);
         }
-        const redirect = routeRedirect(incomingUrl);
         if (redirect) return permanentRedirect(incomingUrl, redirect);
 
         const appResponse = await serveAppAsset(request, env, incomingUrl);

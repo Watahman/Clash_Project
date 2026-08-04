@@ -70,10 +70,10 @@ describe('Pre-launch static contract', () => {
         expect(robots).toContain('Disallow: /api/');
         expect(robots).not.toContain('Disallow: /app/');
         expect(robots).toContain('Disallow: /subpages/popup_htmls/');
-        expect(robots).toContain('https://replace-with-production-domain.invalid/sitemap.xml');
+        expect(robots).toContain('https://clashpanel.com/sitemap.xml');
         expect(sitemap).not.toContain('replace-with-production-domain.invalid');
         expect(sitemap).not.toContain('/bracket-generator');
-        expect(sitemap.match(/https:\/\/clashpanel\.com/g)).toHaveLength(9);
+        expect(sitemap.match(/https:\/\/clashpanel\.com/g)).toHaveLength(12);
     });
 
     it('defines permanent static fallbacks for legacy legal URLs', () => {
