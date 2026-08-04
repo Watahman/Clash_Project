@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en" data-theme="dark" class="public-page">
+<html lang="en" data-theme="dark" class="workspace-page-loading public-page">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="./assets/js/Data/analytics.js"></script>
     <title>Free Clash of Clans CWL Planner &amp; Roster Optimizer | ClashPanel</title>
-    <meta name="description" content="Build Clash of Clans CWL rosters, assign core, rotation and reserve players, compare day-by-day availability and optimize multi-clan planning.">
+    <meta name="description" content="Build full-week Clash of Clans CWL rosters, assign core, rotation and reserve players, and optimize multi-clan planning.">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#0d1117">
     <link rel="canonical" href="https://clashpanel.com/cwl-planner">
@@ -13,18 +13,18 @@
     <meta property="og:site_name" content="ClashPanel">
     <meta property="og:url" content="https://clashpanel.com/cwl-planner">
     <meta property="og:title" content="Free Clash of Clans CWL Planner &amp; Roster Optimizer">
-    <meta property="og:description" content="Build and optimize multi-clan CWL rosters with player roles, day-by-day availability and manual control.">
+    <meta property="og:description" content="Build and optimize full-week multi-clan CWL rosters with player roles, roster limits and manual control.">
     <meta property="og:image" content="https://clashpanel.com/assets/social/cwl-planner.png">
     <meta property="og:image:alt" content="ClashPanel CWL roster planner for multiple Clash of Clans clans">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Free Clash of Clans CWL Planner &amp; Roster Optimizer">
-    <meta name="twitter:description" content="Build and optimize multi-clan CWL rosters with player roles, day-by-day availability and manual control.">
+    <meta name="twitter:description" content="Build and optimize full-week multi-clan CWL rosters with player roles, roster limits and manual control.">
     <meta name="twitter:image" content="https://clashpanel.com/assets/social/cwl-planner.png">
     <script type="application/ld+json">
         {
             "@context": "https://schema.org",
             "@graph": [
-                {"@type":"WebApplication","name":"ClashPanel CWL Planner","url":"https://clashpanel.com/cwl-planner","description":"A free Clash of Clans CWL roster planner and lineup optimizer for one or multiple clans.","operatingSystem":"Any","applicationCategory":"GameApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}},
+                {"@type":"WebApplication","name":"ClashPanel CWL Planner","url":"https://clashpanel.com/cwl-planner","description":"A free Clash of Clans CWL roster planner and optimizer for one or multiple clans across the full league week.","operatingSystem":"Any","applicationCategory":"GameApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}},
                 {"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ClashPanel","item":"https://clashpanel.com/"},{"@type":"ListItem","position":2,"name":"CWL Planner","item":"https://clashpanel.com/cwl-planner"}]}
             ]
         }
@@ -40,13 +40,17 @@
     <link rel="stylesheet" href="/assets/css/public-marketing.css">
     <link rel="stylesheet" href="/assets/css/public-home-v2.css">
     <link rel="stylesheet" href="/assets/css/public-feature-v2.css">
-    <link rel="stylesheet" href="/assets/css/public-resources.css">
 </head>
 <body class="public-site public-home-v2 public-feature-v2 public-feature-planner">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
 <header class="public-header">
     <a class="public-brand" href="/" aria-label="ClashPanel home"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
-    <nav class="public-nav" id="public-nav" aria-label="Public navigation"><a href="/#features" aria-current="page">Tools</a><a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about">About</a><a href="/changelog">Changelog</a></nav>
+    <nav class="public-nav" id="public-nav" aria-label="Public navigation" data-i18n-aria-label="public.navigation">
+        <a href="/cwl-planner" aria-current="page" data-i18n="publicPages.navPlanner">CWL Planner</a>
+        <a href="/cwl-tracker" data-i18n="publicPages.navTracker">CWL Tracker</a>
+        <a href="/clan-management" data-i18n="publicPages.navFamily">Clan Management</a>
+        <a href="/about" data-i18n="publicPages.navAbout">About</a>
+    </nav>
     <div class="public-actions">
         <button type="button" data-language-control data-i18n="header.language">Language</button>
         <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme"><span aria-hidden="true">◐</span></button>
@@ -64,13 +68,13 @@
         <div class="home-v2-hero-copy">
             <p class="eyebrow" data-i18n="planner.kicker">Clash of Clans CWL Planner</p>
             <h1 data-i18n="planner.h1">Build your CWL roster plan.</h1>
-            <p class="home-v2-lead" data-i18n="planner.lead">Build one CWL plan across one or multiple clans, assign player roles, compare day-by-day availability and refine the roster with Auto Plan or optimization suggestions.</p>
+            <p class="home-v2-lead" data-i18n="planner.lead">Build one full-week CWL roster plan for one or multiple clans, assign player roles and refine the clan distribution with Auto Plan or targeted optimization suggestions.</p>
             <div class="hero-actions home-v2-actions"><a class="button button-primary button-large" href="/app/cwl-planner" data-i18n="planner.primary">Open CWL Planner</a>
                 <a class="button button-secondary button-large" href="/cwl-tracker" data-i18n="planner.secondary">Explore CWL Tracker</a></div>
             <p class="hero-footnote" data-i18n="planner.note">Free to use · sign in to save and manage your own planning data</p>
         </div>
     </section>
-    <section class="home-v2-signal-strip" aria-label="Clash of Clans CWL Planner capabilities" data-reveal><span data-i18n="planner.signal.multiClan">Multi-clan rosters</span><span data-i18n="planner.signal.sevenDays">Day-by-day availability</span><span data-i18n="planner.signal.availability">Player availability</span><span data-i18n="planner.signal.autoPlan">Auto Plan</span><span data-i18n="planner.signal.optimize">Roster optimization</span><span data-i18n="planner.signal.import">Spreadsheet import</span></section>
+    <section class="home-v2-signal-strip" aria-label="Clash of Clans CWL Planner capabilities" data-reveal><span data-i18n="planner.signal.multiClan">Multi-clan rosters</span><span data-i18n="planner.signal.sevenDays">Full-week roster planning</span><span data-i18n="planner.signal.availability">Player availability</span><span data-i18n="planner.signal.autoPlan">Auto Plan</span><span data-i18n="planner.signal.optimize">Roster optimization</span><span data-i18n="planner.signal.import">Spreadsheet import</span></section>
     <section class="home-v2-workflow feature-v2-workflow">
         <div class="home-v2-section-head" data-reveal="left">
             <p class="eyebrow" data-i18n="planner.workflow.kicker">One planning flow</p>
@@ -84,21 +88,21 @@
         </div>
         <ol class="home-v2-workflow-list">
             <li data-reveal style="--reveal-delay:60ms"><span>01</span><div><h3 data-i18n="planner.workflow.step1.title">Load the roster</h3><p data-i18n="planner.workflow.step1.desc">Add players by tag, account, Clan Family or spreadsheet and keep the shared player pool in one place.</p></div></li>
-            <li data-reveal style="--reveal-delay:130ms"><span>02</span><div><h3 data-i18n="planner.workflow.step2.title">Set roles and availability</h3><p data-i18n="planner.workflow.step2.desc">Mark core, rotation and reserve players, then use each player&#39;s CWL-day availability to guide your decisions.</p></div></li>
+            <li data-reveal style="--reveal-delay:130ms"><span>02</span><div><h3 data-i18n="planner.workflow.step2.title">Set roles and availability</h3><p data-i18n="planner.workflow.step2.desc">Mark core, rotation and reserve players, then use player availability as context for the full-week clan assignment.</p></div></li>
             <li data-reveal style="--reveal-delay:200ms"><span>03</span><div><h3 data-i18n="planner.workflow.step3.title">Build and refine the roster</h3><p data-i18n="planner.workflow.step3.desc">Create the plan manually, use Auto Plan for a starting clan distribution or review targeted optimization suggestions.</p></div></li>
         </ol>
     </section>
     <section class="home-v2-products"><article class="home-v2-product-section">
         <div class="home-v2-product-copy" data-reveal="left">
-            <p class="eyebrow" data-i18n="planner.week.kicker">Availability-aware planning</p>
-            <h2 data-i18n="planner.week.title">See availability before you decide.</h2>
-            <p data-i18n="planner.week.copy">Keep every clan, player role and day-by-day availability visible while you build one connected CWL roster plan.</p>
-            <div class="home-v2-feature-lines"><div><strong data-i18n="planner.week.f1.title">Multi-clan planning</strong><span data-i18n="planner.week.f1.desc">Plan several CWL clans from one shared player pool without duplicating the roster.</span></div><div><strong data-i18n="planner.week.f2.title">Day-by-day availability</strong><span data-i18n="planner.week.f2.desc">See which players are available on each war day, then decide how that should influence your roster.</span></div><div><strong data-i18n="planner.week.f3.title">Clear player roles</strong><span data-i18n="planner.week.f3.desc">Keep core, rotation and reserve status visible while building the final roster.</span></div></div>
+            <p class="eyebrow" data-i18n="planner.week.kicker">Full-week roster planning</p>
+            <h2 data-i18n="planner.week.title">Plan the whole CWL week at once.</h2>
+            <p data-i18n="planner.week.copy">Assign players to their clan once and keep roles, roster limits and availability visible in one connected CWL plan.</p>
+            <div class="home-v2-feature-lines"><div><strong data-i18n="planner.week.f1.title">Multi-clan planning</strong><span data-i18n="planner.week.f1.desc">Plan several CWL clans from one shared player pool without duplicating the roster.</span></div><div><strong data-i18n="planner.week.f2.title">One roster for the full week</strong><span data-i18n="planner.week.f2.desc">Build one clan roster for the entire CWL week instead of creating a separate lineup for every war day.</span></div><div><strong data-i18n="planner.week.f3.title">Clear player roles</strong><span data-i18n="planner.week.f3.desc">Keep core, rotation and reserve status visible while building the final roster.</span></div></div>
         </div>
         <div class="home-v2-artwork home-v2-artwork-planner" data-reveal="right">
             <!-- IMAGE TIP: Main: CWL trophy, league map or full-team war scene. Inset: lineup, clan badge or battle detail. Replace only the two src values below. -->
             <img class="home-v2-artwork-main" src="/assets/css/pictures/public-pages/clan-campfire.0d358ff2d8.avif" alt="Clash of Clans troops gathered as one CWL roster" loading="lazy" decoding="async" width="736" height="736">
-            <span class="home-v2-artwork-label" data-i18n="planner.week.artLabel">Plan with availability</span>
+            <span class="home-v2-artwork-label" data-i18n="planner.week.artLabel">One plan for the full week</span>
             <img class="home-v2-artwork-inset" src="/assets/css/pictures/public-pages/village-team.733aafd064.avif" alt="Clash of Clans troops together near their village" loading="lazy" decoding="async" width="404" height="316">
         </div>
     </article><article class="home-v2-product-section home-v2-product-operation">
@@ -106,7 +110,7 @@
             <p class="eyebrow" data-i18n="planner.control.kicker">Smarter planning</p>
             <h2 data-i18n="planner.control.title">Optimize without losing control.</h2>
             <p data-i18n="planner.control.copy">Automation should speed up planning, not hide the decisions. ClashPanel keeps proposed changes visible before you apply them.</p>
-            <div class="home-v2-feature-lines"><div><strong data-i18n="planner.control.f1.title">Auto Plan</strong><span data-i18n="planner.control.f1.desc">Create a starting distribution across active clans with availability and roster limits in view.</span></div><div><strong data-i18n="planner.control.f2.title">Optimize Plan</strong><span data-i18n="planner.control.f2.desc">Review smaller lineup and role improvements individually instead of replacing your plan blindly.</span></div><div><strong data-i18n="planner.control.f3.title">Import what you already use</strong><span data-i18n="planner.control.f3.desc">Bring player and clan tags in from spreadsheets so you do not need to rebuild your roster by hand.</span></div></div>
+            <div class="home-v2-feature-lines"><div><strong data-i18n="planner.control.f1.title">Auto Plan</strong><span data-i18n="planner.control.f1.desc">Create a starting distribution across active clans with availability and roster limits in view.</span></div><div><strong data-i18n="planner.control.f2.title">Optimize Plan</strong><span data-i18n="planner.control.f2.desc">Review smaller roster and role improvements individually instead of replacing your plan blindly.</span></div><div><strong data-i18n="planner.control.f3.title">Import what you already use</strong><span data-i18n="planner.control.f3.desc">Bring player and clan tags in from spreadsheets so you do not need to rebuild your roster by hand.</span></div></div>
         </div>
         <div class="home-v2-artwork home-v2-artwork-operation" data-reveal="left">
             <!-- IMAGE TIP: Main: planning/strategy scene. Inset: trophy, roster or focused competitive detail. Replace only the two src values below. -->
@@ -115,20 +119,6 @@
             <img class="home-v2-artwork-inset" src="/assets/css/pictures/public-pages/townhall-blueprints.8832d64e9a.avif" alt="Clash of Clans planning blueprints" loading="lazy" decoding="async" width="736" height="458">
         </div>
     </article></section>
-    <section class="resource-page" aria-labelledby="planner-sample-title">
-        <article class="resource-article">
-            <p class="resource-kicker">Read-only product example</p>
-            <h2 id="planner-sample-title">See the roster risk before Day 7.</h2>
-            <p>This controlled example uses invented names and values. It shows the decision a completed plan supports without requiring an account, clan tag or API response.</p>
-            <figure class="sample-panel">
-                <span class="sample-label">Sample data — not a live clan</span>
-                <table><thead><tr><th>War day</th><th>Planned</th><th>Unavailable</th><th>Decision</th></tr></thead><tbody><tr><td>Day 1</td><td>15 / 15</td><td>None</td><td class="status-ok">Lineup complete</td></tr><tr><td>Day 4</td><td>15 / 15</td><td>Sample Nova</td><td class="status-watch">Rotation covers the gap</td></tr><tr><td>Day 7</td><td>14 / 15</td><td>Sample Nova, Sample Ember</td><td class="status-risk">Move or confirm one player</td></tr></tbody></table>
-                <figcaption>The value is not a filled table: the organiser can see that Day 7 is incomplete and knows which assumption must change before publishing.</figcaption>
-            </figure>
-            <p>Auto Plan can prepare a starting distribution and Optimise Plan can propose smaller changes, but the organiser reviews every role, day and warning before applying it.</p>
-            <div class="resource-links"><a class="button button-secondary" href="/methodology#auto-plan">How Auto Plan works</a><a class="button button-secondary" href="/guides#fair-roster">Build a fair roster</a><a class="button button-secondary" href="/guides#spreadsheet">Spreadsheet vs planner</a></div>
-        </article>
-    </section>
     <section class="home-v2-bottom-cta" data-reveal>
         <div><p class="eyebrow" data-i18n="planner.cta.kicker">Ready for league week?</p><h2 data-i18n="planner.cta.title">Build your next CWL plan.</h2><p data-i18n="planner.cta.desc">Start with one clan, a Clan Family or an existing spreadsheet and keep the roster, roles and availability in one place.</p></div>
         <a class="button button-primary button-large" href="/app/cwl-planner" data-i18n="planner.cta.button">Open CWL Planner</a>
@@ -138,7 +128,7 @@
     <div class="public-footer-main">
         <a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
         <nav aria-label="Footer navigation" data-i18n-aria-label="public.footerNav">
-            <a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about" data-i18n="public.about">About</a><a href="/changelog">Changelog</a>
+            <a href="/about" data-i18n="public.about">About</a>
             <a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a>
             <a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a>
             <a href="/subpages/terms" data-i18n="public.terms">Terms of use</a>
