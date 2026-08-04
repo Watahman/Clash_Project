@@ -33,4 +33,25 @@ describe('Public content quality', () => {
         expect(guides.querySelectorAll('.resource-article')).toHaveLength(8);
         expect(guides.body.textContent).toContain('Written by ClashPanel');
     });
+
+
+    it('describes the planner as one full-week roster without daily lineup claims', () => {
+        const planner = new JSDOM(readFileSync('src/cwl-planner.html', 'utf8')).window.document;
+        const guides = new JSDOM(readFileSync('src/guides.html', 'utf8')).window.document;
+        const methodology = new JSDOM(readFileSync('src/methodology.html', 'utf8')).window.document;
+
+        const plannerText = planner.body.textContent.replace(/\s+/g, ' ');
+        const guideText = ['fair-roster', 'rotation', 'availability']
+            .map(id => guides.getElementById(id)?.textContent || '')
+            .join(' ');
+        const methodText = ['auto-plan', 'optimise']
+            .map(id => methodology.getElementById(id)?.textContent || '')
+            .join(' ');
+        const planningCopy = `${plannerText} ${guideText} ${methodText}`;
+
+        expect(planningCopy).toMatch(/full-week|full week/i);
+        expect(planningCopy).not.toMatch(/seven[- ]day lineup|daily lineup|day-by-day availability|per-day lineup/i);
+        expect(planner.querySelector('#planner-sample-title')?.textContent).not.toMatch(/Day [1-7]/i);
+        expect(planner.querySelector('.sample-panel')?.textContent).not.toMatch(/Day [1-7]/i);
+    });
 });

@@ -62,6 +62,7 @@ describe('Public marketing shell', () => {
         const stylesheets = [...document.querySelectorAll('link[rel="stylesheet"]')]
             .map(link => link.getAttribute('href'));
 
+        expect(stylesheets).toContain('/assets/css/public-marketing.css');
         expect(stylesheets).toContain('/assets/css/public-home-v2.css');
         expect(document.querySelector('body.public-home-v2')).not.toBeNull();
     });
