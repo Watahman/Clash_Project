@@ -3,7 +3,7 @@
 Prepared: 2026-08-04  
 Branch: `agent/adsense-low-value-remediation`  
 Baseline: production commit `f064d01`  
-Deployment status: approved for release; live deployment verification pending
+Deployment status: deployed and live-verified on 2026-08-04
 
 ## A. Initial audit
 
@@ -155,12 +155,28 @@ These values were intentionally not invented:
 - **TODO(owner):** supply or approve anonymised screenshots from the current application if real UI images should supplement the controlled static demos. No screenshot is required for the current demos to remain useful.
 - **TODO(owner):** verify Search Console property/canonical selection, coverage reasons, manual actions and security issues.
 - **TODO(owner):** change/verify the Cloudflare HTTP+`www` redirect rule so every variant reaches the final apex HTTPS clean URL in one hop; current live HTTP `www` behaviour is two hops.
-- **TODO(owner/legal review):** review privacy, cookie and terms wording before deployment; this work is a technical/content implementation, not legal advice.
+- **TODO(owner/legal review):** review the deployed privacy, cookie and terms wording; this work is a technical/content implementation, not legal advice.
+
+## G. Deployment verification
+
+- Git branch: `agent/adsense-low-value-remediation`
+- Release commits: `1533908` and routing follow-up `bb7cf75`
+- Draft pull request: `#4`, based on the previously deployed `agent/fix-mobile-planner-layout` branch
+- Cloudflare Worker version: `0552fea4-ec1b-456f-97b7-6eb93afdff38`
+- The production build and Worker deployment completed successfully.
+- All sitemap content routes returned HTTP 200 after deployment; an intentional missing route returned HTTP 404.
+- `/api/health` and `/api/ready` both returned HTTP 200, confirming that the unchanged backend proxy remained healthy.
+- `/guides` and `/methodology` each exposed eight initial-HTML articles; `/guides` had the expected canonical URL.
+- The Planner and dashboard HTML contained no AdSense loader. The homepage contained only the local eligibility gate and no external AdSense network script.
+- `ads.txt` returned the exact approved publisher record.
+- `/guides.html` redirected permanently to `/guides`.
+- `http://www.clashpanel.com/guides` still required two redirects before reaching the canonical apex HTTPS URL. This is the remaining Cloudflare edge-rule TODO documented above.
+- The full unit/integration suite was intentionally not run at the owner's request; production build, targeted browser review and live post-deployment checks are reported separately.
 
 ## Search Console and AdSense review-readiness checklist
 
 1. Review and approve the owner/legal TODOs above.
-2. Deploy only the confirmed files; do not include the separate Clan Family working tree.
+2. **Completed:** only the confirmed AdSense remediation branch was deployed; the separate Clan Family working tree was not included.
 3. Verify `https://clashpanel.com` as the canonical hostname and correct the remaining two-hop HTTP `www` edge rule.
 4. Verify all sitemap URLs return 200, show the expected initial HTML and have one canonical/H1.
 5. Submit `https://clashpanel.com/sitemap.xml` in Search Console.
