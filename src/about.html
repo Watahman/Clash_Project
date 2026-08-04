@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark" class="workspace-page-loading public-page">
+<html lang="en" data-theme="dark" class="public-page">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,17 +40,13 @@
     <link rel="stylesheet" href="/assets/css/public-marketing.css">
     <link rel="stylesheet" href="/assets/css/public-home-v2.css">
     <link rel="stylesheet" href="/assets/css/public-feature-v2.css">
+    <link rel="stylesheet" href="/assets/css/public-resources.css">
 </head>
 <body class="public-site public-home-v2 public-feature-v2 public-feature-about">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
 <header class="public-header">
     <a class="public-brand" href="/" aria-label="ClashPanel home"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
-    <nav class="public-nav" id="public-nav" aria-label="Public navigation" data-i18n-aria-label="public.navigation">
-        <a href="/cwl-planner" data-i18n="publicPages.navPlanner">CWL Planner</a>
-        <a href="/cwl-tracker" data-i18n="publicPages.navTracker">CWL Tracker</a>
-        <a href="/clan-management" data-i18n="publicPages.navFamily">Clan Management</a>
-        <a href="/about" aria-current="page" data-i18n="publicPages.navAbout">About</a>
-    </nav>
+    <nav class="public-nav" id="public-nav" aria-label="Public navigation"><a href="/#features">Tools</a><a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about" aria-current="page">About</a><a href="/changelog">Changelog</a></nav>
     <div class="public-actions">
         <button type="button" data-language-control data-i18n="header.language">Language</button>
         <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme"><span aria-hidden="true">◐</span></button>
@@ -119,6 +115,18 @@
             <img class="home-v2-artwork-inset" src="/assets/css/pictures/public-pages/pekka-barbarians.6446bf60da.avif" alt="Clash of Clans troops together in a fan-made community scene" loading="lazy" decoding="async" width="565" height="353">
         </div>
     </article></section>
+    <section class="resource-page" aria-labelledby="trust-title">
+        <article class="resource-article">
+            <p class="resource-kicker">How the project is maintained</p>
+            <h2 id="trust-title">Useful output, visible limits.</h2>
+            <p>ClashPanel is maintained as an independent fan-made project. Features are designed around connected planning, tracking and multi-clan coordination tasks. Recommendations remain reviewable: unknown data stays unknown, demo data is labelled and organisers keep the final decision.</p>
+            <h3>Corrections and support</h3>
+            <p>Report a calculation concern, stale description, accessibility problem or factual error through the public contact form or by email. Include the affected page and enough non-private detail to reproduce the issue. Published documentation and the changelog are updated when a confirmed correction changes what users should expect.</p>
+            <h3>External data limits</h3>
+            <p>Player, clan, war and historical information can depend on the official Clash of Clans API and selected history providers. Data can be delayed, incomplete or unavailable. ClashPanel does not treat a missing value as proof of zero activity and does not guarantee planner or prediction outcomes.</p>
+            <div class="resource-links"><a class="button button-secondary" href="/methodology">Read the methodology</a><a class="button button-secondary" href="/changelog">View the changelog</a><a class="button button-secondary" href="/subpages/contact">Report a correction</a></div>
+        </article>
+    </section>
     <section class="home-v2-bottom-cta" data-reveal>
         <div><p class="eyebrow" data-i18n="aboutPage.cta.kicker">Ready to try it?</p><h2 data-i18n="aboutPage.cta.title">Put your next CWL in one place.</h2><p data-i18n="aboutPage.cta.desc">Start with the Planner, then add tracking or Clan Families when the workflow needs them.</p></div>
         <a class="button button-primary button-large" href="/subpages/register.html" data-i18n="aboutPage.cta.button">Start for free</a>
@@ -128,7 +136,7 @@
     <div class="public-footer-main">
         <a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
         <nav aria-label="Footer navigation" data-i18n-aria-label="public.footerNav">
-            <a href="/about" data-i18n="public.about">About</a>
+            <a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about" data-i18n="public.about">About</a><a href="/changelog">Changelog</a>
             <a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a>
             <a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a>
             <a href="/subpages/terms" data-i18n="public.terms">Terms of use</a>

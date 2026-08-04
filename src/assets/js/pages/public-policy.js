@@ -453,7 +453,15 @@ function render() {
 
     document.title = `${copy.title} · ClashPanel`;
     document.querySelector('meta[name="description"]')?.setAttribute('content', copy.description);
+    if (language === 'en' && root.dataset.staticEnglish === 'true' && !root.dataset.renderedLanguage) {
+        root.dataset.renderedLanguage = 'en';
+        if (root.dataset.policyDocument === 'contact' && !root.querySelector('.feedback-form-section')) {
+            root.appendChild(createFeedbackForm(language));
+        }
+        return;
+    }
     root.replaceChildren();
+    root.dataset.renderedLanguage = language;
 
     const header = document.createElement('header');
     const title = document.createElement('h1');

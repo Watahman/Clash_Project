@@ -27,7 +27,10 @@
       "/cwl-planner*",
       "/cwl-tracker*",
       "/clan-management*",
-      "/bracket-generator*"
+      "/bracket-generator*",
+      "/guides*",
+      "/methodology*",
+      "/changelog*"
     ]
   },
 

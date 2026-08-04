@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark" class="workspace-page-loading public-page">
+<html lang="en" data-theme="dark" class="public-page">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,12 +31,7 @@
 <a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
 <header class="public-header">
     <a class="public-brand" href="/" aria-label="ClashPanel home"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
-    <nav class="public-nav" id="public-nav" aria-label="Public navigation" data-i18n-aria-label="public.navigation">
-        <a href="/cwl-planner">CWL Planner</a>
-        <a href="/cwl-tracker">CWL Tracker</a>
-        <a href="/clan-management">Clan Families</a>
-        <a href="/about">About</a>
-    </nav>
+    <nav class="public-nav" id="public-nav" aria-label="Public navigation"><a href="/#features">Tools</a><a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about">About</a><a href="/changelog">Changelog</a></nav>
     <div class="public-actions">
         <button type="button" data-language-control data-i18n="header.language">Language</button>
         <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme"><span aria-hidden="true">◐</span></button>
@@ -45,12 +40,19 @@
     </div>
     <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" data-i18n-aria-label="public.openMenu" aria-label="Open menu"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
 </header>
-<main id="main-content" class="policy-page"><article class="policy-document" data-policy-document="contact"><h1>Contact ClashPanel</h1><p>Contact ClashPanel by email for support, privacy, security and general questions.</p></article></main>
+<main id="main-content" class="policy-page"><article class="policy-document" data-policy-document="contact" data-static-english="true">
+    <header><h1>Contact ClashPanel</h1><p>The official contact method for ClashPanel is email: <a href="mailto:support.clashpanel@gmail.com?subject=ClashPanel%20contact">support.clashpanel@gmail.com</a>.</p></header>
+    <nav class="policy-toc" aria-label="On this page"><strong>On this page</strong><a href="#email-support">Email support</a><a href="#privacy-requests">Privacy requests</a><a href="#security-reports">Security reports</a></nav>
+    <section id="email-support"><h2>Email support</h2><ul><li>For bugs, feature requests, account questions, privacy requests, AdSense or advertising questions and general project enquiries, email <a href="mailto:support.clashpanel@gmail.com?subject=ClashPanel%20contact">support.clashpanel@gmail.com</a>.</li><li>For a bug report, include the affected page, what you expected, what happened and any useful browser error message. Remove private information from screenshots before sending them.</li><li>Include the approximate time, browser, device and whether you were signed in so the report can be investigated without requesting avoidable follow-up details.</li></ul></section>
+    <section id="privacy-requests"><h2>Privacy and account requests</h2><ul><li>For access, correction, deletion or other privacy requests, explain what you are requesting and which account email is affected. Additional verification may be required before account-related data is changed or disclosed.</li><li>Never email passwords, access tokens, refresh tokens, verification codes or other authentication secrets.</li></ul></section>
+    <section id="security-reports"><h2>Security reports</h2><ul><li>If you believe you found a security issue, describe the issue and the minimum steps needed to reproduce it. Do not access, change or publish other users' data to prove a vulnerability.</li></ul></section>
+    <div class="policy-actions"><a class="button button-secondary" href="mailto:support.clashpanel@gmail.com?subject=ClashPanel%20contact">Email ClashPanel</a></div>
+</article></main>
 <footer class="public-footer">
     <div class="public-footer-main">
         <a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
         <nav aria-label="Footer navigation" data-i18n-aria-label="public.footerNav">
-            <a href="/about">About</a>
+            <a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about">About</a><a href="/changelog">Changelog</a>
             <a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a>
             <a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a>
             <a href="/subpages/terms" data-i18n="public.terms">Terms of use</a>

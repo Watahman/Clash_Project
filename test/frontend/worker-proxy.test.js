@@ -46,7 +46,10 @@ describe('Cloudflare API proxy', () => {
         ['/subpages/contact.html', '/subpages/contact'],
         ['/subpages/dashboard.html', '/dashboard'],
         ['/app/dashboard', '/dashboard'],
-        ['/cwl-planner.html', '/cwl-planner']
+        ['/cwl-planner.html', '/cwl-planner'],
+        ['/guides.html', '/guides'],
+        ['/methodology.html', '/methodology'],
+        ['/changelog.html', '/changelog']
     ])('permanently redirects %s to its public canonical route', async (source, destination) => {
         const response = await worker.fetch(
             new Request(`https://clashpanel.com${source}?ref=legacy`),
@@ -56,6 +59,16 @@ describe('Cloudflare API proxy', () => {
         expect(response.status).toBe(301);
         expect(response.headers.get('Location'))
             .toBe(`https://clashpanel.com${destination}?ref=legacy`);
+    });
+
+    it.each([
+        ['http://clashpanel.com/guides.html?ref=legacy', 'https://clashpanel.com/guides?ref=legacy'],
+        ['https://www.clashpanel.com/methodology', 'https://clashpanel.com/methodology'],
+        ['http://www.clashpanel.com/changelog', 'https://clashpanel.com/changelog']
+    ])('canonicalizes origin in one Worker redirect: %s', async (source, destination) => {
+        const response = await worker.fetch(new Request(source), env());
+        expect(response.status).toBe(301);
+        expect(response.headers.get('Location')).toBe(destination);
     });
 
     it('serves private app routes from the existing tool HTML with noindex headers', async () => {

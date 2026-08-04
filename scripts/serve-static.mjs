@@ -18,7 +18,10 @@ const mimeTypes = new Map([
     ['.json', 'application/json; charset=utf-8'],
     ['.png', 'image/png'],
     ['.svg', 'image/svg+xml'],
-    ['.webp', 'image/webp']
+    ['.webp', 'image/webp'],
+    ['.avif', 'image/avif'],
+    ['.txt', 'text/plain; charset=utf-8'],
+    ['.xml', 'application/xml; charset=utf-8']
 ]);
 
 function proxyApi(request, response) {
@@ -74,6 +77,20 @@ async function serveFile(request, response) {
         if (request.method === 'HEAD') response.end();
         else createReadStream(file).pipe(response);
     } catch {
+        if (!extname(requested)) {
+            try {
+                const htmlFile = `${requested}.html`;
+                const htmlMetadata = await stat(htmlFile);
+                response.writeHead(200, {
+                    'Content-Type': mimeTypes.get('.html'),
+                    'Content-Length': htmlMetadata.size,
+                    'Cache-Control': 'no-cache'
+                });
+                if (request.method === 'HEAD') response.end();
+                else createReadStream(htmlFile).pipe(response);
+                return;
+            } catch {}
+        }
         response.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
         response.end('Not found');
     }
