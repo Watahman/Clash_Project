@@ -24,7 +24,8 @@ body.public-feature-v2 {
 .feature-v2-hero .home-v2-hero-copy { max-width:46rem; }
 .feature-v2-hero .home-v2-hero-copy h1 { max-width:10.5ch; font-size:clamp(3.4rem,6vw,6rem); }
 .feature-v2-hero .home-v2-lead { max-width:41rem; }
-.feature-v2-disabled { cursor:default; opacity:.88; }
+.feature-v2-disabled { cursor:default; opacity:.88; pointer-events:none; }
+.feature-v2-disabled:hover { transform:none; box-shadow:none; }
 .feature-v2-workflow { border-bottom:.0625rem solid var(--border-strong); }
 .public-feature-v2 .home-v2-products { border-top:0; }
 .public-feature-v2 .home-v2-artwork-main,

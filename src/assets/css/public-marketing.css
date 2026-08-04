@@ -82,6 +82,17 @@ body.public-site::after {
 }
 
 .public-actions { gap: .55rem; }
+.public-actions > [data-language-control] {
+    min-width: 7.6rem;
+    min-height: 2.55rem;
+    border: 1px solid var(--border);
+    border-radius: .58rem;
+    background: color-mix(in srgb, var(--surface) 76%, transparent);
+    padding: 0 .75rem;
+    color: var(--text-muted);
+    font-size: .76rem;
+    font-weight: 650;
+}
 .public-actions .language-switcher-button { min-width: 7.6rem; }
 .public-actions .link-button {
     min-height: 2.45rem;
@@ -133,6 +144,7 @@ body.public-site::after {
     .public-header { grid-template-columns: minmax(0, 1fr) auto auto; }
     .public-brand { grid-column: 1; }
     .public-actions { grid-column: 2; }
+    .public-actions > [data-language-control] { display: none; }
     .public-menu { grid-column: 3; }
     .public-nav {
         top: calc(var(--marketing-header) - .2rem);

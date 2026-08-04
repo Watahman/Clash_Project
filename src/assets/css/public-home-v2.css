@@ -675,7 +675,7 @@ html.has-reveal body.public-home-v2 [data-reveal].is-visible {
     .home-v2-window-bar,
     .home-v2-preview-layout { min-width: 39rem; }
     .home-v2-signal-strip { padding-inline: .4rem; }
-    .home-v2-signal-strip span { min-height: 3.75rem; padding: .7rem .65rem; font-size: .65rem; }
+    .home-v2-signal-strip span { min-height: 3.75rem; padding: .75rem .65rem; font-size: .7rem; line-height: 1.35; }
     .home-v2-workflow { padding: 5rem 0; }
     .home-v2-workflow-list li { grid-template-columns: 2.5rem minmax(0,1fr); gap: .75rem; }
     .home-v2-product-section { padding: 4.5rem 0; }
@@ -683,7 +683,9 @@ html.has-reveal body.public-home-v2 [data-reveal].is-visible {
     .home-v2-artwork-inset { width: clamp(8.5rem, 38%, 11rem); }
     .home-v2-product-copy h2,
     .home-v2-bottom-cta h2 { font-size: clamp(2rem,10vw,3rem); }
-    .home-v2-feature-lines > div { grid-template-columns: 1fr; gap: .35rem; }
+    .home-v2-feature-lines > div { grid-template-columns: 1fr; gap: .4rem; padding-block: 1.05rem; }
+    .home-v2-feature-lines strong { font-size: .86rem; }
+    .home-v2-feature-lines span { font-size: .82rem; line-height: 1.6; }
     .home-v2-feature-visual { overflow-x: auto; }
     .home-v2-plan-visual,
     .home-v2-operation-visual,
