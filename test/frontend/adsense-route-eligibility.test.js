@@ -31,14 +31,16 @@ describe('AdSense route eligibility', () => {
         expect(readFileSync(file, 'utf8')).not.toContain('Data/ads.js');
     });
 
-    it('uses one conservative central allowlist with explicit consent', () => {
+    it('uses one conservative allowlist and the published Google CMP consent state', () => {
         const source = readFileSync('src/assets/js/Data/ads.js', 'utf8');
         expect(source).toContain("const AD_ELIGIBLE_ROUTES = new Set(['/'])");
-        expect(source).toContain("window.ClashToolsCMP?.hasAdvertisingConsent?.() === true");
+        expect(source).toContain('CONSENT_MODE_DATA_READY');
+        expect(source).toContain('ConsentModePurposeStatusEnum');
+        expect(source).toContain('showRevocationMessage');
+        expect(source).toContain('hasAdvertisingConsent: () => advertisingConsent');
         expect(source).toContain("robots.includes('noindex')");
         expect(source).toContain('navigation.responseStatus === 200');
         expect(source).toContain("'/app/'");
         expect(source).toContain("'/subpages/'");
     });
 });
-

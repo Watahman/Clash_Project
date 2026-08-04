@@ -3,6 +3,7 @@
 
     const SCRIPT_ID = 'clashtools-google-ads';
     const CLIENT_ID = 'ca-pub-7361256415342967';
+    let advertisingConsent = false;
 
     // Deliberately conservative during the next AdSense review. A route belongs
     // here only after its initial HTML is a useful, indexable public resource.
@@ -47,16 +48,49 @@
         return hasMeaningfulPublisherContent();
     }
 
-    function hasAdvertisingConsent() {
-        // A certified CMP must expose this explicit decision. Missing, pending
-        // or rejected consent keeps advertising disabled without hiding content.
-        return window.ClashToolsCMP?.hasAdvertisingConsent?.() === true;
+    function consentModeAllowsAdvertising() {
+        const googlefc = window.googlefc;
+        const status = googlefc?.getGoogleConsentModeValues?.();
+        const statusEnum = googlefc?.ConsentModePurposeStatusEnum;
+        if (!status || !statusEnum) return false;
+
+        const permitsPurpose = value => value === statusEnum.GRANTED || value === statusEnum.NOT_APPLICABLE;
+        return permitsPurpose(status.adStoragePurposeConsentStatus)
+            && permitsPurpose(status.adUserDataPurposeConsentStatus)
+            && permitsPurpose(status.adPersonalizationPurposeConsentStatus);
     }
 
-    function loadAds() {
+    function publishConsentState() {
+        advertisingConsent = consentModeAllowsAdvertising();
+        window.dispatchEvent(new CustomEvent('clashtools:ad-consent-changed', {
+            detail: { advertisingConsent }
+        }));
+    }
+
+    function queueConsentRefresh() {
+        window.googlefc.callbackQueue.push({ CONSENT_MODE_DATA_READY: publishConsentState });
+    }
+
+    function installGoogleCmpBridge() {
+        window.googlefc = window.googlefc || {};
+        window.googlefc.callbackQueue = window.googlefc.callbackQueue || [];
+        queueConsentRefresh();
+
+        window.ClashToolsCMP = {
+            hasAdvertisingConsent: () => advertisingConsent,
+            openPreferences: () => {
+                queueConsentRefresh();
+                window.googlefc.callbackQueue.push({
+                    CONSENT_API_READY: () => window.googlefc.showRevocationMessage?.()
+                });
+            }
+        };
+        window.dispatchEvent(new CustomEvent('clashtools:cmp-ready'));
+    }
+
+    function loadGoogleCmpAndAds() {
         if (document.getElementById(SCRIPT_ID)) return;
-        if (!isRouteEligible() || !hasAdvertisingConsent()) return;
-        if (navigator.connection?.saveData || document.visibilityState === 'hidden') return;
+        if (!isRouteEligible()) return;
 
         const script = document.createElement('script');
         script.id = SCRIPT_ID;
@@ -67,21 +101,18 @@
         document.head.append(script);
     }
 
-    function loadAdsWhenIdle() {
-        const run = () => loadAds();
+    function loadGoogleCmpWhenIdle() {
+        const run = () => loadGoogleCmpAndAds();
         if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 1500 });
         else run();
     }
 
-    function scheduleAds() {
+    function scheduleGoogleCmp() {
         if (!isRouteEligible()) return;
-        ['pointerdown', 'touchstart', 'keydown'].forEach(type => {
-            window.addEventListener(type, loadAdsWhenIdle, { once: true, passive: true });
-        });
-        window.addEventListener('clashtools:ad-consent-changed', loadAdsWhenIdle);
-        window.setTimeout(loadAdsWhenIdle, 12000);
+        installGoogleCmpBridge();
+        loadGoogleCmpWhenIdle();
     }
 
-    if (document.readyState === 'complete') scheduleAds();
-    else window.addEventListener('load', scheduleAds, { once: true });
+    if (document.readyState === 'complete') scheduleGoogleCmp();
+    else window.addEventListener('load', scheduleGoogleCmp, { once: true });
 })();
