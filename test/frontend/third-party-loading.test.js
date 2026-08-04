@@ -42,7 +42,7 @@ describe('Privacy-aware third-party loading', () => {
         expect(source).toContain("ad_storage: 'denied'");
     });
 
-    it('loads analytics and ads after window load or idle time', () => {
+    it('loads analytics after interaction and the Google CMP after load or idle time', () => {
         const analytics = readFileSync('src/assets/js/Data/analytics.js', 'utf8');
         const ads = readFileSync('src/assets/js/Data/ads.js', 'utf8');
 
@@ -52,7 +52,8 @@ describe('Privacy-aware third-party loading', () => {
         expect(analytics).toContain('12000');
         expect(ads).toContain("window.addEventListener('load'");
         expect(ads).toContain('requestIdleCallback');
-        expect(ads).toContain('navigator.connection?.saveData');
+        expect(ads).toContain('installGoogleCmpBridge()');
+        expect(ads).toContain('loadGoogleCmpWhenIdle()');
     });
 
     it('reveals public content without waiting for registered application tasks', () => {
