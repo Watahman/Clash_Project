@@ -28,6 +28,15 @@ export function getLanguage() {
     return isSupportedLanguage(stored) ? stored : DEFAULT_LANG;
 }
 
+/*
+ * Importing page modules call t() while they build dynamic controls. Load
+ * the stored dictionary before those modules continue, otherwise their first
+ * render can permanently use the English fallback.
+ */
+const initialLanguage = getLanguage();
+await ensureLanguage(initialLanguage).catch(() => translations[DEFAULT_LANG]);
+document.documentElement.lang = initialLanguage;
+
 export function setLanguage(language) {
     const safeLanguage = isSupportedLanguage(language) ? language : DEFAULT_LANG;
     localStorage.setItem(STORAGE_KEY, safeLanguage);

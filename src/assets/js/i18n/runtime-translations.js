@@ -2,6 +2,7 @@ import { en } from './locales/en.js';
 import workspaceEn from './runtime-locales/workspace-en.js';
 import publicEn from './runtime-locales/public-en.js';
 import { guidanceLocales } from './guidance-locales.js';
+import { runtimeCompletionLocales } from './runtime-completion-locales.js';
 
 export const supportedLanguages = Object.freeze(['nl', 'en', 'fr', 'de', 'es']);
 
@@ -73,7 +74,8 @@ export async function ensureLanguage(language) {
             ...base,
             ...workspaceModule.default,
             ...publicModule.default,
-            ...(guidanceLocales[language] || {})
+            ...(guidanceLocales[language] || {}),
+            ...(runtimeCompletionLocales[language] || {})
         });
         translations[language] = dictionary;
         loadingLanguages.delete(language);
