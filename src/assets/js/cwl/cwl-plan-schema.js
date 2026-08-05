@@ -1,4 +1,5 @@
 import { normalizeTag } from './cwl-utils.js';
+import { t } from '../i18n/i18n.js';
 
 export const CWL_PLAN_SCHEMA_VERSION = 4;
 
@@ -113,7 +114,7 @@ export function validatePlanDocument(input) {
         ...document.clans.flatMap(clan => clan.players.map(player => player.tag))
     ];
     if (new Set(allTags).size !== allTags.length) {
-        throw new Error('Een speler kan maar één keer in een plan voorkomen.');
+        throw new Error(t('cwl.accountAlreadyInPlanner'));
     }
     return document;
 }

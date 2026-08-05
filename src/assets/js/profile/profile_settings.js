@@ -14,6 +14,7 @@ let onProfileUpdated = null;
 let refs = {};
 let messageTimer = null;
 
+const PROFILE_FIX_STYLESHEET = '/assets/css/profile-language-fixes.css';
 const MESSAGE_DURATION = Object.freeze({
     success: 2500,
     error: 4000
@@ -21,6 +22,15 @@ const MESSAGE_DURATION = Object.freeze({
 
 function q(selector) {
     return document.querySelector(selector);
+}
+
+function ensureProfileFixStyles() {
+    if (document.querySelector(`link[href="${PROFILE_FIX_STYLESHEET}"]`)) return;
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = PROFILE_FIX_STYLESHEET;
+    document.head.append(link);
 }
 
 function setMessage(key, state = 'success') {
@@ -202,6 +212,7 @@ function bindOnce(element, eventName, handler, key = eventName) {
 }
 
 export function initProfileSettings(options = {}) {
+    ensureProfileFixStyles();
     bindRefs();
     onRefreshProfile = options.onRefreshProfile;
     onProfileUpdated = options.onProfileUpdated;

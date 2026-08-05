@@ -2,13 +2,81 @@ import { initI18n, t } from '../i18n/i18n.js';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { getThemePreference, setThemePreference } from '../theme/theme-manager.js';
 
+const PUBLIC_FIX_STYLESHEET = '/assets/css/public-consistency-fixes.css';
+const PUBLIC_NAV_ITEMS = Object.freeze([
+    Object.freeze({ href: '/#features', label: 'Tools', section: 'tools' }),
+    Object.freeze({ href: '/guides', label: 'Guides', section: 'guides' }),
+    Object.freeze({ href: '/methodology', label: 'Methodology', section: 'methodology' }),
+    Object.freeze({ href: '/about', label: 'About', section: 'about' }),
+    Object.freeze({ href: '/changelog', label: 'Changelog', section: 'changelog' })
+]);
+const TOOL_PATHS = new Set([
+    '/',
+    '/cwl-planner',
+    '/cwl-tracker',
+    '/clan-management',
+    '/bracket-generator'
+]);
+
+function normalizePath(pathname = window.location.pathname) {
+    const normalized = String(pathname || '/').replace(/\/+$/, '');
+    return normalized || '/';
+}
+
+function loadPublicConsistencyStyles() {
+    if (document.querySelector(`link[href="${PUBLIC_FIX_STYLESHEET}"]`)) return;
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = PUBLIC_FIX_STYLESHEET;
+    document.head.append(link);
+}
+
+function normalizePublicNavigation() {
+    const nav = document.querySelector('#public-nav');
+    if (!nav) return;
+
+    const path = normalizePath();
+    const activeSection = TOOL_PATHS.has(path)
+        ? 'tools'
+        : PUBLIC_NAV_ITEMS.find(item => item.href === path)?.section;
+
+    const fragment = document.createDocumentFragment();
+    PUBLIC_NAV_ITEMS.forEach(item => {
+        const anchor = document.createElement('a');
+        anchor.href = item.href;
+        anchor.textContent = item.label;
+        if (item.section === activeSection) anchor.setAttribute('aria-current', 'page');
+        fragment.append(anchor);
+    });
+
+    nav.replaceChildren(fragment);
+}
+
+function isPublicThemeLocked() {
+    return document.documentElement.classList.contains('public-page')
+        || document.body.classList.contains('public-site');
+}
+
 function toggleTheme() {
+    if (isPublicThemeLocked()) return;
     const next = getThemePreference() === 'light' ? 'dark' : 'light';
     setThemePreference(next);
     updateThemeButtons();
 }
 
 function updateThemeButtons() {
+    if (isPublicThemeLocked()) {
+        document.documentElement.dataset.theme = 'dark';
+        document.documentElement.dataset.themePreference = 'dark';
+        document.querySelectorAll('[data-theme-toggle]').forEach(button => {
+            button.hidden = true;
+            button.setAttribute('aria-hidden', 'true');
+            button.tabIndex = -1;
+        });
+        return;
+    }
+
     const isLight = document.documentElement.dataset.theme === 'light';
     document.querySelectorAll('[data-theme-toggle]').forEach(button => {
         button.setAttribute('aria-pressed', String(isLight));
@@ -235,7 +303,9 @@ async function redirectReturningUser() {
 }
 
 function init() {
+    loadPublicConsistencyStyles();
     initI18n();
+    normalizePublicNavigation();
     initThemeButtons();
     initPublicMenu();
     initCookiePreferencesControls();

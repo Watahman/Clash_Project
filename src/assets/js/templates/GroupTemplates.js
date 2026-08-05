@@ -199,7 +199,7 @@ function formatDate(value) {
     if (!value) return '—';
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return String(value).split('T')[0] || '—';
-    return new Intl.DateTimeFormat(document.documentElement.lang || 'nl', { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
+    return new Intl.DateTimeFormat(document.documentElement.lang || 'en', { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
 }
 
 function textNode(tagName, text) {

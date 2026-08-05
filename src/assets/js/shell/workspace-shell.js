@@ -103,26 +103,26 @@ function shellMarkup(currentPage) {
         sidebar: `<aside class="workspace-sidebar" id="workspace-sidebar">
             <a class="workspace-brand" href="/dashboard"><img src="../assets/css/pictures/clashtools-logo.png" alt=""><span><strong>ClashPanel</strong><small>CWL workspace</small></span></a>
             <button class="workspace-sidebar-toggle" id="workspace-sidebar-toggle" type="button" aria-controls="workspace-sidebar" aria-expanded="true">${icons.collapse}</button>
-            <nav class="workspace-nav" id="workspace-navigation" aria-label="Applicatienavigatie" data-i18n-aria-label="shell.navigation">
-                <p data-i18n="shell.overview">Overzicht</p>
+            <nav class="workspace-nav" id="workspace-navigation" aria-label="Application navigation" data-i18n-aria-label="shell.navigation">
+                <p data-i18n="shell.overview">Overview</p>
                 ${navLink('dashboard', '/dashboard')}
                 <p>CWL</p>
                 ${navLink('planner', '/app/cwl-planner')}
                 ${navLink('drafts', '/app/cwl-planner-drafts')}
                 ${navLink('operation', '/app/cwl-tracker')}
                 ${comingSoonNavItem('warOperation')}
-                <p data-i18n="shell.collaborate">Samenwerken</p>
+                <p data-i18n="shell.collaborate">Collaborate</p>
                 ${navLink('groups', '/app/clan-management')}
                 ${comingSoonNavItem('bracket')}
             </nav>
-            <div class="workspace-sidebar-bottom"><button class="workspace-profile-button" id="profile-btn" type="button" data-i18n-aria-label="shell.openProfile"><span class="workspace-avatar" aria-hidden="true">CT</span><span class="workspace-profile-copy"><strong data-i18n="header.user">Gebruiker</strong><small data-i18n="shell.profileAccounts">Profiel & accounts</small></span><span class="workspace-profile-arrow" aria-hidden="true">›</span></button></div>
+            <div class="workspace-sidebar-bottom"><button class="workspace-profile-button" id="profile-btn" type="button" data-i18n-aria-label="shell.openProfile"><span class="workspace-avatar" aria-hidden="true">CT</span><span class="workspace-profile-copy"><strong data-i18n="header.user">User</strong><small data-i18n="shell.profileAccounts">Profile & accounts</small></span><span class="workspace-profile-arrow" aria-hidden="true">›</span></button></div>
         </aside>`,
         topbar: `<header class="workspace-topbar">
             <button class="workspace-mobile-menu" id="workspace-mobile-menu" type="button" aria-controls="workspace-sidebar" aria-expanded="false" data-i18n-aria-label="shell.openMenu">${icons.menu}</button>
             <div class="workspace-breadcrumbs"><span>ClashPanel</span><b>/</b><strong data-workspace-current data-i18n="${current.key}">${current.fallback}</strong></div>
             <div class="workspace-top-actions">
                 <span class="workspace-sync"><i></i><span data-i18n="shell.online">Online</span></span>
-                <button type="button" data-language-control data-i18n="header.language">Taal</button>
+                <button type="button" data-language-control data-i18n="header.language">Language</button>
                 <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle"><span aria-hidden="true">◐</span></button>
                 <div class="workspace-notifications" id="workspace-notifications-root">
                     <button class="workspace-icon-button" id="workspace-notifications" type="button" aria-expanded="false" aria-controls="workspace-notifications-panel" data-i18n-aria-label="notifications.title">
@@ -131,7 +131,7 @@ function shellMarkup(currentPage) {
                     </button>
                     <section class="workspace-notifications-panel hidden" id="workspace-notifications-panel" aria-labelledby="workspace-notifications-title" aria-live="polite">
                         <div class="workspace-notifications-heading">
-                            <strong id="workspace-notifications-title" data-i18n="notifications.title">Notificaties</strong>
+                            <strong id="workspace-notifications-title" data-i18n="notifications.title">Notifications</strong>
                             <button class="workspace-notifications-close" id="workspace-notifications-close" type="button" data-i18n-aria-label="common.close" aria-label="Close">&times;</button>
                         </div>
                         <div class="workspace-notifications-list" id="workspace-notifications-list"></div>

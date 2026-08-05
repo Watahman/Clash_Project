@@ -8,6 +8,20 @@ const plannerToolFallback = Object.fromEntries(
     Object.entries(en).filter(([key]) => key.startsWith('autoPlan.') || key.startsWith('optimizePlan.'))
 );
 
+/* Only unambiguous Dutch words are checked. Shared words such as "plan",
+   "automatisch" or "laden" are deliberately excluded. */
+const DUTCH_LEAK_PATTERN = /\b(?:geen|opslaan|verwijderen|toevoegen|sluiten|annuleren|speler|spelers|aanval|aanvallen|instellingen|vrienden|beschikbaar|wachtwoord|gebruikersnaam|meldingen|volgende|vorige|vandaag|gisteren|kies|zoeken|overzicht|bewerken|wordt|worden)\b|\bnog geen\b|\bprobeer opnieuw\b/iu;
+
+function completeDictionary(language, dictionary) {
+    const completed = { ...translations.en, ...dictionary };
+    Object.entries(completed).forEach(([key, value]) => {
+        const missing = typeof value !== 'string' || value.trim() === '';
+        const dutchLeak = language !== 'nl' && language !== 'en' && DUTCH_LEAK_PATTERN.test(String(value));
+        if (missing || dutchLeak) completed[key] = translations.en[key] || key;
+    });
+    return Object.freeze(completed);
+}
+
 export const translations = {
     en: Object.freeze({ ...en, ...workspaceEn, ...publicEn })
 };
@@ -53,7 +67,7 @@ export async function ensureLanguage(language) {
     const loading = localeLoaders[language]().then(([baseModule, workspaceModule, publicModule]) => {
         const base = baseModule[language];
         const fallback = language === 'en' || language === 'nl' ? {} : plannerToolFallback;
-        const dictionary = Object.freeze({ ...fallback, ...base, ...workspaceModule.default, ...publicModule.default });
+        const dictionary = completeDictionary(language, { ...fallback, ...base, ...workspaceModule.default, ...publicModule.default });
         translations[language] = dictionary;
         loadingLanguages.delete(language);
         return dictionary;

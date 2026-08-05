@@ -1,0 +1,40 @@
+/* Keep the profile language menu inside the modal and directly below its trigger. */
+#profile-overlay .po-settings:not(.hidden) {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-right: 0.2rem;
+}
+
+#profile-overlay .po-language-picker,
+#profile-overlay .language-switcher--profile,
+#profile-overlay .language-switcher--profile .language-switcher-button {
+    width: 100%;
+    min-width: 0;
+}
+
+#profile-overlay .language-switcher--profile .language-switcher-menu {
+    position: static;
+    top: auto;
+    right: auto;
+    left: auto;
+    width: 100%;
+    max-width: none;
+    margin-top: 0.45rem;
+    box-sizing: border-box;
+}
+
+#profile-overlay .language-switcher--profile .language-switcher-option {
+    min-width: 0;
+}
+
+@media (max-width: 38rem) {
+    #profile-overlay .po-settings:not(.hidden) {
+        padding-right: 0;
+    }
+
+    #profile-overlay .language-switcher--profile .language-switcher-menu {
+        border-radius: var(--radius-small, 0.45rem);
+    }
+}

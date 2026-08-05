@@ -1,7 +1,13 @@
 const THEME_STORAGE_KEY = 'clashtools_theme';
 const THEMES = new Set(['dark', 'light']);
 
+function isPublicPage() {
+    return document.documentElement.classList.contains('public-page')
+        || document.body?.classList.contains('public-site');
+}
+
 function getSystemTheme() {
+    if (isPublicPage()) return 'dark';
     if (!window.matchMedia) return 'dark';
     return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 }
@@ -25,7 +31,7 @@ export function getThemePreference() {
 }
 
 export function applyTheme(preference = getThemePreference()) {
-    const theme = safePreference(preference);
+    const theme = isPublicPage() ? 'dark' : safePreference(preference);
     document.documentElement.dataset.themePreference = theme;
     document.documentElement.dataset.theme = theme;
     return theme;
@@ -33,6 +39,11 @@ export function applyTheme(preference = getThemePreference()) {
 
 export function setThemePreference(preference) {
     const theme = safePreference(preference);
+
+    if (isPublicPage()) {
+        return applyTheme('dark');
+    }
+
     localStorage.setItem(THEME_STORAGE_KEY, theme);
     applyTheme(theme);
     window.dispatchEvent(new CustomEvent('clashtools:theme-changed', {

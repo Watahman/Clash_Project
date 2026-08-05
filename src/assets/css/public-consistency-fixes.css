@@ -1,0 +1,78 @@
+/* Central, low-risk corrections shared by every public page. */
+html.public-page {
+    color-scheme: dark;
+}
+
+html.public-page [data-theme-toggle] {
+    display: none !important;
+}
+
+body.public-site .public-nav a {
+    white-space: nowrap;
+}
+
+body.public-site .home-v2-product-section > *,
+body.public-site .home-v2-workflow > *,
+body.public-site .home-v2-artwork {
+    min-width: 0;
+}
+
+body.public-site .home-v2-artwork img,
+body.public-site .home-v2-workflow-art img,
+body.public-site .feature-v2-hero-media img {
+    display: block;
+    max-width: 100%;
+}
+
+/* The secondary artwork is always the same compact square on every page. */
+body.public-site .home-v2-artwork .home-v2-artwork-inset {
+    width: clamp(8.75rem, 24%, 12.5rem);
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+
+@media (max-width: 70rem) {
+    body.public-site .public-nav.is-open {
+        max-height: calc(100svh - var(--marketing-header, 4.4rem) - 1rem);
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    body.public-site .public-nav-mobile-controls,
+    body.public-site .public-nav-mobile-controls .language-switcher,
+    body.public-site .public-nav-mobile-controls .language-switcher-button {
+        width: 100%;
+    }
+
+    body.public-site .public-nav-mobile-controls {
+        display: block;
+        padding-top: 0.25rem;
+    }
+
+    body.public-site .public-nav-mobile-controls .language-switcher-menu {
+        position: static;
+        width: 100%;
+        max-width: none;
+        margin-top: 0.35rem;
+    }
+}
+
+@media (max-width: 46rem) {
+    body.public-site .home-v2-artwork .home-v2-artwork-inset {
+        top: 0.9rem;
+        right: 0.9rem;
+        width: clamp(7.5rem, 34%, 9.5rem);
+    }
+
+    body.public-site .home-v2-product-section,
+    body.public-site .home-v2-workflow {
+        width: min(100% - 1.7rem, 94rem);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.public-site .home-v2-artwork .home-v2-artwork-inset {
+        transition: none;
+    }
+}
