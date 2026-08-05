@@ -1,6 +1,7 @@
 import { en } from './locales/en.js';
 import workspaceEn from './runtime-locales/workspace-en.js';
 import publicEn from './runtime-locales/public-en.js';
+import { guidanceLocales } from './guidance-locales.js';
 
 export const supportedLanguages = Object.freeze(['nl', 'en', 'fr', 'de', 'es']);
 
@@ -67,7 +68,13 @@ export async function ensureLanguage(language) {
     const loading = localeLoaders[language]().then(([baseModule, workspaceModule, publicModule]) => {
         const base = baseModule[language];
         const fallback = language === 'en' || language === 'nl' ? {} : plannerToolFallback;
-        const dictionary = completeDictionary(language, { ...fallback, ...base, ...workspaceModule.default, ...publicModule.default });
+        const dictionary = completeDictionary(language, {
+            ...fallback,
+            ...base,
+            ...workspaceModule.default,
+            ...publicModule.default,
+            ...(guidanceLocales[language] || {})
+        });
         translations[language] = dictionary;
         loadingLanguages.delete(language);
         return dictionary;
