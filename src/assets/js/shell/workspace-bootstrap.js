@@ -39,6 +39,15 @@
     window.setTimeout(revealPage, INITIAL_CONTENT_TIMEOUT_MS + 500);
 
     function applyStoredThemeImmediately() {
+        // Public pages are intentionally dark. Lock this before stylesheets paint
+        // so a stored or device light preference cannot override the marketing UI.
+        if (html.classList.contains('public-page')) {
+            html.dataset.theme = 'dark';
+            html.dataset.themePreference = 'dark';
+            html.style.colorScheme = 'dark';
+            return;
+        }
+
         try {
             let theme = localStorage.getItem('clashtools_theme');
             if (theme === 'system') {
