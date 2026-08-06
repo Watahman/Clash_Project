@@ -34,14 +34,17 @@ function setPageMetadata(prefix) {
     setMeta('meta[name="twitter:description"]', `${prefix}.metaDescription`);
 }
 
+function setSimpleMetadata(titleKey, descriptionKey) {
+    document.title = t(titleKey);
+    setMeta('meta[name="description"]', descriptionKey);
+}
+
 function replaceResourceArticle(sectionSelector, key) {
     const article = document.querySelector(`${sectionSelector} > .resource-article`);
     if (article) article.innerHTML = t(key);
 }
 
 function renderHomepageCopy() {
-    if (normalizedPath() !== '/') return;
-
     document.title = t('homeV2.documentTitle');
     setMeta('meta[name="description"]', 'homeV2.metaDescription');
     setMeta('meta[property="og:title"]', 'homeV2.ogTitle');
@@ -151,6 +154,14 @@ function renderCurrentPageCopy() {
             break;
         case '/bracket-generator':
             renderBracketCopy();
+            break;
+        case '/subpages/login':
+        case '/subpages/login.html':
+            setSimpleMetadata('authPage.loginTitle', 'authPage.loginDescription');
+            break;
+        case '/subpages/register':
+        case '/subpages/register.html':
+            setSimpleMetadata('authPage.registerTitle', 'authPage.registerDescription');
             break;
         default:
             break;
