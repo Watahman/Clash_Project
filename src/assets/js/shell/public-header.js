@@ -14,10 +14,23 @@ const TOOL_PATHS = new Set([
     '/bracket-generator'
 ]);
 
-function currentPublicSection(pathname) {
-    const normalized = String(pathname || '/')
+const CAPABILITY_LABEL_KEYS = Object.freeze({
+    '/': 'homeV2.capabilitiesLabel',
+    '/about': 'feature.about.capabilitiesLabel',
+    '/cwl-planner': 'feature.planner.capabilitiesLabel',
+    '/cwl-tracker': 'feature.tracker.capabilitiesLabel',
+    '/clan-management': 'feature.family.capabilitiesLabel',
+    '/bracket-generator': 'feature.bracket.capabilitiesLabel'
+});
+
+function normalizedPath(pathname = window.location.pathname) {
+    return String(pathname || '/')
         .replace(/\/index\.html$/i, '/')
         .replace(/\/$/, '') || '/';
+}
+
+function currentPublicSection(pathname) {
+    const normalized = normalizedPath(pathname);
 
     if (TOOL_PATHS.has(normalized)) return 'tools';
     if (normalized === '/guides') return 'guides';
@@ -95,6 +108,13 @@ export function normalizePublicFooter(root = document) {
     footer.dataset.publicFooterNormalized = 'true';
 }
 
+function bindPublicAccessibility(root) {
+    if (!root.body?.classList.contains('public-site')) return;
+    const key = CAPABILITY_LABEL_KEYS[normalizedPath()];
+    const strip = root.querySelector('.home-v2-signal-strip');
+    if (key && strip) strip.dataset.i18nAriaLabel = key;
+}
+
 function loadPolicyOverlay(root) {
     if (!root.querySelector('[data-policy-document]')) return;
     if (root.body.dataset.policyOverlayLoaded === 'true') return;
@@ -109,6 +129,7 @@ function loadPolicyOverlay(root) {
 export function normalizePublicShell(root = document) {
     normalizePublicHeader(root);
     normalizePublicFooter(root);
+    bindPublicAccessibility(root);
     loadPolicyOverlay(root);
 }
 
