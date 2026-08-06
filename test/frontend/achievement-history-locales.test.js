@@ -34,7 +34,7 @@ describe('Achievement history and locale integration', () => {
     it('loads a permanent achievements link through the shared i18n runtime', () => {
         const navigation = readFileSync('src/assets/js/shell/achievements-navigation.js', 'utf8');
         const runtimeTranslations = readFileSync('src/assets/js/i18n/runtime-translations.js', 'utf8');
-        expect(navigation).toContain("data-workspace-nav = 'achievements'");
+        expect(navigation).toContain("link.dataset.workspaceNav = 'achievements'");
         expect(navigation).toContain("const ACHIEVEMENTS_PATH = '/app/achievements'");
         expect(navigation).toContain('prefetchAchievements');
         expect(runtimeTranslations).toContain("import '../shell/achievements-navigation.js'");
