@@ -1,6 +1,7 @@
 import '../theme/theme-manager.js';
 import {
     ensureLanguage,
+    getTranslationValue,
     isLanguageLoaded,
     isSupportedLanguage,
     supportedLanguages,
@@ -22,6 +23,10 @@ const LANGUAGE_ICON = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><
 const CHEVRON_ICON = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 9.5 5 5 5-5"/></svg>';
 const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6.5 12.5 3.3 3.3 7.7-8"/></svg>';
 const languageChangeHandlers = new WeakMap();
+const sourceText = new WeakMap();
+const sourceAttributes = new WeakMap();
+const documentSource = {};
+let englishSourceIndex = null;
 
 export function getLanguage() {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -39,8 +44,7 @@ export function setLanguage(language) {
 }
 
 export function t(key, params = {}) {
-    const dictionary = translations[getLanguage()] || translations[DEFAULT_LANG];
-    let value = dictionary[key] || translations[DEFAULT_LANG][key] || key;
+    let value = getTranslationValue(getLanguage(), key) ?? key;
     Object.entries(params).forEach(([param, replacement]) => {
         value = value.replaceAll(`{${param}}`, replacement ?? '');
     });
@@ -48,6 +52,106 @@ export function t(key, params = {}) {
 }
 
 const SAFE_HTML_KEYS = new Set(['home.title']);
+const SOURCE_ATTRIBUTE_NAMES = ['aria-label', 'title', 'placeholder', 'alt'];
+const SOURCE_SKIP_SELECTOR = [
+    '[data-i18n]',
+    '[data-i18n-html]',
+    'script',
+    'style',
+    'noscript',
+    'textarea',
+    'input',
+    'select',
+    'option',
+    'code',
+    'pre',
+    'svg'
+].join(',');
+
+function getEnglishSourceIndex() {
+    if (englishSourceIndex) return englishSourceIndex;
+    englishSourceIndex = new Map();
+    Object.entries(translations.en).forEach(([key, value]) => {
+        if (typeof value !== 'string') return;
+        const source = value.trim();
+        if (!source || source.includes('{')) return;
+        if (!englishSourceIndex.has(source)) englishSourceIndex.set(source, key);
+    });
+    return englishSourceIndex;
+}
+
+function translatedSourceValue(source) {
+    const normalized = String(source || '').trim();
+    if (!normalized) return source;
+    const key = getEnglishSourceIndex().get(normalized);
+    if (!key) return source;
+    return t(key);
+}
+
+function applyPublicTextNodes(root) {
+    const scanRoot = root === document ? document.body : root;
+    if (!scanRoot) return;
+    const showText = document.defaultView?.NodeFilter?.SHOW_TEXT ?? 4;
+    const walker = document.createTreeWalker(scanRoot, showText);
+    let node = walker.nextNode();
+    while (node) {
+        const parent = node.parentElement;
+        if (parent && !parent.closest(SOURCE_SKIP_SELECTOR)) {
+            const original = sourceText.get(node) ?? node.nodeValue;
+            if (!sourceText.has(node)) sourceText.set(node, original);
+            const translated = translatedSourceValue(original);
+            if (translated !== original.trim()) {
+                const leading = original.match(/^\s*/)?.[0] || '';
+                const trailing = original.match(/\s*$/)?.[0] || '';
+                node.nodeValue = `${leading}${translated}${trailing}`;
+            } else if (getLanguage() === DEFAULT_LANG) {
+                node.nodeValue = original;
+            }
+        }
+        node = walker.nextNode();
+    }
+}
+
+function applyPublicAttributes(root) {
+    const scanRoot = root === document ? document : root;
+    const elements = scanRoot.querySelectorAll(SOURCE_ATTRIBUTE_NAMES.map(name => `[${name}]`).join(','));
+    elements.forEach(element => {
+        const saved = sourceAttributes.get(element) || {};
+        SOURCE_ATTRIBUTE_NAMES.forEach(name => {
+            if (!element.hasAttribute(name)) return;
+            const explicitKey = name === 'aria-label'
+                ? element.dataset.i18nAriaLabel
+                : name === 'title'
+                    ? element.dataset.i18nTitle
+                    : name === 'placeholder'
+                        ? element.dataset.i18nPlaceholder
+                        : null;
+            if (explicitKey) return;
+            if (!(name in saved)) saved[name] = element.getAttribute(name);
+            const translated = translatedSourceValue(saved[name]);
+            element.setAttribute(name, translated);
+        });
+        sourceAttributes.set(element, saved);
+    });
+}
+
+function applyPublicDocumentCopy() {
+    if (!documentSource.title) documentSource.title = document.title;
+    document.title = translatedSourceValue(documentSource.title);
+
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) {
+        if (!documentSource.description) documentSource.description = meta.content;
+        meta.content = translatedSourceValue(documentSource.description);
+    }
+}
+
+function applyPublicSourceCopy(root) {
+    if (!document.body?.classList.contains('public-site')) return;
+    applyPublicTextNodes(root);
+    applyPublicAttributes(root);
+    applyPublicDocumentCopy();
+}
 
 export function applyI18n(root = document) {
     document.documentElement.lang = getLanguage();
@@ -69,6 +173,7 @@ export function applyI18n(root = document) {
     root.querySelectorAll('[data-i18n-aria-label]').forEach(element => {
         element.setAttribute('aria-label', t(element.dataset.i18nAriaLabel));
     });
+    applyPublicSourceCopy(root);
 }
 
 function getLanguageMeta(language) {
