@@ -58,20 +58,23 @@ body.public-site::after {
 }
 
 .public-nav {
-    gap: .2rem;
+    gap: clamp(.08rem, .15vw, .2rem);
     padding: .28rem;
     border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
     border-radius: 999px;
     background: color-mix(in srgb, var(--surface-subtle) 58%, transparent);
-    font-size: .77rem;
+    font-size: clamp(.73rem, .8vw, .77rem);
     font-weight: 650;
+    white-space: nowrap;
 }
 
 .public-nav a {
     position: relative;
+    flex: 0 0 auto;
     border-radius: 999px;
-    padding: .5rem .75rem;
+    padding: .5rem clamp(.55rem, .65vw, .75rem);
     color: var(--text-muted);
+    white-space: nowrap;
     transition: color 160ms ease, background 160ms ease, transform 160ms ease;
 }
 
@@ -81,7 +84,11 @@ body.public-site::after {
     color: var(--text);
 }
 
-.public-actions { gap: .55rem; }
+.public-actions {
+    gap: clamp(.38rem, .45vw, .55rem);
+    flex-wrap: nowrap;
+}
+.public-actions > * { flex: 0 0 auto; }
 .public-actions > [data-language-control] {
     min-width: 7.6rem;
     min-height: 2.55rem;
@@ -92,22 +99,30 @@ body.public-site::after {
     color: var(--text-muted);
     font-size: .76rem;
     font-weight: 650;
+    white-space: nowrap;
 }
-.public-actions .language-switcher-button { min-width: 7.6rem; }
+.public-actions .language-switcher-button {
+    min-width: 7.6rem;
+    white-space: nowrap;
+}
 .public-actions .link-button {
     min-height: 2.45rem;
     display: inline-flex;
     align-items: center;
-    padding: 0 .55rem;
+    padding: 0 clamp(.4rem, .45vw, .55rem);
     color: var(--text-muted);
     font-size: .78rem;
     font-weight: 650;
+    white-space: nowrap;
 }
 
 .public-actions .button-primary {
+    min-width: max-content;
     min-height: 2.55rem;
     border-radius: .58rem;
-    padding-inline: .95rem;
+    padding-inline: clamp(.75rem, .8vw, .95rem);
+    line-height: 1;
+    white-space: nowrap;
     box-shadow: 0 .5rem 1.4rem rgba(215, 173, 85, .13);
 }
 
@@ -157,6 +172,9 @@ body.public-site::after {
         box-shadow: 0 1.4rem 3rem rgba(0,0,0,.3);
     }
     .public-nav a { border-radius: .55rem; }
+    .public-nav-mobile-controls { display: flex; padding: .45rem .75rem .65rem; }
+    .public-nav-mobile-controls .language-switcher,
+    .public-nav-mobile-controls .language-switcher-button { width: 100%; }
 }
 
 @media (max-width: 38rem) {
