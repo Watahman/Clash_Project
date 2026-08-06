@@ -9,6 +9,55 @@ import {
 } from '../../src/assets/js/i18n/runtime-translations.js';
 
 const languages = ['nl', 'fr', 'de', 'es'];
+const dashboardKeys = [
+    'dashboard.welcome',
+    'dashboard.welcomeName',
+    'guidance.dashboard.hero',
+    'guidance.dashboard.chooseKicker',
+    'guidance.dashboard.chooseTitle',
+    'guidance.dashboard.planTitle',
+    'guidance.dashboard.planText',
+    'guidance.dashboard.planAction',
+    'guidance.dashboard.runTitle',
+    'guidance.dashboard.runText',
+    'guidance.dashboard.runAction',
+    'guidance.dashboard.familyTitle',
+    'guidance.dashboard.familyText',
+    'guidance.dashboard.familyAction',
+    'guidance.dashboard.continueKicker',
+    'guidance.dashboard.continueTitle',
+    'dashboard.loadingPlans',
+    'dashboard.loadingGroups',
+    'dashboard.plansUnavailable',
+    'dashboard.groupsUnavailable',
+    'dashboard.loginRequired',
+    'dashboard.noPlans',
+    'dashboard.createFirstPlan',
+    'dashboard.noGroups',
+    'dashboard.openGroups',
+    'dashboard.linkedAccounts',
+    'dashboard.openProfile'
+];
+const guideKeys = [
+    'guidance.help.kicker',
+    'guidance.help.open',
+    'guidance.help.pageAction',
+    'guidance.help.sections',
+    'guidance.help.pageTab',
+    'guidance.help.profileTab',
+    'guidance.dashboard.title',
+    'guidance.dashboard.intro',
+    'guidance.dashboard.itemPlan',
+    'guidance.dashboard.itemRun',
+    'guidance.dashboard.itemFamily',
+    'guidance.profile.kicker',
+    'guidance.profile.title',
+    'guidance.profile.intro',
+    'guidance.profile.itemAccounts',
+    'guidance.profile.itemFriends',
+    'guidance.profile.itemFamily',
+    'guidance.profile.itemSettings'
+];
 
 describe('translation completeness', () => {
     it('keeps every methodology key available in every supported language', () => {
@@ -30,13 +79,21 @@ describe('translation completeness', () => {
         await Promise.all(languages.map(language => ensureLanguage(language)));
     });
 
-    it('translates dashboard and page-guide copy without an English loading window', () => {
+    it('translates every dashboard state without an English loading window', () => {
         languages.forEach(language => {
-            expect(getTranslationValue(language, 'guidance.help.pageAction')).not.toBe('What can I do here?');
-            expect(getTranslationValue(language, 'guidance.help.kicker')).not.toBe('Page guide');
-            expect(getTranslationValue(language, 'guidance.dashboard.title')).not.toBe('Find your next action');
-            expect(getTranslationValue(language, 'guidance.dashboard.chooseTitle')).not.toBe('What do you want to do?');
-            expect(getTranslationValue(language, 'guidance.dashboard.continueTitle')).not.toBe('Continue where you left off');
+            dashboardKeys.forEach(key => {
+                expect(getTranslationValue(language, key), `${language}:${key}`)
+                    .not.toBe(getTranslationValue('en', key));
+            });
+        });
+    });
+
+    it('translates the complete page and profile guide', () => {
+        languages.forEach(language => {
+            guideKeys.forEach(key => {
+                expect(getTranslationValue(language, key), `${language}:${key}`)
+                    .not.toBe(getTranslationValue('en', key));
+            });
         });
     });
 
