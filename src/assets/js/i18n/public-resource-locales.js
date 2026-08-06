@@ -3,6 +3,7 @@ import { publicGuidesLocales } from './public-guides-locales.js';
 import { publicChangelogLocales } from './public-changelog-locales.js';
 import { publicFeatureExtraLocales } from './public-feature-extra-locales.js';
 import { publicMediaLocales } from './public-media-locales.js';
+import { publicAccessibilityLocales } from './public-accessibility-locales.js';
 import { authPageLocales } from './auth-page-locales.js';
 
 const languages = ['en', 'nl', 'fr', 'de', 'es'];
@@ -14,6 +15,7 @@ export const publicResourceLocales = Object.freeze(Object.fromEntries(
         ...publicChangelogLocales[language],
         ...publicFeatureExtraLocales[language],
         ...publicMediaLocales[language],
+        ...publicAccessibilityLocales[language],
         ...authPageLocales[language]
     })])
 ));
