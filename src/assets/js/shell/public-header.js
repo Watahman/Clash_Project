@@ -6,16 +6,25 @@ const PUBLIC_NAV_ITEMS = Object.freeze([
     { id: 'changelog', href: '/changelog', label: 'Changelog' }
 ]);
 
+const TOOL_PATHS = new Set([
+    '/',
+    '/cwl-planner',
+    '/cwl-tracker',
+    '/clan-management',
+    '/bracket-generator'
+]);
+
 function currentPublicSection(pathname) {
     const normalized = String(pathname || '/')
         .replace(/\/index\.html$/i, '/')
         .replace(/\/$/, '') || '/';
 
+    if (TOOL_PATHS.has(normalized)) return 'tools';
     if (normalized === '/guides') return 'guides';
     if (normalized === '/methodology') return 'methodology';
     if (normalized === '/about') return 'about';
     if (normalized === '/changelog') return 'changelog';
-    return 'tools';
+    return null;
 }
 
 function navMarkup(activeSection) {
