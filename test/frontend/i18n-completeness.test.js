@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { publicStaticLocales } from '../../src/assets/js/i18n/public-static-locales.js';
 import { publicResourceLocales } from '../../src/assets/js/i18n/public-resource-locales.js';
+import { publicPolicyExtraLocales } from '../../src/assets/js/i18n/public-policy-extra-locales.js';
 import {
     ensureLanguage,
     getTranslationValue,
@@ -47,6 +48,28 @@ describe('translation completeness', () => {
             expect(getTranslationValue(language, 'guides.article1Html')).not.toBe(publicResourceLocales.en['guides.article1Html']);
             expect(getTranslationValue(language, 'changelog.heroTitle')).not.toBe(publicResourceLocales.en['changelog.heroTitle']);
             expect(getTranslationValue(language, 'homeV2.heroLead')).not.toBe(publicResourceLocales.en['homeV2.heroLead']);
+        });
+    });
+
+    it('contains explicit translated metadata and samples for every public feature page', () => {
+        languages.forEach(language => {
+            expect(getTranslationValue(language, 'feature.about.documentTitle')).not.toBe(publicResourceLocales.en['feature.about.documentTitle']);
+            expect(getTranslationValue(language, 'feature.planner.sampleHtml')).not.toBe(publicResourceLocales.en['feature.planner.sampleHtml']);
+            expect(getTranslationValue(language, 'feature.tracker.sampleHtml')).not.toBe(publicResourceLocales.en['feature.tracker.sampleHtml']);
+            expect(getTranslationValue(language, 'feature.family.sampleHtml')).not.toBe(publicResourceLocales.en['feature.family.sampleHtml']);
+            expect(getTranslationValue(language, 'authPage.loginTitle')).not.toBe(publicResourceLocales.en['authPage.loginTitle']);
+            expect(getTranslationValue(language, 'authPage.registerTitle')).not.toBe(publicResourceLocales.en['authPage.registerTitle']);
+        });
+    });
+
+    it('provides complete French German and Spanish legal-page content', () => {
+        ['fr', 'de', 'es'].forEach(language => {
+            const locale = publicPolicyExtraLocales[language];
+            expect(locale.privacy.sections.length).toBeGreaterThanOrEqual(10);
+            expect(locale.cookies.sections.length).toBeGreaterThanOrEqual(7);
+            expect(locale.terms.sections.length).toBeGreaterThanOrEqual(11);
+            expect(locale.contact.sections.length).toBeGreaterThanOrEqual(3);
+            expect(locale.contact.feedback.send).toBeTruthy();
         });
     });
 });
