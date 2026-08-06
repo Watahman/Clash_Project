@@ -19,6 +19,7 @@ import deCompletion from './locale-completions/de.js';
 import esCompletion from './locale-completions/es.js';
 import { publicStaticLocales } from './public-static-locales.js';
 import { publicResourceLocales } from './public-resource-locales.js';
+import { achievementLocales } from './achievement-locales.js';
 
 export const supportedLanguages = Object.freeze(['nl', 'en', 'fr', 'de', 'es']);
 
@@ -35,7 +36,8 @@ function buildDictionary(language, base, workspace, publicCopy, completion = {})
         ...publicCopy,
         ...completion,
         ...(publicStaticLocales[language] || {}),
-        ...(publicResourceLocales[language] || {})
+        ...(publicResourceLocales[language] || {}),
+        ...(achievementLocales[language] || {})
     });
 }
 
