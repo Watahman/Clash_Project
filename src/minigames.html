@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en" data-theme="dark" class="public-page">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/assets/js/Data/analytics.js"></script>
+    <title>Daily Clash of Clans Troop Guesser | ClashPanel</title>
+    <meta name="description" content="Play ClashPanel's free daily Clash of Clans troop guessing game. Compare troop type, movement, targets, housing space, Town Hall unlock and role.">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#0d1117">
+    <link rel="canonical" href="https://clashpanel.com/minigames">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ClashPanel">
+    <meta property="og:url" content="https://clashpanel.com/minigames">
+    <meta property="og:title" content="Daily Clash of Clans Troop Guesser">
+    <meta property="og:description" content="Guess today's hidden troop in six attempts using stat and category feedback.">
+    <meta name="twitter:card" content="summary">
+    <script type="application/ld+json">
+        {"@context":"https://schema.org","@type":"Game","name":"ClashPanel Daily Troop Guesser","url":"https://clashpanel.com/minigames","description":"A free daily text and statistics based Clash of Clans troop knowledge quiz.","gamePlatform":"Web browser","isAccessibleForFree":true}
+    </script>
+    <link rel="icon" type="image/png" href="/assets/css/pictures/clashtools-logo.png">
+    <link rel="stylesheet" href="/assets/css/workspace-loading.css">
+    <script src="/assets/js/shell/workspace-bootstrap.js"></script>
+    <link rel="stylesheet" href="/assets/css/workspace-system.css">
+    <script src="/assets/js/Data/runtime-config.js"></script>
+    <script type="module" src="/assets/js/pages/public-site.js"></script>
+    <script type="module" src="/assets/js/pages/minigames.js"></script>
+    <link rel="stylesheet" href="/assets/css/light-theme.css">
+    <link rel="stylesheet" href="/assets/css/workspace-polish.css">
+    <link rel="stylesheet" href="/assets/css/public-marketing.css">
+    <link rel="stylesheet" href="/assets/css/minigames.css">
+</head>
+<body class="public-site minigames-page">
+<a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
+<header class="public-header">
+    <a class="public-brand" href="/" aria-label="ClashPanel home"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
+    <nav class="public-nav" id="public-nav" aria-label="Public navigation"><a href="/#features">Tools</a><a href="/minigames" aria-current="page">Games</a><a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about">About</a><a href="/changelog">Changelog</a></nav>
+    <div class="public-actions">
+        <button type="button" data-language-control data-i18n="header.language">Language</button>
+        <button class="theme-button" type="button" data-theme-toggle aria-label="Switch theme"><span aria-hidden="true">◐</span></button>
+        <a class="link-button" href="/subpages/login.html" data-i18n="auth.login">Log in</a>
+        <a class="button button-primary" href="/subpages/register.html" data-i18n="public.startFree">Start for free</a>
+    </div>
+    <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" aria-label="Open menu"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
+</header>
+
+<main id="main-content" class="minigames-main">
+    <section class="minigames-hero">
+        <div class="minigames-hero-copy">
+            <p class="eyebrow">ClashPanel Daily Games</p>
+            <h1>Know the troop. Prove it.</h1>
+            <p>Find the hidden Home Village troop in six attempts. Every guess compares type, movement, targets, housing space, Town Hall unlock and battlefield role.</p>
+        </div>
+        <div class="minigames-orbit" aria-hidden="true">
+            <div class="minigames-core"><span>?</span></div>
+            <span class="minigames-node">Housing space</span>
+            <span class="minigames-node">Targets</span>
+            <span class="minigames-node">Town Hall</span>
+            <span class="minigames-node">Battle role</span>
+        </div>
+    </section>
+
+    <section class="game-shell" aria-labelledby="game-title">
+        <div class="game-toolbar">
+            <div class="game-mode-tabs" role="tablist" aria-label="Game mode">
+                <button type="button" role="tab" data-game-mode="daily" data-game-i18n="daily">Daily</button>
+                <button type="button" role="tab" data-game-mode="practice" data-game-i18n="practice">Practice</button>
+            </div>
+            <p class="game-toolbar-note" data-mode-note></p>
+        </div>
+
+        <div class="game-content">
+            <aside class="game-sidebar">
+                <p class="eyebrow">Entity Guesser · Phase 1</p>
+                <h2 data-game-i18n="category">Home Village Troops</h2>
+                <p data-game-i18n="instructions">Compare each property. Arrows show whether the hidden value is higher or lower.</p>
+                <div class="game-stat-grid">
+                    <div class="game-stat"><span data-game-i18n="attempts">Attempts</span><strong data-attempts-value>0/6</strong></div>
+                    <div class="game-stat"><span data-game-i18n="score">Score</span><strong data-score-value>0</strong></div>
+                    <div class="game-stat"><span data-game-i18n="streak">Streak</span><strong data-streak-value>0</strong></div>
+                    <div class="game-stat"><span data-game-i18n="best">Best</span><strong data-best-value>0</strong></div>
+                </div>
+                <div class="game-legend" aria-label="Feedback legend">
+                    <div><span class="legend-dot correct"></span><span data-game-i18n="correct">Exact match</span></div>
+                    <div><span class="legend-dot close"></span><span data-game-i18n="close">Close value</span></div>
+                    <div><span class="legend-dot wrong"></span><span data-game-i18n="wrong">Different</span></div>
+                </div>
+            </aside>
+
+            <div class="game-board">
+                <div class="game-board-top">
+                    <div><p class="eyebrow">Six attempts · two optional hints</p><h2 id="game-title">Which troop is hidden?</h2></div>
+                    <button type="button" class="game-action secondary" data-new-practice hidden data-game-i18n="newPractice">New practice round</button>
+                </div>
+
+                <form class="guess-form" data-guess-form autocomplete="off">
+                    <label class="sr-only" for="troop-guess">Troop name</label>
+                    <input id="troop-guess" data-guess-input list="troop-suggestions" maxlength="40" required>
+                    <datalist id="troop-suggestions" data-guess-suggestions></datalist>
+                    <button class="game-action" type="submit" data-game-i18n="submit">Submit guess</button>
+                </form>
+                <p class="game-message" data-game-message aria-live="polite"></p>
+
+                <div class="guess-scroll" tabindex="0" aria-label="Guess comparison table">
+                    <div class="guess-grid guess-grid-header" aria-hidden="true">
+                        <div>Guess</div><div data-column-label>Type</div><div data-column-label>Move</div><div data-column-label>Targets</div><div data-column-label>Favorite</div><div data-column-label>Housing</div><div data-column-label>TH</div><div data-column-label>Attack</div><div data-column-label>Role</div>
+                    </div>
+                    <div data-guess-rows></div>
+                </div>
+
+                <div class="game-support">
+                    <button type="button" class="game-action secondary" data-hint-button data-game-i18n="hint" disabled>Reveal hint</button>
+                    <button type="button" class="game-action secondary" data-share-result data-game-i18n="share" hidden>Share result</button>
+                </div>
+                <ol class="game-hints" data-hints></ol>
+                <div class="game-result" data-result hidden>
+                    <h3 data-result-heading></h3>
+                    <p data-result-body></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <aside class="minigames-policy">
+        This is an unofficial, text-and-statistics based fan quiz. It uses no official troop artwork, audio or recreated game interface. ClashPanel is not endorsed by Supercell.
+    </aside>
+</main>
+
+<footer class="public-footer">
+    <div class="public-footer-main">
+        <a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a>
+        <nav aria-label="Footer navigation">
+            <a href="/subpages/privacy">Privacy</a><a href="/subpages/cookies">Cookies</a><a href="/subpages/terms">Terms of use</a><a href="/subpages/contact">Contact</a><a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer">Supercell Fan Content Policy</a>
+        </nav>
+    </div>
+    <p class="public-disclaimer">ClashPanel is unofficial and is not endorsed by Supercell. For more information, see Supercell's Fan Content Policy.</p>
+    <p class="public-footer-meta">© 2026 ClashPanel · Not affiliated with Supercell</p>
+</footer>
+</body>
+</html>
