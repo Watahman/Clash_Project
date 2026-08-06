@@ -27,12 +27,21 @@ describe('Phase 2B minigames public page', () => {
         ].forEach(label => expect(page).toContain(label));
     });
 
-    it('keeps all five supported interface languages', () => {
-        ['en:', 'nl:', 'de:', 'fr:', 'es:'].forEach(locale => {
-            expect(controller).toContain(locale);
-        });
-        ['defenses', 'resourceBuildings', 'armyBuildings', 'utilityBuildings', 'traps'].forEach(category => {
-            expect(controller).toContain(`${category}:`);
-        });
+    it('keeps all five supported interface languages and structure categories', () => {
+        [
+            "en:{daily:'Daily'",
+            "nl:{daily:'Dagelijks'",
+            "de:{daily:'Täglich'",
+            "fr:{daily:'Quotidien'",
+            "es:{daily:'Diario'"
+        ].forEach(locale => expect(controller).toContain(locale));
+
+        [
+            "defenses:'Defenses'",
+            "resourceBuildings:'Resource Buildings'",
+            "armyBuildings:'Army Buildings'",
+            "utilityBuildings:'Utility Buildings'",
+            "traps:'Traps'"
+        ].forEach(category => expect(controller).toContain(category));
     });
 });
