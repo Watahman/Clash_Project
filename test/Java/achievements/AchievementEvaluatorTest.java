@@ -26,11 +26,13 @@ class AchievementEvaluatorTest {
     }
 
     @Test
-    void exposesThirtyPlusAchievementFamilies() {
+    void exposesCurrentAndHistoricalAchievementCatalog() {
         long families = AchievementCatalog.definitions().stream()
                 .map(AchievementDefinition::familyKey)
                 .distinct()
                 .count();
-        assertTrue(families >= 30);
+
+        assertEquals(46, families);
+        assertEquals(184, AchievementCatalog.definitions().size());
     }
 }
