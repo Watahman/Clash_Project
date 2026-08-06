@@ -26,7 +26,10 @@ class BaseDataMetricsTest {
                   "units":[{"data":4000000,"lvl":12}],
                   "heroes":[{"data":28000000,"lvl":100}],
                   "equipment":[{"data":90000000,"lvl":18}],
-                  "buildings2":[{"data":1000033,"lvl":8,"cnt":180}]
+                  "buildings2":[
+                    {"data":1000033,"lvl":8,"cnt":180},
+                    {"data":1000034,"lvl":10,"cnt":1}
+                  ]
                 }
                 """).getAsJsonObject();
 
@@ -34,8 +37,16 @@ class BaseDataMetricsTest {
 
         assertEquals(300L, metrics.get("home_wall_count"));
         assertEquals(5400L, metrics.get("home_wall_level_sum"));
+        assertEquals(6L, metrics.get("home_building_count"));
+        assertEquals(4L, metrics.get("home_building_distinct_count"));
+        assertEquals(77L, metrics.get("home_building_level_sum"));
+
         assertEquals(180L, metrics.get("builder_wall_count"));
         assertEquals(1440L, metrics.get("builder_wall_level_sum"));
+        assertEquals(1L, metrics.get("builder_building_count"));
+        assertEquals(1L, metrics.get("builder_building_distinct_count"));
+        assertEquals(10L, metrics.get("builder_building_level_sum"));
+
         assertEquals(2L, metrics.get("active_upgrade_count"));
         assertEquals(3L, metrics.get("gear_up_count"));
         assertEquals(3L, metrics.get("townhall_weapon_level"));
