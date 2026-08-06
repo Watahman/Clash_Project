@@ -3,6 +3,7 @@ package Java;
 import Java.achievements.AchievementEvaluator;
 import Java.achievements.AchievementProgress;
 import Java.achievements.BaseDataSnapshot;
+import Java.achievements.HistoricalAchievementMetrics;
 import Java.cache.CacheKeys;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -13,7 +14,9 @@ import com.sun.net.httpserver.HttpServer;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +46,18 @@ public class SUPABASE_Achievements {
 
         ensureOwnedAccount(userId, snapshot.playerTag());
 
-        List<AchievementProgress> evaluated = evaluator.evaluate(snapshot.metrics());
+        Map<String, Long> combinedMetrics = new LinkedHashMap<>(snapshot.metrics());
+        List<HistoricalAchievementMetrics.Snapshot> history = loadHistoricalSnapshots(
+                userId,
+                snapshot.playerTag()
+        );
+        history.add(new HistoricalAchievementMetrics.Snapshot(
+                snapshot.sourceTimestamp(),
+                snapshot.metrics()
+        ));
+        combinedMetrics.putAll(HistoricalAchievementMetrics.extract(history));
+
+        List<AchievementProgress> evaluated = evaluator.evaluate(combinedMetrics);
         JsonArray progressJson = evaluator.toJson(evaluated);
         long unlockedCount = evaluated.stream().filter(AchievementProgress::unlocked).count();
 
@@ -53,7 +67,7 @@ public class SUPABASE_Achievements {
         rpcBody.addProperty("p_source_timestamp", snapshot.sourceTimestamp());
         rpcBody.addProperty("p_checksum", snapshot.checksum());
         rpcBody.add("p_payload", snapshot.payload());
-        rpcBody.add("p_metrics", metricsJson(snapshot.metrics()));
+        rpcBody.add("p_metrics", metricsJson(combinedMetrics));
         rpcBody.add("p_progress", progressJson);
 
         String persistenceResult = SUPABASE_Client.rpc("save_achievement_import", rpcBody.toString());
@@ -65,7 +79,8 @@ public class SUPABASE_Achievements {
         response.addProperty("checksum", snapshot.checksum());
         response.addProperty("unlockedCount", unlockedCount);
         response.addProperty("achievementCount", evaluated.size());
-        response.add("metrics", metricsJson(snapshot.metrics()));
+        response.add("metrics", metricsJson(combinedMetrics));
+        response.add("history", historySummaryJson(combinedMetrics));
         response.add("achievements", progressJson);
         response.add("persistence", parseAnyJson(persistenceResult));
         utils.sendJsonResponse(exchange, response.toString(), 200);
@@ -90,11 +105,35 @@ public class SUPABASE_Achievements {
                         + "&" + userFilter + "&" + tagFilter + "&order=source_timestamp.desc&limit=1"
         );
 
+        JsonElement latestSnapshot = firstOrNull(snapshots);
         JsonObject response = new JsonObject();
         response.addProperty("playerTag", playerTag);
         response.add("achievements", JsonParser.parseString(progress));
-        response.add("latestSnapshot", firstOrNull(snapshots));
+        response.add("latestSnapshot", latestSnapshot);
+        if (latestSnapshot.isJsonObject()) {
+            JsonElement metrics = latestSnapshot.getAsJsonObject().get("metrics");
+            response.add("history", metrics != null && metrics.isJsonObject()
+                    ? historySummaryJson(numericMap(metrics.getAsJsonObject()))
+                    : new JsonObject());
+        } else {
+            response.add("history", new JsonObject());
+        }
         utils.sendJsonResponse(exchange, response.toString(), 200);
+    }
+
+    private List<HistoricalAchievementMetrics.Snapshot> loadHistoricalSnapshots(
+            String userId,
+            String playerTag
+    ) throws Exception {
+        String response = SUPABASE_Client.getWithBody(
+                "achievement_base_snapshots",
+                "select=source_timestamp,metrics"
+                        + "&user_id=" + SUPABASE_Client.eq(userId)
+                        + "&player_tag=" + SUPABASE_Client.eq(playerTag)
+                        + "&order=source_timestamp.asc&limit=250"
+        );
+        JsonArray rows = JsonParser.parseString(response).getAsJsonArray();
+        return new ArrayList<>(HistoricalAchievementMetrics.snapshotsFromJson(rows));
     }
 
     private JsonObject unwrapBaseData(JsonObject body) {
@@ -167,6 +206,36 @@ public class SUPABASE_Achievements {
     private JsonObject metricsJson(Map<String, Long> metrics) {
         JsonObject result = new JsonObject();
         metrics.forEach(result::addProperty);
+        return result;
+    }
+
+    private Map<String, Long> numericMap(JsonObject object) {
+        Map<String, Long> result = new LinkedHashMap<>();
+        for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
+            JsonElement value = entry.getValue();
+            if (value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isNumber()) {
+                result.put(entry.getKey(), Math.max(0, value.getAsLong()));
+            }
+        }
+        return Map.copyOf(result);
+    }
+
+    private JsonObject historySummaryJson(Map<String, Long> metrics) {
+        JsonObject result = new JsonObject();
+        for (String key : List.of(
+                "snapshot_import_count",
+                "tracked_days",
+                "tracked_progress_intervals",
+                "tracked_home_building_levels",
+                "tracked_home_wall_levels",
+                "tracked_home_hero_levels",
+                "tracked_equipment_levels",
+                "tracked_army_levels",
+                "tracked_builder_building_levels",
+                "tracked_cosmetics_added",
+                "tracked_active_upgrade_observations",
+                "tracked_largest_progress_jump"
+        )) result.addProperty(key, Math.max(0, metrics.getOrDefault(key, 0L)));
         return result;
     }
 
