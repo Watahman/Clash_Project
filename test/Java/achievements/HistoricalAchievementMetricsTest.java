@@ -63,7 +63,20 @@ class HistoricalAchievementMetricsTest {
         assertEquals(5L, metrics.get("tracked_cosmetics_added"));
         assertEquals(2L, metrics.get("tracked_active_upgrade_observations"));
         assertEquals(2L, metrics.get("tracked_progress_intervals"));
-        assertEquals(50L, metrics.get("tracked_largest_progress_jump"));
+        assertEquals(53L, metrics.get("tracked_largest_progress_jump"));
+    }
+
+    @Test
+    void doesNotCountRestoredValuesTwiceAfterTemporaryDecrease() {
+        var metrics = HistoricalAchievementMetrics.extract(List.of(
+                new HistoricalAchievementMetrics.Snapshot(1_000L, Map.of("home_wall_level_sum", 100L)),
+                new HistoricalAchievementMetrics.Snapshot(2_000L, Map.of("home_wall_level_sum", 80L)),
+                new HistoricalAchievementMetrics.Snapshot(3_000L, Map.of("home_wall_level_sum", 100L)),
+                new HistoricalAchievementMetrics.Snapshot(4_000L, Map.of("home_wall_level_sum", 105L))
+        ));
+
+        assertEquals(5L, metrics.get("tracked_home_wall_levels"));
+        assertEquals(1L, metrics.get("tracked_progress_intervals"));
     }
 
     @Test
