@@ -22,7 +22,7 @@ The catalog currently powers:
 - Entity Guesser, phases 1 through 2B;
 - Higher or Lower, phase 3A.
 
-Phase 3A means the complete Daily and Practice game loop is present, but advanced level-dependent combat comparisons, account synchronization and global leaderboards are not yet included.
+Phase 3A includes the complete Daily and Practice game loop. Advanced level-dependent combat comparisons, account synchronization and global leaderboards are not yet included.
 
 ## Daily eligibility
 
