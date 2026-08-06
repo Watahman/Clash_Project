@@ -2,6 +2,7 @@ import { publicHomeLocales } from './public-home-locales.js';
 import { publicGuidesLocales } from './public-guides-locales.js';
 import { publicChangelogLocales } from './public-changelog-locales.js';
 import { publicFeatureExtraLocales } from './public-feature-extra-locales.js';
+import { publicMediaLocales } from './public-media-locales.js';
 
 const languages = ['en', 'nl', 'fr', 'de', 'es'];
 
@@ -10,6 +11,7 @@ export const publicResourceLocales = Object.freeze(Object.fromEntries(
         ...publicHomeLocales[language],
         ...publicGuidesLocales[language],
         ...publicChangelogLocales[language],
-        ...publicFeatureExtraLocales[language]
+        ...publicFeatureExtraLocales[language],
+        ...publicMediaLocales[language]
     })])
 ));
