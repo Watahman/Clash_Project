@@ -25,7 +25,13 @@ public final class BaseDataMetrics {
     public static Map<String, Long> extract(JsonObject root) {
         Map<String, Long> metrics = new LinkedHashMap<>();
 
-        addCollectionMetrics(metrics, root, "buildings", "home_building");
+        addCollectionMetricsExcludingData(
+                metrics,
+                root,
+                "buildings",
+                "home_building",
+                HOME_WALL_DATA_ID
+        );
         addCollectionMetrics(metrics, root, "traps", "home_trap");
         addCollectionMetrics(metrics, root, "units", "home_unit");
         addCollectionMetrics(metrics, root, "siege_machines", "siege");
@@ -35,7 +41,13 @@ public final class BaseDataMetrics {
         addCollectionMetrics(metrics, root, "equipment", "equipment");
         addCollectionMetrics(metrics, root, "helpers", "helper");
 
-        addCollectionMetrics(metrics, root, "buildings2", "builder_building");
+        addCollectionMetricsExcludingData(
+                metrics,
+                root,
+                "buildings2",
+                "builder_building",
+                BUILDER_WALL_DATA_ID
+        );
         addCollectionMetrics(metrics, root, "traps2", "builder_trap");
         addCollectionMetrics(metrics, root, "units2", "builder_unit");
         addCollectionMetrics(metrics, root, "heroes2", "builder_hero");
@@ -86,6 +98,19 @@ public final class BaseDataMetrics {
         metrics.put(prefix + "_level_sum", levelSum(values));
     }
 
+    private static void addCollectionMetricsExcludingData(
+            Map<String, Long> metrics,
+            JsonObject root,
+            String section,
+            String prefix,
+            int excludedDataId
+    ) {
+        JsonArray values = array(root, section);
+        metrics.put(prefix + "_count", itemCountExcludingData(values, excludedDataId));
+        metrics.put(prefix + "_distinct_count", distinctDataCountExcludingData(values, excludedDataId));
+        metrics.put(prefix + "_level_sum", levelSumExcludingData(values, excludedDataId));
+    }
+
     private static void addObjectCollectionMetrics(Map<String, Long> metrics, JsonObject root, String section, String prefix) {
         JsonArray values = array(root, section);
         metrics.put(prefix + "_count", itemCount(values));
@@ -106,6 +131,20 @@ public final class BaseDataMetrics {
         return total;
     }
 
+    private static long itemCountExcludingData(JsonArray array, int excludedDataId) {
+        long total = 0;
+        for (JsonElement element : array) {
+            if (!element.isJsonObject()) {
+                total++;
+                continue;
+            }
+            JsonObject object = element.getAsJsonObject();
+            if (positiveLong(object, "data", -1) == excludedDataId) continue;
+            total += positiveLong(object, "cnt", 1);
+        }
+        return total;
+    }
+
     private static long primitiveArrayCount(JsonArray array) {
         return array.size();
     }
@@ -122,11 +161,34 @@ public final class BaseDataMetrics {
         return ids.size();
     }
 
+    private static long distinctDataCountExcludingData(JsonArray array, int excludedDataId) {
+        Set<Long> ids = new LinkedHashSet<>();
+        for (JsonElement element : array) {
+            if (!element.isJsonObject()) continue;
+            JsonElement data = element.getAsJsonObject().get("data");
+            if (data == null || !data.isJsonPrimitive() || !data.getAsJsonPrimitive().isNumber()) continue;
+            long dataId = data.getAsLong();
+            if (dataId != excludedDataId) ids.add(dataId);
+        }
+        return ids.size();
+    }
+
     private static long levelSum(JsonArray array) {
         long total = 0;
         for (JsonElement element : array) {
             if (!element.isJsonObject()) continue;
             JsonObject object = element.getAsJsonObject();
+            total += positiveLong(object, "lvl", 0) * positiveLong(object, "cnt", 1);
+        }
+        return total;
+    }
+
+    private static long levelSumExcludingData(JsonArray array, int excludedDataId) {
+        long total = 0;
+        for (JsonElement element : array) {
+            if (!element.isJsonObject()) continue;
+            JsonObject object = element.getAsJsonObject();
+            if (positiveLong(object, "data", -1) == excludedDataId) continue;
             total += positiveLong(object, "lvl", 0) * positiveLong(object, "cnt", 1);
         }
         return total;
