@@ -25,8 +25,11 @@ function ensureAchievementsNavigation() {
     if (active) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
 
-    link.addEventListener('pointerenter', prefetchAchievements, { once: true, passive: true });
-    link.addEventListener('focus', prefetchAchievements, { once: true });
+    if (link.dataset.achievementPrefetchBound !== 'true') {
+        link.dataset.achievementPrefetchBound = 'true';
+        link.addEventListener('pointerenter', prefetchAchievements, { once: true, passive: true });
+        link.addEventListener('focus', prefetchAchievements, { once: true });
+    }
     return true;
 }
 
@@ -47,10 +50,11 @@ function install() {
     window.setTimeout(() => observer.disconnect(), 10_000);
 }
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', install, { once: true });
-} else {
-    install();
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', install, { once: true });
+    } else {
+        install();
+    }
+    window.addEventListener('clashtools:page-ready', ensureAchievementsNavigation);
 }
-
-window.addEventListener('clashtools:page-ready', ensureAchievementsNavigation);
