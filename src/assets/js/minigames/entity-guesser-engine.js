@@ -1,7 +1,13 @@
-import { TROOP_CATEGORY, TROOPS } from './entity-guesser-data.js';
+import {
+    DAILY_CATEGORY_SEQUENCE,
+    ENTITY_CATEGORIES,
+    getCategory,
+    getEntities
+} from './entity-guesser-data.js';
 
-export const DAILY_STORAGE_KEY = 'clashpanel:minigames:entity-guesser:daily:v1';
-export const STATS_STORAGE_KEY = 'clashpanel:minigames:entity-guesser:stats:v1';
+export const DAILY_STORAGE_KEY = 'clashpanel:minigames:entity-guesser:daily:v2';
+export const STATS_STORAGE_KEY = 'clashpanel:minigames:entity-guesser:stats:v2';
+export const PRACTICE_CATEGORY_KEY = 'clashpanel:minigames:entity-guesser:practice-category:v1';
 
 export function normalizeGuess(value) {
     return String(value || '')
@@ -12,7 +18,7 @@ export function normalizeGuess(value) {
         .toLowerCase();
 }
 
-export function findEntity(value, entities = TROOPS) {
+export function findEntity(value, entities) {
     const normalized = normalizeGuess(value);
     if (!normalized) return null;
     return entities.find(entity => {
@@ -21,12 +27,19 @@ export function findEntity(value, entities = TROOPS) {
     }) || null;
 }
 
-export function searchEntities(value, entities = TROOPS, limit = 8) {
+export function searchEntities(value, entities, limit = 8) {
     const normalized = normalizeGuess(value);
     if (!normalized) return entities.slice(0, limit);
     return entities
         .filter(entity => [entity.name, ...(entity.aliases || [])]
             .some(candidate => normalizeGuess(candidate).includes(normalized)))
+        .sort((left, right) => {
+            const leftName = normalizeGuess(left.name);
+            const rightName = normalizeGuess(right.name);
+            const leftStarts = leftName.startsWith(normalized) ? 0 : 1;
+            const rightStarts = rightName.startsWith(normalized) ? 0 : 1;
+            return leftStarts - rightStarts || left.name.localeCompare(right.name);
+        })
         .slice(0, limit);
 }
 
@@ -49,17 +62,45 @@ export function stableHash(value) {
     return hash >>> 0;
 }
 
-export function getDailyEntity(dateKey = utcDateKey(), entities = TROOPS) {
-    if (!entities.length) throw new Error('Entity Guesser requires at least one entity.');
-    return entities[stableHash(`clashpanel:${dateKey}:troops`) % entities.length];
+export function dayNumber(dateKey = utcDateKey()) {
+    return Math.floor(Date.parse(`${dateKey}T00:00:00.000Z`) / 86_400_000);
 }
 
-export function getPracticeEntity(entities = TROOPS, random = Math.random) {
-    if (!entities.length) throw new Error('Entity Guesser requires at least one entity.');
+export function getDailyCategory(dateKey = utcDateKey()) {
+    const index = Math.abs(dayNumber(dateKey)) % DAILY_CATEGORY_SEQUENCE.length;
+    return getCategory(DAILY_CATEGORY_SEQUENCE[index]);
+}
+
+export function getDailyEntity(dateKey = utcDateKey(), category = getDailyCategory(dateKey)) {
+    const entities = getEntities(category.id, { dailyOnly: true });
+    if (!entities.length) throw new Error(`Entity Guesser requires daily entities for ${category.id}.`);
+    return entities[stableHash(`clashpanel:${dateKey}:${category.id}`) % entities.length];
+}
+
+export function getPracticeEntity(category, random = Math.random) {
+    const entities = getEntities(category.id);
+    if (!entities.length) throw new Error(`Entity Guesser requires entities for ${category.id}.`);
     return entities[Math.floor(random() * entities.length) % entities.length];
 }
 
+export function formatValue(value) {
+    if (Array.isArray(value)) return value.join(' & ');
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+    if (value === null || value === undefined || value === '') return 'N/A';
+    return String(value);
+}
+
+function setsOverlap(left, right) {
+    const leftValues = new Set(Array.isArray(left) ? left : [left]);
+    const rightValues = Array.isArray(right) ? right : [right];
+    return rightValues.some(value => leftValues.has(value));
+}
+
 export function compareValue(guessValue, answerValue, column) {
+    if (guessValue === null || guessValue === undefined || answerValue === null || answerValue === undefined) {
+        return { state: 'notComparable', direction: null };
+    }
+
     if (column.kind === 'number') {
         const difference = Number(guessValue) - Number(answerValue);
         if (difference === 0) return { state: 'correct', direction: null };
@@ -69,16 +110,37 @@ export function compareValue(guessValue, answerValue, column) {
             direction: difference < 0 ? 'higher' : 'lower'
         };
     }
+
+    if (column.kind === 'ordered') {
+        const order = Array.isArray(column.order) ? column.order : [];
+        const guessIndex = order.indexOf(guessValue);
+        const answerIndex = order.indexOf(answerValue);
+        if (guessIndex === answerIndex) return { state: 'correct', direction: null };
+        if (guessIndex < 0 || answerIndex < 0) return { state: 'wrong', direction: null };
+        return {
+            state: Math.abs(guessIndex - answerIndex) === 1 ? 'close' : 'wrong',
+            direction: guessIndex < answerIndex ? 'higher' : 'lower'
+        };
+    }
+
+    if (column.kind === 'set') {
+        const guessFormatted = formatValue(guessValue);
+        const answerFormatted = formatValue(answerValue);
+        if (guessFormatted === answerFormatted) return { state: 'correct', direction: null };
+        return { state: setsOverlap(guessValue, answerValue) ? 'partial' : 'wrong', direction: null };
+    }
+
     return {
         state: guessValue === answerValue ? 'correct' : 'wrong',
         direction: null
     };
 }
 
-export function compareEntity(guess, answer, category = TROOP_CATEGORY) {
+export function compareEntity(guess, answer, category) {
     return category.columns.map(column => ({
         key: column.key,
         value: guess[column.key],
+        displayValue: formatValue(guess[column.key]),
         ...compareValue(guess[column.key], answer[column.key], column)
     }));
 }
@@ -87,27 +149,51 @@ export function isWinningGuess(guess, answer) {
     return Boolean(guess && answer && guess.id === answer.id);
 }
 
-export function calculateScore(attemptNumber, hintsUsed = 0, won = true) {
+export function calculateScore(attemptNumber, hintsUsed = 0, won = true, maxAttempts = 6) {
     if (!won) return 0;
-    const baseByAttempt = [1000, 850, 700, 550, 400, 250];
-    const base = baseByAttempt[Math.max(0, Math.min(baseByAttempt.length - 1, attemptNumber - 1))];
+    const scoreSteps = maxAttempts <= 5
+        ? [1000, 800, 600, 400, 250]
+        : [1000, 850, 700, 550, 400, 250];
+    const base = scoreSteps[Math.max(0, Math.min(scoreSteps.length - 1, attemptNumber - 1))];
     const hintPenalty = hintsUsed === 0 ? 0 : hintsUsed === 1 ? 100 : 250;
     return Math.max(100, base - hintPenalty);
 }
 
-export function availableHintCount(attempts, usedHints) {
-    const unlocked = attempts >= 5 ? 2 : attempts >= 3 ? 1 : 0;
+export function availableHintCount(attempts, usedHints, maxAttempts = 6) {
+    const firstUnlock = maxAttempts <= 5 ? 2 : 3;
+    const secondUnlock = maxAttempts <= 5 ? 4 : 5;
+    const unlocked = attempts >= secondUnlock ? 2 : attempts >= firstUnlock ? 1 : 0;
     return Math.max(0, unlocked - usedHints);
 }
 
-export function buildHint(answer, hintNumber) {
-    if (hintNumber === 1) {
-        return `${answer.movement} troop · targets ${answer.targets.toLowerCase()}.`;
-    }
-    return `${answer.resource} · ${answer.role.toLowerCase()} role · unlocked at Town Hall ${answer.unlockTh}.`;
+export function buildHint(answer, category, hintNumber) {
+    const hintBuilders = {
+        troops: [
+            entity => `${entity.movement} troop · targets ${formatValue(entity.targets).toLowerCase()}.`,
+            entity => `${entity.resource} · ${entity.role.toLowerCase()} role · unlocked at Town Hall ${entity.unlockTh}.`
+        ],
+        spells: [
+            entity => `${entity.resource} spell · ${entity.effect.toLowerCase()} effect.`,
+            entity => `${entity.housing} housing space · ${entity.unlockTier.toLowerCase()}-game unlock · ${entity.role.toLowerCase()} role.`
+        ],
+        heroes: [
+            entity => `${entity.movement} Hero · ${entity.attackStyle.toLowerCase()} attacker.`,
+            entity => `${entity.role} role · unlocked at Town Hall ${entity.unlockTh}.`
+        ],
+        pets: [
+            entity => `${entity.movement} Pet · ${entity.role.toLowerCase()} role.`,
+            entity => `Pet House level ${entity.petHouse} · unlocked at Town Hall ${entity.unlockTh}.`
+        ],
+        equipment: [
+            entity => `${entity.rarity} ${entity.activation.toLowerCase()} equipment for the ${entity.hero}.`,
+            entity => `${entity.effect} effect · mainly ${entity.role.toLowerCase()} · obtained from ${entity.source.toLowerCase()}.`
+        ]
+    };
+    const builders = hintBuilders[category.id] || [];
+    return builders[Math.max(0, hintNumber - 1)]?.(answer) || `Starts with “${answer.name.charAt(0)}”.`;
 }
 
-export function updateStreak(stats, completedDateKey, won) {
+export function updateStreak(stats, completedDateKey, won, categoryId) {
     const current = Number(stats?.currentStreak || 0);
     const best = Number(stats?.bestStreak || 0);
     const last = stats?.lastCompletedDate || null;
@@ -117,19 +203,49 @@ export function updateStreak(stats, completedDateKey, won) {
         nextCurrent = last === previousUtcDateKey(completedDateKey) ? current + 1 : 1;
     }
 
+    const categoryStats = { ...(stats?.categories || {}) };
+    const previousCategory = categoryStats[categoryId] || { played: 0, won: 0 };
+    if (last !== completedDateKey) {
+        categoryStats[categoryId] = {
+            played: Number(previousCategory.played || 0) + 1,
+            won: Number(previousCategory.won || 0) + (won ? 1 : 0)
+        };
+    }
+
     return {
         gamesPlayed: Number(stats?.gamesPlayed || 0) + (last === completedDateKey ? 0 : 1),
         gamesWon: Number(stats?.gamesWon || 0) + (last === completedDateKey || !won ? 0 : 1),
         currentStreak: nextCurrent,
         bestStreak: Math.max(best, nextCurrent),
-        lastCompletedDate: completedDateKey
+        lastCompletedDate: completedDateKey,
+        categories: categoryStats
     };
 }
 
 export function resultSquares(comparisonRows) {
     return comparisonRows.map(row => row.map(cell => {
         if (cell.state === 'correct') return '🟩';
-        if (cell.state === 'close') return '🟨';
+        if (cell.state === 'close' || cell.state === 'partial') return '🟨';
+        if (cell.state === 'notComparable') return '⬜';
         return '⬛';
     }).join(''));
+}
+
+export function validateCatalog() {
+    const ids = new Set();
+    const errors = [];
+
+    for (const category of ENTITY_CATEGORIES) {
+        const entities = getEntities(category.id);
+        if (entities.length < 5) errors.push(`${category.id} needs at least five entities.`);
+        for (const entity of entities) {
+            if (ids.has(entity.id)) errors.push(`Duplicate entity id: ${entity.id}`);
+            ids.add(entity.id);
+            for (const column of category.columns) {
+                if (!(column.key in entity)) errors.push(`${entity.id} is missing ${column.key}.`);
+            }
+        }
+    }
+
+    return errors;
 }
