@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/assets/js/Data/analytics.js"></script>
     <title>Daily Clash of Clans Entity Guesser | ClashPanel</title>
-    <meta name="description" content="Play ClashPanel's free daily Clash of Clans guessing game for troops, spells, Heroes, Hero Pets and Hero Equipment using text and stat feedback.">
+    <meta name="description" content="Play ClashPanel's free daily Clash of Clans guessing game for troops, spells, Heroes, Hero Pets, Hero Equipment, defenses, buildings and traps.">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#0d1117">
     <link rel="canonical" href="https://clashpanel.com/minigames">
@@ -13,10 +13,10 @@
     <meta property="og:site_name" content="ClashPanel">
     <meta property="og:url" content="https://clashpanel.com/minigames">
     <meta property="og:title" content="Daily Clash of Clans Entity Guesser">
-    <meta property="og:description" content="Guess today's hidden troop, spell, Hero, Pet or Hero Equipment in six attempts using category-specific feedback.">
+    <meta property="og:description" content="Guess today's hidden troop, spell, Hero, Pet, Equipment, defense, building or trap using category-specific feedback.">
     <meta name="twitter:card" content="summary">
     <script type="application/ld+json">
-        {"@context":"https://schema.org","@type":"Game","name":"ClashPanel Daily Entity Guesser","url":"https://clashpanel.com/minigames","description":"A free daily text and statistics based Clash of Clans knowledge quiz covering troops, spells, Heroes, Hero Pets and Hero Equipment.","gamePlatform":"Web browser","isAccessibleForFree":true}
+        {"@context":"https://schema.org","@type":"Game","name":"ClashPanel Daily Entity Guesser","url":"https://clashpanel.com/minigames","description":"A free daily text and statistics based Clash of Clans knowledge quiz covering permanent Home Village entities.","gamePlatform":"Web browser","isAccessibleForFree":true}
     </script>
     <link rel="icon" type="image/png" href="/assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="/assets/css/workspace-loading.css">
@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="/assets/css/workspace-system.css">
     <script src="/assets/js/Data/runtime-config.js"></script>
     <script type="module" src="/assets/js/pages/public-site.js"></script>
-    <script type="module" src="/assets/js/pages/minigames.js"></script>
+    <script type="module" src="/assets/js/pages/minigames-phase2b.js"></script>
     <link rel="stylesheet" href="/assets/css/light-theme.css">
     <link rel="stylesheet" href="/assets/css/workspace-polish.css">
     <link rel="stylesheet" href="/assets/css/public-marketing.css">
@@ -50,14 +50,14 @@
         <div class="minigames-hero-copy">
             <p class="eyebrow">ClashPanel Daily Games</p>
             <h1>One hidden entity. Your game knowledge.</h1>
-            <p>Every day rotates between Home Village troops, spells, Heroes, Hero Pets and Hero Equipment. Use category-specific feedback to solve the answer before your attempts run out.</p>
+            <p>Every day rotates through ten Home Village categories, from troops and Hero Equipment to defenses, buildings and traps. Each category uses its own meaningful comparison fields.</p>
         </div>
         <div class="minigames-orbit" aria-hidden="true">
             <div class="minigames-core"><span>?</span></div>
             <span class="minigames-node">Troops</span>
-            <span class="minigames-node">Spells</span>
-            <span class="minigames-node">Hero Pets</span>
-            <span class="minigames-node">Equipment</span>
+            <span class="minigames-node">Defenses</span>
+            <span class="minigames-node">Buildings</span>
+            <span class="minigames-node">Traps</span>
         </div>
     </section>
 
@@ -72,7 +72,7 @@
 
         <div class="game-content">
             <aside class="game-sidebar">
-                <p class="eyebrow" data-game-i18n="phase">Entity Guesser · Phase 2</p>
+                <p class="eyebrow" data-game-i18n="phase">Entity Guesser · Phase 2B</p>
                 <h2 data-category-title>Home Village Troops</h2>
                 <p data-game-i18n="instructions">Compare each property. Arrows show whether the hidden value is higher or lower.</p>
 
@@ -132,9 +132,9 @@
 
     <section class="minigames-category-summary" aria-labelledby="category-summary-title">
         <div>
-            <p class="eyebrow">Phase 2 catalog</p>
-            <h2 id="category-summary-title">Five fully playable knowledge categories.</h2>
-            <p>The daily rotates automatically. Practice lets you focus on one catalog without affecting your streak.</p>
+            <p class="eyebrow">Phase 2B catalog</p>
+            <h2 id="category-summary-title">Ten fully playable knowledge categories.</h2>
+            <p>The Daily rotates automatically. Practice lets you focus on one catalog without affecting your streak.</p>
         </div>
         <ul>
             <li><strong>32</strong><span>Home Village troops</span></li>
@@ -142,11 +142,16 @@
             <li><strong>6</strong><span>Heroes</span></li>
             <li><strong>12</strong><span>Hero Pets</span></li>
             <li><strong>41</strong><span>Hero Equipment items</span></li>
+            <li><strong>21</strong><span>Permanent defenses</span></li>
+            <li><strong>6</strong><span>Resource buildings</span></li>
+            <li><strong>12</strong><span>Army buildings</span></li>
+            <li><strong>7</strong><span>Utility buildings</span></li>
+            <li><strong>8</strong><span>Traps</span></li>
         </ul>
     </section>
 
     <aside class="minigames-policy">
-        This is an unofficial, text-and-statistics based fan quiz. It uses no official troop, Hero, Pet or Equipment artwork, no game audio and no recreated game interface. ClashPanel is not endorsed by Supercell.
+        This is an unofficial, text-and-statistics based fan quiz. It uses no official troop, Hero, Pet, Equipment, defense, building or trap artwork, no game audio and no recreated game interface. ClashPanel is not endorsed by Supercell.
     </aside>
 </main>
 
