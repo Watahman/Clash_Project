@@ -1,6 +1,9 @@
 import { initI18n, t } from '../i18n/i18n.js';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { getThemePreference, setThemePreference } from '../theme/theme-manager.js';
+import { normalizePublicShell } from '../shell/public-header.js';
+import { initPublicPageBindings } from './public-page-bindings.js';
+import { initPublicResourcePages } from './public-resource-pages.js';
 
 function toggleTheme() {
     const next = getThemePreference() === 'light' ? 'dark' : 'light';
@@ -89,7 +92,6 @@ function initCookiePreferencesControls() {
     sync();
     window.addEventListener('clashtools:cmp-ready', sync);
 }
-
 
 function initHomepageReveal() {
     const items = Array.from(document.querySelectorAll('[data-reveal]'));
@@ -191,7 +193,6 @@ function initHomepageDemo() {
     restart();
 }
 
-
 function initProductFlow() {
     document.querySelectorAll('[data-product-flow]').forEach(root => {
         const tabs = Array.from(root.querySelectorAll('[data-flow-tab]'));
@@ -235,7 +236,10 @@ async function redirectReturningUser() {
 }
 
 function init() {
+    normalizePublicShell();
     initI18n();
+    initPublicPageBindings();
+    initPublicResourcePages();
     initThemeButtons();
     initPublicMenu();
     initCookiePreferencesControls();
