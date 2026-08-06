@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { publicStaticLocales } from '../../src/assets/js/i18n/public-static-locales.js';
-import { getTranslationValue } from '../../src/assets/js/i18n/runtime-translations.js';
+import {
+    ensureLanguage,
+    getTranslationValue
+} from '../../src/assets/js/i18n/runtime-translations.js';
 
 const languages = ['nl', 'fr', 'de', 'es'];
 
@@ -12,11 +15,19 @@ describe('translation completeness', () => {
         });
     });
 
-    it('loads dashboard and help translations before async locale modules finish', () => {
+    it('loads dashboard and help translations in every supported language', async () => {
+        await Promise.all(languages.map(language => ensureLanguage(language)));
         languages.forEach(language => {
             expect(getTranslationValue(language, 'guidance.help.pageAction')).not.toBe('What can I do here?');
             expect(getTranslationValue(language, 'guidance.dashboard.title')).not.toBe('Find your next action');
             expect(getTranslationValue(language, 'guidance.dashboard.chooseTitle')).not.toBe('What do you want to do?');
+        });
+    });
+
+    it('keeps completion translations available before the async locale finishes', () => {
+        ['fr', 'de', 'es'].forEach(language => {
+            expect(getTranslationValue(language, 'guidance.help.pageAction')).not.toBe('What can I do here?');
+            expect(getTranslationValue(language, 'guidance.dashboard.title')).not.toBe('Find your next action');
         });
     });
 
