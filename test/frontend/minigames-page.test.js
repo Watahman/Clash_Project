@@ -25,6 +25,12 @@ describe('ClashPanel minigames public page', () => {
         expect(hubController).toContain("url.searchParams.delete('game')");
     });
 
+    it('uses minigames metadata rather than Entity-Guesser-only metadata', () => {
+        expect(page).toContain('<title>Daily Clash of Clans Minigames | ClashPanel</title>');
+        expect(page).toContain('Entity Guesser and Higher or Lower games');
+        expect(page).toContain('ClashPanel Higher or Lower');
+    });
+
     it('advertises the complete shared ten-category catalog', () => {
         expect(page).toContain('Ten knowledge categories, reused across both games.');
         [
