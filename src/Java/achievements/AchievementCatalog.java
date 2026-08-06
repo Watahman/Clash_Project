@@ -56,6 +56,19 @@ public final class AchievementCatalog {
         family(items, "module_mastery", "Module Mastery", "Combined defense module levels", "base", "defense_module_level_sum", 3, 6, 9, 12);
         family(items, "complete_export", "Complete Export", "Recognized sections present in the copied base-data", "system", "snapshot_section_count", 10, 16, 20, 22);
 
+        family(items, "snapshot_historian", "Snapshot Historian", "Base-data snapshots saved in ClashPanel", "history", "snapshot_import_count", 2, 5, 12, 25);
+        family(items, "long_term_tracker", "Long-term Tracker", "Days between the first and latest tracked snapshot", "history", "tracked_days", 7, 30, 90, 180);
+        family(items, "building_momentum", "Building Momentum", "Home Village building levels gained while tracked", "history", "tracked_home_building_levels", 5, 25, 75, 150);
+        family(items, "wall_marathon", "Wall Marathon", "Home Village wall levels gained while tracked", "history", "tracked_home_wall_levels", 25, 100, 300, 750);
+        family(items, "hero_training_arc", "Hero Training Arc", "Home Village hero levels gained while tracked", "history", "tracked_home_hero_levels", 1, 5, 15, 30);
+        family(items, "equipment_evolution", "Equipment Evolution", "Hero equipment levels gained while tracked", "history", "tracked_equipment_levels", 5, 25, 75, 150);
+        family(items, "army_evolution", "Army Evolution", "Troop, spell, siege and pet levels gained while tracked", "history", "tracked_army_levels", 5, 25, 75, 150);
+        family(items, "builder_momentum", "Builder Base Momentum", "Builder Base building levels gained while tracked", "history", "tracked_builder_building_levels", 5, 25, 75, 150);
+        family(items, "collection_growth", "Collection Growth", "Cosmetics and obstacles added while tracked", "history", "tracked_cosmetics_added", 1, 5, 15, 30);
+        family(items, "active_project_log", "Active Project Log", "Snapshots captured while at least one upgrade was active", "history", "tracked_active_upgrade_observations", 2, 5, 12, 25);
+        family(items, "productive_checkins", "Productive Check-ins", "Snapshot intervals with measurable progress", "history", "tracked_progress_intervals", 2, 5, 12, 25);
+        family(items, "progress_burst", "Progress Burst", "Largest combined positive level gain between two snapshots", "history", "tracked_largest_progress_jump", 5, 15, 30, 60);
+
         return List.copyOf(items);
     }
 
