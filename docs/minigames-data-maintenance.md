@@ -2,6 +2,21 @@
 
 The Entity Guesser uses curated static gameplay identity data. It is deliberately separate from live player and clan API data.
 
+## Current catalog scope
+
+Phase 2B contains ten playable categories and 163 curated entities:
+
+- Home Village troops;
+- Home Village spells;
+- Heroes;
+- Hero Pets;
+- Hero Equipment;
+- permanent defenses;
+- resource buildings;
+- army buildings;
+- utility buildings;
+- traps.
+
 ## Daily eligibility
 
 An entity may enter the Daily rotation only when:
