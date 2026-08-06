@@ -2,7 +2,7 @@
 
 The minigames use curated static gameplay identity data. This data is deliberately separate from live player and clan API data.
 
-## Current catalog scope
+## Current implementation scope
 
 The shared catalog contains ten playable categories and 163 curated entities:
 
@@ -19,8 +19,10 @@ The shared catalog contains ten playable categories and 163 curated entities:
 
 The catalog currently powers:
 
-- Entity Guesser;
-- Higher or Lower.
+- Entity Guesser, phases 1 through 2B;
+- Higher or Lower, phase 3A.
+
+Phase 3A means the complete Daily and Practice game loop is present, but advanced level-dependent combat comparisons, account synchronization and global leaderboards are not yet included.
 
 ## Daily eligibility
 
