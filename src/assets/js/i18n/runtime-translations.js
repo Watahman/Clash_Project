@@ -16,22 +16,26 @@ const localeLoaders = {
     nl: () => Promise.all([
         import('./locales/nl.js'),
         import('./runtime-locales/workspace-nl.js'),
-        import('./runtime-locales/public-nl.js')
+        import('./runtime-locales/public-nl.js'),
+        import('./locale-completions/nl.js')
     ]),
     fr: () => Promise.all([
         import('./locales/fr.js'),
         import('./runtime-locales/workspace-fr.js'),
-        import('./runtime-locales/public-fr.js')
+        import('./runtime-locales/public-fr.js'),
+        import('./locale-completions/fr.js')
     ]),
     de: () => Promise.all([
         import('./locales/de.js'),
         import('./runtime-locales/workspace-de.js'),
-        import('./runtime-locales/public-de.js')
+        import('./runtime-locales/public-de.js'),
+        import('./locale-completions/de.js')
     ]),
     es: () => Promise.all([
         import('./locales/es.js'),
         import('./runtime-locales/workspace-es.js'),
-        import('./runtime-locales/public-es.js')
+        import('./runtime-locales/public-es.js'),
+        import('./locale-completions/es.js')
     ])
 };
 
@@ -50,10 +54,16 @@ export async function ensureLanguage(language) {
     if (translations[language]) return translations[language];
     if (loadingLanguages.has(language)) return loadingLanguages.get(language);
 
-    const loading = localeLoaders[language]().then(([baseModule, workspaceModule, publicModule]) => {
+    const loading = localeLoaders[language]().then(([baseModule, workspaceModule, publicModule, completionModule]) => {
         const base = baseModule[language];
         const fallback = language === 'en' || language === 'nl' ? {} : plannerToolFallback;
-        const dictionary = Object.freeze({ ...fallback, ...base, ...workspaceModule.default, ...publicModule.default });
+        const dictionary = Object.freeze({
+            ...fallback,
+            ...base,
+            ...workspaceModule.default,
+            ...publicModule.default,
+            ...completionModule.default
+        });
         translations[language] = dictionary;
         loadingLanguages.delete(language);
         return dictionary;
