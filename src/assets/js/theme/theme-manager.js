@@ -1,3 +1,5 @@
+import { normalizePublicHeader } from '../shell/public-header.js';
+
 const THEME_STORAGE_KEY = 'clashtools_theme';
 const THEMES = new Set(['dark', 'light']);
 
@@ -42,6 +44,7 @@ export function setThemePreference(preference) {
 
 export function initTheme() {
     applyTheme();
+    normalizePublicHeader();
 }
 
 initTheme();
