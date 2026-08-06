@@ -1,4 +1,21 @@
 const ACHIEVEMENTS_PATH = '/app/achievements';
+const ACHIEVEMENT_LABELS = Object.freeze({
+    nl: 'Achievements',
+    en: 'Achievements',
+    fr: 'Succès',
+    de: 'Erfolge',
+    es: 'Logros'
+});
+
+function currentLabel() {
+    let language = 'en';
+    try {
+        language = localStorage.getItem('clashtools_language') || document.documentElement.lang || 'en';
+    } catch {
+        language = document.documentElement.lang || 'en';
+    }
+    return ACHIEVEMENT_LABELS[language] || ACHIEVEMENT_LABELS.en;
+}
 
 function achievementIcon() {
     return `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -21,9 +38,21 @@ function ensureAchievementsNavigation() {
         dashboard?.insertAdjacentElement('afterend', link);
     }
 
+    const label = currentLabel();
+    const labelElement = link.querySelector('span');
+    if (labelElement) labelElement.textContent = label;
+
     const active = window.location.pathname.replace(/\/+$/, '') === ACHIEVEMENTS_PATH;
-    if (active) link.setAttribute('aria-current', 'page');
-    else link.removeAttribute('aria-current');
+    if (active) {
+        link.setAttribute('aria-current', 'page');
+        const breadcrumb = document.querySelector('[data-workspace-current]');
+        if (breadcrumb) {
+            breadcrumb.dataset.i18n = 'nav.achievements';
+            breadcrumb.textContent = label;
+        }
+    } else {
+        link.removeAttribute('aria-current');
+    }
 
     if (link.dataset.achievementPrefetchBound !== 'true') {
         link.dataset.achievementPrefetchBound = 'true';
@@ -57,4 +86,5 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
         install();
     }
     window.addEventListener('clashtools:page-ready', ensureAchievementsNavigation);
+    window.addEventListener('clashtools:language-changed', ensureAchievementsNavigation);
 }
