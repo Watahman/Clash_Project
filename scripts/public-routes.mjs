@@ -6,6 +6,7 @@ export const publicRoutes = Object.freeze([
     { path: '/cwl-planner', file: 'cwl-planner.html', indexable: true, lastmod: '2026-08-04' },
     { path: '/cwl-tracker', file: 'cwl-tracker.html', indexable: true, lastmod: '2026-08-04' },
     { path: '/clan-management', file: 'clan-management.html', indexable: true, lastmod: '2026-08-04' },
+    { path: '/minigames', file: 'minigames.html', indexable: true, lastmod: '2026-08-06' },
     { path: '/guides', file: 'guides.html', indexable: true, lastmod: '2026-08-04' },
     { path: '/methodology', file: 'methodology.html', indexable: true, lastmod: '2026-08-04' },
     { path: '/changelog', file: 'changelog.html', indexable: true, lastmod: '2026-08-04' },
