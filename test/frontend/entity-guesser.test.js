@@ -17,10 +17,10 @@ import {
     resultSquares,
     updateStreak,
     validateCatalog
-} from '../../src/assets/js/minigames/entity-guesser-engine.js';
+} from '../../src/assets/js/minigames/entity-guesser-engine-v2.js';
 
-describe('Entity Guesser phase 2 engine', () => {
-    it('ships the five phase 2 categories with a versioned catalog', () => {
+describe('Entity Guesser core categories', () => {
+    it('ships the five core categories with a versioned catalog', () => {
         expect(ENTITY_GUESSER_DATA_VERSION).toContain('phase-2');
         expect(ENTITY_CATEGORIES.map(category => category.id)).toEqual([
             'troops', 'spells', 'heroes', 'pets', 'equipment'
