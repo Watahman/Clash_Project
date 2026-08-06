@@ -85,7 +85,9 @@ Rules:
 - the exact metric and unit are always visible;
 - a Daily contains ten questions, one from each category;
 - the Daily is deterministic from the UTC date;
-- Practice may be filtered by category and has no Daily score impact;
+- Daily progress survives refreshes;
+- Practice is unlimited, may be filtered by category and has no Daily score impact;
+- changing the Practice filter starts a new Practice run;
 - question results never depend on temporary boosts or player-specific levels.
 
 ## Higher or Lower scoring
