@@ -95,9 +95,21 @@ export function normalizePublicFooter(root = document) {
     footer.dataset.publicFooterNormalized = 'true';
 }
 
+function loadPolicyOverlay(root) {
+    if (!root.querySelector('[data-policy-document]')) return;
+    if (root.body.dataset.policyOverlayLoaded === 'true') return;
+    root.body.dataset.policyOverlayLoaded = 'true';
+    void import('../pages/public-policy-overlay.js')
+        .then(module => module.initPublicPolicyOverlay())
+        .catch(() => {
+            delete root.body.dataset.policyOverlayLoaded;
+        });
+}
+
 export function normalizePublicShell(root = document) {
     normalizePublicHeader(root);
     normalizePublicFooter(root);
+    loadPolicyOverlay(root);
 }
 
 if (document.readyState === 'loading') {
