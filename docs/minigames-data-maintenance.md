@@ -86,6 +86,16 @@ Rules:
 - Practice may be filtered by category and has no Daily score impact;
 - question results never depend on temporary boosts or player-specific levels.
 
+## Higher or Lower scoring
+
+- Every correct answer gives 100 base points.
+- Correct-answer combo 3–4 adds 10 points per answer.
+- Combo 5–7 adds 20 points per answer.
+- Combo 8–10 adds 30 points per answer.
+- A wrong answer gives 0 points and resets the combo.
+- Ten correct answers produce the maximum Daily score of 1,170.
+- The result shares only correct/incorrect symbols, score and best combo; it never reveals question answers.
+
 ## Level-dependent combat data
 
 HP, DPS, damage per hit, healing, duration and percentage effects are not yet eligible for Higher or Lower.
