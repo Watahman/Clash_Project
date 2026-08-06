@@ -80,11 +80,11 @@ function getEnglishSourceIndex() {
     return englishSourceIndex;
 }
 
-function translatedSourceValue(source) {
+function translatedSource(source) {
     const normalized = String(source || '').trim();
-    if (!normalized) return source;
+    if (!normalized) return null;
     const key = getEnglishSourceIndex().get(normalized);
-    if (!key) return source;
+    if (!key) return null;
     return t(key);
 }
 
@@ -99,8 +99,8 @@ function applyPublicTextNodes(root) {
         if (parent && !parent.closest(SOURCE_SKIP_SELECTOR)) {
             const original = sourceText.get(node) ?? node.nodeValue;
             if (!sourceText.has(node)) sourceText.set(node, original);
-            const translated = translatedSourceValue(original);
-            if (translated !== original.trim()) {
+            const translated = translatedSource(original);
+            if (translated !== null) {
                 const leading = original.match(/^\s*/)?.[0] || '';
                 const trailing = original.match(/\s*$/)?.[0] || '';
                 node.nodeValue = `${leading}${translated}${trailing}`;
@@ -128,8 +128,8 @@ function applyPublicAttributes(root) {
                         : null;
             if (explicitKey) return;
             if (!(name in saved)) saved[name] = element.getAttribute(name);
-            const translated = translatedSourceValue(saved[name]);
-            element.setAttribute(name, translated);
+            const translated = translatedSource(saved[name]);
+            element.setAttribute(name, translated ?? saved[name]);
         });
         sourceAttributes.set(element, saved);
     });
@@ -137,12 +137,12 @@ function applyPublicAttributes(root) {
 
 function applyPublicDocumentCopy() {
     if (!documentSource.title) documentSource.title = document.title;
-    document.title = translatedSourceValue(documentSource.title);
+    document.title = translatedSource(documentSource.title) ?? documentSource.title;
 
     const meta = document.querySelector('meta[name="description"]');
     if (meta) {
         if (!documentSource.description) documentSource.description = meta.content;
-        meta.content = translatedSourceValue(documentSource.description);
+        meta.content = translatedSource(documentSource.description) ?? documentSource.description;
     }
 }
 
