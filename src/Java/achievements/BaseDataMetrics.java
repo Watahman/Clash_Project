@@ -58,7 +58,7 @@ public final class BaseDataMetrics {
         metrics.put("builder_wall_level_sum", levelSumForData(array(root, "buildings2"), BUILDER_WALL_DATA_ID));
 
         metrics.put("active_upgrade_count", timedCount(root));
-        metrics.put("gear_up_count", positiveFieldCount(array(root, "buildings"), "gear_up"));
+        metrics.put("gear_up_count", positiveEntryCount(array(root, "buildings"), "gear_up"));
         metrics.put("townhall_weapon_level", maxField(array(root, "buildings"), "weapon"));
 
         ModuleTotals modules = moduleTotals(array(root, "buildings"));
@@ -222,17 +222,16 @@ public final class BaseDataMetrics {
         String[] timedSections = {"buildings", "traps", "siege_machines", "heroes", "pets", "equipment", "buildings2", "traps2", "heroes2"};
         long total = 0;
         for (String section : timedSections) {
-            total += positiveFieldCount(array(root, section), "timer");
+            total += positiveEntryCount(array(root, section), "timer");
         }
         return total;
     }
 
-    private static long positiveFieldCount(JsonArray array, String field) {
+    private static long positiveEntryCount(JsonArray array, String field) {
         long total = 0;
         for (JsonElement element : array) {
             if (!element.isJsonObject()) continue;
-            JsonObject object = element.getAsJsonObject();
-            if (positiveLong(object, field, 0) > 0) total += positiveLong(object, "cnt", 1);
+            if (positiveLong(element.getAsJsonObject(), field, 0) > 0) total++;
         }
         return total;
     }
