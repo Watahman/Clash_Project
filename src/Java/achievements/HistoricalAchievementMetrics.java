@@ -12,23 +12,11 @@ import java.util.TreeMap;
 
 /**
  * Derives cumulative, monotonic achievement metrics from stored base-data snapshots.
- * Only positive changes are counted so temporary parser changes or incomplete imports
- * cannot remove already observed progress.
+ * Progress is measured against a per-metric high-water mark so incomplete snapshots
+ * cannot remove progress or make restored values count a second time.
  */
 public final class HistoricalAchievementMetrics {
     private static final long SECONDS_PER_DAY = 86_400L;
-
-    private static final String[] CORE_PROGRESS_METRICS = {
-            "home_building_level_sum",
-            "home_wall_level_sum",
-            "home_hero_level_sum",
-            "equipment_level_sum",
-            "home_unit_level_sum",
-            "spell_level_sum",
-            "siege_level_sum",
-            "pet_level_sum",
-            "builder_building_level_sum"
-    };
 
     private HistoricalAchievementMetrics() {}
 
@@ -77,20 +65,20 @@ public final class HistoricalAchievementMetrics {
 
         long progressIntervals = 0;
         long largestProgressJump = 0;
+        Map<String, Long> highWater = new LinkedHashMap<>(snapshots.getFirst().getValue());
         for (int index = 1; index < snapshots.size(); index++) {
-            Map<String, Long> previous = snapshots.get(index - 1).getValue();
             Map<String, Long> current = snapshots.get(index).getValue();
 
-            long buildingGain = positiveDelta(previous, current, "home_building_level_sum");
-            long wallGain = positiveDelta(previous, current, "home_wall_level_sum");
-            long heroGain = positiveDelta(previous, current, "home_hero_level_sum");
-            long equipmentGain = positiveDelta(previous, current, "equipment_level_sum");
-            long armyGain = positiveDelta(previous, current, "home_unit_level_sum")
-                    + positiveDelta(previous, current, "spell_level_sum")
-                    + positiveDelta(previous, current, "siege_level_sum")
-                    + positiveDelta(previous, current, "pet_level_sum");
-            long builderGain = positiveDelta(previous, current, "builder_building_level_sum");
-            long collectionGain = positiveDelta(previous, current, "cosmetic_collection_count");
+            long buildingGain = gainAboveHighWater(highWater, current, "home_building_level_sum");
+            long wallGain = gainAboveHighWater(highWater, current, "home_wall_level_sum");
+            long heroGain = gainAboveHighWater(highWater, current, "home_hero_level_sum");
+            long equipmentGain = gainAboveHighWater(highWater, current, "equipment_level_sum");
+            long armyGain = gainAboveHighWater(highWater, current, "home_unit_level_sum")
+                    + gainAboveHighWater(highWater, current, "spell_level_sum")
+                    + gainAboveHighWater(highWater, current, "siege_level_sum")
+                    + gainAboveHighWater(highWater, current, "pet_level_sum");
+            long builderGain = gainAboveHighWater(highWater, current, "builder_building_level_sum");
+            long collectionGain = gainAboveHighWater(highWater, current, "cosmetic_collection_count");
 
             add(result, "tracked_home_building_levels", buildingGain);
             add(result, "tracked_home_wall_levels", wallGain);
@@ -100,11 +88,8 @@ public final class HistoricalAchievementMetrics {
             add(result, "tracked_builder_building_levels", builderGain);
             add(result, "tracked_cosmetics_added", collectionGain);
 
-            long intervalProgress = 0;
-            for (String metric : CORE_PROGRESS_METRICS) {
-                intervalProgress += positiveDelta(previous, current, metric);
-            }
-            intervalProgress += collectionGain;
+            long intervalProgress = buildingGain + wallGain + heroGain + equipmentGain
+                    + armyGain + builderGain + collectionGain;
             if (intervalProgress > 0) progressIntervals++;
             largestProgressJump = Math.max(largestProgressJump, intervalProgress);
         }
@@ -143,8 +128,16 @@ public final class HistoricalAchievementMetrics {
         return Map.copyOf(result);
     }
 
-    private static long positiveDelta(Map<String, Long> previous, Map<String, Long> current, String metric) {
-        return Math.max(0, value(current, metric) - value(previous, metric));
+    private static long gainAboveHighWater(
+            Map<String, Long> highWater,
+            Map<String, Long> current,
+            String metric
+    ) {
+        long previousMaximum = value(highWater, metric);
+        long currentValue = value(current, metric);
+        if (currentValue <= previousMaximum) return 0;
+        highWater.put(metric, currentValue);
+        return currentValue - previousMaximum;
     }
 
     private static long value(Map<String, Long> values, String key) {
