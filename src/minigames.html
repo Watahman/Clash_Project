@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/assets/js/Data/analytics.js"></script>
-    <title>Daily Clash of Clans Troop Guesser | ClashPanel</title>
-    <meta name="description" content="Play ClashPanel's free daily Clash of Clans troop guessing game. Compare troop type, movement, targets, housing space, Town Hall unlock and role.">
+    <title>Daily Clash of Clans Entity Guesser | ClashPanel</title>
+    <meta name="description" content="Play ClashPanel's free daily Clash of Clans guessing game for troops, spells, Heroes, Hero Pets and Hero Equipment using text and stat feedback.">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#0d1117">
     <link rel="canonical" href="https://clashpanel.com/minigames">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="ClashPanel">
     <meta property="og:url" content="https://clashpanel.com/minigames">
-    <meta property="og:title" content="Daily Clash of Clans Troop Guesser">
-    <meta property="og:description" content="Guess today's hidden troop in six attempts using stat and category feedback.">
+    <meta property="og:title" content="Daily Clash of Clans Entity Guesser">
+    <meta property="og:description" content="Guess today's hidden troop, spell, Hero, Pet or Hero Equipment in six attempts using category-specific feedback.">
     <meta name="twitter:card" content="summary">
     <script type="application/ld+json">
-        {"@context":"https://schema.org","@type":"Game","name":"ClashPanel Daily Troop Guesser","url":"https://clashpanel.com/minigames","description":"A free daily text and statistics based Clash of Clans troop knowledge quiz.","gamePlatform":"Web browser","isAccessibleForFree":true}
+        {"@context":"https://schema.org","@type":"Game","name":"ClashPanel Daily Entity Guesser","url":"https://clashpanel.com/minigames","description":"A free daily text and statistics based Clash of Clans knowledge quiz covering troops, spells, Heroes, Hero Pets and Hero Equipment.","gamePlatform":"Web browser","isAccessibleForFree":true}
     </script>
     <link rel="icon" type="image/png" href="/assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="/assets/css/workspace-loading.css">
@@ -29,6 +29,7 @@
     <link rel="stylesheet" href="/assets/css/workspace-polish.css">
     <link rel="stylesheet" href="/assets/css/public-marketing.css">
     <link rel="stylesheet" href="/assets/css/minigames.css">
+    <link rel="stylesheet" href="/assets/css/minigames-phase2.css">
 </head>
 <body class="public-site minigames-page">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
@@ -48,15 +49,15 @@
     <section class="minigames-hero">
         <div class="minigames-hero-copy">
             <p class="eyebrow">ClashPanel Daily Games</p>
-            <h1>Know the troop. Prove it.</h1>
-            <p>Find the hidden Home Village troop in six attempts. Every guess compares type, movement, targets, housing space, Town Hall unlock and battlefield role.</p>
+            <h1>One hidden entity. Your game knowledge.</h1>
+            <p>Every day rotates between Home Village troops, spells, Heroes, Hero Pets and Hero Equipment. Use category-specific feedback to solve the answer before your attempts run out.</p>
         </div>
         <div class="minigames-orbit" aria-hidden="true">
             <div class="minigames-core"><span>?</span></div>
-            <span class="minigames-node">Housing space</span>
-            <span class="minigames-node">Targets</span>
-            <span class="minigames-node">Town Hall</span>
-            <span class="minigames-node">Battle role</span>
+            <span class="minigames-node">Troops</span>
+            <span class="minigames-node">Spells</span>
+            <span class="minigames-node">Hero Pets</span>
+            <span class="minigames-node">Equipment</span>
         </div>
     </section>
 
@@ -71,9 +72,15 @@
 
         <div class="game-content">
             <aside class="game-sidebar">
-                <p class="eyebrow">Entity Guesser · Phase 1</p>
-                <h2 data-game-i18n="category">Home Village Troops</h2>
+                <p class="eyebrow" data-game-i18n="phase">Entity Guesser · Phase 2</p>
+                <h2 data-category-title>Home Village Troops</h2>
                 <p data-game-i18n="instructions">Compare each property. Arrows show whether the hidden value is higher or lower.</p>
+
+                <label class="game-category-picker" data-category-picker>
+                    <span data-game-i18n="selectCategory">Practice category</span>
+                    <select data-category-select aria-label="Practice category"></select>
+                </label>
+
                 <div class="game-stat-grid">
                     <div class="game-stat"><span data-game-i18n="attempts">Attempts</span><strong data-attempts-value>0/6</strong></div>
                     <div class="game-stat"><span data-game-i18n="score">Score</span><strong data-score-value>0</strong></div>
@@ -83,28 +90,30 @@
                 <div class="game-legend" aria-label="Feedback legend">
                     <div><span class="legend-dot correct"></span><span data-game-i18n="correct">Exact match</span></div>
                     <div><span class="legend-dot close"></span><span data-game-i18n="close">Close value</span></div>
+                    <div><span class="legend-dot partial"></span><span data-game-i18n="partial">Partial match</span></div>
                     <div><span class="legend-dot wrong"></span><span data-game-i18n="wrong">Different</span></div>
                 </div>
             </aside>
 
             <div class="game-board">
                 <div class="game-board-top">
-                    <div><p class="eyebrow">Six attempts · two optional hints</p><h2 id="game-title">Which troop is hidden?</h2></div>
+                    <div>
+                        <p class="eyebrow">Category-specific comparisons · two optional hints</p>
+                        <h2 id="game-title" data-game-title>Which entity is hidden?</h2>
+                    </div>
                     <button type="button" class="game-action secondary" data-new-practice hidden data-game-i18n="newPractice">New practice round</button>
                 </div>
 
                 <form class="guess-form" data-guess-form autocomplete="off">
-                    <label class="sr-only" for="troop-guess">Troop name</label>
-                    <input id="troop-guess" data-guess-input list="troop-suggestions" maxlength="40" required>
-                    <datalist id="troop-suggestions" data-guess-suggestions></datalist>
+                    <label class="sr-only" for="entity-guess" data-guess-input-label>Entity name</label>
+                    <input id="entity-guess" data-guess-input list="entity-suggestions" maxlength="60" required>
+                    <datalist id="entity-suggestions" data-guess-suggestions></datalist>
                     <button class="game-action" type="submit" data-game-i18n="submit">Submit guess</button>
                 </form>
                 <p class="game-message" data-game-message aria-live="polite"></p>
 
                 <div class="guess-scroll" tabindex="0" aria-label="Guess comparison table">
-                    <div class="guess-grid guess-grid-header" aria-hidden="true">
-                        <div>Guess</div><div data-column-label>Type</div><div data-column-label>Move</div><div data-column-label>Targets</div><div data-column-label>Favorite</div><div data-column-label>Housing</div><div data-column-label>TH</div><div data-column-label>Attack</div><div data-column-label>Role</div>
-                    </div>
+                    <div class="guess-grid guess-grid-header" data-guess-header aria-hidden="true"></div>
                     <div data-guess-rows></div>
                 </div>
 
@@ -121,8 +130,23 @@
         </div>
     </section>
 
+    <section class="minigames-category-summary" aria-labelledby="category-summary-title">
+        <div>
+            <p class="eyebrow">Phase 2 catalog</p>
+            <h2 id="category-summary-title">Five fully playable knowledge categories.</h2>
+            <p>The daily rotates automatically. Practice lets you focus on one catalog without affecting your streak.</p>
+        </div>
+        <ul>
+            <li><strong>32</strong><span>Home Village troops</span></li>
+            <li><strong>18</strong><span>Home Village spells</span></li>
+            <li><strong>6</strong><span>Heroes</span></li>
+            <li><strong>12</strong><span>Hero Pets</span></li>
+            <li><strong>41</strong><span>Hero Equipment items</span></li>
+        </ul>
+    </section>
+
     <aside class="minigames-policy">
-        This is an unofficial, text-and-statistics based fan quiz. It uses no official troop artwork, audio or recreated game interface. ClashPanel is not endorsed by Supercell.
+        This is an unofficial, text-and-statistics based fan quiz. It uses no official troop, Hero, Pet or Equipment artwork, no game audio and no recreated game interface. ClashPanel is not endorsed by Supercell.
     </aside>
 </main>
 
