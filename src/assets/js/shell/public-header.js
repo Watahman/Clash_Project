@@ -1,9 +1,9 @@
 const PUBLIC_NAV_ITEMS = Object.freeze([
-    { id: 'tools', href: '/#features', label: 'Tools' },
-    { id: 'guides', href: '/guides', label: 'Guides' },
-    { id: 'methodology', href: '/methodology', label: 'Methodology' },
-    { id: 'about', href: '/about', label: 'About' },
-    { id: 'changelog', href: '/changelog', label: 'Changelog' }
+    { id: 'tools', href: '/#features', key: 'public.nav.tools', label: 'Tools' },
+    { id: 'guides', href: '/guides', key: 'public.nav.guides', label: 'Guides' },
+    { id: 'methodology', href: '/methodology', key: 'public.nav.methodology', label: 'Methodology' },
+    { id: 'about', href: '/about', key: 'public.nav.about', label: 'About' },
+    { id: 'changelog', href: '/changelog', key: 'public.nav.changelog', label: 'Changelog' }
 ]);
 
 const TOOL_PATHS = new Set([
@@ -29,10 +29,8 @@ function currentPublicSection(pathname) {
 
 function navMarkup(activeSection) {
     return PUBLIC_NAV_ITEMS.map(item => {
-        const current = item.id === activeSection
-            ? ' aria-current="page"'
-            : '';
-        return `<a href="${item.href}"${current}>${item.label}</a>`;
+        const current = item.id === activeSection ? ' aria-current="page"' : '';
+        return `<a href="${item.href}" data-i18n="${item.key}"${current}>${item.label}</a>`;
     }).join('');
 }
 
@@ -44,11 +42,11 @@ export function normalizePublicHeader(root = document) {
 
     const activeSection = currentPublicSection(window.location.pathname);
     header.innerHTML = `
-        <a class="public-brand" href="/" aria-label="ClashPanel home">
+        <a class="public-brand" href="/" data-i18n-aria-label="public.homeLabel" aria-label="ClashPanel home">
             <img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160">
             <span>ClashPanel</span>
         </a>
-        <nav class="public-nav" id="public-nav" aria-label="Public navigation">
+        <nav class="public-nav" id="public-nav" data-i18n-aria-label="public.navigation" aria-label="Public navigation">
             ${navMarkup(activeSection)}
         </nav>
         <div class="public-actions">
@@ -67,8 +65,43 @@ export function normalizePublicHeader(root = document) {
     header.dataset.publicHeaderNormalized = 'true';
 }
 
+export function normalizePublicFooter(root = document) {
+    if (!root.body?.classList.contains('public-site')) return;
+
+    const footer = root.querySelector('footer.public-footer');
+    if (!footer || footer.dataset.publicFooterNormalized === 'true') return;
+
+    footer.innerHTML = `
+        <div class="public-footer-main">
+            <a class="public-brand" href="/" data-i18n-aria-label="public.homeLabel" aria-label="ClashPanel home">
+                <img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160">
+                <span>ClashPanel</span>
+            </a>
+            <nav data-i18n-aria-label="public.footerNav" aria-label="Footer navigation">
+                <a href="/guides" data-i18n="public.footer.guides">Guides</a>
+                <a href="/methodology" data-i18n="public.footer.methodology">Methodology</a>
+                <a href="/about" data-i18n="public.footer.about">About</a>
+                <a href="/changelog" data-i18n="public.footer.changelog">Changelog</a>
+                <a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a>
+                <a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a>
+                <a href="/subpages/terms" data-i18n="public.terms">Terms of use</a>
+                <a href="/subpages/contact" data-i18n="public.contact">Contact</a>
+                <a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer" data-i18n="public.fanPolicy">Supercell Fan Content Policy</a>
+                <button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button>
+            </nav>
+        </div>
+        <p class="public-disclaimer" data-i18n="public.disclaimer">ClashPanel is unofficial and is not endorsed by Supercell.</p>
+        <p class="public-footer-meta" data-i18n="public.footer.meta">© 2026 ClashPanel · Not affiliated with Supercell</p>`;
+    footer.dataset.publicFooterNormalized = 'true';
+}
+
+export function normalizePublicShell(root = document) {
+    normalizePublicHeader(root);
+    normalizePublicFooter(root);
+}
+
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => normalizePublicHeader(), { once: true });
+    document.addEventListener('DOMContentLoaded', () => normalizePublicShell(), { once: true });
 } else {
-    normalizePublicHeader();
+    normalizePublicShell();
 }
