@@ -1,0 +1,170 @@
+package Java;
+
+import Java.advancedstats.AdvancedStatsLifecycleService;
+import Java.advancedstats.AdvancedStatsModels;
+import Java.advancedstats.AdvancedStatsTrackingStatus;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.sun.net.httpserver.HttpServer;
+
+import java.time.Instant;
+import java.util.Optional;
+import java.util.UUID;
+
+/** Authenticated lifecycle routes for opt-in Advanced Stats tracking. */
+public final class SUPABASE_AdvancedStats {
+    public static final String ROUTE_TRACKING_START = "/AdvancedStatsTrackingStart";
+    public static final String ROUTE_TRACKING_GET = "/AdvancedStatsTrackingGet";
+    public static final String ROUTE_TRACKING_PAUSE = "/AdvancedStatsTrackingPause";
+    public static final String ROUTE_TRACKING_RESUME = "/AdvancedStatsTrackingResume";
+    public static final String ROUTE_TRACKING_STOP = "/AdvancedStatsTrackingStop";
+    public static final String ROUTE_DATA_DELETE = "/AdvancedStatsDataDelete";
+
+    private final HttpServer server;
+    private final API_Utils utils;
+    private final AdvancedStatsLifecycleService lifecycle;
+
+    public SUPABASE_AdvancedStats(HttpServer server, Config conf) {
+        this(server, conf, new AdvancedStatsLifecycleService());
+    }
+
+    SUPABASE_AdvancedStats(HttpServer server, Config conf, AdvancedStatsLifecycleService lifecycle) {
+        this.server = server;
+        this.utils = new API_Utils(conf);
+        this.lifecycle = lifecycle;
+    }
+
+    public void registerRoutes() {
+        registerStart();
+        registerStatus();
+        registerPause();
+        registerResume();
+        registerStop();
+        registerDelete();
+    }
+
+    private void registerStart() {
+        server.createContext(ROUTE_TRACKING_START, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject body = utils.parseBody(ex);
+            UUID userId = authenticatedUserId(ex);
+            AdvancedStatsModels.TrackingState state = lifecycle.start(userId, requirePlayerTag(body));
+            utils.sendJsonResponse(ex, trackingResponse(Optional.of(state)).toString(), 200);
+        }));
+    }
+
+    private void registerStatus() {
+        server.createContext(ROUTE_TRACKING_GET, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject body = utils.parseBody(ex);
+            UUID userId = authenticatedUserId(ex);
+            Optional<AdvancedStatsModels.TrackingState> state = lifecycle.status(userId, requirePlayerTag(body));
+            utils.sendJsonResponse(ex, trackingResponse(state).toString(), 200);
+        }));
+    }
+
+    private void registerPause() {
+        server.createContext(ROUTE_TRACKING_PAUSE, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject body = utils.parseBody(ex);
+            UUID userId = authenticatedUserId(ex);
+            AdvancedStatsModels.TrackingState state = lifecycle.pause(userId, requirePlayerTag(body));
+            utils.sendJsonResponse(ex, trackingResponse(Optional.of(state)).toString(), 200);
+        }));
+    }
+
+    private void registerResume() {
+        server.createContext(ROUTE_TRACKING_RESUME, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject body = utils.parseBody(ex);
+            UUID userId = authenticatedUserId(ex);
+            AdvancedStatsModels.TrackingState state = lifecycle.resume(userId, requirePlayerTag(body));
+            utils.sendJsonResponse(ex, trackingResponse(Optional.of(state)).toString(), 200);
+        }));
+    }
+
+    private void registerStop() {
+        server.createContext(ROUTE_TRACKING_STOP, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject body = utils.parseBody(ex);
+            UUID userId = authenticatedUserId(ex);
+            Optional<AdvancedStatsModels.TrackingState> state = lifecycle.stop(userId, requirePlayerTag(body));
+            utils.sendJsonResponse(ex, trackingResponse(state).toString(), 200);
+        }));
+    }
+
+    private void registerDelete() {
+        server.createContext(ROUTE_DATA_DELETE, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject body = utils.parseBody(ex);
+            UUID userId = authenticatedUserId(ex);
+            String playerTag = requirePlayerTag(body);
+            boolean deleted = lifecycle.delete(userId, playerTag);
+
+            JsonObject response = new JsonObject();
+            response.addProperty("success", true);
+            response.addProperty("deleted", deleted);
+            response.addProperty("enabled", false);
+            response.addProperty("status", "DISABLED");
+            utils.sendJsonResponse(ex, response.toString(), 200);
+        }));
+    }
+
+    private UUID authenticatedUserId(com.sun.net.httpserver.HttpExchange exchange) throws Exception {
+        String userId = utils.requireAuthenticatedUser(exchange);
+        try {
+            return UUID.fromString(userId);
+        } catch (IllegalArgumentException invalidProfileId) {
+            throw new HttpException(
+                    500,
+                    "{\"error\":\"Gebruikersprofiel heeft een ongeldige id\",\"code\":\"INVALID_PROFILE_ID\"}"
+            );
+        }
+    }
+
+    private String requirePlayerTag(JsonObject body) {
+        JsonElement playerTag = body.get("playerTag");
+        if (playerTag == null || playerTag.isJsonNull()) playerTag = body.get("playerID");
+        if (playerTag == null || playerTag.isJsonNull()
+                || !playerTag.isJsonPrimitive() || !playerTag.getAsJsonPrimitive().isString()) {
+            throw new IllegalArgumentException("Verplicht veld ontbreekt: playerTag");
+        }
+        return playerTag.getAsString();
+    }
+
+    static JsonObject trackingResponse(Optional<AdvancedStatsModels.TrackingState> state) {
+        JsonObject response = new JsonObject();
+        if (state == null || state.isEmpty()) {
+            response.addProperty("trackingExists", false);
+            response.addProperty("enabled", false);
+            response.addProperty("status", "DISABLED");
+            return response;
+        }
+
+        AdvancedStatsModels.TrackingState tracking = state.get();
+        AdvancedStatsTrackingStatus status = tracking.status();
+        response.addProperty("trackingExists", true);
+        response.addProperty("enabled", status != AdvancedStatsTrackingStatus.STOPPED);
+        response.addProperty("status", status.name());
+        response.addProperty("playerTag", tracking.playerTag());
+        addOptional(response, "playerName", tracking.playerName());
+        if (tracking.townHallLevel() == null) response.add("townHallLevel", JsonNull.INSTANCE);
+        else response.addProperty("townHallLevel", tracking.townHallLevel());
+        addOptional(response, "trackingStartedAt", tracking.trackingStartedAt());
+        addOptional(response, "bootstrapCompletedAt", tracking.bootstrapCompletedAt());
+        addOptional(response, "lastPollAt", tracking.lastPollAt());
+        addOptional(response, "lastSuccessfulPollAt", tracking.lastSuccessfulPollAt());
+        addOptional(response, "nextPollAt", tracking.nextPollAt());
+        addOptional(response, "gapStartedAt", tracking.gapStartedAt());
+        addOptional(response, "dataCompleteSince", tracking.dataCompleteSince());
+        response.addProperty("consecutiveFailures", tracking.consecutiveFailures());
+        response.addProperty("battlesProcessed", tracking.battlesProcessed());
+        response.addProperty("hasPotentialGap", tracking.gapStartedAt() != null);
+        return response;
+    }
+
+    private static void addOptional(JsonObject target, String field, String value) {
+        if (value == null || value.isBlank()) target.add(field, JsonNull.INSTANCE);
+        else target.addProperty(field, value);
+    }
+
+    private static void addOptional(JsonObject target, String field, Instant value) {
+        if (value == null) target.add(field, JsonNull.INSTANCE);
+        else target.addProperty(field, value.toString());
+    }
+}
