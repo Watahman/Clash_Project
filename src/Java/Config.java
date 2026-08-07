@@ -161,7 +161,7 @@ public class Config {
 
     String _EXT_SUPA_USER_ADD_FRIEND = "/SupabaseUserAddFriend";
     String _EXT_SUPA_USER_GET_PENDING_FRIENDS = "/SupabaseUserGetPendingFriends";
-    String _EXT_SUPA_USER_GET_FRIEND_REQUESTS =  "/SupabaseUserGetPendingFriends";
+    String _EXT_SUPA_USER_GET_FRIEND_REQUESTS =  "/SupabaseUserGetFriendRequests";
     String _EXT_SUPA_USER_ACCEPT_FRIEND =  "/SupabaseUserAcceptFriend";
     String _EXT_SUPA_USER_REJECT_FRIEND = "/SupabaseUserRejectFriend";
     String _EXT_SUPA_USER_GET_FRIENDS = "/SupabaseUserGetFriends";
@@ -247,7 +247,7 @@ public class Config {
         int start = Math.floorMod(clashApiKeyCursor.getAndIncrement(), keys.size());
         List<String> rotated = new ArrayList<>(keys.size());
         for (int offset = 0; offset < keys.size(); offset++) {
-            rotated.add(keys.get((start + offset) % keys.size()));
+            rotated.add(keys.get((start + offset) % keys.size());
         }
         return List.copyOf(rotated);
     }
