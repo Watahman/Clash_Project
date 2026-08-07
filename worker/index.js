@@ -25,7 +25,9 @@ const PUBLIC_REDIRECTS = new Map([
     ["/subpages/dashboard", "/dashboard"],
     ["/subpages/dashboard.html", "/dashboard"],
     ["/subpages/cwl-planner-drafts", "/app/cwl-planner-drafts"],
-    ["/subpages/cwl-planner-drafts.html", "/app/cwl-planner-drafts"]
+    ["/subpages/cwl-planner-drafts.html", "/app/cwl-planner-drafts"],
+    ["/subpages/advanced-stats", "/app/advanced-stats"],
+    ["/subpages/advanced-stats.html", "/app/advanced-stats"]
 ]);
 
 const APP_ASSETS = new Map([
@@ -34,7 +36,8 @@ const APP_ASSETS = new Map([
     ["/app/cwl-planner-drafts", "/subpages/cwl-planner-drafts"],
     ["/app/cwl-tracker", "/subpages/cwl-operation-board"],
     ["/app/clan-management", "/subpages/groups"],
-    ["/app/war-operation-board", "/subpages/war-operation-board"]
+    ["/app/war-operation-board", "/subpages/war-operation-board"],
+    ["/app/advanced-stats", "/subpages/advanced-stats"]
 ]);
 
 const APP_ALIASES = new Map([
@@ -49,7 +52,8 @@ const APP_ALIASES = new Map([
     ["/app/groups", "/app/clan-management"],
     ["/app/groups.html", "/app/clan-management"],
     ["/app/clan-management.html", "/app/clan-management"],
-    ["/app/war-operation-board.html", "/app/war-operation-board"]
+    ["/app/war-operation-board.html", "/app/war-operation-board"],
+    ["/app/advanced-stats.html", "/app/advanced-stats"]
 ]);
 
 function jsonError(status, code, error) {
