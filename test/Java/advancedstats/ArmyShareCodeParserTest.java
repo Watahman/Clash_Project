@@ -40,7 +40,7 @@ class ArmyShareCodeParserTest {
 
     @Test
     void recognizesSiegeMachinesSeparatelyFromTroops() throws Exception {
-        var army = parser.parse("u1x51-1x91-8x110");
+        var army = parser.parse("u1x51-1x91-1x188-8x110");
 
         assertTrue(army.units().stream().anyMatch(unit ->
                 unit.category() == AdvancedStatsUnitCategory.SIEGE
@@ -49,8 +49,46 @@ class ArmyShareCodeParserTest {
                 unit.category() == AdvancedStatsUnitCategory.SIEGE
                         && unit.unitName().equals("Flame Flinger")));
         assertTrue(army.units().stream().anyMatch(unit ->
+                unit.category() == AdvancedStatsUnitCategory.SIEGE
+                        && unit.unitName().equals("Sky Wagon")));
+        assertTrue(army.units().stream().anyMatch(unit ->
                 unit.category() == AdvancedStatsUnitCategory.TROOP
                         && unit.unitName().equals("Root Rider")));
+    }
+
+    @Test
+    void classifiesCurrentSuperTroopsWithoutMixingThemIntoRegularTroops() throws Exception {
+        var army = parser.parse("u5x26-4x27-3x98-2x147");
+
+        assertTrue(army.units().stream().anyMatch(unit ->
+                unit.category() == AdvancedStatsUnitCategory.SUPER_TROOP
+                        && unit.unitName().equals("Super Barbarian")));
+        assertTrue(army.units().stream().anyMatch(unit ->
+                unit.category() == AdvancedStatsUnitCategory.SUPER_TROOP
+                        && unit.unitName().equals("Super Archer")));
+        assertTrue(army.units().stream().anyMatch(unit ->
+                unit.category() == AdvancedStatsUnitCategory.SUPER_TROOP
+                        && unit.unitName().equals("Super Hog Rider")));
+        assertTrue(army.units().stream().anyMatch(unit ->
+                unit.category() == AdvancedStatsUnitCategory.SUPER_TROOP
+                        && unit.unitName().equals("Super Yeti")));
+    }
+
+    @Test
+    void resolvesNewCurrentTroopAndSpellMetadata() throws Exception {
+        var army = parser.parse("u2x109s1x123");
+
+        assertTrue(army.units().stream().anyMatch(unit -> unit.unitName().equals("Ruin Witch")));
+        assertTrue(army.units().stream().anyMatch(unit -> unit.unitName().equals("Angry Spell")));
+    }
+
+    @Test
+    void clanCastleSuperTroopKeepsClanCastleCategoryButResolvedName() throws Exception {
+        var army = parser.parse("i2x27");
+
+        assertTrue(army.units().stream().anyMatch(unit ->
+                unit.category() == AdvancedStatsUnitCategory.CLAN_CASTLE_TROOP
+                        && unit.unitName().equals("Super Archer")));
     }
 
     @Test
@@ -62,6 +100,14 @@ class ArmyShareCodeParserTest {
 
         assertEquals(raw.normalizedArmyJson(), link.normalizedArmyJson());
         assertEquals(raw.normalizedArmyHash(), link.normalizedArmyHash());
+    }
+
+    @Test
+    void fullLinkWithoutArmyParameterIsRejected() {
+        assertThrows(
+                ArmyShareCodeParser.ArmyParseException.class,
+                () -> parser.parse("https://link.clashofclans.com/en?action=CopyArmy")
+        );
     }
 
     @Test
