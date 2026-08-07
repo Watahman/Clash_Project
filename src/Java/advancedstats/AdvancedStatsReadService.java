@@ -23,22 +23,22 @@ public final class AdvancedStatsReadService {
         JsonElement trends(UUID trackingId, Instant from) throws Exception;
     }
 
-    public interface Ownership {
-        String requireLinkedAccount(UUID userId, String rawPlayerTag) throws Exception;
-    }
-
     record Cursor(Instant at, UUID id) {}
     private record Context(String playerTag, AdvancedStatsModels.TrackingState tracking) {}
 
     private final Store store;
-    private final Ownership ownership;
+    private final AdvancedStatsLifecycleService.Ownership ownership;
     private final Clock clock;
 
     public AdvancedStatsReadService() {
         this(new AdvancedStatsReadRepository(), new AdvancedStatsAccountOwnership(), Clock.systemUTC());
     }
 
-    AdvancedStatsReadService(Store store, Ownership ownership, Clock clock) {
+    AdvancedStatsReadService(
+            Store store,
+            AdvancedStatsLifecycleService.Ownership ownership,
+            Clock clock
+    ) {
         this.store = store;
         this.ownership = ownership;
         this.clock = clock;
