@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.util.HexFormat;
 
 public final class BattleFingerprint {
@@ -26,6 +27,35 @@ public final class BattleFingerprint {
         return sha256(canonical);
     }
 
+    /**
+     * Rich fingerprint for the current player battle log. The upstream payload
+     * does not guarantee an ID or timestamp, so loot is included as an extra
+     * discriminator. This keeps repeated polls idempotent without relying on
+     * response-array position, which changes as new battles arrive.
+     */
+    public static String from(AdvancedStatsModels.BattleCandidate battle) {
+        if (battle == null) throw new IllegalArgumentException("battle is required");
+
+        String canonical = String.join("|",
+                escape(battle.playerTag()),
+                canonicalInstant(battle.battleTimestamp()),
+                battle.attack() ? "attack" : "defense",
+                escape(battle.battleType()),
+                escape(battle.opponentPlayerTag()),
+                escape(battle.opponentName()),
+                battle.opponentTownHall() == null ? "" : Integer.toString(battle.opponentTownHall()),
+                battle.playerTownHall() == null ? "" : Integer.toString(battle.playerTownHall()),
+                battle.stars() == null ? "" : Integer.toString(battle.stars()),
+                canonicalNumber(battle.destructionPercentage()),
+                escape(battle.armyShareCode()),
+                Long.toString(battle.lootGold()),
+                Long.toString(battle.lootElixir()),
+                Long.toString(battle.lootDarkElixir())
+        );
+
+        return sha256(canonical);
+    }
+
     public static String sha256(String value) {
         if (value == null) throw new IllegalArgumentException("value is required");
         try {
@@ -34,6 +64,10 @@ public final class BattleFingerprint {
         } catch (NoSuchAlgorithmException impossible) {
             throw new IllegalStateException("SHA-256 is unavailable", impossible);
         }
+    }
+
+    private static String canonicalInstant(Instant value) {
+        return value == null ? "" : value.toString();
     }
 
     private static String canonicalNumber(Double value) {
