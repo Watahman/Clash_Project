@@ -4,6 +4,7 @@ import Java.SUPABASE_Client;
 import Java.cache.CacheKeys;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -12,14 +13,8 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Backend-only persistence boundary for Advanced Stats.
- *
- * Phase 1 intentionally exposes only read/existence primitives. Lifecycle writes,
- * battle ingestion and aggregate mutations are added in later phases so storage
- * semantics cannot accidentally become public before ownership rules exist.
- */
-public final class AdvancedStatsRepository {
+/** Backend-only persistence boundary for Advanced Stats. */
+public final class AdvancedStatsRepository implements AdvancedStatsLifecycleService.Store {
     static final String TRACKING_TABLE = "advanced_stats_tracking";
     static final String BATTLES_TABLE = "advanced_stats_battles";
     static final String BATTLE_UNITS_TABLE = "advanced_stats_battle_units";
@@ -41,10 +36,12 @@ public final class AdvancedStatsRepository {
             "last_successful_poll_at",
             "next_poll_at",
             "consecutive_failures",
+            "gap_started_at",
             "data_complete_since",
             "battles_processed"
     );
 
+    @Override
     public Optional<AdvancedStatsModels.TrackingState> findTracking(UUID userId, String rawPlayerTag)
             throws Exception {
         if (userId == null) throw new IllegalArgumentException("userId is required");
@@ -60,6 +57,83 @@ public final class AdvancedStatsRepository {
         return Optional.of(toTrackingState(rows.get(0).getAsJsonObject()));
     }
 
+    @Override
+    public AdvancedStatsModels.TrackingState startTracking(UUID userId, String rawPlayerTag) throws Exception {
+        if (userId == null) throw new IllegalArgumentException("userId is required");
+        String playerTag = CacheKeys.requireValidTag(rawPlayerTag);
+
+        JsonObject insert = new JsonObject();
+        insert.addProperty("user_id", userId.toString());
+        insert.addProperty("player_tag", playerTag);
+
+        // Only identity columns are included. On conflict the existing lifecycle state is preserved,
+        // making repeated start requests idempotent instead of resetting a paused/stopped tracker.
+        SUPABASE_Client.upsert(TRACKING_TABLE, "user_id,player_tag", insert.toString());
+        return requireTracking(userId, playerTag);
+    }
+
+    @Override
+    public AdvancedStatsModels.TrackingState pauseTracking(
+            UUID userId,
+            String rawPlayerTag,
+            Instant gapStartedAt
+    ) throws Exception {
+        String playerTag = CacheKeys.requireValidTag(rawPlayerTag);
+        Instant now = Instant.now();
+        JsonObject patch = baseLifecyclePatch(AdvancedStatsTrackingStatus.PAUSED, now);
+        patch.add("next_poll_at", JsonNull.INSTANCE);
+        patch.addProperty("gap_started_at", gapStartedAt.toString());
+        clearLease(patch);
+        patchTracking(userId, playerTag, patch);
+        return requireTracking(userId, playerTag);
+    }
+
+    @Override
+    public AdvancedStatsModels.TrackingState resumeTracking(
+            UUID userId,
+            String rawPlayerTag,
+            Instant resumeRequestedAt
+    ) throws Exception {
+        String playerTag = CacheKeys.requireValidTag(rawPlayerTag);
+        JsonObject patch = baseLifecyclePatch(AdvancedStatsTrackingStatus.INITIALIZING, resumeRequestedAt);
+        patch.addProperty("next_poll_at", resumeRequestedAt.toString());
+        patch.addProperty("consecutive_failures", 0);
+        clearLease(patch);
+        // gap_started_at is intentionally preserved until a successful collection pass can
+        // determine whether recent upstream history fully covered the interruption.
+        patchTracking(userId, playerTag, patch);
+        return requireTracking(userId, playerTag);
+    }
+
+    @Override
+    public AdvancedStatsModels.TrackingState stopTracking(
+            UUID userId,
+            String rawPlayerTag,
+            Instant gapStartedAt
+    ) throws Exception {
+        String playerTag = CacheKeys.requireValidTag(rawPlayerTag);
+        Instant now = Instant.now();
+        JsonObject patch = baseLifecyclePatch(AdvancedStatsTrackingStatus.STOPPED, now);
+        patch.add("next_poll_at", JsonNull.INSTANCE);
+        patch.addProperty("gap_started_at", gapStartedAt.toString());
+        clearLease(patch);
+        patchTracking(userId, playerTag, patch);
+        return requireTracking(userId, playerTag);
+    }
+
+    @Override
+    public boolean deleteTracking(UUID userId, String rawPlayerTag) throws Exception {
+        if (userId == null) throw new IllegalArgumentException("userId is required");
+        String playerTag = CacheKeys.requireValidTag(rawPlayerTag);
+        boolean existed = findTracking(userId, playerTag).isPresent();
+        if (!existed) return false;
+
+        String filter = "user_id=" + SUPABASE_Client.eq(userId.toString())
+                + "&player_tag=" + SUPABASE_Client.eq(playerTag);
+        SUPABASE_Client.deleteColumn(TRACKING_TABLE, filter);
+        return true;
+    }
+
     public boolean battleFingerprintExists(UUID trackingId, String rawFingerprint) throws Exception {
         if (trackingId == null) throw new IllegalArgumentException("trackingId is required");
         String fingerprint = AdvancedStatsModels.requireSha256(rawFingerprint, "fingerprint");
@@ -70,6 +144,30 @@ public final class AdvancedStatsRepository {
                 + "&limit=1";
 
         return !parseArray(SUPABASE_Client.getWithBody(BATTLES_TABLE, query)).isEmpty();
+    }
+
+    private AdvancedStatsModels.TrackingState requireTracking(UUID userId, String playerTag) throws Exception {
+        return findTracking(userId, playerTag)
+                .orElseThrow(() -> new IllegalStateException("Advanced Stats tracking row was not persisted"));
+    }
+
+    private void patchTracking(UUID userId, String playerTag, JsonObject patch) throws Exception {
+        if (userId == null) throw new IllegalArgumentException("userId is required");
+        String filter = "user_id=" + SUPABASE_Client.eq(userId.toString())
+                + "&player_tag=" + SUPABASE_Client.eq(playerTag);
+        SUPABASE_Client.patch(TRACKING_TABLE, filter, patch.toString());
+    }
+
+    private JsonObject baseLifecyclePatch(AdvancedStatsTrackingStatus status, Instant updatedAt) {
+        JsonObject patch = new JsonObject();
+        patch.addProperty("status", status.name());
+        patch.addProperty("updated_at", updatedAt.toString());
+        return patch;
+    }
+
+    private void clearLease(JsonObject patch) {
+        patch.add("locked_until", JsonNull.INSTANCE);
+        patch.add("locked_by", JsonNull.INSTANCE);
     }
 
     private AdvancedStatsModels.TrackingState toTrackingState(JsonObject row) {
@@ -86,6 +184,7 @@ public final class AdvancedStatsRepository {
                 optionalInstant(row, "last_successful_poll_at"),
                 optionalInstant(row, "next_poll_at"),
                 optionalInteger(row, "consecutive_failures", 0),
+                optionalInstant(row, "gap_started_at"),
                 optionalInstant(row, "data_complete_since"),
                 optionalLong(row, "battles_processed", 0L)
         );
