@@ -105,12 +105,14 @@ public final class AdvancedStatsRepository
     public boolean deleteTracking(UUID userId, String rawPlayerTag) throws Exception {
         if (userId == null) throw new IllegalArgumentException("userId is required");
         String playerTag = CacheKeys.requireValidTag(rawPlayerTag);
-        boolean existed = findTracking(userId, playerTag).isPresent();
-        if (!existed) return false;
-        String filter = "user_id=" + SUPABASE_Client.eq(userId.toString())
-                + "&player_tag=" + SUPABASE_Client.eq(playerTag);
-        SUPABASE_Client.deleteColumn(TRACKING_TABLE, filter);
-        return true;
+        JsonObject body = new JsonObject();
+        body.addProperty("p_user_id", userId.toString());
+        body.addProperty("p_player_tag", playerTag);
+        JsonObject result = parseObject(SUPABASE_Client.rpc(
+                "delete_advanced_stats_tracking_v1",
+                body.toString()
+        ));
+        return booleanValue(result, "deleted", false);
     }
 
     @Override
