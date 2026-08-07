@@ -8,6 +8,7 @@ const ACHIEVEMENT_LABELS = Object.freeze({
 });
 
 function currentLabel() {
+    if (typeof document === 'undefined') return ACHIEVEMENT_LABELS.en;
     let language = 'en';
     try {
         language = localStorage.getItem('clashtools_language') || document.documentElement.lang || 'en';
@@ -25,6 +26,7 @@ function achievementIcon() {
 }
 
 function ensureAchievementsNavigation() {
+    if (typeof document === 'undefined' || typeof window === 'undefined') return false;
     const navigation = document.querySelector('#workspace-navigation');
     if (!navigation) return false;
 
@@ -72,6 +74,10 @@ function prefetchAchievements() {
 function install() {
     if (ensureAchievementsNavigation()) return;
     const observer = new MutationObserver(() => {
+        if (typeof document === 'undefined' || typeof window === 'undefined') {
+            observer.disconnect();
+            return;
+        }
         if (!ensureAchievementsNavigation()) return;
         observer.disconnect();
     });
