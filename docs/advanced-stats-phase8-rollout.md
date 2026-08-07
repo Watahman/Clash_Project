@@ -24,10 +24,45 @@ For the first live stage, keep public enrollment disabled and put only the devel
 
 Do not put user UUID allowlists or scheduler secrets in frontend files or public runtime config.
 
+## Completed pre-live database validation
+
+Completed on the active production Supabase project on 2026-08-07:
+
+- Advanced Achievements foundation migration applied;
+- all seven Advanced Stats migrations applied in order;
+- all 9 required Achievement/Advanced Stats tables verified;
+- RLS verified on all 9 tables;
+- direct CRUD denied to `anon` and `authenticated`;
+- required CRUD available to `service_role`;
+- required backend RPCs verified;
+- backend-only RPC execute denied to `anon` and `authenticated`;
+- required RPC execute available to `service_role`;
+- all 8 required migration names verified in Supabase migration history.
+
+A transaction-only production DB smoke test also passed:
+
+- first battle persisted once;
+- duplicate fingerprint did not increment battle/aggregate counts twice;
+- daily, unit and army aggregates were correct;
+- `battles_processed` incremented once;
+- Advanced Stats -> Achievement reconciliation succeeded;
+- the transaction was rolled back;
+- follow-up checks confirmed zero synthetic tracking, battle or achievement rows remained.
+
+Reusable scripts:
+
+```text
+scripts/check-advanced-stats-schema.sql
+scripts/check-advanced-stats-schema.mjs
+scripts/smoke-test-advanced-stats-db.sql
+```
+
+The remaining Phase 8 gate is therefore runtime validation, not schema creation.
+
 ## Deployment order
 
-1. Run the ordered Advanced Stats/Achievements migrations.
-2. Deploy the backend with collection still disabled.
+1. Production database migrations — **COMPLETE**.
+2. Deploy the exact candidate backend with collection still disabled.
 3. Confirm `/health` and `/ready` are healthy.
 4. Confirm `POST /InternalAdvancedStatsPoll` behaves as disabled while `ADVANCED_STATS_COLLECTION_ENABLED=false`.
 5. Configure `ADVANCED_STATS_SCHEDULER_SECRET` through Secret Manager.
@@ -106,4 +141,6 @@ Then add a small explicit set of user UUIDs to `ADVANCED_STATS_ROLLOUT_USER_IDS`
 
 ## Current environment note
 
-Repository tests and static checks are not substitutes for this live gate. If the production/staging database has not yet received the Advanced Stats migrations, or Cloud Run/Scheduler is not deployed with the candidate backend, Phase 8 remains incomplete even if CI is green.
+The production database schema and transactional DB contract are now validated. Repository tests and the rollback DB smoke test are still not substitutes for the runtime gate.
+
+Phase 8 remains incomplete until the candidate backend is deployed and real Cloud Run + Clash API + Scheduler cycles have been observed with the developer-only rollout controls above.
