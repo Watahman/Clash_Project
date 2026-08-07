@@ -1,6 +1,6 @@
 # Advanced Stats — Scheduler Runbook
 
-This is the deployment/runbook for Phase 4. The code is intentionally **disabled by default** until the staged rollout phase explicitly enables it.
+This is the deployment/runbook for Advanced Stats collection. The code is intentionally **disabled by default** until the staged rollout explicitly enables it.
 
 ## Runtime design
 
@@ -33,11 +33,20 @@ Failure backoff is stored in `next_poll_at` and is independent of the scheduler 
 
 ## Required runtime variables
 
-The collector recognizes:
+Enrollment and background collection are separate controls.
+
+Rollout variables:
 
 ```text
+ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED
+ADVANCED_STATS_ROLLOUT_USER_IDS
 ADVANCED_STATS_COLLECTION_ENABLED
 ADVANCED_STATS_SCHEDULER_SECRET
+```
+
+Collector tuning variables:
+
+```text
 ADVANCED_STATS_BATCH_SIZE
 ADVANCED_STATS_LEASE_SECONDS
 ADVANCED_STATS_ACTIVE_POLL_MINUTES
@@ -49,9 +58,11 @@ ADVANCED_STATS_MAX_BACKOFF_MINUTES
 ADVANCED_STATS_DEGRADED_THRESHOLD
 ```
 
-Defaults:
+Safe defaults:
 
 ```text
+ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false
+ADVANCED_STATS_ROLLOUT_USER_IDS=
 ADVANCED_STATS_COLLECTION_ENABLED=false
 ADVANCED_STATS_BATCH_SIZE=25
 ADVANCED_STATS_LEASE_SECONDS=600
@@ -63,6 +74,8 @@ ADVANCED_STATS_UNKNOWN_BACKOFF_MINUTES=15
 ADVANCED_STATS_MAX_BACKOFF_MINUTES=240
 ADVANCED_STATS_DEGRADED_THRESHOLD=3
 ```
+
+With the defaults above, nobody can start a new tracker and the scheduled collector is disabled. Existing tracker history/lifecycle remains manageable.
 
 The 25-row/10-minute lease defaults are intentionally conservative for sequential upstream fetches. A slow batch has room to finish before the same rows become claimable by another scheduler invocation.
 
@@ -80,7 +93,7 @@ X-ClashPanel-Scheduler-Secret
 
 The endpoint uses constant-time comparison.
 
-Do not place this secret in frontend files, runtime-config.js, public environment variables or repository files.
+Do not place this secret, the rollout user allowlist or private runtime values in frontend files, `runtime-config.js`, public environment variables or repository files.
 
 ## Cloud Scheduler job
 
@@ -112,20 +125,23 @@ Keep project IAM restricted because Scheduler job configuration is infrastructur
 
 ## Rollout order
 
-Do not switch the flag directly to all users.
+Do not switch the feature directly to all users.
 
 Recommended order:
 
-1. deploy migrations and backend with `ADVANCED_STATS_COLLECTION_ENABLED=false`;
-2. confirm `/InternalAdvancedStatsPoll` returns 404 while disabled;
-3. configure the scheduler secret in Cloud Run;
-4. create the Cloud Scheduler job;
-5. enable one developer-owned tracker only;
-6. set `ADVANCED_STATS_COLLECTION_ENABLED=true`;
-7. observe multiple scheduler cycles;
-8. verify the same recent battle log does not increase counters twice;
-9. verify `last_successful_poll_at`, `next_poll_at`, leases and failure counters;
-10. only then expand the feature flag/user rollout.
+1. database migrations and rollback-only DB validation — **complete before runtime rollout**;
+2. deploy the exact candidate backend with `ADVANCED_STATS_COLLECTION_ENABLED=false` and `ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false`;
+3. confirm `/InternalAdvancedStatsPoll` returns 404 while collection is disabled;
+4. configure `ADVANCED_STATS_SCHEDULER_SECRET` in Cloud Run;
+5. set `ADVANCED_STATS_ROLLOUT_USER_IDS` to only the developer account UUID;
+6. create/configure the Cloud Scheduler job but keep collection disabled while verifying configuration;
+7. start one developer-owned linked account through the normal authenticated flow;
+8. verify a user outside the allowlist cannot start tracking;
+9. set `ADVANCED_STATS_COLLECTION_ENABLED=true`;
+10. observe multiple scheduler cycles;
+11. verify the same recent battle log does not increase counters twice;
+12. verify `last_successful_poll_at`, `next_poll_at`, leases and failure counters;
+13. only after the developer and small-subset stages are healthy may `ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=true` be considered.
 
 ## Operational signals
 
@@ -161,7 +177,7 @@ finalizeFailures
 healthy
 ```
 
-These counters provide an initial Cloud Logging signal without adding a separate metrics service in Phase 4.
+These counters provide an initial Cloud Logging signal without adding a separate metrics service.
 
 ## Failure semantics
 
@@ -176,6 +192,8 @@ A single failed fetch does not mark tracking `ERROR`.
 - `data_complete_since` restarts at recovery time after a known gap.
 
 If a Cloud Run worker dies while owning a tracker, the lease expires. The next worker can reclaim it, and the expired lease is recorded as a potential `WORKER_OUTAGE` gap.
+
+These database state transitions also have rollback-only synthetic production-DB coverage. The remaining live gate is specifically the real Cloud Run/Scheduler/network execution path.
 
 ## Why no Java timer
 
