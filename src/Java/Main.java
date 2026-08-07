@@ -22,6 +22,7 @@ public class Main {
         SUPABASE_User supaUser;
         SUPABASE_Auth supaAuth;
         SUPABASE_AdvancedStats supaAdvancedStats;
+        AdvancedStatsInternalPoll advancedStatsInternalPoll;
         PublicIntake publicIntake;
         API_Player apiPlayer;
         API_PlayerPerformance apiPlayerPerformance;
@@ -50,6 +51,7 @@ public class Main {
         supaUser = new SUPABASE_User(server, conf);
         supaAuth = new SUPABASE_Auth(server, conf);
         supaAdvancedStats = new SUPABASE_AdvancedStats(server, conf);
+        advancedStatsInternalPoll = new AdvancedStatsInternalPoll(server, conf);
         publicIntake = new PublicIntake(server, conf);
         supaCWLPlanner = new SUPABASE_CWLPlanner(server, conf);
         supaFriend = new SUPABASE_Friend(server, conf);
@@ -104,6 +106,7 @@ public class Main {
 
         supaAuth.registerRoutes();
         supaAdvancedStats.registerRoutes();
+        advancedStatsInternalPoll.registerRoute();
         publicIntake.registerRoutes();
 
         supaUser.getUserInfo();
