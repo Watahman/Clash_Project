@@ -36,7 +36,8 @@ declare
         'public.read_advanced_stats_battles_v1(uuid,timestamptz,integer,timestamptz,uuid)',
         'public.read_advanced_stats_trends_v1(uuid,timestamptz)',
         'public.read_advanced_stats_achievement_metrics_v1(uuid)',
-        'public.reconcile_advanced_stats_achievement_progress_v1(uuid,text,bigint,jsonb)'
+        'public.reconcile_advanced_stats_achievement_progress_v1(uuid,text,bigint,jsonb)',
+        'public.delete_advanced_stats_tracking_v1(uuid,text)'
     ];
     v_required_migrations text[] := array[
         'advanced_achievements_foundation',
@@ -46,7 +47,8 @@ declare
         'advanced_stats_scheduled_collection',
         'advanced_stats_read_models',
         'advanced_stats_exact_trends',
-        'advanced_stats_achievements_integration'
+        'advanced_stats_achievements_integration',
+        'advanced_stats_delete_cleanup'
     ];
 begin
     foreach v_table in array v_required_tables loop
@@ -119,8 +121,8 @@ end $$;
 select jsonb_build_object(
     'status', 'PASS',
     'tablesChecked', 9,
-    'functionsChecked', 16,
-    'migrationsChecked', 8,
+    'functionsChecked', 17,
+    'migrationsChecked', 9,
     'browserTableAccess', 'DENIED',
     'browserRpcExecute', 'DENIED',
     'serviceRoleAccess', 'REQUIRED'
