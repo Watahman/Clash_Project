@@ -54,4 +54,20 @@ class AdvancedStatsMigrationContractTest {
         assertTrue(sql.contains("when v_tracker.gap_started_at is not null then p_now"));
         assertTrue(sql.contains("revoke all on function public.claim_advanced_stats_trackers_v1"));
     }
+
+    @Test
+    void destructiveDeleteRemovesOnlyAdvancedStatsDerivedAchievementProgressAtomically() throws Exception {
+        String sql = Files.readString(Path.of(
+                "database/migrations/20260807_008_advanced_stats_delete_cleanup.sql"
+        ));
+
+        assertTrue(sql.contains("delete_advanced_stats_tracking_v1"));
+        assertTrue(sql.contains("delete from public.achievement_progress"));
+        assertTrue(sql.contains("'tracked_attack_count'"));
+        assertTrue(sql.contains("'tracked_star_count'"));
+        assertTrue(sql.contains("'tracked_three_star_count'"));
+        assertTrue(sql.contains("delete from public.advanced_stats_tracking"));
+        assertTrue(sql.contains("revoke all on function public.delete_advanced_stats_tracking_v1"));
+        assertTrue(sql.contains("grant execute on function public.delete_advanced_stats_tracking_v1"));
+    }
 }
