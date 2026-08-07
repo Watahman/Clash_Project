@@ -32,7 +32,7 @@ Before declaring **READY TO MERGE**:
 - Phase 3 — battle ingestion + army parsing + deduplication: **COMPLETE**
 - Phase 4 — scheduled collection: **COMPLETE**
 - Phase 5 — read APIs + derived stats: **COMPLETE**
-- Phase 6 — frontend + navigation + i18n: **NOT STARTED**
+- Phase 6 — frontend + navigation + i18n: **COMPLETE**
 - Phase 7 — Advanced Achievements integration: **BLOCKED until that work exists on master / is intentionally incorporated**
 - Phase 8 — hardening + staged rollout: **NOT STARTED**
 
@@ -42,7 +42,7 @@ Before declaring **READY TO MERGE**:
 
 Reasons:
 
-1. Advanced Stats still needs phases 6–8.
+1. Advanced Stats still needs Phase 7 integration/reconciliation and Phase 8 hardening/staged live rollout.
 2. The user explicitly wants other feature branches merged before this branch.
 3. This branch must later be refreshed against the then-current `master` and revalidated after those earlier branches land.
 4. Draft PR #8 is CI/review visibility only and must remain draft.
@@ -83,8 +83,6 @@ Implemented:
 - explicit `USER_PAUSED` gap reason;
 - authenticated lifecycle routes in `SUPABASE_AdvancedStats`;
 - ownership/lifecycle/response tests.
-
-Lifecycle routes remain backend-local until frontend integration in Phase 6.
 
 ---
 
@@ -207,9 +205,7 @@ contributes to the read models.
 all
 ```
 
-Missing/blank defaults to `all`.
-
-The same exact UTC lower boundary is used for overview, units, armies, battles and trends. Trend points filter individual battles before UTC daily bucketing, so the first day may be partial but cannot include data outside the requested window.
+The same exact UTC lower boundary is used for overview, units, armies, battles and trends. Trend points filter individual battles before UTC daily bucketing.
 
 ## Ownership-safe read service
 
@@ -218,13 +214,11 @@ Added:
 - `AdvancedStatsReadRepository`;
 - `AdvancedStatsReadService`.
 
-The read service reuses the exact Phase 2 verified-account ownership contract. The caller never supplies a tracking UUID; the backend resolves the owner's tracking row after linked-account verification.
+The read service reuses the Phase 2 verified-account ownership contract. The caller never supplies a tracking UUID; the backend resolves the owner's tracking row after linked-account verification.
 
 `STOPPED` history remains readable. Delete is the only lifecycle operation that removes read data.
 
 ## Authenticated read routes
-
-Added to `SUPABASE_AdvancedStats`:
 
 ```text
 POST /AdvancedStatsOverview
@@ -236,80 +230,175 @@ POST /AdvancedStatsTrends
 
 The backend provides graph/render-ready domain data. The browser does not recalculate core statistics and these endpoints do not make extra Clash API requests.
 
-## MVP derived statistics
-
-Overview provides:
-
-- attacks;
-- average stars;
-- average destruction;
-- 3-star rate;
-- Gold/Elixir/Dark Elixir tracked loot;
-- favorite troop/Super Troop;
-- favorite spell;
-- favorite siege machine;
-- favorite army and its average performance.
-
-Units provide:
-
-- stable key/name/category;
-- total quantity;
-- battles containing the unit;
-- usage rate;
-- first/last seen.
-
-Armies provide:
-
-- normalized army;
-- battle count;
-- average stars/destruction;
-- first/last seen.
-
-Trends provide exact-period UTC daily points.
-
 ## Battle-history pagination
 
-Battle history uses opaque cursor pagination rather than offsets.
-
-Stable ordering:
+Stable opaque cursor ordering:
 
 ```text
 (effective battle timestamp DESC, battle UUID DESC)
 ```
 
-The API returns an opaque URL-safe Base64 `nextCursor`. The frontend must pass it back unchanged.
+Battle response items distinguish `timestampSource=BATTLE|OBSERVED`.
 
-Battle response items expose history-safe parsed fields, including `timestampSource=BATTLE|OBSERVED`, army identity and parsed units. Raw API credentials/payload secrets are never returned.
-
-## Phase 5 tests
-
-Coverage includes:
-
-- 7/30/90/all period parsing/boundaries;
-- invalid periods/categories;
-- owner tracking-id resolution;
-- ownership failure before stats lookup;
-- history remains readable when tracking is `STOPPED`;
-- missing tracking -> `ADVANCED_STATS_NOT_ENABLED`;
-- army/battle limit caps;
-- cursor encode/decode and next-page forwarding;
-- invalid cursor rejection before DB query;
-- V3 ingestion RPC requirement;
-- per-battle army identity migration contract;
-- five read RPCs present;
-- exact trends period boundary;
-- service-role-only read RPC permissions.
-
-## Phase 5 API documentation
+API documentation:
 
 `docs/advanced-stats-read-api.md`
 
 ## Phase 5 CI
 
-Code/docs head before status update: `583bb7f95d4a3ecf05fecee269df92c92203797f`  
-GitHub Actions run: `31188112086` / run #464
+GitHub Actions run #464: **SUCCESS**.
 
-Results:
+Backend tests/package, frontend tests/build/static checks, migration/endpoint/casing checks and secret scan all passed.
+
+---
+
+# Phase 6 — frontend + navigation + i18n
+
+Implemented:
+
+## Private workspace route
+
+Added:
+
+```text
+/app/advanced-stats
+```
+
+The Cloudflare worker serves it from:
+
+```text
+/subpages/advanced-stats
+```
+
+and applies the existing private-app header:
+
+```text
+X-Robots-Tag: noindex, nofollow
+```
+
+Legacy `.html` access redirects to the clean app route.
+
+## Workspace navigation
+
+Added `advanced-stats-navigation.js`:
+
+- inserts an `Advanced Stats` item in a compact `Stats` section after Dashboard;
+- marks `/app/advanced-stats` active;
+- updates the workspace breadcrumb;
+- prefetches the private page on hover/focus;
+- installs only inside `workspace-app` pages.
+
+This is intentionally isolated rather than rewriting the existing workspace shell. Phase 7/current-master reconciliation can combine its placement with Advanced Achievements if that branch lands first.
+
+## Shared endpoint contract
+
+The six lifecycle and five read routes are now mirrored in:
+
+- `src/Java/Config.java`;
+- `src/assets/js/Data/config.js`.
+
+`SUPABASE_AdvancedStats` registers all browser-facing routes through `conf._EXT_ADVANCED_STATS_*`, allowing `scripts/check-endpoints.mjs` to enforce exact backend/frontend path parity.
+
+No scheduler secret or internal collector route is exposed to the browser.
+
+## Frontend API client
+
+Added:
+
+`src/assets/js/Supabase/Supabase-AdvancedStats.js`
+
+It uses the existing authenticated `databaseRequestWithBody` path and exposes only lifecycle/read operations. The browser never calls the Clash API directly.
+
+## Advanced Stats page
+
+Added:
+
+- `src/subpages/advanced-stats.html`;
+- `src/assets/css/advanced-stats.css`;
+- `src/assets/js/pages/advanced-stats-bootstrap.js`;
+- `src/assets/js/pages/advanced-stats.js`.
+
+The page supports:
+
+- linked-account selection;
+- no-linked-account guidance;
+- start tracking;
+- initializing state;
+- active/paused/degraded/stopped/error states;
+- refresh/pause/resume/stop/delete actions;
+- stop preserving historical data;
+- typed confirmation for destructive delete;
+- explicit gap/completeness warnings;
+- 7d / 30d / 90d / all tracked-time filters;
+- attack KPI overview;
+- favorite troop/spell/siege/army;
+- unit-category filtering;
+- favorite army composition cards;
+- daily performance trend visualization;
+- cursor-paginated battle timeline;
+- exact battle time versus first-observed-time labeling;
+- bootstrap-import labeling;
+- responsive desktop/mobile layouts.
+
+The frontend renders backend-derived statistics rather than duplicating domain calculations.
+
+## Auth/session initialization
+
+The page has a small bootstrap module that:
+
+1. waits for the existing `syncAuthSession()` flow;
+2. loads the existing profile overlay;
+3. only then initializes the Advanced Stats page.
+
+This avoids a race where the page could read `getCurrentUserId()` while the workspace shell was still refreshing the session.
+
+## Linked-account compatibility
+
+The UI consumes the existing `SupabaseUserIdCheck` profile response and supports the same account-tag shapes as backend ownership checks (`tag`, `playerTag`, `accountTag`, `clashTag`, including nested account/base objects).
+
+Tracking remains impossible for an arbitrary unlinked player tag because backend ownership remains authoritative.
+
+## Wording/data integrity
+
+UI copy explicitly states:
+
+- this is **tracked lifetime** / **all tracked time**, not reconstructed historical lifetime;
+- ClashPanel cannot reconstruct complete history before tracking starts;
+- troop/unit “usage” means presence in the recorded army composition, not proof that every unit was deployed;
+- an `OBSERVED` timestamp means first seen by ClashPanel when the upstream exact battle timestamp was unavailable;
+- known gaps are shown instead of silently claiming complete data.
+
+`STOPPED`, `PAUSED` and `DEGRADED` states keep existing history visible.
+
+## i18n
+
+Added a dedicated Advanced Stats locale module with complete English/Dutch key parity. Other existing workspace languages fall back to English for these new feature-specific strings until dedicated translations are added later.
+
+## Phase 6 tests
+
+Added frontend coverage for:
+
+- private/noindex page structure;
+- required lifecycle controls;
+- all four period filters;
+- units/armies/trends/timeline surfaces;
+- explicit button types;
+- stop versus destructive delete separation;
+- clean worker route + noindex header;
+- workspace navigation route;
+- complete EN/NL locale key parity;
+- non-misleading tracked-lifetime wording;
+- non-misleading army-composition wording.
+
+The normal repository endpoint checker also validates all 11 Advanced Stats browser routes against registered Java handlers.
+
+## Phase 6 CI
+
+Final code head before this status update:
+
+`75c56383bc2db22f1b7b8148a1abced360755d1d`
+
+GitHub Actions run `31190535645` / run #506:
 
 - secret scan: **PASS**;
 - `npm ci`: **PASS**;
@@ -323,14 +412,16 @@ Results:
 - `mvn --batch-mode package -DskipTests`: **PASS**;
 - overall CI: **SUCCESS**.
 
-### Phase 5 route-constant note
+### Phase 6 rollout note
 
-The five read routes and six lifecycle routes are still backend-local intentionally. Phase 6 must mirror the complete Advanced Stats API surface into shared frontend endpoint configuration and let `scripts/check-endpoints.mjs` enforce that browser/backend contract.
+The UI is implemented on this WIP branch, but real scheduled collection is still deliberately disabled by default. A user could start tracking only in an environment where this branch is deployed, but the collector will not begin live periodic tracking until Phase 8 explicitly configures and enables it.
 
 ---
 
 # Next phase
 
-Phase 6 — frontend + navigation + i18n.
+Phase 7 — Advanced Achievements integration/reconciliation.
 
-Phase 6 should build the actual Advanced Stats user experience on top of the Phase 2 lifecycle and Phase 5 read APIs. It must not move domain calculations into the browser and must preserve the explicit wording that "lifetime" means tracked lifetime since Advanced Stats was enabled.
+This phase must not blindly merge the old Advanced Achievements branch. First inspect whatever version has actually landed on the then-current `master`, then reconcile navigation and ensure Advanced Achievements consumes the shared Advanced Stats processed-data/event path rather than introducing duplicate battle-log polling/parsing.
+
+If the prerequisite Advanced Achievements work has still not landed, Phase 7 remains blocked and the branch must stay **NOT READY**.
