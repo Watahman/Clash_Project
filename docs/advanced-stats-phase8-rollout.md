@@ -29,15 +29,16 @@ Do not put user UUID allowlists or scheduler secrets in frontend files or public
 Completed on the active production Supabase project on 2026-08-07:
 
 - Advanced Achievements foundation migration applied;
-- all seven Advanced Stats migrations applied in order;
+- all eight Advanced Stats migrations applied in order;
 - all 9 required Achievement/Advanced Stats tables verified;
 - RLS verified on all 9 tables;
 - direct CRUD denied to `anon` and `authenticated`;
 - required CRUD available to `service_role`;
-- all 16 required backend RPC signatures verified;
+- all 17 required backend RPC signatures verified;
 - backend-only RPC execute denied to `anon` and `authenticated`;
 - required RPC execute available to `service_role`;
-- all 8 required migration names verified in Supabase migration history;
+- browser roles cannot create objects in schema `public`;
+- all 9 required migration names verified in Supabase migration history;
 - direct PostgreSQL role tests confirmed real `permission denied` behavior for browser roles;
 - migration SQL passed a replay/idempotency pattern audit.
 
@@ -51,16 +52,26 @@ Rollback-only synthetic production DB tests additionally verified:
 - RATE_LIMIT failures -> `DEGRADED` -> successful recovery;
 - all-time/7d/30d read models;
 - favorite unit/army ranking;
-- cursor pagination;
+- cursor pagination, including identical timestamps;
 - observed-time fallback;
 - exact trends and Achievement metrics;
 - parser-error isolation and one-time reprocessing;
 - STOPPED history preservation;
 - tracking/user delete cascades;
+- destructive Advanced Stats deletion resets only its derived Achievement metrics and preserves unrelated Achievement progress;
+- repeated feature-level deletion is idempotent;
 - constraint/abuse rejection;
 - monotonic Achievement progress/unlock/source timestamp behavior.
 
 A deeper parser/fingerprint pass also added regressions for non-finite numeric inputs, randomized army-order normalization, unknown IDs, timestamp-less fingerprint stability and a large deterministic identity sample.
+
+Pre-live frontend/privacy hardening also covers:
+
+- complete Advanced Stats locale parity for English, Dutch, French, German and Spanish;
+- translated dynamic army/category labels;
+- translated semantic accessibility labels;
+- private Advanced Stats/internal-poll API responses forced to `Cache-Control: no-store`;
+- Privacy/Terms wording aligned with opt-in collection, known gaps, stop/pause retention and destructive delete semantics.
 
 Reusable commands:
 
@@ -77,13 +88,13 @@ The remaining Phase 8 gate is therefore external runtime validation, not schema/
 
 1. Production database migrations — **COMPLETE**.
 2. Production DB schema/security/rollback behavior validation — **COMPLETE**.
-3. Deploy the exact candidate backend with collection still disabled.
+3. Deploy the exact candidate backend with collection and public enrollment still disabled.
 4. Confirm `/health` and `/ready` are healthy.
 5. Confirm `POST /InternalAdvancedStatsPoll` behaves as disabled while `ADVANCED_STATS_COLLECTION_ENABLED=false`.
 6. Configure `ADVANCED_STATS_SCHEDULER_SECRET` through Secret Manager.
 7. Set `ADVANCED_STATS_ROLLOUT_USER_IDS` to only the developer account.
 8. Start one developer-owned linked Clash account through the normal authenticated UI/API.
-9. Confirm no unrelated user can start tracking.
+9. Confirm a user outside the allowlist cannot start tracking.
 10. Enable `ADVANCED_STATS_COLLECTION_ENABLED=true`.
 11. Trigger/observe several real scheduler cycles before expanding the rollout.
 
@@ -154,6 +165,6 @@ Then add a small explicit set of user UUIDs to `ADVANCED_STATS_ROLLOUT_USER_IDS`
 
 ## Current environment note
 
-The production schema, permissions, constraints, aggregates, leases, failure/recovery state machine, read models, cascades and retry semantics now have direct rollback-only database validation.
+The production schema, permissions, constraints, aggregates, leases, failure/recovery state machine, read models, cascades, deletion reset and retry semantics now have direct rollback-only database validation.
 
 Phase 8 remains incomplete only for behavior that depends on the deployed backend/external environment: Cloud Run revision/runtime behavior, Cloud Scheduler authentication/invocation, real Clash API payloads/network behavior and a real observation window.
