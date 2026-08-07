@@ -11,44 +11,44 @@ class HistoricalAchievementMetricsTest {
     @Test
     void accumulatesOnlyPositiveChangesAcrossAllSnapshots() {
         var metrics = HistoricalAchievementMetrics.extract(List.of(
-                new HistoricalAchievementMetrics.Snapshot(1_000_000L, Map.of(
-                        "home_building_level_sum", 100L,
-                        "home_wall_level_sum", 500L,
-                        "home_hero_level_sum", 50L,
-                        "equipment_level_sum", 20L,
-                        "home_unit_level_sum", 80L,
-                        "spell_level_sum", 20L,
-                        "siege_level_sum", 10L,
-                        "pet_level_sum", 10L,
-                        "builder_building_level_sum", 200L,
-                        "cosmetic_collection_count", 25L,
-                        "active_upgrade_count", 2L
+                new HistoricalAchievementMetrics.Snapshot(1_000_000L, Map.ofEntries(
+                        Map.entry("home_building_level_sum", 100L),
+                        Map.entry("home_wall_level_sum", 500L),
+                        Map.entry("home_hero_level_sum", 50L),
+                        Map.entry("equipment_level_sum", 20L),
+                        Map.entry("home_unit_level_sum", 80L),
+                        Map.entry("spell_level_sum", 20L),
+                        Map.entry("siege_level_sum", 10L),
+                        Map.entry("pet_level_sum", 10L),
+                        Map.entry("builder_building_level_sum", 200L),
+                        Map.entry("cosmetic_collection_count", 25L),
+                        Map.entry("active_upgrade_count", 2L)
                 )),
-                new HistoricalAchievementMetrics.Snapshot(1_086_400L, Map.of(
-                        "home_building_level_sum", 110L,
-                        "home_wall_level_sum", 520L,
-                        "home_hero_level_sum", 52L,
-                        "equipment_level_sum", 25L,
-                        "home_unit_level_sum", 82L,
-                        "spell_level_sum", 21L,
-                        "siege_level_sum", 10L,
-                        "pet_level_sum", 10L,
-                        "builder_building_level_sum", 204L,
-                        "cosmetic_collection_count", 27L,
-                        "active_upgrade_count", 0L
+                new HistoricalAchievementMetrics.Snapshot(1_086_400L, Map.ofEntries(
+                        Map.entry("home_building_level_sum", 110L),
+                        Map.entry("home_wall_level_sum", 520L),
+                        Map.entry("home_hero_level_sum", 52L),
+                        Map.entry("equipment_level_sum", 25L),
+                        Map.entry("home_unit_level_sum", 82L),
+                        Map.entry("spell_level_sum", 21L),
+                        Map.entry("siege_level_sum", 10L),
+                        Map.entry("pet_level_sum", 10L),
+                        Map.entry("builder_building_level_sum", 204L),
+                        Map.entry("cosmetic_collection_count", 27L),
+                        Map.entry("active_upgrade_count", 0L)
                 )),
-                new HistoricalAchievementMetrics.Snapshot(1_172_800L, Map.of(
-                        "home_building_level_sum", 108L,
-                        "home_wall_level_sum", 550L,
-                        "home_hero_level_sum", 55L,
-                        "equipment_level_sum", 28L,
-                        "home_unit_level_sum", 85L,
-                        "spell_level_sum", 23L,
-                        "siege_level_sum", 11L,
-                        "pet_level_sum", 12L,
-                        "builder_building_level_sum", 210L,
-                        "cosmetic_collection_count", 30L,
-                        "active_upgrade_count", 1L
+                new HistoricalAchievementMetrics.Snapshot(1_172_800L, Map.ofEntries(
+                        Map.entry("home_building_level_sum", 108L),
+                        Map.entry("home_wall_level_sum", 550L),
+                        Map.entry("home_hero_level_sum", 55L),
+                        Map.entry("equipment_level_sum", 28L),
+                        Map.entry("home_unit_level_sum", 85L),
+                        Map.entry("spell_level_sum", 23L),
+                        Map.entry("siege_level_sum", 11L),
+                        Map.entry("pet_level_sum", 12L),
+                        Map.entry("builder_building_level_sum", 210L),
+                        Map.entry("cosmetic_collection_count", 30L),
+                        Map.entry("active_upgrade_count", 1L)
                 ))
         ));
 
