@@ -31,6 +31,7 @@ const env = {
 
 const scripts = [
   'check-advanced-stats-schema.sql',
+  'smoke-test-advanced-stats-db.sql',
   'smoke-test-advanced-stats-state-machine.sql',
   'smoke-test-advanced-stats-read-models.sql',
   'smoke-test-advanced-stats-constraints.sql',
