@@ -7,11 +7,6 @@ function icon() {
     </svg>`;
 }
 
-function translated(key, fallback) {
-    const source = globalThis.clashtoolsI18n?.t;
-    return typeof source === 'function' ? source(key) : fallback;
-}
-
 function ensureNavigation() {
     if (!document.body?.classList.contains('workspace-app')) return false;
     const navigation = document.querySelector('#workspace-navigation');
@@ -24,7 +19,6 @@ function ensureNavigation() {
     if (!heading) {
         heading = document.createElement('p');
         heading.dataset.advancedStatsNavSection = 'true';
-        heading.dataset.i18n = 'advancedStats.navSection';
         heading.textContent = 'Stats';
         dashboard.insertAdjacentElement('afterend', heading);
     }
@@ -45,7 +39,7 @@ function ensureNavigation() {
         const breadcrumb = document.querySelector('[data-workspace-current]');
         if (breadcrumb) {
             breadcrumb.dataset.i18n = 'nav.advancedStats';
-            breadcrumb.textContent = translated('nav.advancedStats', 'Advanced Stats');
+            breadcrumb.textContent = 'Advanced Stats';
         }
     } else {
         link.removeAttribute('aria-current');
