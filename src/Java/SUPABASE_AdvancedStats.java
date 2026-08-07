@@ -21,7 +21,6 @@ public final class SUPABASE_AdvancedStats {
     public static final String ROUTE_TRACKING_RESUME = "/AdvancedStatsTrackingResume";
     public static final String ROUTE_TRACKING_STOP = "/AdvancedStatsTrackingStop";
     public static final String ROUTE_DATA_DELETE = "/AdvancedStatsDataDelete";
-
     public static final String ROUTE_OVERVIEW = "/AdvancedStatsOverview";
     public static final String ROUTE_UNITS = "/AdvancedStatsUnits";
     public static final String ROUTE_ARMIES = "/AdvancedStatsArmies";
@@ -29,6 +28,7 @@ public final class SUPABASE_AdvancedStats {
     public static final String ROUTE_TRENDS = "/AdvancedStatsTrends";
 
     private final HttpServer server;
+    private final Config conf;
     private final API_Utils utils;
     private final AdvancedStatsLifecycleService lifecycle;
     private final AdvancedStatsReadService reads;
@@ -48,6 +48,7 @@ public final class SUPABASE_AdvancedStats {
             AdvancedStatsReadService reads
     ) {
         this.server = server;
+        this.conf = conf;
         this.utils = new API_Utils(conf);
         this.lifecycle = lifecycle;
         this.reads = reads;
@@ -68,7 +69,7 @@ public final class SUPABASE_AdvancedStats {
     }
 
     private void registerStart() {
-        server.createContext(ROUTE_TRACKING_START, exchange -> utils.handlePost(exchange, ex -> {
+        server.createContext(conf._EXT_ADVANCED_STATS_TRACKING_START, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject body = utils.parseBody(ex);
             UUID userId = authenticatedUserId(ex);
             AdvancedStatsModels.TrackingState state = lifecycle.start(userId, requirePlayerTag(body));
@@ -77,7 +78,7 @@ public final class SUPABASE_AdvancedStats {
     }
 
     private void registerStatus() {
-        server.createContext(ROUTE_TRACKING_GET, exchange -> utils.handlePost(exchange, ex -> {
+        server.createContext(conf._EXT_ADVANCED_STATS_TRACKING_GET, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject body = utils.parseBody(ex);
             UUID userId = authenticatedUserId(ex);
             Optional<AdvancedStatsModels.TrackingState> state = lifecycle.status(userId, requirePlayerTag(body));
@@ -86,7 +87,7 @@ public final class SUPABASE_AdvancedStats {
     }
 
     private void registerPause() {
-        server.createContext(ROUTE_TRACKING_PAUSE, exchange -> utils.handlePost(exchange, ex -> {
+        server.createContext(conf._EXT_ADVANCED_STATS_TRACKING_PAUSE, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject body = utils.parseBody(ex);
             UUID userId = authenticatedUserId(ex);
             AdvancedStatsModels.TrackingState state = lifecycle.pause(userId, requirePlayerTag(body));
@@ -95,7 +96,7 @@ public final class SUPABASE_AdvancedStats {
     }
 
     private void registerResume() {
-        server.createContext(ROUTE_TRACKING_RESUME, exchange -> utils.handlePost(exchange, ex -> {
+        server.createContext(conf._EXT_ADVANCED_STATS_TRACKING_RESUME, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject body = utils.parseBody(ex);
             UUID userId = authenticatedUserId(ex);
             AdvancedStatsModels.TrackingState state = lifecycle.resume(userId, requirePlayerTag(body));
@@ -104,7 +105,7 @@ public final class SUPABASE_AdvancedStats {
     }
 
     private void registerStop() {
-        server.createContext(ROUTE_TRACKING_STOP, exchange -> utils.handlePost(exchange, ex -> {
+        server.createContext(conf._EXT_ADVANCED_STATS_TRACKING_STOP, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject body = utils.parseBody(ex);
             UUID userId = authenticatedUserId(ex);
             Optional<AdvancedStatsModels.TrackingState> state = lifecycle.stop(userId, requirePlayerTag(body));
@@ -113,7 +114,7 @@ public final class SUPABASE_AdvancedStats {
     }
 
     private void registerDelete() {
-        server.createContext(ROUTE_DATA_DELETE, exchange -> utils.handlePost(exchange, ex -> {
+        server.createContext(conf._EXT_ADVANCED_STATS_DATA_DELETE, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject body = utils.parseBody(ex);
             UUID userId = authenticatedUserId(ex);
             String playerTag = requirePlayerTag(body);
@@ -129,7 +130,7 @@ public final class SUPABASE_AdvancedStats {
     }
 
     private void registerOverview() {
-        server.createContext(ROUTE_OVERVIEW, exchange -> utils.handlePost(exchange, ex -> {
+        server.createContext(conf._EXT_ADVANCED_STATS_OVERVIEW, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject body = utils.parseBody(ex);
             JsonObject response = reads.overview(
                     authenticatedUserId(ex),
@@ -141,7 +142,7 @@ public final class SUPABASE_AdvancedStats {
     }
 
     private void registerUnits() {
-        server.createContext(ROUTE_UNITS, exchange -> utils.handlePost(exchange, ex -> {
+        server.createContext(conf._EXT_ADVANCED_STATS_UNITS, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject body = utils.parseBody(ex);
             JsonObject response = reads.units(
                     authenticatedUserId(ex),
@@ -154,7 +155,7 @@ public final class SUPABASE_AdvancedStats {
     }
 
     private void registerArmies() {
-        server.createContext(ROUTE_ARMIES, exchange -> utils.handlePost(exchange, ex -> {
+        server.createContext(conf._EXT_ADVANCED_STATS_ARMIES, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject body = utils.parseBody(ex);
             JsonObject response = reads.armies(
                     authenticatedUserId(ex),
@@ -167,7 +168,7 @@ public final class SUPABASE_AdvancedStats {
     }
 
     private void registerBattles() {
-        server.createContext(ROUTE_BATTLES, exchange -> utils.handlePost(exchange, ex -> {
+        server.createContext(conf._EXT_ADVANCED_STATS_BATTLES, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject body = utils.parseBody(ex);
             JsonObject response = reads.battles(
                     authenticatedUserId(ex),
@@ -181,7 +182,7 @@ public final class SUPABASE_AdvancedStats {
     }
 
     private void registerTrends() {
-        server.createContext(ROUTE_TRENDS, exchange -> utils.handlePost(exchange, ex -> {
+        server.createContext(conf._EXT_ADVANCED_STATS_TRENDS, exchange -> utils.handlePost(exchange, ex -> {
             JsonObject body = utils.parseBody(ex);
             JsonObject response = reads.trends(
                     authenticatedUserId(ex),
