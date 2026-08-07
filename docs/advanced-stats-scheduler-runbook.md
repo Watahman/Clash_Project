@@ -53,8 +53,8 @@ Defaults:
 
 ```text
 ADVANCED_STATS_COLLECTION_ENABLED=false
-ADVANCED_STATS_BATCH_SIZE=50
-ADVANCED_STATS_LEASE_SECONDS=120
+ADVANCED_STATS_BATCH_SIZE=25
+ADVANCED_STATS_LEASE_SECONDS=600
 ADVANCED_STATS_ACTIVE_POLL_MINUTES=15
 ADVANCED_STATS_IDLE_POLL_MINUTES=30
 ADVANCED_STATS_RATE_LIMIT_BACKOFF_MINUTES=30
@@ -63,6 +63,8 @@ ADVANCED_STATS_UNKNOWN_BACKOFF_MINUTES=15
 ADVANCED_STATS_MAX_BACKOFF_MINUTES=240
 ADVANCED_STATS_DEGRADED_THRESHOLD=3
 ```
+
+The 25-row/10-minute lease defaults are intentionally conservative for sequential upstream fetches. A slow batch has room to finish before the same rows become claimable by another scheduler invocation.
 
 Do not enable collection without setting a strong `ADVANCED_STATS_SCHEDULER_SECRET`.
 
