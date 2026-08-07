@@ -5,6 +5,7 @@ import { de } from './locales/de.js';
 import { es } from './locales/es.js';
 import { workspaceLocales } from './workspace-locales.js';
 import { publicPageLocales } from './public-pages-locales.js';
+import { achievementLocales } from './achievement-locales.js';
 
 const plannerToolFallback = Object.fromEntries(
     Object.entries(en).filter(([key]) =>
@@ -13,9 +14,9 @@ const plannerToolFallback = Object.fromEntries(
 );
 
 export const translations = Object.freeze({
-    nl: Object.freeze({ ...nl, ...workspaceLocales.nl, ...publicPageLocales.nl }),
-    en: Object.freeze({ ...en, ...workspaceLocales.en, ...publicPageLocales.en }),
-    fr: Object.freeze({ ...plannerToolFallback, ...fr, ...workspaceLocales.fr, ...publicPageLocales.fr }),
-    de: Object.freeze({ ...plannerToolFallback, ...de, ...workspaceLocales.de, ...publicPageLocales.de }),
-    es: Object.freeze({ ...plannerToolFallback, ...es, ...workspaceLocales.es, ...publicPageLocales.es })
+    nl: Object.freeze({ ...nl, ...workspaceLocales.nl, ...publicPageLocales.nl, ...achievementLocales.nl }),
+    en: Object.freeze({ ...en, ...workspaceLocales.en, ...publicPageLocales.en, ...achievementLocales.en }),
+    fr: Object.freeze({ ...plannerToolFallback, ...fr, ...workspaceLocales.fr, ...publicPageLocales.fr, ...achievementLocales.fr }),
+    de: Object.freeze({ ...plannerToolFallback, ...de, ...workspaceLocales.de, ...publicPageLocales.de, ...achievementLocales.de }),
+    es: Object.freeze({ ...plannerToolFallback, ...es, ...workspaceLocales.es, ...publicPageLocales.es, ...achievementLocales.es })
 });

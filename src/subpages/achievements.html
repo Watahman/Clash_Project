@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en" data-theme="dark" class="workspace-page-loading">
+<head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex">
+    <script src="../assets/js/Data/analytics.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Import your Clash of Clans base data and track advanced ClashPanel achievements.">
+    <link rel="stylesheet" href="../assets/css/workspace-loading.css">
+    <script src="../assets/js/shell/workspace-bootstrap.js"></script>
+    <title>Achievements · ClashPanel</title>
+    <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
+    <link rel="stylesheet" href="../assets/css/profile-overlay.css">
+    <link rel="stylesheet" href="../assets/css/workspace-system.css">
+    <link rel="stylesheet" href="../assets/css/achievements.css">
+    <script src="../assets/js/Data/runtime-config.js"></script>
+    <script type="module" src="../assets/js/shell/workspace-shell.js"></script>
+    <script type="module" src="../assets/js/pages/achievements.js"></script>
+    <link rel="stylesheet" href="../assets/css/light-theme.css">
+    <link rel="stylesheet" href="../assets/css/workspace-polish.css">
+    <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
+</head>
+<body class="workspace-app" data-workspace-page="achievements">
+<main class="achievement-page" id="main-content">
+    <header class="achievement-hero">
+        <div class="achievement-hero-copy">
+            <p class="page-kicker" data-i18n="achievements.kicker">Player progression</p>
+            <h1 data-i18n="achievements.title">Advanced achievements</h1>
+            <p data-i18n="achievements.intro">Turn your live base data into detailed progression, collection and mastery achievements that the normal player profile cannot show.</p>
+        </div>
+        <div class="achievement-account-control">
+            <label for="achievement-account" data-i18n="achievements.account">Clash account</label>
+            <div>
+                <select id="achievement-account" data-i18n-aria-label="achievements.account" aria-label="Clash account"></select>
+                <button id="achievement-refresh" class="achievement-button achievement-button-secondary" type="button" data-i18n="achievements.refresh">Refresh</button>
+            </div>
+            <small data-i18n="achievements.verifiedOnly">Only verified accounts linked to your ClashPanel profile can be imported.</small>
+        </div>
+    </header>
+
+    <p id="achievement-page-status" class="achievement-page-status" role="status" aria-live="polite" hidden></p>
+
+    <section class="achievement-overview" data-i18n-aria-label="achievements.overview" aria-label="Achievement overview">
+        <article class="achievement-level-card">
+            <div id="achievement-level-progress" class="achievement-level-ring" style="--achievement-level-progress: 0deg">
+                <span><small data-i18n="achievements.level">Level</small><strong id="achievement-level">1</strong></span>
+            </div>
+            <div>
+                <p data-i18n="achievements.achievementLevel">Achievement level</p>
+                <strong id="achievement-level-copy">0 / 250 XP to level 2</strong>
+                <small data-i18n="achievements.earnXp">Earn XP by unlocking achievement tiers.</small>
+            </div>
+        </article>
+        <article class="achievement-stat-card">
+            <span data-i18n="achievements.xp">XP</span>
+            <strong id="achievement-total-xp">0</strong>
+            <small data-i18n="achievements.totalEarned">Total earned</small>
+        </article>
+        <article class="achievement-stat-card">
+            <span data-i18n="achievements.tiers">Tiers</span>
+            <strong id="achievement-unlocked">0/0</strong>
+            <small data-i18n="achievements.unlocked">Unlocked</small>
+        </article>
+        <article class="achievement-stat-card">
+            <span data-i18n="achievements.families">Families</span>
+            <strong id="achievement-completed">0/0</strong>
+            <small data-i18n="achievements.fullyCompleted">Fully completed</small>
+        </article>
+        <article class="achievement-stat-card achievement-stat-card-wide">
+            <span data-i18n="achievements.latestSnapshot">Latest snapshot</span>
+            <strong id="achievement-last-import" data-i18n="achievements.notImported">Not imported yet</strong>
+            <small data-i18n="achievements.historyHint">Import again later to unlock historical progress.</small>
+        </article>
+    </section>
+
+    <section class="achievement-import-shell" aria-labelledby="achievement-import-title">
+        <div class="achievement-import-heading">
+            <div>
+                <p class="page-kicker" data-i18n="achievements.baseData">Base data</p>
+                <h2 id="achievement-import-title" data-i18n="achievements.importTitle">Import a new snapshot</h2>
+                <p data-i18n="achievements.importIntro">Copy the JSON shown in the Clash of Clans settings and paste it here. Positions are not required; only progression and collection data is analyzed.</p>
+            </div>
+            <button id="achievement-import-toggle" class="achievement-button achievement-button-primary" type="button" aria-expanded="false" aria-controls="achievement-import-panel" data-i18n="achievements.importButton">Import base data</button>
+        </div>
+
+        <div id="achievement-import-panel" class="achievement-import-panel" hidden>
+            <ol class="achievement-import-steps">
+                <li><span>1</span><div><strong data-i18n="achievements.step1Title">Open Clash of Clans settings</strong><small data-i18n="achievements.step1Text">Open the settings screen for the account selected above.</small></div></li>
+                <li><span>2</span><div><strong data-i18n="achievements.step2Title">Find the base-data JSON</strong><small data-i18n="achievements.step2Text">Open the base-data JSON option without changing the copied content.</small></div></li>
+                <li><span>3</span><div><strong data-i18n="achievements.step3Title">Copy and paste</strong><small data-i18n="achievements.step3Text">Paste the complete JSON below. ClashPanel validates the player tag before saving anything.</small></div></li>
+            </ol>
+
+            <form id="achievement-import-form" class="achievement-import-form">
+                <div class="achievement-json-heading">
+                    <label for="achievement-json" data-i18n="achievements.copiedJson">Copied JSON</label>
+                    <div>
+                        <label class="achievement-file-button" for="achievement-json-file" data-i18n="achievements.chooseFile">Choose file</label>
+                        <input id="achievement-json-file" type="file" accept=".json,application/json" hidden>
+                        <button id="achievement-paste" class="achievement-text-button" type="button" data-i18n="achievements.pasteClipboard">Paste clipboard</button>
+                        <button id="achievement-clear" class="achievement-text-button" type="button" data-i18n="achievements.clear">Clear</button>
+                    </div>
+                </div>
+                <textarea id="achievement-json" rows="10" spellcheck="false" autocomplete="off" placeholder='{"tag":"#PLAYER_TAG","timestamp":...}'></textarea>
+
+                <div id="achievement-import-preview" class="achievement-import-preview" hidden>
+                    <span><small data-i18n="achievements.player">Player</small><strong data-import-tag>—</strong></span>
+                    <span><small data-i18n="achievements.snapshot">Snapshot</small><strong data-import-time>—</strong></span>
+                    <span><small data-i18n="achievements.sections">Sections</small><strong data-import-sections>0</strong></span>
+                    <span><small data-i18n="achievements.items">Items</small><strong data-import-items>0</strong></span>
+                </div>
+
+                <div class="achievement-import-footer">
+                    <p id="achievement-import-feedback" class="achievement-import-feedback" role="status" aria-live="polite" hidden></p>
+                    <button id="achievement-import-submit" class="achievement-button achievement-button-primary" type="submit" disabled data-i18n="achievements.analyzeSave">Analyze and save snapshot</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section class="achievement-library" aria-labelledby="achievement-library-title">
+        <header class="achievement-library-heading">
+            <div>
+                <p class="page-kicker" data-i18n="achievements.collection">Collection</p>
+                <h2 id="achievement-library-title" data-i18n="achievements.libraryTitle">Achievement library</h2>
+                <p id="achievement-results-count">0 achievement families</p>
+            </div>
+            <div class="achievement-filter-grid">
+                <label class="achievement-search-field">
+                    <span class="sr-only" data-i18n="achievements.searchLabel">Search achievements</span>
+                    <input id="achievement-search" type="search" data-i18n-placeholder="achievements.searchPlaceholder" placeholder="Search achievements">
+                </label>
+                <label><span class="sr-only" data-i18n="achievements.category">Category</span><select id="achievement-category"></select></label>
+                <label>
+                    <span class="sr-only" data-i18n="achievements.rarity">Rarity</span>
+                    <select id="achievement-rarity">
+                        <option value="all" data-i18n="achievements.allRarities">All rarities</option>
+                        <option value="common" data-i18n="achievements.common">Common</option>
+                        <option value="rare" data-i18n="achievements.rare">Rare</option>
+                        <option value="epic" data-i18n="achievements.epic">Epic</option>
+                        <option value="legendary" data-i18n="achievements.legendary">Legendary</option>
+                    </select>
+                </label>
+                <label>
+                    <span class="sr-only" data-i18n="achievements.status">Status</span>
+                    <select id="achievement-status">
+                        <option value="all" data-i18n="achievements.allStatuses">All statuses</option>
+                        <option value="in_progress" data-i18n="achievements.inProgress">In progress</option>
+                        <option value="unlocked" data-i18n="achievements.partlyUnlocked">Partly unlocked</option>
+                        <option value="complete" data-i18n="achievements.completed">Completed</option>
+                        <option value="locked" data-i18n="achievements.notStarted">Not started</option>
+                    </select>
+                </label>
+            </div>
+        </header>
+
+        <div id="achievement-empty-state" class="achievement-empty-state">
+            <span aria-hidden="true">◇</span>
+            <h2 data-i18n="achievements.importEmptyTitle">Import your base data to begin</h2>
+            <p data-i18n="achievements.importEmptyText">Paste the JSON copied from the in-game settings. ClashPanel will calculate your first achievement progress immediately.</p>
+            <div>
+                <button class="achievement-button achievement-button-primary" type="button" data-empty-import data-i18n="achievements.importButton">Import base data</button>
+                <button class="achievement-button achievement-button-secondary" type="button" data-empty-profile data-i18n="achievements.openProfile">Open profile</button>
+            </div>
+        </div>
+        <div id="achievement-grid" class="achievement-grid" hidden></div>
+    </section>
+</main>
+<div class="profile-placeholder"></div>
+</body>
+</html>
