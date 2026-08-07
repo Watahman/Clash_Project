@@ -24,6 +24,7 @@ public final class AdvancedStatsModels {
             Instant lastSuccessfulPollAt,
             Instant nextPollAt,
             int consecutiveFailures,
+            Instant gapStartedAt,
             Instant dataCompleteSince,
             long battlesProcessed
     ) {
