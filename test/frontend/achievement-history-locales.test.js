@@ -11,20 +11,23 @@ const historicalFamilies = [
     'active_project_log', 'productive_checkins', 'progress_burst'
 ];
 
+const battleFamilies = ['battle_tracker', 'star_collector', 'three_star_specialist'];
+
 describe('Achievement history and locale integration', () => {
     it('keeps achievement translation keys aligned in all languages', () => {
         const englishKeys = Object.keys(achievementLocales.en).sort();
-        expect(englishKeys).toHaveLength(198);
+        expect(englishKeys).toHaveLength(205);
         for (const language of languages) {
             expect(Object.keys(achievementLocales[language]).sort()).toEqual(englishKeys);
             expect(achievementLocales[language]['nav.achievements']).toBeTruthy();
             expect(achievementLocales[language]['achievements.category.history']).toBeTruthy();
+            expect(achievementLocales[language]['achievements.category.battle']).toBeTruthy();
         }
     });
 
-    it('contains every historical achievement family in each language', () => {
+    it('contains every historical and battle achievement family in each language', () => {
         for (const language of languages) {
-            for (const family of historicalFamilies) {
+            for (const family of [...historicalFamilies, ...battleFamilies]) {
                 expect(achievementLocales[language][`achievements.family.${family}.title`]).toBeTruthy();
                 expect(achievementLocales[language][`achievements.family.${family}.description`]).toBeTruthy();
             }
