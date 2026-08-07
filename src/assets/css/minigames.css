@@ -1,0 +1,209 @@
+body.minigames-page {
+    --game-max: 92rem;
+    background:
+        radial-gradient(circle at 13% 7%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 25rem),
+        radial-gradient(circle at 88% 15%, color-mix(in srgb, #557ad7 13%, transparent), transparent 28rem),
+        var(--bg);
+}
+
+.minigames-main { min-height: calc(100vh - 13rem); }
+
+.minigames-hero {
+    width: min(var(--game-max), calc(100% - 2rem));
+    margin: 0 auto;
+    padding: clamp(3.5rem, 8vw, 7rem) 0 clamp(2rem, 5vw, 4rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(17rem, .8fr);
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: center;
+}
+
+.minigames-hero-copy { max-width: 51rem; }
+.minigames-hero h1 { max-width: 12ch; font-size: clamp(2.8rem, 7vw, 6.6rem); line-height: .94; }
+.minigames-hero .eyebrow { color: var(--accent-strong); font-size: .76rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.minigames-hero-copy > p:not(.eyebrow) { max-width: 45rem; font-size: clamp(1rem, 1.5vw, 1.2rem); }
+
+.minigames-orbit {
+    position: relative;
+    min-height: 23rem;
+    display: grid;
+    place-items: center;
+    isolation: isolate;
+}
+.minigames-orbit::before,
+.minigames-orbit::after {
+    content: "";
+    position: absolute;
+    border: 1px solid color-mix(in srgb, var(--border-strong) 80%, transparent);
+    border-radius: 50%;
+}
+.minigames-orbit::before { width: 21rem; height: 21rem; }
+.minigames-orbit::after { width: 15rem; height: 15rem; border-style: dashed; transform: rotate(22deg); }
+.minigames-core {
+    width: 10rem;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+    border-radius: 2.3rem;
+    background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 26%, var(--surface-raised)), var(--surface));
+    box-shadow: 0 2.2rem 5rem rgba(0,0,0,.32), inset 0 1px rgba(255,255,255,.1);
+    transform: rotate(45deg);
+    z-index: 1;
+}
+.minigames-core span { transform: rotate(-45deg); font: 800 3rem/1 Manrope, sans-serif; color: var(--accent-strong); }
+.minigames-node {
+    position: absolute;
+    min-width: 6.7rem;
+    padding: .65rem .85rem;
+    border: 1px solid var(--border);
+    border-radius: .7rem;
+    background: color-mix(in srgb, var(--surface) 90%, transparent);
+    color: var(--text-muted);
+    font-size: .75rem;
+    font-weight: 700;
+    text-align: center;
+    box-shadow: var(--shadow-raised);
+    backdrop-filter: blur(.8rem);
+}
+.minigames-node:nth-child(2) { top: 1rem; right: 1rem; }
+.minigames-node:nth-child(3) { bottom: 2rem; right: 0; }
+.minigames-node:nth-child(4) { bottom: 1.4rem; left: .4rem; }
+.minigames-node:nth-child(5) { top: 2.2rem; left: 0; }
+
+.game-shell {
+    width: min(var(--game-max), calc(100% - 2rem));
+    margin: 0 auto clamp(4rem, 8vw, 7rem);
+    border: 1px solid var(--border);
+    border-radius: 1.2rem;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--surface) 91%, transparent);
+    box-shadow: 0 2rem 5rem rgba(0,0,0,.22);
+}
+
+.game-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--surface-raised) 72%, transparent);
+}
+.game-mode-tabs { display: inline-flex; gap: .25rem; padding: .25rem; border: 1px solid var(--border); border-radius: .7rem; background: var(--surface-subtle); }
+.game-mode-tabs button { min-height: 2.45rem; padding: 0 .95rem; border-radius: .5rem; background: transparent; color: var(--text-muted); font-weight: 750; }
+.game-mode-tabs button.is-active { background: var(--surface-raised); color: var(--text); box-shadow: var(--shadow-raised); }
+.game-toolbar-note { margin: 0; max-width: 45rem; font-size: .76rem; text-align: right; }
+
+.game-content { display: grid; grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr); }
+.game-sidebar { padding: 1.4rem; border-right: 1px solid var(--border); background: color-mix(in srgb, var(--surface-subtle) 56%, transparent); }
+.game-sidebar h2 { font-size: 1.45rem; }
+.game-sidebar > p { font-size: .85rem; }
+.game-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; margin: 1.25rem 0; }
+.game-stat { min-height: 5rem; padding: .8rem; border: 1px solid var(--border); border-radius: .72rem; background: var(--surface); }
+.game-stat span { display: block; color: var(--text-subtle); font-size: .68rem; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; }
+.game-stat strong { display: block; margin-top: .3rem; font: 800 1.45rem/1 Manrope, sans-serif; }
+.game-legend { display: grid; gap: .55rem; margin-top: 1.15rem; }
+.game-legend div { display: grid; grid-template-columns: .75rem 1fr; gap: .55rem; align-items: center; color: var(--text-muted); font-size: .75rem; }
+.legend-dot { width: .7rem; height: .7rem; border-radius: .18rem; }
+.legend-dot.correct { background: var(--success); }
+.legend-dot.close { background: var(--warning); }
+.legend-dot.wrong { background: color-mix(in srgb, var(--text-subtle) 60%, transparent); }
+
+.game-board { min-width: 0; padding: clamp(1rem, 3vw, 2rem); }
+.game-board-top { display: flex; justify-content: space-between; gap: 1rem; align-items: start; margin-bottom: 1.25rem; }
+.game-board-top h2 { margin-bottom: .3rem; font-size: clamp(1.35rem, 3vw, 2rem); }
+.game-board-top p { margin-bottom: 0; font-size: .82rem; }
+
+.guess-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .65rem; margin-bottom: .75rem; }
+.guess-form input {
+    min-height: 3.25rem;
+    width: 100%;
+    border: 1px solid var(--border-strong);
+    border-radius: .68rem;
+    padding: 0 1rem;
+    background: var(--surface-subtle);
+    color: var(--text);
+}
+.guess-form input::placeholder { color: var(--text-subtle); }
+.game-action {
+    min-height: 3.25rem;
+    border-radius: .68rem;
+    padding: 0 1.15rem;
+    background: var(--accent);
+    color: #17130b;
+    font-weight: 850;
+}
+.game-action:hover { background: var(--accent-strong); }
+.game-action:disabled { cursor: not-allowed; opacity: .46; }
+.game-action.secondary { min-height: 2.7rem; border: 1px solid var(--border); background: var(--surface-raised); color: var(--text); }
+.game-message { min-height: 1.45rem; margin: 0 0 1rem; font-size: .78rem; }
+.game-message[data-type="error"] { color: var(--danger); }
+.game-message[data-type="success"] { color: var(--success); }
+.game-message[data-type="warning"] { color: var(--warning); }
+
+.guess-scroll { overflow-x: auto; padding-bottom: .45rem; }
+.guess-grid { min-width: 70rem; display: grid; grid-template-columns: 10rem repeat(8, minmax(6.6rem, 1fr)); gap: .45rem; }
+.guess-grid + .guess-grid { margin-top: .45rem; }
+.guess-grid-header { position: sticky; top: 0; z-index: 1; }
+.guess-grid-header > div { padding: .55rem .6rem; color: var(--text-subtle); font-size: .66rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.guess-cell {
+    min-height: 4rem;
+    display: flex;
+    gap: .45rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: .58rem;
+    padding: .55rem;
+    background: var(--surface-subtle);
+    color: var(--text-muted);
+    font-size: .75rem;
+    font-weight: 750;
+    text-align: center;
+}
+.guess-name { justify-content: flex-start; background: var(--surface-raised); color: var(--text); font-family: Manrope, sans-serif; }
+.guess-cell b { color: currentColor; font-size: 1rem; }
+.guess-cell.is-correct { border-color: color-mix(in srgb, var(--success) 70%, transparent); background: var(--success-soft); color: var(--success); }
+.guess-cell.is-close { border-color: color-mix(in srgb, var(--warning) 72%, transparent); background: var(--warning-soft); color: var(--warning); }
+.guess-cell.is-wrong { color: var(--text-subtle); }
+
+.game-support { display: flex; flex-wrap: wrap; gap: .65rem; align-items: center; margin-top: 1.1rem; }
+.game-hints { margin: .9rem 0 0; padding-left: 1.2rem; color: var(--text-muted); font-size: .82rem; }
+.game-result { margin-top: 1.4rem; padding: 1.1rem; border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border)); border-radius: .8rem; background: var(--accent-soft); }
+.game-result h3 { margin-bottom: .25rem; }
+.game-result p { margin-bottom: .8rem; }
+
+.minigames-policy {
+    width: min(var(--game-max), calc(100% - 2rem));
+    margin: -2rem auto 4rem;
+    padding: 1rem 1.2rem;
+    border-left: .18rem solid var(--accent);
+    background: color-mix(in srgb, var(--surface) 76%, transparent);
+    color: var(--text-muted);
+    font-size: .75rem;
+    line-height: 1.65;
+}
+
+@media (max-width: 62rem) {
+    .minigames-hero { grid-template-columns: 1fr; }
+    .minigames-orbit { min-height: 18rem; }
+    .minigames-orbit::before { width: 17rem; height: 17rem; }
+    .minigames-orbit::after { width: 12rem; height: 12rem; }
+    .game-content { grid-template-columns: 1fr; }
+    .game-sidebar { border-right: 0; border-bottom: 1px solid var(--border); }
+    .game-stat-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 42rem) {
+    .minigames-hero, .game-shell, .minigames-policy { width: min(100% - 1rem, var(--game-max)); }
+    .minigames-hero { padding-top: 2.5rem; }
+    .minigames-hero h1 { font-size: clamp(2.5rem, 14vw, 4.3rem); }
+    .minigames-orbit { min-height: 15rem; transform: scale(.86); margin: -1.2rem 0; }
+    .game-toolbar { align-items: stretch; flex-direction: column; }
+    .game-toolbar-note { text-align: left; }
+    .game-stat-grid { grid-template-columns: 1fr 1fr; }
+    .game-board-top { flex-direction: column; }
+    .guess-form { grid-template-columns: 1fr; }
+    .game-action { width: 100%; }
+}
