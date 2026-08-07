@@ -28,7 +28,7 @@ Before declaring **READY TO MERGE**, always:
 
 - Phase 0 — branch + plan: **COMPLETE**
 - Phase 1 — database + backend domain foundation: **COMPLETE**
-- Phase 2 — tracking ownership + lifecycle API: **NOT STARTED**
+- Phase 2 — tracking ownership + lifecycle API: **COMPLETE**
 - Phase 3 — battle ingestion + army parsing + deduplication: **NOT STARTED**
 - Phase 4 — scheduled collection: **NOT STARTED**
 - Phase 5 — read APIs + derived stats: **NOT STARTED**
@@ -42,7 +42,7 @@ Before declaring **READY TO MERGE**, always:
 
 Reasons:
 
-1. Advanced Stats still needs phases 2–8.
+1. Advanced Stats still needs phases 3–8.
 2. The user explicitly wants other feature branches to merge before this branch.
 3. Before final merge readiness, this branch must be refreshed against the then-current `master` and overlap with those earlier branches must be revalidated.
 
@@ -68,7 +68,7 @@ Implemented:
 - `AdvancedStatsUnitCategory`;
 - `AdvancedStatsBattleProcessingStatus`;
 - `AdvancedStatsModels`;
-- `AdvancedStatsRepository` read/existence boundary;
+- initial `AdvancedStatsRepository` read/existence boundary;
 - deterministic SHA-256 `BattleFingerprint`;
 - JUnit coverage for deterministic fingerprints, identity changes and domain validation.
 
@@ -77,17 +77,79 @@ Validation performed:
 - Java 21 isolated compilation of the new domain/fingerprint classes: **PASS**;
 - Java 21 isolated syntax/integration compilation of the repository against the existing public `SUPABASE_Client` contract: **PASS**;
 - deterministic fingerprint + validation execution harness: **PASS**;
-- inspected migration against the repository migration checker rules: non-empty, no unbalanced dollar blocks, no embedded service-role value, filename orders after the required baseline migrations;
-- final branch diff inspected: Phase 1 changes add only Advanced Stats migration/docs/backend/tests and do not alter existing routes/UI/auth behavior.
+- inspected migration against the repository migration checker rules;
+- Phase 1 diff contained no existing route/UI/auth behavior changes.
 
-Environment note:
+## Phase 2 result
 
-- this connector session does not expose a full repository checkout/Maven executable and no GitHub Actions run is attached to this branch head, so a literal full `mvn test` + `npm run check` invocation was not available here;
-- no existing production code path was modified in Phase 1, and the newly added Java foundation was compiled separately as above;
-- the full repository suite remains a mandatory final gate before any **READY TO MERGE** declaration.
+Implemented:
+
+- `AdvancedStatsAccountOwnership`
+  - reads the authenticated profile's existing `users.accounts`;
+  - accepts existing account tag shapes used by ClashPanel (`tag`, `playerTag`, `accountTag`, `clashTag`, nested base/account);
+  - normalizes tags through the existing `CacheKeys` implementation;
+  - returns 403 before any lifecycle action when the requested player is not linked;
+  - does not request or re-verify a Clash token because account linking already performed that verification.
+- `AdvancedStatsLifecycleService`
+  - ownership-first orchestration;
+  - idempotent start/status/pause/resume/stop/delete semantics;
+  - pause/stop record a potential collection gap;
+  - resume preserves the gap until a successful future collector can determine whether it was fully recoverable;
+  - stop preserves collected statistics;
+  - delete remains a separate destructive operation.
+- `AdvancedStatsRepository` lifecycle writes
+  - start uses an identity-only upsert against `(user_id, player_tag)` so repeated start requests do not reset existing lifecycle state;
+  - lifecycle updates remain scoped by both user id and normalized player tag;
+  - pause/stop clear any future worker lease and scheduled poll;
+  - resume moves the tracker to `INITIALIZING`, resets failure count and makes it due for future collection;
+  - delete removes only the owner's tracking row, relying on existing database cascades for child data.
+- authenticated backend routes in `SUPABASE_AdvancedStats`:
+  - `/AdvancedStatsTrackingStart`
+  - `/AdvancedStatsTrackingGet`
+  - `/AdvancedStatsTrackingPause`
+  - `/AdvancedStatsTrackingResume`
+  - `/AdvancedStatsTrackingStop`
+  - `/AdvancedStatsDataDelete`
+- `Main.java` registers the lifecycle route group.
+- lifecycle API responses distinguish:
+  - no tracking: `DISABLED`;
+  - retained-but-stopped tracking: `STOPPED` with `trackingExists=true`;
+  - active/configured lifecycle states;
+  - potential tracking gaps.
+
+Tests added:
+
+- linked-account matching across current/legacy account shapes;
+- rejection of different/invalid account tags;
+- ownership failure before store access;
+- lifecycle start behavior;
+- pause idempotency;
+- stopped -> pause conflict;
+- resume idempotency;
+- gap preservation on resume;
+- stop without deleting history;
+- stop/delete idempotency when no tracking exists;
+- 404 for pause when tracking was never enabled;
+- API response semantics for DISABLED / STOPPED / ACTIVE states.
+
+### Phase 2 route-constant note
+
+During the backend-only phases the six Advanced Stats route constants intentionally live in `SUPABASE_AdvancedStats` rather than expanding the broad shared `Config.java` surface early.
+
+Before frontend integration in Phase 6, mirror these routes into the Java/frontend shared endpoint configuration and let `scripts/check-endpoints.mjs` validate them end-to-end. This does not change the runtime behavior of Phase 2 and avoids exposing unused frontend route constants before the UI exists.
+
+### Phase 2 validation note
+
+- inspected `Main.java` diff: only three lifecycle registration lines were added;
+- existing auth/token verification code was not rewritten;
+- existing `/PlayerBattleLog` route was not changed;
+- no frontend code was changed;
+- branch remains based on the same `master` revision and was 0 commits behind at the Phase 2 checkpoint;
+- Java/JUnit coverage was added for the pure ownership/lifecycle/response logic;
+- this connector session does not expose the repository checkout/Maven runner or pull-request workflow runs for this branch, so the full `mvn test` + `npm run check` suite remains a mandatory later gate and must be rerun before any merge-ready declaration.
 
 ## Next phase
 
-Phase 2 — tracking ownership + lifecycle API.
+Phase 3 — battle ingestion + army parsing + deduplication.
 
-Do not start battle polling yet. Phase 2 should first make start/status/pause/resume/stop/delete ownership-safe and idempotent using already verified linked Clash accounts.
+Phase 3 must make one newly observed attack the atomic write unit. It must not add the scheduler yet; first prove deterministic parsing, database deduplication and aggregate correctness with fixtures/retries.
