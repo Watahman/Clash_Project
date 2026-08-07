@@ -27,7 +27,7 @@ describe('public shell normalization', () => {
             .map(link => link.textContent.trim());
 
         expect(navLabels).toEqual(['Tools', 'Games', 'Guides', 'Methodology', 'About', 'Changelog']);
-        expect(header.querySelectorAll('.public-nav [data-i18n]').length).toBe(6);
+        expect(header.querySelectorAll('.public-nav [data-i18n]').length).toBe(5);
         expect(header.querySelector('[href="/subpages/login.html"]')?.textContent.trim()).toBe('Log in');
         expect(header.querySelector('[href="/subpages/register.html"]')?.textContent.trim()).toBe('Start for free');
         expect(header.querySelector('[href="/methodology"]')?.getAttribute('aria-current')).toBe('page');
