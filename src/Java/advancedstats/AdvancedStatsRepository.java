@@ -14,7 +14,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 /** Backend-only persistence boundary for Advanced Stats. */
-public final class AdvancedStatsRepository implements AdvancedStatsLifecycleService.Store {
+public final class AdvancedStatsRepository
+        implements AdvancedStatsLifecycleService.Store, AdvancedStatsBattleProcessor.Store {
     static final String TRACKING_TABLE = "advanced_stats_tracking";
     static final String BATTLES_TABLE = "advanced_stats_battles";
     static final String BATTLE_UNITS_TABLE = "advanced_stats_battle_units";
@@ -134,6 +135,75 @@ public final class AdvancedStatsRepository implements AdvancedStatsLifecycleServ
         return true;
     }
 
+    @Override
+    public AdvancedStatsModels.SaveBattleResult saveProcessedBattle(
+            UUID trackingId,
+            AdvancedStatsModels.BattleCandidate battle,
+            String rawFingerprint,
+            AdvancedStatsModels.ParsedArmy army,
+            boolean bootstrapImport,
+            int parserVersion
+    ) throws Exception {
+        if (trackingId == null) throw new IllegalArgumentException("trackingId is required");
+        if (battle == null) throw new IllegalArgumentException("battle is required");
+        if (army == null) throw new IllegalArgumentException("army is required");
+        String fingerprint = AdvancedStatsModels.requireSha256(rawFingerprint, "fingerprint");
+
+        JsonObject body = baseBattleRpcBody(
+                trackingId,
+                battle,
+                fingerprint,
+                bootstrapImport,
+                parserVersion
+        );
+        body.addProperty("p_army_data_available", army.armyDataAvailable());
+        body.add("p_units", unitsJson(army));
+        if (army.armyDataAvailable()) {
+            body.addProperty("p_army_hash", army.normalizedArmyHash());
+            body.add("p_normalized_army_json", JsonParser.parseString(army.normalizedArmyJson()));
+        } else {
+            body.add("p_army_hash", JsonNull.INSTANCE);
+            body.add("p_normalized_army_json", JsonNull.INSTANCE);
+        }
+
+        JsonObject result = parseObject(SUPABASE_Client.rpc(
+                "save_advanced_stats_battle_v1",
+                body.toString()
+        ));
+        boolean inserted = booleanValue(result, "inserted", false);
+        if (!inserted) return AdvancedStatsModels.SaveBattleResult.duplicate();
+
+        String battleId = requiredString(result, "battleId");
+        return new AdvancedStatsModels.SaveBattleResult(true, UUID.fromString(battleId));
+    }
+
+    @Override
+    public boolean recordParserError(
+            UUID trackingId,
+            AdvancedStatsModels.BattleCandidate battle,
+            String rawFingerprint,
+            boolean bootstrapImport,
+            int parserVersion
+    ) throws Exception {
+        if (trackingId == null) throw new IllegalArgumentException("trackingId is required");
+        if (battle == null) throw new IllegalArgumentException("battle is required");
+        String fingerprint = AdvancedStatsModels.requireSha256(rawFingerprint, "fingerprint");
+
+        JsonObject body = baseBattleRpcBody(
+                trackingId,
+                battle,
+                fingerprint,
+                bootstrapImport,
+                parserVersion
+        );
+        // The parser-error RPC intentionally has no army aggregate parameters.
+        JsonObject result = parseObject(SUPABASE_Client.rpc(
+                "record_advanced_stats_parser_error_v1",
+                body.toString()
+        ));
+        return booleanValue(result, "inserted", false);
+    }
+
     public boolean battleFingerprintExists(UUID trackingId, String rawFingerprint) throws Exception {
         if (trackingId == null) throw new IllegalArgumentException("trackingId is required");
         String fingerprint = AdvancedStatsModels.requireSha256(rawFingerprint, "fingerprint");
@@ -144,6 +214,50 @@ public final class AdvancedStatsRepository implements AdvancedStatsLifecycleServ
                 + "&limit=1";
 
         return !parseArray(SUPABASE_Client.getWithBody(BATTLES_TABLE, query)).isEmpty();
+    }
+
+    private JsonObject baseBattleRpcBody(
+            UUID trackingId,
+            AdvancedStatsModels.BattleCandidate battle,
+            String fingerprint,
+            boolean bootstrapImport,
+            int parserVersion
+    ) {
+        JsonObject body = new JsonObject();
+        body.addProperty("p_tracking_id", trackingId.toString());
+        body.addProperty("p_player_tag", battle.playerTag());
+        body.addProperty("p_battle_fingerprint", fingerprint);
+        addInstant(body, "p_battle_timestamp", battle.battleTimestamp());
+        addInstant(body, "p_observed_at", battle.observedAt());
+        body.addProperty("p_battle_type", battle.battleType());
+        body.addProperty("p_opponent_player_tag", battle.opponentPlayerTag());
+        body.addProperty("p_opponent_name", battle.opponentName());
+        addInteger(body, "p_opponent_town_hall", battle.opponentTownHall());
+        addInteger(body, "p_player_town_hall", battle.playerTownHall());
+        addInteger(body, "p_stars", battle.stars());
+        addDouble(body, "p_destruction_percentage", battle.destructionPercentage());
+        body.addProperty("p_army_share_code", battle.armyShareCode());
+        body.addProperty("p_loot_gold", battle.lootGold());
+        body.addProperty("p_loot_elixir", battle.lootElixir());
+        body.addProperty("p_loot_dark_elixir", battle.lootDarkElixir());
+        body.addProperty("p_bootstrap_import", bootstrapImport);
+        body.addProperty("p_parser_version", Math.max(1, parserVersion));
+        return body;
+    }
+
+    private JsonArray unitsJson(AdvancedStatsModels.ParsedArmy army) {
+        JsonArray units = new JsonArray();
+        for (AdvancedStatsModels.UnitUsage unit : army.units()) {
+            JsonObject item = new JsonObject();
+            item.addProperty("unit_key", unit.unitKey());
+            item.addProperty("unit_name", unit.unitName());
+            item.addProperty("category", unit.category().name());
+            item.addProperty("quantity", unit.quantity());
+            if (unit.unitLevel() == null) item.add("unit_level", JsonNull.INSTANCE);
+            else item.addProperty("unit_level", unit.unitLevel());
+            units.add(item);
+        }
+        return units;
     }
 
     private AdvancedStatsModels.TrackingState requireTracking(UUID userId, String playerTag) throws Exception {
@@ -198,6 +312,14 @@ public final class AdvancedStatsRepository implements AdvancedStatsLifecycleServ
         return parsed.getAsJsonArray();
     }
 
+    private JsonObject parseObject(String json) {
+        JsonElement parsed = JsonParser.parseString(json == null || json.isBlank() ? "{}" : json);
+        if (!parsed.isJsonObject()) {
+            throw new IllegalStateException("Advanced Stats database response must be an object");
+        }
+        return parsed.getAsJsonObject();
+    }
+
     private String requiredString(JsonObject row, String field) {
         JsonElement value = row.get(field);
         if (value == null || value.isJsonNull()) {
@@ -226,6 +348,11 @@ public final class AdvancedStatsRepository implements AdvancedStatsLifecycleServ
         return value == null || value.isJsonNull() ? fallback : value.getAsLong();
     }
 
+    private boolean booleanValue(JsonObject row, String field, boolean fallback) {
+        JsonElement value = row.get(field);
+        return value == null || value.isJsonNull() ? fallback : value.getAsBoolean();
+    }
+
     private Instant requiredInstant(JsonObject row, String field) {
         Instant value = optionalInstant(row, field);
         if (value == null) throw new IllegalStateException("Missing Advanced Stats database field: " + field);
@@ -240,5 +367,20 @@ public final class AdvancedStatsRepository implements AdvancedStatsLifecycleServ
         } catch (RuntimeException ignored) {
             return OffsetDateTime.parse(value).toInstant();
         }
+    }
+
+    private void addInstant(JsonObject object, String field, Instant value) {
+        if (value == null) object.add(field, JsonNull.INSTANCE);
+        else object.addProperty(field, value.toString());
+    }
+
+    private void addInteger(JsonObject object, String field, Integer value) {
+        if (value == null) object.add(field, JsonNull.INSTANCE);
+        else object.addProperty(field, value);
+    }
+
+    private void addDouble(JsonObject object, String field, Double value) {
+        if (value == null) object.add(field, JsonNull.INSTANCE);
+        else object.addProperty(field, value);
     }
 }
