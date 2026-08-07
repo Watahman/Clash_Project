@@ -247,7 +247,7 @@ public class Config {
         int start = Math.floorMod(clashApiKeyCursor.getAndIncrement(), keys.size());
         List<String> rotated = new ArrayList<>(keys.size());
         for (int offset = 0; offset < keys.size(); offset++) {
-            rotated.add(keys.get((start + offset) % keys.size());
+            rotated.add(keys.get((start + offset) % keys.size()));
         }
         return List.copyOf(rotated);
     }
