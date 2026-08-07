@@ -42,6 +42,22 @@ begin
     insert into public.advanced_stats_tracking_gaps (tracking_id, started_at, ended_at, reason)
     values (v_t1, v_now - interval '4 hours', v_now - interval '3 hours', 'USER_PAUSED');
 
+    insert into public.achievement_progress (
+        user_id, player_tag, achievement_key, family_key, title, description,
+        category, rarity, tier, xp, metric, progress, target, unlocked,
+        unlocked_at, source_timestamp, updated_at
+    ) values
+    (
+        v_user, '#P0Y2', 'tracked_attack_synthetic', 'battle_tracker', 'Tracked', 'Tracked',
+        'battle', 'common', 1, 1, 'tracked_attack_count', 50, 100, false,
+        null, 2000, now()
+    ),
+    (
+        v_user, '#P0Y2', 'unrelated_synthetic', 'unrelated', 'Unrelated', 'Unrelated',
+        'progression', 'common', 1, 1, 'donations', 25, 100, false,
+        null, 2000, now()
+    );
+
     update public.advanced_stats_tracking
        set status='STOPPED', next_poll_at=null, locked_by=null, locked_until=null,
            gap_started_at=v_now, gap_reason='USER_PAUSED'
@@ -52,7 +68,12 @@ begin
         raise exception 'STOPPED tracker lost readable history: %', v_overview;
     end if;
 
-    delete from public.advanced_stats_tracking where id=v_t1;
+    v_result := public.delete_advanced_stats_tracking_v1(v_user, '#P0Y2');
+    if coalesce((v_result->>'deleted')::boolean,false) is not true
+       or (v_result->>'achievementRowsDeleted')::integer <> 1 then
+        raise exception 'Advanced Stats delete RPC returned unexpected result: %', v_result;
+    end if;
+
     select count(*) into v_count from public.advanced_stats_battles where tracking_id=v_t1;
     if v_count <> 0 then raise exception 'Tracking delete did not cascade battles'; end if;
     select count(*) into v_count from public.advanced_stats_daily where tracking_id=v_t1;
@@ -63,6 +84,18 @@ begin
     if v_count <> 0 then raise exception 'Tracking delete did not cascade army totals'; end if;
     select count(*) into v_count from public.advanced_stats_tracking_gaps where tracking_id=v_t1;
     if v_count <> 0 then raise exception 'Tracking delete did not cascade gaps'; end if;
+    select count(*) into v_count from public.achievement_progress
+     where user_id=v_user and player_tag='#P0Y2'
+       and metric in ('tracked_attack_count','tracked_star_count','tracked_three_star_count');
+    if v_count <> 0 then raise exception 'Advanced Stats-derived achievement progress survived delete'; end if;
+    select count(*) into v_count from public.achievement_progress
+     where user_id=v_user and player_tag='#P0Y2' and achievement_key='unrelated_synthetic';
+    if v_count <> 1 then raise exception 'Unrelated achievement progress was removed'; end if;
+
+    v_result := public.delete_advanced_stats_tracking_v1(v_user, '#P0Y2');
+    if coalesce((v_result->>'deleted')::boolean,true) is not false then
+        raise exception 'Second destructive delete was not idempotent: %', v_result;
+    end if;
 
     insert into public.advanced_stats_tracking (user_id, player_tag, status, tracking_started_at)
     values (v_user, '#Q8G2', 'ACTIVE', v_now - interval '1 day')
@@ -83,6 +116,8 @@ begin
     if v_count <> 0 then raise exception 'User delete did not cascade tracking'; end if;
     select count(*) into v_count from public.advanced_stats_battles where tracking_id=v_t2;
     if v_count <> 0 then raise exception 'User delete did not cascade battle history'; end if;
+    select count(*) into v_count from public.achievement_progress where user_id=v_user;
+    if v_count <> 0 then raise exception 'User delete did not cascade achievement progress'; end if;
 end $$;
 
 rollback;
@@ -92,7 +127,10 @@ select jsonb_build_object(
     'persistence', 'ROLLBACK',
     'verified', jsonb_build_array(
         'STOPPED preserves history',
-        'tracking delete cascades',
+        'destructive delete cascades tracking history',
+        'destructive delete resets Advanced Stats-derived achievements',
+        'destructive delete preserves unrelated achievements',
+        'destructive delete is idempotent',
         'user delete cascades'
     )
 ) as advanced_stats_cascade_smoke_test;
