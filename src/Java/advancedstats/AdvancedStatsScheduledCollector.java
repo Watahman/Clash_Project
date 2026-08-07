@@ -61,8 +61,8 @@ public final class AdvancedStatsScheduledCollector {
 
         public static Settings defaults() {
             return new Settings(
-                    50,
-                    120,
+                    25,
+                    600,
                     Duration.ofMinutes(15),
                     Duration.ofMinutes(30),
                     Duration.ofMinutes(30),
