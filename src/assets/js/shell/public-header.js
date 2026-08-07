@@ -1,5 +1,6 @@
 const PUBLIC_NAV_ITEMS = Object.freeze([
     { id: 'tools', href: '/#features', key: 'public.nav.tools', label: 'Tools' },
+    { id: 'games', href: '/minigames', key: null, label: 'Games' },
     { id: 'guides', href: '/guides', key: 'public.nav.guides', label: 'Guides' },
     { id: 'methodology', href: '/methodology', key: 'public.nav.methodology', label: 'Methodology' },
     { id: 'about', href: '/about', key: 'public.nav.about', label: 'About' },
@@ -32,6 +33,7 @@ function normalizedPath(pathname = window.location.pathname) {
 function currentPublicSection(pathname) {
     const normalized = normalizedPath(pathname);
 
+    if (normalized === '/minigames') return 'games';
     if (TOOL_PATHS.has(normalized)) return 'tools';
     if (normalized === '/guides') return 'guides';
     if (normalized === '/methodology') return 'methodology';
@@ -43,7 +45,8 @@ function currentPublicSection(pathname) {
 function navMarkup(activeSection) {
     return PUBLIC_NAV_ITEMS.map(item => {
         const current = item.id === activeSection ? ' aria-current="page"' : '';
-        return `<a href="${item.href}" data-i18n="${item.key}"${current}>${item.label}</a>`;
+        const translation = item.key ? ` data-i18n="${item.key}"` : '';
+        return `<a href="${item.href}"${translation}${current}>${item.label}</a>`;
     }).join('');
 }
 
