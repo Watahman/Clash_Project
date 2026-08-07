@@ -29,9 +29,9 @@ public final class BattleFingerprint {
 
     /**
      * Rich fingerprint for the current player battle log. The upstream payload
-     * does not guarantee an ID or timestamp, so loot is included as an extra
-     * discriminator. This keeps repeated polls idempotent without relying on
-     * response-array position, which changes as new battles arrive.
+     * does not guarantee an ID or timestamp, so both looted and available loot
+     * are included as extra discriminators. observedAt is intentionally not
+     * included because it changes on every poll.
      */
     public static String from(AdvancedStatsModels.BattleCandidate battle) {
         if (battle == null) throw new IllegalArgumentException("battle is required");
@@ -50,7 +50,10 @@ public final class BattleFingerprint {
                 escape(battle.armyShareCode()),
                 Long.toString(battle.lootGold()),
                 Long.toString(battle.lootElixir()),
-                Long.toString(battle.lootDarkElixir())
+                Long.toString(battle.lootDarkElixir()),
+                Long.toString(battle.availableGold()),
+                Long.toString(battle.availableElixir()),
+                Long.toString(battle.availableDarkElixir())
         );
 
         return sha256(canonical);
