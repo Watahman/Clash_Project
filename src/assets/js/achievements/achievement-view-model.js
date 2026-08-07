@@ -94,17 +94,19 @@ export function collectLinkedAccounts(input) {
         const tag = normalizePlayerTag(rawTag);
         if (/^#[A-Z0-9]{3,}$/.test(tag)) {
             const previous = accounts.get(tag) || {};
+            const candidateName = String(
+                value.name ?? value.playerName ?? value.accountName ?? ''
+            ).trim();
             const townHall = Number(
                 value.townHallLevel ?? value.townhall ?? value.townHall ?? value.th
             );
+            const candidateTownHall = Number.isFinite(townHall) && townHall > 0
+                ? Math.trunc(townHall)
+                : null;
             accounts.set(tag, {
                 tag,
-                name: String(
-                    value.name ?? value.playerName ?? value.accountName ?? previous.name ?? ''
-                ).trim(),
-                townHallLevel: Number.isFinite(townHall) && townHall > 0
-                    ? Math.trunc(townHall)
-                    : previous.townHallLevel ?? null
+                name: previous.name || candidateName,
+                townHallLevel: previous.townHallLevel ?? candidateTownHall
             });
         }
 
