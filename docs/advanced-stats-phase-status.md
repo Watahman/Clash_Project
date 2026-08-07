@@ -27,7 +27,7 @@ Before declaring **READY TO MERGE**, always:
 ## Current status
 
 - Phase 0 — branch + plan: **COMPLETE**
-- Phase 1 — database + backend domain foundation: **IN PROGRESS**
+- Phase 1 — database + backend domain foundation: **COMPLETE**
 - Phase 2 — tracking ownership + lifecycle API: **NOT STARTED**
 - Phase 3 — battle ingestion + army parsing + deduplication: **NOT STARTED**
 - Phase 4 — scheduled collection: **NOT STARTED**
@@ -40,21 +40,54 @@ Before declaring **READY TO MERGE**, always:
 
 **NOT READY**
 
-Reason: implementation is only in Phase 1 and the branch is intentionally expected to wait behind other branches before final merge.
+Reasons:
 
-## Phase 1 gate
+1. Advanced Stats still needs phases 2–8.
+2. The user explicitly wants other feature branches to merge before this branch.
+3. Before final merge readiness, this branch must be refreshed against the then-current `master` and overlap with those earlier branches must be revalidated.
 
-Phase 1 is complete only when all of the following hold:
+## Phase 1 result
 
-- Advanced Stats database migration exists and passes migration checks;
-- tables are backend-managed with RLS enabled and anon/authenticated access revoked;
-- `(tracking_id, battle_fingerprint)` is database-unique;
-- child tables cascade from the tracking row;
-- no closed CHECK constraint is used for upstream battle-type values;
-- domain enums/models compile;
-- deterministic SHA-256 battle fingerprinting is covered by tests;
-- initial repository boundary exists without exposing lifecycle writes/routes;
-- existing route/UI behavior is unchanged;
-- available baseline/full checks are green.
+Implemented:
 
-When Phase 1 completes, this file must be updated before Phase 2 work starts.
+- `database/migrations/20260807_001_advanced_stats_foundation.sql`
+  - `advanced_stats_tracking`
+  - `advanced_stats_battles`
+  - `advanced_stats_battle_units`
+  - `advanced_stats_unit_totals`
+  - `advanced_stats_army_totals`
+  - `advanced_stats_daily`
+  - `advanced_stats_tracking_gaps`
+- backend-only RLS posture with anon/authenticated table access revoked;
+- tracking/user uniqueness and battle fingerprint uniqueness;
+- cascading child deletion;
+- future worker lease fields (`locked_until`, `locked_by`);
+- parser/processing version and recovery fields;
+- no closed enum/check constraint for upstream `battle_type`;
+- `AdvancedStatsTrackingStatus`;
+- `AdvancedStatsUnitCategory`;
+- `AdvancedStatsBattleProcessingStatus`;
+- `AdvancedStatsModels`;
+- `AdvancedStatsRepository` read/existence boundary;
+- deterministic SHA-256 `BattleFingerprint`;
+- JUnit coverage for deterministic fingerprints, identity changes and domain validation.
+
+Validation performed:
+
+- Java 21 isolated compilation of the new domain/fingerprint classes: **PASS**;
+- Java 21 isolated syntax/integration compilation of the repository against the existing public `SUPABASE_Client` contract: **PASS**;
+- deterministic fingerprint + validation execution harness: **PASS**;
+- inspected migration against the repository migration checker rules: non-empty, no unbalanced dollar blocks, no embedded service-role value, filename orders after the required baseline migrations;
+- final branch diff inspected: Phase 1 changes add only Advanced Stats migration/docs/backend/tests and do not alter existing routes/UI/auth behavior.
+
+Environment note:
+
+- this connector session does not expose a full repository checkout/Maven executable and no GitHub Actions run is attached to this branch head, so a literal full `mvn test` + `npm run check` invocation was not available here;
+- no existing production code path was modified in Phase 1, and the newly added Java foundation was compiled separately as above;
+- the full repository suite remains a mandatory final gate before any **READY TO MERGE** declaration.
+
+## Next phase
+
+Phase 2 — tracking ownership + lifecycle API.
+
+Do not start battle polling yet. Phase 2 should first make start/status/pause/resume/stop/delete ownership-safe and idempotent using already verified linked Clash accounts.
