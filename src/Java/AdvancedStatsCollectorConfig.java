@@ -39,8 +39,8 @@ public final class AdvancedStatsCollectorConfig {
 
     public AdvancedStatsScheduledCollector.Settings settings() {
         return new AdvancedStatsScheduledCollector.Settings(
-                boundedInt("ADVANCED_STATS_BATCH_SIZE", 50, 1, 500),
-                boundedInt("ADVANCED_STATS_LEASE_SECONDS", 120, 30, 900),
+                boundedInt("ADVANCED_STATS_BATCH_SIZE", 25, 1, 500),
+                boundedInt("ADVANCED_STATS_LEASE_SECONDS", 600, 30, 900),
                 Duration.ofMinutes(boundedInt("ADVANCED_STATS_ACTIVE_POLL_MINUTES", 15, 5, 120)),
                 Duration.ofMinutes(boundedInt("ADVANCED_STATS_IDLE_POLL_MINUTES", 30, 10, 240)),
                 Duration.ofMinutes(boundedInt("ADVANCED_STATS_RATE_LIMIT_BACKOFF_MINUTES", 30, 5, 240)),
