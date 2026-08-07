@@ -81,7 +81,7 @@ public final class AdvancedStatsRepository
         patch.addProperty("next_poll_at", resumeRequestedAt.toString());
         patch.addProperty("consecutive_failures", 0);
         clearLease(patch);
-        // Preserve gap_started_at/gap_reason until collection closes the known gap.
+        // Preserve gap_started_at until collection proves that upstream history covered it.
         patchTracking(userId, playerTag, patch);
         return requireTracking(userId, playerTag);
     }
@@ -138,7 +138,7 @@ public final class AdvancedStatsRepository
             body.add("p_normalized_army_json", JsonNull.INSTANCE);
         }
 
-        JsonObject result = parseObject(SUPABASE_Client.rpc("save_advanced_stats_battle_v2", body.toString()));
+        JsonObject result = parseObject(SUPABASE_Client.rpc("save_advanced_stats_battle_v3", body.toString()));
         if (!booleanValue(result, "inserted", false)) {
             return AdvancedStatsModels.SaveBattleResult.duplicate();
         }
