@@ -89,27 +89,13 @@ class AdvancedStatsBattleProcessorTest {
         FakeStore store = new FakeStore();
         AdvancedStatsBattleProcessor processor = processor(store);
         var wrongPlayer = new AdvancedStatsModels.BattleCandidate(
-                "#9GCUV",
-                null,
-                OBSERVED,
-                true,
-                "multiplayer",
-                "#8GCUV",
-                "Opponent",
-                18,
-                18,
-                3,
-                100.0,
-                "u8x110",
-                0,
-                0,
-                0
+                "#9GCUV", null, OBSERVED, true, "multiplayer", "#8GCUV", "Opponent",
+                18, 18, 3, 100.0, "u8x110",
+                0, 0, 0,
+                0, 0, 0
         );
 
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> processor.process(tracking(), wrongPlayer, false)
-        );
+        assertThrows(IllegalArgumentException.class, () -> processor.process(tracking(), wrongPlayer, false));
         assertEquals(0, store.saveCalls);
     }
 
@@ -119,41 +105,19 @@ class AdvancedStatsBattleProcessorTest {
 
     private AdvancedStatsModels.TrackingState tracking() {
         return new AdvancedStatsModels.TrackingState(
-                TRACKING_ID,
-                USER_ID,
-                "#2PYLQ",
-                "Player",
-                18,
-                AdvancedStatsTrackingStatus.ACTIVE,
-                STARTED,
-                STARTED,
-                OBSERVED.minusSeconds(600),
-                OBSERVED.minusSeconds(600),
-                OBSERVED.plusSeconds(600),
-                0,
-                null,
-                STARTED,
-                12
+                TRACKING_ID, USER_ID, "#2PYLQ", "Player", 18,
+                AdvancedStatsTrackingStatus.ACTIVE, STARTED, STARTED,
+                OBSERVED.minusSeconds(600), OBSERVED.minusSeconds(600), OBSERVED.plusSeconds(600),
+                0, null, STARTED, 12
         );
     }
 
     private AdvancedStatsModels.BattleCandidate battle(boolean attack, String armyShareCode) {
         return new AdvancedStatsModels.BattleCandidate(
-                "#2PYLQ",
-                null,
-                OBSERVED,
-                attack,
-                "multiplayer",
-                "#9GCUV",
-                "Opponent",
-                18,
-                18,
-                3,
-                100.0,
-                armyShareCode,
-                500000,
-                400000,
-                5000
+                "#2PYLQ", null, OBSERVED, attack, "multiplayer", "#9GCUV", "Opponent",
+                18, 18, 3, 100.0, armyShareCode,
+                500000, 400000, 5000,
+                800000, 700000, 10000
         );
     }
 
