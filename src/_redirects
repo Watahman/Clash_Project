@@ -2,6 +2,7 @@
 /cwl-planner.html /cwl-planner 301
 /cwl-tracker.html /cwl-tracker 301
 /clan-management.html /clan-management 301
+/minigames.html /minigames 301
 /bracket-generator.html /bracket-generator 301
 /guides.html /guides 301
 /methodology.html /methodology 301
@@ -19,4 +20,5 @@
 /app/dashboard.html /dashboard 301
 /subpages/dashboard.html /dashboard 301
 /subpages/cwl-planner-drafts.html /app/cwl-planner-drafts 301
+/subpages/achievements.html /app/achievements 301
 /subpages/advanced-stats.html /app/advanced-stats 301
