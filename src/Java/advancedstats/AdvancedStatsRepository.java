@@ -66,6 +66,7 @@ public final class AdvancedStatsRepository
         JsonObject patch = baseLifecyclePatch(AdvancedStatsTrackingStatus.PAUSED, now);
         patch.add("next_poll_at", JsonNull.INSTANCE);
         patch.addProperty("gap_started_at", gapStartedAt.toString());
+        patch.addProperty("gap_reason", "USER_PAUSED");
         clearLease(patch);
         patchTracking(userId, playerTag, patch);
         return requireTracking(userId, playerTag);
@@ -80,7 +81,7 @@ public final class AdvancedStatsRepository
         patch.addProperty("next_poll_at", resumeRequestedAt.toString());
         patch.addProperty("consecutive_failures", 0);
         clearLease(patch);
-        // Preserve gap_started_at until collection proves that upstream history covered it.
+        // Preserve gap_started_at/gap_reason until collection closes the known gap.
         patchTracking(userId, playerTag, patch);
         return requireTracking(userId, playerTag);
     }
@@ -94,6 +95,7 @@ public final class AdvancedStatsRepository
         JsonObject patch = baseLifecyclePatch(AdvancedStatsTrackingStatus.STOPPED, now);
         patch.add("next_poll_at", JsonNull.INSTANCE);
         patch.addProperty("gap_started_at", gapStartedAt.toString());
+        patch.addProperty("gap_reason", "USER_PAUSED");
         clearLease(patch);
         patchTracking(userId, playerTag, patch);
         return requireTracking(userId, playerTag);
