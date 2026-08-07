@@ -1,4 +1,5 @@
 import '../shell/achievements-navigation.js';
+import '../shell/advanced-stats-navigation.js';
 import { en } from './locales/en.js';
 import { nl } from './locales/nl.js';
 import { fr } from './locales/fr.js';
@@ -21,6 +22,7 @@ import esCompletion from './locale-completions/es.js';
 import { publicStaticLocales } from './public-static-locales.js';
 import { publicResourceLocales } from './public-resource-locales.js';
 import { achievementLocales } from './achievement-locales.js';
+import { advancedStatsLocales } from './advanced-stats-locales.js';
 
 export const supportedLanguages = Object.freeze(['nl', 'en', 'fr', 'de', 'es']);
 
@@ -30,12 +32,14 @@ const plannerToolFallback = Object.fromEntries(
 
 function buildDictionary(language, base, workspace, publicCopy, completion = {}) {
     const fallback = language === 'en' || language === 'nl' ? {} : plannerToolFallback;
+    const advancedStats = advancedStatsLocales[language] || {};
     return Object.freeze({
         ...fallback,
         ...base,
         ...workspace,
         ...publicCopy,
         ...completion,
+        ...advancedStats,
         ...(publicStaticLocales[language] || {}),
         ...(publicResourceLocales[language] || {}),
         ...(achievementLocales[language] || {})
