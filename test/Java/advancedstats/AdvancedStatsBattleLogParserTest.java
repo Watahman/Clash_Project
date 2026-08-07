@@ -34,6 +34,11 @@ class AdvancedStatsBattleLogParserTest {
                     ],
                     "extraLootedResources": [
                       {"name":"Gold","amount":10000}
+                    ],
+                    "availableLoot": [
+                      {"name":"Gold","amount":900000},
+                      {"name":"Elixir","amount":850000},
+                      {"name":"Dark Elixir","amount":12000}
                     ]
                   }
                 ]
@@ -49,6 +54,9 @@ class AdvancedStatsBattleLogParserTest {
         assertEquals(510000, battle.lootGold());
         assertEquals(400000, battle.lootElixir());
         assertEquals(5000, battle.lootDarkElixir());
+        assertEquals(900000, battle.availableGold());
+        assertEquals(850000, battle.availableElixir());
+        assertEquals(12000, battle.availableDarkElixir());
         assertEquals(18, battle.playerTownHall());
         assertEquals(18, battle.opponentTownHall());
     }
