@@ -2,6 +2,8 @@ package Java.advancedstats;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -23,22 +25,46 @@ class BattleFingerprintTest {
     void identityChangesProduceDifferentFingerprints() {
         var base = battle("#2PYLQ", "#9GCUV", "2026-08-07T12:30:00Z", "u1x10-s2x1", 87.5);
 
-        assertNotEquals(
-                BattleFingerprint.from(base),
-                BattleFingerprint.from(battle("#2PYLQ", "#9GCUV", "2026-08-07T12:31:00Z", "u1x10-s2x1", 87.5))
+        assertNotEquals(BattleFingerprint.from(base), BattleFingerprint.from(
+                battle("#2PYLQ", "#9GCUV", "2026-08-07T12:31:00Z", "u1x10-s2x1", 87.5)));
+        assertNotEquals(BattleFingerprint.from(base), BattleFingerprint.from(
+                battle("#2PYLQ", "#8GCUV", "2026-08-07T12:30:00Z", "u1x10-s2x1", 87.5)));
+        assertNotEquals(BattleFingerprint.from(base), BattleFingerprint.from(
+                battle("#2PYLQ", "#9GCUV", "2026-08-07T12:30:00Z", "u1x11-s2x1", 87.5)));
+        assertNotEquals(BattleFingerprint.from(base), BattleFingerprint.from(
+                battle("#2PYLQ", "#9GCUV", "2026-08-07T12:30:00Z", "u1x10-s2x1", 88.0)));
+    }
+
+    @Test
+    void timestampLessCandidateIgnoresPollObservationTime() {
+        var first = candidate(null, Instant.parse("2026-08-07T13:00:00Z"), 900000);
+        var second = candidate(null, Instant.parse("2026-08-07T13:30:00Z"), 900000);
+
+        assertEquals(BattleFingerprint.from(first), BattleFingerprint.from(second));
+    }
+
+    @Test
+    void timestampLessCandidateUsesAvailableLootAsExtraDiscriminator() {
+        var first = candidate(null, Instant.parse("2026-08-07T13:00:00Z"), 900000);
+        var second = candidate(null, Instant.parse("2026-08-07T13:00:00Z"), 900001);
+
+        assertNotEquals(BattleFingerprint.from(first), BattleFingerprint.from(second));
+    }
+
+    @Test
+    void realBattleTimestampRemainsPartOfIdentityWhenPresent() {
+        var first = candidate(
+                Instant.parse("2026-08-07T12:00:00Z"),
+                Instant.parse("2026-08-07T13:00:00Z"),
+                900000
         );
-        assertNotEquals(
-                BattleFingerprint.from(base),
-                BattleFingerprint.from(battle("#2PYLQ", "#8GCUV", "2026-08-07T12:30:00Z", "u1x10-s2x1", 87.5))
+        var second = candidate(
+                Instant.parse("2026-08-07T12:01:00Z"),
+                Instant.parse("2026-08-07T13:00:00Z"),
+                900000
         );
-        assertNotEquals(
-                BattleFingerprint.from(base),
-                BattleFingerprint.from(battle("#2PYLQ", "#9GCUV", "2026-08-07T12:30:00Z", "u1x11-s2x1", 87.5))
-        );
-        assertNotEquals(
-                BattleFingerprint.from(base),
-                BattleFingerprint.from(battle("#2PYLQ", "#9GCUV", "2026-08-07T12:30:00Z", "u1x10-s2x1", 88.0))
-        );
+
+        assertNotEquals(BattleFingerprint.from(first), BattleFingerprint.from(second));
     }
 
     @Test
@@ -88,6 +114,33 @@ class BattleFingerprintTest {
                 2,
                 destruction,
                 armyShareCode
+        );
+    }
+
+    private AdvancedStatsModels.BattleCandidate candidate(
+            Instant battleTimestamp,
+            Instant observedAt,
+            long availableGold
+    ) {
+        return new AdvancedStatsModels.BattleCandidate(
+                "#2PYLQ",
+                battleTimestamp,
+                observedAt,
+                true,
+                "multiplayer",
+                "#9GCUV",
+                "Opponent",
+                18,
+                18,
+                3,
+                100.0,
+                "u8x110s2x2",
+                500000,
+                400000,
+                5000,
+                availableGold,
+                800000,
+                10000
         );
     }
 }
