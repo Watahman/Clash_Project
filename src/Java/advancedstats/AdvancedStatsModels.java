@@ -46,6 +46,12 @@ public final class AdvancedStatsModels {
         }
     }
 
+    /**
+     * Stable battle identity used by the original Phase 1 fingerprint tests.
+     * New battle-log ingestion uses {@link BattleCandidate}, which also includes
+     * loot values because the current player battle-log payload does not expose
+     * a guaranteed battle timestamp/ID for every entry.
+     */
     public record BattleIdentity(
             String playerTag,
             String battleTimestamp,
@@ -62,13 +68,55 @@ public final class AdvancedStatsModels {
             battleType = normalizeOptional(battleType);
             opponentPlayerTag = normalizeOptionalTag(opponentPlayerTag);
             armyShareCode = normalizeOptional(armyShareCode);
-            if (stars != null && (stars < 0 || stars > 3)) {
-                throw new IllegalArgumentException("stars must be between 0 and 3");
+            validateStars(stars);
+            validateDestruction(destructionPercentage);
+        }
+    }
+
+    /**
+     * One entry observed in the player battle log.
+     * battleTimestamp may be null because current battle-log responses do not
+     * guarantee a timestamp field. observedAt is therefore always retained.
+     */
+    public record BattleCandidate(
+            String playerTag,
+            Instant battleTimestamp,
+            Instant observedAt,
+            boolean attack,
+            String battleType,
+            String opponentPlayerTag,
+            String opponentName,
+            Integer opponentTownHall,
+            Integer playerTownHall,
+            Integer stars,
+            Double destructionPercentage,
+            String armyShareCode,
+            long lootGold,
+            long lootElixir,
+            long lootDarkElixir
+    ) {
+        public BattleCandidate {
+            playerTag = CacheKeys.requireValidTag(playerTag);
+            Objects.requireNonNull(observedAt, "observedAt");
+            battleType = normalizeOptional(battleType);
+            opponentPlayerTag = normalizeOptionalTag(opponentPlayerTag);
+            opponentName = normalizeOptional(opponentName);
+            armyShareCode = normalizeOptional(armyShareCode);
+            if (opponentTownHall != null && opponentTownHall <= 0) {
+                throw new IllegalArgumentException("opponentTownHall must be positive");
             }
-            if (destructionPercentage != null
-                    && (destructionPercentage < 0 || destructionPercentage > 100)) {
-                throw new IllegalArgumentException("destructionPercentage must be between 0 and 100");
+            if (playerTownHall != null && playerTownHall <= 0) {
+                throw new IllegalArgumentException("playerTownHall must be positive");
             }
+            validateStars(stars);
+            validateDestruction(destructionPercentage);
+            if (lootGold < 0 || lootElixir < 0 || lootDarkElixir < 0) {
+                throw new IllegalArgumentException("loot values cannot be negative");
+            }
+        }
+
+        public Instant effectiveTimestamp() {
+            return battleTimestamp == null ? observedAt : battleTimestamp;
         }
     }
 
@@ -87,6 +135,34 @@ public final class AdvancedStatsModels {
             if (unitLevel != null && unitLevel < 0) {
                 throw new IllegalArgumentException("unitLevel cannot be negative");
             }
+        }
+    }
+
+    /** Parsed and deterministically normalized army payload. */
+    public record ParsedArmy(
+            List<UnitUsage> units,
+            String normalizedArmyJson,
+            String normalizedArmyHash,
+            boolean armyDataAvailable
+    ) {
+        public ParsedArmy {
+            units = units == null ? List.of() : List.copyOf(units);
+            normalizedArmyJson = normalizeOptional(normalizedArmyJson);
+            if (armyDataAvailable) {
+                if (normalizedArmyJson.isBlank()) {
+                    throw new IllegalArgumentException("normalizedArmyJson is required when army data is available");
+                }
+                normalizedArmyHash = requireSha256(normalizedArmyHash, "normalizedArmyHash");
+            } else {
+                normalizedArmyHash = normalizeOptional(normalizedArmyHash);
+                if (!normalizedArmyHash.isBlank()) {
+                    normalizedArmyHash = requireSha256(normalizedArmyHash, "normalizedArmyHash");
+                }
+            }
+        }
+
+        public static ParsedArmy unavailable() {
+            return new ParsedArmy(List.of(), "", "", false);
         }
     }
 
@@ -110,6 +186,21 @@ public final class AdvancedStatsModels {
             }
             units = units == null ? List.of() : List.copyOf(units);
             normalizedArmyHash = requireSha256(normalizedArmyHash, "normalizedArmyHash");
+        }
+    }
+
+    public record SaveBattleResult(boolean inserted, UUID battleId) {
+        public SaveBattleResult {
+            if (inserted && battleId == null) {
+                throw new IllegalArgumentException("battleId is required for an inserted battle");
+            }
+            if (!inserted && battleId != null) {
+                throw new IllegalArgumentException("duplicate result cannot contain a battleId");
+            }
+        }
+
+        public static SaveBattleResult duplicate() {
+            return new SaveBattleResult(false, null);
         }
     }
 
@@ -147,6 +238,19 @@ public final class AdvancedStatsModels {
             throw new IllegalArgumentException(field + " must be a SHA-256 hex string");
         }
         return normalized;
+    }
+
+    private static void validateStars(Integer stars) {
+        if (stars != null && (stars < 0 || stars > 3)) {
+            throw new IllegalArgumentException("stars must be between 0 and 3");
+        }
+    }
+
+    private static void validateDestruction(Double destructionPercentage) {
+        if (destructionPercentage != null
+                && (destructionPercentage < 0 || destructionPercentage > 100)) {
+            throw new IllegalArgumentException("destructionPercentage must be between 0 and 100");
+        }
     }
 
     private static String normalizeOptionalTag(String value) {
