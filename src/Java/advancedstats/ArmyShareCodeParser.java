@@ -14,18 +14,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Parser for Clash army share payloads used by the player battle log.
- *
- * Grammar markers follow the current in-game format:
- * u = home army troops, s = home army spells,
- * i = Clan Castle troops, d = Clan Castle spells,
- * h = hero/pet/equipment loadouts.
- *
- * The parser is deliberately strict. A malformed non-empty section throws so a
- * battle can be retained as PARSER_ERROR instead of partially incrementing
- * lifetime counters.
- */
+/** Strict parser for army share payloads exposed by the player battle log. */
 public final class ArmyShareCodeParser {
     private static final int TROOP_BASE_ID = 4_000_000;
     private static final int SPELL_BASE_ID = 26_000_000;
@@ -39,115 +28,65 @@ public final class ArmyShareCodeParser {
     private static final Pattern ITEM_PATTERN = Pattern.compile("^(\\d+)x(\\d+)$");
 
     private static final Map<Integer, String> TROOPS = Map.ofEntries(
-            Map.entry(0, "Barbarian"),
-            Map.entry(1, "Archer"),
-            Map.entry(2, "Goblin"),
-            Map.entry(3, "Giant"),
-            Map.entry(4, "Wall Breaker"),
-            Map.entry(5, "Balloon"),
-            Map.entry(6, "Wizard"),
-            Map.entry(7, "Healer"),
-            Map.entry(8, "Dragon"),
-            Map.entry(9, "P.E.K.K.A"),
-            Map.entry(10, "Minion"),
-            Map.entry(11, "Hog Rider"),
-            Map.entry(12, "Valkyrie"),
-            Map.entry(13, "Golem"),
-            Map.entry(15, "Witch"),
-            Map.entry(17, "Lava Hound"),
-            Map.entry(22, "Bowler"),
-            Map.entry(24, "Miner"),
-            Map.entry(41, "Baby Dragon"),
-            Map.entry(53, "Yeti"),
-            Map.entry(58, "Ice Golem"),
-            Map.entry(59, "Electro Dragon"),
-            Map.entry(65, "Dragon Rider"),
-            Map.entry(82, "Headhunter"),
-            Map.entry(95, "Electro Titan"),
-            Map.entry(97, "Apprentice Warden"),
-            Map.entry(109, "Ruin Witch"),
-            Map.entry(110, "Root Rider"),
-            Map.entry(123, "Druid"),
-            Map.entry(132, "Thrower"),
-            Map.entry(150, "Furnace"),
-            Map.entry(177, "Meteor Golem")
+            Map.entry(0, "Barbarian"), Map.entry(1, "Archer"), Map.entry(2, "Goblin"),
+            Map.entry(3, "Giant"), Map.entry(4, "Wall Breaker"), Map.entry(5, "Balloon"),
+            Map.entry(6, "Wizard"), Map.entry(7, "Healer"), Map.entry(8, "Dragon"),
+            Map.entry(9, "P.E.K.K.A"), Map.entry(10, "Minion"), Map.entry(11, "Hog Rider"),
+            Map.entry(12, "Valkyrie"), Map.entry(13, "Golem"), Map.entry(15, "Witch"),
+            Map.entry(17, "Lava Hound"), Map.entry(22, "Bowler"), Map.entry(24, "Miner"),
+            Map.entry(41, "Baby Dragon"), Map.entry(53, "Yeti"), Map.entry(58, "Ice Golem"),
+            Map.entry(59, "Electro Dragon"), Map.entry(65, "Dragon Rider"),
+            Map.entry(82, "Headhunter"), Map.entry(95, "Electro Titan"),
+            Map.entry(97, "Apprentice Warden"), Map.entry(109, "Ruin Witch"),
+            Map.entry(110, "Root Rider"), Map.entry(123, "Druid"), Map.entry(132, "Thrower"),
+            Map.entry(150, "Furnace"), Map.entry(177, "Meteor Golem")
     );
 
     private static final Map<Integer, String> SUPER_TROOPS = Map.ofEntries(
-            Map.entry(26, "Super Barbarian"),
-            Map.entry(27, "Super Archer"),
-            Map.entry(28, "Super Wall Breaker"),
-            Map.entry(29, "Super Giant"),
-            Map.entry(55, "Sneaky Goblin"),
-            Map.entry(56, "Super Miner"),
-            Map.entry(57, "Rocket Balloon"),
-            Map.entry(63, "Inferno Dragon"),
-            Map.entry(64, "Super Valkyrie"),
-            Map.entry(66, "Super Witch"),
-            Map.entry(76, "Ice Hound"),
-            Map.entry(80, "Super Bowler"),
-            Map.entry(81, "Super Dragon"),
-            Map.entry(83, "Super Wizard"),
-            Map.entry(84, "Super Minion"),
-            Map.entry(98, "Super Hog Rider"),
+            Map.entry(26, "Super Barbarian"), Map.entry(27, "Super Archer"),
+            Map.entry(28, "Super Wall Breaker"), Map.entry(29, "Super Giant"),
+            Map.entry(55, "Sneaky Goblin"), Map.entry(56, "Super Miner"),
+            Map.entry(57, "Rocket Balloon"), Map.entry(63, "Inferno Dragon"),
+            Map.entry(64, "Super Valkyrie"), Map.entry(66, "Super Witch"),
+            Map.entry(76, "Ice Hound"), Map.entry(80, "Super Bowler"),
+            Map.entry(81, "Super Dragon"), Map.entry(83, "Super Wizard"),
+            Map.entry(84, "Super Minion"), Map.entry(98, "Super Hog Rider"),
             Map.entry(147, "Super Yeti")
     );
 
     private static final Map<Integer, String> SIEGES = Map.ofEntries(
-            Map.entry(51, "Wall Wrecker"),
-            Map.entry(52, "Battle Blimp"),
-            Map.entry(62, "Stone Slammer"),
-            Map.entry(75, "Siege Barracks"),
-            Map.entry(87, "Log Launcher"),
-            Map.entry(91, "Flame Flinger"),
-            Map.entry(92, "Battle Drill"),
-            Map.entry(135, "Troop Launcher"),
+            Map.entry(51, "Wall Wrecker"), Map.entry(52, "Battle Blimp"),
+            Map.entry(62, "Stone Slammer"), Map.entry(75, "Siege Barracks"),
+            Map.entry(87, "Log Launcher"), Map.entry(91, "Flame Flinger"),
+            Map.entry(92, "Battle Drill"), Map.entry(135, "Troop Launcher"),
             Map.entry(188, "Sky Wagon")
     );
 
     private static final Map<Integer, String> SPELLS = Map.ofEntries(
-            Map.entry(0, "Lightning Spell"),
-            Map.entry(1, "Healing Spell"),
-            Map.entry(2, "Rage Spell"),
-            Map.entry(3, "Jump Spell"),
-            Map.entry(5, "Freeze Spell"),
-            Map.entry(9, "Poison Spell"),
-            Map.entry(10, "Earthquake Spell"),
-            Map.entry(11, "Haste Spell"),
-            Map.entry(16, "Clone Spell"),
-            Map.entry(17, "Skeleton Spell"),
-            Map.entry(28, "Bat Spell"),
-            Map.entry(35, "Invisibility Spell"),
-            Map.entry(53, "Recall Spell"),
-            Map.entry(70, "Overgrowth Spell"),
-            Map.entry(98, "Revive Spell"),
-            Map.entry(109, "Ice Block Spell"),
-            Map.entry(120, "Totem Spell"),
-            Map.entry(123, "Angry Spell")
+            Map.entry(0, "Lightning Spell"), Map.entry(1, "Healing Spell"),
+            Map.entry(2, "Rage Spell"), Map.entry(3, "Jump Spell"),
+            Map.entry(5, "Freeze Spell"), Map.entry(9, "Poison Spell"),
+            Map.entry(10, "Earthquake Spell"), Map.entry(11, "Haste Spell"),
+            Map.entry(16, "Clone Spell"), Map.entry(17, "Skeleton Spell"),
+            Map.entry(28, "Bat Spell"), Map.entry(35, "Invisibility Spell"),
+            Map.entry(53, "Recall Spell"), Map.entry(70, "Overgrowth Spell"),
+            Map.entry(98, "Revive Spell"), Map.entry(109, "Ice Block Spell"),
+            Map.entry(120, "Totem Spell"), Map.entry(123, "Angry Spell")
     );
 
     private static final Map<Integer, String> HEROES = Map.ofEntries(
-            Map.entry(0, "Barbarian King"),
-            Map.entry(1, "Archer Queen"),
-            Map.entry(2, "Grand Warden"),
-            Map.entry(4, "Royal Champion"),
-            Map.entry(6, "Minion Prince"),
-            Map.entry(7, "Dragon Duke")
+            Map.entry(0, "Barbarian King"), Map.entry(1, "Archer Queen"),
+            Map.entry(2, "Grand Warden"), Map.entry(4, "Royal Champion"),
+            Map.entry(6, "Minion Prince"), Map.entry(7, "Dragon Duke")
     );
 
     private static final Map<Integer, String> PETS = Map.ofEntries(
-            Map.entry(0, "L.A.S.S.I"),
-            Map.entry(1, "Mighty Yak"),
-            Map.entry(2, "Electro Owl"),
-            Map.entry(3, "Unicorn"),
-            Map.entry(4, "Phoenix"),
-            Map.entry(7, "Poison Lizard"),
-            Map.entry(8, "Diggy"),
-            Map.entry(9, "Frosty"),
-            Map.entry(10, "Spirit Fox"),
-            Map.entry(11, "Angry Jelly"),
-            Map.entry(16, "Sneezy"),
-            Map.entry(17, "Greedy Raven")
+            Map.entry(0, "L.A.S.S.I"), Map.entry(1, "Mighty Yak"),
+            Map.entry(2, "Electro Owl"), Map.entry(3, "Unicorn"),
+            Map.entry(4, "Phoenix"), Map.entry(7, "Poison Lizard"),
+            Map.entry(8, "Diggy"), Map.entry(9, "Frosty"),
+            Map.entry(10, "Spirit Fox"), Map.entry(11, "Angry Jelly"),
+            Map.entry(16, "Sneezy"), Map.entry(17, "Greedy Raven")
     );
 
     private static final Map<Integer, String> EQUIPMENT = Map.ofEntries(
@@ -176,7 +115,6 @@ public final class ArmyShareCodeParser {
     public AdvancedStatsModels.ParsedArmy parse(String rawLinkOrPayload) throws ArmyParseException {
         String payload = extractPayload(rawLinkOrPayload);
         if (payload.isBlank()) throw new ArmyParseException("Army share code is empty");
-
         List<String> sections = splitSections(payload);
         if (sections.isEmpty()) throw new ArmyParseException("Army share code contains no recognized sections");
 
@@ -194,7 +132,6 @@ public final class ArmyShareCodeParser {
                 default -> throw new ArmyParseException("Unsupported army section: " + marker);
             }
         }
-
         if (merged.isEmpty()) throw new ArmyParseException("Army share code did not contain usable units");
 
         List<AdvancedStatsModels.UnitUsage> units = new ArrayList<>(merged.values());
@@ -207,13 +144,12 @@ public final class ArmyShareCodeParser {
     private void parseItems(String body, boolean spell, boolean clanCastle,
                             Map<UnitKey, AdvancedStatsModels.UnitUsage> merged) throws ArmyParseException {
         if (body.isBlank()) throw new ArmyParseException("Army item section is empty");
-
         for (String rawEntry : body.split("-")) {
             Matcher matcher = ITEM_PATTERN.matcher(rawEntry);
             if (!matcher.matches()) throw new ArmyParseException("Malformed army item: " + rawEntry);
-
             int quantity = parsePositive(matcher.group(1), "quantity");
             int relativeId = parseNonNegative(matcher.group(2), "unit id");
+
             if (spell) {
                 int absoluteId = SPELL_BASE_ID + relativeId;
                 AdvancedStatsUnitCategory category = clanCastle
@@ -226,7 +162,7 @@ public final class ArmyShareCodeParser {
 
             int absoluteId = TROOP_BASE_ID + relativeId;
             String troopName = TROOPS.get(relativeId);
-            String superTroopName = SUPER_TROOPS.get(relativeId);
+            String superName = SUPER_TROOPS.get(relativeId);
             String siegeName = SIEGES.get(relativeId);
             AdvancedStatsUnitCategory category;
             String name;
@@ -234,16 +170,16 @@ public final class ArmyShareCodeParser {
 
             if (clanCastle) {
                 category = AdvancedStatsUnitCategory.CLAN_CASTLE_TROOP;
-                name = firstNonNull(siegeName, superTroopName, troopName);
-                keyPrefix = name == null ? "unknown" : "troop";
+                name = firstNonNull(siegeName, superName, troopName);
+                keyPrefix = name == null ? "unknown" : (siegeName != null ? "siege" : "troop");
             } else if (siegeName != null) {
                 category = AdvancedStatsUnitCategory.SIEGE;
                 name = siegeName;
                 keyPrefix = "siege";
-            } else if (superTroopName != null) {
+            } else if (superName != null) {
                 category = AdvancedStatsUnitCategory.SUPER_TROOP;
-                name = superTroopName;
-                keyPrefix = "super_troop";
+                name = superName;
+                keyPrefix = "troop";
             } else {
                 category = AdvancedStatsUnitCategory.TROOP;
                 name = troopName;
@@ -261,9 +197,8 @@ public final class ArmyShareCodeParser {
         for (String entry : body.split("-")) {
             Matcher matcher = HERO_PATTERN.matcher(entry);
             if (!matcher.matches()) throw new ArmyParseException("Malformed hero loadout: " + entry);
-
-            int heroId = parseNonNegative(matcher.group(1), "hero id");
-            addSingle(merged, HEROES, HERO_BASE_ID, heroId, "hero", AdvancedStatsUnitCategory.HERO);
+            addSingle(merged, HEROES, HERO_BASE_ID, parseNonNegative(matcher.group(1), "hero id"),
+                    "hero", AdvancedStatsUnitCategory.HERO);
             if (matcher.group(2) != null) addSingle(merged, PETS, PET_BASE_ID,
                     parseNonNegative(matcher.group(2), "pet id"), "pet", AdvancedStatsUnitCategory.PET);
             if (matcher.group(3) != null) addSingle(merged, EQUIPMENT, EQUIPMENT_BASE_ID,
@@ -290,11 +225,8 @@ public final class ArmyShareCodeParser {
                        AdvancedStatsModels.UnitUsage incoming) {
         UnitKey key = new UnitKey(incoming.category(), incoming.unitKey());
         AdvancedStatsModels.UnitUsage current = target.get(key);
-        if (current == null) {
-            target.put(key, incoming);
-            return;
-        }
-        target.put(key, new AdvancedStatsModels.UnitUsage(current.unitKey(), current.unitName(),
+        if (current == null) target.put(key, incoming);
+        else target.put(key, new AdvancedStatsModels.UnitUsage(current.unitKey(), current.unitName(),
                 current.category(), Math.addExact(current.quantity(), incoming.quantity()), null));
     }
 
