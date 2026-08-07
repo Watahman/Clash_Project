@@ -51,6 +51,11 @@ declare
         'advanced_stats_delete_cleanup'
     ];
 begin
+    if has_schema_privilege('anon', 'public', 'CREATE')
+       or has_schema_privilege('authenticated', 'public', 'CREATE') then
+        raise exception 'A browser role can create objects in schema public';
+    end if;
+
     foreach v_table in array v_required_tables loop
         if to_regclass(format('public.%I', v_table)) is null then
             raise exception 'Missing required table public.%', v_table;
@@ -123,6 +128,7 @@ select jsonb_build_object(
     'tablesChecked', 9,
     'functionsChecked', 17,
     'migrationsChecked', 9,
+    'browserSchemaCreate', 'DENIED',
     'browserTableAccess', 'DENIED',
     'browserRpcExecute', 'DENIED',
     'serviceRoleAccess', 'REQUIRED'
