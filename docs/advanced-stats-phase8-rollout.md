@@ -24,6 +24,12 @@ For the first live stage, keep public enrollment disabled and put only the devel
 
 Do not put user UUID allowlists or scheduler secrets in frontend files or public runtime config.
 
+## Validation policy
+
+GitHub Actions CI is intentionally disabled repository-wide. Do not add or re-enable GitHub Actions or automatic CI pipelines unless explicitly requested.
+
+All repository verification described below is manual/local verification using the existing Maven, npm and database-check commands.
+
 ## Completed pre-live validation
 
 Completed on the active production Supabase project on 2026-08-07:
@@ -80,7 +86,7 @@ npm run check:advanced-stats-db
 npm run smoke:advanced-stats-db
 ```
 
-These commands require an explicit `SUPABASE_DB_URL`; they are deliberately not part of normal CI so GitHub Actions never connects to production automatically.
+These commands require an explicit `SUPABASE_DB_URL` and are manual/local-only checks.
 
 The remaining Phase 8 gate is therefore external runtime validation, not schema/state-machine creation.
 
@@ -157,7 +163,7 @@ Only expand from the developer account when all of the following are true:
 - request volume and database growth are acceptable;
 - deployed Cloud Scheduler/Cloud Run invocation is stable;
 - restart/overlap behavior has been observed in the real runtime;
-- full backend/frontend CI is green on the exact rollout candidate.
+- full backend/frontend repository checks have been run locally/manually on the exact rollout candidate.
 
 Then add a small explicit set of user UUIDs to `ADVANCED_STATS_ROLLOUT_USER_IDS` and repeat the observation window.
 
