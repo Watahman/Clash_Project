@@ -25,6 +25,18 @@ describe('Advanced Stats workspace page', () => {
         expect([...document.querySelectorAll('button:not([type])')]).toHaveLength(0);
     });
 
+    it('uses translatable and semantic accessibility labels', () => {
+        const document = documentFor('src/subpages/advanced-stats.html');
+        const trend = document.querySelector('#advanced-stats-trend-chart');
+        const unitFilter = document.querySelector('#advanced-stats-unit-category');
+
+        expect(trend?.getAttribute('role')).toBe('img');
+        expect(trend?.getAttribute('data-i18n-aria-label')).toBe('advancedStats.trendsTitle');
+        expect(unitFilter?.getAttribute('aria-labelledby')).toBe('advanced-stats-units-title');
+        expect(document.querySelector('#advanced-stats-page-status')?.getAttribute('aria-live')).toBe('polite');
+        expect(document.querySelector('#advanced-stats-data-status')?.getAttribute('aria-live')).toBe('polite');
+    });
+
     it('keeps destructive deletion visually separate from stopping future tracking', () => {
         const document = documentFor('src/subpages/advanced-stats.html');
         expect(document.querySelector('#advanced-stats-stop')).not.toBeNull();
