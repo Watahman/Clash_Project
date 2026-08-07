@@ -162,7 +162,10 @@ begin
         consecutive_failures = 0,
         gap_started_at = null,
         gap_reason = null,
-        data_complete_since = coalesce(data_complete_since, tracking_started_at),
+        data_complete_since = case
+            when v_tracker.gap_started_at is not null then p_now
+            else coalesce(data_complete_since, tracking_started_at)
+        end,
         locked_until = null,
         locked_by = null,
         updated_at = p_now
