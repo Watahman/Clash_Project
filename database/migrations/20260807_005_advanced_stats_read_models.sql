@@ -24,8 +24,6 @@ create index if not exists advanced_stats_battles_army_period_idx
       and processing_status = 'PROCESSED'
       and army_hash is not null;
 
--- V3 keeps the proven V2 ingestion transaction, then persists the already validated
--- normalized army identity on the same processed battle row.
 create or replace function public.save_advanced_stats_battle_v3(
     p_tracking_id uuid,
     p_player_tag text,
@@ -120,8 +118,7 @@ security definer
 set search_path = public, pg_temp
 as $$
 with filtered as (
-    select b.*,
-           coalesce(b.battle_timestamp, b.observed_at) as effective_at
+    select b.*, coalesce(b.battle_timestamp, b.observed_at) as effective_at
       from public.advanced_stats_battles b
      where b.tracking_id = p_tracking_id
        and b.is_attack = true
@@ -142,6 +139,12 @@ with filtered as (
            max(bu.unit_name) as unit_name,
            sum(bu.quantity)::bigint as total_quantity,
            count(distinct bu.battle_id)::bigint as battles_present,
+           case
+               when bu.category in ('TROOP', 'SUPER_TROOP') then 'FAVORITE_TROOP'
+               when bu.category = 'SPELL' then 'FAVORITE_SPELL'
+               when bu.category = 'SIEGE' then 'FAVORITE_SIEGE'
+               else bu.category
+           end as favorite_group,
            row_number() over (
                partition by case
                    when bu.category in ('TROOP', 'SUPER_TROOP') then 'FAVORITE_TROOP'
@@ -150,13 +153,7 @@ with filtered as (
                    else bu.category
                end
                order by sum(bu.quantity) desc, count(distinct bu.battle_id) desc, bu.unit_key
-           ) as rn,
-           case
-               when bu.category in ('TROOP', 'SUPER_TROOP') then 'FAVORITE_TROOP'
-               when bu.category = 'SPELL' then 'FAVORITE_SPELL'
-               when bu.category = 'SIEGE' then 'FAVORITE_SIEGE'
-               else bu.category
-           end as favorite_group
+           ) as rn
       from filtered f
       join public.advanced_stats_battle_units bu on bu.battle_id = f.id
      where bu.category in ('TROOP', 'SUPER_TROOP', 'SPELL', 'SIEGE')
@@ -174,9 +171,7 @@ with filtered as (
      order by count(*) desc, coalesce(sum(f.stars), 0) desc, f.army_hash
      limit 1
 ), tracking as (
-    select t.*
-      from public.advanced_stats_tracking t
-     where t.id = p_tracking_id
+    select t.* from public.advanced_stats_tracking t where t.id = p_tracking_id
 )
 select jsonb_build_object(
     'tracking', jsonb_build_object(
@@ -240,8 +235,7 @@ security definer
 set search_path = public, pg_temp
 as $$
 with filtered as (
-    select b.id,
-           coalesce(b.battle_timestamp, b.observed_at) as effective_at
+    select b.id, coalesce(b.battle_timestamp, b.observed_at) as effective_at
       from public.advanced_stats_battles b
      where b.tracking_id = p_tracking_id
        and b.is_attack = true
@@ -289,7 +283,7 @@ set search_path = public, pg_temp
 as $$
 with grouped as (
     select b.army_hash,
-           max(b.normalized_army_json) as normalized_army_json,
+           b.normalized_army_json,
            count(*)::bigint as battle_count,
            coalesce(sum(b.stars), 0)::bigint as total_stars,
            coalesce(sum(b.destruction_percentage), 0)::numeric as total_destruction,
@@ -302,7 +296,7 @@ with grouped as (
        and b.army_hash is not null
        and b.normalized_army_json is not null
        and (p_from is null or coalesce(b.battle_timestamp, b.observed_at) >= p_from)
-     group by b.army_hash
+     group by b.army_hash, b.normalized_army_json
      order by count(*) desc, coalesce(sum(b.stars), 0) desc, b.army_hash
      limit greatest(1, least(coalesce(p_limit, 20), 100))
 )
@@ -333,8 +327,7 @@ security definer
 set search_path = public, pg_temp
 as $$
 with page as (
-    select b.*,
-           coalesce(b.battle_timestamp, b.observed_at) as effective_at
+    select b.*, coalesce(b.battle_timestamp, b.observed_at) as effective_at
       from public.advanced_stats_battles b
      where b.tracking_id = p_tracking_id
        and b.is_attack = true
@@ -442,16 +435,11 @@ grant execute on function public.save_advanced_stats_battle_v3(
     boolean, integer, jsonb, text, jsonb
 ) to service_role;
 
-revoke all on function public.read_advanced_stats_overview_v1(uuid, timestamptz)
-    from public, anon, authenticated;
-revoke all on function public.read_advanced_stats_units_v1(uuid, timestamptz, text)
-    from public, anon, authenticated;
-revoke all on function public.read_advanced_stats_armies_v1(uuid, timestamptz, integer)
-    from public, anon, authenticated;
-revoke all on function public.read_advanced_stats_battles_v1(uuid, timestamptz, integer, timestamptz, uuid)
-    from public, anon, authenticated;
-revoke all on function public.read_advanced_stats_trends_v1(uuid, timestamptz)
-    from public, anon, authenticated;
+revoke all on function public.read_advanced_stats_overview_v1(uuid, timestamptz) from public, anon, authenticated;
+revoke all on function public.read_advanced_stats_units_v1(uuid, timestamptz, text) from public, anon, authenticated;
+revoke all on function public.read_advanced_stats_armies_v1(uuid, timestamptz, integer) from public, anon, authenticated;
+revoke all on function public.read_advanced_stats_battles_v1(uuid, timestamptz, integer, timestamptz, uuid) from public, anon, authenticated;
+revoke all on function public.read_advanced_stats_trends_v1(uuid, timestamptz) from public, anon, authenticated;
 
 grant execute on function public.read_advanced_stats_overview_v1(uuid, timestamptz) to service_role;
 grant execute on function public.read_advanced_stats_units_v1(uuid, timestamptz, text) to service_role;
