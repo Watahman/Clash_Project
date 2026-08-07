@@ -24,6 +24,7 @@ import { publicResourceLocales } from './public-resource-locales.js';
 import { achievementLocales } from './achievement-locales.js';
 import { advancedStatsLocales } from './advanced-stats-locales.js';
 import { advancedStatsExtraLocales } from './advanced-stats-extra-locales.js';
+import { advancedStatsUiLocales } from './advanced-stats-ui-locales.js';
 
 export const supportedLanguages = Object.freeze(['nl', 'en', 'fr', 'de', 'es']);
 
@@ -35,7 +36,8 @@ function buildDictionary(language, base, workspace, publicCopy, completion = {})
     const fallback = language === 'en' || language === 'nl' ? {} : plannerToolFallback;
     const advancedStats = {
         ...(advancedStatsLocales[language] || {}),
-        ...(advancedStatsExtraLocales[language] || {})
+        ...(advancedStatsExtraLocales[language] || {}),
+        ...(advancedStatsUiLocales[language] || {})
     };
     return Object.freeze({
         ...fallback,
