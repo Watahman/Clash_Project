@@ -6,25 +6,31 @@ These notes document correctness limits that must remain visible through later U
 
 The current player battle-log payload used by Advanced Stats does not guarantee a durable battle ID or battle timestamp for every entry.
 
-Advanced Stats therefore builds a content fingerprint from the stable fields currently available to it:
+Advanced Stats therefore builds a content fingerprint from stable battle fields currently available to it:
 
 - tracked player tag;
 - attack/defense;
 - battle type;
 - optional upstream timestamp when present;
-- opponent tag/name/Town Hall;
-- tracked-player Town Hall observed for the poll;
+- stable opponent tag when available, otherwise opponent name;
+- opponent Town Hall;
 - stars;
 - destruction percentage;
 - army share code;
 - looted Gold/Elixir/Dark Elixir;
 - available Gold/Elixir/Dark Elixir.
 
-`observed_at` is deliberately excluded from the fingerprint because the same battle is observed at a different time on each poll.
+Poll-local/profile data is deliberately excluded from identity when it can change while the same recent battle remains visible. In particular:
+
+- `observed_at` is not fingerprinted;
+- the tracked player's current Town Hall is stored for analysis but not fingerprinted;
+- opponent name is ignored when the stable opponent tag exists.
+
+This prevents a later poll, player Town Hall upgrade or opponent rename from turning an old recent battle into a fake new battle.
 
 ### Remaining theoretical collision
 
-If the upstream API supplies no battle ID/timestamp and two genuinely separate attacks are identical across every field above, ClashPanel cannot prove that they are separate events. They may share a fingerprint.
+If the upstream API supplies no battle ID/timestamp and two genuinely separate attacks are identical across every stable source field used above, ClashPanel cannot prove that they are separate events. They may share a fingerprint.
 
 This is an upstream-data limitation. Advanced Stats must not claim mathematically complete battle identity while this remains true.
 
