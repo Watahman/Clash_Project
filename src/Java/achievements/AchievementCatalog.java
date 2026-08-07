@@ -69,6 +69,10 @@ public final class AchievementCatalog {
         family(items, "productive_checkins", "Productive Check-ins", "Snapshot intervals with measurable progress", "history", "tracked_progress_intervals", 2, 5, 12, 25);
         family(items, "progress_burst", "Progress Burst", "Largest combined positive level gain between two snapshots", "history", "tracked_largest_progress_jump", 5, 15, 30, 60);
 
+        family(items, "battle_tracker", "Battle Tracker", "Multiplayer attacks recorded by Advanced Stats", "battle", "tracked_attack_count", 10, 50, 250, 1000);
+        family(items, "star_collector", "Star Collector", "Stars earned in attacks recorded by Advanced Stats", "battle", "tracked_star_count", 25, 150, 750, 3000);
+        family(items, "three_star_specialist", "Three-Star Specialist", "Three-star attacks recorded by Advanced Stats", "battle", "tracked_three_star_count", 3, 25, 100, 500);
+
         return List.copyOf(items);
     }
 
