@@ -5,6 +5,7 @@ import Java.HttpException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -27,18 +28,35 @@ public final class AdvancedStatsLifecycleService {
     private final Store store;
     private final Ownership ownership;
     private final Clock clock;
+    private final AdvancedStatsRolloutPolicy rolloutPolicy;
 
     public AdvancedStatsLifecycleService() {
-        this(new AdvancedStatsRepository(), new AdvancedStatsAccountOwnership(), Clock.systemUTC());
+        this(
+                new AdvancedStatsRepository(),
+                new AdvancedStatsAccountOwnership(),
+                Clock.systemUTC(),
+                new AdvancedStatsRolloutPolicy()
+        );
     }
 
     AdvancedStatsLifecycleService(Store store, Ownership ownership, Clock clock) {
+        this(store, ownership, clock, new AdvancedStatsRolloutPolicy(true, Set.of()));
+    }
+
+    AdvancedStatsLifecycleService(
+            Store store,
+            Ownership ownership,
+            Clock clock,
+            AdvancedStatsRolloutPolicy rolloutPolicy
+    ) {
         this.store = store;
         this.ownership = ownership;
         this.clock = clock;
+        this.rolloutPolicy = rolloutPolicy;
     }
 
     public AdvancedStatsModels.TrackingState start(UUID userId, String rawPlayerTag) throws Exception {
+        rolloutPolicy.requireCanStart(userId);
         String playerTag = ownership.requireLinkedAccount(userId, rawPlayerTag);
         return store.startTracking(userId, playerTag);
     }
