@@ -21,6 +21,7 @@ public class Main {
         SUPABASE_CWLPlanner supaCWLPlanner;
         SUPABASE_User supaUser;
         SUPABASE_Auth supaAuth;
+        SUPABASE_Achievements supaAchievements;
         SUPABASE_AdvancedStats supaAdvancedStats;
         AdvancedStatsInternalPoll advancedStatsInternalPoll;
         PublicIntake publicIntake;
@@ -50,6 +51,7 @@ public class Main {
         apiCwlHistory = new API_CWLHistory(server, conf);
         supaUser = new SUPABASE_User(server, conf);
         supaAuth = new SUPABASE_Auth(server, conf);
+        supaAchievements = new SUPABASE_Achievements(server, conf);
         supaAdvancedStats = new SUPABASE_AdvancedStats(server, conf);
         advancedStatsInternalPoll = new AdvancedStatsInternalPoll(server, conf);
         publicIntake = new PublicIntake(server, conf);
@@ -105,6 +107,7 @@ public class Main {
         apiLabels.getLabelsClans();
 
         supaAuth.registerRoutes();
+        supaAchievements.registerRoutes();
         supaAdvancedStats.registerRoutes();
         advancedStatsInternalPoll.registerRoute();
         publicIntake.registerRoutes();
