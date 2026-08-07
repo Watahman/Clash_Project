@@ -1,15 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { advancedStatsLocales } from '../../src/assets/js/i18n/advanced-stats-locales.js';
 import { advancedStatsExtraLocales } from '../../src/assets/js/i18n/advanced-stats-extra-locales.js';
+import { advancedStatsUiLocales } from '../../src/assets/js/i18n/advanced-stats-ui-locales.js';
 import { translations } from '../../src/assets/js/i18n/runtime-translations.js';
 
-const featureLocales = {
-    en: advancedStatsLocales.en,
-    nl: advancedStatsLocales.nl,
-    fr: advancedStatsExtraLocales.fr,
-    de: advancedStatsExtraLocales.de,
-    es: advancedStatsExtraLocales.es
-};
+const featureLocales = Object.fromEntries(
+    ['en', 'nl', 'fr', 'de', 'es'].map(language => [
+        language,
+        {
+            ...(advancedStatsLocales[language] || {}),
+            ...(advancedStatsExtraLocales[language] || {}),
+            ...(advancedStatsUiLocales[language] || {})
+        }
+    ])
+);
 
 describe('Advanced Stats locales', () => {
     it('keeps complete key parity in all supported site languages', () => {
@@ -34,6 +38,7 @@ describe('Advanced Stats locales', () => {
     it('preserves interpolation placeholders across languages', () => {
         for (const language of ['en', 'nl', 'fr', 'de', 'es']) {
             expect(featureLocales[language]['advancedStats.armyUses']).toContain('{count}');
+            expect(featureLocales[language]['advancedStats.unitsCount']).toContain('{count}');
         }
     });
 
