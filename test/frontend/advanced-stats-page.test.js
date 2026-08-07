@@ -37,6 +37,14 @@ describe('Advanced Stats workspace page', () => {
         expect(document.querySelector('#advanced-stats-data-status')?.getAttribute('aria-live')).toBe('polite');
     });
 
+    it('keeps dynamic army summaries localized', () => {
+        const source = readFileSync('src/assets/js/pages/advanced-stats.js', 'utf8');
+        expect(source).toContain("t('advancedStats.unitsCount'");
+        expect(source).toContain("CLAN_CASTLE_TROOP: 'advancedStats.categoryClanCastleTroops'");
+        expect(source).toContain("CLAN_CASTLE_SPELL: 'advancedStats.categoryClanCastleSpells'");
+        expect(source).not.toContain('${formatNumber(units.length)} units');
+    });
+
     it('keeps destructive deletion visually separate from stopping future tracking', () => {
         const document = documentFor('src/subpages/advanced-stats.html');
         expect(document.querySelector('#advanced-stats-stop')).not.toBeNull();
