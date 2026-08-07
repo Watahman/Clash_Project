@@ -75,6 +75,11 @@ function isApiPath(pathname) {
     return pathname === "/api" || pathname.startsWith("/api/");
 }
 
+function isAdvancedStatsApiPath(pathname) {
+    const path = String(pathname || "").toLowerCase();
+    return path.startsWith("/api/advancedstats") || path === "/api/internaladvancedstatspoll";
+}
+
 function normalizedPath(pathname) {
     const normalized = pathname.replace(/\/+$/, "") || "/";
     return normalized.toLowerCase();
@@ -157,6 +162,17 @@ function createBackendHeaders(request, incomingUrl, env) {
     return headers;
 }
 
+function privateApiResponse(response) {
+    const headers = new Headers(response.headers);
+    headers.set("Cache-Control", "no-store");
+    headers.set("Pragma", "no-cache");
+    return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers
+    });
+}
+
 async function proxyApiRequest(request, env, incomingUrl) {
     if (!env.CLOUD_RUN_ORIGIN) {
         return jsonError(500, "PROXY_NOT_CONFIGURED", "API proxy is not configured.");
@@ -199,6 +215,9 @@ async function proxyApiRequest(request, env, incomingUrl) {
         return jsonError(upstreamResponse.status, code, message);
     }
 
+    if (isAdvancedStatsApiPath(incomingUrl.pathname)) {
+        return privateApiResponse(upstreamResponse);
+    }
     return upstreamResponse;
 }
 
