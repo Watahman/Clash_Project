@@ -40,9 +40,11 @@ public final class AdvancedStatsBattleLogParser {
             JsonObject battle = entry.getAsJsonObject();
             boolean attack = booleanValue(battle, "attack", false);
 
-            Loot loot = new Loot();
-            addResources(loot, arrayValue(battle, "lootedResources"));
-            addResources(loot, arrayValue(battle, "extraLootedResources"));
+            Loot looted = new Loot();
+            addResources(looted, arrayValue(battle, "lootedResources"));
+            addResources(looted, arrayValue(battle, "extraLootedResources"));
+            Loot available = new Loot();
+            addResources(available, arrayValue(battle, "availableLoot"));
 
             result.add(new AdvancedStatsModels.BattleCandidate(
                     playerTag,
@@ -57,9 +59,12 @@ public final class AdvancedStatsBattleLogParser {
                     integerValue(battle, "stars"),
                     doubleValue(battle, "destructionPercentage"),
                     stringValue(battle, "armyShareCode"),
-                    loot.gold,
-                    loot.elixir,
-                    loot.darkElixir
+                    looted.gold,
+                    looted.elixir,
+                    looted.darkElixir,
+                    available.gold,
+                    available.elixir,
+                    available.darkElixir
             ));
         }
 
