@@ -39,13 +39,30 @@ class AdvancedStatsReadMigrationContractTest {
     }
 
     @Test
+    void trendReadUsesExactBattleBoundaryBeforeDailyBucketing() throws Exception {
+        String sql = Files.readString(Path.of(
+                "database/migrations/20260807_006_advanced_stats_exact_trends.sql"
+        ));
+
+        assertTrue(sql.contains("coalesce(b.battle_timestamp, b.observed_at) >= p_from"));
+        assertTrue(sql.contains("at time zone 'UTC'"));
+        assertTrue(sql.contains("processing_status = 'PROCESSED'"));
+        assertFalse(sql.contains("from public.advanced_stats_daily"));
+    }
+
+    @Test
     void readFunctionsRemainServiceRoleOnly() throws Exception {
         String sql = Files.readString(Path.of(
                 "database/migrations/20260807_005_advanced_stats_read_models.sql"
         ));
+        String trends = Files.readString(Path.of(
+                "database/migrations/20260807_006_advanced_stats_exact_trends.sql"
+        ));
 
         assertTrue(sql.contains("from public, anon, authenticated"));
         assertTrue(sql.contains("to service_role"));
+        assertTrue(trends.contains("from public, anon, authenticated"));
+        assertTrue(trends.contains("to service_role"));
         assertFalse(sql.contains("grant execute on function public.read_advanced_stats_overview_v1(uuid, timestamptz) to authenticated"));
     }
 }
