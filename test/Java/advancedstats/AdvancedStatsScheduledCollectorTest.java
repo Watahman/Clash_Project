@@ -234,8 +234,8 @@ class AdvancedStatsScheduledCollectorTest {
         ) {
             this.workerId = workerId;
             assertEquals(NOW, now);
-            assertEquals(50, limit);
-            assertEquals(120, leaseSeconds);
+            assertEquals(25, limit);
+            assertEquals(600, leaseSeconds);
             return List.copyOf(claim);
         }
 
