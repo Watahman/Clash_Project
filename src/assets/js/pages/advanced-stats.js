@@ -664,16 +664,31 @@ function armyLabel(army) {
     const units = arrayValue(army?.units);
     if (!units.length) return t('advancedStats.noFavorite');
     const total = units.reduce((sum, unit) => sum + Math.max(0, Number(unit.quantity || 0)), 0);
-    return `${formatNumber(total)} · ${formatNumber(units.length)} units`;
+    return `${formatNumber(total)} · ${t('advancedStats.unitsCount', { count: formatNumber(units.length) })}`;
 }
 
 function armyCompositionSummary(army) {
     const groups = new Map();
     arrayValue(army?.units).forEach(unit => {
-        const category = String(unit.category || 'UNIT').replaceAll('_', ' ');
+        const category = categoryLabel(unit.category);
         groups.set(category, (groups.get(category) || 0) + Math.max(0, Number(unit.quantity || 0)));
     });
     return [...groups.entries()].slice(0, 7).map(([category, quantity]) => `${formatNumber(quantity)}× ${category}`);
+}
+
+function categoryLabel(category) {
+    const key = {
+        TROOP: 'advancedStats.categoryTroops',
+        SUPER_TROOP: 'advancedStats.categorySuperTroops',
+        SPELL: 'advancedStats.categorySpells',
+        SIEGE: 'advancedStats.categorySiege',
+        CLAN_CASTLE_TROOP: 'advancedStats.categoryClanCastleTroops',
+        CLAN_CASTLE_SPELL: 'advancedStats.categoryClanCastleSpells',
+        HERO: 'advancedStats.categoryHeroes',
+        PET: 'advancedStats.categoryPets',
+        EQUIPMENT: 'advancedStats.categoryEquipment'
+    }[String(category || '').toUpperCase()] || 'advancedStats.categoryOther';
+    return t(key);
 }
 
 function arrayValue(value) {
