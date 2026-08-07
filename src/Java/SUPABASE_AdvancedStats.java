@@ -2,6 +2,7 @@ package Java;
 
 import Java.advancedstats.AdvancedStatsLifecycleService;
 import Java.advancedstats.AdvancedStatsModels;
+import Java.advancedstats.AdvancedStatsReadService;
 import Java.advancedstats.AdvancedStatsTrackingStatus;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -12,7 +13,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-/** Authenticated lifecycle routes for opt-in Advanced Stats tracking. */
+/** Authenticated lifecycle and read routes for opt-in Advanced Stats tracking. */
 public final class SUPABASE_AdvancedStats {
     public static final String ROUTE_TRACKING_START = "/AdvancedStatsTrackingStart";
     public static final String ROUTE_TRACKING_GET = "/AdvancedStatsTrackingGet";
@@ -21,18 +22,35 @@ public final class SUPABASE_AdvancedStats {
     public static final String ROUTE_TRACKING_STOP = "/AdvancedStatsTrackingStop";
     public static final String ROUTE_DATA_DELETE = "/AdvancedStatsDataDelete";
 
+    public static final String ROUTE_OVERVIEW = "/AdvancedStatsOverview";
+    public static final String ROUTE_UNITS = "/AdvancedStatsUnits";
+    public static final String ROUTE_ARMIES = "/AdvancedStatsArmies";
+    public static final String ROUTE_BATTLES = "/AdvancedStatsBattles";
+    public static final String ROUTE_TRENDS = "/AdvancedStatsTrends";
+
     private final HttpServer server;
     private final API_Utils utils;
     private final AdvancedStatsLifecycleService lifecycle;
+    private final AdvancedStatsReadService reads;
 
     public SUPABASE_AdvancedStats(HttpServer server, Config conf) {
-        this(server, conf, new AdvancedStatsLifecycleService());
+        this(server, conf, new AdvancedStatsLifecycleService(), new AdvancedStatsReadService());
     }
 
     SUPABASE_AdvancedStats(HttpServer server, Config conf, AdvancedStatsLifecycleService lifecycle) {
+        this(server, conf, lifecycle, new AdvancedStatsReadService());
+    }
+
+    SUPABASE_AdvancedStats(
+            HttpServer server,
+            Config conf,
+            AdvancedStatsLifecycleService lifecycle,
+            AdvancedStatsReadService reads
+    ) {
         this.server = server;
         this.utils = new API_Utils(conf);
         this.lifecycle = lifecycle;
+        this.reads = reads;
     }
 
     public void registerRoutes() {
@@ -42,6 +60,11 @@ public final class SUPABASE_AdvancedStats {
         registerResume();
         registerStop();
         registerDelete();
+        registerOverview();
+        registerUnits();
+        registerArmies();
+        registerBattles();
+        registerTrends();
     }
 
     private void registerStart() {
@@ -105,6 +128,70 @@ public final class SUPABASE_AdvancedStats {
         }));
     }
 
+    private void registerOverview() {
+        server.createContext(ROUTE_OVERVIEW, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject body = utils.parseBody(ex);
+            JsonObject response = reads.overview(
+                    authenticatedUserId(ex),
+                    requirePlayerTag(body),
+                    optionalString(body, "period")
+            );
+            utils.sendJsonResponse(ex, response.toString(), 200);
+        }));
+    }
+
+    private void registerUnits() {
+        server.createContext(ROUTE_UNITS, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject body = utils.parseBody(ex);
+            JsonObject response = reads.units(
+                    authenticatedUserId(ex),
+                    requirePlayerTag(body),
+                    optionalString(body, "period"),
+                    optionalString(body, "category")
+            );
+            utils.sendJsonResponse(ex, response.toString(), 200);
+        }));
+    }
+
+    private void registerArmies() {
+        server.createContext(ROUTE_ARMIES, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject body = utils.parseBody(ex);
+            JsonObject response = reads.armies(
+                    authenticatedUserId(ex),
+                    requirePlayerTag(body),
+                    optionalString(body, "period"),
+                    optionalInt(body, "limit", 20)
+            );
+            utils.sendJsonResponse(ex, response.toString(), 200);
+        }));
+    }
+
+    private void registerBattles() {
+        server.createContext(ROUTE_BATTLES, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject body = utils.parseBody(ex);
+            JsonObject response = reads.battles(
+                    authenticatedUserId(ex),
+                    requirePlayerTag(body),
+                    optionalString(body, "period"),
+                    optionalInt(body, "limit", 25),
+                    optionalString(body, "cursor")
+            );
+            utils.sendJsonResponse(ex, response.toString(), 200);
+        }));
+    }
+
+    private void registerTrends() {
+        server.createContext(ROUTE_TRENDS, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject body = utils.parseBody(ex);
+            JsonObject response = reads.trends(
+                    authenticatedUserId(ex),
+                    requirePlayerTag(body),
+                    optionalString(body, "period")
+            );
+            utils.sendJsonResponse(ex, response.toString(), 200);
+        }));
+    }
+
     private UUID authenticatedUserId(com.sun.net.httpserver.HttpExchange exchange) throws Exception {
         String userId = utils.requireAuthenticatedUser(exchange);
         try {
@@ -125,6 +212,28 @@ public final class SUPABASE_AdvancedStats {
             throw new IllegalArgumentException("Verplicht veld ontbreekt: playerTag");
         }
         return playerTag.getAsString();
+    }
+
+    private String optionalString(JsonObject body, String field) {
+        JsonElement value = body.get(field);
+        if (value == null || value.isJsonNull()) return null;
+        if (!value.isJsonPrimitive() || !value.getAsJsonPrimitive().isString()) {
+            throw new IllegalArgumentException("Veld moet tekst zijn: " + field);
+        }
+        return value.getAsString();
+    }
+
+    private int optionalInt(JsonObject body, String field, int fallback) {
+        JsonElement value = body.get(field);
+        if (value == null || value.isJsonNull()) return fallback;
+        if (!value.isJsonPrimitive() || !value.getAsJsonPrimitive().isNumber()) {
+            throw new IllegalArgumentException("Veld moet een getal zijn: " + field);
+        }
+        try {
+            return value.getAsInt();
+        } catch (RuntimeException invalidNumber) {
+            throw new IllegalArgumentException("Ongeldig getal voor veld: " + field);
+        }
     }
 
     static JsonObject trackingResponse(Optional<AdvancedStatsModels.TrackingState> state) {
