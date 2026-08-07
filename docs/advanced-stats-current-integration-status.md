@@ -26,7 +26,9 @@ The sync was validated through PR #12 before it was merged into this branch.
 - Phase 6 — COMPLETE
 - Phase 7 — COMPLETE
 - Phase 8 code/static hardening — COMPLETE
-- Phase 8 staged live rollout — NOT COMPLETE
+- Phase 8 production database deployment — COMPLETE
+- Phase 8 transactional database smoke test — COMPLETE
+- Phase 8 real Cloud Run / Clash API / Scheduler rollout — NOT COMPLETE
 
 ## Phase 7 result
 
@@ -54,27 +56,84 @@ Implemented server-side rollout controls:
 
 See `docs/advanced-stats-phase8-rollout.md` for the mandatory live checklist.
 
-## Latest validation
+## Production database deployment
 
-GitHub Actions run `31196692862` passed completely on the integrated branch:
+On 2026-08-07 the active production Supabase project received:
 
-- Maven tests: PASS
-- Maven package: PASS
-- migration ordering check: PASS
-- frontend endpoint check: PASS
-- filename casing check: PASS
-- frontend/Vitest suite: PASS
-- production build: PASS
-- static output check: PASS
-- SEO check: PASS
-- secret scan: PASS
+- `advanced_achievements_foundation`;
+- `advanced_stats_foundation`;
+- `advanced_stats_battle_ingestion`;
+- `advanced_stats_identity_hardening`;
+- `advanced_stats_scheduled_collection`;
+- `advanced_stats_read_models`;
+- `advanced_stats_exact_trends`;
+- `advanced_stats_achievements_integration`.
+
+Verified after deployment:
+
+- all 9 required Achievement/Advanced Stats tables exist;
+- RLS is enabled on all 9 tables;
+- `anon` and `authenticated` have no direct CRUD access to these tables;
+- `service_role` has required CRUD access;
+- all required Advanced Stats/Achievement RPCs exist;
+- `anon` and `authenticated` cannot execute backend-only RPCs;
+- `service_role` can execute them;
+- all 8 migration names are present in Supabase migration history.
+
+The Supabase linter reports `RLS enabled, no policy` as informational for these backend-only tables. That is intentional because browser roles receive no direct table access.
+
+## Transactional production database smoke test
+
+A rollback-only synthetic test was executed against the deployed production schema on 2026-08-07.
+
+It verified in one transaction:
+
+- first battle insert succeeds;
+- replay of the same fingerprint is deduplicated;
+- durable battle count remains one;
+- daily attack/star/three-star aggregates update once;
+- unit totals update once;
+- army totals update once;
+- `battles_processed` updates once;
+- Advanced Stats -> Achievement reconciliation writes expected progress.
+
+The transaction was rolled back and a follow-up query confirmed zero synthetic tracking, battle or achievement rows remained.
+
+Reusable checks now live in:
+
+- `scripts/check-advanced-stats-schema.sql`;
+- `scripts/check-advanced-stats-schema.mjs`;
+- `scripts/smoke-test-advanced-stats-db.sql`.
+
+`npm run check:advanced-stats-db` is intentionally separate from normal CI and requires an explicit `SUPABASE_DB_URL`.
+
+## Latest repository validation
+
+The integrated Phase 7/8 code candidate previously passed the full GitHub Actions gate including:
+
+- Maven tests/package;
+- migration ordering;
+- frontend endpoint parity;
+- filename casing;
+- frontend/Vitest suite;
+- production build;
+- static output;
+- SEO checks;
+- secret scan.
+
+The DB verification/smoke-test additions must also keep normal repository CI green before the branch is called merge-ready.
 
 ## Remaining blocker before merge
 
-The staged live rollout is still mandatory.
+The remaining mandatory gate is the real staged runtime rollout:
 
-A read-only inspection of the current production Supabase project showed no `advanced_stats_*` tables yet. Therefore real battle collection, scheduler cycles, lease/restart behavior, DB growth, parser/unknown-ID observations and stop/delete/gap behavior have not been validated against a deployed Advanced Stats schema.
+1. deploy the candidate backend to Cloud Run with collection disabled;
+2. configure scheduler secret + developer-only rollout allowlist;
+3. start tracking for one verified developer-owned account;
+4. enable collection;
+5. observe real Clash battle-log polls and repeated payloads;
+6. verify scheduler lease/restart/overlap behavior, rate-limit recovery, gaps, stop/delete and real Achievement reconciliation;
+7. confirm request/database growth is acceptable;
+8. rerun the complete repository validation on the exact merge candidate.
 
-Do not merge PR #8 into `Development` merely because CI is green. The live Phase 8 rollout gate must be completed first.
-
-No production database migration or Cloud Run/Scheduler rollout was performed as part of this integration pass.
+PR #8 must remain draft and must not be merged into `Development` until this live runtime gate is complete.
