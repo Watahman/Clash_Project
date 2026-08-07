@@ -46,12 +46,7 @@ public final class AdvancedStatsModels {
         }
     }
 
-    /**
-     * Stable battle identity used by the original Phase 1 fingerprint tests.
-     * New battle-log ingestion uses {@link BattleCandidate}, which also includes
-     * loot values because the current player battle-log payload does not expose
-     * a guaranteed battle timestamp/ID for every entry.
-     */
+    /** Legacy Phase 1 identity kept for deterministic fingerprint regression coverage. */
     public record BattleIdentity(
             String playerTag,
             String battleTimestamp,
@@ -77,6 +72,7 @@ public final class AdvancedStatsModels {
      * One entry observed in the player battle log.
      * battleTimestamp may be null because current battle-log responses do not
      * guarantee a timestamp field. observedAt is therefore always retained.
+     * Available loot is retained as additional stable battle identity data.
      */
     public record BattleCandidate(
             String playerTag,
@@ -93,7 +89,10 @@ public final class AdvancedStatsModels {
             String armyShareCode,
             long lootGold,
             long lootElixir,
-            long lootDarkElixir
+            long lootDarkElixir,
+            long availableGold,
+            long availableElixir,
+            long availableDarkElixir
     ) {
         public BattleCandidate {
             playerTag = CacheKeys.requireValidTag(playerTag);
@@ -110,7 +109,8 @@ public final class AdvancedStatsModels {
             }
             validateStars(stars);
             validateDestruction(destructionPercentage);
-            if (lootGold < 0 || lootElixir < 0 || lootDarkElixir < 0) {
+            if (lootGold < 0 || lootElixir < 0 || lootDarkElixir < 0
+                    || availableGold < 0 || availableElixir < 0 || availableDarkElixir < 0) {
                 throw new IllegalArgumentException("loot values cannot be negative");
             }
         }
