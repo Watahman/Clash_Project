@@ -250,7 +250,7 @@ npm run check:advanced-stats-db
 npm run smoke:advanced-stats-db
 ```
 
-Both require an explicit `SUPABASE_DB_URL` and are intentionally separate from normal CI so GitHub Actions never connects to production by accident.
+Both require an explicit `SUPABASE_DB_URL` and are manual/local verification commands only. GitHub Actions CI is intentionally disabled repository-wide and must not be reintroduced unless explicitly requested.
 
 ## Final diff/code audit
 
@@ -274,7 +274,7 @@ The remaining mandatory gate is the real staged runtime rollout:
 8. confirm real Cloud Run/Scheduler invocation, process restart/overlap behavior and network/rate-limit handling;
 9. inspect real parser/unknown-ID output and real Achievement reconciliation;
 10. confirm request/database growth is acceptable;
-11. rerun the complete repository validation on the exact merge candidate.
+11. run the complete local/manual repository validation on the exact merge candidate.
 
 Many database/state-machine behaviors have now been proven directly against production PostgreSQL with rollback-only synthetic fixtures. The remaining gate specifically covers behavior that cannot be proven without the deployed backend, external scheduler, real Clash API traffic and an observation window.
 
