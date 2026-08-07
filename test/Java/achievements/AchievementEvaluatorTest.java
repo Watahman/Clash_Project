@@ -3,6 +3,8 @@ package Java.achievements;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -26,13 +28,15 @@ class AchievementEvaluatorTest {
     }
 
     @Test
-    void exposesCurrentAndHistoricalAchievementCatalog() {
-        long families = AchievementCatalog.definitions().stream()
+    void exposesCurrentHistoricalAndBattleAchievementCatalog() {
+        Set<String> familyKeys = AchievementCatalog.definitions().stream()
                 .map(AchievementDefinition::familyKey)
-                .distinct()
-                .count();
+                .collect(Collectors.toSet());
 
-        assertEquals(46, families);
-        assertEquals(184, AchievementCatalog.definitions().size());
+        assertEquals(49, familyKeys.size());
+        assertEquals(196, AchievementCatalog.definitions().size());
+        assertTrue(familyKeys.contains("battle_tracker"));
+        assertTrue(familyKeys.contains("star_collector"));
+        assertTrue(familyKeys.contains("three_star_specialist"));
     }
 }
