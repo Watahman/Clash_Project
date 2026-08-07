@@ -33,12 +33,22 @@ public final class AdvancedStatsBattleIngestionService {
         }
     }
 
+    @FunctionalInterface
+    interface AchievementReconciliation {
+        void reconcile(AdvancedStatsModels.TrackingState tracking) throws Exception;
+    }
+
     private final AdvancedStatsBattleLogParser battleLogParser;
     private final AdvancedStatsBattleProcessor processor;
     private final Clock clock;
+    private final AchievementReconciliation achievementReconciliation;
 
     public AdvancedStatsBattleIngestionService() {
-        this(new AdvancedStatsBattleLogParser(), new AdvancedStatsBattleProcessor(), Clock.systemUTC());
+        AdvancedStatsAchievementReconciler reconciler = new AdvancedStatsAchievementReconciler();
+        this.battleLogParser = new AdvancedStatsBattleLogParser();
+        this.processor = new AdvancedStatsBattleProcessor();
+        this.clock = Clock.systemUTC();
+        this.achievementReconciliation = reconciler::reconcile;
     }
 
     AdvancedStatsBattleIngestionService(
@@ -46,9 +56,22 @@ public final class AdvancedStatsBattleIngestionService {
             AdvancedStatsBattleProcessor processor,
             Clock clock
     ) {
+        this(battleLogParser, processor, clock, tracking -> { });
+    }
+
+    AdvancedStatsBattleIngestionService(
+            AdvancedStatsBattleLogParser battleLogParser,
+            AdvancedStatsBattleProcessor processor,
+            Clock clock,
+            AchievementReconciliation achievementReconciliation
+    ) {
         this.battleLogParser = Objects.requireNonNull(battleLogParser, "battleLogParser");
         this.processor = Objects.requireNonNull(processor, "processor");
         this.clock = Objects.requireNonNull(clock, "clock");
+        this.achievementReconciliation = Objects.requireNonNull(
+                achievementReconciliation,
+                "achievementReconciliation"
+        );
     }
 
     public IngestionSummary ingest(
@@ -89,6 +112,10 @@ public final class AdvancedStatsBattleIngestionService {
                 case IGNORED_DEFENSE -> ignoredDefenses++;
             }
         }
+
+        // Reconcile from durable aggregates after processing the whole log. This intentionally
+        // also runs on duplicate-only polls so a previous reconciliation failure self-heals.
+        achievementReconciliation.reconcile(tracking);
 
         return new IngestionSummary(
                 battles.size(),
