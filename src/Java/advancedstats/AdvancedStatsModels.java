@@ -181,8 +181,9 @@ public final class AdvancedStatsModels {
             Objects.requireNonNull(battleTimestamp, "battleTimestamp");
             battleType = normalizeOptional(battleType);
             if (stars < 0 || stars > 3) throw new IllegalArgumentException("stars must be between 0 and 3");
-            if (destructionPercentage < 0 || destructionPercentage > 100) {
-                throw new IllegalArgumentException("destructionPercentage must be between 0 and 100");
+            if (!Double.isFinite(destructionPercentage)
+                    || destructionPercentage < 0 || destructionPercentage > 100) {
+                throw new IllegalArgumentException("destructionPercentage must be finite and between 0 and 100");
             }
             units = units == null ? List.of() : List.copyOf(units);
             normalizedArmyHash = requireSha256(normalizedArmyHash, "normalizedArmyHash");
@@ -219,11 +220,11 @@ public final class AdvancedStatsModels {
     ) {
         public DailyAggregate {
             Objects.requireNonNull(date, "date");
-            if (attacks < 0 || totalStars < 0 || totalDestruction < 0
+            if (attacks < 0 || totalStars < 0 || !Double.isFinite(totalDestruction) || totalDestruction < 0
                     || threeStarAttacks < 0 || twoStarAttacks < 0
                     || oneStarAttacks < 0 || zeroStarAttacks < 0
                     || goldLooted < 0 || elixirLooted < 0 || darkElixirLooted < 0) {
-                throw new IllegalArgumentException("aggregate values cannot be negative");
+                throw new IllegalArgumentException("aggregate values must be finite and non-negative");
             }
             int categorized = threeStarAttacks + twoStarAttacks + oneStarAttacks + zeroStarAttacks;
             if (categorized > attacks) {
@@ -248,8 +249,9 @@ public final class AdvancedStatsModels {
 
     private static void validateDestruction(Double destructionPercentage) {
         if (destructionPercentage != null
-                && (destructionPercentage < 0 || destructionPercentage > 100)) {
-            throw new IllegalArgumentException("destructionPercentage must be between 0 and 100");
+                && (!Double.isFinite(destructionPercentage)
+                || destructionPercentage < 0 || destructionPercentage > 100)) {
+            throw new IllegalArgumentException("destructionPercentage must be finite and between 0 and 100");
         }
     }
 
