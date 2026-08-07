@@ -15,6 +15,7 @@
     "check:static": "node scripts/check-static-output.mjs",
     "check:seo": "node scripts/check-seo-output.mjs",
     "check:advanced-stats-db": "node scripts/check-advanced-stats-schema.mjs",
+    "smoke:advanced-stats-db": "node scripts/smoke-test-advanced-stats-db.mjs",
     "check": "npm run check:migrations && npm run check:endpoints && npm run check:casing && npm test && npm run build && npm run check:static && npm run check:seo"
   },
   "repository": {
