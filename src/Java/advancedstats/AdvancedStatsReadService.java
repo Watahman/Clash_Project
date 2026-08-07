@@ -193,10 +193,6 @@ public final class AdvancedStatsReadService {
         }
     }
 
-    private int boundedLimit(int requested, int fallback, int maximum) {
-        return boundedLimit(requested, fallback, maximum);
-    }
-
     private JsonElement copyOrNull(JsonObject source, String field) {
         JsonElement value = source.get(field);
         return value == null ? JsonNull.INSTANCE : value.deepCopy();
