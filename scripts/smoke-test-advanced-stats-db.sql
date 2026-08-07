@@ -1,11 +1,11 @@
 -- Transactional smoke test for the deployed Advanced Stats/Achievements database contract.
--- All synthetic writes are rolled back. Any failed assertion aborts the script.
+-- Uses a synthetic user and rolls every write back. Any failed assertion aborts the script.
 
 begin;
 
 do $$
 declare
-    v_user uuid;
+    v_user uuid := gen_random_uuid();
     v_tracking uuid;
     v_first jsonb;
     v_duplicate jsonb;
@@ -15,38 +15,29 @@ declare
     v_progress bigint;
     v_unlocked boolean;
 begin
-    select u.id
-      into v_user
-      from public.users u
-     where not exists (
-         select 1 from public.advanced_stats_tracking t
-          where t.user_id = u.id and t.player_tag = '#000000000000000'
-     )
-       and not exists (
-         select 1 from public.achievement_progress p
-          where p.user_id = u.id and p.player_tag = '#000000000000000'
-     )
-     order by u.id
-     limit 1;
-
-    if v_user is null then
-        raise exception 'Advanced Stats smoke test requires an existing user without the synthetic test tag';
-    end if;
+    insert into public.users (id, name, email, accounts, code)
+    values (
+        v_user,
+        'Advanced Stats base smoke test',
+        'advanced-stats-base-' || v_user || '@example.invalid',
+        '[]'::jsonb,
+        'ASB' || replace(v_user::text, '-', '')
+    );
 
     insert into public.advanced_stats_tracking (
         user_id, player_tag, player_name, town_hall_level, status, tracking_started_at, next_poll_at
     ) values (
-        v_user, '#000000000000000', 'Advanced Stats Smoke Test', 17, 'ACTIVE', now(), now()
+        v_user, '#P0Y2', 'Advanced Stats Smoke Test', 17, 'ACTIVE', now(), now()
     ) returning id into v_tracking;
 
     v_first := public.save_advanced_stats_battle_v3(
         v_tracking,
-        '#000000000000000',
+        '#P0Y2',
         repeat('f', 64),
         now() - interval '1 minute',
         now(),
         'multiplayer',
-        '#P0Y8LQ',
+        '#Q8G2',
         'Synthetic Opponent',
         17,
         17,
@@ -81,12 +72,12 @@ begin
 
     v_duplicate := public.save_advanced_stats_battle_v3(
         v_tracking,
-        '#000000000000000',
+        '#P0Y2',
         repeat('f', 64),
         now() - interval '1 minute',
         now(),
         'multiplayer',
-        '#P0Y8LQ',
+        '#Q8G2',
         'Synthetic Opponent',
         17,
         17,
@@ -122,58 +113,44 @@ begin
     select count(*) into v_count
       from public.advanced_stats_battles
      where tracking_id = v_tracking;
-    if v_count <> 1 then
-        raise exception 'Expected 1 durable battle, got %', v_count;
-    end if;
+    if v_count <> 1 then raise exception 'Expected 1 durable battle, got %', v_count; end if;
 
     select attacks into v_value
       from public.advanced_stats_daily
      where tracking_id = v_tracking;
-    if v_value <> 1 then
-        raise exception 'Expected daily attacks=1, got %', v_value;
-    end if;
+    if v_value <> 1 then raise exception 'Expected daily attacks=1, got %', v_value; end if;
 
     select total_stars into v_value
       from public.advanced_stats_daily
      where tracking_id = v_tracking;
-    if v_value <> 3 then
-        raise exception 'Expected daily total_stars=3, got %', v_value;
-    end if;
+    if v_value <> 3 then raise exception 'Expected daily total_stars=3, got %', v_value; end if;
 
     select three_star_attacks into v_value
       from public.advanced_stats_daily
      where tracking_id = v_tracking;
-    if v_value <> 1 then
-        raise exception 'Expected daily three_star_attacks=1, got %', v_value;
-    end if;
+    if v_value <> 1 then raise exception 'Expected daily three_star_attacks=1, got %', v_value; end if;
 
     select total_quantity into v_value
       from public.advanced_stats_unit_totals
      where tracking_id = v_tracking
        and category = 'TROOP'
        and unit_key = 'troop-4000000';
-    if v_value <> 2 then
-        raise exception 'Expected unit total_quantity=2, got %', v_value;
-    end if;
+    if v_value <> 2 then raise exception 'Expected unit total_quantity=2, got %', v_value; end if;
 
     select battle_count into v_value
       from public.advanced_stats_army_totals
      where tracking_id = v_tracking
        and army_hash = repeat('a', 64);
-    if v_value <> 1 then
-        raise exception 'Expected army battle_count=1, got %', v_value;
-    end if;
+    if v_value <> 1 then raise exception 'Expected army battle_count=1, got %', v_value; end if;
 
     select battles_processed into v_value
       from public.advanced_stats_tracking
      where id = v_tracking;
-    if v_value <> 1 then
-        raise exception 'Expected tracking battles_processed=1, got %', v_value;
-    end if;
+    if v_value <> 1 then raise exception 'Expected tracking battles_processed=1, got %', v_value; end if;
 
     v_reconcile := public.reconcile_advanced_stats_achievement_progress_v1(
         v_user,
-        '#000000000000000',
+        '#P0Y2',
         floor(extract(epoch from now()))::bigint,
         jsonb_build_array(jsonb_build_object(
             'achievement_key', 'smoke_test_battle_tracker',
@@ -199,7 +176,7 @@ begin
       into v_progress, v_unlocked
       from public.achievement_progress
      where user_id = v_user
-       and player_tag = '#000000000000000'
+       and player_tag = '#P0Y2'
        and achievement_key = 'smoke_test_battle_tracker'
        and tier = 1;
 
