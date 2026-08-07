@@ -1,163 +1,140 @@
 # Advanced Stats — Phase & Merge Status
 
+Updated: 2026-08-07  
 Branch: `agent/advanced-stats-foundation`  
-Draft PR: `#8` (`WIP: Add Advanced Stats tracking`)  
-Updated: 2026-08-07
+Draft PR: `#8` -> `Development`
 
-This is the durable phase checkpoint. Detailed API/parser/scheduler notes remain in the dedicated Advanced Stats docs.
-
-## Merge readiness vocabulary
-
-- **NOT READY** — a mandatory implementation or live validation gate is still missing.
-- **READY TO MERGE** — the exact merge candidate has passed repository CI, database validation and the staged real runtime rollout.
-
-A green CI run or a deployed database schema alone does not make the branch merge-ready.
+This file is the compact phase checkpoint. Detailed implementation and validation evidence lives in `docs/advanced-stats-current-integration-status.md`; the remaining live gate is in `docs/advanced-stats-phase8-rollout.md`.
 
 ## Current phase status
 
-- Phase 0 — branch + plan: **COMPLETE**
-- Phase 1 — database + backend domain foundation: **COMPLETE**
-- Phase 2 — tracking ownership + lifecycle API: **COMPLETE**
+- Phase 0 — branch + integration plan: **COMPLETE**
+- Phase 1 — durable database + backend domain foundation: **COMPLETE**
+- Phase 2 — verified-account ownership + lifecycle API: **COMPLETE**
 - Phase 3 — battle ingestion + army parsing + deduplication: **COMPLETE**
-- Phase 4 — scheduled collection: **COMPLETE**
-- Phase 5 — read APIs + derived stats: **COMPLETE**
-- Phase 6 — frontend + navigation + i18n: **COMPLETE**
+- Phase 4 — scheduled collection design + leases/backoff/recovery: **COMPLETE**
+- Phase 5 — read APIs + derived statistics: **COMPLETE**
+- Phase 6 — private frontend + navigation + all-site-language i18n: **COMPLETE**
 - Phase 7 — Advanced Achievements integration: **COMPLETE**
-- Phase 8 — code/static hardening: **COMPLETE**
-- Phase 8 — production database migrations: **COMPLETE**
-- Phase 8 — transactional production DB smoke test: **COMPLETE**
-- Phase 8 — real Cloud Run / Clash API / Scheduler rollout: **PENDING**
+- Phase 8 — code/static/security/database hardening: **COMPLETE**
+- Phase 8 — real Cloud Run / Cloud Scheduler / Clash API staged rollout: **PENDING**
+
+## Merge status
+
+**NOT READY — LIVE RUNTIME GATE REMAINS**
+
+PR #8 must remain draft until the real staged runtime checks are complete.
+
+The remaining blocker is no longer unfinished feature code or missing database schema. It is specifically validation that depends on the deployed environment:
+
+1. deploy the exact candidate backend with collection and public enrollment disabled;
+2. verify health/ready and disabled internal-poll behavior;
+3. configure the scheduler secret and developer-only rollout UUID;
+4. start one verified developer-owned linked account;
+5. enable collection;
+6. observe real Clash battle-log cycles and duplicate payloads;
+7. verify Cloud Scheduler authentication/invocation;
+8. observe real restart/overlap behavior;
+9. inspect actual parser/unknown-ID, API 429/5xx/network and Achievement reconciliation behavior;
+10. inspect real request/database growth;
+11. run full CI on the exact merge candidate;
+12. only then move PR #8 out of draft and merge it into `Development`.
+
+`ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=true` is not part of the first live stage.
 
 ## Integrated prerequisite state
 
-Before Phase 7, current `Development` was synced into this branch after these user-prioritized branches had landed there:
+Current `Development` was synced into this branch after these prerequisite integrations landed there:
 
 1. Bracket Generator redesign
 2. War Operation Board Webby redesign
 3. Entity Guesser / Higher or Lower Minigames
 4. Advanced Achievements
 
-Advanced Stats therefore builds on the actual integrated Achievement implementation rather than a stale parallel branch.
+Advanced Stats therefore builds on the integrated Achievement implementation rather than a stale parallel branch.
 
-## Phase 7 result
+## Completed production database work
 
-Advanced Stats is the only battle-log/history collector.
+The active production Supabase project contains:
 
-Advanced Achievements consumes exact persisted Advanced Stats metrics for:
+- Advanced Achievements foundation;
+- Advanced Stats migrations `001` through `008`.
 
-- tracked attack count;
-- tracked star count;
-- tracked three-star count.
+The eighth Advanced Stats migration makes destructive feature deletion transactionally complete: it removes the tracking row/history and only the Achievement progress derived exclusively from Advanced Stats tracking. Unrelated Achievement progress remains intact.
 
-The reconciliation path is monotonic and retry-safe. A duplicate-only later poll can retry Achievement reconciliation without inserting the battle or aggregate counters twice.
+Verified production DB contract:
 
-Migration:
+- 9 required tables;
+- RLS enabled on all 9;
+- 17 required backend-only RPCs;
+- 9 migration-history entries (Achievements foundation + 8 Advanced Stats migrations);
+- browser roles cannot CRUD the feature tables;
+- browser roles cannot execute backend-only RPCs;
+- browser roles cannot create objects in schema `public`;
+- `service_role` has the required table/RPC access.
 
-`database/migrations/20260807_007_advanced_stats_achievements_integration.sql`
+## Completed rollback-only production DB tests
 
-## Phase 8 hardening result
+Synthetic transactions ending in `ROLLBACK` cover:
 
-Implemented runtime controls:
+- battle ingestion and duplicate idempotency;
+- daily/unit/army aggregates;
+- Advanced Stats -> Achievement reconciliation;
+- exclusive leases and expired-lease recovery;
+- `WORKER_OUTAGE` gaps;
+- repeated failures -> `DEGRADED` -> recovery;
+- all-time / 7d / 30d read models;
+- exact trend filtering;
+- favorite units/armies;
+- cursor pagination, including identical battle timestamps;
+- first-observed timestamp fallback;
+- parser-error isolation + exact reprocessing;
+- STOPPED history preservation;
+- destructive feature deletion + cascades;
+- user deletion cascades;
+- constraint/abuse rejection;
+- monotonic Achievement progress;
+- complete reset of Advanced-Stats-derived Achievement progress on feature deletion while unrelated Achievement progress is preserved.
+
+No synthetic production records are intentionally retained.
+
+Reusable commands:
 
 ```text
-ADVANCED_STATS_COLLECTION_ENABLED=false
-ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false
-ADVANCED_STATS_ROLLOUT_USER_IDS=<explicit UUID allowlist>
-ADVANCED_STATS_SCHEDULER_SECRET=<Secret Manager value>
+npm run check:advanced-stats-db
+npm run smoke:advanced-stats-db
 ```
 
-Behavior:
+They require an explicit `SUPABASE_DB_URL` and are intentionally excluded from normal GitHub CI.
 
-- background collection defaults off;
-- new enrollment defaults closed;
-- a small server-side UUID allowlist supports staged rollout;
-- public enrollment requires a separate explicit switch;
-- existing status/pause/resume/stop/delete actions remain available when enrollment is closed;
-- scheduler requests require the dedicated secret;
-- collector claims use leases and `FOR UPDATE SKIP LOCKED`;
-- expired leases produce conservative `WORKER_OUTAGE` gap semantics;
-- rate limits/outages use bounded backoff and can degrade a tracker after repeated failures.
+## Additional hardening completed
 
-## Production database state
+- non-finite numeric values (`NaN` / infinity) rejected at the domain boundary;
+- deterministic fuzz/property coverage for army normalization and battle fingerprints;
+- full Advanced Stats locale coverage for `en`, `nl`, `fr`, `de`, `es`;
+- dynamic army/category labels localized;
+- translated/semantic accessibility labels;
+- private Advanced Stats/internal-poll API responses forced to `Cache-Control: no-store` at the Cloudflare proxy;
+- Privacy Policy and Terms updated for opt-in battle-history collection, gaps, retention and destructive deletion semantics;
+- stale temporary phase/CI checkpoint documents removed;
+- scheduler runbook aligned with separate collection/public-enrollment/developer-allowlist controls.
 
-On 2026-08-07 the active production Supabase project received the Advanced Achievements foundation plus all seven Advanced Stats migrations.
+## Important data limitation
 
-Verified after deployment:
+The upstream player battle log does not guarantee a durable battle ID or exact timestamp for every entry.
 
-- all 9 required tables exist;
-- RLS is enabled on all 9;
-- `anon` and `authenticated` have no direct CRUD access;
-- `service_role` has required CRUD access;
-- all required RPCs exist;
-- backend-only RPC execute is denied to `anon`/`authenticated` and granted to `service_role`;
-- all 8 required migration names exist in `supabase_migrations.schema_migrations`.
+When an exact upstream timestamp is unavailable:
 
-Reusable verifier:
+- `observed_at` is used as the fallback display/bucketing time;
+- `observed_at` is deliberately excluded from the battle fingerprint;
+- timestamp-less identity uses stable battle content and is therefore best-effort;
+- known interruptions are represented as gaps instead of silently claiming complete history.
 
-- `scripts/check-advanced-stats-schema.sql`
-- `scripts/check-advanced-stats-schema.mjs`
-- `npm run check:advanced-stats-db`
+## Future integration note
 
-The npm DB check is intentionally not part of normal CI and only runs when a developer explicitly provides `SUPABASE_DB_URL`.
+If ClashPanel later adds a backend operation that unlinks a Clash account from a user profile, that flow must explicitly define what happens to an active Advanced Stats tracker. No backend unlink/remove-account route exists in the current implementation, so no speculative cross-feature behavior was added here.
 
-## Transactional database smoke test
-
-A rollback-only smoke test was executed successfully against the deployed production schema.
-
-Verified:
-
-- first synthetic battle insert;
-- duplicate replay idempotency;
-- daily aggregates;
-- unit aggregates;
-- army aggregates;
-- tracking `battles_processed`;
-- Advanced Stats -> Achievement reconciliation.
-
-After rollback, follow-up checks confirmed zero synthetic tracking, battle and achievement rows remained.
-
-Reusable script:
-
-`scripts/smoke-test-advanced-stats-db.sql`
-
-## Repository validation
-
-The integrated Phase 7/8 code candidate has passed the complete repository gate covering:
-
-- Maven tests and package;
-- frontend/Vitest tests;
-- migration ordering;
-- endpoint parity;
-- filename casing;
-- production build;
-- static output;
-- SEO checks;
-- secret scan.
-
-Any later release/documentation/script commit must keep this normal CI green on the final candidate.
-
-## Branch merge status
-
-**NOT READY**
-
-Only one material gate remains: the staged real runtime rollout.
-
-Before changing this status to **READY TO MERGE**:
-
-1. deploy the exact candidate backend to Cloud Run with collection disabled;
-2. verify health/ready and disabled internal polling behavior;
-3. configure the scheduler secret and developer-only rollout UUID;
-4. start one verified developer-owned Clash account;
-5. enable collection;
-6. observe multiple real scheduler cycles and real attacks;
-7. verify repeated battle-log payload idempotency;
-8. verify real Achievement reconciliation;
-9. verify lease overlap/restart recovery, 429/5xx backoff and gap semantics;
-10. verify pause/stop/delete behavior and database/request growth;
-11. rerun full repository CI on the exact merge candidate;
-12. inspect final PR diff and merge only then.
-
-See:
+## Detailed references
 
 - `docs/advanced-stats-current-integration-status.md`
 - `docs/advanced-stats-phase8-rollout.md`
