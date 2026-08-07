@@ -5,6 +5,7 @@ import {
     getCategory,
     getEntities
 } from '../../src/assets/js/minigames/entity-guesser-data.js';
+import { getEntities as getCatalogEntities } from '../../src/assets/js/minigames/entity-guesser-catalog.js';
 import {
     availableHintCount,
     buildHint,
@@ -48,7 +49,7 @@ describe('Entity Guesser core categories', () => {
         const second = getDailyEntity('2026-08-06', secondCategory);
         expect(firstCategory.id).toBe(secondCategory.id);
         expect(first.id).toBe(second.id);
-        expect(getEntities(firstCategory.id)).toContain(first);
+        expect(getCatalogEntities(firstCategory.id)).toContain(first);
     });
 
     it('returns numeric, ordered and partial-set feedback', () => {
