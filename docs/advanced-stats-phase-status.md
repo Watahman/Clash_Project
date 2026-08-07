@@ -37,10 +37,16 @@ The remaining blocker is no longer unfinished feature code or missing database s
 8. observe real restart/overlap behavior;
 9. inspect actual parser/unknown-ID, API 429/5xx/network and Achievement reconciliation behavior;
 10. inspect real request/database growth;
-11. run full CI on the exact merge candidate;
+11. run the full repository test/build checks locally or manually on the exact merge candidate;
 12. only then move PR #8 out of draft and merge it into `Development`.
 
 `ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=true` is not part of the first live stage.
+
+## Validation policy
+
+GitHub Actions CI is intentionally disabled for this repository. Do not add or re-enable GitHub Actions or automatic CI pipelines unless explicitly requested.
+
+Repository checks remain available for manual/local execution, including `mvn test`, `npm test`, `npm run build`, `npm run check` and the Advanced Stats database verification commands.
 
 ## Integrated prerequisite state
 
@@ -105,7 +111,7 @@ npm run check:advanced-stats-db
 npm run smoke:advanced-stats-db
 ```
 
-They require an explicit `SUPABASE_DB_URL` and are intentionally excluded from normal GitHub CI.
+They require an explicit `SUPABASE_DB_URL` and are manual/local commands only.
 
 ## Additional hardening completed
 
@@ -116,7 +122,7 @@ They require an explicit `SUPABASE_DB_URL` and are intentionally excluded from n
 - translated/semantic accessibility labels;
 - private Advanced Stats/internal-poll API responses forced to `Cache-Control: no-store` at the Cloudflare proxy;
 - Privacy Policy and Terms updated for opt-in battle-history collection, gaps, retention and destructive deletion semantics;
-- stale temporary phase/CI checkpoint documents removed;
+- stale temporary phase/checkpoint documents removed;
 - scheduler runbook aligned with separate collection/public-enrollment/developer-allowlist controls.
 
 ## Important data limitation
