@@ -30,21 +30,27 @@ public final class BattleFingerprint {
     /**
      * Rich fingerprint for the current player battle log. The upstream payload
      * does not guarantee an ID or timestamp, so both looted and available loot
-     * are included as extra discriminators. observedAt is intentionally not
-     * included because it changes on every poll.
+     * are included as extra discriminators.
+     *
+     * Poll-local data such as observedAt and the tracked player's current Town
+     * Hall are deliberately excluded: those can change while the same recent
+     * battle remains in the upstream log. Opponent name is used only when a
+     * stable opponent tag is unavailable.
      */
     public static String from(AdvancedStatsModels.BattleCandidate battle) {
         if (battle == null) throw new IllegalArgumentException("battle is required");
+
+        String opponentIdentity = battle.opponentPlayerTag().isBlank()
+                ? "name:" + escape(battle.opponentName())
+                : "tag:" + escape(battle.opponentPlayerTag());
 
         String canonical = String.join("|",
                 escape(battle.playerTag()),
                 canonicalInstant(battle.battleTimestamp()),
                 battle.attack() ? "attack" : "defense",
                 escape(battle.battleType()),
-                escape(battle.opponentPlayerTag()),
-                escape(battle.opponentName()),
+                opponentIdentity,
                 battle.opponentTownHall() == null ? "" : Integer.toString(battle.opponentTownHall()),
-                battle.playerTownHall() == null ? "" : Integer.toString(battle.playerTownHall()),
                 battle.stars() == null ? "" : Integer.toString(battle.stars()),
                 canonicalNumber(battle.destructionPercentage()),
                 escape(battle.armyShareCode()),
