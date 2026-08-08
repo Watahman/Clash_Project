@@ -144,6 +144,19 @@ async function serveAppAsset(request, env, incomingUrl) {
     });
 }
 
+function applyUpstreamOriginOverride(headers, env) {
+    const rawOverride = String(env.UPSTREAM_ORIGIN_OVERRIDE || "").trim();
+    if (!rawOverride) return;
+    try {
+        const overrideUrl = new URL(rawOverride);
+        if (!["http:", "https:"].includes(overrideUrl.protocol)) return;
+        headers.set("Origin", overrideUrl.origin);
+        headers.set("Referer", `${overrideUrl.origin}/`);
+    } catch {
+        // Invalid preview-only override is ignored; production behavior remains unchanged.
+    }
+}
+
 function createBackendHeaders(request, incomingUrl, env) {
     const headers = new Headers(request.headers);
     headers.delete("host");
@@ -153,6 +166,7 @@ function createBackendHeaders(request, incomingUrl, env) {
     headers.delete("x-clashpanel-proxy-secret");
     headers.set("X-Forwarded-Host", incomingUrl.host);
     headers.set("X-Forwarded-Proto", incomingUrl.protocol.replace(":", ""));
+    applyUpstreamOriginOverride(headers, env);
 
     const connectingIp = request.headers.get("CF-Connecting-IP");
     if (connectingIp) headers.set("X-Forwarded-For", connectingIp);
