@@ -9,20 +9,6 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-function Require-SafeFalseFlag {
-    param(
-        [Parameter(Mandatory = $true)] [string]$Content,
-        [Parameter(Mandatory = $true)] [string]$Name
-    )
-
-    # Single-quoted PowerShell string avoids the parser ambiguity caused by
-    # embedding both quote characters inside a double-quoted regex string.
-    $pattern = '(?mi)^\s*' + [regex]::Escape($Name) + '\s*:\s*["'']?false["'']?\s*$'
-    if ($Content -notmatch $pattern) {
-        throw "$Name must explicitly be false in cloudrun-env.yaml for the first Phase 8 deployment."
-    }
-}
-
 function Get-HttpStatus {
     param(
         [Parameter(Mandatory = $true)] [string]$Url,
@@ -44,36 +30,36 @@ if (-not (Test-Path "./Dockerfile")) {
     throw "Run this script from the Clash_Project root where Dockerfile exists."
 }
 
-if (-not (Test-Path "./cloudrun-env.yaml")) {
-    throw "cloudrun-env.yaml is missing. Copy cloudrun-env.example.yaml and fill the non-secret production values first."
-}
-
-$envContent = Get-Content "./cloudrun-env.yaml" -Raw
-Require-SafeFalseFlag -Content $envContent -Name "ADVANCED_STATS_COLLECTION_ENABLED"
-Require-SafeFalseFlag -Content $envContent -Name "ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED"
-
-Write-Host "Phase 8 safety gate passed: collection OFF, public enrollment OFF." -ForegroundColor Green
-Write-Host "Deploying a tagged Cloud Run candidate with 0% production traffic..." -ForegroundColor Cyan
+Write-Host "Preparing zero-traffic Phase 8 candidate..." -ForegroundColor Cyan
 
 gcloud config set project $ProjectId
-if ($LASTEXITCODE -ne 0) { throw "Could not select Google Cloud project '$ProjectId'." }
+if ($LASTEXITCODE -ne 0) {
+    throw "Could not select Google Cloud project '$ProjectId'."
+}
 
 gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com secretmanager.googleapis.com
-if ($LASTEXITCODE -ne 0) { throw "Could not enable required Google Cloud services." }
+if ($LASTEXITCODE -ne 0) {
+    throw "Could not enable required Google Cloud services."
+}
+
+# Confirm that the existing production service is present. The Phase 8 revision
+# intentionally inherits its existing runtime configuration and Secret Manager
+# references. Only the Advanced Stats rollout flags below are changed.
+$before = (& gcloud run services describe $ServiceName --project $ProjectId --region $Region --format=json) | ConvertFrom-Json
+if ($LASTEXITCODE -ne 0 -or -not $before) {
+    throw "Existing Cloud Run service '$ServiceName' was not found in $Region."
+}
+
+Write-Host "Existing Cloud Run service found. Production runtime config will be inherited." -ForegroundColor Green
+Write-Host "Deploying current checkout with collection OFF, public enrollment OFF and 0% normal traffic..." -ForegroundColor Cyan
 
 gcloud run deploy $ServiceName `
     --source . `
     --project $ProjectId `
     --region $Region `
-    --allow-unauthenticated `
-    --memory 512Mi `
-    --cpu 1 `
-    --min-instances 0 `
-    --max-instances 1 `
-    --concurrency 40 `
-    --timeout 30s `
-    --cpu-boost `
-    --env-vars-file ./cloudrun-env.yaml `
+    --update-env-vars="ADVANCED_STATS_COLLECTION_ENABLED=false,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false" `
+    --remove-env-vars="ADVANCED_STATS_ROLLOUT_USER_IDS" `
+    --remove-secrets="ADVANCED_STATS_SCHEDULER_SECRET" `
     --no-traffic `
     --tag $TagName
 if ($LASTEXITCODE -ne 0) {
@@ -89,6 +75,14 @@ $tagTraffic = @($service.status.traffic) | Where-Object { $_.tag -eq $TagName } 
 $candidateUrl = [string]$tagTraffic.url
 if (-not $candidateUrl) {
     throw "Could not resolve the tagged '$TagName' revision URL."
+}
+
+$tagPercent = 0
+if ($null -ne $tagTraffic.percent -and [string]$tagTraffic.percent -ne "") {
+    $tagPercent = [int]$tagTraffic.percent
+}
+if ($tagPercent -ne 0) {
+    throw "Safety gate failed: tagged candidate unexpectedly has $tagPercent% normal production traffic."
 }
 
 Write-Host "Tagged candidate URL: $candidateUrl" -ForegroundColor Cyan
@@ -110,6 +104,11 @@ if ($disabledPoll -ne 404) {
 
 Write-Host "Phase 8 first-deploy checks passed:" -ForegroundColor Green
 Write-Host "  tagged candidate receives 0% normal production traffic"
+Write-Host "  existing production runtime/secrets inherited"
+Write-Host "  collection OFF"
+Write-Host "  public enrollment OFF"
+Write-Host "  rollout allowlist cleared"
+Write-Host "  scheduler secret not attached yet"
 Write-Host "  /health = 200"
 Write-Host "  /ready = 200"
 Write-Host "  /InternalAdvancedStatsPoll = 404 while collection is disabled"
