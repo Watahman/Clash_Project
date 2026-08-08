@@ -58,8 +58,9 @@ public class SUPABASE_Achievements {
         combinedMetrics.putAll(HistoricalAchievementMetrics.extract(history));
 
         List<AchievementProgress> evaluated = evaluator.evaluate(combinedMetrics).stream()
+                .filter(AchievementProgress::measurable)
                 .filter(item -> {
-                    String source = AchievementSources.forMetric(item.definition().metric());
+                    String source = AchievementSources.forDefinition(item.definition());
                     return AchievementSources.BASE_DATA.equals(source)
                             || AchievementSources.BASE_HISTORY.equals(source);
                 })
@@ -133,13 +134,23 @@ public class SUPABASE_Achievements {
         }
 
         AchievementMetricCollector.Result collected = metricCollector.collect(userId, playerTag, snapshotMetrics, deepHistory);
-        JsonArray achievements = completeAchievementCatalog(progress, collected.metrics());
-        boolean persisted = persistObservedProgress(userId, playerTag, progress, achievements, collected.metrics());
+        JsonArray fixedAchievements = completeAchievementCatalog(progress, collected.metrics());
+        boolean persisted = persistObservedProgress(userId, playerTag, progress, fixedAchievements, collected.metrics());
+
+        JsonArray achievements = fixedAchievements.deepCopy();
+        JsonArray official = evaluator.dynamicOfficialAchievements(
+                collected.officialAchievements(),
+                sourceAvailable(collected.sources(), AchievementSources.LIVE_PROFILE)
+        );
+        official.forEach(achievements::add);
 
         JsonObject response = new JsonObject();
         response.addProperty("playerTag", playerTag);
         response.addProperty("deepHistory", deepHistory);
         response.addProperty("progressPersisted", persisted);
+        response.addProperty("fixedFamilyCount", 340);
+        response.addProperty("fixedTierCount", 1331);
+        response.addProperty("dynamicOfficialCount", official.size());
         response.add("achievements", achievements);
         response.add("latestSnapshot", latestSnapshotForResponse);
         response.add("sources", collected.sources());
@@ -157,18 +168,25 @@ public class SUPABASE_Achievements {
             JsonObject row = element.getAsJsonObject().deepCopy();
             String key = stringValue(row, "achievement_key");
             JsonObject stored = storedByKey.get(key);
+            boolean progressKnown = booleanValue(row, "progress_known");
+            boolean currentUnlock = booleanValue(row, "unlocked");
+
             if (stored != null) {
-                long progress = Math.max(longValue(row, "progress"), longValue(stored, "progress"));
-                long target = Math.max(0, longValue(row, "target"));
+                long storedProgress = longValue(stored, "progress");
+                long progress = progressKnown
+                        ? Math.max(longValue(row, "progress"), storedProgress)
+                        : storedProgress;
                 boolean previouslyUnlocked = booleanValue(stored, "unlocked");
                 row.addProperty("progress", progress);
-                row.addProperty("unlocked", previouslyUnlocked || (target > 0 && progress >= target));
+                row.addProperty("unlocked", previouslyUnlocked || currentUnlock);
                 copyOptional(stored, row, "unlocked_at");
                 copyOptional(stored, row, "updated_at");
             }
-            String metric = stringValue(row, "metric");
-            row.addProperty("source_available", currentMetrics.containsKey(metric));
-            row.addProperty("has_stored_progress", stored != null && longValue(stored, "progress") > 0);
+
+            boolean hasStoredProgress = stored != null
+                    && (longValue(stored, "progress") > 0 || booleanValue(stored, "unlocked"));
+            row.addProperty("source_available", progressKnown);
+            row.addProperty("has_stored_progress", hasStoredProgress);
             result.add(row);
         }
         return result;
@@ -190,8 +208,8 @@ public class SUPABASE_Achievements {
             for (JsonElement element : completeRows) {
                 if (!element.isJsonObject()) continue;
                 JsonObject row = element.getAsJsonObject();
-                String metric = stringValue(row, "metric");
-                if (!currentMetrics.containsKey(metric)) continue;
+                if (!booleanValue(row, "progress_known")) continue;
+                if (booleanValue(row, "catalog_template")) continue;
 
                 String key = stringValue(row, "achievement_key");
                 JsonObject stored = storedByKey.get(key);
@@ -285,6 +303,11 @@ public class SUPABASE_Achievements {
         return value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isBoolean() && value.getAsBoolean();
     }
 
+    private boolean sourceAvailable(JsonObject sources, String source) {
+        if (sources == null || source == null || !sources.has(source) || !sources.get(source).isJsonObject()) return false;
+        return booleanValue(sources.getAsJsonObject(source), "available");
+    }
+
     private List<HistoricalAchievementMetrics.Snapshot> loadHistoricalSnapshots(String userId, String playerTag) throws Exception {
         String response = SUPABASE_Client.getWithBody(
                 "achievement_base_snapshots",
@@ -371,8 +394,9 @@ public class SUPABASE_Achievements {
         JsonObject result = new JsonObject();
         for (String key : List.of(
                 "snapshot_import_count", "tracked_days", "tracked_progress_intervals",
-                "tracked_home_building_levels", "tracked_home_wall_levels", "tracked_home_hero_levels",
-                "tracked_equipment_levels", "tracked_army_levels", "tracked_builder_building_levels",
+                "tracked_home_building_levels", "tracked_home_trap_levels", "tracked_home_wall_levels",
+                "tracked_home_hero_levels", "tracked_equipment_levels", "tracked_helper_levels",
+                "tracked_army_levels", "tracked_builder_building_levels", "tracked_builder_wall_levels",
                 "tracked_cosmetics_added", "tracked_active_upgrade_observations", "tracked_largest_progress_jump"
         )) result.addProperty(key, Math.max(0, metrics.getOrDefault(key, 0L)));
         return result;
