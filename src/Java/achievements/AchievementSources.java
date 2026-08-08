@@ -15,7 +15,7 @@ public final class AchievementSources {
 
     public static String forMetric(String metric) {
         String value = metric == null ? "" : metric;
-        if (value.startsWith("profile_") || value.startsWith("native_")) return LIVE_PROFILE;
+        if (value.startsWith("profile_") || value.startsWith("native_") || value.startsWith("mastery_")) return LIVE_PROFILE;
         if (value.startsWith("war_current_")) return WAR;
         if (value.startsWith("cwl_")) return CWL;
         if (value.startsWith("clashpanel_") || value.equals("war_assignment_count")) return CLASHPANEL;
