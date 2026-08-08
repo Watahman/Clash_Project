@@ -11,6 +11,22 @@ import {
     parseBaseDataText
 } from '../achievements/achievement-view-model.js';
 
+const PAGE_SIZE = 48;
+const SOURCE_ORDER = [
+    'live_profile', 'base_data', 'base_history', 'advanced_stats',
+    'war', 'cwl_history', 'clashpanel', 'clan_family', 'mixed'
+];
+const SOURCE_FALLBACKS = {
+    live_profile: 'Live profile',
+    base_data: 'Base data',
+    base_history: 'Snapshot history',
+    advanced_stats: 'Advanced Stats',
+    war: 'Regular war',
+    cwl_history: 'CWL history',
+    clashpanel: 'ClashPanel usage',
+    clan_family: 'Clan Family',
+    mixed: 'Cross-source'
+};
 const PARSE_ERROR_KEYS = new Map([
     ['Paste the copied JSON first.', 'achievements.pasteFirst'],
     ['This is not valid JSON.', 'achievements.invalidJson'],
@@ -26,14 +42,57 @@ const state = {
     families: [],
     latestSnapshot: null,
     history: {},
+    sources: {},
     parsedImport: null,
     loading: false,
-    filters: { search: '', category: 'all', rarity: 'all', status: 'all' }
+    deepLoading: false,
+    requestId: 0,
+    visibleLimit: PAGE_SIZE,
+    filters: { search: '', category: 'all', rarity: 'all', status: 'all', source: 'all' }
 };
 
 const refs = {};
 
+function ensureEnhancedUi() {
+    const overview = document.querySelector('.achievement-overview');
+    if (overview && !document.querySelector('#achievement-source-list')) {
+        const section = document.createElement('section');
+        section.className = 'achievement-source-overview';
+        section.setAttribute('aria-labelledby', 'achievement-source-title');
+        section.innerHTML = `
+            <div class="achievement-source-heading">
+                <div>
+                    <p class="page-kicker">Data sources</p>
+                    <h2 id="achievement-source-title">How your achievements are measured</h2>
+                    <p>ClashPanel combines several sources. Missing data never counts as zero progress.</p>
+                </div>
+                <strong id="achievement-source-summary"></strong>
+            </div>
+            <div id="achievement-source-list" class="achievement-source-list"></div>`;
+        overview.insertAdjacentElement('afterend', section);
+    }
+
+    const filters = document.querySelector('.achievement-filter-grid');
+    if (filters && !document.querySelector('#achievement-source')) {
+        const label = document.createElement('label');
+        label.innerHTML = '<span class="sr-only">Data source</span><select id="achievement-source" aria-label="Data source"></select>';
+        filters.append(label);
+    }
+
+    const grid = document.querySelector('#achievement-grid');
+    if (grid && !document.querySelector('#achievement-load-more')) {
+        const button = document.createElement('button');
+        button.id = 'achievement-load-more';
+        button.type = 'button';
+        button.className = 'achievement-button achievement-button-secondary achievement-load-more';
+        button.hidden = true;
+        button.textContent = 'Show more achievements';
+        grid.insertAdjacentElement('afterend', button);
+    }
+}
+
 function captureRefs() {
+    ensureEnhancedUi();
     for (const [key, selector] of Object.entries({
         accountSelect: '#achievement-account', refreshButton: '#achievement-refresh', importForm: '#achievement-import-form',
         importToggle: '#achievement-import-toggle', importPanel: '#achievement-import-panel', importText: '#achievement-json',
@@ -41,9 +100,11 @@ function captureRefs() {
         importButton: '#achievement-import-submit', importFeedback: '#achievement-import-feedback', importPreview: '#achievement-import-preview',
         pageStatus: '#achievement-page-status', emptyState: '#achievement-empty-state', grid: '#achievement-grid',
         resultsCount: '#achievement-results-count', search: '#achievement-search', category: '#achievement-category',
-        rarity: '#achievement-rarity', status: '#achievement-status', summaryLevel: '#achievement-level',
-        summaryLevelProgress: '#achievement-level-progress', summaryLevelCopy: '#achievement-level-copy', summaryXp: '#achievement-total-xp',
-        summaryUnlocked: '#achievement-unlocked', summaryCompleted: '#achievement-completed', summaryImported: '#achievement-last-import'
+        rarity: '#achievement-rarity', status: '#achievement-status', source: '#achievement-source',
+        sourceList: '#achievement-source-list', sourceSummary: '#achievement-source-summary', loadMore: '#achievement-load-more',
+        summaryLevel: '#achievement-level', summaryLevelProgress: '#achievement-level-progress', summaryLevelCopy: '#achievement-level-copy',
+        summaryXp: '#achievement-total-xp', summaryUnlocked: '#achievement-unlocked', summaryCompleted: '#achievement-completed',
+        summaryImported: '#achievement-last-import'
     })) refs[key] = document.querySelector(selector);
 }
 
@@ -52,10 +113,24 @@ function translated(key, fallback = key, params = {}) {
     return value === key ? fallback : value;
 }
 
+function sourceLabel(source) {
+    return translated(`achievements.source.${source}`, SOURCE_FALLBACKS[source] || source);
+}
+
 function updateDocumentMetadata() {
     document.title = t('achievements.metaTitle');
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.content = t('achievements.metaDescription');
+    if (meta) meta.content = translated(
+        'achievements.metaDescriptionExpanded',
+        'Track hundreds of ClashPanel achievements across your live profile, wars, CWL, base progress, Advanced Stats and Clan Family activity.'
+    );
+    const intro = document.querySelector('.achievement-hero-copy > p:last-child');
+    if (intro) intro.textContent = translated(
+        'achievements.introExpanded',
+        'Track hundreds of achievements across your live Clash profile, base progress, wars, CWL, Advanced Stats and ClashPanel activity.'
+    );
+    const familyLabel = document.querySelector('[data-i18n="achievements.families"]');
+    if (familyLabel) familyLabel.textContent = translated('achievements.achievementsLabel', 'Achievements');
 }
 
 function setStatus(message = '', type = '') {
@@ -71,6 +146,7 @@ function setImportFeedback(message = '', type = '') {
 }
 
 function setImportPanelOpen(open, { focus = false } = {}) {
+    if (!state.accounts.length) open = false;
     refs.importPanel.hidden = !open;
     refs.importToggle.setAttribute('aria-expanded', String(open));
     if (open && focus) refs.importText.focus();
@@ -99,10 +175,13 @@ function populateAccounts() {
         refs.accountSelect.append(new Option(t('achievements.noLinkedAccounts'), ''));
         refs.accountSelect.disabled = true;
         refs.refreshButton.disabled = true;
+        refs.importToggle.disabled = true;
+        setImportPanelOpen(false);
         return;
     }
     refs.accountSelect.disabled = false;
-    refs.refreshButton.disabled = false;
+    refs.refreshButton.disabled = state.loading;
+    refs.importToggle.disabled = false;
     state.accounts.forEach(account => refs.accountSelect.append(new Option(accountLabel(account), account.tag)));
     state.selectedTag = state.selectedTag && state.accounts.some(account => account.tag === state.selectedTag)
         ? state.selectedTag : state.accounts[0].tag;
@@ -113,22 +192,16 @@ function localizedFamilies() {
     return state.families.map(family => {
         const title = translated(`achievements.family.${family.familyKey}.title`, family.title);
         const description = translated(`achievements.family.${family.familyKey}.description`, family.description);
+        const tierTitle = tier => family.tiers.length === 1
+            ? title
+            : `${title} ${['I', 'II', 'III', 'IV'][tier.tier - 1] || tier.tier}`;
         return {
             ...family,
             title,
             description,
-            tiers: family.tiers.map(tier => ({
-                ...tier,
-                title: `${title} ${['I', 'II', 'III', 'IV'][tier.tier - 1] || tier.tier}`
-            })),
-            currentTier: family.currentTier ? {
-                ...family.currentTier,
-                title: `${title} ${['I', 'II', 'III', 'IV'][family.currentTier.tier - 1] || family.currentTier.tier}`
-            } : null,
-            highestUnlocked: family.highestUnlocked ? {
-                ...family.highestUnlocked,
-                title: `${title} ${['I', 'II', 'III', 'IV'][family.highestUnlocked.tier - 1] || family.highestUnlocked.tier}`
-            } : null
+            tiers: family.tiers.map(tier => ({ ...tier, title: tierTitle(tier) })),
+            currentTier: family.currentTier ? { ...family.currentTier, title: tierTitle(family.currentTier) } : null,
+            highestUnlocked: family.highestUnlocked ? { ...family.highestUnlocked, title: tierTitle(family.highestUnlocked) } : null
         };
     });
 }
@@ -150,8 +223,42 @@ function renderSummary() {
         : t('achievements.notImported');
 }
 
+function renderSources() {
+    refs.sourceList.replaceChildren();
+    const summary = buildAchievementSummary(state.families);
+    refs.sourceSummary.textContent = state.accounts.length
+        ? translated('achievements.availableNow', `${summary.availableFamilies}/${summary.familyCount} measurable now`, {
+            available: summary.availableFamilies,
+            total: summary.familyCount
+        })
+        : translated('achievements.linkForSources', 'Link an account to activate sources');
+
+    SOURCE_ORDER.forEach(source => {
+        const info = state.sources?.[source] || {};
+        const item = document.createElement('article');
+        item.className = 'achievement-source-item';
+        item.dataset.available = String(info.available === true);
+        if (source === 'cwl_history' && state.deepLoading) item.dataset.loading = 'true';
+        const dot = document.createElement('i');
+        dot.setAttribute('aria-hidden', 'true');
+        const copy = document.createElement('span');
+        const strong = document.createElement('strong');
+        strong.textContent = sourceLabel(source);
+        const small = document.createElement('small');
+        small.textContent = source === 'cwl_history' && state.deepLoading
+            ? translated('achievements.sourceLoading', 'Loading history…')
+            : String(info.detail || translated(
+                info.available ? 'achievements.sourceReady' : 'achievements.sourceMissing',
+                info.available ? 'Ready' : 'Not available yet'
+            ));
+        copy.append(strong, small);
+        item.append(dot, copy);
+        refs.sourceList.append(item);
+    });
+}
+
 function categoryLabel(category) {
-    return translated(`achievements.category.${category}`, category);
+    return translated(`achievements.category.${category}`, category.replaceAll('_', ' '));
 }
 
 function categoryOptions(families) {
@@ -162,6 +269,16 @@ function categoryOptions(families) {
     });
     refs.category.value = available.has(state.filters.category) ? state.filters.category : 'all';
     state.filters.category = refs.category.value;
+}
+
+function sourceOptions(families) {
+    const available = new Set(families.map(family => family.source));
+    refs.source.replaceChildren(new Option(translated('achievements.allSources', 'All data sources'), 'all'));
+    SOURCE_ORDER.filter(source => available.has(source)).forEach(source => {
+        refs.source.append(new Option(sourceLabel(source), source));
+    });
+    refs.source.value = available.has(state.filters.source) ? state.filters.source : 'all';
+    state.filters.source = refs.source.value;
 }
 
 function tierMarker(tier) {
@@ -179,6 +296,7 @@ function achievementCard(family) {
     card.className = 'achievement-card';
     card.dataset.state = family.state;
     card.dataset.rarity = family.currentTier?.rarity || family.highestUnlocked?.rarity || 'common';
+    card.dataset.sourceAvailable = String(family.sourceAvailable);
 
     const heading = document.createElement('header');
     const icon = document.createElement('span');
@@ -188,9 +306,16 @@ function achievementCard(family) {
     const headingCopy = document.createElement('div');
     const title = document.createElement('h3');
     title.textContent = family.title;
-    const category = document.createElement('p');
+    const meta = document.createElement('p');
+    meta.className = 'achievement-card-meta';
+    const category = document.createElement('span');
     category.textContent = categoryLabel(family.category);
-    headingCopy.append(title, category);
+    const source = document.createElement('span');
+    source.className = 'achievement-card-source';
+    source.dataset.available = String(family.sourceAvailable);
+    source.textContent = sourceLabel(family.source);
+    meta.append(category, source);
+    headingCopy.append(title, meta);
     const badge = document.createElement('span');
     badge.className = 'achievement-rarity-badge';
     badge.textContent = family.complete ? t('achievements.complete') : t(`achievements.${family.currentTier?.rarity || 'common'}`);
@@ -202,7 +327,8 @@ function achievementCard(family) {
 
     const tierRow = document.createElement('div');
     tierRow.className = 'achievement-tier-row';
-    family.tiers.forEach(tier => tierRow.append(tierMarker(tier)));
+    if (family.tiers.length > 1) family.tiers.forEach(tier => tierRow.append(tierMarker(tier)));
+    else tierRow.hidden = true;
 
     const current = family.currentTier;
     const progressHeader = document.createElement('div');
@@ -210,9 +336,17 @@ function achievementCard(family) {
     const targetName = document.createElement('strong');
     targetName.textContent = family.complete ? t('achievements.allTiersUnlocked') : current?.title || family.title;
     const values = document.createElement('span');
-    values.textContent = family.complete
-        ? t('achievements.xpEarned', { xp: formatNumber(family.totalXp) })
-        : t('achievements.progressValue', { progress: formatNumber(current?.progress), target: formatNumber(current?.target) });
+    if (!family.sourceAvailable && !family.hasStoredProgress) {
+        values.textContent = translated('achievements.waitingForSource', 'Waiting for this data source');
+    } else if (!family.sourceAvailable && family.hasStoredProgress) {
+        values.textContent = translated('achievements.lastKnownProgress', `Last known: ${formatNumber(current?.progress)} / ${formatNumber(current?.target)}`, {
+            progress: formatNumber(current?.progress), target: formatNumber(current?.target)
+        });
+    } else {
+        values.textContent = family.complete
+            ? t('achievements.xpEarned', { xp: formatNumber(family.totalXp) })
+            : t('achievements.progressValue', { progress: formatNumber(current?.progress), target: formatNumber(current?.target) });
+    }
     progressHeader.append(targetName, values);
 
     const progressTrack = document.createElement('div');
@@ -228,7 +362,9 @@ function achievementCard(family) {
     const footer = document.createElement('footer');
     const status = document.createElement('span');
     status.className = 'achievement-status-label';
-    status.textContent = family.complete ? t('achievements.completed')
+    status.textContent = !family.sourceAvailable && !family.hasStoredProgress
+        ? translated('achievements.sourceRequired', 'Data source required')
+        : family.complete ? t('achievements.completed')
         : family.unlockedTiers.length === 1 ? t('achievements.oneTierUnlocked')
         : family.unlockedTiers.length > 1 ? t('achievements.tiersUnlocked', { count: family.unlockedTiers.length })
         : family.currentTier?.progress > 0 ? t('achievements.inProgress') : t('achievements.notStarted');
@@ -245,12 +381,19 @@ function achievementCard(family) {
 function renderAchievements() {
     refs.grid.replaceChildren();
     const families = localizedFamilies();
-    const visible = filterAchievementFamilies(families, state.filters);
-    refs.resultsCount.textContent = t('achievements.resultsCount', { visible: visible.length, total: families.length });
+    const filtered = filterAchievementFamilies(families, state.filters);
+    const visible = filtered.slice(0, state.visibleLimit);
+    refs.resultsCount.textContent = translated(
+        'achievements.resultsCountExpanded',
+        `${filtered.length} matching · ${families.length} total achievements`,
+        { visible: filtered.length, total: families.length }
+    );
 
     const emptyTitle = refs.emptyState.querySelector('h2');
     const emptyText = refs.emptyState.querySelector('p');
+    refs.loadMore.hidden = true;
     if (!state.accounts.length) {
+        refs.emptyState.dataset.reason = 'accounts';
         refs.emptyState.hidden = false;
         emptyTitle.textContent = t('achievements.linkAccountTitle');
         emptyText.textContent = t('achievements.linkAccountText');
@@ -258,13 +401,15 @@ function renderAchievements() {
         return;
     }
     if (!families.length) {
+        refs.emptyState.dataset.reason = 'catalog';
         refs.emptyState.hidden = false;
-        emptyTitle.textContent = t('achievements.importEmptyTitle');
-        emptyText.textContent = t('achievements.importEmptyText');
+        emptyTitle.textContent = translated('achievements.catalogEmptyTitle', 'Achievements could not be loaded');
+        emptyText.textContent = translated('achievements.catalogEmptyText', 'Refresh the page. Base-data import is not required for the achievement catalog to appear.');
         refs.grid.hidden = true;
         return;
     }
-    if (!visible.length) {
+    if (!filtered.length) {
+        refs.emptyState.dataset.reason = 'filters';
         refs.emptyState.hidden = false;
         emptyTitle.textContent = t('achievements.noMatchTitle');
         emptyText.textContent = t('achievements.noMatchText');
@@ -274,6 +419,12 @@ function renderAchievements() {
     refs.emptyState.hidden = true;
     refs.grid.hidden = false;
     visible.forEach(family => refs.grid.append(achievementCard(family)));
+    refs.loadMore.hidden = visible.length >= filtered.length;
+    refs.loadMore.textContent = translated(
+        'achievements.showMore',
+        `Show more (${filtered.length - visible.length} remaining)`,
+        { count: filtered.length - visible.length }
+    );
 }
 
 function renderAll() {
@@ -283,14 +434,52 @@ function renderAll() {
     renderSummary();
     const families = localizedFamilies();
     categoryOptions(families);
+    sourceOptions(families);
+    renderSources();
     renderAchievements();
 }
 
-async function loadSelectedAccount({ quiet = false } = {}) {
-    if (!state.selectedTag) {
+function applyAchievementResponse(response) {
+    state.families = groupAchievementFamilies(response?.achievements);
+    state.latestSnapshot = response?.latestSnapshot || null;
+    state.history = response?.history || {};
+    state.sources = response?.sources || {};
+}
+
+async function loadDeepHistory(tag, requestId) {
+    if (!tag || requestId !== state.requestId) return;
+    state.deepLoading = true;
+    renderSources();
+    try {
+        const response = await getAchievements(tag, { deepHistory: true, loading: 'background' });
+        if (requestId !== state.requestId || tag !== state.selectedTag) return;
+        applyAchievementResponse(response);
+        renderAll();
+    } catch {
+        if (requestId === state.requestId) {
+            state.sources = {
+                ...state.sources,
+                cwl_history: { available: false, detail: translated('achievements.cwlHistoryUnavailable', 'CWL history is temporarily unavailable.') }
+            };
+            renderSources();
+        }
+    } finally {
+        if (requestId === state.requestId) {
+            state.deepLoading = false;
+            renderSources();
+        }
+    }
+}
+
+async function loadSelectedAccount({ quiet = false, loadHistory = true } = {}) {
+    const requestId = ++state.requestId;
+    const tag = state.selectedTag;
+    state.visibleLimit = PAGE_SIZE;
+    if (!tag) {
         state.families = [];
         state.latestSnapshot = null;
         state.history = {};
+        state.sources = {};
         renderAll();
         return;
     }
@@ -298,20 +487,25 @@ async function loadSelectedAccount({ quiet = false } = {}) {
     refs.refreshButton.disabled = true;
     if (!quiet) setStatus(t('achievements.loading'));
     try {
-        const response = await getAchievements(state.selectedTag);
-        state.families = groupAchievementFamilies(response?.achievements);
-        state.latestSnapshot = response?.latestSnapshot || null;
-        state.history = response?.history || {};
+        const response = await getAchievements(tag, { deepHistory: false });
+        if (requestId !== state.requestId) return;
+        applyAchievementResponse(response);
         setStatus();
+        renderAll();
+        if (loadHistory) void loadDeepHistory(tag, requestId);
     } catch (error) {
+        if (requestId !== state.requestId) return;
         state.families = [];
         state.latestSnapshot = null;
         state.history = {};
+        state.sources = {};
         setStatus(error?.message || t('achievements.loadError'), 'error');
-    } finally {
-        state.loading = false;
-        refs.refreshButton.disabled = !state.accounts.length;
         renderAll();
+    } finally {
+        if (requestId === state.requestId) {
+            state.loading = false;
+            refs.refreshButton.disabled = !state.accounts.length;
+        }
     }
 }
 
@@ -324,7 +518,6 @@ function updateImportPreview() {
     state.parsedImport = result.valid ? result : null;
     refs.importButton.disabled = !result.valid;
     refs.importPreview.hidden = !result.valid;
-
     if (!result.valid) {
         setImportFeedback(refs.importText.value.trim() ? localizedParseError(result) : '');
         return;
@@ -388,36 +581,41 @@ async function submitImport(event) {
         await loadSelectedAccount({ quiet: true });
         const successMessage = t('achievements.importSuccess', { count: unlocked });
         setStatus(successMessage, 'success');
-        setImportFeedback(successMessage, 'success');
     } catch (error) {
         setImportFeedback(error?.message || t('achievements.importError'), 'error');
         refs.importButton.disabled = false;
     }
 }
 
+function resetVisibleAndRender() {
+    state.visibleLimit = PAGE_SIZE;
+    renderAchievements();
+}
+
 function bindEvents() {
     refs.accountSelect.addEventListener('change', () => {
         state.selectedTag = normalizePlayerTag(refs.accountSelect.value);
-        updateImportPreview();
+        clearImport();
+        setImportPanelOpen(false);
         void loadSelectedAccount();
     });
     refs.refreshButton.addEventListener('click', () => void loadSelectedAccount());
-    refs.importToggle.addEventListener('click', () => {
-        setImportPanelOpen(refs.importPanel.hidden, { focus: true });
-    });
+    refs.importToggle.addEventListener('click', () => setImportPanelOpen(refs.importPanel.hidden, { focus: true }));
     refs.importText.addEventListener('input', updateImportPreview);
     refs.importText.addEventListener('paste', () => window.setTimeout(updateImportPreview));
     refs.importFile.addEventListener('change', () => void readImportFile(refs.importFile.files?.[0]));
     refs.pasteButton.addEventListener('click', () => void pasteFromClipboard());
     refs.clearButton.addEventListener('click', clearImport);
     refs.importForm.addEventListener('submit', submitImport);
-    refs.search.addEventListener('input', () => { state.filters.search = refs.search.value; renderAchievements(); });
-    for (const [ref, key] of [[refs.category, 'category'], [refs.rarity, 'rarity'], [refs.status, 'status']]) {
-        ref.addEventListener('change', () => { state.filters[key] = ref.value; renderAchievements(); });
+    refs.search.addEventListener('input', () => { state.filters.search = refs.search.value; resetVisibleAndRender(); });
+    for (const [ref, key] of [[refs.category, 'category'], [refs.rarity, 'rarity'], [refs.status, 'status'], [refs.source, 'source']]) {
+        ref.addEventListener('change', () => { state.filters[key] = ref.value; resetVisibleAndRender(); });
     }
-    refs.emptyState.querySelector('[data-empty-import]').addEventListener('click', () => {
-        setImportPanelOpen(true, { focus: true });
+    refs.loadMore.addEventListener('click', () => {
+        state.visibleLimit += PAGE_SIZE;
+        renderAchievements();
     });
+    refs.emptyState.querySelector('[data-empty-import]').addEventListener('click', () => setImportPanelOpen(true, { focus: true }));
     refs.emptyState.querySelector('[data-empty-profile]').addEventListener('click', () => {
         document.querySelector('#workspace-profile-shortcut, #profile-btn')?.click();
     });
