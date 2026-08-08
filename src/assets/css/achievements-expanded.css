@@ -131,6 +131,25 @@
     color: var(--text-subtle);
 }
 
+/* Spec v2 adds Uncommon/Mythic and allows up to seven fixed tiers. */
+.achievement-card[data-rarity="uncommon"] { --achievement-rarity: #66b98f; }
+.achievement-card[data-rarity="mythic"] { --achievement-rarity: #e06ccf; }
+.achievement-tier-row {
+    display: flex;
+    flex-wrap: wrap;
+}
+.achievement-tier-marker {
+    flex: 1 1 4rem;
+    min-width: 0;
+    padding-inline: .35rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.achievement-card[data-state="unknown"] .achievement-progress-track {
+    opacity: .35;
+}
+
 .achievement-load-more {
     width: fit-content;
     min-width: min(18rem, calc(100% - 1.7rem));
