@@ -1,0 +1,39 @@
+# Copy this file to cloudrun-env.yaml before deploying.
+# cloudrun-env.yaml is gitignored. Never put secrets in this file.
+
+# Required backend URLs / production browser origin
+_BASE_URL_SUPABASE: "https://<your-project-ref>.supabase.co"
+_ALLOWED_ORIGINS: "https://clashpanel.com,https://www.clashpanel.com"
+TRUST_PROXY_HEADERS: "true"
+
+# Production auth redirects
+AUTH_COOKIE_SECURE: "true"
+AUTH_COOKIE_SAME_SITE: "Lax"
+AUTH_EMAIL_CONFIRM_REDIRECT_URL: "https://clashpanel.com/subpages/login.html"
+AUTH_PASSWORD_RESET_REDIRECT_URL: "https://clashpanel.com/subpages/login.html"
+AUTH_GOOGLE_CALLBACK_URL: "https://clashpanel.com/api/AuthGoogleCallback"
+
+# Phase 8 Advanced Stats rollout safety defaults.
+# Keep both false for the first candidate deployment.
+ADVANCED_STATS_COLLECTION_ENABLED: "false"
+ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED: "false"
+ADVANCED_STATS_ROLLOUT_USER_IDS: ""
+
+# Conservative collector defaults. These can remain unchanged for the developer stage.
+ADVANCED_STATS_BATCH_SIZE: "25"
+ADVANCED_STATS_LEASE_SECONDS: "600"
+ADVANCED_STATS_ACTIVE_POLL_MINUTES: "15"
+ADVANCED_STATS_IDLE_POLL_MINUTES: "30"
+ADVANCED_STATS_RATE_LIMIT_BACKOFF_MINUTES: "30"
+ADVANCED_STATS_OUTAGE_BACKOFF_MINUTES: "10"
+ADVANCED_STATS_UNKNOWN_BACKOFF_MINUTES: "15"
+ADVANCED_STATS_MAX_BACKOFF_MINUTES: "240"
+ADVANCED_STATS_DEGRADED_THRESHOLD: "3"
+
+# Secrets are intentionally NOT stored here.
+# Configure these through Cloud Run / Secret Manager:
+# _API_KEY_ALL
+# _API_KEY_SUPABASE
+# SUPABASE_SERVICE_ROLE_KEY
+# API_PROXY_SECRET
+# ADVANCED_STATS_SCHEDULER_SECRET
