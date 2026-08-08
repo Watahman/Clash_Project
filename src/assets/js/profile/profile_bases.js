@@ -26,7 +26,7 @@ function extractTagCandidate(value) {
         // Keep the original value when percent-decoding is not valid.
     }
 
-    return raw.trim().toUpperCase().replace(/\s+/g, '');
+    return raw.trim().toUpperCase().replace(/O/g, '0').replace(/\s+/g, '');
 }
 
 function normalizeTag(value) {
