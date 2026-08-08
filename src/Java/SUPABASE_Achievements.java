@@ -1,6 +1,7 @@
 package Java;
 
 import Java.achievements.AchievementEvaluator;
+import Java.achievements.AchievementMetricCollector;
 import Java.achievements.AchievementProgress;
 import Java.achievements.BaseDataSnapshot;
 import Java.achievements.HistoricalAchievementMetrics;
@@ -14,6 +15,7 @@ import com.sun.net.httpserver.HttpServer;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -27,10 +29,12 @@ public class SUPABASE_Achievements {
     private final HttpServer server;
     private final API_Utils utils;
     private final AchievementEvaluator evaluator = new AchievementEvaluator();
+    private final AchievementMetricCollector metricCollector;
 
     public SUPABASE_Achievements(HttpServer server, Config conf) {
         this.server = server;
         this.utils = new API_Utils(conf);
+        this.metricCollector = new AchievementMetricCollector(conf);
     }
 
     public void registerRoutes() {
@@ -88,7 +92,10 @@ public class SUPABASE_Achievements {
 
     private void getAchievements(HttpExchange exchange) throws Exception {
         String userId = utils.requireAuthenticatedUser(exchange);
-        String playerTag = CacheKeys.requireValidTag(requiredQueryParameter(exchange, "playerTag"));
+        Map<String, String> query = queryParameters(exchange.getRequestURI().getRawQuery());
+        String playerTag = CacheKeys.requireValidTag(requiredQueryParameter(query, "playerTag"));
+        boolean deepHistory = "1".equals(query.get("deepHistory"))
+                || "true".equalsIgnoreCase(query.getOrDefault("deepHistory", ""));
         ensureOwnedAccount(userId, playerTag);
 
         String userFilter = "user_id=" + SUPABASE_Client.eq(userId);
@@ -106,44 +113,42 @@ public class SUPABASE_Achievements {
         );
 
         JsonElement latestSnapshot = firstOrNull(snapshots);
-        JsonObject response = new JsonObject();
-        response.addProperty("playerTag", playerTag);
-        response.add("achievements", completeAchievementCatalog(progress, latestSnapshot));
-        response.add("latestSnapshot", latestSnapshot);
+        Map<String, Long> snapshotMetrics = new LinkedHashMap<>();
         if (latestSnapshot.isJsonObject()) {
             JsonElement metrics = latestSnapshot.getAsJsonObject().get("metrics");
-            response.add("history", metrics != null && metrics.isJsonObject()
-                    ? historySummaryJson(numericMap(metrics.getAsJsonObject()))
-                    : new JsonObject());
-        } else {
-            response.add("history", new JsonObject());
+            if (metrics != null && metrics.isJsonObject()) snapshotMetrics.putAll(numericMap(metrics.getAsJsonObject()));
         }
+
+        AchievementMetricCollector.Result collected = metricCollector.collect(
+                userId,
+                playerTag,
+                snapshotMetrics,
+                deepHistory
+        );
+        JsonArray achievements = completeAchievementCatalog(progress, collected.metrics());
+        boolean persisted = persistObservedProgress(userId, playerTag, progress, achievements, collected.metrics());
+
+        JsonObject response = new JsonObject();
+        response.addProperty("playerTag", playerTag);
+        response.addProperty("deepHistory", deepHistory);
+        response.addProperty("progressPersisted", persisted);
+        response.add("achievements", achievements);
+        response.add("latestSnapshot", latestSnapshot);
+        response.add("sources", collected.sources());
+        response.add("history", historySummaryJson(collected.metrics()));
         utils.sendJsonResponse(exchange, response.toString(), 200);
     }
 
-    private JsonArray completeAchievementCatalog(String storedProgressJson, JsonElement latestSnapshot) {
+    private JsonArray completeAchievementCatalog(String storedProgressJson, Map<String, Long> currentMetrics) {
         JsonArray storedRows = JsonParser.parseString(storedProgressJson).getAsJsonArray();
-        Map<String, JsonObject> storedByKey = new HashMap<>();
-        for (JsonElement element : storedRows) {
-            if (!element.isJsonObject()) continue;
-            JsonObject row = element.getAsJsonObject();
-            String key = stringValue(row, "achievement_key");
-            if (!key.isBlank()) storedByKey.put(key, row);
-        }
-
-        Map<String, Long> currentMetrics = new LinkedHashMap<>();
-        if (latestSnapshot != null && latestSnapshot.isJsonObject()) {
-            JsonElement metrics = latestSnapshot.getAsJsonObject().get("metrics");
-            if (metrics != null && metrics.isJsonObject()) {
-                currentMetrics.putAll(numericMap(metrics.getAsJsonObject()));
-            }
-        }
-
+        Map<String, JsonObject> storedByKey = storedRowsByKey(storedRows);
         JsonArray catalog = evaluator.toJson(evaluator.evaluate(currentMetrics));
         JsonArray result = new JsonArray();
+
         for (JsonElement element : catalog) {
             JsonObject row = element.getAsJsonObject().deepCopy();
-            JsonObject stored = storedByKey.get(stringValue(row, "achievement_key"));
+            String key = stringValue(row, "achievement_key");
+            JsonObject stored = storedByKey.get(key);
             if (stored != null) {
                 long progress = Math.max(longValue(row, "progress"), longValue(stored, "progress"));
                 long target = Math.max(0, longValue(row, "target"));
@@ -153,9 +158,101 @@ public class SUPABASE_Achievements {
                 copyOptional(stored, row, "unlocked_at");
                 copyOptional(stored, row, "updated_at");
             }
+            String metric = stringValue(row, "metric");
+            boolean availableNow = currentMetrics.containsKey(metric);
+            row.addProperty("source_available", availableNow);
+            row.addProperty("has_stored_progress", stored != null && longValue(stored, "progress") > 0);
             result.add(row);
         }
         return result;
+    }
+
+    private boolean persistObservedProgress(
+            String userId,
+            String playerTag,
+            String storedProgressJson,
+            JsonArray completeRows,
+            Map<String, Long> currentMetrics
+    ) {
+        try {
+            Map<String, JsonObject> storedByKey = storedRowsByKey(
+                    JsonParser.parseString(storedProgressJson).getAsJsonArray()
+            );
+            JsonArray changed = new JsonArray();
+            long now = Instant.now().getEpochSecond();
+            String unlockedNow = Instant.now().toString();
+
+            for (JsonElement element : completeRows) {
+                if (!element.isJsonObject()) continue;
+                JsonObject row = element.getAsJsonObject();
+                String metric = stringValue(row, "metric");
+                if (!currentMetrics.containsKey(metric)) continue;
+
+                String key = stringValue(row, "achievement_key");
+                JsonObject stored = storedByKey.get(key);
+                long progress = longValue(row, "progress");
+                long target = longValue(row, "target");
+                boolean unlocked = booleanValue(row, "unlocked");
+                boolean changedProgress = stored == null || progress > longValue(stored, "progress");
+                boolean changedUnlock = stored == null
+                        ? unlocked
+                        : unlocked && !booleanValue(stored, "unlocked");
+                boolean changedTarget = stored == null || target != longValue(stored, "target");
+                if (!changedProgress && !changedUnlock && !changedTarget) continue;
+
+                JsonObject db = new JsonObject();
+                db.addProperty("user_id", userId);
+                db.addProperty("player_tag", playerTag);
+                copyRequired(row, db, "achievement_key");
+                copyRequired(row, db, "family_key");
+                copyRequired(row, db, "title");
+                copyRequired(row, db, "description");
+                copyRequired(row, db, "category");
+                copyRequired(row, db, "rarity");
+                copyRequired(row, db, "tier");
+                copyRequired(row, db, "xp");
+                copyRequired(row, db, "metric");
+                db.addProperty("progress", progress);
+                db.addProperty("target", target);
+                db.addProperty("unlocked", unlocked);
+                JsonElement existingUnlockedAt = stored == null ? null : stored.get("unlocked_at");
+                if (existingUnlockedAt != null && !existingUnlockedAt.isJsonNull()) {
+                    db.add("unlocked_at", existingUnlockedAt.deepCopy());
+                } else if (unlocked) {
+                    db.addProperty("unlocked_at", unlockedNow);
+                }
+                db.addProperty("source_timestamp", now);
+                changed.add(db);
+            }
+
+            if (changed.isEmpty()) return true;
+            SUPABASE_Client.upsert(
+                    "achievement_progress",
+                    "user_id,player_tag,achievement_key,tier",
+                    changed.toString()
+            );
+            return true;
+        } catch (Exception persistenceFailure) {
+            System.err.println("[Achievements] Could not persist observed progress: " + persistenceFailure.getMessage());
+            return false;
+        }
+    }
+
+    private Map<String, JsonObject> storedRowsByKey(JsonArray storedRows) {
+        Map<String, JsonObject> storedByKey = new HashMap<>();
+        for (JsonElement element : storedRows) {
+            if (!element.isJsonObject()) continue;
+            JsonObject row = element.getAsJsonObject();
+            String key = stringValue(row, "achievement_key");
+            if (!key.isBlank()) storedByKey.put(key, row);
+        }
+        return storedByKey;
+    }
+
+    private void copyRequired(JsonObject source, JsonObject target, String field) {
+        JsonElement value = source.get(field);
+        if (value == null || value.isJsonNull()) throw new IllegalArgumentException("Missing achievement field: " + field);
+        target.add(field, value.deepCopy());
     }
 
     private void copyOptional(JsonObject source, JsonObject target, String field) {
@@ -247,8 +344,7 @@ public class SUPABASE_Achievements {
         return false;
     }
 
-    private String requiredQueryParameter(HttpExchange exchange, String name) {
-        Map<String, String> parameters = queryParameters(exchange.getRequestURI().getRawQuery());
+    private String requiredQueryParameter(Map<String, String> parameters, String name) {
         String value = parameters.get(name);
         if (value == null || value.isBlank()) throw new IllegalArgumentException("Queryparameter ontbreekt: " + name);
         return value;
