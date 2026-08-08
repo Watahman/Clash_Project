@@ -70,26 +70,32 @@ public final class HistoricalAchievementMetrics {
             Map<String, Long> current = snapshots.get(index).getValue();
 
             long buildingGain = gainAboveHighWater(highWater, current, "home_building_level_sum");
+            long trapGain = gainAboveHighWater(highWater, current, "home_trap_level_sum");
             long wallGain = gainAboveHighWater(highWater, current, "home_wall_level_sum");
             long heroGain = gainAboveHighWater(highWater, current, "home_hero_level_sum");
             long equipmentGain = gainAboveHighWater(highWater, current, "equipment_level_sum");
+            long helperGain = gainAboveHighWater(highWater, current, "helper_level_sum");
             long armyGain = gainAboveHighWater(highWater, current, "home_unit_level_sum")
                     + gainAboveHighWater(highWater, current, "spell_level_sum")
                     + gainAboveHighWater(highWater, current, "siege_level_sum")
                     + gainAboveHighWater(highWater, current, "pet_level_sum");
             long builderGain = gainAboveHighWater(highWater, current, "builder_building_level_sum");
+            long builderWallGain = gainAboveHighWater(highWater, current, "builder_wall_level_sum");
             long collectionGain = gainAboveHighWater(highWater, current, "cosmetic_collection_count");
 
             add(result, "tracked_home_building_levels", buildingGain);
+            add(result, "tracked_home_trap_levels", trapGain);
             add(result, "tracked_home_wall_levels", wallGain);
             add(result, "tracked_home_hero_levels", heroGain);
             add(result, "tracked_equipment_levels", equipmentGain);
+            add(result, "tracked_helper_levels", helperGain);
             add(result, "tracked_army_levels", armyGain);
             add(result, "tracked_builder_building_levels", builderGain);
+            add(result, "tracked_builder_wall_levels", builderWallGain);
             add(result, "tracked_cosmetics_added", collectionGain);
 
-            long intervalProgress = buildingGain + wallGain + heroGain + equipmentGain
-                    + armyGain + builderGain + collectionGain;
+            long intervalProgress = buildingGain + trapGain + wallGain + heroGain + equipmentGain
+                    + helperGain + armyGain + builderGain + builderWallGain + collectionGain;
             if (intervalProgress > 0) progressIntervals++;
             largestProgressJump = Math.max(largestProgressJump, intervalProgress);
         }
@@ -105,11 +111,14 @@ public final class HistoricalAchievementMetrics {
                 "snapshot_import_count",
                 "tracked_days",
                 "tracked_home_building_levels",
+                "tracked_home_trap_levels",
                 "tracked_home_wall_levels",
                 "tracked_home_hero_levels",
                 "tracked_equipment_levels",
+                "tracked_helper_levels",
                 "tracked_army_levels",
                 "tracked_builder_building_levels",
+                "tracked_builder_wall_levels",
                 "tracked_cosmetics_added",
                 "tracked_active_upgrade_observations",
                 "tracked_progress_intervals",
