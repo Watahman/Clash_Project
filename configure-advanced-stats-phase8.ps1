@@ -47,11 +47,16 @@ if ($LASTEXITCODE -ne 0 -or -not $existingSecret) {
 }
 
 $bytes = New-Object byte[] 48
-[System.Security.Cryptography.RandomNumberGenerator]::Fill($bytes)
+$rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+try {
+    $rng.GetBytes($bytes)
+} finally {
+    $rng.Dispose()
+}
 $schedulerSecret = [Convert]::ToBase64String($bytes)
 $tempSecretFile = [System.IO.Path]::GetTempFileName()
 try {
-    [System.IO.File]::WriteAllText($tempSecretFile, $schedulerSecret, [System.Text.UTF8Encoding]::new($false))
+    [System.IO.File]::WriteAllText($tempSecretFile, $schedulerSecret, (New-Object System.Text.UTF8Encoding($false)))
     Run-Gcloud secrets versions add $SecretName --project $ProjectId --data-file=$tempSecretFile
 } finally {
     Remove-Item $tempSecretFile -Force -ErrorAction SilentlyContinue
@@ -66,7 +71,7 @@ Run-Gcloud run services update $ServiceName `
     --project $ProjectId `
     --region $Region `
     --update-env-vars="ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false,ADVANCED_STATS_COLLECTION_ENABLED=false,ADVANCED_STATS_ROLLOUT_USER_IDS=$DeveloperUserId" `
-    --update-secrets="ADVANCED_STATS_SCHEDULER_SECRET=$SecretName`:latest"
+    --update-secrets="ADVANCED_STATS_SCHEDULER_SECRET=${SecretName}:latest"
 
 $jobExists = & gcloud scheduler jobs describe $SchedulerJobName --project $ProjectId --location $Region --format="value(name)" 2>$null
 if ($LASTEXITCODE -eq 0 -and $jobExists) {
