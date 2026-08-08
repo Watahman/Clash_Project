@@ -35,6 +35,33 @@ function Get-TaggedCandidateUrl {
     return $url
 }
 
+function Secret-Exists {
+    $names = @(& gcloud secrets list --project $ProjectId --format="value(name)")
+    if ($LASTEXITCODE -ne 0) {
+        throw "Could not list Secret Manager secrets."
+    }
+    return $names -contains $SecretName
+}
+
+function Get-SchedulerJobState {
+    $rows = @(& gcloud scheduler jobs list --project $ProjectId --location $Region --format="csv[no-heading](name,state)")
+    if ($LASTEXITCODE -ne 0) {
+        throw "Could not list Cloud Scheduler jobs in $Region."
+    }
+
+    foreach ($row in $rows) {
+        if ([string]::IsNullOrWhiteSpace($row)) { continue }
+        $parts = $row.Split(',', 2)
+        if ($parts.Count -lt 2) { continue }
+        $name = $parts[0].Trim()
+        $state = $parts[1].Trim()
+        if ($name -eq $SchedulerJobName -or $name.EndsWith("/$SchedulerJobName")) {
+            return $state
+        }
+    }
+    return $null
+}
+
 Run-Gcloud config set project $ProjectId
 Run-Gcloud services enable run.googleapis.com secretmanager.googleapis.com cloudscheduler.googleapis.com
 
@@ -52,8 +79,7 @@ if (-not $serviceAccount) {
     $serviceAccount = "$projectNumber-compute@developer.gserviceaccount.com"
 }
 
-$existingSecret = & gcloud secrets describe $SecretName --project $ProjectId --format="value(name)" 2>$null
-if ($LASTEXITCODE -ne 0 -or -not $existingSecret) {
+if (-not (Secret-Exists)) {
     Run-Gcloud secrets create $SecretName --project $ProjectId --replication-policy="automatic"
 }
 
@@ -89,8 +115,8 @@ Run-Gcloud run services update $ServiceName `
 
 $candidateUrl = Get-TaggedCandidateUrl
 
-$jobExists = & gcloud scheduler jobs describe $SchedulerJobName --project $ProjectId --location $Region --format="value(name)" 2>$null
-if ($LASTEXITCODE -eq 0 -and $jobExists) {
+$jobState = Get-SchedulerJobState
+if ($jobState) {
     Run-Gcloud scheduler jobs update http $SchedulerJobName `
         --project $ProjectId `
         --location $Region `
@@ -115,7 +141,10 @@ if ($LASTEXITCODE -eq 0 -and $jobExists) {
 }
 
 # The job is intentionally paused during setup. Collection is also still disabled.
-Run-Gcloud scheduler jobs pause $SchedulerJobName --project $ProjectId --location $Region
+$jobState = Get-SchedulerJobState
+if ($jobState -ne "PAUSED") {
+    Run-Gcloud scheduler jobs pause $SchedulerJobName --project $ProjectId --location $Region
+}
 
 Write-Host "Phase 8 developer-only runtime configuration prepared." -ForegroundColor Green
 Write-Host "  Tagged candidate URL: $candidateUrl"
