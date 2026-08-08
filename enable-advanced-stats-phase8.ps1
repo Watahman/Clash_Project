@@ -4,6 +4,7 @@ param(
 
     [string]$Region = "europe-west1",
     [string]$ServiceName = "clashpanel-api",
+    [string]$TagName = "phase8",
     [string]$SchedulerJobName = "clashpanel-advanced-stats-poll",
     [string]$SecretName = "clashpanel-advanced-stats-scheduler-secret"
 )
@@ -16,6 +17,24 @@ function Run-Gcloud {
     if ($LASTEXITCODE -ne 0) {
         throw "gcloud command failed: gcloud $($Args -join ' ')"
     }
+}
+
+function Get-ServiceJson {
+    $service = (& gcloud run services describe $ServiceName --project $ProjectId --region $Region --format=json) | ConvertFrom-Json
+    if ($LASTEXITCODE -ne 0 -or -not $service) {
+        throw "Cloud Run service '$ServiceName' was not found."
+    }
+    return $service
+}
+
+function Get-TaggedCandidateUrl {
+    $service = Get-ServiceJson
+    $tagTraffic = @($service.status.traffic) | Where-Object { $_.tag -eq $TagName } | Select-Object -First 1
+    $url = [string]$tagTraffic.url
+    if (-not $url) {
+        throw "Tagged Cloud Run candidate '$TagName' was not found."
+    }
+    return $url
 }
 
 function Get-HttpResult {
@@ -36,12 +55,8 @@ function Get-HttpResult {
     }
 }
 
-$serviceJson = (& gcloud run services describe $ServiceName --project $ProjectId --region $Region --format=json) | ConvertFrom-Json
-if ($LASTEXITCODE -ne 0 -or -not $serviceJson) {
-    throw "Cloud Run service '$ServiceName' was not found."
-}
-
-$serviceUrl = [string]$serviceJson.status.url
+$serviceJson = Get-ServiceJson
+$candidateUrl = Get-TaggedCandidateUrl
 $envEntries = @($serviceJson.spec.template.spec.containers[0].env)
 
 function Get-EnvValue([string]$Name) {
@@ -83,24 +98,28 @@ if ($LASTEXITCODE -ne 0 -or -not $schedulerSecret) {
     throw "Could not access scheduler secret '$SecretName'."
 }
 
-Write-Host "Enabling collection for the single allowlisted developer while the scheduler remains paused..." -ForegroundColor Cyan
+Write-Host "Enabling collection only on the zero-traffic Phase 8 candidate..." -ForegroundColor Cyan
 Run-Gcloud run services update $ServiceName `
     --project $ProjectId `
     --region $Region `
-    --update-env-vars="ADVANCED_STATS_COLLECTION_ENABLED=true,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false"
+    --update-env-vars="ADVANCED_STATS_COLLECTION_ENABLED=true,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false" `
+    --no-traffic `
+    --tag $TagName
+
+$candidateUrl = Get-TaggedCandidateUrl
 
 try {
-    $noSecret = Get-HttpResult -Url "$serviceUrl/InternalAdvancedStatsPoll"
+    $noSecret = Get-HttpResult -Url "$candidateUrl/InternalAdvancedStatsPoll"
     if ($noSecret.Status -ne 401) {
         throw "Internal poll without scheduler secret returned $($noSecret.Status) instead of 401."
     }
 
-    $wrongSecret = Get-HttpResult -Url "$serviceUrl/InternalAdvancedStatsPoll" -Headers @{ "X-ClashPanel-Scheduler-Secret" = "intentionally-wrong-phase8-secret" }
+    $wrongSecret = Get-HttpResult -Url "$candidateUrl/InternalAdvancedStatsPoll" -Headers @{ "X-ClashPanel-Scheduler-Secret" = "intentionally-wrong-phase8-secret" }
     if ($wrongSecret.Status -ne 401) {
         throw "Internal poll with a wrong scheduler secret returned $($wrongSecret.Status) instead of 401."
     }
 
-    $authorized = Get-HttpResult -Url "$serviceUrl/InternalAdvancedStatsPoll" -Headers @{ "X-ClashPanel-Scheduler-Secret" = $schedulerSecret }
+    $authorized = Get-HttpResult -Url "$candidateUrl/InternalAdvancedStatsPoll" -Headers @{ "X-ClashPanel-Scheduler-Secret" = $schedulerSecret }
     if ($authorized.Status -ne 200) {
         throw "Authorized internal poll returned $($authorized.Status) instead of 200."
     }
@@ -115,17 +134,18 @@ try {
 
     Run-Gcloud scheduler jobs resume $SchedulerJobName --project $ProjectId --location $Region
 } catch {
-    Write-Warning "Phase 8 enablement failed. Applying kill switch: collection OFF and scheduler PAUSED."
+    Write-Warning "Phase 8 enablement failed. Applying kill switch on the tagged candidate."
     & gcloud scheduler jobs pause $SchedulerJobName --project $ProjectId --location $Region | Out-Null
-    & gcloud run services update $ServiceName --project $ProjectId --region $Region --update-env-vars="ADVANCED_STATS_COLLECTION_ENABLED=false,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false" | Out-Null
+    & gcloud run services update $ServiceName --project $ProjectId --region $Region --update-env-vars="ADVANCED_STATS_COLLECTION_ENABLED=false,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false" --no-traffic --tag $TagName | Out-Null
     throw
 } finally {
     $schedulerSecret = $null
 }
 
-Write-Host "Phase 8 developer collection is now enabled." -ForegroundColor Green
+Write-Host "Phase 8 developer collection is now enabled on the tagged candidate." -ForegroundColor Green
+Write-Host "  Normal production traffic to candidate: 0%"
 Write-Host "  Public enrollment: OFF"
 Write-Host "  Allowlist: exactly one developer UUID"
-Write-Host "  Scheduler: ACTIVE every 5 minutes"
+Write-Host "  Scheduler: ACTIVE every 5 minutes against tagged candidate"
 Write-Host ""
-Write-Host "Observe real battle-log cycles before expanding the allowlist or enabling public enrollment." -ForegroundColor Yellow
+Write-Host "Observe real battle-log cycles before expanding the allowlist or moving any production traffic." -ForegroundColor Yellow
