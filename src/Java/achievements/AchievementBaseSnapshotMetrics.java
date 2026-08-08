@@ -37,7 +37,7 @@ public final class AchievementBaseSnapshotMetrics {
                 + value(metrics, "builder_hero_level_sum");
         metrics.put("home_progress_score", homeProgress);
         metrics.put("builder_progress_score", builderProgress);
-        return Map.copyOf(metrics);
+        return AchievementSpecBaseMetrics.enrich(payload, metrics);
     }
 
     private static long value(Map<String, Long> metrics, String key) {
