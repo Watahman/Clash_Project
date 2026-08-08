@@ -15,7 +15,15 @@ describe('Achievements workspace page', () => {
         expect(document.querySelector('#achievement-json')).not.toBeNull();
         expect(document.querySelector('#achievement-import-submit')?.getAttribute('type')).toBe('submit');
         expect(document.querySelector('#achievement-search')?.getAttribute('type')).toBe('search');
+        expect(document.querySelector('#achievement-import-panel')?.hasAttribute('hidden')).toBe(true);
+        expect(document.querySelector('#achievement-import-toggle')?.getAttribute('aria-expanded')).toBe('false');
         expect([...document.querySelectorAll('button:not([type])')]).toHaveLength(0);
+    });
+
+    it('collapses the large import panel after a successful snapshot save', () => {
+        const source = readFileSync('src/assets/js/pages/achievements.js', 'utf8');
+        expect(source).toContain('setImportPanelOpen(false);');
+        expect(source).toContain("setStatus(successMessage, 'success');");
     });
 
     it('is discoverable from the dashboard', () => {
