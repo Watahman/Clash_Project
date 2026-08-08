@@ -53,19 +53,10 @@ public class SUPABASE_Achievements {
         ensureOwnedAccount(userId, snapshot.playerTag());
 
         Map<String, Long> combinedMetrics = new LinkedHashMap<>(snapshot.metrics());
-        List<HistoricalAchievementMetrics.Snapshot> history = loadHistoricalSnapshots(
-                userId,
-                snapshot.playerTag()
-        );
-        history.add(new HistoricalAchievementMetrics.Snapshot(
-                snapshot.sourceTimestamp(),
-                snapshot.metrics()
-        ));
+        List<HistoricalAchievementMetrics.Snapshot> history = loadHistoricalSnapshots(userId, snapshot.playerTag());
+        history.add(new HistoricalAchievementMetrics.Snapshot(snapshot.sourceTimestamp(), snapshot.metrics()));
         combinedMetrics.putAll(HistoricalAchievementMetrics.extract(history));
 
-        // Importing one base snapshot must not manufacture hundreds of zero rows
-        // for live-profile/CWL/War/Advanced-Stats achievements. Those sources are
-        // reconciled by GET when their real data is available.
         List<AchievementProgress> evaluated = evaluator.evaluate(combinedMetrics).stream()
                 .filter(item -> {
                     String source = AchievementSources.forMetric(item.definition().metric());
@@ -134,24 +125,14 @@ public class SUPABASE_Achievements {
                     : Map.of();
             JsonElement payload = snapshotObject.get("payload");
             if (payload != null && payload.isJsonObject()) {
-                snapshotMetrics.putAll(AchievementBaseSnapshotMetrics.enrich(
-                        payload.getAsJsonObject(),
-                        storedMetrics
-                ));
+                snapshotMetrics.putAll(AchievementBaseSnapshotMetrics.enrich(payload.getAsJsonObject(), storedMetrics));
             } else {
                 snapshotMetrics.putAll(storedMetrics);
             }
-            if (latestSnapshotForResponse.isJsonObject()) {
-                latestSnapshotForResponse.getAsJsonObject().remove("payload");
-            }
+            if (latestSnapshotForResponse.isJsonObject()) latestSnapshotForResponse.getAsJsonObject().remove("payload");
         }
 
-        AchievementMetricCollector.Result collected = metricCollector.collect(
-                userId,
-                playerTag,
-                snapshotMetrics,
-                deepHistory
-        );
+        AchievementMetricCollector.Result collected = metricCollector.collect(userId, playerTag, snapshotMetrics, deepHistory);
         JsonArray achievements = completeAchievementCatalog(progress, collected.metrics());
         boolean persisted = persistObservedProgress(userId, playerTag, progress, achievements, collected.metrics());
 
@@ -186,8 +167,7 @@ public class SUPABASE_Achievements {
                 copyOptional(stored, row, "updated_at");
             }
             String metric = stringValue(row, "metric");
-            boolean availableNow = currentMetrics.containsKey(metric);
-            row.addProperty("source_available", availableNow);
+            row.addProperty("source_available", currentMetrics.containsKey(metric));
             row.addProperty("has_stored_progress", stored != null && longValue(stored, "progress") > 0);
             result.add(row);
         }
@@ -202,9 +182,7 @@ public class SUPABASE_Achievements {
             Map<String, Long> currentMetrics
     ) {
         try {
-            Map<String, JsonObject> storedByKey = storedRowsByKey(
-                    JsonParser.parseString(storedProgressJson).getAsJsonArray()
-            );
+            Map<String, JsonObject> storedByKey = storedRowsByKey(JsonParser.parseString(storedProgressJson).getAsJsonArray());
             JsonArray changed = new JsonArray();
             long now = Instant.now().getEpochSecond();
             String unlockedNow = Instant.now().toString();
@@ -220,11 +198,18 @@ public class SUPABASE_Achievements {
                 long progress = longValue(row, "progress");
                 long target = longValue(row, "target");
                 boolean unlocked = booleanValue(row, "unlocked");
-                boolean changedProgress = stored == null || progress > longValue(stored, "progress");
+
+                // The catalog itself is virtual/read-only. Do not create a DB row
+                // merely because a measurable achievement currently has zero progress.
+                if (stored == null && progress == 0 && !unlocked) continue;
+
+                boolean changedProgress = stored == null
+                        ? progress > 0
+                        : progress > longValue(stored, "progress");
                 boolean changedUnlock = stored == null
                         ? unlocked
                         : unlocked && !booleanValue(stored, "unlocked");
-                boolean changedTarget = stored == null || target != longValue(stored, "target");
+                boolean changedTarget = stored != null && target != longValue(stored, "target");
                 if (!changedProgress && !changedUnlock && !changedTarget) continue;
 
                 JsonObject db = new JsonObject();
@@ -253,11 +238,7 @@ public class SUPABASE_Achievements {
             }
 
             if (changed.isEmpty()) return true;
-            SUPABASE_Client.upsert(
-                    "achievement_progress",
-                    "user_id,player_tag,achievement_key,tier",
-                    changed.toString()
-            );
+            SUPABASE_Client.upsert("achievement_progress", "user_id,player_tag,achievement_key,tier", changed.toString());
             return true;
         } catch (Exception persistenceFailure) {
             System.err.println("[Achievements] Could not persist observed progress: " + persistenceFailure.getMessage());
@@ -290,8 +271,7 @@ public class SUPABASE_Achievements {
     private String stringValue(JsonObject object, String field) {
         JsonElement value = object.get(field);
         return value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isString()
-                ? value.getAsString()
-                : "";
+                ? value.getAsString() : "";
     }
 
     private long longValue(JsonObject object, String field) {
@@ -302,20 +282,13 @@ public class SUPABASE_Achievements {
 
     private boolean booleanValue(JsonObject object, String field) {
         JsonElement value = object.get(field);
-        return value != null
-                && value.isJsonPrimitive()
-                && value.getAsJsonPrimitive().isBoolean()
-                && value.getAsBoolean();
+        return value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isBoolean() && value.getAsBoolean();
     }
 
-    private List<HistoricalAchievementMetrics.Snapshot> loadHistoricalSnapshots(
-            String userId,
-            String playerTag
-    ) throws Exception {
+    private List<HistoricalAchievementMetrics.Snapshot> loadHistoricalSnapshots(String userId, String playerTag) throws Exception {
         String response = SUPABASE_Client.getWithBody(
                 "achievement_base_snapshots",
-                "select=source_timestamp,metrics"
-                        + "&user_id=" + SUPABASE_Client.eq(userId)
+                "select=source_timestamp,metrics&user_id=" + SUPABASE_Client.eq(userId)
                         + "&player_tag=" + SUPABASE_Client.eq(playerTag)
                         + "&order=source_timestamp.asc&limit=250"
         );
@@ -331,39 +304,27 @@ public class SUPABASE_Achievements {
     }
 
     private void ensureOwnedAccount(String userId, String playerTag) throws Exception {
-        String result = SUPABASE_Client.getWithBody(
-                "users",
-                "select=accounts&id=" + SUPABASE_Client.eq(userId) + "&limit=1"
-        );
+        String result = SUPABASE_Client.getWithBody("users", "select=accounts&id=" + SUPABASE_Client.eq(userId) + "&limit=1");
         JsonArray users = JsonParser.parseString(result).getAsJsonArray();
         if (users.isEmpty()) throw new HttpException(404, "{\"error\":\"Gebruiker niet gevonden\"}");
 
         JsonElement accounts = users.get(0).getAsJsonObject().get("accounts");
         if (!containsPlayerTag(accounts, playerTag)) {
-            throw new HttpException(
-                    403,
-                    "{\"error\":\"Deze speler is niet als geverifieerd account gekoppeld\",\"code\":\"ACCOUNT_NOT_LINKED\"}"
-            );
+            throw new HttpException(403, "{\"error\":\"Deze speler is niet als geverifieerd account gekoppeld\",\"code\":\"ACCOUNT_NOT_LINKED\"}");
         }
     }
 
     private boolean containsPlayerTag(JsonElement element, String playerTag) {
         if (element == null || element.isJsonNull()) return false;
         if (element.isJsonPrimitive() && element.getAsJsonPrimitive().isString()) {
-            try {
-                return playerTag.equals(CacheKeys.requireValidTag(element.getAsString()));
-            } catch (IllegalArgumentException ignored) {
-                return false;
-            }
+            try { return playerTag.equals(CacheKeys.requireValidTag(element.getAsString())); }
+            catch (IllegalArgumentException ignored) { return false; }
         }
         if (element.isJsonArray()) {
-            for (JsonElement child : element.getAsJsonArray()) {
-                if (containsPlayerTag(child, playerTag)) return true;
-            }
+            for (JsonElement child : element.getAsJsonArray()) if (containsPlayerTag(child, playerTag)) return true;
             return false;
         }
         if (!element.isJsonObject()) return false;
-
         JsonObject object = element.getAsJsonObject();
         for (String key : List.of("tag", "playerTag", "accountTag", "clashTag")) {
             if (object.has(key) && containsPlayerTag(object.get(key), playerTag)) return true;
@@ -409,18 +370,10 @@ public class SUPABASE_Achievements {
     private JsonObject historySummaryJson(Map<String, Long> metrics) {
         JsonObject result = new JsonObject();
         for (String key : List.of(
-                "snapshot_import_count",
-                "tracked_days",
-                "tracked_progress_intervals",
-                "tracked_home_building_levels",
-                "tracked_home_wall_levels",
-                "tracked_home_hero_levels",
-                "tracked_equipment_levels",
-                "tracked_army_levels",
-                "tracked_builder_building_levels",
-                "tracked_cosmetics_added",
-                "tracked_active_upgrade_observations",
-                "tracked_largest_progress_jump"
+                "snapshot_import_count", "tracked_days", "tracked_progress_intervals",
+                "tracked_home_building_levels", "tracked_home_wall_levels", "tracked_home_hero_levels",
+                "tracked_equipment_levels", "tracked_army_levels", "tracked_builder_building_levels",
+                "tracked_cosmetics_added", "tracked_active_upgrade_observations", "tracked_largest_progress_jump"
         )) result.addProperty(key, Math.max(0, metrics.getOrDefault(key, 0L)));
         return result;
     }
