@@ -1,8 +1,10 @@
 package Java;
 
+import Java.achievements.AchievementBaseSnapshotMetrics;
 import Java.achievements.AchievementEvaluator;
 import Java.achievements.AchievementMetricCollector;
 import Java.achievements.AchievementProgress;
+import Java.achievements.AchievementSources;
 import Java.achievements.BaseDataSnapshot;
 import Java.achievements.HistoricalAchievementMetrics;
 import Java.cache.CacheKeys;
@@ -61,7 +63,16 @@ public class SUPABASE_Achievements {
         ));
         combinedMetrics.putAll(HistoricalAchievementMetrics.extract(history));
 
-        List<AchievementProgress> evaluated = evaluator.evaluate(combinedMetrics);
+        // Importing one base snapshot must not manufacture hundreds of zero rows
+        // for live-profile/CWL/War/Advanced-Stats achievements. Those sources are
+        // reconciled by GET when their real data is available.
+        List<AchievementProgress> evaluated = evaluator.evaluate(combinedMetrics).stream()
+                .filter(item -> {
+                    String source = AchievementSources.forMetric(item.definition().metric());
+                    return AchievementSources.BASE_DATA.equals(source)
+                            || AchievementSources.BASE_HISTORY.equals(source);
+                })
+                .toList();
         JsonArray progressJson = evaluator.toJson(evaluated);
         long unlockedCount = evaluated.stream().filter(AchievementProgress::unlocked).count();
 
@@ -108,15 +119,31 @@ public class SUPABASE_Achievements {
         );
         String snapshots = SUPABASE_Client.getWithBody(
                 "achievement_base_snapshots",
-                "select=source_timestamp,imported_at,checksum,metrics"
+                "select=source_timestamp,imported_at,checksum,metrics,payload"
                         + "&" + userFilter + "&" + tagFilter + "&order=source_timestamp.desc&limit=1"
         );
 
         JsonElement latestSnapshot = firstOrNull(snapshots);
         Map<String, Long> snapshotMetrics = new LinkedHashMap<>();
+        JsonElement latestSnapshotForResponse = latestSnapshot.deepCopy();
         if (latestSnapshot.isJsonObject()) {
-            JsonElement metrics = latestSnapshot.getAsJsonObject().get("metrics");
-            if (metrics != null && metrics.isJsonObject()) snapshotMetrics.putAll(numericMap(metrics.getAsJsonObject()));
+            JsonObject snapshotObject = latestSnapshot.getAsJsonObject();
+            JsonElement metrics = snapshotObject.get("metrics");
+            Map<String, Long> storedMetrics = metrics != null && metrics.isJsonObject()
+                    ? numericMap(metrics.getAsJsonObject())
+                    : Map.of();
+            JsonElement payload = snapshotObject.get("payload");
+            if (payload != null && payload.isJsonObject()) {
+                snapshotMetrics.putAll(AchievementBaseSnapshotMetrics.enrich(
+                        payload.getAsJsonObject(),
+                        storedMetrics
+                ));
+            } else {
+                snapshotMetrics.putAll(storedMetrics);
+            }
+            if (latestSnapshotForResponse.isJsonObject()) {
+                latestSnapshotForResponse.getAsJsonObject().remove("payload");
+            }
         }
 
         AchievementMetricCollector.Result collected = metricCollector.collect(
@@ -133,7 +160,7 @@ public class SUPABASE_Achievements {
         response.addProperty("deepHistory", deepHistory);
         response.addProperty("progressPersisted", persisted);
         response.add("achievements", achievements);
-        response.add("latestSnapshot", latestSnapshot);
+        response.add("latestSnapshot", latestSnapshotForResponse);
         response.add("sources", collected.sources());
         response.add("history", historySummaryJson(collected.metrics()));
         utils.sendJsonResponse(exchange, response.toString(), 200);
