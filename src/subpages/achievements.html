@@ -5,7 +5,7 @@
     <meta name="robots" content="noindex">
     <script src="../assets/js/Data/analytics.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Import your Clash of Clans base data and track advanced ClashPanel achievements.">
+    <meta name="description" content="Track hundreds of ClashPanel achievements across your live profile, base progress, wars, CWL, Advanced Stats and Clan Family activity.">
     <link rel="stylesheet" href="../assets/css/workspace-loading.css">
     <script src="../assets/js/shell/workspace-bootstrap.js"></script>
     <title>Achievements · ClashPanel</title>
@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="../assets/css/profile-overlay.css">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
     <link rel="stylesheet" href="../assets/css/achievements.css">
+    <link rel="stylesheet" href="../assets/css/achievements-expanded.css">
     <script src="../assets/js/Data/runtime-config.js"></script>
     <script type="module" src="../assets/js/shell/workspace-shell.js"></script>
     <script type="module" src="../assets/js/pages/achievements.js"></script>
@@ -26,7 +27,7 @@
         <div class="achievement-hero-copy">
             <p class="page-kicker" data-i18n="achievements.kicker">Player progression</p>
             <h1 data-i18n="achievements.title">Advanced achievements</h1>
-            <p data-i18n="achievements.intro">Turn your live base data into detailed progression, collection and mastery achievements that the normal player profile cannot show.</p>
+            <p data-i18n="achievements.intro">Track hundreds of achievements across your live Clash profile, base progress, wars, CWL, Advanced Stats and ClashPanel activity.</p>
         </div>
         <div class="achievement-account-control">
             <label for="achievement-account" data-i18n="achievements.account">Clash account</label>
@@ -34,7 +35,7 @@
                 <select id="achievement-account" data-i18n-aria-label="achievements.account" aria-label="Clash account"></select>
                 <button id="achievement-refresh" class="achievement-button achievement-button-secondary" type="button" data-i18n="achievements.refresh">Refresh</button>
             </div>
-            <small data-i18n="achievements.verifiedOnly">Only verified accounts linked to your ClashPanel profile can be imported.</small>
+            <small data-i18n="achievements.verifiedOnly">Achievements are private and evaluated only for verified accounts linked to your ClashPanel profile.</small>
         </div>
     </header>
 
@@ -62,23 +63,35 @@
             <small data-i18n="achievements.unlocked">Unlocked</small>
         </article>
         <article class="achievement-stat-card">
-            <span data-i18n="achievements.families">Families</span>
+            <span data-i18n="achievements.families">Achievements</span>
             <strong id="achievement-completed">0/0</strong>
             <small data-i18n="achievements.fullyCompleted">Fully completed</small>
         </article>
         <article class="achievement-stat-card achievement-stat-card-wide">
-            <span data-i18n="achievements.latestSnapshot">Latest snapshot</span>
+            <span data-i18n="achievements.latestSnapshot">Base-data snapshot</span>
             <strong id="achievement-last-import" data-i18n="achievements.notImported">Not imported yet</strong>
-            <small data-i18n="achievements.historyHint">Import again later to unlock historical progress.</small>
+            <small data-i18n="achievements.historyHint">Optional: import base data again later to build snapshot-history achievements.</small>
         </article>
+    </section>
+
+    <section class="achievement-source-overview" aria-labelledby="achievement-source-title">
+        <div class="achievement-source-heading">
+            <div>
+                <p class="page-kicker">Data sources</p>
+                <h2 id="achievement-source-title">How your achievements are measured</h2>
+                <p>ClashPanel combines several independent sources. If a source is missing, those achievements stay waiting instead of being treated as zero progress.</p>
+            </div>
+            <strong id="achievement-source-summary"></strong>
+        </div>
+        <div id="achievement-source-list" class="achievement-source-list"></div>
     </section>
 
     <section class="achievement-import-shell" aria-labelledby="achievement-import-title">
         <div class="achievement-import-heading">
             <div>
-                <p class="page-kicker" data-i18n="achievements.baseData">Base data</p>
-                <h2 id="achievement-import-title" data-i18n="achievements.importTitle">Import a new snapshot</h2>
-                <p data-i18n="achievements.importIntro">Copy the JSON shown in the Clash of Clans settings and paste it here. Positions are not required; only progression and collection data is analyzed.</p>
+                <p class="page-kicker" data-i18n="achievements.baseData">Optional base data</p>
+                <h2 id="achievement-import-title" data-i18n="achievements.importTitle">Import a base snapshot</h2>
+                <p data-i18n="achievements.importIntro">Base data unlocks detailed village, collection and long-term snapshot achievements. The rest of the achievement library works without this import.</p>
             </div>
             <button id="achievement-import-toggle" class="achievement-button achievement-button-primary" type="button" aria-expanded="false" aria-controls="achievement-import-panel" data-i18n="achievements.importButton">Import base data</button>
         </div>
@@ -122,7 +135,7 @@
             <div>
                 <p class="page-kicker" data-i18n="achievements.collection">Collection</p>
                 <h2 id="achievement-library-title" data-i18n="achievements.libraryTitle">Achievement library</h2>
-                <p id="achievement-results-count">0 achievement families</p>
+                <p id="achievement-results-count">0 achievements</p>
             </div>
             <div class="achievement-filter-grid">
                 <label class="achievement-search-field">
@@ -150,19 +163,24 @@
                         <option value="locked" data-i18n="achievements.notStarted">Not started</option>
                     </select>
                 </label>
+                <label>
+                    <span class="sr-only">Data source</span>
+                    <select id="achievement-source" aria-label="Data source"></select>
+                </label>
             </div>
         </header>
 
         <div id="achievement-empty-state" class="achievement-empty-state">
             <span aria-hidden="true">◇</span>
-            <h2 data-i18n="achievements.importEmptyTitle">Import your base data to begin</h2>
-            <p data-i18n="achievements.importEmptyText">Paste the JSON copied from the in-game settings. ClashPanel will calculate your first achievement progress immediately.</p>
+            <h2 data-i18n="achievements.linkAccountTitle">Link a Clash account first</h2>
+            <p data-i18n="achievements.linkAccountText">Achievements are stored per verified Clash account. Open your profile to link one.</p>
             <div>
                 <button class="achievement-button achievement-button-primary" type="button" data-empty-import data-i18n="achievements.importButton">Import base data</button>
                 <button class="achievement-button achievement-button-secondary" type="button" data-empty-profile data-i18n="achievements.openProfile">Open profile</button>
             </div>
         </div>
         <div id="achievement-grid" class="achievement-grid" hidden></div>
+        <button id="achievement-load-more" class="achievement-button achievement-button-secondary achievement-load-more" type="button" hidden>Show more achievements</button>
     </section>
 </main>
 <div class="profile-placeholder"></div>
