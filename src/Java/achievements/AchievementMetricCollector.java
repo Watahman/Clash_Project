@@ -1,6 +1,7 @@
 package Java.achievements;
 
 import Java.Config;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.util.LinkedHashMap;
@@ -75,21 +76,25 @@ public final class AchievementMetricCollector {
                 AchievementSources.CLAN_FAMILY,
                 fast.clashPanelAvailable(),
                 fast.clashPanelAvailable()
-                        ? "Clan Family activity loaded; zero progress is valid when you have not used it yet."
+                        ? "Clan Family activity source is available."
                         : "Clan Family metrics could not be loaded."
         );
+
+        // Advanced Stats remains an internal feature source, but the original v2
+        // achievement spec does not invent extra Advanced-Stats-only families.
         source(
                 sources,
                 AchievementSources.ADVANCED_STATS,
                 fast.advancedStatsAvailable(),
                 fast.advancedStatsAvailable()
                         ? "Advanced Stats tracking totals loaded."
-                        : "Start Advanced Stats to build tracked battle achievements."
+                        : "Advanced Stats tracking is not active for this account."
         );
 
         CacheRead cached = readCachedHistory(userId, playerTag);
         metrics.putAll(cached.metrics());
-        boolean cachedWar = hasMetricPrefix(cached.metrics(), "war_current_");
+        boolean cachedWar = hasMetricPrefix(cached.metrics(), "war_current_")
+                || hasMetricPrefix(cached.metrics(), "war_recorded_");
         boolean cachedCwl = hasMetricPrefix(cached.metrics(), "cwl_");
         String clanTag = fast.clanTag();
 
@@ -106,7 +111,8 @@ public final class AchievementMetricCollector {
             AchievementHistoryCollector.RefreshResult refresh = historyCollector.refresh(userId, playerTag, clanTag);
             CacheRead refreshed = readCachedHistory(userId, playerTag);
             metrics.putAll(refreshed.metrics());
-            cachedWar = cachedWar || hasMetricPrefix(refreshed.metrics(), "war_current_");
+            cachedWar = cachedWar || hasMetricPrefix(refreshed.metrics(), "war_current_")
+                    || hasMetricPrefix(refreshed.metrics(), "war_recorded_");
             cachedCwl = cachedCwl || hasMetricPrefix(refreshed.metrics(), "cwl_");
 
             boolean warAvailable = refresh.warAvailable() || cachedWar;
@@ -137,7 +143,7 @@ public final class AchievementMetricCollector {
                     AchievementSources.WAR,
                     cachedWar,
                     cachedWar
-                            ? "Cached regular-war achievements loaded; the background refresh checks the current war."
+                            ? "Cached regular-war evidence loaded; the background refresh checks only new/current records."
                             : "Regular-war history will be checked after the fast first render."
             );
             source(
@@ -150,18 +156,20 @@ public final class AchievementMetricCollector {
             );
         }
 
-        collectMixedMetrics(metrics);
-        boolean mixedAvailable = metrics.keySet().stream().anyMatch(key -> key.startsWith("fun_"));
-        source(
-                sources,
-                AchievementSources.MIXED,
-                mixedAvailable,
-                mixedAvailable
-                        ? "Cross-source signature achievements calculated from the data currently available."
-                        : "More data sources are needed for signature achievements."
-        );
+        // v2 sources that are present in the specification but do not yet have a
+        // trustworthy evaluator in this branch stay explicitly unavailable.
+        source(sources, AchievementSources.RAID_HISTORY, false,
+                "Raid-history achievements are in the v2 catalog but are not evaluated until normalized raid evidence is connected.");
+        source(sources, AchievementSources.LEGEND_HISTORY, false,
+                "Legend/Ranked history is in the v2 catalog but its historical provider is not connected yet.");
+        source(sources, AchievementSources.CLASHKING_HISTORY, false,
+                "ClashKing-backed history remains UNKNOWN until its normalized evidence is connected.");
+        source(sources, AchievementSources.CLAN_PROFILE, false,
+                "Clan-level achievements remain UNKNOWN until the clan evaluator loads the required clan evidence.");
+        source(sources, AchievementSources.MIXED, false,
+                "Combination achievements remain UNKNOWN until every required source is available.");
 
-        return new Result(Map.copyOf(metrics), sources);
+        return new Result(Map.copyOf(metrics), sources, fast.officialAchievements());
     }
 
     private CacheRead readCachedHistory(String userId, String playerTag) {
@@ -176,19 +184,6 @@ public final class AchievementMetricCollector {
         return metrics.keySet().stream().anyMatch(key -> key.startsWith(prefix));
     }
 
-    private static void collectMixedMetrics(Map<String, Long> metrics) {
-        sumIfPresent(metrics, "fun_attack_defense_total", "profile_attack_wins", "profile_defense_wins");
-        minIfPresent(metrics, "fun_support_balance", "profile_donations", "profile_donations_received");
-        minIfPresent(metrics, "fun_dual_trophy_score", "profile_best_trophies", "profile_best_builder_trophies");
-        sumIfPresent(metrics, "fun_social_score", "clashpanel_friends_count", "clashpanel_group_memberships", "clashpanel_polls_answered");
-        weightedIfPresent(metrics, "fun_planner_score", "clashpanel_plans_owned", 5, "clashpanel_plans_joined", 1, "war_assignment_count", 1);
-        copyIfPresent(metrics, "fun_cwl_cleaner", "cwl_perfect_attacks");
-        copyIfPresent(metrics, "fun_war_machine", "profile_war_stars");
-        copyIfPresent(metrics, "fun_account_army", "clashpanel_account_count");
-        sumIfPresent(metrics, "fun_family_builder", "family_group_memberships", "family_clans_linked", "family_polls_created");
-        copyIfPresent(metrics, "fun_achievement_hunter", "profile_native_achievement_stars");
-    }
-
     private static void source(JsonObject sources, String key, boolean available, String detail) {
         JsonObject item = new JsonObject();
         item.addProperty("available", available);
@@ -196,46 +191,17 @@ public final class AchievementMetricCollector {
         sources.add(key, item);
     }
 
-    private static void put(Map<String, Long> metrics, String key, long value) {
-        metrics.put(key, Math.max(0L, value));
-    }
+    public record Result(Map<String, Long> metrics, JsonObject sources, JsonArray officialAchievements) {
+        public Result {
+            metrics = Map.copyOf(metrics == null ? Map.of() : metrics);
+            sources = sources == null ? new JsonObject() : sources.deepCopy();
+            officialAchievements = officialAchievements == null ? new JsonArray() : officialAchievements.deepCopy();
+        }
 
-    private static void copyIfPresent(Map<String, Long> metrics, String output, String input) {
-        if (metrics.containsKey(input)) put(metrics, output, metrics.get(input));
-    }
-
-    private static void minIfPresent(Map<String, Long> metrics, String output, String left, String right) {
-        if (metrics.containsKey(left) && metrics.containsKey(right)) {
-            put(metrics, output, Math.min(metrics.get(left), metrics.get(right)));
+        public Result(Map<String, Long> metrics, JsonObject sources) {
+            this(metrics, sources, new JsonArray());
         }
     }
 
-    private static void sumIfPresent(Map<String, Long> metrics, String output, String... inputs) {
-        long sum = 0;
-        for (String input : inputs) {
-            if (!metrics.containsKey(input)) return;
-            sum += metrics.get(input);
-        }
-        put(metrics, output, sum);
-    }
-
-    private static void weightedIfPresent(
-            Map<String, Long> metrics,
-            String output,
-            String first,
-            long firstWeight,
-            String second,
-            long secondWeight,
-            String third,
-            long thirdWeight
-    ) {
-        if (!metrics.containsKey(first) || !metrics.containsKey(second) || !metrics.containsKey(third)) return;
-        put(metrics, output,
-                metrics.get(first) * firstWeight
-                        + metrics.get(second) * secondWeight
-                        + metrics.get(third) * thirdWeight);
-    }
-
-    public record Result(Map<String, Long> metrics, JsonObject sources) {}
     private record CacheRead(Map<String, Long> metrics, boolean available) {}
 }
