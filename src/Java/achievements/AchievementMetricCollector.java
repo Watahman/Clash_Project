@@ -54,11 +54,15 @@ public final class AchievementMetricCollector {
 
         try {
             collectClashPanelUsage(userId, metrics);
-            source(sources, AchievementSources.CLASHPANEL, true, "ClashPanel usage data loaded.");
-            source(sources, AchievementSources.CLAN_FAMILY,
-                    metrics.getOrDefault("family_group_memberships", 0L) > 0
-                            || metrics.getOrDefault("family_groups_owned", 0L) > 0,
-                    "Clan Family activity is measured from ClashPanel usage.");
+            source(sources, AchievementSources.CLASHPANEL, true, "ClashPanel profile-wide usage data loaded.");
+            boolean hasFamilyActivity = metrics.getOrDefault("family_group_memberships", 0L) > 0
+                    || metrics.getOrDefault("family_groups_owned", 0L) > 0
+                    || metrics.getOrDefault("family_polls_created", 0L) > 0
+                    || metrics.getOrDefault("family_polls_answered", 0L) > 0;
+            source(sources, AchievementSources.CLAN_FAMILY, true,
+                    hasFamilyActivity
+                            ? "Clan Family profile-wide activity loaded."
+                            : "Clan Family data loaded; no activity recorded yet.");
         } catch (Exception unavailable) {
             source(sources, AchievementSources.CLASHPANEL, false, "ClashPanel usage metrics could not be loaded.");
             source(sources, AchievementSources.CLAN_FAMILY, false, "Clan Family metrics could not be loaded.");
@@ -87,10 +91,10 @@ public final class AchievementMetricCollector {
         if (includeDeepHistory && !clanTag.isBlank()) {
             try {
                 int seasons = collectCwlHistory(clanTag, playerTag, metrics);
-                source(sources, AchievementSources.CWL, seasons > 0,
+                source(sources, AchievementSources.CWL, true,
                         seasons > 0
                                 ? "Available CWL history loaded for the current clan."
-                                : "No matching CWL history was found for this player in the current clan.");
+                                : "CWL history scan completed; no matching season participation was found in the current clan history.");
             } catch (Exception unavailable) {
                 source(sources, AchievementSources.CWL, false, "CWL history could not be loaded.");
             }
@@ -114,8 +118,6 @@ public final class AchievementMetricCollector {
         String raw = utils.clashGetFreshValue("/players/" + encoded, CachePolicy.PLAYER_INFO);
         JsonObject player = JsonParser.parseString(raw).getAsJsonObject();
 
-        // A successful profile read means known live-profile achievements are
-        // measurable even when a unit/achievement is still locked or at zero.
         initializeLiveCatalogDefaults(metrics);
 
         put(metrics, "profile_town_hall", number(player, "townHallLevel"));
