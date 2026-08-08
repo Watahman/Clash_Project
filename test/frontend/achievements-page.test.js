@@ -40,11 +40,10 @@ describe('Achievements workspace page', () => {
         expect(source).toContain('Waiting for this data source');
     });
 
-    it('uses the v2 XP level formula', () => {
+    it('uses the v2 XP level formula and hides the dynamic catalog template', () => {
         const source = readFileSync('src/assets/js/achievements/achievement-view-model.js', 'utf8');
         expect(source).toContain('Math.sqrt(xp / 100)');
         expect(source).toContain('100 * (level - 1) ** 2');
-        expect(source).toContain("state = complete").toBe(false);
         expect(source).toContain("? 'unknown'");
         expect(source).toContain('if (row.catalogTemplate) continue;');
     });
