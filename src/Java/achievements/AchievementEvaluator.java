@@ -31,6 +31,7 @@ public final class AchievementEvaluator {
             item.addProperty("tier", definition.tier());
             item.addProperty("xp", definition.xp());
             item.addProperty("metric", definition.metric());
+            item.addProperty("source", AchievementSources.forMetric(definition.metric()));
             item.addProperty("progress", value.progress());
             item.addProperty("target", definition.target());
             item.addProperty("unlocked", value.unlocked());
