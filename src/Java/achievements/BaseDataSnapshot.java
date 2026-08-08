@@ -50,7 +50,10 @@ public record BaseDataSnapshot(
         }
 
         JsonObject payload = input.deepCopy();
-        Map<String, Long> metrics = BaseDataMetrics.extract(payload);
+        Map<String, Long> metrics = AchievementBaseSnapshotMetrics.enrich(
+                payload,
+                BaseDataMetrics.extract(payload)
+        );
         return new BaseDataSnapshot(playerTag, timestamp, payload, metrics, sha256(payload.toString()));
     }
 
