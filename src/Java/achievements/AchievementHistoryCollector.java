@@ -33,6 +33,7 @@ public final class AchievementHistoryCollector {
     ) {}
 
     private static final int CWL_BATCH_SIZE = 4;
+    private static final int PERFECT_CWL_ATTACKS = 7;
     private final API_Utils utils;
     private final AchievementSourceCache cache = new AchievementSourceCache();
     private final HistoricalCwlService cwlService;
@@ -239,14 +240,13 @@ public final class AchievementHistoryCollector {
         long twos = 0;
         long perfectAttacks = 0;
         long uphitTriples = 0;
-        long clanWins = 0;
         boolean allAttacksPerfect = true;
 
         for (HistoricalCwlSeason.War war : season.wars()) {
             HistoricalCwlSeason.Member member = findMember(war.clan(), playerTag);
             if (member == null) continue;
             warsPlayed++;
-            if ("win".equalsIgnoreCase(war.result())) clanWins++;
+            if (member.attacks().isEmpty()) allAttacksPerfect = false;
             for (HistoricalCwlSeason.Attack attack : member.attacks()) {
                 attacks++;
                 stars += Math.max(0, attack.stars());
@@ -262,6 +262,20 @@ public final class AchievementHistoryCollector {
         }
 
         boolean playedSeason = rostered || warsPlayed > 0;
+        long clanWins = playedSeason && season.record() != null
+                ? Math.max(0, season.record().wins())
+                : 0;
+        boolean perfectSeason = playedSeason
+                && season.warDetailsComplete()
+                && attacks == PERFECT_CWL_ATTACKS
+                && triples == PERFECT_CWL_ATTACKS
+                && stars == PERFECT_CWL_ATTACKS * 3L
+                && allAttacksPerfect;
+        boolean podium = playedSeason
+                && season.position() != null
+                && season.position() > 0
+                && season.position() <= 3;
+
         metrics.put("cwl_seasons_played", playedSeason ? 1L : 0L);
         metrics.put("cwl_wars_played", warsPlayed);
         metrics.put("cwl_attacks", attacks);
@@ -270,9 +284,9 @@ public final class AchievementHistoryCollector {
         metrics.put("cwl_two_stars", twos);
         metrics.put("cwl_perfect_attacks", perfectAttacks);
         metrics.put("cwl_uphit_three_stars", uphitTriples);
-        metrics.put("cwl_perfect_seasons", playedSeason && attacks > 0 && allAttacksPerfect ? 1L : 0L);
-        metrics.put("cwl_clan_wins", playedSeason ? clanWins : 0L);
-        metrics.put("cwl_top3_finishes", playedSeason && season.position() != null && season.position() <= 3 ? 1L : 0L);
+        metrics.put("cwl_perfect_seasons", perfectSeason ? 1L : 0L);
+        metrics.put("cwl_clan_wins", clanWins);
+        metrics.put("cwl_top3_finishes", podium ? 1L : 0L);
         metrics.put("fun_cwl_cleaner", perfectAttacks);
         return Map.copyOf(metrics);
     }
