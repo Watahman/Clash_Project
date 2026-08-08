@@ -6,7 +6,7 @@ import worker from '../../worker/index.js';
 const documentFor = path => new JSDOM(readFileSync(path, 'utf8')).window.document;
 
 describe('Achievements workspace page', () => {
-    it('contains an accessible optional import and expanded filter workflow', () => {
+    it('contains an accessible optional import and v2 filter workflow', () => {
         const document = documentFor('src/subpages/achievements.html');
 
         expect(document.title).toContain('Achievements');
@@ -22,18 +22,31 @@ describe('Achievements workspace page', () => {
         expect(document.querySelector('#achievement-import-toggle')?.getAttribute('aria-expanded')).toBe('false');
         expect(document.querySelector('.achievement-import-heading p:last-child')?.textContent)
             .toContain('rest of the achievement library works without this import');
+        expect(document.querySelector('#achievement-rarity option[value="uncommon"]')).not.toBeNull();
+        expect(document.querySelector('#achievement-rarity option[value="mythic"]')).not.toBeNull();
+        expect(document.querySelector('#achievement-status option[value="unknown"]')).not.toBeNull();
         expect([...document.querySelectorAll('button:not([type])')]).toHaveLength(0);
     });
 
-    it('does not model base-data import as the only achievement source', () => {
+    it('keeps unavailable sources separate from zero progress', () => {
         const source = readFileSync('src/assets/js/pages/achievements.js', 'utf8');
         expect(source).toContain("'live_profile'");
-        expect(source).toContain("'advanced_stats'");
         expect(source).toContain("'cwl_history'");
-        expect(source).toContain("'clashpanel'");
-        expect(source).toContain("'clan_family'");
-        expect(source).toContain('sourceAvailable');
+        expect(source).toContain("'raid_history'");
+        expect(source).toContain("'legend_history'");
+        expect(source).toContain("'clashking_history'");
+        expect(source).toContain("'clan_profile'");
+        expect(source).toContain("family.state === 'unknown'");
         expect(source).toContain('Waiting for this data source');
+    });
+
+    it('uses the v2 XP level formula', () => {
+        const source = readFileSync('src/assets/js/achievements/achievement-view-model.js', 'utf8');
+        expect(source).toContain('Math.sqrt(xp / 100)');
+        expect(source).toContain('100 * (level - 1) ** 2');
+        expect(source).toContain("state = complete").toBe(false);
+        expect(source).toContain("? 'unknown'");
+        expect(source).toContain('if (row.catalogTemplate) continue;');
     });
 
     it('loads expensive CWL history after the fast first render', () => {
