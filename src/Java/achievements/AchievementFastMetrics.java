@@ -78,7 +78,9 @@ public final class AchievementFastMetrics {
                     ? parsed.getAsJsonObject()
                     : new JsonObject();
             statsAvailable = bool(response, "available");
-            mergeNumeric(metrics, object(response.get("metrics")));
+            if (statsAvailable) {
+                mergeNumeric(metrics, object(response.get("metrics")));
+            }
         } catch (Exception error) {
             statsError = errorCode(error);
         }
