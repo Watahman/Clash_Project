@@ -11,7 +11,8 @@ describe('Advanced Stats workspace page', () => {
 
         expect(document.title).toContain('Advanced Stats');
         expect(document.querySelector('meta[name="robots"]')?.content).toContain('noindex');
-        expect(document.body.dataset.workspacePage).toBe('advancedStats');
+        expect(document.body.dataset.workspacePage).toBe('dashboard');
+        expect(document.body.dataset.advancedStatsPage).toBe('true');
         expect(document.querySelector('#advanced-stats-account')).not.toBeNull();
         expect(document.querySelector('#advanced-stats-start')?.getAttribute('type')).toBe('button');
         expect(document.querySelector('#advanced-stats-periods [data-period="7d"]')).not.toBeNull();
@@ -57,6 +58,7 @@ describe('Advanced Stats workspace page', () => {
         expect(source).toContain("const ADVANCED_STATS_PATH = '/app/advanced-stats'");
         expect(source).toContain('data-workspace-nav');
         expect(source).toContain('nav.advancedStats');
+        expect(source).toContain('removeAttribute(\'aria-current\')');
     });
 
     it('serves the clean private route through the worker', async () => {
