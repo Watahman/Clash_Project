@@ -37,3 +37,7 @@ ADVANCED_STATS_DEGRADED_THRESHOLD: "3"
 # SUPABASE_SERVICE_ROLE_KEY
 # API_PROXY_SECRET
 # ADVANCED_STATS_SCHEDULER_SECRET
+
+# Phase 8 preview-only Worker variables such as DISABLE_CANONICAL_REDIRECT and
+# UPSTREAM_ORIGIN_OVERRIDE belong in wrangler.phase8-preview.jsonc only.
+# Do not add those preview overrides to production Cloud Run configuration.
