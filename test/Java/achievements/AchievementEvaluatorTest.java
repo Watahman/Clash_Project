@@ -28,6 +28,16 @@ class AchievementEvaluatorTest {
     }
 
     @Test
+    void exposesEntireCatalogAtZeroProgress() {
+        AchievementEvaluator evaluator = new AchievementEvaluator();
+        var result = evaluator.evaluate(Map.of());
+
+        assertEquals(AchievementCatalog.definitions().size(), result.size());
+        assertTrue(result.stream().allMatch(item -> item.progress() == 0));
+        assertTrue(result.stream().noneMatch(AchievementProgress::unlocked));
+    }
+
+    @Test
     void exposesCurrentHistoricalAndBattleAchievementCatalog() {
         Set<String> familyKeys = AchievementCatalog.definitions().stream()
                 .map(AchievementDefinition::familyKey)
