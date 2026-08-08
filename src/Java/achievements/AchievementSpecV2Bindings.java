@@ -84,7 +84,6 @@ public final class AchievementSpecV2Bindings {
             case "BASE_WALL_LEVELS_GAINED" -> gte("tracked_home_wall_levels");
             case "BASE_BB_WALL_LEVELS_GAINED" -> gte("tracked_builder_wall_levels");
             case "BASE_HELPER_PROGRESS" -> gte("tracked_helper_levels");
-            case "COL_COSMETIC_GROWTH" -> gte("tracked_cosmetics_added");
 
             case "BASE_HELPER_LEVEL_SUM" -> gte("helper_level_sum");
             case "BASE_HELPERS_UNLOCKED" -> gte("helper_distinct_count");
