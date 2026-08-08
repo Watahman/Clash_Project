@@ -143,23 +143,28 @@ $generatedConfigPath = Join-Path (Get-Location) ".wrangler.phase8-preview.genera
 $generatedConfig = $templateConfig.Replace("__PHASE8_CANDIDATE_URL__", $candidateUrl)
 [System.IO.File]::WriteAllText($generatedConfigPath, $generatedConfig, (New-Object System.Text.UTF8Encoding($false)))
 
-if ($PreflightOnly) {
-    Remove-Item $generatedConfigPath -Force -ErrorAction SilentlyContinue
-    $proxySecret = $null
-    Write-Host "Phase 8 preview preflight passed." -ForegroundColor Green
-    Write-Host "  Tagged backend candidate: found"
-    Write-Host "  Normal production traffic: unchanged"
-    Write-Host "  Existing proxy credential: resolved without guessing its Secret Manager name"
-    Write-Host "  Local Wrangler: available and authenticated"
-    Write-Host "  Frontend build: passed"
-    Write-Host "  Cloudflare deploy: NOT performed (-PreflightOnly)"
-    exit 0
-}
-
 $tempSecretsFile = Join-Path ([System.IO.Path]::GetTempPath()) ("clashpanel-phase8-secrets-" + [Guid]::NewGuid().ToString("N") + ".json")
 try {
     $secretJson = @{ API_PROXY_SECRET = $proxySecret } | ConvertTo-Json -Compress
     [System.IO.File]::WriteAllText($tempSecretsFile, $secretJson, (New-Object System.Text.UTF8Encoding($false)))
+
+    if ($PreflightOnly) {
+        Write-Host "Validating Wrangler config/bundle without uploading..." -ForegroundColor Cyan
+        Run-NativeChecked `
+            -Executable $wranglerExecutable `
+            -Arguments @("deploy", "--dry-run", "--config", $generatedConfigPath, "--secrets-file", $tempSecretsFile) `
+            -FailureMessage "Wrangler Phase 8 dry-run validation failed"
+
+        Write-Host "Phase 8 preview preflight passed." -ForegroundColor Green
+        Write-Host "  Tagged backend candidate: found"
+        Write-Host "  Normal production traffic: unchanged"
+        Write-Host "  Existing proxy credential: resolved without guessing its Secret Manager name"
+        Write-Host "  Local Wrangler: available and authenticated"
+        Write-Host "  Frontend build: passed"
+        Write-Host "  Wrangler config/bundle dry-run: passed"
+        Write-Host "  Cloudflare deploy: NOT performed (-PreflightOnly)"
+        return
+    }
 
     Write-Host "Deploying isolated workers.dev preview against $candidateUrl ..." -ForegroundColor Cyan
     Run-NativeChecked `
@@ -170,6 +175,10 @@ try {
     Remove-Item $tempSecretsFile -Force -ErrorAction SilentlyContinue
     Remove-Item $generatedConfigPath -Force -ErrorAction SilentlyContinue
     $proxySecret = $null
+}
+
+if ($PreflightOnly) {
+    exit 0
 }
 
 Write-Host "Phase 8 frontend preview deployed." -ForegroundColor Green
