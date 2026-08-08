@@ -6,6 +6,7 @@ import Java.achievements.AchievementMetricCollector;
 import Java.achievements.AchievementProgress;
 import Java.achievements.AchievementSources;
 import Java.achievements.BaseDataSnapshot;
+import Java.achievements.DynamicOfficialAchievementProgress;
 import Java.achievements.HistoricalAchievementMetrics;
 import Java.cache.CacheKeys;
 import com.google.gson.JsonArray;
@@ -135,14 +136,16 @@ public class SUPABASE_Achievements {
 
         AchievementMetricCollector.Result collected = metricCollector.collect(userId, playerTag, snapshotMetrics, deepHistory);
         JsonArray fixedAchievements = completeAchievementCatalog(progress, collected.metrics());
-        boolean persisted = persistObservedProgress(userId, playerTag, progress, fixedAchievements, collected.metrics());
+        boolean liveProfileAvailable = sourceAvailable(collected.sources(), AchievementSources.LIVE_PROFILE);
+        JsonArray officialAchievements = DynamicOfficialAchievementProgress.merge(
+                progress,
+                evaluator.dynamicOfficialAchievements(collected.officialAchievements(), liveProfileAvailable),
+                liveProfileAvailable
+        );
 
         JsonArray achievements = fixedAchievements.deepCopy();
-        JsonArray official = evaluator.dynamicOfficialAchievements(
-                collected.officialAchievements(),
-                sourceAvailable(collected.sources(), AchievementSources.LIVE_PROFILE)
-        );
-        official.forEach(achievements::add);
+        officialAchievements.forEach(achievements::add);
+        boolean persisted = persistObservedProgress(userId, playerTag, progress, achievements);
 
         JsonObject response = new JsonObject();
         response.addProperty("playerTag", playerTag);
@@ -150,7 +153,7 @@ public class SUPABASE_Achievements {
         response.addProperty("progressPersisted", persisted);
         response.addProperty("fixedFamilyCount", 340);
         response.addProperty("fixedTierCount", 1331);
-        response.addProperty("dynamicOfficialCount", official.size());
+        response.addProperty("dynamicOfficialCount", officialAchievements.size());
         response.add("achievements", achievements);
         response.add("latestSnapshot", latestSnapshotForResponse);
         response.add("sources", collected.sources());
@@ -196,8 +199,7 @@ public class SUPABASE_Achievements {
             String userId,
             String playerTag,
             String storedProgressJson,
-            JsonArray completeRows,
-            Map<String, Long> currentMetrics
+            JsonArray completeRows
     ) {
         try {
             Map<String, JsonObject> storedByKey = storedRowsByKey(JsonParser.parseString(storedProgressJson).getAsJsonArray());
