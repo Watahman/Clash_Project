@@ -14,11 +14,25 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Format-SafeGcloudArgs {
+    param([string[]]$Args)
+    return ($Args | ForEach-Object {
+        if ($_ -match '^--(?:headers|update-headers)=') {
+            $flag = $_.Substring(0, $_.IndexOf('=') + 1)
+            return "${flag}<redacted>"
+        }
+        if ($_ -match '^--update-secrets=') {
+            return '--update-secrets=<redacted-binding>'
+        }
+        return $_
+    }) -join ' '
+}
+
 function Run-Gcloud {
     param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Args)
     & gcloud @Args
     if ($LASTEXITCODE -ne 0) {
-        throw "gcloud command failed: gcloud $($Args -join ' ')"
+        throw "gcloud command failed: gcloud $(Format-SafeGcloudArgs $Args)"
     }
 }
 
@@ -117,6 +131,8 @@ $candidateUrl = Get-TaggedCandidateUrl
 
 $jobState = Get-SchedulerJobState
 if ($jobState) {
+    # Existing jobs use --update-headers. --headers is accepted by create but not
+    # by current gcloud scheduler jobs update http.
     Run-Gcloud scheduler jobs update http $SchedulerJobName `
         --project $ProjectId `
         --location $Region `
@@ -124,7 +140,7 @@ if ($jobState) {
         --time-zone="Etc/UTC" `
         --uri="$candidateUrl/InternalAdvancedStatsPoll" `
         --http-method=POST `
-        --headers="X-ClashPanel-Scheduler-Secret=$schedulerSecret" `
+        --update-headers="X-ClashPanel-Scheduler-Secret=$schedulerSecret" `
         --attempt-deadline="30s" `
         --max-retry-attempts=0
 } else {
