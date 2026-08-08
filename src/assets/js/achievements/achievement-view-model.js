@@ -13,29 +13,21 @@ export function normalizePlayerTag(value) {
 
 export function parseBaseDataText(text) {
     const source = String(text || '').trim();
-    if (!source) {
-        return { valid: false, error: 'Paste the copied JSON first.' };
-    }
+    if (!source) return { valid: false, error: 'Paste the copied JSON first.' };
 
     let parsed;
-    try {
-        parsed = JSON.parse(source);
-    } catch {
-        return { valid: false, error: 'This is not valid JSON.' };
-    }
+    try { parsed = JSON.parse(source); }
+    catch { return { valid: false, error: 'This is not valid JSON.' }; }
 
     if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') {
         return { valid: false, error: 'The copied data must be one JSON object.' };
     }
 
     const data = parsed.baseData && typeof parsed.baseData === 'object' && !Array.isArray(parsed.baseData)
-        ? parsed.baseData
-        : parsed;
+        ? parsed.baseData : parsed;
     const tag = normalizePlayerTag(data.tag);
     const timestamp = Number(data.timestamp);
-    if (!tag || tag === '#') {
-        return { valid: false, error: 'The JSON does not contain a player tag.' };
-    }
+    if (!tag || tag === '#') return { valid: false, error: 'The JSON does not contain a player tag.' };
     if (!Number.isFinite(timestamp) || timestamp <= 0) {
         return { valid: false, error: 'The JSON does not contain a valid timestamp.' };
     }
@@ -48,17 +40,10 @@ export function parseBaseDataText(text) {
     ].filter(key => Array.isArray(data[key]));
 
     if (recognizedSections.length < 3) {
-        return {
-            valid: false,
-            error: 'The JSON does not look like complete Clash of Clans base data.'
-        };
+        return { valid: false, error: 'The JSON does not look like complete Clash of Clans base data.' };
     }
 
-    const itemCount = recognizedSections.reduce(
-        (total, key) => total + data[key].length,
-        0
-    );
-
+    const itemCount = recognizedSections.reduce((total, key) => total + data[key].length, 0);
     return {
         valid: true,
         data,
@@ -94,15 +79,9 @@ export function collectLinkedAccounts(input) {
         const tag = normalizePlayerTag(rawTag);
         if (/^#[A-Z0-9]{3,}$/.test(tag)) {
             const previous = accounts.get(tag) || {};
-            const candidateName = String(
-                value.name ?? value.playerName ?? value.accountName ?? ''
-            ).trim();
-            const townHall = Number(
-                value.townHallLevel ?? value.townhall ?? value.townHall ?? value.th
-            );
-            const candidateTownHall = Number.isFinite(townHall) && townHall > 0
-                ? Math.trunc(townHall)
-                : null;
+            const candidateName = String(value.name ?? value.playerName ?? value.accountName ?? '').trim();
+            const townHall = Number(value.townHallLevel ?? value.townhall ?? value.townHall ?? value.th);
+            const candidateTownHall = Number.isFinite(townHall) && townHall > 0 ? Math.trunc(townHall) : null;
             accounts.set(tag, {
                 tag,
                 name: previous.name || candidateName,
@@ -132,6 +111,9 @@ function normalizedRow(row) {
         category: String(row?.category || 'other'),
         rarity: String(row?.rarity || 'common'),
         metric: String(row?.metric || ''),
+        source: String(row?.source || 'base_data'),
+        sourceAvailable: row?.source_available !== false,
+        hasStoredProgress: row?.has_stored_progress === true,
         tier: Math.max(1, Number(row?.tier) || 1),
         xp: Math.max(0, Number(row?.xp) || 0),
         target,
@@ -143,7 +125,6 @@ function normalizedRow(row) {
 
 export function groupAchievementFamilies(rows) {
     const groups = new Map();
-
     for (const sourceRow of Array.isArray(rows) ? rows : []) {
         const row = normalizedRow(sourceRow);
         const familyKey = row.family_key || row.achievement_key || `achievement-${groups.size}`;
@@ -168,12 +149,16 @@ export function groupAchievementFamilies(rows) {
                     ? 'in_progress'
                     : 'locked';
         const first = tiers[0];
+        const sourceAvailable = tiers.some(tier => tier.sourceAvailable);
 
         return {
             familyKey,
             title: first.title.replace(ROMAN_TIER_SUFFIX, ''),
             description: first.description.replace(DESCRIPTION_TARGET_SUFFIX, ''),
             category: first.category,
+            source: first.source,
+            sourceAvailable,
+            hasStoredProgress: tiers.some(tier => tier.hasStoredProgress),
             tiers,
             unlockedTiers,
             highestUnlocked,
@@ -184,6 +169,8 @@ export function groupAchievementFamilies(rows) {
             totalXp: unlockedTiers.reduce((sum, tier) => sum + tier.xp, 0)
         };
     }).sort((left, right) => {
+        const availability = Number(right.sourceAvailable) - Number(left.sourceAvailable);
+        if (availability) return availability;
         const stateOrder = { in_progress: 0, unlocked: 1, locked: 2, complete: 3 };
         return (stateOrder[left.state] ?? 9) - (stateOrder[right.state] ?? 9)
             || left.category.localeCompare(right.category)
@@ -196,15 +183,8 @@ export function achievementLevelFromXp(totalXp) {
     const level = Math.floor(Math.sqrt(xp / 250)) + 1;
     const floorXp = 250 * (level - 1) ** 2;
     const nextXp = 250 * level ** 2;
-    const progress = nextXp > floorXp
-        ? (xp - floorXp) / (nextXp - floorXp)
-        : 1;
-    return {
-        level,
-        floorXp,
-        nextXp,
-        progress: Math.max(0, Math.min(1, progress))
-    };
+    const progress = nextXp > floorXp ? (xp - floorXp) / (nextXp - floorXp) : 1;
+    return { level, floorXp, nextXp, progress: Math.max(0, Math.min(1, progress)) };
 }
 
 export function buildAchievementSummary(families) {
@@ -217,6 +197,7 @@ export function buildAchievementSummary(families) {
         completedFamilies: list.filter(family => family.complete).length,
         unlockedTierCount: unlockedTiers.length,
         totalTierCount: allTiers.length,
+        availableFamilies: list.filter(family => family.sourceAvailable).length,
         totalXp,
         completion: allTiers.length ? unlockedTiers.length / allTiers.length : 0,
         level: achievementLevelFromXp(totalXp)
@@ -228,16 +209,22 @@ export function filterAchievementFamilies(families, filters = {}) {
     const category = String(filters.category || 'all');
     const rarity = String(filters.rarity || 'all');
     const status = String(filters.status || 'all');
+    const source = String(filters.source || 'all');
 
     return (Array.isArray(families) ? families : []).filter(family => {
         if (category !== 'all' && family.category !== category) return false;
         if (status !== 'all' && family.state !== status) return false;
-        if (rarity !== 'all' && !family.tiers.some(tier => tier.rarity === rarity)) return false;
+        if (source !== 'all' && family.source !== source) return false;
+        const effectiveRarity = family.complete
+            ? family.highestUnlocked?.rarity
+            : family.currentTier?.rarity;
+        if (rarity !== 'all' && effectiveRarity !== rarity) return false;
         if (!search) return true;
         const searchable = [
             family.title,
             family.description,
             family.category,
+            family.source,
             ...family.tiers.map(tier => tier.title)
         ].join(' ').toLowerCase();
         return searchable.includes(search);
