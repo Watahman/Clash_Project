@@ -32,22 +32,43 @@ class AchievementEvaluatorTest {
         AchievementEvaluator evaluator = new AchievementEvaluator();
         var result = evaluator.evaluate(Map.of());
 
+        assertEquals(526, result.size());
         assertEquals(AchievementCatalog.definitions().size(), result.size());
         assertTrue(result.stream().allMatch(item -> item.progress() == 0));
         assertTrue(result.stream().noneMatch(AchievementProgress::unlocked));
     }
 
     @Test
-    void exposesCurrentHistoricalAndBattleAchievementCatalog() {
+    void restoresBroadUniqueAchievementScope() {
         Set<String> familyKeys = AchievementCatalog.definitions().stream()
                 .map(AchievementDefinition::familyKey)
                 .collect(Collectors.toSet());
 
-        assertEquals(49, familyKeys.size());
-        assertEquals(195, AchievementCatalog.definitions().size());
+        assertEquals(380, familyKeys.size());
+        assertEquals(526, AchievementCatalog.definitions().size());
+
         assertTrue(familyKeys.contains("battle_tracker"));
-        assertTrue(familyKeys.contains("star_collector"));
-        assertTrue(familyKeys.contains("three_star_specialist"));
+        assertTrue(familyKeys.contains("perfect_cwl_season_badge_1"));
+        assertTrue(familyKeys.contains("war_triple_machine_badge_1"));
+        assertTrue(familyKeys.contains("cwl_reliable_attacker_badge_1"));
+        assertTrue(familyKeys.contains("family_champion_badge_1"));
+        assertTrue(familyKeys.contains("hall_of_fame_badge_1"));
+        assertTrue(familyKeys.contains("planner_architect_badge_1"));
+        assertTrue(familyKeys.contains("season_donor_badge_1"));
+        assertTrue(familyKeys.contains("tracked_gold_raider_badge_1"));
+    }
+
+    @Test
+    void classifiesExpandedAchievementsByTheirRealDataSource() {
+        assertEquals(AchievementSources.LIVE_PROFILE, AchievementSources.forMetric("profile_war_stars"));
+        assertEquals(AchievementSources.WAR, AchievementSources.forMetric("war_current_three_stars"));
+        assertEquals(AchievementSources.CWL, AchievementSources.forMetric("cwl_perfect_seasons"));
+        assertEquals(AchievementSources.CLASHPANEL, AchievementSources.forMetric("clashpanel_plans_owned"));
+        assertEquals(AchievementSources.CLAN_FAMILY, AchievementSources.forMetric("family_polls_answered"));
+        assertEquals(AchievementSources.ADVANCED_STATS, AchievementSources.forMetric("tracked_gold_looted"));
+        assertEquals(AchievementSources.MIXED, AchievementSources.forMetric("fun_social_score"));
+        assertEquals(AchievementSources.BASE_DATA, AchievementSources.forMetric("home_wall_count"));
+        assertEquals(AchievementSources.BASE_HISTORY, AchievementSources.forMetric("tracked_days"));
     }
 
     @Test
