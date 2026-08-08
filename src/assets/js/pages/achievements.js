@@ -341,6 +341,7 @@ function achievementCard(family) {
     else tierRow.hidden = true;
 
     const current = family.currentTier;
+    const currentHasStoredProgress = current?.hasStoredProgress === true && (current?.progress || 0) > 0;
     const progressHeader = document.createElement('div');
     progressHeader.className = 'achievement-progress-copy';
     const targetName = document.createElement('strong');
@@ -348,12 +349,12 @@ function achievementCard(family) {
         ? t('achievements.allTiersUnlocked')
         : current?.tierLabel || family.title;
     const values = document.createElement('span');
-    if (!family.sourceAvailable && !family.hasStoredProgress) {
+    if (!family.sourceAvailable && currentHasStoredProgress) {
+        values.textContent = `${translated('achievements.lastKnown', 'Last known')}: ${formatNumber(current?.progress)}`;
+    } else if (!family.sourceAvailable) {
         values.textContent = current?.thresholdText
             ? `${translated('achievements.waitingForSource', 'Waiting for this data source')} · ${current.thresholdText}`
             : translated('achievements.waitingForSource', 'Waiting for this data source');
-    } else if (!family.sourceAvailable && family.hasStoredProgress) {
-        values.textContent = `${translated('achievements.lastKnown', 'Last known')}: ${formatNumber(current?.progress)}`;
     } else {
         values.textContent = family.complete
             ? t('achievements.xpEarned', { xp: formatNumber(family.totalXp) })
@@ -374,14 +375,15 @@ function achievementCard(family) {
     const footer = document.createElement('footer');
     const status = document.createElement('span');
     status.className = 'achievement-status-label';
-    status.textContent = family.state === 'unknown'
-        ? translated('achievements.waitingForData', 'Waiting for data')
-        : !family.sourceAvailable && family.hasStoredProgress
+    status.textContent = family.complete
+        ? t('achievements.completed')
+        : !family.sourceAvailable && currentHasStoredProgress
             ? translated('achievements.sourceRequired', 'Data source required')
-            : family.complete ? t('achievements.completed')
-            : family.unlockedTiers.length === 1 ? t('achievements.oneTierUnlocked')
-            : family.unlockedTiers.length > 1 ? t('achievements.tiersUnlocked', { count: family.unlockedTiers.length })
-            : family.currentTier?.progress > 0 ? t('achievements.inProgress') : t('achievements.notStarted');
+            : !family.sourceAvailable
+                ? translated('achievements.waitingForData', 'Waiting for data')
+                : family.unlockedTiers.length === 1 ? t('achievements.oneTierUnlocked')
+                : family.unlockedTiers.length > 1 ? t('achievements.tiersUnlocked', { count: family.unlockedTiers.length })
+                : family.currentTier?.progress > 0 ? t('achievements.inProgress') : t('achievements.notStarted');
     const xp = document.createElement('strong');
     xp.textContent = family.complete
         ? `+${formatNumber(family.totalXp)} XP`
