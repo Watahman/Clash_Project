@@ -7,6 +7,7 @@ param(
 
     [string]$Region = "europe-west1",
     [string]$ServiceName = "clashpanel-api",
+    [string]$TagName = "phase8",
     [string]$SchedulerJobName = "clashpanel-advanced-stats-poll",
     [string]$SecretName = "clashpanel-advanced-stats-scheduler-secret"
 )
@@ -21,13 +22,23 @@ function Run-Gcloud {
     }
 }
 
+function Get-TaggedCandidateUrl {
+    $service = (& gcloud run services describe $ServiceName --project $ProjectId --region $Region --format=json) | ConvertFrom-Json
+    if ($LASTEXITCODE -ne 0 -or -not $service) {
+        throw "Cloud Run service '$ServiceName' was not found in $Region."
+    }
+    $tagTraffic = @($service.status.traffic) | Where-Object { $_.tag -eq $TagName } | Select-Object -First 1
+    $url = [string]$tagTraffic.url
+    if (-not $url) {
+        throw "Tagged Cloud Run candidate '$TagName' was not found. Run deploy-cloud-run-phase8.ps1 first."
+    }
+    return $url
+}
+
 Run-Gcloud config set project $ProjectId
 Run-Gcloud services enable run.googleapis.com secretmanager.googleapis.com cloudscheduler.googleapis.com
 
-$serviceUrl = (& gcloud run services describe $ServiceName --project $ProjectId --region $Region --format="value(status.url)").Trim()
-if ($LASTEXITCODE -ne 0 -or -not $serviceUrl) {
-    throw "Cloud Run service '$ServiceName' was not found in $Region. Run deploy-cloud-run-phase8.ps1 first."
-}
+$candidateUrl = Get-TaggedCandidateUrl
 
 $serviceAccount = (& gcloud run services describe $ServiceName --project $ProjectId --region $Region --format="value(spec.template.spec.serviceAccountName)").Trim()
 if ($LASTEXITCODE -ne 0) {
@@ -67,11 +78,16 @@ Run-Gcloud secrets add-iam-policy-binding $SecretName `
     --member="serviceAccount:$serviceAccount" `
     --role="roles/secretmanager.secretAccessor"
 
+# Create a new tagged candidate revision, still with 0% normal production traffic.
 Run-Gcloud run services update $ServiceName `
     --project $ProjectId `
     --region $Region `
     --update-env-vars="ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false,ADVANCED_STATS_COLLECTION_ENABLED=false,ADVANCED_STATS_ROLLOUT_USER_IDS=$DeveloperUserId" `
-    --update-secrets="ADVANCED_STATS_SCHEDULER_SECRET=${SecretName}:latest"
+    --update-secrets="ADVANCED_STATS_SCHEDULER_SECRET=${SecretName}:latest" `
+    --no-traffic `
+    --tag $TagName
+
+$candidateUrl = Get-TaggedCandidateUrl
 
 $jobExists = & gcloud scheduler jobs describe $SchedulerJobName --project $ProjectId --location $Region --format="value(name)" 2>$null
 if ($LASTEXITCODE -eq 0 -and $jobExists) {
@@ -80,7 +96,7 @@ if ($LASTEXITCODE -eq 0 -and $jobExists) {
         --location $Region `
         --schedule="*/5 * * * *" `
         --time-zone="Etc/UTC" `
-        --uri="$serviceUrl/InternalAdvancedStatsPoll" `
+        --uri="$candidateUrl/InternalAdvancedStatsPoll" `
         --http-method=POST `
         --headers="X-ClashPanel-Scheduler-Secret=$schedulerSecret" `
         --attempt-deadline="30s" `
@@ -91,7 +107,7 @@ if ($LASTEXITCODE -eq 0 -and $jobExists) {
         --location $Region `
         --schedule="*/5 * * * *" `
         --time-zone="Etc/UTC" `
-        --uri="$serviceUrl/InternalAdvancedStatsPoll" `
+        --uri="$candidateUrl/InternalAdvancedStatsPoll" `
         --http-method=POST `
         --headers="X-ClashPanel-Scheduler-Secret=$schedulerSecret" `
         --attempt-deadline="30s" `
@@ -102,11 +118,13 @@ if ($LASTEXITCODE -eq 0 -and $jobExists) {
 Run-Gcloud scheduler jobs pause $SchedulerJobName --project $ProjectId --location $Region
 
 Write-Host "Phase 8 developer-only runtime configuration prepared." -ForegroundColor Green
+Write-Host "  Tagged candidate URL: $candidateUrl"
+Write-Host "  Normal production traffic to candidate: 0%"
 Write-Host "  Public enrollment: OFF"
 Write-Host "  Collection: OFF"
 Write-Host "  Rollout allowlist: developer UUID only"
 Write-Host "  Scheduler secret: Secret Manager"
-Write-Host "  Scheduler job: configured every 5 minutes and PAUSED"
+Write-Host "  Scheduler job: targets tagged candidate, every 5 minutes, PAUSED"
 Write-Host ""
 Write-Host "No scheduled Advanced Stats collection is running yet." -ForegroundColor Yellow
-Write-Host "Next: start Advanced Stats for the allowlisted linked account through the normal site/API, then explicitly enable collection and resume the scheduler."
+Write-Host "Next: deploy the isolated Cloudflare preview against this tagged candidate and start Advanced Stats for the allowlisted linked account."
