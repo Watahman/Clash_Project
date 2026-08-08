@@ -30,7 +30,8 @@
 
   "vars": {
     "CLOUD_RUN_ORIGIN": "__PHASE8_CANDIDATE_URL__",
-    "DISABLE_CANONICAL_REDIRECT": "true"
+    "DISABLE_CANONICAL_REDIRECT": "true",
+    "UPSTREAM_ORIGIN_OVERRIDE": "https://clashpanel.com"
   },
 
   "secrets": {
