@@ -1,0 +1,39 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "clashpanel-phase8-preview",
+  "compatibility_date": "2026-07-24",
+  "main": "./worker/index.js",
+  "workers_dev": true,
+  "preview_urls": false,
+
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page",
+    "run_worker_first": [
+      "/api",
+      "/api/*",
+      "/dashboard*",
+      "/app/*",
+      "/subpages/*",
+      "/subPages/*",
+      "/cwl-planner*",
+      "/cwl-tracker*",
+      "/clan-management*",
+      "/bracket-generator*",
+      "/guides*",
+      "/methodology*",
+      "/changelog*"
+    ]
+  },
+
+  "vars": {
+    "CLOUD_RUN_ORIGIN": "https://clashpanel-api-982136486076.europe-west1.run.app",
+    "DISABLE_CANONICAL_REDIRECT": "true"
+  },
+
+  "secrets": {
+    "required": ["API_PROXY_SECRET"]
+  }
+}
