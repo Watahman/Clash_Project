@@ -15,7 +15,9 @@ function Require-SafeFalseFlag {
         [Parameter(Mandatory = $true)] [string]$Name
     )
 
-    $pattern = "(?mi)^\s*" + [regex]::Escape($Name) + "\s*:\s*[\"']?false[\"']?\s*$"
+    # Single-quoted PowerShell string avoids the parser ambiguity caused by
+    # embedding both quote characters inside a double-quoted regex string.
+    $pattern = '(?mi)^\s*' + [regex]::Escape($Name) + '\s*:\s*["'']?false["'']?\s*$'
     if ($Content -notmatch $pattern) {
         throw "$Name must explicitly be false in cloudrun-env.yaml for the first Phase 8 deployment."
     }
