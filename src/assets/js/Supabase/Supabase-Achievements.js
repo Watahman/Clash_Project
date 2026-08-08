@@ -10,10 +10,12 @@ function endpoint(path) {
 
 export function getAchievements(playerTag, options = {}) {
     const query = new URLSearchParams({ playerTag: String(playerTag || '') });
+    if (options.deepHistory) query.set('deepHistory', '1');
     return requestJson(`${endpoint(GET_ROUTE)}?${query}`, {
         method: 'GET',
         signal: options.signal,
-        loading: options.loading || 'background'
+        loading: options.loading || 'background',
+        timeoutMs: options.deepHistory ? 45_000 : undefined
     });
 }
 
