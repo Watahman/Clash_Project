@@ -14,6 +14,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Collects fast/non-history achievement sources. Heavy war/CWL history is handled
+ * by AchievementHistoryCollector and never blocks the first page render.
+ */
 public final class AchievementFastMetrics {
     public record Result(
             Map<String, Long> metrics,
@@ -74,8 +78,7 @@ public final class AchievementFastMetrics {
                     ? parsed.getAsJsonObject()
                     : new JsonObject();
             statsAvailable = bool(response, "available");
-            JsonObject statsMetrics = object(response.get("metrics"));
-            mergeNumeric(metrics, statsMetrics);
+            mergeNumeric(metrics, object(response.get("metrics")));
         } catch (Exception error) {
             statsError = errorCode(error);
         }
@@ -94,6 +97,8 @@ public final class AchievementFastMetrics {
 
     private Map<String, Long> profileMetrics(JsonObject profile) {
         Map<String, Long> metrics = new LinkedHashMap<>();
+        initializeLiveCatalogDefaults(metrics);
+
         long trophies = number(profile, "trophies");
         long bestTrophies = number(profile, "bestTrophies");
         long attackWins = number(profile, "attackWins");
@@ -126,30 +131,34 @@ public final class AchievementFastMetrics {
         metrics.put("profile_role_rank", roleRank(string(profile, "role")));
 
         JsonArray heroes = array(profile.get("heroes"));
+        JsonArray troops = array(profile.get("troops"));
+        JsonArray spells = array(profile.get("spells"));
+        JsonArray equipment = firstArray(profile, "heroEquipment", "equipment");
+
         metrics.put("profile_hero_count", countVillage(heroes, "home"));
         metrics.put("profile_hero_level_sum", sumVillageLevels(heroes, "home"));
-        metrics.put("profile_troop_count", countVillage(array(profile.get("troops")), "home"));
-        metrics.put("profile_spell_count", countVillage(array(profile.get("spells")), "home"));
-        JsonArray equipment = array(profile.get("heroEquipment"));
+        metrics.put("profile_troop_count", countVillage(troops, "home"));
+        metrics.put("profile_spell_count", countVillage(spells, "home"));
         metrics.put("profile_equipment_count", equipment.size());
 
-        Map<String, Long> nativeValues = new LinkedHashMap<>();
+        collectMasteryRows(troops, "troop", metrics);
+        collectMasteryRows(heroes, "hero", metrics);
+        collectMasteryRows(spells, "spell", metrics);
+        collectMasteryRows(equipment, "equipment", metrics);
+
         long nativeStars = 0;
         for (JsonElement element : array(profile.get("achievements"))) {
             if (!element.isJsonObject()) continue;
             JsonObject achievement = element.getAsJsonObject();
             String name = string(achievement, "name");
+            if (name.isBlank()) continue;
+            String slug = AchievementCatalogExpansion.slug(name);
             long value = number(achievement, "value");
-            nativeValues.put(normalizedName(name), value);
-            nativeStars += number(achievement, "stars");
+            long stars = number(achievement, "stars");
+            metrics.put("native_" + slug, value);
+            metrics.put("native_stars_" + slug, stars);
+            nativeStars += stars;
         }
-        metrics.put("native_war_hero", nativeValues.getOrDefault("warhero", 0L));
-        metrics.put("native_unbreakable", nativeValues.getOrDefault("unbreakable", 0L));
-        metrics.put("native_friend_in_need", nativeValues.getOrDefault("friendinneed", 0L));
-        metrics.put("native_sharing_is_caring", nativeValues.getOrDefault("sharingiscaring", 0L));
-        metrics.put("native_games_champion", nativeValues.getOrDefault("gameschampion", 0L));
-        metrics.put("native_treasurer", nativeValues.getOrDefault("treasurer", 0L));
-        metrics.put("native_most_valuable_clanmate", nativeValues.getOrDefault("mostvaluableclanmate", 0L));
         metrics.put("profile_native_achievement_stars", nativeStars);
 
         metrics.put("fun_attack_defense_total", attackWins + defenseWins);
@@ -158,6 +167,42 @@ public final class AchievementFastMetrics {
         metrics.put("fun_war_machine", warStars);
         metrics.put("fun_achievement_hunter", nativeStars);
         return Map.copyOf(metrics);
+    }
+
+    private void initializeLiveCatalogDefaults(Map<String, Long> metrics) {
+        for (AchievementDefinition definition : AchievementCatalog.definitions()) {
+            String metric = definition.metric();
+            if (metric.startsWith("mastery_") || metric.startsWith("native_stars_")) {
+                metrics.putIfAbsent(metric, 0L);
+            }
+        }
+    }
+
+    private void collectMasteryRows(JsonArray rows, String kind, Map<String, Long> metrics) {
+        for (JsonElement element : rows) {
+            if (!element.isJsonObject()) continue;
+            JsonObject item = element.getAsJsonObject();
+            String name = string(item, "name");
+            if (name.isBlank()) continue;
+            long level = number(item, "level");
+            long maxLevel = number(item, "maxLevel");
+            if (maxLevel <= 0) continue;
+
+            String prefix;
+            if ("spell".equals(kind)) {
+                prefix = "mastery_spell_";
+            } else if ("equipment".equals(kind)) {
+                prefix = "mastery_equipment_";
+            } else {
+                String village = string(item, "village");
+                boolean builder = "builderbase".equalsIgnoreCase(village)
+                        || "builder_base".equalsIgnoreCase(village)
+                        || "builder".equalsIgnoreCase(village);
+                prefix = builder ? "mastery_builder_" : "mastery_home_";
+            }
+            long percentage = Math.min(100, level * 100L / maxLevel);
+            metrics.put(prefix + AchievementCatalogExpansion.slug(name), percentage);
+        }
     }
 
     private Map<String, Long> readRpcMetrics(String function, String userId, String playerTag) throws Exception {
@@ -198,11 +243,14 @@ public final class AchievementFastMetrics {
     }
 
     private static long countVillage(JsonArray values, String village) {
-        return values.asList().stream()
-                .filter(JsonElement::isJsonObject)
-                .map(JsonElement::getAsJsonObject)
-                .filter(value -> village.equalsIgnoreCase(string(value, "village")))
-                .count();
+        long count = 0;
+        for (JsonElement element : values) {
+            if (!element.isJsonObject()) continue;
+            JsonObject item = element.getAsJsonObject();
+            String itemVillage = string(item, "village");
+            if (itemVillage.isBlank() || village.equalsIgnoreCase(itemVillage)) count++;
+        }
+        return count;
     }
 
     private static long sumVillageLevels(JsonArray values, String village) {
@@ -210,9 +258,18 @@ public final class AchievementFastMetrics {
         for (JsonElement element : values) {
             if (!element.isJsonObject()) continue;
             JsonObject value = element.getAsJsonObject();
-            if (village.equalsIgnoreCase(string(value, "village"))) result += number(value, "level");
+            String itemVillage = string(value, "village");
+            if (itemVillage.isBlank() || village.equalsIgnoreCase(itemVillage)) result += number(value, "level");
         }
         return result;
+    }
+
+    private static JsonArray firstArray(JsonObject object, String... fields) {
+        for (String field : fields) {
+            JsonArray values = array(object.get(field));
+            if (!values.isEmpty()) return values;
+        }
+        return new JsonArray();
     }
 
     private static long firstNumber(JsonObject object, String... fields) {
@@ -234,10 +291,6 @@ public final class AchievementFastMetrics {
         return value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isBoolean() && value.getAsBoolean();
     }
 
-    private static String normalizedName(String value) {
-        return String.valueOf(value == null ? "" : value).replaceAll("[^A-Za-z0-9]", "").toLowerCase();
-    }
-
     private static JsonObject object(JsonElement value) {
         return value != null && value.isJsonObject() ? value.getAsJsonObject() : new JsonObject();
     }
@@ -249,7 +302,7 @@ public final class AchievementFastMetrics {
     private static String string(JsonObject object, String field) {
         JsonElement value = object.get(field);
         return value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isString()
-                ? value.getAsString()
+                ? value.getAsString().trim()
                 : "";
     }
 
