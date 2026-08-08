@@ -3,7 +3,8 @@ param(
     [string]$ProjectId,
 
     [string]$Region = "europe-west1",
-    [string]$ServiceName = "clashpanel-api"
+    [string]$ServiceName = "clashpanel-api",
+    [string]$TagName = "phase8"
 )
 
 $ErrorActionPreference = "Stop"
@@ -50,38 +51,66 @@ Require-SafeFalseFlag -Content $envContent -Name "ADVANCED_STATS_COLLECTION_ENAB
 Require-SafeFalseFlag -Content $envContent -Name "ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED"
 
 Write-Host "Phase 8 safety gate passed: collection OFF, public enrollment OFF." -ForegroundColor Green
-Write-Host "Deploying the current checkout as the staged candidate..." -ForegroundColor Cyan
+Write-Host "Deploying a tagged Cloud Run candidate with 0% production traffic..." -ForegroundColor Cyan
 
-& ./deploy-cloud-run.ps1 -ProjectId $ProjectId -Region $Region -ServiceName $ServiceName
+gcloud config set project $ProjectId
+if ($LASTEXITCODE -ne 0) { throw "Could not select Google Cloud project '$ProjectId'." }
+
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com secretmanager.googleapis.com
+if ($LASTEXITCODE -ne 0) { throw "Could not enable required Google Cloud services." }
+
+gcloud run deploy $ServiceName `
+    --source . `
+    --project $ProjectId `
+    --region $Region `
+    --allow-unauthenticated `
+    --memory 512Mi `
+    --cpu 1 `
+    --min-instances 0 `
+    --max-instances 1 `
+    --concurrency 40 `
+    --timeout 30s `
+    --cpu-boost `
+    --env-vars-file ./cloudrun-env.yaml `
+    --no-traffic `
+    --tag $TagName
 if ($LASTEXITCODE -ne 0) {
-    throw "Cloud Run deployment failed."
+    throw "Cloud Run Phase 8 candidate deployment failed."
 }
 
-$serviceUrl = (& gcloud run services describe $ServiceName --project $ProjectId --region $Region --format="value(status.url)").Trim()
-if (-not $serviceUrl) {
-    throw "Could not resolve the deployed Cloud Run service URL."
+$service = (& gcloud run services describe $ServiceName --project $ProjectId --region $Region --format=json) | ConvertFrom-Json
+if ($LASTEXITCODE -ne 0 -or -not $service) {
+    throw "Could not inspect the deployed Cloud Run service."
 }
 
-Write-Host "Candidate URL: $serviceUrl" -ForegroundColor Cyan
+$tagTraffic = @($service.status.traffic) | Where-Object { $_.tag -eq $TagName } | Select-Object -First 1
+$candidateUrl = [string]$tagTraffic.url
+if (-not $candidateUrl) {
+    throw "Could not resolve the tagged '$TagName' revision URL."
+}
 
-$health = Get-HttpStatus -Url "$serviceUrl/health"
-$ready = Get-HttpStatus -Url "$serviceUrl/ready"
-$disabledPoll = Get-HttpStatus -Url "$serviceUrl/InternalAdvancedStatsPoll" -Method "POST"
+Write-Host "Tagged candidate URL: $candidateUrl" -ForegroundColor Cyan
+Write-Host "Production traffic to this revision: 0%" -ForegroundColor Green
+
+$health = Get-HttpStatus -Url "$candidateUrl/health"
+$ready = Get-HttpStatus -Url "$candidateUrl/ready"
+$disabledPoll = Get-HttpStatus -Url "$candidateUrl/InternalAdvancedStatsPoll" -Method "POST"
 
 if ($health -ne 200) {
-    throw "/health returned $health instead of 200."
+    throw "/health returned $health instead of 200 on the tagged candidate."
 }
 if ($ready -ne 200) {
-    throw "/ready returned $ready instead of 200."
+    throw "/ready returned $ready instead of 200 on the tagged candidate."
 }
 if ($disabledPoll -ne 404) {
     throw "/InternalAdvancedStatsPoll returned $disabledPoll instead of the expected 404 while collection is disabled."
 }
 
 Write-Host "Phase 8 first-deploy checks passed:" -ForegroundColor Green
+Write-Host "  tagged candidate receives 0% normal production traffic"
 Write-Host "  /health = 200"
 Write-Host "  /ready = 200"
 Write-Host "  /InternalAdvancedStatsPoll = 404 while collection is disabled"
 Write-Host ""
-Write-Host "Do not enable collection yet." -ForegroundColor Yellow
-Write-Host "Next: configure ADVANCED_STATS_SCHEDULER_SECRET in Secret Manager and set only the developer UUID in ADVANCED_STATS_ROLLOUT_USER_IDS while keeping public enrollment false."
+Write-Host "Do not move production traffic to the Phase 8 tag yet." -ForegroundColor Yellow
+Write-Host "Next: configure the scheduler secret + one developer UUID against this tagged candidate, then deploy the isolated Cloudflare preview."
