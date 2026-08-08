@@ -148,17 +148,19 @@ export function groupAchievementFamilies(rows) {
         const currentTier = tiers.find(tier => !tier.unlocked) || tiers.at(-1);
         const highestUnlocked = unlockedTiers.at(-1) || null;
         const complete = unlockedTiers.length === tiers.length && tiers.length > 0;
-        const hasStoredProgress = tiers.some(tier => tier.hasStoredProgress);
-        const sourceAvailable = tiers.some(tier => tier.sourceAvailable);
-        const progressRatio = sourceAvailable && currentTier?.target > 0
-            ? Math.min(1, currentTier.progress / currentTier.target)
-            : complete ? 1 : 0;
+        const hasStoredProgress = tiers.some(tier => tier.hasStoredProgress || tier.unlocked || tier.progress > 0);
+        const sourceAvailable = complete || currentTier?.sourceAvailable === true;
+        const progressRatio = complete
+            ? 1
+            : sourceAvailable && currentTier?.target > 0
+                ? Math.min(1, currentTier.progress / currentTier.target)
+                : 0;
         const state = complete
             ? 'complete'
-            : unlockedTiers.length > 0
-                ? 'unlocked'
-                : !sourceAvailable && !hasStoredProgress
-                    ? 'unknown'
+            : !sourceAvailable
+                ? 'unknown'
+                : unlockedTiers.length > 0
+                    ? 'unlocked'
                     : currentTier?.progress > 0
                         ? 'in_progress'
                         : 'locked';
@@ -170,11 +172,11 @@ export function groupAchievementFamilies(rows) {
             description: first.description,
             category: first.category,
             categoryLabel: first.categoryLabel,
-            source: first.source,
-            sourceCodes: first.sourceCodes,
-            evaluationMode: first.evaluationMode,
-            priority: first.priority,
-            notes: first.notes,
+            source: currentTier?.source || first.source,
+            sourceCodes: currentTier?.sourceCodes || first.sourceCodes,
+            evaluationMode: currentTier?.evaluationMode || first.evaluationMode,
+            priority: currentTier?.priority || first.priority,
+            notes: currentTier?.notes || first.notes,
             sourceAvailable,
             hasStoredProgress,
             tiers,
