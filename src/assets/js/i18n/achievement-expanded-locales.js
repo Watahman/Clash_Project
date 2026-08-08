@@ -7,7 +7,8 @@ const shared = {
     'achievements.category.clashpanel': 'ClashPanel',
     'achievements.category.clan_family': 'Clan Family',
     'achievements.category.rare_fun': 'Signature',
-    'achievements.category.battle': 'Advanced Stats'
+    'achievements.category.battle': 'Advanced Stats',
+    'achievements.category.native': 'In-game achievements'
 };
 
 export const achievementExpandedLocales = Object.freeze({
@@ -36,8 +37,8 @@ export const achievementExpandedLocales = Object.freeze({
         'achievements.source.advanced_stats': 'Advanced Stats',
         'achievements.source.war': 'Regular war',
         'achievements.source.cwl_history': 'CWL history',
-        'achievements.source.clashpanel': 'ClashPanel usage',
-        'achievements.source.clan_family': 'Clan Family',
+        'achievements.source.clashpanel': 'ClashPanel usage · profile-wide',
+        'achievements.source.clan_family': 'Clan Family · profile-wide',
         'achievements.source.mixed': 'Cross-source'
     }),
     nl: Object.freeze({
@@ -65,8 +66,8 @@ export const achievementExpandedLocales = Object.freeze({
         'achievements.source.advanced_stats': 'Advanced Stats',
         'achievements.source.war': 'Gewone war',
         'achievements.source.cwl_history': 'CWL-geschiedenis',
-        'achievements.source.clashpanel': 'ClashPanel-gebruik',
-        'achievements.source.clan_family': 'Clan Family',
+        'achievements.source.clashpanel': 'ClashPanel-gebruik · profielbreed',
+        'achievements.source.clan_family': 'Clan Family · profielbreed',
         'achievements.source.mixed': 'Gecombineerde bronnen',
         'achievements.category.multiplayer': 'Multiplayer',
         'achievements.category.war': 'War',
@@ -76,7 +77,8 @@ export const achievementExpandedLocales = Object.freeze({
         'achievements.category.clashpanel': 'ClashPanel',
         'achievements.category.clan_family': 'Clan Family',
         'achievements.category.rare_fun': 'Bijzonder',
-        'achievements.category.battle': 'Advanced Stats'
+        'achievements.category.battle': 'Advanced Stats',
+        'achievements.category.native': 'In-game achievements'
     }),
     fr: Object.freeze({
         ...shared,
@@ -103,8 +105,8 @@ export const achievementExpandedLocales = Object.freeze({
         'achievements.source.advanced_stats': 'Advanced Stats',
         'achievements.source.war': 'Guerre classique',
         'achievements.source.cwl_history': 'Historique CWL',
-        'achievements.source.clashpanel': 'Utilisation de ClashPanel',
-        'achievements.source.clan_family': 'Clan Family',
+        'achievements.source.clashpanel': 'Utilisation de ClashPanel · profil global',
+        'achievements.source.clan_family': 'Clan Family · profil global',
         'achievements.source.mixed': 'Sources combinées',
         'achievements.category.multiplayer': 'Multijoueur',
         'achievements.category.war': 'Guerre',
@@ -114,7 +116,8 @@ export const achievementExpandedLocales = Object.freeze({
         'achievements.category.clashpanel': 'ClashPanel',
         'achievements.category.clan_family': 'Clan Family',
         'achievements.category.rare_fun': 'Spécial',
-        'achievements.category.battle': 'Advanced Stats'
+        'achievements.category.battle': 'Advanced Stats',
+        'achievements.category.native': 'Succès en jeu'
     }),
     de: Object.freeze({
         ...shared,
@@ -141,8 +144,8 @@ export const achievementExpandedLocales = Object.freeze({
         'achievements.source.advanced_stats': 'Advanced Stats',
         'achievements.source.war': 'Normaler Krieg',
         'achievements.source.cwl_history': 'CWL-Verlauf',
-        'achievements.source.clashpanel': 'ClashPanel-Nutzung',
-        'achievements.source.clan_family': 'Clan Family',
+        'achievements.source.clashpanel': 'ClashPanel-Nutzung · profilweit',
+        'achievements.source.clan_family': 'Clan Family · profilweit',
         'achievements.source.mixed': 'Kombinierte Quellen',
         'achievements.category.multiplayer': 'Mehrspieler',
         'achievements.category.war': 'Krieg',
@@ -152,7 +155,8 @@ export const achievementExpandedLocales = Object.freeze({
         'achievements.category.clashpanel': 'ClashPanel',
         'achievements.category.clan_family': 'Clan Family',
         'achievements.category.rare_fun': 'Besonders',
-        'achievements.category.battle': 'Advanced Stats'
+        'achievements.category.battle': 'Advanced Stats',
+        'achievements.category.native': 'In-Game-Erfolge'
     }),
     es: Object.freeze({
         ...shared,
@@ -179,8 +183,8 @@ export const achievementExpandedLocales = Object.freeze({
         'achievements.source.advanced_stats': 'Advanced Stats',
         'achievements.source.war': 'Guerra normal',
         'achievements.source.cwl_history': 'Historial CWL',
-        'achievements.source.clashpanel': 'Uso de ClashPanel',
-        'achievements.source.clan_family': 'Clan Family',
+        'achievements.source.clashpanel': 'Uso de ClashPanel · perfil completo',
+        'achievements.source.clan_family': 'Clan Family · perfil completo',
         'achievements.source.mixed': 'Fuentes combinadas',
         'achievements.category.multiplayer': 'Multijugador',
         'achievements.category.war': 'Guerra',
@@ -190,6 +194,7 @@ export const achievementExpandedLocales = Object.freeze({
         'achievements.category.clashpanel': 'ClashPanel',
         'achievements.category.clan_family': 'Clan Family',
         'achievements.category.rare_fun': 'Especial',
-        'achievements.category.battle': 'Advanced Stats'
+        'achievements.category.battle': 'Advanced Stats',
+        'achievements.category.native': 'Logros del juego'
     })
 });
