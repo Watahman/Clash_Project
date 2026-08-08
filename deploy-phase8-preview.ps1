@@ -4,6 +4,7 @@ param(
 
     [string]$Region = "europe-west1",
     [string]$ServiceName = "clashpanel-api",
+    [string]$TagName = "phase8",
     [string]$ProxySecretName = "API_PROXY_SECRET"
 )
 
@@ -23,18 +24,29 @@ if ($LASTEXITCODE -ne 0) {
     throw "Frontend build failed."
 }
 
-$serviceUrl = (& gcloud run services describe $ServiceName --project $ProjectId --region $Region --format="value(status.url)").Trim()
-if ($LASTEXITCODE -ne 0 -or -not $serviceUrl) {
+$service = (& gcloud run services describe $ServiceName --project $ProjectId --region $Region --format=json) | ConvertFrom-Json
+if ($LASTEXITCODE -ne 0 -or -not $service) {
     throw "Cloud Run service '$ServiceName' was not found in $Region. Deploy the Phase 8 backend candidate first."
 }
 
-$configText = Get-Content "./wrangler.phase8-preview.jsonc" -Raw
-if ($configText -notmatch [regex]::Escape($serviceUrl)) {
-    throw "wrangler.phase8-preview.jsonc CLOUD_RUN_ORIGIN does not match the deployed service URL: $serviceUrl"
+$tagTraffic = @($service.status.traffic) | Where-Object { $_.tag -eq $TagName } | Select-Object -First 1
+$candidateUrl = [string]$tagTraffic.url
+if (-not $candidateUrl) {
+    throw "Tagged Cloud Run candidate '$TagName' was not found. Run deploy-cloud-run-phase8.ps1 first."
 }
+
+$templateConfig = Get-Content "./wrangler.phase8-preview.jsonc" -Raw
+if ($templateConfig -notmatch "__PHASE8_CANDIDATE_URL__") {
+    throw "wrangler.phase8-preview.jsonc is missing the Phase 8 candidate URL placeholder."
+}
+
+$generatedConfigPath = Join-Path (Get-Location) ".wrangler.phase8-preview.generated.jsonc"
+$generatedConfig = $templateConfig.Replace("__PHASE8_CANDIDATE_URL__", $candidateUrl)
+[System.IO.File]::WriteAllText($generatedConfigPath, $generatedConfig, (New-Object System.Text.UTF8Encoding($false)))
 
 $proxySecret = (& gcloud secrets versions access latest --secret=$ProxySecretName --project=$ProjectId).Trim()
 if ($LASTEXITCODE -ne 0 -or -not $proxySecret) {
+    Remove-Item $generatedConfigPath -Force -ErrorAction SilentlyContinue
     throw "Could not read Secret Manager secret '$ProxySecretName'. The preview reuses the existing production API proxy secret without exposing it in Git."
 }
 
@@ -43,17 +55,24 @@ try {
     $secretJson = @{ API_PROXY_SECRET = $proxySecret } | ConvertTo-Json -Compress
     [System.IO.File]::WriteAllText($tempSecretsFile, $secretJson, (New-Object System.Text.UTF8Encoding($false)))
 
-    Write-Host "Deploying isolated workers.dev preview..." -ForegroundColor Cyan
-    npx wrangler deploy --config ./wrangler.phase8-preview.jsonc --secrets-file $tempSecretsFile
+    Write-Host "Deploying isolated workers.dev preview against $candidateUrl ..." -ForegroundColor Cyan
+    npx wrangler deploy --config $generatedConfigPath --secrets-file $tempSecretsFile
     if ($LASTEXITCODE -ne 0) {
         throw "Cloudflare Phase 8 preview deployment failed."
     }
 } finally {
     Remove-Item $tempSecretsFile -Force -ErrorAction SilentlyContinue
+    Remove-Item $generatedConfigPath -Force -ErrorAction SilentlyContinue
     $proxySecret = $null
 }
 
 Write-Host "Phase 8 frontend preview deployed." -ForegroundColor Green
-Write-Host "This Worker has no custom-domain route and no cron trigger. Production clashpanel.com is unchanged."
+Write-Host "  Backend target: tagged '$TagName' Cloud Run candidate"
+Write-Host "  Normal production traffic to candidate: 0%"
+Write-Host "  Preview Worker: separate workers.dev Worker"
+Write-Host "  Custom-domain route: none"
+Write-Host "  Cron trigger: none"
+Write-Host "  Production clashpanel.com: unchanged"
+Write-Host ""
 Write-Host "Use the workers.dev URL printed by Wrangler to sign in and open /app/advanced-stats."
-Write-Host "For the preview, prefer normal email/password sign-in; the production Google OAuth callback still points to clashpanel.com."
+Write-Host "For this preview, prefer normal email/password sign-in; the production Google OAuth callback still points to clashpanel.com."
