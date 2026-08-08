@@ -70,6 +70,12 @@ function setImportFeedback(message = '', type = '') {
     refs.importFeedback.hidden = !message;
 }
 
+function setImportPanelOpen(open, { focus = false } = {}) {
+    refs.importPanel.hidden = !open;
+    refs.importToggle.setAttribute('aria-expanded', String(open));
+    if (open && focus) refs.importText.focus();
+}
+
 function formatNumber(value) {
     return new Intl.NumberFormat(getLanguage()).format(Number(value) || 0);
 }
@@ -378,8 +384,11 @@ async function submitImport(event) {
         refs.accountSelect.value = state.selectedTag;
         const unlocked = Number(result.unlockedCount) || 0;
         clearImport();
+        setImportPanelOpen(false);
         await loadSelectedAccount({ quiet: true });
-        setImportFeedback(t('achievements.importSuccess', { count: unlocked }), 'success');
+        const successMessage = t('achievements.importSuccess', { count: unlocked });
+        setStatus(successMessage, 'success');
+        setImportFeedback(successMessage, 'success');
     } catch (error) {
         setImportFeedback(error?.message || t('achievements.importError'), 'error');
         refs.importButton.disabled = false;
@@ -394,10 +403,7 @@ function bindEvents() {
     });
     refs.refreshButton.addEventListener('click', () => void loadSelectedAccount());
     refs.importToggle.addEventListener('click', () => {
-        const open = refs.importPanel.hidden;
-        refs.importPanel.hidden = !open;
-        refs.importToggle.setAttribute('aria-expanded', String(open));
-        if (open) refs.importText.focus();
+        setImportPanelOpen(refs.importPanel.hidden, { focus: true });
     });
     refs.importText.addEventListener('input', updateImportPreview);
     refs.importText.addEventListener('paste', () => window.setTimeout(updateImportPreview));
@@ -410,9 +416,7 @@ function bindEvents() {
         ref.addEventListener('change', () => { state.filters[key] = ref.value; renderAchievements(); });
     }
     refs.emptyState.querySelector('[data-empty-import]').addEventListener('click', () => {
-        refs.importPanel.hidden = false;
-        refs.importToggle.setAttribute('aria-expanded', 'true');
-        refs.importText.focus();
+        setImportPanelOpen(true, { focus: true });
     });
     refs.emptyState.querySelector('[data-empty-profile]').addEventListener('click', () => {
         document.querySelector('#workspace-profile-shortcut, #profile-btn')?.click();
