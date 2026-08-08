@@ -89,4 +89,37 @@ describe('Advanced Stats API proxy privacy', () => {
         expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
         expect(assetFetch).toHaveBeenCalledTimes(1);
     });
+
+    it('uses the trusted production origin upstream only when the preview override is explicit', async () => {
+        const upstreamFetch = vi.fn(async (_url, options) => {
+            expect(options.headers.get('Origin')).toBe('https://clashpanel.com');
+            expect(options.headers.get('Referer')).toBe('https://clashpanel.com/');
+            expect(options.headers.get('X-Forwarded-Host')).toBe('clashpanel-phase8-preview.example');
+            return new Response(JSON.stringify({ ok: true }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        });
+        vi.stubGlobal('fetch', upstreamFetch);
+
+        const response = await worker.fetch(
+            new Request('https://clashpanel-phase8-preview.example/api/Player', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Origin': 'https://clashpanel-phase8-preview.example'
+                },
+                body: '{}'
+            }),
+            {
+                CLOUD_RUN_ORIGIN: 'https://backend.example',
+                DISABLE_CANONICAL_REDIRECT: 'true',
+                UPSTREAM_ORIGIN_OVERRIDE: 'https://clashpanel.com',
+                API_PROXY_SECRET: 'preview-proxy-secret'
+            }
+        );
+
+        expect(response.status).toBe(200);
+        expect(upstreamFetch).toHaveBeenCalledTimes(1);
+    });
 });
