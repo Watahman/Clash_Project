@@ -10,6 +10,8 @@ class CacheKeysTest {
         assertEquals("#ABC123", CacheKeys.normalizeTag("  abc123 "));
         assertEquals("#ABC123", CacheKeys.normalizeTag(" #AbC123 "));
         assertEquals("#ABC123", CacheKeys.normalizeTag("%23abc123"));
+        assertEquals("#LQURPQJ0Y", CacheKeys.normalizeTag("#LQURPQJOY"));
+        assertEquals("#LQURPQJ0Y", CacheKeys.normalizeTag("%23LQURPQJOY"));
     }
 
     @Test
@@ -25,6 +27,7 @@ class CacheKeysTest {
     @Test
     void validatesTagsBeforeTheyReachTheClashApi() {
         assertEquals("#P0LYQ8", CacheKeys.requireValidTag("p0lyq8"));
+        assertEquals("#LQURPQJ0Y", CacheKeys.requireValidTag("#LQURPQJOY"));
         assertThrows(IllegalArgumentException.class, () -> CacheKeys.requireValidTag("#ABC123"));
         assertThrows(IllegalArgumentException.class, () -> CacheKeys.requireValidTag("../../players"));
     }
