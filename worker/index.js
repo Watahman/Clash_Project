@@ -91,7 +91,8 @@ function permanentRedirect(requestUrl, destination) {
     return Response.redirect(redirectUrl.toString(), PERMANENT_REDIRECT_STATUS);
 }
 
-function canonicalOriginRedirect(incomingUrl, canonicalPath = null) {
+function canonicalOriginRedirect(incomingUrl, canonicalPath = null, env = {}) {
+    if (String(env.DISABLE_CANONICAL_REDIRECT || "").toLowerCase() === "true") return null;
     if (incomingUrl.protocol === "https:" && incomingUrl.hostname === CANONICAL_HOST) return null;
     const canonicalUrl = new URL(incomingUrl);
     canonicalUrl.protocol = "https:";
@@ -236,7 +237,7 @@ export default {
     async fetch(request, env) {
         const incomingUrl = new URL(request.url);
         const redirect = routeRedirect(incomingUrl);
-        const originRedirect = canonicalOriginRedirect(incomingUrl, redirect);
+        const originRedirect = canonicalOriginRedirect(incomingUrl, redirect, env);
         if (originRedirect) return originRedirect;
         if (isApiPath(incomingUrl.pathname)) {
             return proxyApiRequest(request, env, incomingUrl);
