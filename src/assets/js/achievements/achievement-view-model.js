@@ -1,6 +1,3 @@
-const ROMAN_TIER_SUFFIX = /\s+(?:I|II|III|IV)$/;
-const DESCRIPTION_TARGET_SUFFIX = /:\s*[\d,.]+\s*$/;
-
 export function normalizePlayerTag(value) {
     const compact = String(value || '')
         .trim()
@@ -17,7 +14,7 @@ export function parseBaseDataText(text) {
 
     let parsed;
     try { parsed = JSON.parse(source); }
-    catch { return { valid: false, error: 'This is not valid JSON.' }; }
+    catch { return { valid: false, error: 'This is not valid JSON.' };
 
     if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') {
         return { valid: false, error: 'The copied data must be one JSON object.' };
@@ -102,6 +99,7 @@ export function collectLinkedAccounts(input) {
 function normalizedRow(row) {
     const target = Math.max(0, Number(row?.target) || 0);
     const progress = Math.max(0, Number(row?.progress) || 0);
+    const progressKnown = row?.progress_known !== false;
     return {
         ...row,
         family_key: String(row?.family_key || row?.familyKey || ''),
@@ -109,11 +107,22 @@ function normalizedRow(row) {
         title: String(row?.title || 'Achievement'),
         description: String(row?.description || ''),
         category: String(row?.category || 'other'),
-        rarity: String(row?.rarity || 'common'),
+        categoryLabel: String(row?.category_label || ''),
+        rarity: String(row?.rarity || 'common').toLowerCase(),
         metric: String(row?.metric || ''),
+        specMetric: String(row?.spec_metric || ''),
         source: String(row?.source || 'base_data'),
-        sourceAvailable: row?.source_available !== false,
+        sourceCodes: Array.isArray(row?.source_codes) ? row.source_codes.map(String) : [],
+        evaluationMode: String(row?.evaluation_mode || ''),
+        priority: String(row?.priority || ''),
+        notes: String(row?.notes || ''),
+        tierLabel: String(row?.tier_label || row?.tier || ''),
+        thresholdText: String(row?.threshold_text || ''),
+        progressKnown,
+        sourceAvailable: row?.source_available === true && progressKnown,
         hasStoredProgress: row?.has_stored_progress === true,
+        catalogTemplate: row?.catalog_template === true,
+        dynamicOfficial: row?.dynamic_official === true,
         tier: Math.max(1, Number(row?.tier) || 1),
         xp: Math.max(0, Number(row?.xp) || 0),
         target,
@@ -127,6 +136,7 @@ export function groupAchievementFamilies(rows) {
     const groups = new Map();
     for (const sourceRow of Array.isArray(rows) ? rows : []) {
         const row = normalizedRow(sourceRow);
+        if (row.catalogTemplate) continue;
         const familyKey = row.family_key || row.achievement_key || `achievement-${groups.size}`;
         if (!groups.has(familyKey)) groups.set(familyKey, []);
         groups.get(familyKey).push(row);
@@ -138,27 +148,35 @@ export function groupAchievementFamilies(rows) {
         const currentTier = tiers.find(tier => !tier.unlocked) || tiers.at(-1);
         const highestUnlocked = unlockedTiers.at(-1) || null;
         const complete = unlockedTiers.length === tiers.length && tiers.length > 0;
-        const progressRatio = currentTier?.target > 0
+        const hasStoredProgress = tiers.some(tier => tier.hasStoredProgress);
+        const sourceAvailable = tiers.some(tier => tier.sourceAvailable);
+        const progressRatio = sourceAvailable && currentTier?.target > 0
             ? Math.min(1, currentTier.progress / currentTier.target)
             : complete ? 1 : 0;
         const state = complete
             ? 'complete'
             : unlockedTiers.length > 0
                 ? 'unlocked'
-                : currentTier?.progress > 0
-                    ? 'in_progress'
-                    : 'locked';
+                : !sourceAvailable && !hasStoredProgress
+                    ? 'unknown'
+                    : currentTier?.progress > 0
+                        ? 'in_progress'
+                        : 'locked';
         const first = tiers[0];
-        const sourceAvailable = tiers.some(tier => tier.sourceAvailable);
 
         return {
             familyKey,
-            title: first.title.replace(ROMAN_TIER_SUFFIX, ''),
-            description: first.description.replace(DESCRIPTION_TARGET_SUFFIX, ''),
+            title: first.title,
+            description: first.description,
             category: first.category,
+            categoryLabel: first.categoryLabel,
             source: first.source,
+            sourceCodes: first.sourceCodes,
+            evaluationMode: first.evaluationMode,
+            priority: first.priority,
+            notes: first.notes,
             sourceAvailable,
-            hasStoredProgress: tiers.some(tier => tier.hasStoredProgress),
+            hasStoredProgress,
             tiers,
             unlockedTiers,
             highestUnlocked,
@@ -171,7 +189,7 @@ export function groupAchievementFamilies(rows) {
     }).sort((left, right) => {
         const availability = Number(right.sourceAvailable) - Number(left.sourceAvailable);
         if (availability) return availability;
-        const stateOrder = { in_progress: 0, unlocked: 1, locked: 2, complete: 3 };
+        const stateOrder = { in_progress: 0, unlocked: 1, locked: 2, unknown: 3, complete: 4 };
         return (stateOrder[left.state] ?? 9) - (stateOrder[right.state] ?? 9)
             || left.category.localeCompare(right.category)
             || left.title.localeCompare(right.title);
@@ -180,9 +198,9 @@ export function groupAchievementFamilies(rows) {
 
 export function achievementLevelFromXp(totalXp) {
     const xp = Math.max(0, Number(totalXp) || 0);
-    const level = Math.floor(Math.sqrt(xp / 250)) + 1;
-    const floorXp = 250 * (level - 1) ** 2;
-    const nextXp = 250 * level ** 2;
+    const level = Math.floor(Math.sqrt(xp / 100)) + 1;
+    const floorXp = 100 * (level - 1) ** 2;
+    const nextXp = 100 * level ** 2;
     const progress = nextXp > floorXp ? (xp - floorXp) / (nextXp - floorXp) : 1;
     return { level, floorXp, nextXp, progress: Math.max(0, Math.min(1, progress)) };
 }
@@ -198,6 +216,7 @@ export function buildAchievementSummary(families) {
         unlockedTierCount: unlockedTiers.length,
         totalTierCount: allTiers.length,
         availableFamilies: list.filter(family => family.sourceAvailable).length,
+        unknownFamilies: list.filter(family => family.state === 'unknown').length,
         totalXp,
         completion: allTiers.length ? unlockedTiers.length / allTiers.length : 0,
         level: achievementLevelFromXp(totalXp)
@@ -224,8 +243,12 @@ export function filterAchievementFamilies(families, filters = {}) {
             family.title,
             family.description,
             family.category,
+            family.categoryLabel,
             family.source,
-            ...family.tiers.map(tier => tier.title)
+            family.evaluationMode,
+            family.priority,
+            ...family.sourceCodes,
+            ...family.tiers.flatMap(tier => [tier.tierLabel, tier.thresholdText])
         ].join(' ').toLowerCase();
         return searchable.includes(search);
     });
