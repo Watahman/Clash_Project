@@ -134,3 +134,57 @@ revoke all on function public.read_clashpanel_achievement_metrics_v1(uuid)
     from public, anon, authenticated;
 grant execute on function public.read_clashpanel_achievement_metrics_v1(uuid)
     to service_role;
+
+-- Broad Advanced Stats metrics reuse the already-collected daily aggregates;
+-- no second battle-log collector is introduced.
+create or replace function public.read_advanced_stats_broad_achievement_metrics_v1(
+    p_user_id uuid,
+    p_player_tag text
+) returns jsonb
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+with tracking as (
+    select t.id
+    from public.advanced_stats_tracking t
+    where t.user_id = p_user_id
+      and t.player_tag = p_player_tag
+), totals as (
+    select
+        coalesce(sum(d.attacks), 0)::bigint as attacks,
+        coalesce(sum(d.total_stars), 0)::bigint as stars,
+        coalesce(sum(d.three_star_attacks), 0)::bigint as threes,
+        coalesce(sum(d.two_star_attacks), 0)::bigint as twos,
+        coalesce(sum(d.one_star_attacks), 0)::bigint as ones,
+        coalesce(sum(d.zero_star_attacks), 0)::bigint as zeroes,
+        coalesce(sum(d.gold_looted), 0)::bigint as gold,
+        coalesce(sum(d.elixir_looted), 0)::bigint as elixir,
+        coalesce(sum(d.dark_elixir_looted), 0)::bigint as dark_elixir,
+        count(distinct d.stat_date) filter (where d.attacks > 0)::bigint as active_days
+    from public.advanced_stats_daily d
+    join tracking t on t.id = d.tracking_id
+)
+select jsonb_build_object(
+    'available', exists(select 1 from tracking),
+    'metrics', jsonb_build_object(
+        'tracked_attack_count', totals.attacks,
+        'tracked_star_count', totals.stars,
+        'tracked_three_star_count', totals.threes,
+        'tracked_two_star_count', totals.twos,
+        'tracked_one_star_count', totals.ones,
+        'tracked_zero_star_count', totals.zeroes,
+        'tracked_gold_looted', totals.gold,
+        'tracked_elixir_looted', totals.elixir,
+        'tracked_dark_elixir_looted', totals.dark_elixir,
+        'tracked_active_days', totals.active_days
+    )
+)
+from totals;
+$$;
+
+revoke all on function public.read_advanced_stats_broad_achievement_metrics_v1(uuid, text)
+    from public, anon, authenticated;
+grant execute on function public.read_advanced_stats_broad_achievement_metrics_v1(uuid, text)
+    to service_role;
