@@ -64,6 +64,12 @@ public final class AdvancedStatsAchievementReconciler {
         List<AchievementProgress> progress = evaluator.evaluate(snapshot.metrics()).stream()
                 .filter(item -> SUPPORTED_METRICS.contains(item.definition().metric()))
                 .toList();
+
+        // The original v2 achievement specification has no synthetic
+        // Advanced-Stats-only Battle Tracker/Star Collector families. Keep the
+        // collector data, but do not write invented achievement rows.
+        if (progress.isEmpty()) return;
+
         store.reconcile(
                 tracking.userId(),
                 tracking.playerTag(),
