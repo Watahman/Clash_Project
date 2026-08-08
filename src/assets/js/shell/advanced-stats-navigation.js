@@ -35,6 +35,9 @@ function ensureNavigation() {
     const currentPath = window.location.pathname.replace(/\/+$/, '');
     const active = currentPath === ADVANCED_STATS_PATH;
     if (active) {
+        navigation.querySelectorAll('[data-workspace-nav][aria-current="page"]').forEach(item => {
+            if (item !== link) item.removeAttribute('aria-current');
+        });
         link.setAttribute('aria-current', 'page');
         const breadcrumb = document.querySelector('[data-workspace-current]');
         if (breadcrumb) {
