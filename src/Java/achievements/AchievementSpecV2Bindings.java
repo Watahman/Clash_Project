@@ -71,19 +71,12 @@ public final class AchievementSpecV2Bindings {
             case "BASE_ACTIVE_HERO_TIMERS" -> gte("base_active_hero_timers");
             case "BASE_ACTIVE_RESEARCH_TIMERS" -> gte("base_active_research_timers");
             case "BASE_ACTIVE_PET_TIMER" -> gte("base_active_pet_timers");
-            case "BASE_BUSY_SYSTEMS" -> gte("base_active_system_count");
             case "BASE_BOTH_VILLAGES_BUSY" -> bool("base_both_villages_busy");
             case "BASE_LONG_TIMER" -> gte("base_max_timer_seconds");
             case "BASE_FINISHING_SOON" -> lte("base_min_positive_timer_seconds");
             case "BASE_CURRENT_TIMER_TOTAL" -> gte("base_timer_seconds_total");
             case "BASE_BB_ACTIVE_TIMERS" -> gte("builder_active_timer_count");
             case "BASE_HOME_GEARUPS" -> gte("gear_up_count");
-
-            case "BASE_BUILDING_LEVELS_GAINED" -> gte("tracked_home_building_levels");
-            case "BASE_TRAP_LEVELS_GAINED" -> gte("tracked_home_trap_levels");
-            case "BASE_WALL_LEVELS_GAINED" -> gte("tracked_home_wall_levels");
-            case "BASE_BB_WALL_LEVELS_GAINED" -> gte("tracked_builder_wall_levels");
-            case "BASE_HELPER_PROGRESS" -> gte("tracked_helper_levels");
 
             case "BASE_HELPER_LEVEL_SUM" -> gte("helper_level_sum");
             case "BASE_HELPERS_UNLOCKED" -> gte("helper_distinct_count");
@@ -100,7 +93,6 @@ public final class AchievementSpecV2Bindings {
             case "COL_HOME_OBSTACLES_TOTAL" -> gte("obstacle_count");
             case "COL_BB_OBSTACLES_UNIQUE" -> gte("builder_obstacle_distinct_count");
             case "COL_BB_OBSTACLES_TOTAL" -> gte("builder_obstacle_count");
-            case "COL_MUSEUM" -> gte("cosmetic_collection_count");
             case "COL_CATEGORY_MASTER" -> gte("collection_non_empty_category_count");
 
             case "APP_BASE_IMPORT_FIRST", "APP_BASE_IMPORTS" -> gte("snapshot_import_count");
