@@ -107,6 +107,8 @@ The frontend candidate also stays isolated:
 - it has no cron trigger;
 - canonical redirect is disabled only when the explicit preview config sets `DISABLE_CANONICAL_REDIRECT=true`;
 - it proxies `/api/*` only to the tagged `phase8` backend candidate;
+- the preview-only Worker sets `UPSTREAM_ORIGIN_OVERRIDE=https://clashpanel.com` before proxying API requests so the existing backend CORS policy accepts the trusted Worker path; production does not set this override;
+- the browser-facing preview host remains unchanged, while `X-Forwarded-Host` still identifies the preview host;
 - it reuses `API_PROXY_SECRET` from Google Secret Manager through a temporary Wrangler secrets file that is deleted immediately after deployment.
 
 Production `clashpanel.com` remains unchanged during this stage.
@@ -127,7 +129,7 @@ Purpose:
 
 - `deploy-cloud-run-phase8.ps1` — deploy candidate with `--no-traffic --tag phase8`, verify `/health`, `/ready` and disabled internal poll;
 - `configure-advanced-stats-phase8.ps1` — generate/store scheduler secret, configure exactly one developer UUID, create/update the scheduler target against the tag URL, keep scheduler paused and collection off;
-- `deploy-phase8-preview.ps1` — build and deploy isolated `workers.dev` frontend against the tagged candidate;
+- `deploy-phase8-preview.ps1` — build and deploy isolated `workers.dev` frontend against the tagged candidate, reusing the existing proxy secret without committing it;
 - `enable-advanced-stats-phase8.ps1` — enable collection only on a new zero-traffic tagged candidate, verify no-secret/wrong-secret rejection and one authorized collector request, then resume Scheduler;
 - `disable-advanced-stats-phase8.ps1` — emergency kill switch: pause Scheduler and disable collection/public enrollment on the tagged candidate without deleting history or moving production traffic.
 
