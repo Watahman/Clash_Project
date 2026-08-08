@@ -108,7 +108,7 @@ public class SUPABASE_Achievements {
         JsonElement latestSnapshot = firstOrNull(snapshots);
         JsonObject response = new JsonObject();
         response.addProperty("playerTag", playerTag);
-        response.add("achievements", JsonParser.parseString(progress));
+        response.add("achievements", completeAchievementCatalog(progress, latestSnapshot));
         response.add("latestSnapshot", latestSnapshot);
         if (latestSnapshot.isJsonObject()) {
             JsonElement metrics = latestSnapshot.getAsJsonObject().get("metrics");
@@ -119,6 +119,69 @@ public class SUPABASE_Achievements {
             response.add("history", new JsonObject());
         }
         utils.sendJsonResponse(exchange, response.toString(), 200);
+    }
+
+    private JsonArray completeAchievementCatalog(String storedProgressJson, JsonElement latestSnapshot) {
+        JsonArray storedRows = JsonParser.parseString(storedProgressJson).getAsJsonArray();
+        Map<String, JsonObject> storedByKey = new HashMap<>();
+        for (JsonElement element : storedRows) {
+            if (!element.isJsonObject()) continue;
+            JsonObject row = element.getAsJsonObject();
+            String key = stringValue(row, "achievement_key");
+            if (!key.isBlank()) storedByKey.put(key, row);
+        }
+
+        Map<String, Long> currentMetrics = new LinkedHashMap<>();
+        if (latestSnapshot != null && latestSnapshot.isJsonObject()) {
+            JsonElement metrics = latestSnapshot.getAsJsonObject().get("metrics");
+            if (metrics != null && metrics.isJsonObject()) {
+                currentMetrics.putAll(numericMap(metrics.getAsJsonObject()));
+            }
+        }
+
+        JsonArray catalog = evaluator.toJson(evaluator.evaluate(currentMetrics));
+        JsonArray result = new JsonArray();
+        for (JsonElement element : catalog) {
+            JsonObject row = element.getAsJsonObject().deepCopy();
+            JsonObject stored = storedByKey.get(stringValue(row, "achievement_key"));
+            if (stored != null) {
+                long progress = Math.max(longValue(row, "progress"), longValue(stored, "progress"));
+                long target = Math.max(0, longValue(row, "target"));
+                boolean previouslyUnlocked = booleanValue(stored, "unlocked");
+                row.addProperty("progress", progress);
+                row.addProperty("unlocked", previouslyUnlocked || (target > 0 && progress >= target));
+                copyOptional(stored, row, "unlocked_at");
+                copyOptional(stored, row, "updated_at");
+            }
+            result.add(row);
+        }
+        return result;
+    }
+
+    private void copyOptional(JsonObject source, JsonObject target, String field) {
+        JsonElement value = source.get(field);
+        if (value != null && !value.isJsonNull()) target.add(field, value.deepCopy());
+    }
+
+    private String stringValue(JsonObject object, String field) {
+        JsonElement value = object.get(field);
+        return value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isString()
+                ? value.getAsString()
+                : "";
+    }
+
+    private long longValue(JsonObject object, String field) {
+        JsonElement value = object.get(field);
+        if (value == null || !value.isJsonPrimitive() || !value.getAsJsonPrimitive().isNumber()) return 0;
+        return Math.max(0, value.getAsLong());
+    }
+
+    private boolean booleanValue(JsonObject object, String field) {
+        JsonElement value = object.get(field);
+        return value != null
+                && value.isJsonPrimitive()
+                && value.getAsJsonPrimitive().isBoolean()
+                && value.getAsBoolean();
     }
 
     private List<HistoricalAchievementMetrics.Snapshot> loadHistoricalSnapshots(
