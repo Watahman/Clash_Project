@@ -114,6 +114,10 @@ public final class AchievementMetricCollector {
         String raw = utils.clashGetFreshValue("/players/" + encoded, CachePolicy.PLAYER_INFO);
         JsonObject player = JsonParser.parseString(raw).getAsJsonObject();
 
+        // A successful profile read means known live-profile achievements are
+        // measurable even when a unit/achievement is still locked or at zero.
+        initializeLiveCatalogDefaults(metrics);
+
         put(metrics, "profile_town_hall", number(player, "townHallLevel"));
         put(metrics, "profile_builder_hall", number(player, "builderHallLevel"));
         put(metrics, "profile_exp_level", number(player, "expLevel"));
@@ -139,15 +143,25 @@ public final class AchievementMetricCollector {
         put(metrics, "profile_clan_level", number(clan, "clanLevel"));
         put(metrics, "profile_role_rank", roleRank(string(player, "role")));
 
-        UnitTotals heroes = unitTotals(array(player, "heroes"), true);
-        UnitTotals troops = unitTotals(array(player, "troops"), true);
-        UnitTotals spells = unitTotals(array(player, "spells"), false);
-        UnitTotals equipment = unitTotals(firstArray(player, "heroEquipment", "equipment"), false);
+        JsonArray heroRows = array(player, "heroes");
+        JsonArray troopRows = array(player, "troops");
+        JsonArray spellRows = array(player, "spells");
+        JsonArray equipmentRows = firstArray(player, "heroEquipment", "equipment");
+
+        UnitTotals heroes = unitTotals(heroRows, true);
+        UnitTotals troops = unitTotals(troopRows, true);
+        UnitTotals spells = unitTotals(spellRows, false);
+        UnitTotals equipment = unitTotals(equipmentRows, false);
         put(metrics, "profile_hero_count", heroes.count());
         put(metrics, "profile_hero_level_sum", heroes.levelSum());
         put(metrics, "profile_troop_count", troops.count());
         put(metrics, "profile_spell_count", spells.count());
         put(metrics, "profile_equipment_count", equipment.count());
+
+        collectMasteryRows(troopRows, "troop", metrics);
+        collectMasteryRows(heroRows, "hero", metrics);
+        collectMasteryRows(spellRows, "spell", metrics);
+        collectMasteryRows(equipmentRows, "equipment", metrics);
 
         long nativeStars = 0;
         for (JsonElement element : array(player, "achievements")) {
@@ -155,12 +169,49 @@ public final class AchievementMetricCollector {
             JsonObject achievement = element.getAsJsonObject();
             String name = string(achievement, "name");
             if (name.isBlank()) continue;
-            String slug = slug(name);
+            String slug = AchievementCatalogExpansion.slug(name);
             put(metrics, "native_" + slug, number(achievement, "value"));
+            put(metrics, "native_stars_" + slug, number(achievement, "stars"));
             nativeStars += number(achievement, "stars");
         }
         put(metrics, "profile_native_achievement_stars", nativeStars);
         return clanTag;
+    }
+
+    private void initializeLiveCatalogDefaults(Map<String, Long> metrics) {
+        for (AchievementDefinition definition : AchievementCatalog.definitions()) {
+            String metric = definition.metric();
+            if (metric.startsWith("mastery_") || metric.startsWith("native_stars_")) {
+                metrics.putIfAbsent(metric, 0L);
+            }
+        }
+    }
+
+    private void collectMasteryRows(JsonArray rows, String kind, Map<String, Long> metrics) {
+        for (JsonElement element : rows) {
+            if (!element.isJsonObject()) continue;
+            JsonObject item = element.getAsJsonObject();
+            String name = string(item, "name");
+            if (name.isBlank()) continue;
+            long level = number(item, "level");
+            long maxLevel = number(item, "maxLevel");
+            if (maxLevel <= 0) continue;
+
+            String prefix;
+            if ("spell".equals(kind)) {
+                prefix = "mastery_spell_";
+            } else if ("equipment".equals(kind)) {
+                prefix = "mastery_equipment_";
+            } else {
+                String village = string(item, "village");
+                boolean builder = "builderbase".equalsIgnoreCase(village)
+                        || "builder_base".equalsIgnoreCase(village)
+                        || "builder".equalsIgnoreCase(village);
+                prefix = builder ? "mastery_builder_" : "mastery_home_";
+            }
+            long percentage = Math.min(100, level * 100L / maxLevel);
+            put(metrics, prefix + AchievementCatalogExpansion.slug(name), percentage);
+        }
     }
 
     private boolean collectCurrentWar(String clanTag, String playerTag, Map<String, Long> metrics) throws Exception {
@@ -242,6 +293,7 @@ public final class AchievementMetricCollector {
             int seasonAttacks = 0;
             boolean seasonPerfect = true;
             for (HistoricalCwlSeason.War war : season.wars()) {
+                if (war.clan() == null) continue;
                 HistoricalCwlSeason.Member member = war.clan().members().stream()
                         .filter(value -> playerTag.equalsIgnoreCase(value.tag()))
                         .findFirst().orElse(null);
@@ -471,14 +523,6 @@ public final class AchievementMetricCollector {
             case "member" -> 1;
             default -> 0;
         };
-    }
-
-    private static String slug(String value) {
-        String slug = value.toLowerCase()
-                .replace("&", " and ")
-                .replaceAll("[^a-z0-9]+", "_")
-                .replaceAll("^_+|_+$", "");
-        return slug;
     }
 
     private static void copyIfPresent(Map<String, Long> metrics, String output, String input) {
