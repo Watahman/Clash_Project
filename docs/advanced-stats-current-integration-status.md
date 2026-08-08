@@ -1,281 +1,108 @@
 # Advanced Stats — Current integration checkpoint
 
-Updated: 2026-08-07
+Updated: 2026-08-08
 Branch: `agent/advanced-stats-foundation`
 PR: #8 (draft, target `Development`)
 
-## Integrated prerequisite work
+## Current status
 
-The current `Development` baseline was synced into this branch after these integrations landed there:
+Phases 0–7 are complete. Phase 8 implementation, production database deployment, rollback-only database validation, parser/fingerprint hardening, i18n/accessibility/privacy hardening, and staged deployment tooling are complete.
 
-1. Bracket Generator redesign
-2. War Operation Board Webby redesign
-3. Entity Guesser / Higher or Lower Minigames
-4. Advanced Achievements
+The remaining gate is the **real external runtime observation** against a deliberately isolated candidate:
 
-The sync was validated through PR #12 before it was merged into this branch.
+- Cloud Run candidate is deployed with tag `phase8` and **0% normal production traffic**;
+- an isolated `clashpanel-phase8-preview` Worker on `workers.dev` is used instead of replacing `clashpanel.com`;
+- public Advanced Stats enrollment remains disabled;
+- only one developer UUID is allowlisted during the first stage;
+- Scheduler targets the tagged candidate, not the production service URL;
+- Scheduler remains paused until one developer tracker has been started and the protected collector endpoint passes its authorization checks.
 
-## Phase status
+No Phase 8 candidate should receive normal production traffic before the staged observation gate is complete.
 
-- Phase 0 — COMPLETE
-- Phase 1 — COMPLETE
-- Phase 2 — COMPLETE
-- Phase 3 — COMPLETE
-- Phase 4 — COMPLETE
-- Phase 5 — COMPLETE
-- Phase 6 — COMPLETE
-- Phase 7 — COMPLETE
-- Phase 8 code/static hardening — COMPLETE
-- Phase 8 production database deployment — COMPLETE
-- Phase 8 schema/security verification — COMPLETE
-- Phase 8 transactional database behavior suite — COMPLETE
-- Phase 8 parser/fingerprint robustness pass — COMPLETE
-- Phase 8 i18n/accessibility/privacy hardening — COMPLETE
-- Phase 8 real Cloud Run / Clash API / Scheduler rollout — NOT COMPLETE
+## Completed production database work
 
-## Phase 7 result
+The active production Supabase project contains the Advanced Achievements foundation plus Advanced Stats migrations `001` through `008`.
 
-Advanced Stats remains the only battle-log/history source.
+Verified directly:
 
-Advanced Achievements consumes exact persisted Advanced Stats aggregates for:
-
-- tracked attacks;
-- tracked stars;
-- tracked three-star attacks.
-
-There is no second Achievement battle-log poller.
-
-Reconciliation is monotonic and retry-safe. If a battle was already durably inserted but Achievement reconciliation temporarily fails, a later duplicate-only poll retries reconciliation without writing the battle or aggregates twice.
-
-## Phase 8 rollout controls
-
-Implemented server-side controls:
-
-- `ADVANCED_STATS_COLLECTION_ENABLED=false` by default;
-- `ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false` by default;
-- `ADVANCED_STATS_ROLLOUT_USER_IDS` for developer/small-subset enrollment;
-- scheduler secret required for internal poll authorization;
-- existing status/pause/resume/stop/delete operations remain available when new enrollment is closed.
-
-See `docs/advanced-stats-phase8-rollout.md` for the mandatory live checklist.
-
-## Production database deployment
-
-On 2026-08-07 the active production Supabase project received:
-
-- `advanced_achievements_foundation`;
-- `advanced_stats_foundation`;
-- `advanced_stats_battle_ingestion`;
-- `advanced_stats_identity_hardening`;
-- `advanced_stats_scheduled_collection`;
-- `advanced_stats_read_models`;
-- `advanced_stats_exact_trends`;
-- `advanced_stats_achievements_integration`;
-- `advanced_stats_delete_cleanup`.
-
-Migration 008 makes feature-level deletion transactionally complete: the tracking row/history is deleted together with only the Achievement progress whose metric is sourced exclusively from Advanced Stats (`tracked_attack_count`, `tracked_star_count`, `tracked_three_star_count`). Unrelated Achievement progress is preserved, so a later Advanced Stats restart genuinely begins from zero without deleting unrelated achievements.
-
-Verified after deployment:
-
-- all 9 required Achievement/Advanced Stats tables exist;
-- RLS is enabled on all 9 tables;
-- `anon` and `authenticated` have no direct CRUD access;
-- `service_role` has required CRUD access;
-- all 17 required Advanced Stats/Achievement RPC signatures exist;
-- `anon` and `authenticated` cannot execute backend-only RPCs;
-- `service_role` can execute them;
+- 9 required tables with RLS;
+- 17 required backend RPC signatures;
+- 9 migration-history entries;
+- no direct Advanced Stats CRUD for `anon`/`authenticated`;
+- no backend-only RPC execute for `anon`/`authenticated`;
+- required `service_role` access;
 - browser roles cannot create objects in schema `public`;
-- all 9 migration names are present in Supabase migration history.
+- destructive Advanced Stats deletion removes only tracking-derived Achievement progress while preserving unrelated Achievement progress.
 
-Negative role tests were also executed directly with PostgreSQL roles: forbidden table reads and RPC execution returned `permission denied` for `anon` / `authenticated`, while `service_role` retained access.
+Rollback-only synthetic production database tests cover ingestion, deduplication, aggregates, leases, failure/recovery state, all read periods, pagination, timestamp fallback, parser-error reprocessing, cascades, constraints and monotonic Achievement reconciliation. Follow-up checks confirmed no synthetic test data remained.
 
-The Supabase linter reports `RLS enabled, no policy` as informational for these backend-only tables. That is intentional because browser roles receive no direct table access.
-
-## Extended rollback-only production database validation
-
-All write tests below used synthetic users/trackers and ended with `ROLLBACK`.
-
-### Base ingestion / aggregation
-
-Verified:
-
-- first battle insert succeeds;
-- replay of the same fingerprint is deduplicated;
-- daily attack/star/three-star aggregates update once;
-- unit totals update once;
-- army totals update once;
-- `battles_processed` updates once;
-- Advanced Stats -> Achievement reconciliation writes expected progress.
-
-### Scheduler lease / failure state machine
-
-Verified:
-
-- only one worker can own a live lease;
-- a second worker cannot claim the same tracker while the lease is active;
-- an expired lease can be reclaimed;
-- reclaim creates a conservative `WORKER_OUTAGE` gap;
-- success closes the durable gap and clears the lease;
-- repeated RATE_LIMIT failures progress to `DEGRADED` at the configured threshold;
-- recovery resets failures/status, closes the gap and conservatively advances `data_complete_since`.
-
-### Read model / history behavior
-
-Verified with multiple synthetic battles across time windows:
-
-- all-time, 7d and 30d overview values;
-- exact stars/destruction/loot calculations;
-- favorite unit ranking;
-- army ranking;
-- cursor pagination and ordering;
-- identical-timestamp cursor tie-breaking with UUIDs, without duplicate or skipped rows;
-- `OBSERVED` timestamp fallback when upstream battle time is absent;
-- exact trend filtering/bucketing;
-- Advanced Achievement metric aggregates;
-- duplicate replay leaves aggregates unchanged;
-- `PARSER_ERROR` does not partially aggregate;
-- later reprocessing of the same fingerprint aggregates exactly once.
-
-The Java period layer also covers the supported 90d range; the DB read functions all receive the exact lower timestamp computed by that layer.
-
-### Lifecycle / destructive delete / cascade semantics
-
-Verified:
-
-- `STOPPED` preserves readable history;
-- destructive Advanced Stats delete removes tracking history through database cascades;
-- destructive delete removes Advanced-Stats-derived Achievement progress;
-- unrelated Achievement progress is preserved;
-- repeated destructive delete is idempotent;
-- deleting the owning user cascades tracking, history and Achievement progress.
-
-### Constraint / abuse behavior
-
-Verified:
-
-- invalid player tags rejected;
-- malformed fingerprint lengths rejected;
-- tracking/player identity mismatch rejected;
-- invalid stars/destruction rejected;
-- invalid unit categories / non-positive quantities fail atomically;
-- malformed unit JSON shape is rejected;
-- negative loot is normalized to zero by the database contract;
-- Achievement reconciliation is monotonic: progress/source timestamp cannot move backwards and unlock remains sticky;
-- unsupported Achievement metrics / invalid source timestamps are rejected.
-
-After the synthetic database work, follow-up queries confirmed no synthetic test users, trackers or synthetic Achievement rows remained in production.
-
-## Parser/fingerprint hardening audit
-
-A deeper Java audit found one concrete edge case: non-finite destruction values (`NaN`, `+Infinity`, `-Infinity`) could pass the previous range-only model validation because comparisons with `NaN` are false.
-
-Fixed in `AdvancedStatsModels` so non-finite destruction/aggregate values are rejected at the domain boundary.
-
-Added regressions for:
-
-- non-finite numeric values;
-- 250 deterministic army-order permutations producing the same normalized army hash;
-- 200 unknown troop/spell ID pairs retaining stable unknown keys;
-- 500 different observation times keeping a timestamp-less battle fingerprint stable;
-- 2,000 distinct stable identity values producing distinct fingerprints in the regression sample;
-- delimiter/backslash escaping in fingerprint canonicalization.
-
-## i18n, accessibility and private-data hardening
-
-Advanced Stats now has feature-specific coverage for every currently supported site language:
-
-- English;
-- Dutch;
-- French;
-- German;
-- Spanish.
-
-Tests require complete key parity and runtime loading for all five languages. Dynamic army summaries also translate unit counts and category labels, including Clan Castle troop/spell categories.
-
-Accessibility/static UI review verified or improved:
-
-- all buttons use explicit button types;
-- destructive delete remains visually and behaviorally separate from stop;
-- page/data status surfaces use polite live regions;
-- trend chart has a translatable semantic label;
-- the unit filter is labelled by its section heading;
-- the private page remains `noindex` through HTML + worker response headers.
-
-The Cloudflare proxy now forces `Cache-Control: no-store` and `Pragma: no-cache` on Advanced Stats/internal-poll API responses, without changing unrelated API caching behavior.
-
-## Privacy / retention alignment
-
-The Privacy Policy and Terms were updated to describe the actual feature contract:
-
-- Advanced Stats is opt-in and only starts for a linked account after the user enables it;
-- available battle-log observations and derived performance/army/tracking-gap data may be stored;
-- exact historical reconstruction before tracking is not promised;
-- upstream timestamp/identity gaps are represented conservatively;
-- pause/stop preserve stored history while preventing future scheduled collection;
-- destructive feature deletion removes Advanced Stats history and the Achievement progress derived exclusively from it;
-- unrelated Achievement progress remains intact.
-
-The delete confirmation is explicit about the same derived-Achievement reset in all five site languages.
-
-## Migration replay audit
-
-A read-only audit of the deployed migration SQL confirmed replay-safe DDL patterns:
-
-- Advanced Stats/Achievement `CREATE TABLE` statements use `IF NOT EXISTS`;
-- relevant indexes use `IF NOT EXISTS`;
-- added columns use `IF NOT EXISTS`;
-- functions use `CREATE OR REPLACE` or an explicit safe drop before recreation;
-- the scheduled-collection constraint is dropped with `IF EXISTS` before being re-added.
-
-This was a static replay/idempotency audit, not a second production migration registration.
-
-## Reusable verification tooling
-
-Repository scripts include:
-
-- `scripts/check-advanced-stats-schema.sql`;
-- `scripts/check-advanced-stats-schema.mjs`;
-- `scripts/smoke-test-advanced-stats-db.sql`;
-- `scripts/smoke-test-advanced-stats-state-machine.sql`;
-- `scripts/smoke-test-advanced-stats-read-models.sql`;
-- `scripts/smoke-test-advanced-stats-cursor.sql`;
-- `scripts/smoke-test-advanced-stats-constraints.sql`;
-- `scripts/smoke-test-advanced-stats-cascades.sql`;
-- `scripts/smoke-test-advanced-stats-db.mjs`.
-
-Commands:
+Reusable manual database verification:
 
 ```text
 npm run check:advanced-stats-db
 npm run smoke:advanced-stats-db
 ```
 
-Both require an explicit `SUPABASE_DB_URL` and are manual/local verification commands only. GitHub Actions CI is intentionally disabled repository-wide and must not be reintroduced unless explicitly requested.
+These require an explicit `SUPABASE_DB_URL` and are never run automatically by GitHub.
 
-## Final diff/code audit
+## Additional hardening completed
 
-The PR file scope was reviewed against `Development`.
+- non-finite numeric values rejected at the Java domain boundary;
+- deterministic parser/fingerprint fuzz regressions;
+- full Advanced Stats locale coverage for English, Dutch, French, German and Spanish;
+- localized dynamic army/category labels;
+- semantic accessibility labels and live regions;
+- private Advanced Stats/internal-poll API responses forced to `Cache-Control: no-store`;
+- Privacy Policy and Terms aligned with opt-in tracking, known gaps, retention and destructive deletion semantics;
+- GitHub Actions removed repository-wide; validation is local/manual only.
 
-Shared-file changes are limited to expected integration surfaces: backend/frontend route registration, workspace routing/navigation/i18n, Achievement battle-goal integration, private-response cache hardening, package verification commands, policies, migrations/docs/tests and Advanced Stats feature files. No unrelated feature rewrite or exposed scheduler secret was found.
+## Phase 8 zero-traffic deployment tooling
 
-Future integration note: if ClashPanel later adds a backend operation that unlinks a Clash account from `users.accounts`, that flow must define what happens to an active Advanced Stats tracker (stop/delete it or retain owner-management). No such unlink backend route exists in the current code, so no speculative cross-feature change was introduced here.
+The branch now includes:
 
-## Remaining blocker before merge
+```text
+cloudrun-env.example.yaml
+deploy-cloud-run-phase8.ps1
+configure-advanced-stats-phase8.ps1
+wrangler.phase8-preview.jsonc
+deploy-phase8-preview.ps1
+enable-advanced-stats-phase8.ps1
+disable-advanced-stats-phase8.ps1
+```
 
-The remaining mandatory gate is the real staged runtime rollout:
+Safety properties:
 
-1. deploy the candidate backend to Cloud Run with collection and public enrollment disabled;
-2. verify health/ready + disabled internal polling behavior;
-3. configure scheduler secret + developer-only rollout allowlist;
-4. start tracking for one verified developer-owned account;
-5. verify a non-allowlisted user cannot start tracking;
-6. enable collection;
-7. observe real Clash battle-log polls and repeated payloads;
-8. confirm real Cloud Run/Scheduler invocation, process restart/overlap behavior and network/rate-limit handling;
-9. inspect real parser/unknown-ID output and real Achievement reconciliation;
-10. confirm request/database growth is acceptable;
-11. run the complete local/manual repository validation on the exact merge candidate.
+- `deploy-cloud-run-phase8.ps1` requires collection/public enrollment to be explicitly false;
+- backend candidate uses `--no-traffic --tag phase8`;
+- health/ready and disabled internal-poll behavior are checked on the tag URL;
+- developer configuration keeps exactly one UUID allowlisted, collection off and Scheduler paused;
+- Scheduler secret is generated into Google Secret Manager rather than Git;
+- Scheduler job targets only the `phase8` tag URL;
+- preview frontend is a separate `workers.dev` Worker with no custom-domain route and no cron;
+- preview config disables canonical redirect only in that isolated Worker;
+- preview API traffic points only to the tagged backend candidate;
+- preview reuses the existing `API_PROXY_SECRET` through a temporary secrets file that is removed after deployment;
+- preview-only `UPSTREAM_ORIGIN_OVERRIDE=https://clashpanel.com` lets the trusted Worker pass the existing backend CORS policy while retaining the preview host in `X-Forwarded-Host`;
+- collection enablement first verifies missing/wrong scheduler-secret rejection and one authorized collector request;
+- any enablement failure automatically pauses Scheduler and turns collection/public enrollment back off on the tagged candidate;
+- `disable-advanced-stats-phase8.ps1` is a non-destructive emergency kill switch and leaves production traffic untouched.
 
-Many database/state-machine behaviors have now been proven directly against production PostgreSQL with rollback-only synthetic fixtures. The remaining gate specifically covers behavior that cannot be proven without the deployed backend, external scheduler, real Clash API traffic and an observation window.
+Production `clashpanel.com` and the currently serving Cloud Run revision remain outside this developer stage.
 
-PR #8 must remain draft and must not be merged into `Development` until this live runtime gate is complete.
+## Remaining mandatory live gate
+
+1. Checkout/pull the current feature branch locally.
+2. Prepare `cloudrun-env.yaml` from the safe example with the existing production non-secret values and both Advanced Stats switches false.
+3. Run `deploy-cloud-run-phase8.ps1` and verify 0% normal traffic + health/ready + disabled poll.
+4. Run `configure-advanced-stats-phase8.ps1` with exactly one developer user UUID.
+5. Run `deploy-phase8-preview.ps1`.
+6. Sign into the isolated preview and start Advanced Stats for the allowlisted linked developer account.
+7. Run `enable-advanced-stats-phase8.ps1`.
+8. Observe multiple real Cloud Scheduler / Cloud Run / Clash battle-log cycles.
+9. Validate real duplicate behavior, parser/unknown IDs, restart/overlap recovery, 429/5xx/network handling, Achievement reconciliation and database/request growth.
+10. Run the complete local/manual repository checks on the exact candidate.
+11. Only then consider moving PR #8 out of draft and merging it into `Development`.
+
+`ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED` must remain false during the initial developer stage. Normal production traffic must remain at 0% for the `phase8` tagged candidate until the live gate succeeds.
+
+Detailed execution instructions are in `docs/advanced-stats-phase8-rollout.md`.
