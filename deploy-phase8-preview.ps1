@@ -6,6 +6,7 @@ param(
     [string]$ServiceName = "clashpanel-api",
     [string]$TagName = "phase8",
     [string]$ProxyEnvName = "API_PROXY_SECRET",
+    [string]$PreviewOrigin = "",
     [switch]$PreflightOnly
 )
 
@@ -33,6 +34,21 @@ function Run-NativeChecked {
     }
 }
 
+function Get-ServiceJson {
+    param([Parameter(Mandatory = $true)][string]$GcloudExecutable)
+
+    $serviceJsonRaw = (& $GcloudExecutable run services describe $ServiceName --project=$ProjectId --region=$Region --format=json)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Could not inspect Cloud Run service '$ServiceName' in $Region."
+    }
+
+    $service = ($serviceJsonRaw -join "`n") | ConvertFrom-Json
+    if (-not $service) {
+        throw "Cloud Run returned an empty service description."
+    }
+    return $service
+}
+
 function Get-TaggedCandidateUrl {
     param([Parameter(Mandatory = $true)]$Service)
     $tagTraffic = @($Service.status.traffic) | Where-Object { $_.tag -eq $TagName } | Select-Object -First 1
@@ -41,6 +57,52 @@ function Get-TaggedCandidateUrl {
         throw "Tagged Cloud Run candidate '$TagName' was not found. Run deploy-cloud-run-phase8.ps1 first."
     }
     return $url
+}
+
+function Get-EnvValue {
+    param(
+        [Parameter(Mandatory = $true)]$Service,
+        [Parameter(Mandatory = $true)][string]$Name
+    )
+
+    $containers = @($Service.spec.template.spec.containers)
+    if ($containers.Count -lt 1) { return $null }
+    $entry = @($containers[0].env) | Where-Object { $_.name -eq $Name } | Select-Object -First 1
+    if (-not $entry) { return $null }
+    return [string]$entry.value
+}
+
+function Assert-Phase8StillSafe {
+    param([Parameter(Mandatory = $true)]$Service)
+
+    $collection = Get-EnvValue -Service $Service -Name "ADVANCED_STATS_COLLECTION_ENABLED"
+    $publicEnrollment = Get-EnvValue -Service $Service -Name "ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED"
+    if ($collection -ne "false") {
+        throw "Phase 8 safety check failed: ADVANCED_STATS_COLLECTION_ENABLED must still be false before preview auth setup."
+    }
+    if ($publicEnrollment -ne "false") {
+        throw "Phase 8 safety check failed: ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED must still be false before preview auth setup."
+    }
+}
+
+function Normalize-PreviewOrigin {
+    param([Parameter(Mandatory = $true)][string]$Origin)
+
+    $trimmed = $Origin.Trim().TrimEnd('/')
+    try {
+        $uri = [Uri]$trimmed
+    } catch {
+        throw "PreviewOrigin must be an absolute HTTPS workers.dev origin."
+    }
+
+    if (-not $uri.IsAbsoluteUri -or $uri.Scheme -ne "https" -or -not $uri.Host.EndsWith(".workers.dev", [StringComparison]::OrdinalIgnoreCase)) {
+        throw "PreviewOrigin must be an absolute HTTPS workers.dev origin, for example https://clashpanel-phase8-preview.example.workers.dev"
+    }
+    if ($uri.AbsolutePath -ne "/" -or -not [string]::IsNullOrEmpty($uri.Query) -or -not [string]::IsNullOrEmpty($uri.Fragment)) {
+        throw "PreviewOrigin must contain only scheme + host, without a path, query or fragment."
+    }
+
+    return $trimmed
 }
 
 function Get-ProxySecretValue {
@@ -101,6 +163,14 @@ if (-not (Test-Path "./worker/index.js")) {
     throw "worker/index.js is missing."
 }
 
+$normalizedPreviewOrigin = ""
+if (-not [string]::IsNullOrWhiteSpace($PreviewOrigin)) {
+    $normalizedPreviewOrigin = Normalize-PreviewOrigin -Origin $PreviewOrigin
+}
+if (-not $PreflightOnly -and [string]::IsNullOrWhiteSpace($normalizedPreviewOrigin)) {
+    throw "A real Phase 8 preview deploy requires -PreviewOrigin so Google OAuth cannot fall back to clashpanel.com."
+}
+
 $nodeExecutable = Require-Command "node.exe"
 $npmExecutable = Require-Command "npm.cmd"
 $gcloudExecutable = Require-Command "gcloud.cmd"
@@ -115,16 +185,34 @@ Run-NativeChecked -Executable $nodeExecutable -Arguments @("--version") -Failure
 Run-NativeChecked -Executable $wranglerExecutable -Arguments @("--version") -FailureMessage "Local Wrangler check failed"
 Run-NativeChecked -Executable $wranglerExecutable -Arguments @("whoami") -FailureMessage "Cloudflare authentication check failed. Run 'npx wrangler login' and retry"
 
-$serviceJsonRaw = (& $gcloudExecutable run services describe $ServiceName --project=$ProjectId --region=$Region --format=json)
-if ($LASTEXITCODE -ne 0) {
-    throw "Could not inspect Cloud Run service '$ServiceName' in $Region."
-}
-$service = ($serviceJsonRaw -join "`n") | ConvertFrom-Json
-if (-not $service) {
-    throw "Cloud Run returned an empty service description."
+$service = Get-ServiceJson -GcloudExecutable $gcloudExecutable
+Assert-Phase8StillSafe -Service $service
+$candidateUrl = Get-TaggedCandidateUrl -Service $service
+
+if (-not $PreflightOnly) {
+    $previewCallback = "$normalizedPreviewOrigin/api/AuthGoogleCallback"
+    Write-Host "Binding Google OAuth callback to the isolated Phase 8 preview..." -ForegroundColor Cyan
+    Run-NativeChecked `
+        -Executable $gcloudExecutable `
+        -Arguments @(
+            "run", "services", "update", $ServiceName,
+            "--project=$ProjectId",
+            "--region=$Region",
+            "--update-env-vars=AUTH_GOOGLE_CALLBACK_URL=$previewCallback",
+            "--no-traffic",
+            "--tag=$TagName"
+        ) `
+        -FailureMessage "Could not bind the Phase 8 Google OAuth callback to the workers.dev preview"
+
+    $service = Get-ServiceJson -GcloudExecutable $gcloudExecutable
+    Assert-Phase8StillSafe -Service $service
+    $candidateUrl = Get-TaggedCandidateUrl -Service $service
+    $configuredCallback = Get-EnvValue -Service $service -Name "AUTH_GOOGLE_CALLBACK_URL"
+    if ($configuredCallback -ne $previewCallback) {
+        throw "Phase 8 callback verification failed: Cloud Run did not retain the expected workers.dev callback URL."
+    }
 }
 
-$candidateUrl = Get-TaggedCandidateUrl -Service $service
 $proxySecret = Get-ProxySecretValue -Service $service -GcloudExecutable $gcloudExecutable
 
 Write-Host "Building the current Advanced Stats candidate locally..." -ForegroundColor Cyan
@@ -158,10 +246,15 @@ try {
         Write-Host "Phase 8 preview preflight passed." -ForegroundColor Green
         Write-Host "  Tagged backend candidate: found"
         Write-Host "  Normal production traffic: unchanged"
+        Write-Host "  Collection/public enrollment: still OFF"
         Write-Host "  Existing proxy credential: resolved without guessing its Secret Manager name"
         Write-Host "  Local Wrangler: available and authenticated"
         Write-Host "  Frontend build: passed"
         Write-Host "  Wrangler config/bundle dry-run: passed"
+        if ($normalizedPreviewOrigin) {
+            Write-Host "  Preview origin format: valid ($normalizedPreviewOrigin)"
+            Write-Host "  Google OAuth callback change: NOT performed in preflight"
+        }
         Write-Host "  Cloudflare deploy: NOT performed (-PreflightOnly)"
         return
     }
@@ -185,10 +278,15 @@ Write-Host "Phase 8 frontend preview deployed." -ForegroundColor Green
 Write-Host "  Backend target: tagged '$TagName' Cloud Run candidate"
 Write-Host "  Normal production traffic to candidate: 0%"
 Write-Host "  Preview Worker: separate workers.dev Worker"
+Write-Host "  Preview origin: $normalizedPreviewOrigin"
+Write-Host "  Google OAuth callback: $normalizedPreviewOrigin/api/AuthGoogleCallback"
+Write-Host "  Collection: OFF"
+Write-Host "  Public enrollment: OFF"
 Write-Host "  Custom-domain route: none"
 Write-Host "  Cron trigger: none"
 Write-Host "  Upstream CORS origin: https://clashpanel.com (preview Worker only)"
 Write-Host "  Production clashpanel.com: unchanged"
 Write-Host ""
-Write-Host "Use the workers.dev URL printed by Wrangler to sign in and open /app/advanced-stats."
-Write-Host "For this preview, prefer normal email/password sign-in; the production Google OAuth callback still points to clashpanel.com."
+Write-Host "Before Google sign-in, make sure this exact callback is present in Supabase Authentication > URL Configuration > Redirect URLs:"
+Write-Host "  $normalizedPreviewOrigin/api/AuthGoogleCallback" -ForegroundColor Yellow
+Write-Host "Then open $normalizedPreviewOrigin/app/advanced-stats and sign in with Google."
