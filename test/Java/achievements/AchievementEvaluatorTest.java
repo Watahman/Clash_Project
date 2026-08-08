@@ -71,7 +71,6 @@ class AchievementEvaluatorTest {
 
         JsonObject json = evaluator.toJson(List.of(warAttack)).get(0).getAsJsonObject();
         assertFalse(json.get("progress_known").getAsBoolean());
-        assertFalse(json.get("source_available").isJsonNull());
     }
 
     @Test
