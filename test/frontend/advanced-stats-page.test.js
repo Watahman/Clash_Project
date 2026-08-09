@@ -38,7 +38,8 @@ describe('Advanced Stats workspace page', () => {
         expect(source).toContain("show(elements['advanced-stats-no-accounts'], false)");
         expect(source).toContain("addEventListener('click', retryProfileLoad)");
         expect(source).toContain("if (overview.status === 'fulfilled') state.overview = overview.value");
-        expect(source).toContain("if (units.status === 'fulfilled') state.units = arrayValue(units.value?.items)");
+        expect(source).toContain("if (units.status === 'fulfilled') {");
+        expect(source).toContain('state.unitCatalog = arrayValue(units.value?.items)');
         expect(source).not.toContain("state.overview = overview.status === 'fulfilled' ? overview.value : null");
         expect(source).not.toContain("setDataStatus('advancedStats.loadingData');\n    state.nextCursor = null;");
         expect(source).toContain("data-load-error");
@@ -57,12 +58,22 @@ describe('Advanced Stats workspace page', () => {
         expect(document.querySelector('#advanced-stats-data-status')?.getAttribute('aria-live')).toBe('polite');
     });
 
-    it('keeps dynamic army summaries localized', () => {
+    it('shows meaningful army names without developer metadata', () => {
         const source = readFileSync('src/assets/js/pages/advanced-stats.js', 'utf8');
-        expect(source).toContain("t('advancedStats.unitsCount'");
-        expect(source).toContain("CLAN_CASTLE_TROOP: 'advancedStats.categoryClanCastleTroops'");
-        expect(source).toContain("CLAN_CASTLE_SPELL: 'advancedStats.categoryClanCastleSpells'");
-        expect(source).not.toContain('${formatNumber(units.length)} units');
+        expect(source).toContain("import { presentArmy } from './advanced-stats-army-view.js'");
+        expect(source).toContain("getAdvancedStatsUnits(state.playerTag, state.period, 'ALL')");
+        expect(source).toContain("formatDate(tracking.lastSuccessfulPollAt");
+        expect(source).not.toContain('pieces.push(battle.battleType)');
+        expect(source).not.toContain("pieces.push(t('advancedStats.bootstrap'))");
+        expect(source).not.toContain("t('advancedStats.unitsCount'");
+    });
+
+    it('removes setup and sorting notes from the player-facing page', () => {
+        const html = readFileSync('src/subpages/advanced-stats.html', 'utf8');
+        expect(html).not.toContain('Imported during setup');
+        expect(html).not.toContain('newest first');
+        expect(html).not.toContain('battle-log snapshot');
+        expect(html).toContain('Last refreshed');
     });
 
     it('keeps destructive deletion visually separate from stopping future tracking', () => {

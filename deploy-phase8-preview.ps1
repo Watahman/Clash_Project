@@ -7,6 +7,7 @@ param(
     [string]$TagName = "phase8",
     [string]$ProxyEnvName = "API_PROXY_SECRET",
     [string]$PreviewOrigin = "",
+    [switch]$AllowEnabledCollection,
     [switch]$PreflightOnly
 )
 
@@ -75,13 +76,40 @@ function Get-EnvValue {
 function Assert-Phase8StillSafe {
     param([Parameter(Mandatory = $true)]$Service)
 
+    $tagTraffic = @($Service.status.traffic) | Where-Object { $_.tag -eq $TagName } | Select-Object -First 1
+    $tagPercent = 0
+    if ($null -ne $tagTraffic.percent -and [string]$tagTraffic.percent -ne "") {
+        $tagPercent = [int]$tagTraffic.percent
+    }
+    if ($tagPercent -ne 0) {
+        throw "Phase 8 safety check failed: tagged candidate has $tagPercent% normal production traffic."
+    }
+
     $collection = Get-EnvValue -Service $Service -Name "ADVANCED_STATS_COLLECTION_ENABLED"
     $publicEnrollment = Get-EnvValue -Service $Service -Name "ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED"
-    if ($collection -ne "false") {
-        throw "Phase 8 safety check failed: ADVANCED_STATS_COLLECTION_ENABLED must still be false before preview auth setup."
-    }
     if ($publicEnrollment -ne "false") {
         throw "Phase 8 safety check failed: ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED must still be false before preview auth setup."
+    }
+    if ($collection -eq "false") { return }
+    if ($collection -ne "true" -or -not $AllowEnabledCollection) {
+        throw "Phase 8 safety check failed: enabled collection requires -AllowEnabledCollection."
+    }
+
+    $allowlist = Get-EnvValue -Service $Service -Name "ADVANCED_STATS_ROLLOUT_USER_IDS"
+    $allowlistIds = @([string]$allowlist -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+    if ($allowlistIds.Count -ne 1) {
+        throw "Phase 8 safety check failed: enabled collection must remain limited to one developer UUID."
+    }
+    try { [void][Guid]::Parse($allowlistIds[0]) } catch {
+        throw "Phase 8 safety check failed: rollout allowlist is not a valid developer UUID."
+    }
+
+    $containers = @($Service.spec.template.spec.containers)
+    $schedulerSecret = @($containers[0].env) |
+        Where-Object { $_.name -eq "ADVANCED_STATS_SCHEDULER_SECRET" } |
+        Select-Object -First 1
+    if (-not $schedulerSecret.valueFrom.secretKeyRef.name) {
+        throw "Phase 8 safety check failed: enabled collection has no Scheduler Secret Manager binding."
     }
 }
 
@@ -191,23 +219,26 @@ $candidateUrl = Get-TaggedCandidateUrl -Service $service
 
 if (-not $PreflightOnly) {
     $previewCallback = "$normalizedPreviewOrigin/api/AuthGoogleCallback"
-    Write-Host "Binding Google OAuth callback to the isolated Phase 8 preview..." -ForegroundColor Cyan
-    Run-NativeChecked `
-        -Executable $gcloudExecutable `
-        -Arguments @(
-            "run", "services", "update", $ServiceName,
-            "--project=$ProjectId",
-            "--region=$Region",
-            "--update-env-vars=AUTH_GOOGLE_CALLBACK_URL=$previewCallback",
-            "--no-traffic",
-            "--tag=$TagName"
-        ) `
-        -FailureMessage "Could not bind the Phase 8 Google OAuth callback to the workers.dev preview"
-
-    $service = Get-ServiceJson -GcloudExecutable $gcloudExecutable
-    Assert-Phase8StillSafe -Service $service
-    $candidateUrl = Get-TaggedCandidateUrl -Service $service
     $configuredCallback = Get-EnvValue -Service $service -Name "AUTH_GOOGLE_CALLBACK_URL"
+    if ($configuredCallback -ne $previewCallback) {
+        Write-Host "Binding Google OAuth callback to the isolated Phase 8 preview..." -ForegroundColor Cyan
+        Run-NativeChecked `
+            -Executable $gcloudExecutable `
+            -Arguments @(
+                "run", "services", "update", $ServiceName,
+                "--project=$ProjectId",
+                "--region=$Region",
+                "--update-env-vars=AUTH_GOOGLE_CALLBACK_URL=$previewCallback",
+                "--no-traffic",
+                "--tag=$TagName"
+            ) `
+            -FailureMessage "Could not bind the Phase 8 Google OAuth callback to the workers.dev preview"
+
+        $service = Get-ServiceJson -GcloudExecutable $gcloudExecutable
+        Assert-Phase8StillSafe -Service $service
+        $candidateUrl = Get-TaggedCandidateUrl -Service $service
+        $configuredCallback = Get-EnvValue -Service $service -Name "AUTH_GOOGLE_CALLBACK_URL"
+    }
     if ($configuredCallback -ne $previewCallback) {
         throw "Phase 8 callback verification failed: Cloud Run did not retain the expected workers.dev callback URL."
     }
@@ -246,7 +277,8 @@ try {
         Write-Host "Phase 8 preview preflight passed." -ForegroundColor Green
         Write-Host "  Tagged backend candidate: found"
         Write-Host "  Normal production traffic: unchanged"
-        Write-Host "  Collection/public enrollment: still OFF"
+        Write-Host "  Public enrollment: still OFF"
+        Write-Host "  Collection: $((Get-EnvValue -Service $service -Name 'ADVANCED_STATS_COLLECTION_ENABLED').ToUpperInvariant())"
         Write-Host "  Existing proxy credential: resolved without guessing its Secret Manager name"
         Write-Host "  Local Wrangler: available and authenticated"
         Write-Host "  Frontend build: passed"
@@ -280,7 +312,7 @@ Write-Host "  Normal production traffic to candidate: 0%"
 Write-Host "  Preview Worker: separate workers.dev Worker"
 Write-Host "  Preview origin: $normalizedPreviewOrigin"
 Write-Host "  Google OAuth callback: $normalizedPreviewOrigin/api/AuthGoogleCallback"
-Write-Host "  Collection: OFF"
+Write-Host "  Collection: $((Get-EnvValue -Service $service -Name 'ADVANCED_STATS_COLLECTION_ENABLED').ToUpperInvariant())"
 Write-Host "  Public enrollment: OFF"
 Write-Host "  Custom-domain route: none"
 Write-Host "  Cron trigger: none"

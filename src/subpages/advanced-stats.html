@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="../assets/css/advanced-stats.css">
     <script src="../assets/js/Data/runtime-config.js"></script>
     <script type="module" src="../assets/js/shell/workspace-shell.js"></script>
-    <script type="module" src="../assets/js/pages/advanced-stats-bootstrap.js"></script>
+    <script type="module" src="../assets/js/pages/advanced-stats-bootstrap.js?v=20260809-1"></script>
     <link rel="stylesheet" href="../assets/css/light-theme.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
@@ -59,7 +59,7 @@
         <div class="advanced-stats__setup-copy">
             <span class="advanced-stats__eyebrow" data-i18n="advancedStats.trackedLifetime">Tracked lifetime</span>
             <h2 data-i18n="advancedStats.notTrackingTitle">Build your tracked lifetime history</h2>
-            <p data-i18n="advancedStats.notTrackingText">Start tracking to record future attack performance, army usage and long-term trends. Recent battles available during setup may be imported as bootstrap history.</p>
+            <p data-i18n="advancedStats.notTrackingText">Start tracking to see your attack performance, favorite armies and trends over time.</p>
             <small data-i18n="advancedStats.startNote">Tracking starts from now. ClashPanel cannot reconstruct your complete lifetime before tracking began.</small>
         </div>
         <button id="advanced-stats-start" class="advanced-stats__primary advanced-stats__primary--large" type="button" data-i18n="advancedStats.start">Start Advanced Stats Tracking</button>
@@ -69,7 +69,7 @@
         <div class="advanced-stats__pulse" aria-hidden="true"><i></i><i></i><i></i></div>
         <div>
             <h2 data-i18n="advancedStats.initializingTitle">Preparing your history</h2>
-            <p data-i18n="advancedStats.initializingText">Your tracker is active. ClashPanel is collecting the first available battle-log snapshot.</p>
+            <p data-i18n="advancedStats.initializingText">ClashPanel is adding your recent attacks. Your stats will appear here shortly.</p>
         </div>
     </section>
 
@@ -84,7 +84,7 @@
             </div>
             <dl class="advanced-stats__tracking-meta">
                 <div><dt data-i18n="advancedStats.trackingSince">Tracking since</dt><dd id="advanced-stats-started-at">—</dd></div>
-                <div><dt data-i18n="advancedStats.lastUpdated">Last successful update</dt><dd id="advanced-stats-updated-at">—</dd></div>
+                <div><dt data-i18n="advancedStats.lastUpdated">Last refreshed</dt><dd id="advanced-stats-updated-at">—</dd></div>
                 <div><dt data-i18n="advancedStats.trackedBattles">Tracked attacks</dt><dd id="advanced-stats-battles-processed">0</dd></div>
             </dl>
             <div class="advanced-stats__tracking-actions">
@@ -142,7 +142,7 @@
             </section>
 
             <section id="advanced-stats-armies-section" class="advanced-stats__section" aria-labelledby="advanced-stats-armies-title">
-                <div class="advanced-stats__section-heading"><div><h2 id="advanced-stats-armies-title" data-i18n="advancedStats.armiesTitle">Favorite armies</h2><p data-i18n="advancedStats.armiesText">Your most frequently recorded full army compositions for this period.</p></div></div>
+                <div class="advanced-stats__section-heading"><div><h2 id="advanced-stats-armies-title" data-i18n="advancedStats.armiesTitle">Favorite armies</h2><p data-i18n="advancedStats.armiesText">The army compositions you use most in this period.</p></div></div>
                 <div id="advanced-stats-armies" class="advanced-stats__army-list"></div>
                 <p id="advanced-stats-armies-empty" class="advanced-stats__empty-copy" data-i18n="advancedStats.noArmies" hidden>No complete army compositions are available for this period.</p>
             </section>
@@ -150,7 +150,7 @@
 
         <section id="advanced-stats-units-section" class="advanced-stats__section" aria-labelledby="advanced-stats-units-title">
             <div class="advanced-stats__section-heading advanced-stats__section-heading--filters">
-                <div><h2 id="advanced-stats-units-title" data-i18n="advancedStats.usageTitle">Unit usage</h2><p data-i18n="advancedStats.usageText">How often each unit appears in your recorded attack armies.</p></div>
+                <div><h2 id="advanced-stats-units-title" data-i18n="advancedStats.usageTitle">Unit usage</h2><p data-i18n="advancedStats.usageText">See which units appear in your armies and how often you use them.</p></div>
                 <select id="advanced-stats-unit-category" aria-labelledby="advanced-stats-units-title">
                     <option value="ALL" data-i18n="advancedStats.categoryAll">All</option>
                     <option value="TROOP" data-i18n="advancedStats.categoryTroops">Troops</option>
@@ -164,16 +164,16 @@
             </div>
             <div class="advanced-stats__table-wrap">
                 <table class="advanced-stats__table">
-                    <thead><tr><th data-i18n="advancedStats.unit">Unit</th><th data-i18n="advancedStats.quantity">Army quantity</th><th data-i18n="advancedStats.battlesPresent">Attacks present</th><th data-i18n="advancedStats.usageRate">Usage rate</th></tr></thead>
+                    <thead><tr><th data-i18n="advancedStats.unit">Unit</th><th data-i18n="advancedStats.quantity">Total used</th><th data-i18n="advancedStats.battlesPresent">Used in attacks</th><th data-i18n="advancedStats.usageRate">Usage rate</th></tr></thead>
                     <tbody id="advanced-stats-units"></tbody>
                 </table>
             </div>
             <p id="advanced-stats-units-empty" class="advanced-stats__empty-copy" data-i18n="advancedStats.noUnits" hidden>No unit usage is available for this period.</p>
-            <p class="advanced-stats__footnote" data-i18n="advancedStats.armyCompositionNote">“Used” means present in the recorded army composition. ClashPanel cannot prove every unit was deployed during the attack.</p>
+            <p class="advanced-stats__footnote" data-i18n="advancedStats.armyCompositionNote">Usage is based on the saved army, not on the order or number of troops deployed.</p>
         </section>
 
         <section id="advanced-stats-battles-section" class="advanced-stats__section" aria-labelledby="advanced-stats-timeline-title">
-            <div class="advanced-stats__section-heading"><div><h2 id="advanced-stats-timeline-title" data-i18n="advancedStats.timelineTitle">Battle timeline</h2><p data-i18n="advancedStats.timelineText">Recent tracked attacks, newest first.</p></div></div>
+            <div class="advanced-stats__section-heading"><div><h2 id="advanced-stats-timeline-title" data-i18n="advancedStats.timelineTitle">Battle timeline</h2></div></div>
             <div id="advanced-stats-battles" class="advanced-stats__timeline"></div>
             <p id="advanced-stats-battles-empty" class="advanced-stats__empty-copy" data-i18n="advancedStats.noBattles" hidden>No tracked attacks in this period yet.</p>
             <button id="advanced-stats-load-more" class="advanced-stats__load-more" type="button" data-i18n="advancedStats.loadMore" hidden>Load more</button>

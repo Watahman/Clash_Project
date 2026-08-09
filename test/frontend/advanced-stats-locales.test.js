@@ -38,7 +38,7 @@ describe('Advanced Stats locales', () => {
     it('preserves interpolation placeholders across languages', () => {
         for (const language of ['en', 'nl', 'fr', 'de', 'es']) {
             expect(featureLocales[language]['advancedStats.armyUses']).toContain('{count}');
-            expect(featureLocales[language]['advancedStats.unitsCount']).toContain('{count}');
+            expect(featureLocales[language]['advancedStats.usedInAttacks']).toContain('{count}');
             expect(featureLocales[language]['advancedStats.partialLoadFailed']).toContain('{sections}');
             expect(featureLocales[language]['advancedStats.profileLoadFailedTitle']).toBeTruthy();
             expect(featureLocales[language]['advancedStats.retry']).toBeTruthy();
@@ -52,10 +52,10 @@ describe('Advanced Stats locales', () => {
         expect(featureLocales.de['advancedStats.startNote']).toContain('nicht rekonstruieren');
         expect(featureLocales.es['advancedStats.startNote']).toContain('no puede reconstruir');
 
-        expect(featureLocales.en['advancedStats.armyCompositionNote']).toContain('cannot prove');
-        expect(featureLocales.nl['advancedStats.armyCompositionNote']).toContain('niet bewijzen');
-        expect(featureLocales.fr['advancedStats.armyCompositionNote']).toContain('ne peut pas prouver');
-        expect(featureLocales.de['advancedStats.armyCompositionNote']).toContain('nicht beweisen');
-        expect(featureLocales.es['advancedStats.armyCompositionNote']).toContain('no puede demostrar');
+        expect(featureLocales.en['advancedStats.armyCompositionNote']).toContain('saved army');
+        expect(featureLocales.nl['advancedStats.armyCompositionNote']).toContain('opgeslagen army');
+        expect(featureLocales.fr['advancedStats.armyCompositionNote']).toContain('armée enregistrée');
+        expect(featureLocales.de['advancedStats.armyCompositionNote']).toContain('gespeicherten Armee');
+        expect(featureLocales.es['advancedStats.armyCompositionNote']).toContain('ejército guardado');
     });
 });

@@ -14,6 +14,7 @@ import {
     startAdvancedStatsTracking,
     stopAdvancedStatsTracking
 } from '../Supabase/Supabase-AdvancedStats.js';
+import { presentArmy } from './advanced-stats-army-view.js';
 
 const PERIOD_DEFAULT = '30d';
 const ACCOUNT_STORAGE_KEY = 'clashpanel_advanced_stats_account';
@@ -26,6 +27,7 @@ const state = {
     category: 'ALL',
     tracking: null,
     overview: null,
+    unitCatalog: [],
     units: [],
     armies: [],
     trends: [],
@@ -210,6 +212,8 @@ function bindEvents() {
         state.category = 'ALL';
         state.nextCursor = null;
         state.battles = [];
+        state.unitCatalog = [];
+        state.units = [];
         writeStorage(ACCOUNT_STORAGE_KEY, state.playerTag);
         syncPeriodButtons();
         elements['advanced-stats-unit-category'].value = 'ALL';
@@ -375,7 +379,7 @@ function renderTracking() {
     const playerName = tracking.playerName || account?.name || state.playerTag;
     elements['advanced-stats-player-line'].textContent = `${playerName} · ${state.playerTag}`;
     elements['advanced-stats-started-at'].textContent = formatDateTime(tracking.trackingStartedAt, t('advancedStats.pending'));
-    elements['advanced-stats-updated-at'].textContent = formatDateTime(tracking.lastSuccessfulPollAt, t('advancedStats.never'));
+    elements['advanced-stats-updated-at'].textContent = formatDate(tracking.lastSuccessfulPollAt, t('advancedStats.never'));
     elements['advanced-stats-battles-processed'].textContent = formatNumber(tracking.battlesProcessed || 0);
 
     const canPause = ['ACTIVE', 'DEGRADED'].includes(status);
@@ -418,7 +422,7 @@ function renderTrackingWarning(status, tracking) {
     elements['advanced-stats-warning-text'].textContent = t(textKey);
     const completeSince = tracking?.dataCompleteSince;
     elements['advanced-stats-complete-since'].textContent = completeSince
-        ? `${t('advancedStats.dataCompleteSince')}: ${formatDateTime(completeSince)}`
+        ? `${t('advancedStats.dataCompleteSince')}: ${formatDate(completeSince)}`
         : '';
 }
 
@@ -429,7 +433,7 @@ async function loadStatistics({ requestVersion = ++state.requestVersion, manageB
 
     const requests = await Promise.allSettled([
         getAdvancedStatsOverview(state.playerTag, state.period),
-        getAdvancedStatsUnits(state.playerTag, state.period, state.category),
+        getAdvancedStatsUnits(state.playerTag, state.period, 'ALL'),
         getAdvancedStatsArmies(state.playerTag, state.period, 12),
         getAdvancedStatsTrends(state.playerTag, state.period),
         getAdvancedStatsBattles(state.playerTag, state.period, { limit: BATTLE_PAGE_SIZE })
@@ -439,7 +443,10 @@ async function loadStatistics({ requestVersion = ++state.requestVersion, manageB
     const [overview, units, armies, trends, battles] = requests;
 
     if (overview.status === 'fulfilled') state.overview = overview.value;
-    if (units.status === 'fulfilled') state.units = arrayValue(units.value?.items);
+    if (units.status === 'fulfilled') {
+        state.unitCatalog = arrayValue(units.value?.items);
+        state.units = filteredUnits();
+    }
     if (armies.status === 'fulfilled') state.armies = arrayValue(armies.value?.items);
     if (trends.status === 'fulfilled') state.trends = arrayValue(trends.value?.points);
     if (battles.status === 'fulfilled') {
@@ -468,18 +475,13 @@ async function loadStatistics({ requestVersion = ++state.requestVersion, manageB
 
 async function loadUnitsOnly() {
     if (!state.playerTag || state.busy) return;
-    setBusy(true);
-    try {
-        const response = await getAdvancedStatsUnits(state.playerTag, state.period, state.category);
-        state.units = arrayValue(response?.items);
-        renderUnits();
-    } catch (error) {
-        console.error('advanced_stats_units_load_failed', error);
-        setDataStatus('advancedStats.loadFailed');
-    } finally {
-        setBusy(false);
-        renderAccountSelector();
-    }
+    state.units = filteredUnits();
+    renderUnits();
+}
+
+function filteredUnits() {
+    if (state.category === 'ALL') return [...state.unitCatalog];
+    return state.unitCatalog.filter(unit => String(unit?.category || '').toUpperCase() === state.category);
 }
 
 async function loadMoreBattles() {
@@ -505,6 +507,7 @@ async function loadMoreBattles() {
 
 function clearStatisticsState() {
     state.overview = null;
+    state.unitCatalog = [];
     state.units = [];
     state.armies = [];
     state.trends = [];
@@ -553,7 +556,7 @@ function renderFavorite(kind, favorite) {
         return;
     }
     name.textContent = favorite.name || favorite.key || t('advancedStats.noFavorite');
-    meta.textContent = `${formatNumber(favorite.totalQuantity || 0)} · ${formatNumber(favorite.battlesPresent || 0)} ${t('advancedStats.attacks').toLowerCase()}`;
+    meta.textContent = t('advancedStats.usedInAttacks', { count: formatNumber(favorite.battlesPresent || 0) });
 }
 
 function renderFavoriteArmy(favorite) {
@@ -564,7 +567,7 @@ function renderFavoriteArmy(favorite) {
         meta.textContent = '';
         return;
     }
-    name.textContent = armyLabel(favorite.army);
+    name.textContent = armyPresentation(favorite.army).label;
     meta.textContent = `${formatNumber(favorite.battleCount || 0)} ${t('advancedStats.attacks').toLowerCase()} · ${formatDecimal(favorite.averageStars)}★`;
 }
 
@@ -597,7 +600,8 @@ function renderArmies() {
         card.className = 'advanced-stats__army-card';
         const header = document.createElement('header');
         const title = document.createElement('strong');
-        title.textContent = `${index + 1}. ${armyLabel(army.army)}`;
+        const presentation = armyPresentation(army.army);
+        title.textContent = `${index + 1}. ${presentation.label}`;
         const uses = document.createElement('span');
         uses.textContent = t('advancedStats.armyUses', { count: formatNumber(army.battleCount || 0) });
         header.append(title, uses);
@@ -605,12 +609,18 @@ function renderArmies() {
 
         const chips = document.createElement('div');
         chips.className = 'advanced-stats__army-units';
-        armyCompositionSummary(army.army).forEach(label => {
+        presentation.units.forEach(label => {
             const chip = document.createElement('span');
             chip.className = 'advanced-stats__unit-chip';
             chip.textContent = label;
             chips.append(chip);
         });
+        if (presentation.hiddenCount) {
+            const more = document.createElement('span');
+            more.className = 'advanced-stats__unit-chip';
+            more.textContent = `+${formatNumber(presentation.hiddenCount)}`;
+            chips.append(more);
+        }
         card.append(chips);
 
         const metrics = document.createElement('div');
@@ -665,8 +675,7 @@ function battleElement(battle) {
     const opponent = document.createElement('strong');
     opponent.textContent = battle.opponentName || battle.opponentPlayerTag || t('advancedStats.opponent');
     const time = document.createElement('small');
-    const sourceLabel = battle.timestampSource === 'BATTLE' ? t('advancedStats.exactTime') : t('advancedStats.observedTime');
-    time.textContent = `${sourceLabel}: ${formatDateTime(battle.battleAt)}`;
+    time.textContent = formatDateTime(battle.battleAt);
     main.append(opponent, time);
 
     const score = document.createElement('div');
@@ -680,9 +689,7 @@ function battleElement(battle) {
     const meta = document.createElement('div');
     meta.className = 'advanced-stats__battle-meta';
     const pieces = [];
-    if (battle.battleType) pieces.push(battle.battleType);
     if (battle.opponentTownHall) pieces.push(`TH${battle.opponentTownHall}`);
-    if (battle.bootstrapImport) pieces.push(t('advancedStats.bootstrap'));
     meta.textContent = pieces.join(' · ');
 
     item.append(main, score, meta);
@@ -702,35 +709,8 @@ function battleElement(battle) {
     return item;
 }
 
-function armyLabel(army) {
-    const units = arrayValue(army?.units);
-    if (!units.length) return t('advancedStats.noFavorite');
-    const total = units.reduce((sum, unit) => sum + Math.max(0, Number(unit.quantity || 0)), 0);
-    return `${formatNumber(total)} · ${t('advancedStats.unitsCount', { count: formatNumber(units.length) })}`;
-}
-
-function armyCompositionSummary(army) {
-    const groups = new Map();
-    arrayValue(army?.units).forEach(unit => {
-        const category = categoryLabel(unit.category);
-        groups.set(category, (groups.get(category) || 0) + Math.max(0, Number(unit.quantity || 0)));
-    });
-    return [...groups.entries()].slice(0, 7).map(([category, quantity]) => `${formatNumber(quantity)}× ${category}`);
-}
-
-function categoryLabel(category) {
-    const key = {
-        TROOP: 'advancedStats.categoryTroops',
-        SUPER_TROOP: 'advancedStats.categorySuperTroops',
-        SPELL: 'advancedStats.categorySpells',
-        SIEGE: 'advancedStats.categorySiege',
-        CLAN_CASTLE_TROOP: 'advancedStats.categoryClanCastleTroops',
-        CLAN_CASTLE_SPELL: 'advancedStats.categoryClanCastleSpells',
-        HERO: 'advancedStats.categoryHeroes',
-        PET: 'advancedStats.categoryPets',
-        EQUIPMENT: 'advancedStats.categoryEquipment'
-    }[String(category || '').toUpperCase()] || 'advancedStats.categoryOther';
-    return t(key);
+function armyPresentation(army) {
+    return presentArmy(army, state.unitCatalog, t('advancedStats.armyComposition'));
 }
 
 function arrayValue(value) {
@@ -767,9 +747,9 @@ function formatDateTime(value, fallback = '—') {
     return new Intl.DateTimeFormat(getLanguage(), { dateStyle: 'medium', timeStyle: 'short' }).format(date);
 }
 
-function formatDate(value) {
+function formatDate(value, fallback = '—') {
     const date = asDate(value);
-    return date ? new Intl.DateTimeFormat(getLanguage(), { dateStyle: 'medium' }).format(date) : '—';
+    return date ? new Intl.DateTimeFormat(getLanguage(), { dateStyle: 'medium' }).format(date) : fallback;
 }
 
 function formatShortDate(value) {
