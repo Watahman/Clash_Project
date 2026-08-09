@@ -36,6 +36,14 @@ function Run-Gcloud {
     }
 }
 
+function Run-GcloudQuiet {
+    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Args)
+    $null = & gcloud @Args
+    if ($LASTEXITCODE -ne 0) {
+        throw "gcloud command failed: gcloud $(Format-SafeGcloudArgs $Args)"
+    }
+}
+
 function Get-TaggedCandidateUrl {
     $service = (& gcloud run services describe $ServiceName --project $ProjectId --region $Region --format=json) | ConvertFrom-Json
     if ($LASTEXITCODE -ne 0 -or -not $service) {
@@ -133,7 +141,7 @@ $jobState = Get-SchedulerJobState
 if ($jobState) {
     # Existing jobs use --update-headers. --headers is accepted by create but not
     # by current gcloud scheduler jobs update http.
-    Run-Gcloud scheduler jobs update http $SchedulerJobName `
+    Run-GcloudQuiet scheduler jobs update http $SchedulerJobName `
         --project $ProjectId `
         --location $Region `
         --schedule="*/5 * * * *" `
@@ -144,7 +152,7 @@ if ($jobState) {
         --attempt-deadline="30s" `
         --max-retry-attempts=0
 } else {
-    Run-Gcloud scheduler jobs create http $SchedulerJobName `
+    Run-GcloudQuiet scheduler jobs create http $SchedulerJobName `
         --project $ProjectId `
         --location $Region `
         --schedule="*/5 * * * *" `

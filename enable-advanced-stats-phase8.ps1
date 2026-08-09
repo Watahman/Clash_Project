@@ -19,6 +19,14 @@ function Run-Gcloud {
     }
 }
 
+function Run-GcloudQuiet {
+    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Args)
+    $null = & gcloud @Args
+    if ($LASTEXITCODE -ne 0) {
+        throw "gcloud command failed while updating protected scheduler configuration."
+    }
+}
+
 function Get-ServiceJson {
     $service = (& gcloud run services describe $ServiceName --project $ProjectId --region $Region --format=json) | ConvertFrom-Json
     if ($LASTEXITCODE -ne 0 -or -not $service) {
@@ -132,7 +140,7 @@ try {
         Write-Host "  inserted=$($summary.insertedBattles) duplicates=$($summary.duplicateBattles) parserErrors=$($summary.parserErrors) rateLimited=$($summary.rateLimited)"
     }
 
-    Run-Gcloud scheduler jobs resume $SchedulerJobName --project $ProjectId --location $Region
+    Run-GcloudQuiet scheduler jobs resume $SchedulerJobName --project $ProjectId --location $Region
 } catch {
     Write-Warning "Phase 8 enablement failed. Applying kill switch on the tagged candidate."
     & gcloud scheduler jobs pause $SchedulerJobName --project $ProjectId --location $Region | Out-Null
