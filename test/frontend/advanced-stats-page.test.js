@@ -23,7 +23,22 @@ describe('Advanced Stats workspace page', () => {
         expect(document.querySelector('#advanced-stats-armies')).not.toBeNull();
         expect(document.querySelector('#advanced-stats-trend-chart')).not.toBeNull();
         expect(document.querySelector('#advanced-stats-battles')).not.toBeNull();
+        expect(document.querySelector('#advanced-stats-profile-error')?.hidden).toBe(true);
+        expect(document.querySelector('#advanced-stats-profile-retry')?.getAttribute('type')).toBe('button');
         expect([...document.querySelectorAll('button:not([type])')]).toHaveLength(0);
+    });
+
+    it('keeps profile errors separate and preserves last-good partial data', () => {
+        const source = readFileSync('src/assets/js/pages/advanced-stats.js', 'utf8');
+        expect(source).toContain("show(elements['advanced-stats-profile-error'], true)");
+        expect(source).toContain("show(elements['advanced-stats-no-accounts'], false)");
+        expect(source).toContain("addEventListener('click', retryProfileLoad)");
+        expect(source).toContain("if (overview.status === 'fulfilled') state.overview = overview.value");
+        expect(source).toContain("if (units.status === 'fulfilled') state.units = arrayValue(units.value?.items)");
+        expect(source).not.toContain("state.overview = overview.status === 'fulfilled' ? overview.value : null");
+        expect(source).not.toContain("setDataStatus('advancedStats.loadingData');\n    state.nextCursor = null;");
+        expect(source).toContain("data-load-error");
+        expect(source).toContain("advancedStats.partialLoadFailed");
     });
 
     it('uses translatable and semantic accessibility labels', () => {

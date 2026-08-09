@@ -27,15 +27,24 @@ public final class ClashKingHttpClient {
     }
 
     public JsonObject get(String path) throws Exception {
-        HttpRequest request = request(path).GET().build();
-        return object(send(request));
+        return object(getElement(path));
+    }
+
+    public JsonObject getNullableObject(String path) throws Exception {
+        JsonElement response = getElement(path);
+        if (response.isJsonNull()) return null;
+        return object(response);
     }
 
     public JsonArray getArray(String path) throws Exception {
-        HttpRequest request = request(path).GET().build();
-        JsonElement response = send(request);
+        JsonElement response = getElement(path);
         if (response.isJsonArray()) return response.getAsJsonArray();
         throw invalidJson();
+    }
+
+    public JsonElement getElement(String path) throws Exception {
+        HttpRequest request = request(path).GET().build();
+        return send(request);
     }
 
     public JsonObject post(String path, JsonObject body) throws Exception {

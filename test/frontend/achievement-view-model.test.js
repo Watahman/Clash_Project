@@ -54,17 +54,20 @@ describe('achievement family presentation', () => {
         {
             achievement_key: 'hero_power_1', family_key: 'hero_power', title: 'Hero Power I',
             description: 'Combined hero levels: 100', category: 'army', rarity: 'common',
-            tier: 1, xp: 50, progress: 180, target: 100, unlocked: true
+            tier: 1, xp: 50, progress: 180, target: 100, unlocked: true,
+            progress_known: true, source_available: true
         },
         {
             achievement_key: 'hero_power_2', family_key: 'hero_power', title: 'Hero Power II',
             description: 'Combined hero levels: 250', category: 'army', rarity: 'rare',
-            tier: 2, xp: 100, progress: 180, target: 250, unlocked: false
+            tier: 2, xp: 100, progress: 180, target: 250, unlocked: false,
+            progress_known: true, source_available: true
         },
         {
             achievement_key: 'wall_grinder_1', family_key: 'wall_grinder', title: 'Wall Grinder I',
             description: 'Combined wall levels: 500', category: 'base', rarity: 'common',
-            tier: 1, xp: 50, progress: 0, target: 500, unlocked: false
+            tier: 1, xp: 50, progress: 0, target: 500, unlocked: false,
+            progress_known: true, source_available: true
         }
     ];
 
@@ -85,6 +88,20 @@ describe('achievement family presentation', () => {
         expect(summary.familyCount).toBe(2);
         expect(summary.unlockedTierCount).toBe(1);
         expect(summary.totalTierCount).toBe(3);
+        expect(summary.totalXp).toBe(50);
+        expect(summary.level).toEqual(achievementLevelFromXp(50));
+    });
+
+    it('shows shared clan unlocks without adding them to personal XP', () => {
+        const clanRow = {
+            achievement_key: 'cl_level_1', family_key: 'cl_level', title: 'Clan Level I',
+            description: 'Reach clan level 2', category: 'clan', rarity: 'common', scope: 'clan',
+            tier: 1, xp: 500, progress: 2, target: 2, unlocked: true,
+            progress_known: true, source_available: true
+        };
+        const summary = buildAchievementSummary(groupAchievementFamilies([...rows, clanRow]));
+
+        expect(summary.unlockedTierCount).toBe(2);
         expect(summary.totalXp).toBe(50);
         expect(summary.level).toEqual(achievementLevelFromXp(50));
     });

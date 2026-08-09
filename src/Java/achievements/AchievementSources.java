@@ -44,6 +44,7 @@ public final class AchievementSources {
         if ("clan_family_achievements".equals(category)) return CLAN_FAMILY;
         if ("clashpanel_workflow".equals(category)) return CLASHPANEL;
         if ("clan_achievements".equals(category) || "clan_loyalty_and_social".equals(category)) return CLAN_PROFILE;
+        if ("secret_and_combination_achievements".equals(category)) return MIXED;
 
         List<String> codes = metadata.sourceCodes();
         if (codes.contains("CK-L")) return LEGEND_HISTORY;
@@ -62,6 +63,9 @@ public final class AchievementSources {
         if (value.startsWith("profile_") || value.startsWith("native_") || value.startsWith("official:")) return LIVE_PROFILE;
         if (value.startsWith("war_current_") || value.startsWith("war_recorded_")) return WAR;
         if (value.startsWith("cwl_")) return CWL;
+        if (value.startsWith("raid_")) return RAID_HISTORY;
+        if (value.startsWith("legend_") || value.startsWith("ranking_")) return LEGEND_HISTORY;
+        if (value.startsWith("clan_")) return CLAN_PROFILE;
         if (value.startsWith("clashpanel_") || value.equals("war_assignment_count")) return CLASHPANEL;
         if (value.startsWith("family_")) return CLAN_FAMILY;
         if (value.startsWith("fun_")) return MIXED;

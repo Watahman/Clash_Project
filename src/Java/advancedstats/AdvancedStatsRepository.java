@@ -151,6 +151,36 @@ public final class AdvancedStatsRepository
     }
 
     @Override
+    public AdvancedStatsModels.SaveBattleResult saveProcessedBattleWithLease(
+            UUID trackingId,
+            AdvancedStatsModels.BattleCandidate battle,
+            String rawFingerprint,
+            AdvancedStatsModels.ParsedArmy army,
+            boolean bootstrapImport,
+            int parserVersion,
+            String workerId
+    ) throws Exception {
+        if (workerId == null || workerId.isBlank()) {
+            return saveProcessedBattle(trackingId, battle, rawFingerprint, army, bootstrapImport, parserVersion);
+        }
+        String fingerprint = AdvancedStatsModels.requireSha256(rawFingerprint, "fingerprint");
+        JsonObject body = baseBattleRpcBody(trackingId, battle, fingerprint, bootstrapImport, parserVersion);
+        body.addProperty("p_worker_id", workerId.trim());
+        body.addProperty("p_army_data_available", army.armyDataAvailable());
+        body.add("p_units", unitsJson(army));
+        if (army.armyDataAvailable()) {
+            body.addProperty("p_army_hash", army.normalizedArmyHash());
+            body.add("p_normalized_army_json", JsonParser.parseString(army.normalizedArmyJson()));
+        } else {
+            body.add("p_army_hash", JsonNull.INSTANCE);
+            body.add("p_normalized_army_json", JsonNull.INSTANCE);
+        }
+        JsonObject result = parseObject(SUPABASE_Client.rpc("save_advanced_stats_battle_v4", body.toString()));
+        if (!booleanValue(result, "inserted", false)) return AdvancedStatsModels.SaveBattleResult.duplicate();
+        return new AdvancedStatsModels.SaveBattleResult(true, UUID.fromString(requiredString(result, "battleId")));
+    }
+
+    @Override
     public boolean recordParserError(
             UUID trackingId,
             AdvancedStatsModels.BattleCandidate battle,
@@ -165,6 +195,27 @@ public final class AdvancedStatsRepository
         JsonObject result = parseObject(SUPABASE_Client.rpc(
                 "record_advanced_stats_parser_error_v2",
                 body.toString()
+        ));
+        return booleanValue(result, "inserted", false);
+    }
+
+    @Override
+    public boolean recordParserErrorWithLease(
+            UUID trackingId,
+            AdvancedStatsModels.BattleCandidate battle,
+            String rawFingerprint,
+            boolean bootstrapImport,
+            int parserVersion,
+            String workerId
+    ) throws Exception {
+        if (workerId == null || workerId.isBlank()) {
+            return recordParserError(trackingId, battle, rawFingerprint, bootstrapImport, parserVersion);
+        }
+        String fingerprint = AdvancedStatsModels.requireSha256(rawFingerprint, "fingerprint");
+        JsonObject body = baseBattleRpcBody(trackingId, battle, fingerprint, bootstrapImport, parserVersion);
+        body.addProperty("p_worker_id", workerId.trim());
+        JsonObject result = parseObject(SUPABASE_Client.rpc(
+                "record_advanced_stats_parser_error_v3", body.toString()
         ));
         return booleanValue(result, "inserted", false);
     }

@@ -2,6 +2,7 @@ package Java.achievements;
 
 import Java.API_Utils;
 import Java.Config;
+import Java.HttpException;
 import Java.cache.CachePolicy;
 import Java.cwlhistory.HistoricalCwlProviderFactory;
 import Java.cwlhistory.HistoricalCwlSeason;
@@ -20,6 +21,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public final class AchievementHistoryCollector {
     public record RefreshResult(
@@ -28,19 +30,38 @@ public final class AchievementHistoryCollector {
             int cwlRemaining,
             boolean cwlAvailable,
             boolean warAvailable,
+            int raidProcessed,
+            boolean raidAvailable,
+            int legendProcessed,
+            boolean legendAvailable,
             String cwlError,
-            String warError
+            String warError,
+            String raidError,
+            String legendError
     ) {}
 
     private static final int CWL_BATCH_SIZE = 4;
+    static final int CWL_ATTEMPT_BUDGET = 12;
     private static final int PERFECT_CWL_ATTACKS = 7;
+    private static final String CLASHKING_SOURCE_KEY = "clashking";
     private final API_Utils utils;
     private final AchievementSourceCache cache = new AchievementSourceCache();
     private final HistoricalCwlService cwlService;
+    private final ClashKingRaidHistoryProvider raidProvider;
+    private final ClashKingLegendHistoryProvider legendProvider;
 
     public AchievementHistoryCollector(Config config) {
+        this(
+                config,
+                new HistoricalCwlService(HistoricalCwlProviderFactory.create(config))
+        );
+    }
+
+    AchievementHistoryCollector(Config config, HistoricalCwlService cwlService) {
         this.utils = new API_Utils(config);
-        this.cwlService = new HistoricalCwlService(HistoricalCwlProviderFactory.create(config));
+        this.cwlService = Objects.requireNonNull(cwlService, "cwlService");
+        this.raidProvider = new ClashKingRaidHistoryProvider(config);
+        this.legendProvider = new ClashKingLegendHistoryProvider(config);
     }
 
     public RefreshResult refresh(
@@ -48,35 +69,66 @@ public final class AchievementHistoryCollector {
             String playerTag,
             String clanTag
     ) {
-        if (clanTag == null || clanTag.isBlank()) {
-            return new RefreshResult(false, 0, 0, false, false, "NO_CLAN", "NO_CLAN");
-        }
-
         boolean changed = false;
         int cwlProcessed = 0;
         int cwlRemaining = 0;
         boolean cwlAvailable = false;
         boolean warAvailable = false;
-        String cwlError = "";
-        String warError = "";
+        int raidProcessed = 0;
+        boolean raidAvailable = false;
+        int legendProcessed = 0;
+        boolean legendAvailable = false;
+        boolean hasClan = clanTag != null && !clanTag.isBlank();
+        String cwlError = hasClan ? "" : "NO_CLAN";
+        String warError = hasClan ? "" : "NO_CLAN";
+        String raidError = "";
+        String legendError = "";
 
-        try {
-            CwlRefresh cwl = refreshCwl(userId, playerTag, clanTag);
-            changed |= cwl.changed();
-            cwlProcessed = cwl.processed();
-            cwlRemaining = cwl.remaining();
-            cwlAvailable = true;
-        } catch (Exception error) {
-            cwlError = sourceError(error);
-            safeMarkFailure(userId, playerTag, AchievementSources.CWL, clanTag, cwlError);
+        if (hasClan) {
+            try {
+                CwlRefresh cwl = refreshCwl(userId, playerTag, clanTag);
+                changed |= cwl.changed();
+                cwlProcessed = cwl.processed();
+                cwlRemaining = cwl.remaining();
+                cwlAvailable = cwl.available();
+            } catch (Exception error) {
+                cwlError = sourceError(error);
+                safeMarkFailure(userId, playerTag, AchievementSources.CWL, clanTag, cwlError);
+            }
+
+            try {
+                changed |= refreshCurrentWar(userId, playerTag, clanTag);
+                warAvailable = true;
+            } catch (Exception error) {
+                warError = sourceError(error);
+                safeMarkFailure(userId, playerTag, AchievementSources.WAR, clanTag, warError);
+            }
         }
 
         try {
-            changed |= refreshCurrentWar(userId, playerTag, clanTag);
-            warAvailable = true;
+            HistoryRefresh raid = refreshRaid(userId, playerTag);
+            changed |= raid.changed();
+            raidProcessed = raid.processed();
+            raidAvailable = raid.available();
         } catch (Exception error) {
-            warError = sourceError(error);
-            safeMarkFailure(userId, playerTag, AchievementSources.WAR, clanTag, warError);
+            raidError = sourceError(error);
+            safeMarkFailure(
+                    userId, playerTag, AchievementSources.RAID_HISTORY,
+                    CLASHKING_SOURCE_KEY, raidError
+            );
+        }
+
+        try {
+            HistoryRefresh legend = refreshLegend(userId, playerTag);
+            changed |= legend.changed();
+            legendProcessed = legend.processed();
+            legendAvailable = legend.available();
+        } catch (Exception error) {
+            legendError = sourceError(error);
+            safeMarkFailure(
+                    userId, playerTag, AchievementSources.LEGEND_HISTORY,
+                    CLASHKING_SOURCE_KEY, legendError
+            );
         }
 
         return new RefreshResult(
@@ -85,8 +137,14 @@ public final class AchievementHistoryCollector {
                 cwlRemaining,
                 cwlAvailable,
                 warAvailable,
+                raidProcessed,
+                raidAvailable,
+                legendProcessed,
+                legendAvailable,
                 cwlError,
-                warError
+                warError,
+                raidError,
+                legendError
         );
     }
 
@@ -109,11 +167,12 @@ public final class AchievementHistoryCollector {
             if (existing == null || !bool(existing.metadata(), "final")) pending.add(summary);
         }
 
+        CwlCandidateBatch candidates = loadCwlCandidates(cwlService, clanTag, pending);
         int processed = 0;
         boolean changed = false;
-        for (HistoricalCwlSeasonSummary summary : pending) {
-            if (processed >= CWL_BATCH_SIZE) break;
-            HistoricalCwlSeason season = cwlService.getSeason(clanTag, summary.season());
+        for (CwlCandidate candidate : candidates.loaded()) {
+            HistoricalCwlSeasonSummary summary = candidate.summary();
+            HistoricalCwlSeason season = candidate.season();
             Map<String, Long> metrics = cwlMetrics(season, playerTag);
             JsonObject metadata = new JsonObject();
             metadata.addProperty("season", season.season());
@@ -135,7 +194,7 @@ public final class AchievementHistoryCollector {
             changed = true;
         }
 
-        int remaining = Math.max(0, pending.size() - processed);
+        int remaining = Math.max(0, pending.size() - candidates.loaded().size());
         JsonObject cursor = new JsonObject();
         if (!available.isEmpty()) cursor.addProperty("latestSeason", available.getFirst().season());
         JsonObject coverage = new JsonObject();
@@ -144,6 +203,8 @@ public final class AchievementHistoryCollector {
         coverage.addProperty("remainingRecords", remaining);
         coverage.addProperty("backfillComplete", remaining == 0);
         coverage.addProperty("batchSize", CWL_BATCH_SIZE);
+        coverage.addProperty("attemptedCandidates", candidates.attempted());
+        coverage.addProperty("missingCandidates", candidates.missing());
         cache.markChecked(
                 userId,
                 playerTag,
@@ -153,7 +214,147 @@ public final class AchievementHistoryCollector {
                 coverage,
                 null
         );
-        return new CwlRefresh(changed, processed, remaining);
+        return new CwlRefresh(
+                changed,
+                processed,
+                remaining,
+                !stored.isEmpty() || processed > 0
+        );
+    }
+
+    private HistoryRefresh refreshRaid(String userId, String playerTag) throws Exception {
+        Map<String, AchievementSourceCache.RecordState> stored = cache.records(
+                userId,
+                playerTag,
+                AchievementSources.RAID_HISTORY,
+                CLASHKING_SOURCE_KEY
+        );
+        RaidHistoryNormalizer.History history = raidProvider.getHistory(playerTag);
+        List<AchievementSourceCache.PendingRecord> pending = new ArrayList<>();
+        for (RaidHistoryNormalizer.WeekendRecord record : history.records()) {
+            AchievementSourceCache.RecordState existing = stored.get(record.recordKey());
+            if (existing != null && bool(existing.metadata(), "final") && record.finalState()) continue;
+            pending.add(new AchievementSourceCache.PendingRecord(
+                    record.recordKey(),
+                    record.recordTimestamp(),
+                    record.metrics(),
+                    record.metadata()
+            ));
+        }
+        cache.upsertRecords(
+                userId,
+                playerTag,
+                AchievementSources.RAID_HISTORY,
+                CLASHKING_SOURCE_KEY,
+                pending
+        );
+
+        JsonObject cursor = new JsonObject();
+        if (history.coverage().newestTimestamp() != null) {
+            cursor.addProperty("newestTimestamp", history.coverage().newestTimestamp().toString());
+        }
+        JsonObject coverage = history.coverage().metadata();
+        long addedRecords = pending.stream()
+                .filter(record -> !stored.containsKey(record.recordKey()))
+                .count();
+        coverage.addProperty("cachedRecords", stored.size() + addedRecords);
+        cache.markChecked(
+                userId,
+                playerTag,
+                AchievementSources.RAID_HISTORY,
+                CLASHKING_SOURCE_KEY,
+                cursor,
+                coverage,
+                null
+        );
+        return new HistoryRefresh(
+                !pending.isEmpty(),
+                pending.size(),
+                !stored.isEmpty() || !history.records().isEmpty()
+        );
+    }
+
+    private HistoryRefresh refreshLegend(String userId, String playerTag) throws Exception {
+        Map<String, AchievementSourceCache.RecordState> stored = cache.records(
+                userId,
+                playerTag,
+                AchievementSources.LEGEND_HISTORY,
+                CLASHKING_SOURCE_KEY
+        );
+        LegendHistoryNormalizer.History history = legendProvider.getHistory(playerTag);
+        List<AchievementSourceCache.PendingRecord> pending = new ArrayList<>();
+        for (LegendHistoryNormalizer.SeasonRecord record : history.records()) {
+            AchievementSourceCache.RecordState existing = stored.get(record.recordKey());
+            if (existing != null && bool(existing.metadata(), "final") && record.finalState()) continue;
+            pending.add(new AchievementSourceCache.PendingRecord(
+                    record.recordKey(),
+                    record.recordTimestamp(),
+                    record.metrics(),
+                    record.metadata()
+            ));
+        }
+        cache.upsertRecords(
+                userId,
+                playerTag,
+                AchievementSources.LEGEND_HISTORY,
+                CLASHKING_SOURCE_KEY,
+                pending
+        );
+
+        JsonObject cursor = new JsonObject();
+        if (history.coverage().newestTimestamp() != null) {
+            cursor.addProperty("newestTimestamp", history.coverage().newestTimestamp().toString());
+        }
+        JsonObject coverage = history.coverage().metadata();
+        long addedRecords = pending.stream()
+                .filter(record -> !stored.containsKey(record.recordKey()))
+                .count();
+        coverage.addProperty("cachedRecords", stored.size() + addedRecords);
+        cache.markChecked(
+                userId,
+                playerTag,
+                AchievementSources.LEGEND_HISTORY,
+                CLASHKING_SOURCE_KEY,
+                cursor,
+                coverage,
+                null
+        );
+        return new HistoryRefresh(
+                !pending.isEmpty(),
+                pending.size(),
+                !stored.isEmpty() || !history.records().isEmpty()
+        );
+    }
+
+    static CwlCandidateBatch loadCwlCandidates(
+            HistoricalCwlService service,
+            String clanTag,
+            List<HistoricalCwlSeasonSummary> pending
+    ) throws Exception {
+        List<CwlCandidate> loaded = new ArrayList<>();
+        int attempted = 0;
+        int missing = 0;
+        for (HistoricalCwlSeasonSummary summary : pending) {
+            if (loaded.size() >= CWL_BATCH_SIZE
+                    || attempted >= CWL_ATTEMPT_BUDGET) break;
+            attempted++;
+            try {
+                loaded.add(new CwlCandidate(
+                        summary,
+                        service.getSeason(clanTag, summary.season())
+                ));
+            } catch (HttpException failure) {
+                if (!isMissingCandidate(failure)) throw failure;
+                missing++;
+            }
+        }
+        return new CwlCandidateBatch(List.copyOf(loaded), attempted, missing);
+    }
+
+    private static boolean isMissingCandidate(HttpException failure) {
+        return failure.getStatusCode() == 404
+                && !failure.isSafeToExpose()
+                && !failure.getUpstream().isBlank();
     }
 
     private boolean refreshCurrentWar(
@@ -449,5 +650,27 @@ public final class AchievementHistoryCollector {
         return name == null || name.isBlank() ? "SOURCE_ERROR" : name.toUpperCase();
     }
 
-    private record CwlRefresh(boolean changed, int processed, int remaining) {}
+    static record CwlCandidate(
+            HistoricalCwlSeasonSummary summary,
+            HistoricalCwlSeason season
+    ) {}
+
+    static record CwlCandidateBatch(
+            List<CwlCandidate> loaded,
+            int attempted,
+            int missing
+    ) {}
+
+    private record CwlRefresh(
+            boolean changed,
+            int processed,
+            int remaining,
+            boolean available
+    ) {}
+
+    private record HistoryRefresh(
+            boolean changed,
+            int processed,
+            boolean available
+    ) {}
 }

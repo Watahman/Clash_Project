@@ -177,6 +177,7 @@ export default Object.freeze({
     "auth.legalIntro": "By creating an account, you confirm that you have read the",
     "auth.legalAnd": "and",
     "nav.dashboard": "Dashboard",
+    "nav.minigames": "Minigames",
     "nav.savedPlans": "Saved plans",
     "nav.bracket": "Bracket generator",
     "shell.navigation": "Application navigation",

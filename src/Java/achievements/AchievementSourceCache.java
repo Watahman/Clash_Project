@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -16,6 +17,13 @@ public final class AchievementSourceCache {
     public record RecordState(
             String recordKey,
             JsonObject metrics,
+            JsonObject metadata
+    ) {}
+
+    public record PendingRecord(
+            String recordKey,
+            Instant recordTimestamp,
+            Map<String, Long> metrics,
             JsonObject metadata
     ) {}
 
@@ -68,19 +76,42 @@ public final class AchievementSourceCache {
             Map<String, Long> metrics,
             JsonObject metadata
     ) throws Exception {
-        JsonObject row = new JsonObject();
-        row.addProperty("user_id", userId);
-        row.addProperty("player_tag", playerTag);
-        row.addProperty("source", source);
-        row.addProperty("source_key", sourceKey == null ? "" : sourceKey);
-        row.addProperty("record_key", recordKey);
-        if (recordTimestamp != null) row.addProperty("record_timestamp", recordTimestamp.toString());
-        row.add("metrics", metricsJson(metrics));
-        row.add("metadata", metadata == null ? new JsonObject() : metadata);
-        row.addProperty("updated_at", Instant.now().toString());
+        upsertRecords(
+                userId,
+                playerTag,
+                source,
+                sourceKey,
+                List.of(new PendingRecord(recordKey, recordTimestamp, metrics, metadata))
+        );
+    }
 
+    public void upsertRecords(
+            String userId,
+            String playerTag,
+            String source,
+            String sourceKey,
+            List<PendingRecord> records
+    ) throws Exception {
+        if (records == null || records.isEmpty()) return;
         JsonArray body = new JsonArray();
-        body.add(row);
+        String now = Instant.now().toString();
+        for (PendingRecord record : records) {
+            if (record == null || record.recordKey() == null || record.recordKey().isBlank()) continue;
+            JsonObject row = new JsonObject();
+            row.addProperty("user_id", userId);
+            row.addProperty("player_tag", playerTag);
+            row.addProperty("source", source);
+            row.addProperty("source_key", sourceKey == null ? "" : sourceKey);
+            row.addProperty("record_key", record.recordKey());
+            if (record.recordTimestamp() != null) {
+                row.addProperty("record_timestamp", record.recordTimestamp().toString());
+            }
+            row.add("metrics", metricsJson(record.metrics()));
+            row.add("metadata", record.metadata() == null ? new JsonObject() : record.metadata());
+            row.addProperty("updated_at", now);
+            body.add(row);
+        }
+        if (body.isEmpty()) return;
         SUPABASE_Client.upsert(
                 "achievement_source_records",
                 "user_id,player_tag,source,source_key,record_key",

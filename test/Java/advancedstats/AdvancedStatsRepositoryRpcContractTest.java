@@ -14,8 +14,9 @@ class AdvancedStatsRepositoryRpcContractTest {
                 "src/Java/advancedstats/AdvancedStatsRepository.java"
         ));
 
-        assertTrue(source.contains("save_advanced_stats_battle_v3"));
-        assertTrue(source.contains("record_advanced_stats_parser_error_v2"));
+        assertTrue(source.contains("save_advanced_stats_battle_v4"));
+        assertTrue(source.contains("record_advanced_stats_parser_error_v3"));
+        assertTrue(source.contains("p_worker_id"));
         assertTrue(source.contains("p_available_gold"));
         assertTrue(source.contains("p_available_elixir"));
         assertTrue(source.contains("p_available_dark_elixir"));

@@ -28,8 +28,9 @@ class AdvancedStatsScheduledCollectorTest {
         AdvancedStatsScheduledCollector collector = collector(
                 store,
                 tag -> "{}",
-                (tracking, raw, bootstrap) -> {
+                (tracking, raw, bootstrap, workerId) -> {
                     assertTrue(bootstrap);
+                    assertFalse(workerId.isBlank());
                     return summary(3, 2, 1, 0);
                 }
         );
@@ -52,7 +53,7 @@ class AdvancedStatsScheduledCollectorTest {
         AdvancedStatsScheduledCollector collector = collector(
                 store,
                 tag -> "{}",
-                (tracking, raw, bootstrap) -> {
+                (tracking, raw, bootstrap, workerId) -> {
                     assertFalse(bootstrap);
                     return summary(2, 0, 2, 0);
                 }
@@ -70,7 +71,7 @@ class AdvancedStatsScheduledCollectorTest {
         AdvancedStatsScheduledCollector collector = collector(
                 store,
                 tag -> { throw HttpException.upstream(429, "{}", "Clash API"); },
-                (tracking, raw, bootstrap) -> summary(0, 0, 0, 0)
+                (tracking, raw, bootstrap, workerId) -> summary(0, 0, 0, 0)
         );
 
         AdvancedStatsScheduledCollector.BatchSummary result = collector.runOnce();
@@ -88,7 +89,7 @@ class AdvancedStatsScheduledCollectorTest {
         AdvancedStatsScheduledCollector collector = collector(
                 store,
                 tag -> { throw HttpException.upstream(429, "{}", "Clash API"); },
-                (tracking, raw, bootstrap) -> summary(0, 0, 0, 0)
+                (tracking, raw, bootstrap, workerId) -> summary(0, 0, 0, 0)
         );
 
         collector.runOnce();
@@ -103,7 +104,7 @@ class AdvancedStatsScheduledCollectorTest {
         AdvancedStatsScheduledCollector collector = collector(
                 store,
                 tag -> { throw new IOException("network"); },
-                (tracking, raw, bootstrap) -> summary(0, 0, 0, 0)
+                (tracking, raw, bootstrap, workerId) -> summary(0, 0, 0, 0)
         );
 
         collector.runOnce();
@@ -128,7 +129,7 @@ class AdvancedStatsScheduledCollectorTest {
         AdvancedStatsScheduledCollector collector = collector(
                 store,
                 tag -> { throw new IOException("network"); },
-                (tracking, raw, bootstrap) -> summary(0, 0, 0, 0)
+                (tracking, raw, bootstrap, workerId) -> summary(0, 0, 0, 0)
         );
 
         AdvancedStatsScheduledCollector.BatchSummary result = collector.runOnce();
@@ -143,7 +144,7 @@ class AdvancedStatsScheduledCollectorTest {
         AdvancedStatsScheduledCollector.BatchSummary result = collector(
                 store,
                 tag -> { throw new AssertionError("source must not be called"); },
-                (tracking, raw, bootstrap) -> { throw new AssertionError("ingestion must not be called"); }
+                (tracking, raw, bootstrap, workerId) -> { throw new AssertionError("ingestion must not be called"); }
         ).runOnce();
 
         assertEquals(0, result.claimed());

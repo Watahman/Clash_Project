@@ -79,6 +79,15 @@ public final class AdvancedStatsBattleIngestionService {
             String rawBattleLog,
             boolean bootstrapImport
     ) throws Exception {
+        return ingest(tracking, rawBattleLog, bootstrapImport, null);
+    }
+
+    public IngestionSummary ingest(
+            AdvancedStatsModels.TrackingState tracking,
+            String rawBattleLog,
+            boolean bootstrapImport,
+            String workerId
+    ) throws Exception {
         Objects.requireNonNull(tracking, "tracking");
         Instant observedAt = clock.instant();
         List<AdvancedStatsModels.BattleCandidate> battles = battleLogParser.parse(
@@ -95,7 +104,7 @@ public final class AdvancedStatsBattleIngestionService {
         int ignoredDefenses = 0;
 
         for (AdvancedStatsModels.BattleCandidate battle : battles) {
-            AdvancedStatsBattleProcessor.Result result = processor.process(tracking, battle, bootstrapImport);
+            AdvancedStatsBattleProcessor.Result result = processor.process(tracking, battle, bootstrapImport, workerId);
             switch (result.outcome()) {
                 case INSERTED -> {
                     attacks++;

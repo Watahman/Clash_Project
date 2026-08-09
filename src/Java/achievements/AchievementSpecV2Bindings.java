@@ -10,7 +10,7 @@ import com.google.gson.JsonElement;
 public final class AchievementSpecV2Bindings {
     public enum Comparison { GTE, LTE, BOOLEAN, UNSUPPORTED }
 
-    public record Binding(String metric, Comparison comparison) {
+    public record Binding(String metric, Comparison comparison, long targetScale) {
         public boolean supports(boolean simpleNumeric, JsonElement threshold) {
             if (comparison == Comparison.UNSUPPORTED) return false;
             if (comparison == Comparison.BOOLEAN) return threshold != null;
@@ -23,7 +23,7 @@ public final class AchievementSpecV2Bindings {
             if (threshold == null || !threshold.isJsonPrimitive() || !threshold.getAsJsonPrimitive().isNumber()) {
                 return 1L;
             }
-            double value = threshold.getAsDouble();
+            double value = threshold.getAsDouble() * targetScale;
             if (!Double.isFinite(value)) return 1L;
             return Math.max(1L, Math.round(value));
         }
@@ -39,7 +39,7 @@ public final class AchievementSpecV2Bindings {
             case "PLY_CAP_CONTRIB" -> gte("profile_capital_contributions");
             case "PLY_ACH_STARS" -> gte("profile_native_achievement_stars");
             case "PLY_ACH_COMPLETE" -> gte("profile_completed_achievement_count");
-            case "PLY_ACH_PROGRESS" -> gte("profile_achievement_completion_pct");
+            case "PLY_ACH_PROGRESS" -> gtePercent("profile_achievement_completion_pct");
             case "PLY_WAR_READY" -> bool("profile_war_ready");
             case "PLY_PROFILED" -> bool("profile_complete");
 
@@ -61,6 +61,8 @@ public final class AchievementSpecV2Bindings {
             case "TR_HOME_CURRENT" -> gte("profile_trophies");
             case "TR_HOME_BEST" -> gte("profile_best_trophies");
             case "TR_LEGEND_TROPHIES" -> gte("profile_legend_trophies");
+            case "TR_GLOBAL_RANK" -> lte("ranking_best_global_rank");
+            case "TR_RANKED_SEASONS" -> gte("legend_ranked_seasons");
             case "BB_HALL" -> gte("profile_builder_hall");
             case "BB_TROPHIES" -> gte("profile_builder_trophies");
             case "BB_BEST" -> gte("profile_best_builder_trophies");
@@ -106,14 +108,35 @@ public final class AchievementSpecV2Bindings {
             case "CWL_PERFECT_21" -> gte("cwl_perfect_seasons");
             case "CWL_TOP_FINISH" -> gte("cwl_top3_finishes");
 
+            case "RAID_WEEKENDS" -> gte("raid_weekends");
+            case "RAID_ATTACKS" -> gte("raid_attacks");
+            case "RAID_LOOT" -> gte("raid_loot");
+            case "RAID_WEEKEND_LOOT" -> gte("raid_weekend_loot");
+            case "RAID_FULL_ATTACKS" -> gte("raid_full_weekends");
+            case "RAID_BONUS" -> gte("raid_bonus_weekends");
+            case "RAID_TOP_LOOTER_COUNT" -> gte("raid_top_looter_weekends");
+
+            case "LEG_EOS_TROPHIES" -> gte("legend_best_season_trophies");
+            case "LEG_EOS_RANK" -> lte("legend_best_season_rank");
+
+            case "CL_LEVEL" -> gte("clan_level");
+            case "CL_MEMBERS" -> gte("clan_members");
+            case "CL_WAR_WINS" -> gte("clan_war_wins");
+            case "CL_WIN_STREAK" -> gte("clan_war_win_streak");
+            case "CL_CAPITAL_POINTS" -> gte("clan_capital_points");
+            case "CL_DONATIONS" -> gte("clan_donations");
+            case "CL_DONOR_PARTICIPATION" -> gtePercent("clan_donor_participation_pct");
+            case "CL_BALANCED_ROSTER" -> bool("clan_balanced_roster");
+
             default -> unsupported(familyId);
         };
     }
 
-    private static Binding gte(String metric) { return new Binding(metric, Comparison.GTE); }
-    private static Binding lte(String metric) { return new Binding(metric, Comparison.LTE); }
-    private static Binding bool(String metric) { return new Binding(metric, Comparison.BOOLEAN); }
+    private static Binding gte(String metric) { return new Binding(metric, Comparison.GTE, 1L); }
+    private static Binding gtePercent(String metric) { return new Binding(metric, Comparison.GTE, 100L); }
+    private static Binding lte(String metric) { return new Binding(metric, Comparison.LTE, 1L); }
+    private static Binding bool(String metric) { return new Binding(metric, Comparison.BOOLEAN, 1L); }
     private static Binding unsupported(String familyId) {
-        return new Binding("spec:" + familyId, Comparison.UNSUPPORTED);
+        return new Binding("spec:" + familyId, Comparison.UNSUPPORTED, 1L);
     }
 }

@@ -21,6 +21,7 @@ const GUIDANCE_STYLESHEET = '../assets/css/workspace-guidance.css';
 
 const pageConfig = {
     dashboard: { key: 'nav.dashboard', fallback: 'Dashboard' },
+    minigames: { key: 'nav.minigames', fallback: 'Minigames' },
     planner: { key: 'nav.cwl', fallback: 'CWL Planner' },
     drafts: { key: 'nav.savedPlans', fallback: 'Saved plans' },
     operation: { key: 'nav.operation', fallback: 'CWL Operation Board' },
@@ -76,6 +77,7 @@ async function loadWorkspaceUserIdentity() {
 
 const icons = {
     dashboard: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 11.5 12 5l8 6.5v7a1 1 0 0 1-1 1h-5v-5h-4v5H5a1 1 0 0 1-1-1v-7Z" stroke-width="1.7" stroke-linejoin="round"/></svg>',
+    minigames: '<svg viewBox="0 0 24 24" fill="none"><path d="M8.5 8.5h7a5 5 0 0 1 4.8 3.6l1 3.5a3 3 0 0 1-5.1 2.9l-1.5-1.7H9.3l-1.5 1.7a3 3 0 0 1-5.1-2.9l1-3.5a5 5 0 0 1 4.8-3.6Z" stroke-width="1.7" stroke-linejoin="round"/><path d="M7.5 11.5v3m-1.5-1.5h3m7-1h.01m2 2h.01M9 6h6" stroke-width="1.7" stroke-linecap="round"/></svg>',
     planner: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 6.5h14M5 12h14M5 17.5h14" stroke-width="1.7" stroke-linecap="round"/></svg>',
     drafts: '<svg viewBox="0 0 24 24" fill="none"><path d="M6 4.5h9l3 3v12H6v-15Z" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 11h6M9 15h6" stroke-width="1.7" stroke-linecap="round"/></svg>',
     operation: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 19V9m5 10V5m5 14v-7m4 7V7" stroke-width="1.7" stroke-linecap="round"/></svg>',
@@ -106,6 +108,7 @@ function shellMarkup(currentPage) {
             <nav class="workspace-nav" id="workspace-navigation" aria-label="Applicatienavigatie" data-i18n-aria-label="shell.navigation">
                 <p data-i18n="shell.overview">Overzicht</p>
                 ${navLink('dashboard', '/dashboard')}
+                ${navLink('minigames', '/minigames')}
                 <p>CWL</p>
                 ${navLink('planner', '/app/cwl-planner')}
                 ${navLink('drafts', '/app/cwl-planner-drafts')}

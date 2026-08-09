@@ -138,7 +138,8 @@ public final class AdvancedStatsScheduledCollector {
         AdvancedStatsBattleIngestionService.IngestionSummary ingest(
                 AdvancedStatsModels.TrackingState tracking,
                 String rawBattleLog,
-                boolean bootstrapImport
+                boolean bootstrapImport,
+                String workerId
         ) throws Exception;
     }
 
@@ -187,7 +188,8 @@ public final class AdvancedStatsScheduledCollector {
                 AdvancedStatsBattleIngestionService.IngestionSummary result = ingestion.ingest(
                         tracking,
                         rawBattleLog,
-                        bootstrap
+                        bootstrap,
+                        workerId
                 );
 
                 Instant completedAt = clock.instant();

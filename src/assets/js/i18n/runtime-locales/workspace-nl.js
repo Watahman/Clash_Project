@@ -177,6 +177,7 @@ export default Object.freeze({
     "auth.legalIntro": "Door een account te maken bevestig je dat je het",
     "auth.legalAnd": "en het",
     "nav.dashboard": "Dashboard",
+    "nav.minigames": "Minigames",
     "nav.savedPlans": "Opgeslagen plannen",
     "nav.bracket": "Bracket generator",
     "shell.navigation": "Applicatienavigatie",

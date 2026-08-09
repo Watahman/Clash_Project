@@ -14,7 +14,7 @@ export function parseBaseDataText(text) {
 
     let parsed;
     try { parsed = JSON.parse(source); }
-    catch { return { valid: false, error: 'This is not valid JSON.' };
+    catch { return { valid: false, error: 'This is not valid JSON.' }; }
 
     if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') {
         return { valid: false, error: 'The copied data must be one JSON object.' };
@@ -108,6 +108,7 @@ function normalizedRow(row) {
         description: String(row?.description || ''),
         category: String(row?.category || 'other'),
         categoryLabel: String(row?.category_label || ''),
+        scope: String(row?.scope || 'player').toLowerCase(),
         rarity: String(row?.rarity || 'common').toLowerCase(),
         metric: String(row?.metric || ''),
         specMetric: String(row?.spec_metric || ''),
@@ -130,6 +131,30 @@ function normalizedRow(row) {
         unlocked: row?.unlocked === true,
         unlocked_at: row?.unlocked_at || row?.unlockedAt || null
     };
+}
+
+function sharedFamilyLabel(tiers, field, stripSuffix) {
+    const values = tiers.map(tier => String(tier?.[field] || '').trim());
+    const stripped = values.map(stripSuffix);
+    return stripped.length > 1 && stripped.every(value => value && value === stripped[0])
+        ? stripped[0]
+        : values[0];
+}
+
+function familyTitle(tiers) {
+    return sharedFamilyLabel(
+        tiers,
+        'title',
+        value => value.replace(/\s+(?:[IVXLCDM]+|\d+)$/u, '').trim()
+    );
+}
+
+function familyDescription(tiers) {
+    return sharedFamilyLabel(
+        tiers,
+        'description',
+        value => value.replace(/:\s*[\d.,]+\s*%?$/u, '').trim()
+    );
 }
 
 export function groupAchievementFamilies(rows) {
@@ -168,10 +193,11 @@ export function groupAchievementFamilies(rows) {
 
         return {
             familyKey,
-            title: first.title,
-            description: first.description,
+            title: familyTitle(tiers),
+            description: familyDescription(tiers),
             category: first.category,
             categoryLabel: first.categoryLabel,
+            scope: first.scope,
             source: currentTier?.source || first.source,
             sourceCodes: currentTier?.sourceCodes || first.sourceCodes,
             evaluationMode: currentTier?.evaluationMode || first.evaluationMode,
@@ -211,7 +237,12 @@ export function buildAchievementSummary(families) {
     const list = Array.isArray(families) ? families : [];
     const allTiers = list.flatMap(family => family.tiers || []);
     const unlockedTiers = allTiers.filter(tier => tier.unlocked);
-    const totalXp = unlockedTiers.reduce((sum, tier) => sum + tier.xp, 0);
+    const personalTiers = list
+        .filter(family => family.scope !== 'clan')
+        .flatMap(family => family.tiers || []);
+    const totalXp = personalTiers
+        .filter(tier => tier.unlocked)
+        .reduce((sum, tier) => sum + tier.xp, 0);
     return {
         familyCount: list.length,
         completedFamilies: list.filter(family => family.complete).length,

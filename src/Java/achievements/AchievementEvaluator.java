@@ -58,6 +58,7 @@ public final class AchievementEvaluator {
 
             if (metadata != null) {
                 item.addProperty("category_label", metadata.categoryLabel());
+                item.addProperty("scope", metadata.scope());
                 item.addProperty("spec_metric", metadata.specMetric());
                 item.addProperty("evaluation_mode", metadata.evaluationMode());
                 item.addProperty("priority", metadata.priority());
@@ -97,6 +98,7 @@ public final class AchievementEvaluator {
             item.addProperty("description", firstNonBlank(string(official, "completionInfo"), string(official, "info")));
             item.addProperty("category", "dynamic_official_achievements");
             item.addProperty("category_label", "Dynamic official achievements");
+            item.addProperty("scope", "player");
             item.addProperty("rarity", "uncommon");
             item.addProperty("tier", 1);
             item.addProperty("xp", 100);

@@ -25,8 +25,10 @@ declare
         'public.save_advanced_stats_battle_v1(uuid,text,text,timestamptz,timestamptz,text,text,text,integer,integer,smallint,numeric,text,boolean,bigint,bigint,bigint,boolean,integer,jsonb,text,jsonb)',
         'public.save_advanced_stats_battle_v2(uuid,text,text,timestamptz,timestamptz,text,text,text,integer,integer,smallint,numeric,text,boolean,bigint,bigint,bigint,bigint,bigint,bigint,boolean,integer,jsonb,text,jsonb)',
         'public.save_advanced_stats_battle_v3(uuid,text,text,timestamptz,timestamptz,text,text,text,integer,integer,smallint,numeric,text,boolean,bigint,bigint,bigint,bigint,bigint,bigint,boolean,integer,jsonb,text,jsonb)',
+        'public.save_advanced_stats_battle_v4(uuid,text,text,timestamptz,timestamptz,text,text,text,integer,integer,smallint,numeric,text,boolean,bigint,bigint,bigint,bigint,bigint,bigint,boolean,integer,jsonb,text,jsonb,text)',
         'public.record_advanced_stats_parser_error_v1(uuid,text,text,timestamptz,timestamptz,text,text,text,integer,integer,smallint,numeric,text,bigint,bigint,bigint,boolean,integer)',
         'public.record_advanced_stats_parser_error_v2(uuid,text,text,timestamptz,timestamptz,text,text,text,integer,integer,smallint,numeric,text,bigint,bigint,bigint,bigint,bigint,bigint,boolean,integer)',
+        'public.record_advanced_stats_parser_error_v3(uuid,text,text,timestamptz,timestamptz,text,text,text,integer,integer,smallint,numeric,text,bigint,bigint,bigint,bigint,bigint,bigint,boolean,integer,text)',
         'public.claim_advanced_stats_trackers_v1(text,timestamptz,integer,integer)',
         'public.complete_advanced_stats_poll_v1(uuid,text,timestamptz,timestamptz,boolean)',
         'public.fail_advanced_stats_poll_v1(uuid,text,timestamptz,timestamptz,text,integer)',
@@ -48,7 +50,8 @@ declare
         'advanced_stats_read_models',
         'advanced_stats_exact_trends',
         'advanced_stats_achievements_integration',
-        'advanced_stats_delete_cleanup'
+        'advanced_stats_delete_cleanup',
+        'advanced_stats_lifecycle_fence_and_delete_cleanup'
     ];
 begin
     if has_schema_privilege('anon', 'public', 'CREATE')
@@ -126,8 +129,8 @@ end $$;
 select jsonb_build_object(
     'status', 'PASS',
     'tablesChecked', 9,
-    'functionsChecked', 17,
-    'migrationsChecked', 9,
+    'functionsChecked', 19,
+    'migrationsChecked', 10,
     'browserSchemaCreate', 'DENIED',
     'browserTableAccess', 'DENIED',
     'browserRpcExecute', 'DENIED',

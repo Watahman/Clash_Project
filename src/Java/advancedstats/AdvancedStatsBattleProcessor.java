@@ -28,6 +28,21 @@ public final class AdvancedStatsBattleProcessor {
                 boolean bootstrapImport,
                 int parserVersion
         ) throws Exception;
+
+        default AdvancedStatsModels.SaveBattleResult saveProcessedBattleWithLease(
+                UUID trackingId, AdvancedStatsModels.BattleCandidate battle, String fingerprint,
+                AdvancedStatsModels.ParsedArmy army, boolean bootstrapImport, int parserVersion,
+                String workerId
+        ) throws Exception {
+            return saveProcessedBattle(trackingId, battle, fingerprint, army, bootstrapImport, parserVersion);
+        }
+
+        default boolean recordParserErrorWithLease(
+                UUID trackingId, AdvancedStatsModels.BattleCandidate battle, String fingerprint,
+                boolean bootstrapImport, int parserVersion, String workerId
+        ) throws Exception {
+            return recordParserError(trackingId, battle, fingerprint, bootstrapImport, parserVersion);
+        }
     }
 
     public enum Outcome {
@@ -64,6 +79,15 @@ public final class AdvancedStatsBattleProcessor {
             AdvancedStatsModels.BattleCandidate battle,
             boolean bootstrapImport
     ) throws Exception {
+        return process(tracking, battle, bootstrapImport, null);
+    }
+
+    public Result process(
+            AdvancedStatsModels.TrackingState tracking,
+            AdvancedStatsModels.BattleCandidate battle,
+            boolean bootstrapImport,
+            String workerId
+    ) throws Exception {
         Objects.requireNonNull(tracking, "tracking");
         Objects.requireNonNull(battle, "battle");
         if (!tracking.playerTag().equals(battle.playerTag())) {
@@ -81,12 +105,13 @@ public final class AdvancedStatsBattleProcessor {
             try {
                 army = armyParser.parse(battle.armyShareCode());
             } catch (ArmyShareCodeParser.ArmyParseException parseFailure) {
-                store.recordParserError(
+                store.recordParserErrorWithLease(
                         tracking.id(),
                         battle,
                         fingerprint,
                         bootstrapImport,
-                        PARSER_VERSION
+                        PARSER_VERSION,
+                        workerId
                 );
                 System.err.printf(
                         "[advanced-stats] parser_error tracking=%s fingerprint=%s parser=%d%n",
@@ -98,13 +123,14 @@ public final class AdvancedStatsBattleProcessor {
             }
         }
 
-        AdvancedStatsModels.SaveBattleResult saved = store.saveProcessedBattle(
+        AdvancedStatsModels.SaveBattleResult saved = store.saveProcessedBattleWithLease(
                 tracking.id(),
                 battle,
                 fingerprint,
                 army,
                 bootstrapImport,
-                PARSER_VERSION
+                PARSER_VERSION,
+                workerId
         );
         if (!saved.inserted()) {
             return new Result(Outcome.DUPLICATE, fingerprint, null);

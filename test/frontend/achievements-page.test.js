@@ -36,7 +36,7 @@ describe('Achievements workspace page', () => {
         expect(source).toContain("'legend_history'");
         expect(source).toContain("'clashking_history'");
         expect(source).toContain("'clan_profile'");
-        expect(source).toContain("family.state === 'unknown'");
+        expect(source).toContain('!family.sourceAvailable');
         expect(source).toContain('Waiting for this data source');
     });
 

@@ -5,10 +5,14 @@ import Java.achievements.AchievementEvaluator;
 import Java.achievements.AchievementMetricCollector;
 import Java.achievements.AchievementProgress;
 import Java.achievements.AchievementSources;
+import Java.achievements.AchievementSpecV2Catalog;
+import Java.achievements.AchievementScopedProgress;
+import Java.achievements.ClanAchievementLedger;
 import Java.achievements.BaseDataSnapshot;
 import Java.achievements.DynamicOfficialAchievementProgress;
 import Java.achievements.HistoricalAchievementMetrics;
 import Java.cache.CacheKeys;
+import Java.cwlhistory.HistoricalCwlService;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -33,11 +37,22 @@ public class SUPABASE_Achievements {
     private final API_Utils utils;
     private final AchievementEvaluator evaluator = new AchievementEvaluator();
     private final AchievementMetricCollector metricCollector;
+    private final ClanAchievementLedger clanLedger = new ClanAchievementLedger();
 
     public SUPABASE_Achievements(HttpServer server, Config conf) {
         this.server = server;
         this.utils = new API_Utils(conf);
         this.metricCollector = new AchievementMetricCollector(conf);
+    }
+
+    SUPABASE_Achievements(
+            HttpServer server,
+            Config conf,
+            HistoricalCwlService cwlService
+    ) {
+        this.server = server;
+        this.utils = new API_Utils(conf);
+        this.metricCollector = new AchievementMetricCollector(conf, cwlService);
     }
 
     public void registerRoutes() {
@@ -60,6 +75,9 @@ public class SUPABASE_Achievements {
 
         List<AchievementProgress> evaluated = evaluator.evaluate(combinedMetrics).stream()
                 .filter(AchievementProgress::measurable)
+                .filter(item -> !"clan".equalsIgnoreCase(
+                        AchievementSpecV2Catalog.metadata(item.definition().key()).scope()
+                ))
                 .filter(item -> {
                     String source = AchievementSources.forDefinition(item.definition());
                     return AchievementSources.BASE_DATA.equals(source)
@@ -135,7 +153,8 @@ public class SUPABASE_Achievements {
         }
 
         AchievementMetricCollector.Result collected = metricCollector.collect(userId, playerTag, snapshotMetrics, deepHistory);
-        JsonArray fixedAchievements = completeAchievementCatalog(progress, collected.metrics());
+        String clanProgress = clanLedger.readCurrent(collected.clanTag());
+        JsonArray fixedAchievements = completeAchievementCatalog(progress, clanProgress, collected.metrics());
         boolean liveProfileAvailable = sourceAvailable(collected.sources(), AchievementSources.LIVE_PROFILE);
         JsonArray officialAchievements = DynamicOfficialAchievementProgress.merge(
                 progress,
@@ -146,11 +165,17 @@ public class SUPABASE_Achievements {
         JsonArray achievements = fixedAchievements.deepCopy();
         officialAchievements.forEach(achievements::add);
         boolean persisted = persistObservedProgress(userId, playerTag, progress, achievements);
+        boolean clanPersisted = persistObservedClanProgress(
+                collected.clanTag(), clanProgress, achievements,
+                sourceAvailable(collected.sources(), AchievementSources.CLAN_PROFILE)
+        );
 
         JsonObject response = new JsonObject();
         response.addProperty("playerTag", playerTag);
         response.addProperty("deepHistory", deepHistory);
         response.addProperty("progressPersisted", persisted);
+        response.addProperty("clanProgressPersisted", clanPersisted);
+        if (!collected.clanTag().isBlank()) response.addProperty("currentClanTag", collected.clanTag());
         response.addProperty("fixedFamilyCount", 340);
         response.addProperty("fixedTierCount", 1331);
         response.addProperty("dynamicOfficialCount", officialAchievements.size());
@@ -161,23 +186,32 @@ public class SUPABASE_Achievements {
         utils.sendJsonResponse(exchange, response.toString(), 200);
     }
 
-    private JsonArray completeAchievementCatalog(String storedProgressJson, Map<String, Long> currentMetrics) {
+    private JsonArray completeAchievementCatalog(
+            String storedProgressJson,
+            String storedClanProgressJson,
+            Map<String, Long> currentMetrics
+    ) {
         JsonArray storedRows = JsonParser.parseString(storedProgressJson).getAsJsonArray();
-        Map<String, JsonObject> storedByKey = storedRowsByKey(storedRows);
+        Map<String, JsonObject> personalStoredByKey = storedRowsByKey(storedRows);
+        Map<String, JsonObject> clanStoredByKey = storedRowsByKey(
+                JsonParser.parseString(storedClanProgressJson).getAsJsonArray()
+        );
         JsonArray catalog = evaluator.toJson(evaluator.evaluate(currentMetrics));
         JsonArray result = new JsonArray();
 
         for (JsonElement element : catalog) {
             JsonObject row = element.getAsJsonObject().deepCopy();
             String key = stringValue(row, "achievement_key");
-            JsonObject stored = storedByKey.get(key);
+            JsonObject stored = AchievementScopedProgress.storedFor(
+                    row, personalStoredByKey, clanStoredByKey
+            );
             boolean progressKnown = booleanValue(row, "progress_known");
             boolean currentUnlock = booleanValue(row, "unlocked");
 
             if (stored != null) {
                 long storedProgress = longValue(stored, "progress");
                 long progress = progressKnown
-                        ? Math.max(longValue(row, "progress"), storedProgress)
+                        ? AchievementProgressMerge.best(key, longValue(row, "progress"), storedProgress)
                         : storedProgress;
                 boolean previouslyUnlocked = booleanValue(stored, "unlocked");
                 row.addProperty("progress", progress);
@@ -193,6 +227,33 @@ public class SUPABASE_Achievements {
             result.add(row);
         }
         return result;
+    }
+
+    private boolean persistObservedClanProgress(
+            String clanTag,
+            String storedProgressJson,
+            JsonArray completeRows,
+            boolean evidenceAvailable
+    ) {
+        if (clanTag == null || clanTag.isBlank() || !evidenceAvailable) return true;
+        try {
+            Map<String, JsonObject> storedByKey = storedRowsByKey(
+                    JsonParser.parseString(storedProgressJson).getAsJsonArray()
+            );
+            JsonArray changed = AchievementScopedProgress.changedClanRows(storedByKey, completeRows);
+            if (changed.isEmpty()) return true;
+
+            JsonObject body = new JsonObject();
+            body.addProperty("p_clan_tag", clanTag);
+            body.addProperty("p_evidence_timestamp", Instant.now().getEpochSecond());
+            body.addProperty("p_evidence_source", "official_clan_profile_and_members");
+            body.add("p_progress", changed);
+            SUPABASE_Client.rpc("reconcile_clan_achievement_progress_v1", body.toString());
+            return true;
+        } catch (Exception persistenceFailure) {
+            System.err.println("[Achievements] Could not persist shared clan progress: " + persistenceFailure.getMessage());
+            return false;
+        }
     }
 
     private boolean persistObservedProgress(
@@ -212,6 +273,9 @@ public class SUPABASE_Achievements {
                 JsonObject row = element.getAsJsonObject();
                 if (!booleanValue(row, "progress_known")) continue;
                 if (booleanValue(row, "catalog_template")) continue;
+                // Shared clan badges have their own clan-tag ledger. Never let
+                // them enter the player-owned XP/unlock table.
+                if ("clan".equalsIgnoreCase(stringValue(row, "scope"))) continue;
 
                 String key = stringValue(row, "achievement_key");
                 JsonObject stored = storedByKey.get(key);
@@ -225,7 +289,7 @@ public class SUPABASE_Achievements {
 
                 boolean changedProgress = stored == null
                         ? progress > 0
-                        : progress > longValue(stored, "progress");
+                        : AchievementProgressMerge.improved(key, progress, longValue(stored, "progress"));
                 boolean changedUnlock = stored == null
                         ? unlocked
                         : unlocked && !booleanValue(stored, "unlocked");

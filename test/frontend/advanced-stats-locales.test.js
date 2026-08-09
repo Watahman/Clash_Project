@@ -39,6 +39,9 @@ describe('Advanced Stats locales', () => {
         for (const language of ['en', 'nl', 'fr', 'de', 'es']) {
             expect(featureLocales[language]['advancedStats.armyUses']).toContain('{count}');
             expect(featureLocales[language]['advancedStats.unitsCount']).toContain('{count}');
+            expect(featureLocales[language]['advancedStats.partialLoadFailed']).toContain('{sections}');
+            expect(featureLocales[language]['advancedStats.profileLoadFailedTitle']).toBeTruthy();
+            expect(featureLocales[language]['advancedStats.retry']).toBeTruthy();
         }
     });
 

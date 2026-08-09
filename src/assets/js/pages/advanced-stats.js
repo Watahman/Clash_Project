@@ -41,6 +41,7 @@ const elements = {};
 function cacheElements() {
     const ids = [
         'advanced-stats-account', 'advanced-stats-no-accounts', 'advanced-stats-open-profile',
+        'advanced-stats-profile-error', 'advanced-stats-profile-retry',
         'advanced-stats-page-status', 'advanced-stats-not-tracking', 'advanced-stats-start',
         'advanced-stats-initializing', 'advanced-stats-content', 'advanced-stats-tracking-title',
         'advanced-stats-player-line', 'advanced-stats-started-at', 'advanced-stats-updated-at',
@@ -177,9 +178,17 @@ async function initialize() {
     try {
         const profile = await checkUserId(userId);
         state.accounts = accountsFromProfile(profile);
-    } catch {
+    } catch (error) {
+        console.error('advanced_stats_profile_load_failed', error);
         state.accounts = [];
+        show(elements['advanced-stats-no-accounts'], false);
+        show(elements['advanced-stats-profile-error'], true);
+        setPageStatus('', '');
+        renderAccountSelector();
+        return;
     }
+
+    show(elements['advanced-stats-profile-error'], false);
 
     if (!state.accounts.length) {
         show(elements['advanced-stats-no-accounts'], true);
@@ -210,6 +219,7 @@ function bindEvents() {
     elements['advanced-stats-open-profile']?.addEventListener('click', () => {
         document.querySelector('#profile-btn')?.click();
     });
+    elements['advanced-stats-profile-retry']?.addEventListener('click', retryProfileLoad);
     elements['advanced-stats-start']?.addEventListener('click', () => runTrackingAction(startAdvancedStatsTracking));
     elements['advanced-stats-pause']?.addEventListener('click', () => runTrackingAction(pauseAdvancedStatsTracking));
     elements['advanced-stats-resume']?.addEventListener('click', () => runTrackingAction(resumeAdvancedStatsTracking));
@@ -242,6 +252,33 @@ function bindEvents() {
         renderStatistics();
         renderAccountSelector();
     });
+}
+
+async function retryProfileLoad() {
+    if (state.busy) return;
+    setBusy(true);
+    show(elements['advanced-stats-profile-error'], false);
+    setPageStatus('advancedStats.loadingTracking');
+    try {
+        const profile = await checkUserId(getCurrentUserId());
+        state.accounts = accountsFromProfile(profile);
+        if (!state.accounts.length) {
+            show(elements['advanced-stats-no-accounts'], true);
+            setPageStatus('', '');
+            return;
+        }
+        show(elements['advanced-stats-no-accounts'], false);
+        state.playerTag = selectInitialAccount(state.accounts);
+        writeStorage(ACCOUNT_STORAGE_KEY, state.playerTag);
+        await refreshTrackingAndData({ preserveBusy: true });
+    } catch (error) {
+        console.error('advanced_stats_profile_load_failed', error);
+        show(elements['advanced-stats-profile-error'], true);
+        setPageStatus('', '');
+    } finally {
+        setBusy(false);
+        renderAccountSelector();
+    }
 }
 
 async function runTrackingAction(action) {
@@ -387,7 +424,6 @@ async function loadStatistics({ requestVersion = ++state.requestVersion, manageB
     if (!state.playerTag) return;
     if (manageBusy) setBusy(true);
     setDataStatus('advancedStats.loadingData');
-    state.nextCursor = null;
 
     const requests = await Promise.allSettled([
         getAdvancedStatsOverview(state.playerTag, state.period),
@@ -400,23 +436,27 @@ async function loadStatistics({ requestVersion = ++state.requestVersion, manageB
     if (requestVersion !== state.requestVersion) return;
     const [overview, units, armies, trends, battles] = requests;
 
-    state.overview = overview.status === 'fulfilled' ? overview.value : null;
-    state.units = units.status === 'fulfilled' ? arrayValue(units.value?.items) : [];
-    state.armies = armies.status === 'fulfilled' ? arrayValue(armies.value?.items) : [];
-    state.trends = trends.status === 'fulfilled' ? arrayValue(trends.value?.points) : [];
+    if (overview.status === 'fulfilled') state.overview = overview.value;
+    if (units.status === 'fulfilled') state.units = arrayValue(units.value?.items);
+    if (armies.status === 'fulfilled') state.armies = arrayValue(armies.value?.items);
+    if (trends.status === 'fulfilled') state.trends = arrayValue(trends.value?.points);
     if (battles.status === 'fulfilled') {
         state.battles = arrayValue(battles.value?.items);
         state.nextCursor = battles.value?.nextCursor || null;
         state.hasMore = Boolean(battles.value?.hasMore && state.nextCursor);
-    } else {
-        state.battles = [];
-        state.nextCursor = null;
-        state.hasMore = false;
     }
 
     renderStatistics();
-    const failed = requests.filter(result => result.status === 'rejected').length;
-    setDataStatus(failed ? 'advancedStats.loadFailed' : '', failed ? '' : t('advancedStats.updatedNow'));
+    const sectionNames = ['summary', 'units', 'armies', 'trends', 'battles'];
+    const failedSections = sectionNames.filter((name, index) => requests[index].status === 'rejected');
+    sectionNames.forEach(name => {
+        document.getElementById(`advanced-stats-${name}-section`)
+            ?.setAttribute('data-load-error', String(failedSections.includes(name)));
+    });
+    const failedLabels = failedSections.map(name => t(`advancedStats.section.${name}`)).join(', ');
+    setDataStatus('', failedSections.length
+        ? t('advancedStats.partialLoadFailed', { sections: failedLabels })
+        : t('advancedStats.updatedNow'));
 
     if (manageBusy) {
         setBusy(false);

@@ -30,7 +30,9 @@ public final class AchievementFastMetrics {
             String liveProfileError,
             String clashPanelError,
             String advancedStatsError,
-            JsonArray officialAchievements
+            JsonArray officialAchievements,
+            boolean clanProfileAvailable,
+            String clanProfileError
     ) {
         public Result {
             metrics = Map.copyOf(metrics == null ? Map.of() : metrics);
@@ -48,7 +50,7 @@ public final class AchievementFastMetrics {
                 String advancedStatsError
         ) {
             this(metrics, liveProfileAvailable, clashPanelAvailable, advancedStatsAvailable, clanTag,
-                    liveProfileError, clashPanelError, advancedStatsError, new JsonArray());
+                    liveProfileError, clashPanelError, advancedStatsError, new JsonArray(), false, "");
         }
     }
 
@@ -68,6 +70,8 @@ public final class AchievementFastMetrics {
         String appError = "";
         String statsError = "";
         JsonArray officialAchievements = new JsonArray();
+        boolean clanProfileAvailable = false;
+        String clanProfileError = "";
 
         try {
             JsonObject profile = JsonParser.parseString(
@@ -82,6 +86,20 @@ public final class AchievementFastMetrics {
             liveAvailable = true;
         } catch (Exception error) {
             liveError = errorCode(error);
+        }
+
+        if (!clanTag.isBlank()) {
+            try {
+                String encodedClanTag = URLEncoder.encode(clanTag, StandardCharsets.UTF_8);
+                JsonObject clan = JsonParser.parseString(utils.clashGetCachedValue(
+                        "/clans/" + encodedClanTag, CachePolicy.CLAN_INFO)).getAsJsonObject();
+                JsonObject members = JsonParser.parseString(utils.clashGetCachedValue(
+                        "/clans/" + encodedClanTag + "/members", CachePolicy.CLAN_MEMBERS)).getAsJsonObject();
+                metrics.putAll(ClanAchievementMetrics.normalize(clanTag, clan, members));
+                clanProfileAvailable = true;
+            } catch (Exception error) {
+                clanProfileError = errorCode(error);
+            }
         }
 
         try {
@@ -118,7 +136,9 @@ public final class AchievementFastMetrics {
                 liveError,
                 appError,
                 statsError,
-                officialAchievements
+                officialAchievements,
+                clanProfileAvailable,
+                clanProfileError
         );
     }
 

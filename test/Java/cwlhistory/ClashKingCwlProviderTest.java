@@ -228,6 +228,53 @@ class ClashKingCwlProviderTest {
         );
     }
 
+    @Test
+    void acceptsJsonNullForTheOptionalBasicClanHistory() throws Exception {
+        respond("/clan/%23PQL/basic", 200, "null");
+        respond("/list/seasons?last=48", 200, "[\"2026-06\"]");
+
+        List<HistoricalCwlSeasonSummary> seasons =
+                provider.getAvailableSeasons("#PQL", 2);
+
+        assertEquals(List.of("2026-06", "2026-05"), seasons.stream()
+                .map(HistoricalCwlSeasonSummary::season)
+                .toList());
+    }
+
+    @Test
+    void doesNotTreatInvalidBasicClanJsonAsMissingHistory() {
+        respond("/clan/%23PQL/basic", 200, "[]");
+
+        Java.HttpException error = assertThrows(
+                Java.HttpException.class,
+                () -> provider.getAvailableSeasons("#PQL", 2)
+        );
+
+        assertEquals(502, error.getStatusCode());
+    }
+
+    @Test
+    void temporarilyCachesMissingSeasonResponses() {
+        respond(
+                "/cwl/%23PQL/2026-06",
+                404,
+                "{\"detail\":\"Not Found\"}"
+        );
+
+        assertThrows(
+                Java.HttpException.class,
+                () -> provider.getSeason("#PQL", "2026-06")
+        );
+        assertThrows(
+                Java.HttpException.class,
+                () -> provider.getSeason("#PQL", "2026-06")
+        );
+
+        assertEquals(1, requests.stream()
+                .filter("/cwl/%23PQL/2026-06"::equals)
+                .count());
+    }
+
     private void respond(String target, int status, String body) {
         responses.put(target, new Response(status, body));
     }

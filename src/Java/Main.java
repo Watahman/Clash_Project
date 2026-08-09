@@ -1,5 +1,8 @@
 package Java;
 
+import Java.achievements.AchievementCatalog;
+import Java.cwlhistory.HistoricalCwlProviderFactory;
+import Java.cwlhistory.HistoricalCwlService;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
@@ -36,6 +39,7 @@ public class Main {
         Config conf;
         HttpServer server;
         conf = new Config(); // config initialiseren
+        AchievementCatalog.definitions(); // Fail startup before readiness if the embedded v2 catalog is invalid.
         server = HttpServer.create(new InetSocketAddress(conf.getServerPort()), 0);
         int workerCount = Math.max(4, Math.min(32, Runtime.getRuntime().availableProcessors() * 2));
         ExecutorService executor = Executors.newFixedThreadPool(workerCount);
@@ -48,10 +52,17 @@ public class Main {
         apiLocations = new API_Locations(server, conf);
         apiPlayer = new API_Player(server, conf);
         apiPlayerPerformance = new API_PlayerPerformance(server, conf);
-        apiCwlHistory = new API_CWLHistory(server, conf);
+        HistoricalCwlService cwlHistoryService = new HistoricalCwlService(
+                HistoricalCwlProviderFactory.create(conf)
+        );
+        apiCwlHistory = new API_CWLHistory(server, conf, cwlHistoryService);
         supaUser = new SUPABASE_User(server, conf);
         supaAuth = new SUPABASE_Auth(server, conf);
-        supaAchievements = new SUPABASE_Achievements(server, conf);
+        supaAchievements = new SUPABASE_Achievements(
+                server,
+                conf,
+                cwlHistoryService
+        );
         supaAdvancedStats = new SUPABASE_AdvancedStats(server, conf);
         advancedStatsInternalPoll = new AdvancedStatsInternalPoll(server, conf);
         publicIntake = new PublicIntake(server, conf);

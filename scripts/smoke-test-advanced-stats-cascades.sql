@@ -46,13 +46,22 @@ begin
         user_id, player_tag, achievement_key, family_key, title, description,
         category, rarity, tier, xp, metric, progress, target, unlocked,
         unlocked_at, source_timestamp, updated_at
-    ) values
-    (
-        v_user, '#P0Y2', 'tracked_attack_synthetic', 'battle_tracker', 'Tracked', 'Tracked',
-        'battle', 'common', 1, 1, 'tracked_attack_count', 50, 100, false,
-        null, 2000, now()
-    ),
-    (
+    )
+    select
+        v_user, '#P0Y2', 'advanced_stats_synthetic_' || metric, 'battle_tracker', 'Tracked', 'Tracked',
+        'battle', 'common', 1, 1, metric, 50, 100, false, null, 2000, now()
+    from unnest(array[
+        'tracked_attack_count', 'tracked_star_count', 'tracked_three_star_count',
+        'tracked_two_star_count', 'tracked_one_star_count', 'tracked_zero_star_count',
+        'tracked_gold_looted', 'tracked_elixir_looted', 'tracked_dark_elixir_looted',
+        'tracked_active_days'
+    ]) as metric;
+
+    insert into public.achievement_progress (
+        user_id, player_tag, achievement_key, family_key, title, description,
+        category, rarity, tier, xp, metric, progress, target, unlocked,
+        unlocked_at, source_timestamp, updated_at
+    ) values (
         v_user, '#P0Y2', 'unrelated_synthetic', 'unrelated', 'Unrelated', 'Unrelated',
         'progression', 'common', 1, 1, 'donations', 25, 100, false,
         null, 2000, now()
@@ -70,7 +79,7 @@ begin
 
     v_result := public.delete_advanced_stats_tracking_v1(v_user, '#P0Y2');
     if coalesce((v_result->>'deleted')::boolean,false) is not true
-       or (v_result->>'achievementRowsDeleted')::integer <> 1 then
+       or (v_result->>'achievementRowsDeleted')::integer <> 10 then
         raise exception 'Advanced Stats delete RPC returned unexpected result: %', v_result;
     end if;
 
@@ -86,7 +95,7 @@ begin
     if v_count <> 0 then raise exception 'Tracking delete did not cascade gaps'; end if;
     select count(*) into v_count from public.achievement_progress
      where user_id=v_user and player_tag='#P0Y2'
-       and metric in ('tracked_attack_count','tracked_star_count','tracked_three_star_count');
+       and metric like 'tracked_%';
     if v_count <> 0 then raise exception 'Advanced Stats-derived achievement progress survived delete'; end if;
     select count(*) into v_count from public.achievement_progress
      where user_id=v_user and player_tag='#P0Y2' and achievement_key='unrelated_synthetic';
