@@ -25,11 +25,18 @@ function unitIdentity(unit) {
     return `${normalizedCategory(unit?.category)}:${String(unit?.key || unit?.unitKey || '').trim()}`;
 }
 
+export function isPlayerFacingUnitName(value) {
+    const name = String(value || '').trim();
+    if (!name) return false;
+    if (/^unknown\b.*\(\d+\)$/i.test(name)) return false;
+    return !/^[a-z_]+:\d+$/i.test(name);
+}
+
 function unitNameLookup(unitCatalog) {
     const names = new Map();
     for (const unit of Array.isArray(unitCatalog) ? unitCatalog : []) {
         const name = String(unit?.name || unit?.unitName || '').trim();
-        if (!name) continue;
+        if (!isPlayerFacingUnitName(name)) continue;
         names.set(unitIdentity(unit), name);
     }
     return names;
@@ -44,7 +51,7 @@ export function presentArmy(army, unitCatalog, fallbackLabel) {
             name: String(unit?.name || unit?.unitName || names.get(unitIdentity(unit)) || '').trim(),
             quantity: Math.max(0, Number(unit?.quantity || 0))
         }))
-        .filter(unit => DISPLAY_CATEGORIES.has(unit.category) && unit.name)
+        .filter(unit => DISPLAY_CATEGORIES.has(unit.category) && isPlayerFacingUnitName(unit.name))
         .sort((left, right) => {
             const categoryDifference = (CATEGORY_ORDER.get(left.category) ?? 99)
                 - (CATEGORY_ORDER.get(right.category) ?? 99);

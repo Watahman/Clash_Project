@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { presentArmy } from '../../src/assets/js/pages/advanced-stats-army-view.js';
+import { isPlayerFacingUnitName, presentArmy } from '../../src/assets/js/pages/advanced-stats-army-view.js';
 
 describe('Advanced Stats army presentation', () => {
     it('uses real troop names instead of category totals', () => {
@@ -45,5 +45,20 @@ describe('Advanced Stats army presentation', () => {
             units: [],
             hiddenCount: 0
         });
+    });
+
+    it('hides unresolved internal unit identifiers', () => {
+        const presentation = presentArmy({
+            units: [
+                { key: 'unknown:4000185', category: 'TROOP', name: 'Unknown troop (4000185)', quantity: 50 },
+                { key: 'troop:7', category: 'TROOP', name: 'Healer', quantity: 5 }
+            ]
+        }, [], 'Army composition');
+
+        expect(presentation.label).toBe('5× Healer');
+        expect(presentation.units).toEqual(['5× Healer']);
+        expect(isPlayerFacingUnitName('Unknown troop (4000185)')).toBe(false);
+        expect(isPlayerFacingUnitName('troop:4000185')).toBe(false);
+        expect(isPlayerFacingUnitName('Meteor Golem')).toBe(true);
     });
 });

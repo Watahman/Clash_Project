@@ -1,4 +1,4 @@
-import { t, getLanguage } from '../i18n/i18n.js';
+import { t, getLanguage, applyI18n } from '../i18n/i18n.js?v=20260809-2';
 import { getCurrentUserId } from '../utils/user.js';
 import { checkUserId } from '../Supabase/Supabase-User.js';
 import {
@@ -14,7 +14,7 @@ import {
     startAdvancedStatsTracking,
     stopAdvancedStatsTracking
 } from '../Supabase/Supabase-AdvancedStats.js';
-import { presentArmy } from './advanced-stats-army-view.js';
+import { isPlayerFacingUnitName, presentArmy } from './advanced-stats-army-view.js';
 
 const PERIOD_DEFAULT = '30d';
 const ACCOUNT_STORAGE_KEY = 'clashpanel_advanced_stats_account';
@@ -168,6 +168,7 @@ function activeAccount() {
 
 async function initialize() {
     cacheElements();
+    applyI18n(document);
     bindEvents();
     setPageStatus('advancedStats.loadingTracking');
 
@@ -480,8 +481,11 @@ async function loadUnitsOnly() {
 }
 
 function filteredUnits() {
-    if (state.category === 'ALL') return [...state.unitCatalog];
-    return state.unitCatalog.filter(unit => String(unit?.category || '').toUpperCase() === state.category);
+    return state.unitCatalog.filter(unit => {
+        const categoryMatches = state.category === 'ALL'
+            || String(unit?.category || '').toUpperCase() === state.category;
+        return categoryMatches && isPlayerFacingUnitName(unit?.name || unit?.unitName);
+    });
 }
 
 async function loadMoreBattles() {
@@ -550,7 +554,7 @@ function renderOverview() {
 function renderFavorite(kind, favorite) {
     const name = elements[`advanced-stats-favorite-${kind}`];
     const meta = elements[`advanced-stats-favorite-${kind}-meta`];
-    if (!favorite) {
+    if (!favorite || !isPlayerFacingUnitName(favorite.name || favorite.unitName)) {
         name.textContent = t('advancedStats.noFavorite');
         meta.textContent = '';
         return;
@@ -562,12 +566,13 @@ function renderFavorite(kind, favorite) {
 function renderFavoriteArmy(favorite) {
     const name = elements['advanced-stats-favorite-army'];
     const meta = elements['advanced-stats-favorite-army-meta'];
-    if (!favorite) {
+    const presentation = favorite ? armyPresentation(favorite.army) : null;
+    if (!favorite || !presentation?.units.length) {
         name.textContent = t('advancedStats.noFavorite');
         meta.textContent = '';
         return;
     }
-    name.textContent = armyPresentation(favorite.army).label;
+    name.textContent = presentation.label;
     meta.textContent = `${formatNumber(favorite.battleCount || 0)} ${t('advancedStats.attacks').toLowerCase()} · ${formatDecimal(favorite.averageStars)}★`;
 }
 
@@ -595,12 +600,14 @@ function renderUnits() {
 function renderArmies() {
     const root = elements['advanced-stats-armies'];
     root.replaceChildren();
-    state.armies.forEach((army, index) => {
+    const playerFacingArmies = state.armies
+        .map(army => ({ army, presentation: armyPresentation(army.army) }))
+        .filter(item => item.presentation.units.length > 0);
+    playerFacingArmies.forEach(({ army, presentation }, index) => {
         const card = document.createElement('article');
         card.className = 'advanced-stats__army-card';
         const header = document.createElement('header');
         const title = document.createElement('strong');
-        const presentation = armyPresentation(army.army);
         title.textContent = `${index + 1}. ${presentation.label}`;
         const uses = document.createElement('span');
         uses.textContent = t('advancedStats.armyUses', { count: formatNumber(army.battleCount || 0) });
@@ -629,7 +636,7 @@ function renderArmies() {
         card.append(metrics);
         root.append(card);
     });
-    show(elements['advanced-stats-armies-empty'], state.armies.length === 0);
+    show(elements['advanced-stats-armies-empty'], playerFacingArmies.length === 0);
 }
 
 function renderTrends() {
@@ -694,7 +701,8 @@ function battleElement(battle) {
 
     item.append(main, score, meta);
 
-    const units = arrayValue(battle.units);
+    const units = arrayValue(battle.units)
+        .filter(unit => isPlayerFacingUnitName(unit?.name || unit?.unitName));
     if (units.length) {
         const army = document.createElement('div');
         army.className = 'advanced-stats__battle-army';

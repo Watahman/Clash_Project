@@ -60,12 +60,31 @@ describe('Advanced Stats workspace page', () => {
 
     it('shows meaningful army names without developer metadata', () => {
         const source = readFileSync('src/assets/js/pages/advanced-stats.js', 'utf8');
-        expect(source).toContain("import { presentArmy } from './advanced-stats-army-view.js'");
+        expect(source).toContain("import { isPlayerFacingUnitName, presentArmy } from './advanced-stats-army-view.js'");
         expect(source).toContain("getAdvancedStatsUnits(state.playerTag, state.period, 'ALL')");
         expect(source).toContain("formatDate(tracking.lastSuccessfulPollAt");
+        expect(source).toContain('.filter(item => item.presentation.units.length > 0)');
+        expect(source).toContain('isPlayerFacingUnitName(unit?.name || unit?.unitName)');
         expect(source).not.toContain('pieces.push(battle.battleType)');
         expect(source).not.toContain("pieces.push(t('advancedStats.bootstrap'))");
         expect(source).not.toContain("t('advancedStats.unitsCount'");
+    });
+
+    it('versions the complete Advanced Stats translation graph', () => {
+        const html = readFileSync('src/subpages/advanced-stats.html', 'utf8');
+        const bootstrap = readFileSync('src/assets/js/pages/advanced-stats-bootstrap.js', 'utf8');
+        const page = readFileSync('src/assets/js/pages/advanced-stats.js', 'utf8');
+        const i18n = readFileSync('src/assets/js/i18n/i18n.js', 'utf8');
+        const runtime = readFileSync('src/assets/js/i18n/runtime-translations.js', 'utf8');
+
+        expect(html).toContain('advanced-stats-bootstrap.js?v=20260809-2');
+        expect(bootstrap).toContain("advanced-stats.js?v=20260809-2");
+        expect(page).toContain("i18n/i18n.js?v=20260809-2");
+        expect(page).toContain('applyI18n(document)');
+        expect(i18n).toContain("runtime-translations.js?v=20260809-2");
+        expect(runtime).toContain("advanced-stats-locales.js?v=20260809-2");
+        expect(runtime).toContain("advanced-stats-extra-locales.js?v=20260809-2");
+        expect(runtime).toContain("advanced-stats-ui-locales.js?v=20260809-2");
     });
 
     it('removes setup and sorting notes from the player-facing page', () => {
