@@ -1,4 +1,4 @@
-import { ENTITY_GUESSER_DATA_VERSION, getEntitiesBySourceCategory } from './entity-guesser-catalog.js?v=20260809-2';
+import { ENTITY_GUESSER_DATA_VERSION, getEntitiesBySourceCategory } from './entity-guesser-catalog.js?v=20260809-3';
 
 export const HIGHER_LOWER_DATA_VERSION = `${ENTITY_GUESSER_DATA_VERSION}-higher-lower-v1`;
 export const HIGHER_LOWER_DAILY_KEY = 'clashpanel:minigames:higher-lower:daily:v1';

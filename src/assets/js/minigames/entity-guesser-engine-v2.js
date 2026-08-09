@@ -3,7 +3,7 @@ import {
     ENTITY_CATEGORIES,
     getCategory,
     getEntities
-} from './entity-guesser-catalog.js?v=20260809-2';
+} from './entity-guesser-catalog.js?v=20260809-3';
 
 export const DAILY_STORAGE_KEY = 'clashpanel:minigames:entity-guesser:daily:v2';
 export const STATS_STORAGE_KEY = 'clashpanel:minigames:entity-guesser:stats:v2';

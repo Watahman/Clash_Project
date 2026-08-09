@@ -106,11 +106,10 @@ body.minigames-page {
     border: 1px solid var(--border-strong);
     border-radius: 50%;
     color: var(--accent-strong);
-    font-size: 1.25rem;
-    line-height: 1;
-    transition: transform .2s ease;
+    transition: transform .2s cubic-bezier(.22, 1, .36, 1);
 }
-.minigames-help[open] .minigames-help-toggle { transform: rotate(45deg); }
+.minigames-help-toggle svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.minigames-help[open] .minigames-help-toggle { transform: rotate(180deg); }
 .minigames-help-content {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -129,6 +128,10 @@ body.minigames-page {
 .minigames-help-content article p:last-child { margin: 0; color: var(--text-muted); font-size: .8rem; line-height: 1.6; }
 .minigames-help-note { grid-column: 1 / -1; margin: 0; color: var(--text-muted); font-size: .78rem; line-height: 1.6; }
 .minigames-help-note strong { color: var(--text); }
+
+@media (prefers-reduced-motion: reduce) {
+    .minigames-help-toggle { transition: none; }
+}
 
 .game-shell {
     width: min(var(--game-max), calc(100% - 2rem));
