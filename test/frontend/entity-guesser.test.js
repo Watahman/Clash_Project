@@ -5,7 +5,10 @@ import {
     getCategory,
     getEntities
 } from '../../src/assets/js/minigames/entity-guesser-data.js';
-import { getEntities as getCatalogEntities } from '../../src/assets/js/minigames/entity-guesser-catalog.js';
+import {
+    getCategory as getCatalogCategory,
+    getEntities as getCatalogEntities
+} from '../../src/assets/js/minigames/entity-guesser-catalog.js';
 import {
     availableHintCount,
     buildHint,
@@ -45,10 +48,10 @@ describe('Entity Guesser core categories', () => {
 
     it('makes every answer in large categories available to the picker', () => {
         const defenses = getCatalogEntities('defenses');
-        const equipment = getCatalogEntities('equipment');
+        const spellsEquipment = getCatalogEntities('spellsEquipment');
 
-        expect(searchEntities('', defenses, defenses.length)).toHaveLength(21);
-        expect(searchEntities('', equipment, equipment.length)).toHaveLength(41);
+        expect(searchEntities('', defenses, defenses.length)).toHaveLength(29);
+        expect(searchEntities('', spellsEquipment, spellsEquipment.length)).toHaveLength(59);
         expect(searchEntities('tower', defenses, defenses.length).map(item => item.name))
             .toContain('Super Wizard Tower');
     });
@@ -60,7 +63,7 @@ describe('Entity Guesser core categories', () => {
         const second = getDailyEntity('2026-08-06', secondCategory);
         expect(firstCategory.id).toBe(secondCategory.id);
         expect(first.id).toBe(second.id);
-        expect(getCatalogEntities(firstCategory.id)).toContain(first);
+        expect(getCatalogEntities(firstCategory.id).some(entity => entity.id === first.id)).toBe(true);
     });
 
     it('returns numeric, ordered and partial-set feedback', () => {
@@ -91,12 +94,13 @@ describe('Entity Guesser core categories', () => {
     });
 
     it('builds category-specific hints without revealing the answer name', () => {
-        const equipment = getEntities('equipment').find(entity => entity.id === 'magic-mirror');
-        const category = getCategory('equipment');
+        const equipment = getCatalogEntities('spellsEquipment').find(entity => entity.id === 'magic-mirror');
+        const category = getCatalogCategory('spellsEquipment');
         const first = buildHint(equipment, category, 1);
         const second = buildHint(equipment, category, 2);
-        expect(first).toContain('Archer Queen');
-        expect(second).toContain('Clone');
+        expect(first).toContain('Equipment');
+        expect(first).toContain('clone');
+        expect(second).toContain('event source');
         expect(`${first} ${second}`).not.toContain('Magic Mirror');
     });
 

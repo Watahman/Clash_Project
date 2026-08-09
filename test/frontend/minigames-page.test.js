@@ -4,11 +4,14 @@ import { describe, expect, it } from 'vitest';
 describe('ClashPanel minigames public page', () => {
     const page = readFileSync('src/minigames.html', 'utf8');
     const entityController = readFileSync('src/assets/js/pages/minigames-phase2b.js', 'utf8');
+    const entityEngine = readFileSync('src/assets/js/minigames/entity-guesser-engine-v2.js', 'utf8');
     const higherLowerController = readFileSync('src/assets/js/pages/higher-lower.js', 'utf8');
+    const higherLowerEngine = readFileSync('src/assets/js/minigames/higher-lower-engine.js', 'utf8');
+    const minigamesState = readFileSync('src/assets/js/minigames/minigames-state.js', 'utf8');
     const hubController = readFileSync('src/assets/js/pages/minigames-hub.js', 'utf8');
 
     it('loads the game hub, Entity Guesser and Higher or Lower controllers', () => {
-        expect(page).toContain('/assets/js/pages/minigames-hub.js');
+        expect(page).toContain('/assets/js/pages/minigames-hub.js?v=20260809-2');
         expect(page).toContain('/assets/js/pages/minigames-phase2b.js');
         expect(page).toContain('/assets/js/pages/higher-lower.js');
         expect(page).toContain('/assets/css/minigames-higher-lower.css');
@@ -31,22 +34,27 @@ describe('ClashPanel minigames public page', () => {
         expect(page).toContain('ClashPanel Higher or Lower');
     });
 
-    it('advertises the complete catalog without implying every game uses every category', () => {
-        expect(page).toContain('Ten knowledge categories across the games.');
-        expect(page).toContain('Entity Guesser uses all ten categories.');
+    it('presents the complete catalog as four broad newcomer-friendly categories', () => {
+        expect(page).toContain('Four broad categories. Less menu, more guessing.');
+        expect(page).toContain('Related Clash items now play together');
         expect(page).toContain('Compare nine values and build a combo.');
         [
-            'Home Village troops',
-            'Home Village spells',
-            'Heroes',
-            'Hero Pets',
-            'Hero Equipment items',
-            'Permanent defenses',
-            'Resource buildings',
-            'Army buildings',
-            'Utility buildings',
-            'Traps'
+            'Defenses',
+            'Other buildings',
+            'Troops &amp; Heroes',
+            'Spells &amp; Equipment'
         ].forEach(label => expect(page).toContain(label));
+        expect(entityController).toContain("otherBuildings:'Other Buildings'");
+        expect(entityController).toContain("troopsHeroes:'Troops & Heroes'");
+        expect(entityController).toContain("spellsEquipment:'Spells & Equipment'");
+    });
+
+    it('gives new players a concise, keyboard-accessible guide to both games', () => {
+        expect(page).toContain('<details class="minigames-help">');
+        expect(page).toContain('<strong>What can I do here?</strong>');
+        expect(page).toContain('You have six tries and two optional hints.');
+        expect(page).toContain('Judge nine fair comparisons.');
+        expect(page).toContain('resets at 00:00 UTC');
     });
 
     it('keeps all five supported interface languages in both games', () => {
@@ -89,17 +97,23 @@ describe('ClashPanel minigames public page', () => {
         expect(page).toContain('data-picker-help');
         expect(page).not.toContain('<datalist');
         expect(entityController).toContain('searchEntities(E.input.value,entities,entities.length)');
+        expect(entityController).toContain('option.tabIndex=-1');
         expect(entityController).toContain("E.input.addEventListener('click',()=>suggestions(true))");
         expect(entityController).toContain("event.key==='ArrowDown'");
     });
 
     it('versions the changed module graph so existing browsers cannot keep the broken picker', () => {
-        expect(page).toContain('/assets/js/pages/minigames-phase2b.js?v=20260809-1');
-        expect(page).toContain('/assets/js/pages/higher-lower.js?v=20260809-1');
-        expect(page).toContain('/assets/css/minigames.css?v=20260809-1');
-        expect(entityController).toContain("entity-guesser-catalog.js?v=20260809-1");
-        expect(entityController).toContain("entity-guesser-engine-v2.js?v=20260809-1");
-        expect(higherLowerController).toContain("higher-lower-engine.js?v=20260809-1");
+        expect(page).toContain('/assets/js/pages/minigames-phase2b.js?v=20260809-2');
+        expect(page).toContain('/assets/js/pages/higher-lower.js?v=20260809-2');
+        expect(page).toContain('/assets/css/minigames.css?v=20260809-2');
+        expect(hubController).toContain("higher-lower-engine.js?v=20260809-2");
+        expect(hubController).toContain("minigames-state.js?v=20260809-2");
+        expect(entityController).toContain("entity-guesser-catalog.js?v=20260809-2");
+        expect(entityController).toContain("entity-guesser-engine-v2.js?v=20260809-2");
+        expect(entityEngine).toContain("entity-guesser-catalog.js?v=20260809-2");
+        expect(higherLowerController).toContain("higher-lower-engine.js?v=20260809-2");
+        expect(higherLowerEngine).toContain("entity-guesser-catalog.js?v=20260809-2");
+        expect(minigamesState).toContain("higher-lower-engine.js?v=20260809-2");
     });
 
     it('keeps the answer picker usable on narrow touch screens', () => {

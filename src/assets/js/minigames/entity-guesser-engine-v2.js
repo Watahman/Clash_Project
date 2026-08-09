@@ -3,7 +3,7 @@ import {
     ENTITY_CATEGORIES,
     getCategory,
     getEntities
-} from './entity-guesser-catalog.js?v=20260809-1';
+} from './entity-guesser-catalog.js?v=20260809-2';
 
 export const DAILY_STORAGE_KEY = 'clashpanel:minigames:entity-guesser:daily:v2';
 export const STATS_STORAGE_KEY = 'clashpanel:minigames:entity-guesser:stats:v2';
@@ -172,45 +172,21 @@ export function availableHintCount(attempts, usedHints, maxAttempts = 6) {
 
 export function buildHint(answer, category, hintNumber) {
     const hintBuilders = {
-        troops: [
-            entity => `${entity.movement} troop · targets ${formatValue(entity.targets).toLowerCase()}.`,
-            entity => `${entity.resource} · ${entity.role.toLowerCase()} role · ${entity.housing} housing space.`
-        ],
-        spells: [
-            entity => `${entity.resource} spell · ${entity.effect.toLowerCase()} effect.`,
-            entity => `${entity.housing} housing space · ${entity.unlockTier.toLowerCase()}-game unlock · ${entity.role.toLowerCase()} role.`
-        ],
-        heroes: [
-            entity => `${entity.movement} Hero · ${entity.attackStyle.toLowerCase()} attacker.`,
-            entity => `${entity.role} role · favors ${entity.favorite.toLowerCase()} targets.`
-        ],
-        pets: [
-            entity => `${entity.movement} Pet · ${entity.role.toLowerCase()} role.`,
-            entity => `Pet House level ${entity.petHouse} · ${entity.attackStyle.toLowerCase()} attacker.`
-        ],
-        equipment: [
-            entity => `${entity.rarity} ${entity.activation.toLowerCase()} equipment for the ${entity.hero}.`,
-            entity => `${entity.effect} effect · mainly ${entity.role.toLowerCase()} · obtained from ${entity.source.toLowerCase()}.`
-        ],
         defenses: [
-            entity => `${formatValue(entity.targets)} defense · ${entity.damageType.toLowerCase()} damage.`,
-            entity => `${entity.rangeClass.toLowerCase()} range · ${entity.special.toLowerCase()} · ${entity.attackStyle.toLowerCase()}.`
+            entity => `${entity.kind} · targets ${formatValue(entity.targets).toLowerCase()} · ${entity.impact.toLowerCase()} effect.`,
+            entity => `${entity.coverage.toLowerCase()} coverage · ${entity.feature.toLowerCase()} · ${entity.visibility.toLowerCase()}.`
         ],
-        resourceBuildings: [
-            entity => `${entity.resource} building · used for ${entity.function.toLowerCase()}.`,
-            entity => `${entity.footprint} footprint · ${entity.countClass.toLowerCase()} building · ${entity.lootRole.toLowerCase()} loot role.`
+        otherBuildings: [
+            entity => `${entity.kind} building · ${entity.system.toLowerCase()} system.`,
+            entity => `${entity.function} · ${entity.footprint} footprint · ${entity.countClass.toLowerCase()} count.`
         ],
-        armyBuildings: [
-            entity => `${entity.system} building · ${entity.function.toLowerCase()}.`,
-            entity => `${entity.footprint} footprint · upgraded with ${entity.upgradeResource.toLowerCase()} · ${entity.capacityBased ? 'capacity based' : 'fixed function'}.`
+        troopsHeroes: [
+            entity => `${entity.kind} · ${entity.movement.toLowerCase()} movement · targets ${formatValue(entity.targets).toLowerCase()}.`,
+            entity => `${entity.role} role · ${entity.attackStyle.toLowerCase()} attack · favors ${entity.favorite.toLowerCase()}.`
         ],
-        utilityBuildings: [
-            entity => `${entity.system} utility · ${entity.function.toLowerCase()}.`,
-            entity => `${entity.footprint} footprint · connects to ${entity.connectsArea} · ${entity.upgradeable ? 'upgradeable' : 'not upgradeable'}.`
-        ],
-        traps: [
-            entity => `${formatValue(entity.targets)} trap · ${entity.effect.toLowerCase()} effect.`,
-            entity => `${entity.visibility.toLowerCase()} · ${entity.area.toLowerCase()} area · ${entity.mode.toLowerCase()} mode.`
+        spellsEquipment: [
+            entity => `${entity.kind} · ${entity.activation.toLowerCase()} activation · ${entity.effect.toLowerCase()} effect.`,
+            entity => `${entity.role} role · affects ${formatValue(entity.affects).toLowerCase()} · ${entity.origin.toLowerCase()} source.`
         ]
     };
     const builders = hintBuilders[category.id] || [];

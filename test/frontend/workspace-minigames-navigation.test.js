@@ -10,6 +10,7 @@ describe('workspace Minigames navigation', () => {
         );
 
         expect(shell).toContain("minigames: { key: 'nav.minigames'");
+        expect(shell).toContain('<p data-player-progress-nav-section data-i18n="shell.progression">Progression</p>');
         expect(shell).toContain("navLink('minigames', '/minigames')");
         expect(shell).not.toContain("comingSoonNavItem('minigames')");
     });
@@ -20,4 +21,14 @@ describe('workspace Minigames navigation', () => {
             expect(workspaceLocales[language]['nav.minigames']).toBeTruthy();
         }
     );
+
+    it('keeps Games, Achievements and Advanced Stats in one deterministic Player group', () => {
+        const achievements = readFileSync('src/assets/js/shell/achievements-navigation.js', 'utf8');
+        const advancedStats = readFileSync('src/assets/js/shell/advanced-stats-navigation.js', 'utf8');
+
+        expect(achievements).toContain("navigation.querySelector('[data-workspace-nav=\"minigames\"]')");
+        expect(advancedStats).toContain("navigation.querySelector('[data-player-progress-nav-section]')");
+        expect(advancedStats).toContain("navigation.querySelector('[data-workspace-nav=\"achievements\"]')");
+        expect(advancedStats).toContain("heading.dataset.i18n = 'shell.progression'");
+    });
 });

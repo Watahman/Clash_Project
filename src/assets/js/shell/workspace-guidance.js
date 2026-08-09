@@ -10,7 +10,10 @@ const pageHelp = Object.freeze({
         items: [
             'guidance.dashboard.itemPlan',
             'guidance.dashboard.itemRun',
-            'guidance.dashboard.itemFamily'
+            'guidance.dashboard.itemFamily',
+            'guidance.dashboard.itemGames',
+            'guidance.dashboard.itemAchievements',
+            'guidance.dashboard.itemAdvancedStats'
         ]
     },
     planner: {
@@ -66,6 +69,26 @@ const pageHelp = Object.freeze({
         title: 'guidance.bracket.title',
         intro: 'guidance.bracket.intro',
         items: []
+    },
+    achievements: {
+        title: 'guidance.achievements.title',
+        intro: 'guidance.achievements.intro',
+        items: [
+            'guidance.achievements.itemAccount',
+            'guidance.achievements.itemSources',
+            'guidance.achievements.itemSnapshot',
+            'guidance.achievements.itemExplore'
+        ]
+    },
+    advancedStats: {
+        title: 'guidance.advancedStats.title',
+        intro: 'guidance.advancedStats.intro',
+        items: [
+            'guidance.advancedStats.itemAccount',
+            'guidance.advancedStats.itemTracking',
+            'guidance.advancedStats.itemHistory',
+            'guidance.advancedStats.itemControls'
+        ]
     }
 });
 
@@ -241,7 +264,9 @@ function pageHeader(page) {
         operation: '.op-page-header > div:first-child',
         groups: '.groups-page-header > div:first-child',
         warOperation: '.war-board-header > div:first-child',
-        drafts: '.drafts-header > div:first-child'
+        drafts: '.drafts-header > div:first-child',
+        achievements: '.achievement-hero-copy',
+        advancedStats: '.advanced-stats__hero > div:first-child'
     };
     return document.querySelector(selectors[page] || '');
 }

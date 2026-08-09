@@ -6,12 +6,16 @@ import worker from '../../worker/index.js';
 const documentFor = path => new JSDOM(readFileSync(path, 'utf8')).window.document;
 
 describe('Advanced Stats workspace page', () => {
+    it('uses its own workspace page identity for contextual help', () => {
+        const document = documentFor('src/subpages/advanced-stats.html');
+        expect(document.body.dataset.workspacePage).toBe('advancedStats');
+    });
     it('contains the private tracking and analysis workflow', () => {
         const document = documentFor('src/subpages/advanced-stats.html');
 
         expect(document.title).toContain('Advanced Stats');
         expect(document.querySelector('meta[name="robots"]')?.content).toContain('noindex');
-        expect(document.body.dataset.workspacePage).toBe('dashboard');
+        expect(document.body.dataset.workspacePage).toBe('advancedStats');
         expect(document.body.dataset.advancedStatsPage).toBe('true');
         expect(document.querySelector('#advanced-stats-account')).not.toBeNull();
         expect(document.querySelector('#advanced-stats-start')?.getAttribute('type')).toBe('button');

@@ -1,4 +1,4 @@
-import { ENTITY_GUESSER_DATA_VERSION, getEntities } from './entity-guesser-catalog.js?v=20260809-1';
+import { ENTITY_GUESSER_DATA_VERSION, getEntitiesBySourceCategory } from './entity-guesser-catalog.js?v=20260809-2';
 
 export const HIGHER_LOWER_DATA_VERSION = `${ENTITY_GUESSER_DATA_VERSION}-higher-lower-v1`;
 export const HIGHER_LOWER_DAILY_KEY = 'clashpanel:minigames:higher-lower:daily:v1';
@@ -7,28 +7,27 @@ export const HIGHER_LOWER_PRACTICE_FILTER_KEY = 'clashpanel:minigames:higher-low
 export const DAILY_QUESTION_COUNT = 9;
 
 export const COMPARISON_PROFILES = Object.freeze([
-    { id: 'troops-housing', categoryId: 'troops', key: 'housing', labelKey: 'housingSpace', unitKey: 'housingSpaces', kind: 'number' },
-    { id: 'spells-housing', categoryId: 'spells', key: 'housing', labelKey: 'housingSpace', unitKey: 'housingSpaces', kind: 'number' },
-    { id: 'spells-unlock', categoryId: 'spells', key: 'unlockTier', labelKey: 'unlockStage', unitKey: 'progressionStage', kind: 'ordered', order: ['Early', 'Mid', 'Late', 'Endgame'] },
-    { id: 'heroes-equipment', categoryId: 'heroes', key: 'equipmentCount', labelKey: 'equipmentCount', unitKey: 'equipmentItems', kind: 'number' },
-    { id: 'pets-house', categoryId: 'pets', key: 'petHouse', labelKey: 'petHouseRequirement', unitKey: 'petHouseLevel', kind: 'number' },
-    { id: 'equipment-max-level', categoryId: 'equipment', key: 'maxLevel', labelKey: 'maximumLevel', unitKey: 'levels', kind: 'number' },
-    { id: 'defenses-range', categoryId: 'defenses', key: 'rangeClass', labelKey: 'rangeClass', unitKey: 'rangeClassUnit', kind: 'ordered', order: ['Short', 'Medium', 'Long', 'Very Long'] },
-    { id: 'army-footprint', categoryId: 'armyBuildings', key: 'footprint', labelKey: 'buildingFootprint', unitKey: 'tiles', kind: 'footprint' },
-    { id: 'utility-footprint', categoryId: 'utilityBuildings', key: 'footprint', labelKey: 'buildingFootprint', unitKey: 'tiles', kind: 'footprint' },
-    { id: 'traps-area', categoryId: 'traps', key: 'area', labelKey: 'effectArea', unitKey: 'areaClass', kind: 'ordered', order: ['Single', 'Small', 'Medium', 'Large'] }
+    { id: 'troops-housing', groupId: 'troopsHeroes', sourceCategoryId: 'troops', key: 'housing', labelKey: 'housingSpace', unitKey: 'housingSpaces', kind: 'number' },
+    { id: 'heroes-equipment', groupId: 'troopsHeroes', sourceCategoryId: 'heroes', key: 'equipmentCount', labelKey: 'equipmentCount', unitKey: 'equipmentItems', kind: 'number' },
+    { id: 'pets-house', groupId: 'troopsHeroes', sourceCategoryId: 'pets', key: 'petHouse', labelKey: 'petHouseRequirement', unitKey: 'petHouseLevel', kind: 'number' },
+    { id: 'spells-housing', groupId: 'spellsEquipment', sourceCategoryId: 'spells', key: 'housing', labelKey: 'housingSpace', unitKey: 'housingSpaces', kind: 'number' },
+    { id: 'equipment-max-level', groupId: 'spellsEquipment', sourceCategoryId: 'equipment', key: 'maxLevel', labelKey: 'maximumLevel', unitKey: 'levels', kind: 'number' },
+    { id: 'defenses-range', groupId: 'defenses', sourceCategoryId: 'defenses', key: 'rangeClass', labelKey: 'rangeClass', unitKey: 'rangeClassUnit', kind: 'ordered', order: ['Short', 'Medium', 'Long', 'Very Long'] },
+    { id: 'traps-area', groupId: 'defenses', sourceCategoryId: 'traps', key: 'area', labelKey: 'effectArea', unitKey: 'areaClass', kind: 'ordered', order: ['Single', 'Small', 'Medium', 'Large'] },
+    { id: 'army-footprint', groupId: 'otherBuildings', sourceCategoryId: 'armyBuildings', key: 'footprint', labelKey: 'buildingFootprint', unitKey: 'tiles', kind: 'footprint' },
+    { id: 'utility-footprint', groupId: 'otherBuildings', sourceCategoryId: 'utilityBuildings', key: 'footprint', labelKey: 'buildingFootprint', unitKey: 'tiles', kind: 'footprint' }
 ]);
 
 export const DAILY_CATEGORY_IDS = Object.freeze([
-    'troops',
-    'spells',
-    'heroes',
-    'pets',
-    'equipment',
     'defenses',
-    'armyBuildings',
-    'utilityBuildings',
-    'traps'
+    'otherBuildings',
+    'troopsHeroes',
+    'spellsEquipment',
+    'defenses',
+    'troopsHeroes',
+    'spellsEquipment',
+    'otherBuildings',
+    'troopsHeroes'
 ]);
 
 export function stableHash(value) {
@@ -76,11 +75,11 @@ export function formatMetricValue(entity, profile) {
 export function getProfiles(categoryId = 'all') {
     return categoryId === 'all'
         ? COMPARISON_PROFILES
-        : COMPARISON_PROFILES.filter(profile => profile.categoryId === categoryId);
+        : COMPARISON_PROFILES.filter(profile => profile.groupId === categoryId);
 }
 
 export function buildComparablePairs(profile) {
-    const entities = getEntities(profile.categoryId);
+    const entities = getEntitiesBySourceCategory(profile.sourceCategoryId);
     const pairs = [];
 
     for (let leftIndex = 0; leftIndex < entities.length; leftIndex += 1) {
@@ -107,7 +106,8 @@ export function createQuestion(profile, pair, { id, flip = false } = {}) {
 
     return {
         id: id || `${profile.id}:${left.id}:${right.id}`,
-        categoryId: profile.categoryId,
+        categoryId: profile.groupId,
+        sourceCategoryId: profile.sourceCategoryId,
         profileId: profile.id,
         labelKey: profile.labelKey,
         unitKey: profile.unitKey,

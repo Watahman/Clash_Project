@@ -15,11 +15,12 @@ function ensureNavigation() {
     const dashboard = navigation.querySelector('[data-workspace-nav="dashboard"]');
     if (!dashboard) return false;
 
-    let heading = navigation.querySelector('[data-advanced-stats-nav-section]');
+    let heading = navigation.querySelector('[data-player-progress-nav-section]');
     if (!heading) {
         heading = document.createElement('p');
-        heading.dataset.advancedStatsNavSection = 'true';
-        heading.textContent = 'Stats';
+        heading.dataset.playerProgressNavSection = 'true';
+        heading.dataset.i18n = 'shell.progression';
+        heading.textContent = 'Progression';
         dashboard.insertAdjacentElement('afterend', heading);
     }
 
@@ -29,7 +30,10 @@ function ensureNavigation() {
         link.href = ADVANCED_STATS_PATH;
         link.dataset.workspaceNav = 'advancedStats';
         link.innerHTML = `${icon()}<span data-i18n="nav.advancedStats">Advanced Stats</span>`;
-        heading.insertAdjacentElement('afterend', link);
+        const anchor = navigation.querySelector('[data-workspace-nav="achievements"]')
+            || navigation.querySelector('[data-workspace-nav="minigames"]')
+            || heading;
+        anchor.insertAdjacentElement('afterend', link);
     }
 
     const currentPath = window.location.pathname.replace(/\/+$/, '');

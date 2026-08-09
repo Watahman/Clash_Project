@@ -4,7 +4,8 @@ import {
     ENTITY_GUESSER_DATA_VERSION,
     ENTITIES,
     getCategory,
-    getEntities
+    getEntities,
+    getEntitiesBySourceCategory
 } from '../../src/assets/js/minigames/entity-guesser-catalog.js';
 import {
     buildHint,
@@ -15,45 +16,44 @@ import {
     validateCatalog
 } from '../../src/assets/js/minigames/entity-guesser-engine-v2.js';
 
-describe('Entity Guesser phase 2C structures catalog', () => {
-    it('combines all ten categories without incomplete entities', () => {
-        expect(ENTITY_GUESSER_DATA_VERSION).toContain('phase-2c');
+describe('Entity Guesser phase 2D broad categories', () => {
+    it('combines the complete catalog into four broad, valid categories', () => {
+        expect(ENTITY_GUESSER_DATA_VERSION).toContain('phase-2d');
         expect(ENTITY_CATEGORIES.map(category => category.id)).toEqual([
-            'troops',
-            'spells',
-            'heroes',
-            'pets',
-            'equipment',
             'defenses',
-            'resourceBuildings',
-            'armyBuildings',
-            'utilityBuildings',
-            'traps'
+            'otherBuildings',
+            'troopsHeroes',
+            'spellsEquipment'
         ]);
         expect(ENTITIES).toHaveLength(163);
+        expect(getEntities('defenses')).toHaveLength(29);
+        expect(getEntities('otherBuildings')).toHaveLength(25);
+        expect(getEntities('troopsHeroes')).toHaveLength(50);
+        expect(getEntities('spellsEquipment')).toHaveLength(59);
         expect(validateCatalog()).toEqual([]);
         ENTITY_CATEGORIES.forEach(category => {
             expect(category.columns.some(column => column.key === 'unlockTh')).toBe(false);
         });
     });
 
-    it('contains the expected permanent structure catalogs', () => {
-        expect(getEntities('defenses')).toHaveLength(21);
-        expect(getEntities('resourceBuildings')).toHaveLength(6);
-        expect(getEntities('armyBuildings')).toHaveLength(12);
-        expect(getEntities('utilityBuildings')).toHaveLength(7);
-        expect(getEntities('traps')).toHaveLength(8);
+    it('keeps every original answer in the expected broad category', () => {
+        expect(getEntitiesBySourceCategory('defenses')).toHaveLength(21);
+        expect(getEntitiesBySourceCategory('traps')).toHaveLength(8);
+        expect(getEntitiesBySourceCategory('resourceBuildings')).toHaveLength(6);
+        expect(getEntitiesBySourceCategory('armyBuildings')).toHaveLength(12);
+        expect(getEntitiesBySourceCategory('utilityBuildings')).toHaveLength(7);
 
         expect(findEntity('MGT', getEntities('defenses'))?.name).toBe('Multi-Gear Tower');
-        expect(findEntity('SAM', getEntities('traps'))?.name).toBe('Seeking Air Mine');
-        expect(findEntity('CC', getEntities('armyBuildings'))?.name).toBe('Clan Castle');
+        expect(findEntity('SAM', getEntities('defenses'))?.name).toBe('Seeking Air Mine');
+        expect(findEntity('CC', getEntities('otherBuildings'))?.name).toBe('Clan Castle');
+        expect(findEntity('fireball', getEntities('spellsEquipment'))?.name).toBe('Fireball');
     });
 
-    it('rotates every phase 2B category through Daily Mode', () => {
+    it('rotates every broad category through Daily Mode', () => {
         const categories = new Set();
         const start = new Date('2026-08-01T00:00:00.000Z');
 
-        for (let offset = 0; offset < 32; offset += 1) {
+        for (let offset = 0; offset < 16; offset += 1) {
             const date = new Date(start);
             date.setUTCDate(date.getUTCDate() + offset);
             const dateKey = date.toISOString().slice(0, 10);
@@ -66,45 +66,45 @@ describe('Entity Guesser phase 2C structures catalog', () => {
         expect(categories).toEqual(new Set(ENTITY_CATEGORIES.map(category => category.id)));
     });
 
-    it('compares defense range, targets and merge status correctly', () => {
+    it('compares defenses and traps using the same meaningful fields', () => {
         const category = getCategory('defenses');
         const cannon = getEntities('defenses').find(entity => entity.id === 'cannon');
-        const multiArcher = getEntities('defenses').find(entity => entity.id === 'multi-archer-tower');
-        const comparison = compareEntity(cannon, multiArcher, category);
+        const gigaBomb = getEntities('defenses').find(entity => entity.id === 'giga-bomb');
+        const comparison = compareEntity(cannon, gigaBomb, category);
 
+        expect(comparison.find(cell => cell.key === 'kind').state).toBe('wrong');
         expect(comparison.find(cell => cell.key === 'targets').state).toBe('partial');
-        expect(comparison.find(cell => cell.key === 'rangeClass'))
-            .toMatchObject({ state: 'close', direction: 'higher' });
-        expect(comparison.find(cell => cell.key === 'merged').state).toBe('wrong');
-    });
-
-    it('compares trap visibility and damage without Town Hall context', () => {
-        const category = getCategory('traps');
-        const bomb = getEntities('traps').find(entity => entity.id === 'bomb');
-        const gigaBomb = getEntities('traps').find(entity => entity.id === 'giga-bomb');
-        const comparison = compareEntity(bomb, gigaBomb, category);
-
         expect(comparison.find(cell => cell.key === 'visibility').state).toBe('wrong');
         expect(comparison.some(cell => cell.key === 'unlockTh')).toBe(false);
-        expect(comparison.find(cell => cell.key === 'directDamage').state).toBe('correct');
     });
 
-    it('builds structure-specific hints without naming the answer', () => {
+    it('compares mixed troops, Heroes and Pets without missing fields', () => {
+        const category = getCategory('troopsHeroes');
+        const barbarian = getEntities('troopsHeroes').find(entity => entity.id === 'barbarian');
+        const king = getEntities('troopsHeroes').find(entity => entity.id === 'barbarian-king');
+        const comparison = compareEntity(barbarian, king, category);
+
+        expect(comparison).toHaveLength(category.columns.length);
+        expect(comparison.find(cell => cell.key === 'kind').state).toBe('wrong');
+        expect(comparison.find(cell => cell.key === 'movement').state).toBe('correct');
+    });
+
+    it('builds broad-category hints without naming the answer', () => {
         const defense = getEntities('defenses').find(entity => entity.id === 'revenge-tower');
         const defenseHints = [
             buildHint(defense, getCategory('defenses'), 1),
             buildHint(defense, getCategory('defenses'), 2)
         ].join(' ');
-        expect(defenseHints).toContain('long range');
+        expect(defenseHints).toContain('long coverage');
         expect(defenseHints).not.toContain('Town Hall');
         expect(defenseHints).not.toContain('Revenge Tower');
 
-        const trapEntity = getEntities('traps').find(entity => entity.id === 'giga-bomb');
-        const trapHints = [
-            buildHint(trapEntity, getCategory('traps'), 1),
-            buildHint(trapEntity, getCategory('traps'), 2)
+        const equipment = getEntities('spellsEquipment').find(entity => entity.id === 'magic-mirror');
+        const equipmentHints = [
+            buildHint(equipment, getCategory('spellsEquipment'), 1),
+            buildHint(equipment, getCategory('spellsEquipment'), 2)
         ].join(' ');
-        expect(trapHints).toContain('visible');
-        expect(trapHints).not.toContain('Giga Bomb');
+        expect(equipmentHints).toContain('Equipment');
+        expect(equipmentHints).not.toContain('Magic Mirror');
     });
 });

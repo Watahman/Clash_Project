@@ -108,6 +108,7 @@ function shellMarkup(currentPage) {
             <nav class="workspace-nav" id="workspace-navigation" aria-label="Applicatienavigatie" data-i18n-aria-label="shell.navigation">
                 <p data-i18n="shell.overview">Overzicht</p>
                 ${navLink('dashboard', '/dashboard')}
+                <p data-player-progress-nav-section data-i18n="shell.progression">Progression</p>
                 ${navLink('minigames', '/minigames')}
                 <p>CWL</p>
                 ${navLink('planner', '/app/cwl-planner')}

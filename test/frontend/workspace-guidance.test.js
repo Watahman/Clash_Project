@@ -53,6 +53,35 @@ describe('workspace guidance', () => {
         expect(document.querySelector('.workspace-help-list')?.textContent).toContain('Add and verify');
     });
 
+    it('keeps the dashboard guide aligned with Games, Achievements and Advanced Stats', () => {
+        shell('dashboard', '<header class="workspace-page-header"><h1>Dashboard</h1><p>Intro</p></header>');
+
+        initWorkspaceGuidance('dashboard');
+        initI18n(document.body);
+        document.querySelector('.workspace-page-help-trigger').click();
+
+        const copy = document.querySelector('.workspace-help-list')?.textContent || '';
+        expect(document.querySelectorAll('.workspace-help-list li')).toHaveLength(6);
+        expect(copy).toContain('Games');
+        expect(copy).toContain('Achievements');
+        expect(copy).toContain('Advanced Stats');
+    });
+
+    it.each([
+        ['achievements', '<header class="achievement-hero"><div class="achievement-hero-copy"><h1>Achievements</h1><p>Intro</p></div></header>', 'Understand your achievement progress', 'independent data'],
+        ['advancedStats', '<header class="advanced-stats__hero"><div><h1>Advanced Stats</h1><p>Intro</p></div></header>', 'Build and review tracked attack history', 'eligible linked account']
+    ])('provides accurate page help for %s', (page, content, title, expectedCopy) => {
+        shell(page, content);
+
+        initWorkspaceGuidance(page);
+        initI18n(document.body);
+        document.querySelector('.workspace-page-help-trigger').click();
+
+        expect(document.querySelector('#workspace-help-title')?.textContent).toBe(title);
+        expect(document.querySelectorAll('.workspace-help-list li')).toHaveLength(4);
+        expect(document.querySelector('.workspace-help-intro')?.textContent).toContain(expectedCopy);
+    });
+
     it('derives planner progress from the real roster, poll, lineups and saved-plan state', () => {
         localStorage.setItem('planner_id', 'plan-1');
         shell('planner', `

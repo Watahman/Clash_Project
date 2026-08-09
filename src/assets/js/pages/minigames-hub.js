@@ -1,11 +1,11 @@
 import {
     HIGHER_LOWER_DAILY_KEY,
     utcDateKey
-} from '../minigames/higher-lower-engine.js';
+} from '../minigames/higher-lower-engine.js?v=20260809-2';
 import {
     getLatestHigherLowerAnswer,
     isValidHigherLowerDailyRun
-} from '../minigames/minigames-state.js';
+} from '../minigames/minigames-state.js?v=20260809-2';
 
 const COPY = {
     en: { entity: 'Entity Guesser', higherLower: 'Higher or Lower' },

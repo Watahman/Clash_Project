@@ -36,8 +36,9 @@ function ensureAchievementsNavigation() {
         link.href = ACHIEVEMENTS_PATH;
         link.dataset.workspaceNav = 'achievements';
         link.innerHTML = `${achievementIcon()}<span data-i18n="nav.achievements">Achievements</span>`;
-        const dashboard = navigation.querySelector('[data-workspace-nav="dashboard"]');
-        dashboard?.insertAdjacentElement('afterend', link);
+        const anchor = navigation.querySelector('[data-workspace-nav="minigames"]')
+            || navigation.querySelector('[data-workspace-nav="dashboard"]');
+        anchor?.insertAdjacentElement('afterend', link);
     }
 
     const label = currentLabel();

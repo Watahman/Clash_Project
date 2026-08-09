@@ -24,13 +24,13 @@
     <link rel="stylesheet" href="/assets/css/workspace-system.css">
     <script src="/assets/js/Data/runtime-config.js"></script>
     <script type="module" src="/assets/js/pages/public-site.js"></script>
-    <script type="module" src="/assets/js/pages/minigames-hub.js"></script>
-    <script type="module" src="/assets/js/pages/minigames-phase2b.js?v=20260809-1"></script>
-    <script type="module" src="/assets/js/pages/higher-lower.js?v=20260809-1"></script>
+    <script type="module" src="/assets/js/pages/minigames-hub.js?v=20260809-2"></script>
+    <script type="module" src="/assets/js/pages/minigames-phase2b.js?v=20260809-2"></script>
+    <script type="module" src="/assets/js/pages/higher-lower.js?v=20260809-2"></script>
     <link rel="stylesheet" href="/assets/css/light-theme.css">
     <link rel="stylesheet" href="/assets/css/workspace-polish.css">
     <link rel="stylesheet" href="/assets/css/public-marketing.css">
-    <link rel="stylesheet" href="/assets/css/minigames.css?v=20260809-1">
+    <link rel="stylesheet" href="/assets/css/minigames.css?v=20260809-2">
     <link rel="stylesheet" href="/assets/css/minigames-phase2.css">
     <link rel="stylesheet" href="/assets/css/minigames-phase2b.css">
     <link rel="stylesheet" href="/assets/css/minigames-higher-lower.css">
@@ -76,6 +76,29 @@
         </button>
     </nav>
 
+    <details class="minigames-help">
+        <summary>
+            <span>
+                <strong>What can I do here?</strong>
+                <small>A quick guide to both games</small>
+            </span>
+            <span class="minigames-help-toggle" aria-hidden="true">+</span>
+        </summary>
+        <div class="minigames-help-content">
+            <article>
+                <p class="eyebrow">Entity Guesser</p>
+                <h2>Find the hidden Clash entity.</h2>
+                <p>Choose one of four broad categories, then search or tap an answer. Every attempt compares shared clues. You have six tries and two optional hints.</p>
+            </article>
+            <article>
+                <p class="eyebrow">Higher or Lower</p>
+                <h2>Judge nine fair comparisons.</h2>
+                <p>Use the shown value to decide whether the hidden value is higher or lower. Correct answers build your combo; equal-value pairs are excluded.</p>
+            </article>
+            <p class="minigames-help-note"><strong>Daily</strong> gives everyone the same challenge and resets at 00:00 UTC. <strong>Practice</strong> lets you choose a category and play freely without changing the daily result.</p>
+        </div>
+    </details>
+
     <section class="game-shell" aria-labelledby="game-title" data-minigame-view="entity">
         <div class="game-toolbar">
             <div class="game-mode-tabs" role="tablist" aria-label="Game mode">
@@ -88,7 +111,7 @@
         <div class="game-content">
             <aside class="game-sidebar">
                 <p class="eyebrow" data-game-i18n="phase">Entity Guesser</p>
-                <h2 data-category-title>Home Village Troops</h2>
+                <h2 data-category-title>Troops &amp; Heroes</h2>
                 <p data-game-i18n="instructions">Compare each property. Arrows show whether the hidden value is higher or lower.</p>
 
                 <label class="game-category-picker" data-category-picker>
@@ -231,20 +254,14 @@
     <section class="minigames-category-summary" aria-labelledby="category-summary-title">
         <div>
             <p class="eyebrow">Shared game catalog</p>
-            <h2 id="category-summary-title">Ten knowledge categories across the games.</h2>
-            <p>Entity Guesser uses all ten categories. Higher or Lower uses the nine categories with a fair, unambiguous value comparison.</p>
+            <h2 id="category-summary-title">Four broad categories. Less menu, more guessing.</h2>
+            <p>Related Clash items now play together, while every comparison still uses a fair shared property.</p>
         </div>
         <ul>
-            <li><strong>32</strong><span>Home Village troops</span></li>
-            <li><strong>18</strong><span>Home Village spells</span></li>
-            <li><strong>6</strong><span>Heroes</span></li>
-            <li><strong>12</strong><span>Hero Pets</span></li>
-            <li><strong>41</strong><span>Hero Equipment items</span></li>
-            <li><strong>21</strong><span>Permanent defenses</span></li>
-            <li><strong>6</strong><span>Resource buildings</span></li>
-            <li><strong>12</strong><span>Army buildings</span></li>
-            <li><strong>7</strong><span>Utility buildings</span></li>
-            <li><strong>8</strong><span>Traps</span></li>
+            <li><strong>29</strong><span>Defenses</span></li>
+            <li><strong>25</strong><span>Other buildings</span></li>
+            <li><strong>50</strong><span>Troops &amp; Heroes</span></li>
+            <li><strong>59</strong><span>Spells &amp; Equipment</span></li>
         </ul>
     </section>
 

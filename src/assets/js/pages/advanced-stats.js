@@ -290,7 +290,9 @@ async function runTrackingAction(action) {
         await refreshTrackingAndData({ preserveBusy: true });
     } catch (error) {
         console.error('advanced_stats_action_failed', error);
-        setDataStatus('advancedStats.actionFailed');
+        setDataStatus(error?.code === 'ADVANCED_STATS_ROLLOUT_RESTRICTED'
+            ? 'advancedStats.rolloutRestricted'
+            : 'advancedStats.actionFailed');
     } finally {
         setBusy(false);
         renderAccountSelector();

@@ -2,7 +2,7 @@ import {
     DAILY_QUESTION_COUNT,
     HIGHER_LOWER_DATA_VERSION,
     utcDateKey
-} from './higher-lower-engine.js';
+} from './higher-lower-engine.js?v=20260809-2';
 
 const CHOICES = new Set(['higher', 'lower']);
 
