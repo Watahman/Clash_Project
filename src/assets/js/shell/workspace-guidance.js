@@ -268,7 +268,8 @@ function pageHeader(page) {
         achievements: '.achievement-hero-copy',
         advancedStats: '.advanced-stats__hero > div:first-child'
     };
-    return document.querySelector(selectors[page] || '');
+    const selector = selectors[page];
+    return selector ? document.querySelector(selector) : null;
 }
 
 function mountPageHelp(page, drawer) {

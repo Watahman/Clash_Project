@@ -148,4 +148,12 @@ describe('workspace guidance', () => {
         expect(isolatedHeader).toContain('backdrop-filter: none');
         expect(isolatedHeader).toContain('box-shadow: none');
     });
+
+    it('does not query an empty selector for unknown workspace pages', () => {
+        shell('unknown-page', '<main><h1>Unknown page</h1></main>');
+
+        expect(() => initWorkspaceGuidance('unknown-page')).not.toThrow();
+        expect(document.querySelector('#workspace-help-button')).toBeTruthy();
+        expect(document.querySelector('.workspace-page-help-trigger')).toBeNull();
+    });
 });

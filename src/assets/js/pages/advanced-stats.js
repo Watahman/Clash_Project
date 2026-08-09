@@ -14,7 +14,7 @@ import {
     startAdvancedStatsTracking,
     stopAdvancedStatsTracking
 } from '../Supabase/Supabase-AdvancedStats.js';
-import { isPlayerFacingUnitName, presentArmy } from './advanced-stats-army-view.js';
+import { isPlayerFacingUnitName, presentArmy } from './advanced-stats-army-view.js?v=20260809-2';
 
 const PERIOD_DEFAULT = '30d';
 const ACCOUNT_STORAGE_KEY = 'clashpanel_advanced_stats_account';
