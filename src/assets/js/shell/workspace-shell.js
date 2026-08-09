@@ -11,7 +11,7 @@ import {
     pollNotificationCopy,
     stageGroupPollNavigation
 } from '../notifications/poll-notifications.js';
-import { initWorkspaceGuidance } from './workspace-guidance.js?v=20260809-2';
+import { initWorkspaceGuidance } from './workspace-guidance.js?v=20260809-3';
 
 let notificationsData = null;
 let notificationsRequestId = 0;

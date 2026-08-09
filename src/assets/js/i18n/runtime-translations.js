@@ -22,9 +22,9 @@ import esCompletion from './locale-completions/es.js';
 import { publicStaticLocales } from './public-static-locales.js';
 import { publicResourceLocales } from './public-resource-locales.js';
 import { achievementLocales } from './achievement-locales.js';
-import { advancedStatsLocales } from './advanced-stats-locales.js?v=20260809-2';
-import { advancedStatsExtraLocales } from './advanced-stats-extra-locales.js?v=20260809-2';
-import { advancedStatsUiLocales } from './advanced-stats-ui-locales.js?v=20260809-2';
+import { advancedStatsLocales } from './advanced-stats-locales.js?v=20260809-3';
+import { advancedStatsExtraLocales } from './advanced-stats-extra-locales.js?v=20260809-3';
+import { advancedStatsUiLocales } from './advanced-stats-ui-locales.js?v=20260809-3';
 
 export const supportedLanguages = Object.freeze(['nl', 'en', 'fr', 'de', 'es']);
 
