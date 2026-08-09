@@ -1,4 +1,4 @@
-import { initI18n, t } from '../i18n/i18n.js';
+import { initI18n, t } from '../i18n/i18n.js?v=20260809-4';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { getThemePreference, setThemePreference } from '../theme/theme-manager.js';
 import { getNotifications, markNotificationRead } from '../Supabase/Supabase-Notifications.js';
@@ -11,7 +11,7 @@ import {
     pollNotificationCopy,
     stageGroupPollNavigation
 } from '../notifications/poll-notifications.js';
-import { initWorkspaceGuidance } from './workspace-guidance.js?v=20260809-3';
+import { initWorkspaceGuidance } from './workspace-guidance.js?v=20260809-4';
 
 let notificationsData = null;
 let notificationsRequestId = 0;

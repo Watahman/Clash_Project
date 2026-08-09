@@ -60,7 +60,7 @@ describe('Advanced Stats workspace page', () => {
 
     it('shows meaningful army names without developer metadata', () => {
         const source = readFileSync('src/assets/js/pages/advanced-stats.js', 'utf8');
-        expect(source).toContain("import { isPlayerFacingUnitName, presentArmy } from './advanced-stats-army-view.js?v=20260809-3'");
+        expect(source).toContain("import { isPlayerFacingUnitName, presentArmy } from './advanced-stats-army-view.js?v=20260809-4'");
         expect(source).toContain("getAdvancedStatsUnits(state.playerTag, state.period, 'ALL')");
         expect(source).toContain("formatDate(tracking.lastSuccessfulPollAt");
         expect(source).toContain('.filter(item => item.presentation.units.length > 0)');
@@ -77,16 +77,18 @@ describe('Advanced Stats workspace page', () => {
         const i18n = readFileSync('src/assets/js/i18n/i18n.js', 'utf8');
         const runtime = readFileSync('src/assets/js/i18n/runtime-translations.js', 'utf8');
 
-        expect(html).toContain('advanced-stats-bootstrap.js?v=20260809-3');
-        expect(html).toContain('workspace-shell.js?v=20260809-3');
-        expect(bootstrap).toContain("advanced-stats.js?v=20260809-3");
-        expect(page).toContain("i18n/i18n.js?v=20260809-3");
-        expect(page).toContain("advanced-stats-army-view.js?v=20260809-3");
+        expect(html).toContain('advanced-stats-bootstrap.js?v=20260809-4');
+        expect(html).toContain('workspace-shell.js?v=20260809-4');
+        expect(bootstrap).toContain("advanced-stats.js?v=20260809-4");
+        expect(page).toContain("i18n/i18n.js?v=20260809-4");
+        expect(page).toContain("advanced-stats-army-view.js?v=20260809-4");
         expect(page).toContain('applyI18n(document)');
-        expect(i18n).toContain("runtime-translations.js?v=20260809-3");
-        expect(runtime).toContain("advanced-stats-locales.js?v=20260809-3");
-        expect(runtime).toContain("advanced-stats-extra-locales.js?v=20260809-3");
-        expect(runtime).toContain("advanced-stats-ui-locales.js?v=20260809-3");
+        expect(i18n).toContain("runtime-translations.js?v=20260809-4");
+        expect(runtime).toContain("runtime-locales/workspace-en.js?v=20260809-4");
+        expect(runtime).toContain("runtime-locales/workspace-nl.js?v=20260809-4");
+        expect(runtime).toContain("advanced-stats-locales.js?v=20260809-4");
+        expect(runtime).toContain("advanced-stats-extra-locales.js?v=20260809-4");
+        expect(runtime).toContain("advanced-stats-ui-locales.js?v=20260809-4");
     });
 
     it('removes setup and sorting notes from the player-facing page', () => {
