@@ -93,6 +93,15 @@ describe('ClashPanel minigames public page', () => {
         expect(entityController).toContain("event.key==='ArrowDown'");
     });
 
+    it('versions the changed module graph so existing browsers cannot keep the broken picker', () => {
+        expect(page).toContain('/assets/js/pages/minigames-phase2b.js?v=20260809-1');
+        expect(page).toContain('/assets/js/pages/higher-lower.js?v=20260809-1');
+        expect(page).toContain('/assets/css/minigames.css?v=20260809-1');
+        expect(entityController).toContain("entity-guesser-catalog.js?v=20260809-1");
+        expect(entityController).toContain("entity-guesser-engine-v2.js?v=20260809-1");
+        expect(higherLowerController).toContain("higher-lower-engine.js?v=20260809-1");
+    });
+
     it('keeps the answer picker usable on narrow touch screens', () => {
         const styles = readFileSync('src/assets/css/minigames.css', 'utf8');
         expect(styles).toMatch(/\.entity-suggestion\s*\{[^}]*min-height:\s*2\.75rem/s);

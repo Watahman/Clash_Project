@@ -1,4 +1,4 @@
-import { ENTITY_CATEGORIES } from '../minigames/entity-guesser-catalog.js';
+import { ENTITY_CATEGORIES } from '../minigames/entity-guesser-catalog.js?v=20260809-1';
 import {
     DAILY_CATEGORY_IDS,
     DAILY_QUESTION_COUNT,
@@ -15,7 +15,7 @@ import {
     resultSymbols,
     updateLifetimeStats,
     utcDateKey
-} from '../minigames/higher-lower-engine.js';
+} from '../minigames/higher-lower-engine.js?v=20260809-1';
 
 const COPY = {
     en: {
