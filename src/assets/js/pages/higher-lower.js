@@ -1,5 +1,6 @@
 import { ENTITY_CATEGORIES } from '../minigames/entity-guesser-catalog.js';
 import {
+    DAILY_CATEGORY_IDS,
     DAILY_QUESTION_COUNT,
     HIGHER_LOWER_DAILY_KEY,
     HIGHER_LOWER_DATA_VERSION,
@@ -20,13 +21,13 @@ const COPY = {
     en: {
         daily: 'Daily', practice: 'Practice', question: 'Question', score: 'Score', correct: 'Correct', combo: 'Combo',
         higher: 'Higher', lower: 'Lower', next: 'Next comparison', newPractice: 'Reset practice', share: 'Share result',
-        allCategories: 'All categories', filter: 'Practice category', dailyNote: 'Ten comparisons. One from every category. Resets at 00:00 UTC.',
+        allCategories: 'All eligible categories', filter: 'Practice category', dailyNote: 'Nine comparisons using meaningful values. Resets at 00:00 UTC.',
         practiceNote: 'Unlimited comparisons. Practice does not affect the Daily result.', choose: 'Does the right side have a higher or lower value?',
         correctAnswer: 'Correct', wrongAnswer: 'Not quite', revealed: 'Revealed value', completed: 'Daily complete',
         accuracy: 'Accuracy', bestCombo: 'Best combo', copied: 'Result copied', points: 'points', bonus: 'combo bonus',
-        housingSpace: 'housing space', unlockTownHall: 'Town Hall unlock', unlockStage: 'unlock stage', equipmentCount: 'equipment count',
+        housingSpace: 'housing space', unlockStage: 'unlock stage', equipmentCount: 'equipment count',
         petHouseRequirement: 'Pet House requirement', maximumLevel: 'maximum level', rangeClass: 'range class',
-        buildingFootprint: 'building footprint', effectArea: 'effect area', townHall: 'Town Hall', housingSpaces: 'housing spaces',
+        buildingFootprint: 'building footprint', effectArea: 'effect area', housingSpaces: 'housing spaces',
         progressionStage: 'progression stage', equipmentItems: 'equipment items', petHouseLevel: 'Pet House level', levels: 'levels',
         rangeClassUnit: 'range class', tiles: 'tiles', areaClass: 'area class',
         troops: 'Troops', spells: 'Spells', heroes: 'Heroes', pets: 'Hero Pets', equipment: 'Hero Equipment', defenses: 'Defenses',
@@ -35,13 +36,13 @@ const COPY = {
     nl: {
         daily: 'Dagelijks', practice: 'Oefenen', question: 'Vraag', score: 'Score', correct: 'Juist', combo: 'Combo',
         higher: 'Hoger', lower: 'Lager', next: 'Volgende vergelijking', newPractice: 'Oefening resetten', share: 'Deel resultaat',
-        allCategories: 'Alle categorieën', filter: 'Oefencategorie', dailyNote: 'Tien vergelijkingen. Eén uit elke categorie. Reset om 00:00 UTC.',
+        allCategories: 'Alle geschikte categorieën', filter: 'Oefencategorie', dailyNote: 'Negen vergelijkingen met betekenisvolle waarden. Reset om 00:00 UTC.',
         practiceNote: 'Onbeperkte vergelijkingen. Oefenen beïnvloedt het dagelijkse resultaat niet.', choose: 'Heeft de rechterkant een hogere of lagere waarde?',
         correctAnswer: 'Juist', wrongAnswer: 'Niet juist', revealed: 'Onthulde waarde', completed: 'Daily voltooid',
         accuracy: 'Nauwkeurigheid', bestCombo: 'Beste combo', copied: 'Resultaat gekopieerd', points: 'punten', bonus: 'combobonus',
-        housingSpace: 'housing space', unlockTownHall: 'Town Hall-ontgrendeling', unlockStage: 'ontgrendelfase', equipmentCount: 'aantal equipment-items',
+        housingSpace: 'housing space', unlockStage: 'ontgrendelfase', equipmentCount: 'aantal equipment-items',
         petHouseRequirement: 'vereist Pet House-level', maximumLevel: 'maximumlevel', rangeClass: 'bereikklasse',
-        buildingFootprint: 'gebouwoppervlakte', effectArea: 'effectgebied', townHall: 'Town Hall', housingSpaces: 'housing spaces',
+        buildingFootprint: 'gebouwoppervlakte', effectArea: 'effectgebied', housingSpaces: 'housing spaces',
         progressionStage: 'progressiefase', equipmentItems: 'equipment-items', petHouseLevel: 'Pet House-level', levels: 'levels',
         rangeClassUnit: 'bereikklasse', tiles: 'tegels', areaClass: 'gebiedsklasse',
         troops: 'Troepen', spells: 'Spreuken', heroes: 'Helden', pets: 'Heldenhuisdieren', equipment: 'Heldenuitrusting', defenses: 'Verdedigingen',
@@ -50,13 +51,13 @@ const COPY = {
     de: {
         daily: 'Täglich', practice: 'Üben', question: 'Frage', score: 'Punkte', correct: 'Richtig', combo: 'Combo',
         higher: 'Höher', lower: 'Niedriger', next: 'Nächster Vergleich', newPractice: 'Übung zurücksetzen', share: 'Ergebnis teilen',
-        allCategories: 'Alle Kategorien', filter: 'Übungskategorie', dailyNote: 'Zehn Vergleiche. Einer aus jeder Kategorie. Reset um 00:00 UTC.',
+        allCategories: 'Alle geeigneten Kategorien', filter: 'Übungskategorie', dailyNote: 'Neun Vergleiche mit aussagekräftigen Werten. Reset um 00:00 UTC.',
         practiceNote: 'Unbegrenzte Vergleiche. Übung beeinflusst das Daily nicht.', choose: 'Hat die rechte Seite einen höheren oder niedrigeren Wert?',
         correctAnswer: 'Richtig', wrongAnswer: 'Leider falsch', revealed: 'Aufgedeckter Wert', completed: 'Daily abgeschlossen',
         accuracy: 'Genauigkeit', bestCombo: 'Beste Combo', copied: 'Ergebnis kopiert', points: 'Punkte', bonus: 'Combobonus',
-        housingSpace: 'Wohnraum', unlockTownHall: 'Rathaus-Freischaltung', unlockStage: 'Freischaltphase', equipmentCount: 'Ausrüstungsanzahl',
+        housingSpace: 'Wohnraum', unlockStage: 'Freischaltphase', equipmentCount: 'Ausrüstungsanzahl',
         petHouseRequirement: 'Tierhaus-Anforderung', maximumLevel: 'Maximalstufe', rangeClass: 'Reichweitenklasse',
-        buildingFootprint: 'Gebäudegröße', effectArea: 'Effektbereich', townHall: 'Rathaus', housingSpaces: 'Wohnraum', progressionStage: 'Fortschrittsphase',
+        buildingFootprint: 'Gebäudegröße', effectArea: 'Effektbereich', housingSpaces: 'Wohnraum', progressionStage: 'Fortschrittsphase',
         equipmentItems: 'Ausrüstungen', petHouseLevel: 'Tierhaus-Stufe', levels: 'Stufen', rangeClassUnit: 'Reichweitenklasse', tiles: 'Felder', areaClass: 'Bereichsklasse',
         troops: 'Truppen', spells: 'Zauber', heroes: 'Helden', pets: 'Heldenbegleiter', equipment: 'Heldenausrüstung', defenses: 'Verteidigungen',
         resourceBuildings: 'Rohstoffgebäude', armyBuildings: 'Armeegebäude', utilityBuildings: 'Nutzgebäude', traps: 'Fallen'
@@ -64,13 +65,13 @@ const COPY = {
     fr: {
         daily: 'Quotidien', practice: 'Entraînement', question: 'Question', score: 'Score', correct: 'Correct', combo: 'Combo',
         higher: 'Plus élevé', lower: 'Plus bas', next: 'Comparaison suivante', newPractice: 'Réinitialiser', share: 'Partager',
-        allCategories: 'Toutes les catégories', filter: 'Catégorie d’entraînement', dailyNote: 'Dix comparaisons. Une par catégorie. Réinitialisation à 00:00 UTC.',
+        allCategories: 'Toutes les catégories adaptées', filter: 'Catégorie d’entraînement', dailyNote: 'Neuf comparaisons avec des valeurs pertinentes. Réinitialisation à 00:00 UTC.',
         practiceNote: 'Comparaisons illimitées. L’entraînement n’affecte pas le défi quotidien.', choose: 'La valeur de droite est-elle plus élevée ou plus basse ?',
         correctAnswer: 'Correct', wrongAnswer: 'Incorrect', revealed: 'Valeur révélée', completed: 'Défi terminé', accuracy: 'Précision',
         bestCombo: 'Meilleur combo', copied: 'Résultat copié', points: 'points', bonus: 'bonus de combo', housingSpace: 'capacité de logement',
-        unlockTownHall: 'Hôtel de ville de déblocage', unlockStage: 'phase de déblocage', equipmentCount: 'nombre d’équipements',
+        unlockStage: 'phase de déblocage', equipmentCount: 'nombre d’équipements',
         petHouseRequirement: 'niveau de la Maison des familiers', maximumLevel: 'niveau maximum', rangeClass: 'classe de portée',
-        buildingFootprint: 'surface du bâtiment', effectArea: 'zone d’effet', townHall: 'Hôtel de ville', housingSpaces: 'places',
+        buildingFootprint: 'surface du bâtiment', effectArea: 'zone d’effet', housingSpaces: 'places',
         progressionStage: 'phase de progression', equipmentItems: 'équipements', petHouseLevel: 'niveau de Maison des familiers', levels: 'niveaux',
         rangeClassUnit: 'classe de portée', tiles: 'cases', areaClass: 'classe de zone', troops: 'Troupes', spells: 'Sorts', heroes: 'Héros',
         pets: 'Familiers de héros', equipment: 'Équipement de héros', defenses: 'Défenses', resourceBuildings: 'Bâtiments de ressources',
@@ -79,13 +80,13 @@ const COPY = {
     es: {
         daily: 'Diario', practice: 'Práctica', question: 'Pregunta', score: 'Puntos', correct: 'Correctas', combo: 'Combo',
         higher: 'Mayor', lower: 'Menor', next: 'Siguiente comparación', newPractice: 'Reiniciar práctica', share: 'Compartir',
-        allCategories: 'Todas las categorías', filter: 'Categoría de práctica', dailyNote: 'Diez comparaciones. Una de cada categoría. Reinicio a las 00:00 UTC.',
+        allCategories: 'Todas las categorías aptas', filter: 'Categoría de práctica', dailyNote: 'Nueve comparaciones con valores significativos. Reinicio a las 00:00 UTC.',
         practiceNote: 'Comparaciones ilimitadas. La práctica no afecta al reto diario.', choose: '¿El valor de la derecha es mayor o menor?',
         correctAnswer: 'Correcto', wrongAnswer: 'Incorrecto', revealed: 'Valor revelado', completed: 'Reto diario completado', accuracy: 'Precisión',
         bestCombo: 'Mejor combo', copied: 'Resultado copiado', points: 'puntos', bonus: 'bonus de combo', housingSpace: 'espacio de vivienda',
-        unlockTownHall: 'Ayuntamiento de desbloqueo', unlockStage: 'fase de desbloqueo', equipmentCount: 'cantidad de equipamiento',
+        unlockStage: 'fase de desbloqueo', equipmentCount: 'cantidad de equipamiento',
         petHouseRequirement: 'nivel de Casa de mascotas', maximumLevel: 'nivel máximo', rangeClass: 'clase de alcance',
-        buildingFootprint: 'superficie del edificio', effectArea: 'área de efecto', townHall: 'Ayuntamiento', housingSpaces: 'espacios',
+        buildingFootprint: 'superficie del edificio', effectArea: 'área de efecto', housingSpaces: 'espacios',
         progressionStage: 'fase de progreso', equipmentItems: 'equipamientos', petHouseLevel: 'nivel de Casa de mascotas', levels: 'niveles',
         rangeClassUnit: 'clase de alcance', tiles: 'casillas', areaClass: 'clase de área', troops: 'Tropas', spells: 'Hechizos', heroes: 'Héroes',
         pets: 'Mascotas de héroe', equipment: 'Equipamiento de héroe', defenses: 'Defensas', resourceBuildings: 'Edificios de recursos',
@@ -139,7 +140,7 @@ let dailyQuestions = [];
 let practiceQuestion = null;
 
 function validPracticeFilter(value) {
-    return value === 'all' || ENTITY_CATEGORIES.some(category => category.id === value) ? value : 'all';
+    return value === 'all' || DAILY_CATEGORY_IDS.includes(value) ? value : 'all';
 }
 
 function loadDailyRun() {
@@ -172,7 +173,7 @@ function populateFilter() {
     all.value = 'all';
     all.textContent = text('allCategories');
     elements.filter.append(all);
-    ENTITY_CATEGORIES.forEach(category => {
+    ENTITY_CATEGORIES.filter(category => DAILY_CATEGORY_IDS.includes(category.id)).forEach(category => {
         const option = document.createElement('option');
         option.value = category.id;
         option.textContent = text(category.id);

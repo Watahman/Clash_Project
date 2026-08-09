@@ -115,7 +115,19 @@ body.minigames-page {
 .game-board-top h2 { margin-bottom: .3rem; font-size: clamp(1.35rem, 3vw, 2rem); }
 .game-board-top p { margin-bottom: 0; font-size: .82rem; }
 
-.guess-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .65rem; margin-bottom: .75rem; }
+.guess-form { display: grid; gap: .45rem; margin-bottom: .75rem; }
+.guess-input-label {
+    color: var(--text);
+    font-size: .82rem;
+    font-weight: 750;
+}
+.guess-entry-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: .65rem;
+    align-items: start;
+}
+.entity-answer-picker { min-width: 0; }
 .guess-form input {
     min-height: 3.25rem;
     width: 100%;
@@ -124,6 +136,51 @@ body.minigames-page {
     padding: 0 1rem;
     background: var(--surface-subtle);
     color: var(--text);
+}
+.guess-form input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+.entity-suggestions {
+    max-height: min(19rem, 45vh);
+    margin-top: .4rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--border-strong);
+    border-radius: .68rem;
+    padding: .3rem;
+    background: var(--surface-raised);
+}
+.entity-suggestion {
+    min-height: 2.75rem;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    border-radius: .48rem;
+    padding: .65rem .75rem;
+    background: transparent;
+    color: var(--text);
+    font-size: .88rem;
+    font-weight: 700;
+    text-align: left;
+}
+.entity-suggestion:hover,
+.entity-suggestion.is-active,
+.entity-suggestion:focus-visible {
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    outline: none;
+}
+.entity-suggestions-empty {
+    margin: 0;
+    padding: .8rem;
+    color: var(--text-muted);
+    font-size: .82rem;
+}
+.guess-picker-help {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: .76rem;
 }
 .guess-form input::placeholder { color: var(--text-subtle); }
 .game-action {
@@ -142,6 +199,12 @@ body.minigames-page {
 .game-message[data-type="success"] { color: var(--success); }
 .game-message[data-type="warning"] { color: var(--warning); }
 
+.game-scroll-help {
+    display: none;
+    margin: 0 0 .55rem;
+    color: var(--text-muted);
+    font-size: .76rem;
+}
 .guess-scroll { overflow-x: auto; padding-bottom: .45rem; }
 .guess-grid { min-width: 70rem; display: grid; grid-template-columns: 10rem repeat(8, minmax(6.6rem, 1fr)); gap: .45rem; }
 .guess-grid + .guess-grid { margin-top: .45rem; }
@@ -204,6 +267,7 @@ body.minigames-page {
     .game-toolbar-note { text-align: left; }
     .game-stat-grid { grid-template-columns: 1fr 1fr; }
     .game-board-top { flex-direction: column; }
-    .guess-form { grid-template-columns: 1fr; }
+    .guess-entry-row { grid-template-columns: 1fr; }
+    .game-scroll-help { display: block; }
     .game-action { width: 100%; }
 }

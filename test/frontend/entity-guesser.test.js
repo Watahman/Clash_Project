@@ -16,6 +16,7 @@ import {
     getDailyEntity,
     normalizeGuess,
     resultSquares,
+    searchEntities,
     updateStreak,
     validateCatalog
 } from '../../src/assets/js/minigames/entity-guesser-engine-v2.js';
@@ -40,6 +41,16 @@ describe('Entity Guesser core categories', () => {
         expect(findEntity('WB', getEntities('troops'))?.id).toBe('wall-breaker');
         expect(findEntity('fireball', getEntities('equipment'))?.hero).toBe('Grand Warden');
         expect(findEntity('fireball', getEntities('spells'))).toBeNull();
+    });
+
+    it('makes every answer in large categories available to the picker', () => {
+        const defenses = getCatalogEntities('defenses');
+        const equipment = getCatalogEntities('equipment');
+
+        expect(searchEntities('', defenses, defenses.length)).toHaveLength(21);
+        expect(searchEntities('', equipment, equipment.length)).toHaveLength(41);
+        expect(searchEntities('tower', defenses, defenses.length).map(item => item.name))
+            .toContain('Super Wizard Tower');
     });
 
     it('selects one deterministic category and answer per UTC day', () => {

@@ -4,26 +4,18 @@ export const HIGHER_LOWER_DATA_VERSION = `${ENTITY_GUESSER_DATA_VERSION}-higher-
 export const HIGHER_LOWER_DAILY_KEY = 'clashpanel:minigames:higher-lower:daily:v1';
 export const HIGHER_LOWER_STATS_KEY = 'clashpanel:minigames:higher-lower:stats:v1';
 export const HIGHER_LOWER_PRACTICE_FILTER_KEY = 'clashpanel:minigames:higher-lower:practice-filter:v1';
-export const DAILY_QUESTION_COUNT = 10;
+export const DAILY_QUESTION_COUNT = 9;
 
 export const COMPARISON_PROFILES = Object.freeze([
     { id: 'troops-housing', categoryId: 'troops', key: 'housing', labelKey: 'housingSpace', unitKey: 'housingSpaces', kind: 'number' },
-    { id: 'troops-unlock', categoryId: 'troops', key: 'unlockTh', labelKey: 'unlockTownHall', unitKey: 'townHall', kind: 'number' },
     { id: 'spells-housing', categoryId: 'spells', key: 'housing', labelKey: 'housingSpace', unitKey: 'housingSpaces', kind: 'number' },
     { id: 'spells-unlock', categoryId: 'spells', key: 'unlockTier', labelKey: 'unlockStage', unitKey: 'progressionStage', kind: 'ordered', order: ['Early', 'Mid', 'Late', 'Endgame'] },
-    { id: 'heroes-unlock', categoryId: 'heroes', key: 'unlockTh', labelKey: 'unlockTownHall', unitKey: 'townHall', kind: 'number' },
     { id: 'heroes-equipment', categoryId: 'heroes', key: 'equipmentCount', labelKey: 'equipmentCount', unitKey: 'equipmentItems', kind: 'number' },
-    { id: 'pets-unlock', categoryId: 'pets', key: 'unlockTh', labelKey: 'unlockTownHall', unitKey: 'townHall', kind: 'number' },
     { id: 'pets-house', categoryId: 'pets', key: 'petHouse', labelKey: 'petHouseRequirement', unitKey: 'petHouseLevel', kind: 'number' },
     { id: 'equipment-max-level', categoryId: 'equipment', key: 'maxLevel', labelKey: 'maximumLevel', unitKey: 'levels', kind: 'number' },
-    { id: 'defenses-unlock', categoryId: 'defenses', key: 'unlockTh', labelKey: 'unlockTownHall', unitKey: 'townHall', kind: 'number' },
     { id: 'defenses-range', categoryId: 'defenses', key: 'rangeClass', labelKey: 'rangeClass', unitKey: 'rangeClassUnit', kind: 'ordered', order: ['Short', 'Medium', 'Long', 'Very Long'] },
-    { id: 'resources-unlock', categoryId: 'resourceBuildings', key: 'unlockTh', labelKey: 'unlockTownHall', unitKey: 'townHall', kind: 'number' },
-    { id: 'army-unlock', categoryId: 'armyBuildings', key: 'unlockTh', labelKey: 'unlockTownHall', unitKey: 'townHall', kind: 'number' },
     { id: 'army-footprint', categoryId: 'armyBuildings', key: 'footprint', labelKey: 'buildingFootprint', unitKey: 'tiles', kind: 'footprint' },
-    { id: 'utility-unlock', categoryId: 'utilityBuildings', key: 'unlockTh', labelKey: 'unlockTownHall', unitKey: 'townHall', kind: 'number' },
     { id: 'utility-footprint', categoryId: 'utilityBuildings', key: 'footprint', labelKey: 'buildingFootprint', unitKey: 'tiles', kind: 'footprint' },
-    { id: 'traps-unlock', categoryId: 'traps', key: 'unlockTh', labelKey: 'unlockTownHall', unitKey: 'townHall', kind: 'number' },
     { id: 'traps-area', categoryId: 'traps', key: 'area', labelKey: 'effectArea', unitKey: 'areaClass', kind: 'ordered', order: ['Single', 'Small', 'Medium', 'Large'] }
 ]);
 
@@ -34,7 +26,6 @@ export const DAILY_CATEGORY_IDS = Object.freeze([
     'pets',
     'equipment',
     'defenses',
-    'resourceBuildings',
     'armyBuildings',
     'utilityBuildings',
     'traps'
@@ -78,7 +69,6 @@ export function getMetricValue(entity, profile) {
 export function formatMetricValue(entity, profile) {
     const rawValue = entity?.[profile.key];
     if (rawValue === null || rawValue === undefined) return 'N/A';
-    if (profile.unitKey === 'townHall') return `TH ${rawValue}`;
     if (profile.kind === 'footprint') return `${rawValue} (${getMetricValue(entity, profile)} tiles)`;
     return String(rawValue);
 }

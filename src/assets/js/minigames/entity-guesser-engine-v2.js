@@ -29,7 +29,11 @@ export function findEntity(value, entities) {
 
 export function searchEntities(value, entities, limit = 8) {
     const normalized = normalizeGuess(value);
-    if (!normalized) return entities.slice(0, limit);
+    if (!normalized) {
+        return [...entities]
+            .sort((left, right) => left.name.localeCompare(right.name))
+            .slice(0, limit);
+    }
     return entities
         .filter(entity => [entity.name, ...(entity.aliases || [])]
             .some(candidate => normalizeGuess(candidate).includes(normalized)))
@@ -170,7 +174,7 @@ export function buildHint(answer, category, hintNumber) {
     const hintBuilders = {
         troops: [
             entity => `${entity.movement} troop · targets ${formatValue(entity.targets).toLowerCase()}.`,
-            entity => `${entity.resource} · ${entity.role.toLowerCase()} role · unlocked at Town Hall ${entity.unlockTh}.`
+            entity => `${entity.resource} · ${entity.role.toLowerCase()} role · ${entity.housing} housing space.`
         ],
         spells: [
             entity => `${entity.resource} spell · ${entity.effect.toLowerCase()} effect.`,
@@ -178,11 +182,11 @@ export function buildHint(answer, category, hintNumber) {
         ],
         heroes: [
             entity => `${entity.movement} Hero · ${entity.attackStyle.toLowerCase()} attacker.`,
-            entity => `${entity.role} role · unlocked at Town Hall ${entity.unlockTh}.`
+            entity => `${entity.role} role · favors ${entity.favorite.toLowerCase()} targets.`
         ],
         pets: [
             entity => `${entity.movement} Pet · ${entity.role.toLowerCase()} role.`,
-            entity => `Pet House level ${entity.petHouse} · unlocked at Town Hall ${entity.unlockTh}.`
+            entity => `Pet House level ${entity.petHouse} · ${entity.attackStyle.toLowerCase()} attacker.`
         ],
         equipment: [
             entity => `${entity.rarity} ${entity.activation.toLowerCase()} equipment for the ${entity.hero}.`,
@@ -190,23 +194,23 @@ export function buildHint(answer, category, hintNumber) {
         ],
         defenses: [
             entity => `${formatValue(entity.targets)} defense · ${entity.damageType.toLowerCase()} damage.`,
-            entity => `${entity.rangeClass.toLowerCase()} range · ${entity.special.toLowerCase()} · unlocked at Town Hall ${entity.unlockTh}.`
+            entity => `${entity.rangeClass.toLowerCase()} range · ${entity.special.toLowerCase()} · ${entity.attackStyle.toLowerCase()}.`
         ],
         resourceBuildings: [
             entity => `${entity.resource} building · used for ${entity.function.toLowerCase()}.`,
-            entity => `${entity.footprint} footprint · ${entity.countClass.toLowerCase()} building · unlocked at Town Hall ${entity.unlockTh}.`
+            entity => `${entity.footprint} footprint · ${entity.countClass.toLowerCase()} building · ${entity.lootRole.toLowerCase()} loot role.`
         ],
         armyBuildings: [
             entity => `${entity.system} building · ${entity.function.toLowerCase()}.`,
-            entity => `${entity.footprint} footprint · upgraded with ${entity.upgradeResource.toLowerCase()} · unlocked at Town Hall ${entity.unlockTh}.`
+            entity => `${entity.footprint} footprint · upgraded with ${entity.upgradeResource.toLowerCase()} · ${entity.capacityBased ? 'capacity based' : 'fixed function'}.`
         ],
         utilityBuildings: [
             entity => `${entity.system} utility · ${entity.function.toLowerCase()}.`,
-            entity => `${entity.footprint} footprint · connects to ${entity.connectsArea} · unlocked at Town Hall ${entity.unlockTh}.`
+            entity => `${entity.footprint} footprint · connects to ${entity.connectsArea} · ${entity.upgradeable ? 'upgradeable' : 'not upgradeable'}.`
         ],
         traps: [
             entity => `${formatValue(entity.targets)} trap · ${entity.effect.toLowerCase()} effect.`,
-            entity => `${entity.visibility.toLowerCase()} · ${entity.area.toLowerCase()} area · unlocked at Town Hall ${entity.unlockTh}.`
+            entity => `${entity.visibility.toLowerCase()} · ${entity.area.toLowerCase()} area · ${entity.mode.toLowerCase()} mode.`
         ]
     };
     const builders = hintBuilders[category.id] || [];

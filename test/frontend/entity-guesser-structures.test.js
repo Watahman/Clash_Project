@@ -15,9 +15,9 @@ import {
     validateCatalog
 } from '../../src/assets/js/minigames/entity-guesser-engine-v2.js';
 
-describe('Entity Guesser phase 2B structures catalog', () => {
+describe('Entity Guesser phase 2C structures catalog', () => {
     it('combines all ten categories without incomplete entities', () => {
-        expect(ENTITY_GUESSER_DATA_VERSION).toContain('phase-2b');
+        expect(ENTITY_GUESSER_DATA_VERSION).toContain('phase-2c');
         expect(ENTITY_CATEGORIES.map(category => category.id)).toEqual([
             'troops',
             'spells',
@@ -32,6 +32,9 @@ describe('Entity Guesser phase 2B structures catalog', () => {
         ]);
         expect(ENTITIES).toHaveLength(163);
         expect(validateCatalog()).toEqual([]);
+        ENTITY_CATEGORIES.forEach(category => {
+            expect(category.columns.some(column => column.key === 'unlockTh')).toBe(false);
+        });
     });
 
     it('contains the expected permanent structure catalogs', () => {
@@ -75,14 +78,14 @@ describe('Entity Guesser phase 2B structures catalog', () => {
         expect(comparison.find(cell => cell.key === 'merged').state).toBe('wrong');
     });
 
-    it('compares trap visibility, effect and Town Hall context', () => {
+    it('compares trap visibility and damage without Town Hall context', () => {
         const category = getCategory('traps');
         const bomb = getEntities('traps').find(entity => entity.id === 'bomb');
         const gigaBomb = getEntities('traps').find(entity => entity.id === 'giga-bomb');
         const comparison = compareEntity(bomb, gigaBomb, category);
 
         expect(comparison.find(cell => cell.key === 'visibility').state).toBe('wrong');
-        expect(comparison.find(cell => cell.key === 'unlockTh').direction).toBe('higher');
+        expect(comparison.some(cell => cell.key === 'unlockTh')).toBe(false);
         expect(comparison.find(cell => cell.key === 'directDamage').state).toBe('correct');
     });
 
@@ -92,7 +95,8 @@ describe('Entity Guesser phase 2B structures catalog', () => {
             buildHint(defense, getCategory('defenses'), 1),
             buildHint(defense, getCategory('defenses'), 2)
         ].join(' ');
-        expect(defenseHints).toContain('Town Hall 18');
+        expect(defenseHints).toContain('long range');
+        expect(defenseHints).not.toContain('Town Hall');
         expect(defenseHints).not.toContain('Revenge Tower');
 
         const trapEntity = getEntities('traps').find(entity => entity.id === 'giga-bomb');

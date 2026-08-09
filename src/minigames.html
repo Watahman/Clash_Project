@@ -54,7 +54,7 @@
         <div class="minigames-hero-copy">
             <p class="eyebrow">ClashPanel Daily Games</p>
             <h1>Daily challenges built around game knowledge.</h1>
-            <p>Deduce a hidden entity or compare two values across ten Home Village categories. Both games use text, verified identity data and their own spoiler-free daily results.</p>
+            <p>Deduce a hidden entity or compare two values across the Home Village catalog. Both games use text, verified identity data and their own spoiler-free daily results.</p>
         </div>
         <div class="minigames-orbit" aria-hidden="true">
             <div class="minigames-core"><span>?</span></div>
@@ -72,7 +72,7 @@
         </button>
         <button class="minigame-switch-button" type="button" role="tab" data-minigame-select="higher-lower">
             <span class="minigame-switch-icon" aria-hidden="true">↕</span>
-            <span><strong data-minigame-label>Higher or Lower</strong><small>Compare ten values and build a combo.</small></span>
+            <span><strong data-minigame-label>Higher or Lower</strong><small>Compare nine values and build a combo.</small></span>
         </button>
     </nav>
 
@@ -87,7 +87,7 @@
 
         <div class="game-content">
             <aside class="game-sidebar">
-                <p class="eyebrow" data-game-i18n="phase">Entity Guesser · Phase 2B</p>
+                <p class="eyebrow" data-game-i18n="phase">Entity Guesser</p>
                 <h2 data-category-title>Home Village Troops</h2>
                 <p data-game-i18n="instructions">Compare each property. Arrows show whether the hidden value is higher or lower.</p>
 
@@ -120,13 +120,22 @@
                 </div>
 
                 <form class="guess-form" data-guess-form autocomplete="off">
-                    <label class="sr-only" for="entity-guess" data-guess-input-label>Entity name</label>
-                    <input id="entity-guess" data-guess-input list="entity-suggestions" maxlength="60" required>
-                    <datalist id="entity-suggestions" data-guess-suggestions></datalist>
-                    <button class="game-action" type="submit" data-game-i18n="submit">Submit guess</button>
+                    <label class="guess-input-label" for="entity-guess" data-guess-input-label>Choose an answer</label>
+                    <div class="guess-entry-row">
+                        <div class="entity-answer-picker" data-answer-picker>
+                            <input id="entity-guess" data-guess-input maxlength="60" required
+                                   role="combobox" aria-autocomplete="list" aria-expanded="false"
+                                   aria-controls="entity-suggestions" aria-describedby="entity-picker-help">
+                            <div class="entity-suggestions" id="entity-suggestions" data-guess-suggestions
+                                 role="listbox" aria-label="Available answers" hidden></div>
+                        </div>
+                        <button class="game-action" type="submit" data-game-i18n="submit">Submit guess</button>
+                    </div>
+                    <p class="guess-picker-help" id="entity-picker-help" data-picker-help>Type to filter or tap an answer.</p>
                 </form>
                 <p class="game-message" data-game-message aria-live="polite"></p>
 
+                <p class="game-scroll-help" data-game-i18n="scrollHelp">Swipe the comparison sideways to see every clue.</p>
                 <div class="guess-scroll" tabindex="0" aria-label="Guess comparison table">
                     <div class="guess-grid guess-grid-header" data-guess-header aria-hidden="true"></div>
                     <div data-guess-rows></div>
@@ -157,7 +166,7 @@
         <div class="hl-layout">
             <aside class="hl-sidebar">
                 <p class="eyebrow">Higher or Lower · Phase 3</p>
-                <h2>Ten comparisons. One value at a time.</h2>
+                <h2>Nine comparisons. One value at a time.</h2>
                 <p>The first value is shown. Decide whether the second is higher or lower. Equal-value pairs are never used.</p>
 
                 <label class="hl-filter" data-hl-filter-wrap hidden>
@@ -166,7 +175,7 @@
                 </label>
 
                 <div class="game-stat-grid">
-                    <div class="game-stat"><span data-hl-i18n="question">Question</span><strong data-hl-question>1/10</strong></div>
+                    <div class="game-stat"><span data-hl-i18n="question">Question</span><strong data-hl-question>1/9</strong></div>
                     <div class="game-stat"><span data-hl-i18n="score">Score</span><strong data-hl-score>0</strong></div>
                     <div class="game-stat"><span data-hl-i18n="correct">Correct</span><strong data-hl-correct>0</strong></div>
                     <div class="game-stat"><span data-hl-i18n="combo">Combo</span><strong data-hl-combo>0</strong></div>
@@ -222,8 +231,8 @@
     <section class="minigames-category-summary" aria-labelledby="category-summary-title">
         <div>
             <p class="eyebrow">Shared game catalog</p>
-            <h2 id="category-summary-title">Ten knowledge categories, reused across both games.</h2>
-            <p>The Entity Guesser uses category-specific identity feedback. Higher or Lower selects only fields that can be compared without ambiguity.</p>
+            <h2 id="category-summary-title">Ten knowledge categories across the games.</h2>
+            <p>Entity Guesser uses all ten categories. Higher or Lower uses the nine categories with a fair, unambiguous value comparison.</p>
         </div>
         <ul>
             <li><strong>32</strong><span>Home Village troops</span></li>

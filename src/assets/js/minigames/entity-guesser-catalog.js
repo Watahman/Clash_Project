@@ -7,7 +7,7 @@ import {
     STRUCTURE_ENTITIES
 } from './entity-guesser-structures-data.js';
 
-export const ENTITY_GUESSER_DATA_VERSION = '2026-08-phase-2b';
+export const ENTITY_GUESSER_DATA_VERSION = '2026-08-phase-2c';
 
 export const DAILY_CATEGORY_SEQUENCE = Object.freeze([
     'troops',
@@ -31,7 +31,10 @@ export const DAILY_CATEGORY_SEQUENCE = Object.freeze([
 export const ENTITY_CATEGORIES = Object.freeze([
     ...CORE_CATEGORIES,
     ...STRUCTURE_CATEGORIES
-]);
+].map(category => Object.freeze({
+    ...category,
+    columns: Object.freeze(category.columns.filter(column => column.key !== 'unlockTh'))
+})));
 
 export const ENTITIES = Object.freeze([
     ...CORE_ENTITIES,

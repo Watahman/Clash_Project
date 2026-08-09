@@ -21,8 +21,10 @@ import {
 describe('Higher or Lower engine', () => {
     it('defines only comparison profiles with non-tied pairs', () => {
         expect(HIGHER_LOWER_DATA_VERSION).toContain('higher-lower-v1');
-        expect(COMPARISON_PROFILES.length).toBeGreaterThanOrEqual(18);
+        expect(COMPARISON_PROFILES.length).toBeGreaterThanOrEqual(9);
         COMPARISON_PROFILES.forEach(profile => {
+            expect(profile.key).not.toBe('unlockTh');
+            expect(profile.unitKey).not.toBe('townHall');
             const pairs = buildComparablePairs(profile);
             expect(pairs.length).toBeGreaterThan(0);
             pairs.forEach(pair => {
@@ -34,7 +36,7 @@ describe('Higher or Lower engine', () => {
         });
     });
 
-    it('creates a deterministic ten-question Daily with every category exactly once', () => {
+    it('creates a deterministic Daily without Town Hall comparisons', () => {
         const first = buildDailyQuestions('2026-08-06');
         const second = buildDailyQuestions('2026-08-06');
         expect(first).toEqual(second);
@@ -54,7 +56,7 @@ describe('Higher or Lower engine', () => {
         expect(second.map(question => question.id)).not.toEqual(first.map(question => question.id));
     });
 
-    it('uses the documented combo bonus thresholds and 1170 maximum score', () => {
+    it('uses the documented combo bonus thresholds and 1040 maximum score', () => {
         expect(getComboBonus(1)).toBe(0);
         expect(getComboBonus(3)).toBe(10);
         expect(getComboBonus(5)).toBe(20);
@@ -67,8 +69,8 @@ describe('Higher or Lower engine', () => {
             combo = result.combo;
             score += result.points;
         }
-        expect(combo).toBe(10);
-        expect(score).toBe(1170);
+        expect(combo).toBe(9);
+        expect(score).toBe(1040);
         expect(scoreChoice(false, combo)).toEqual({ points: 0, combo: 0, bonus: 0 });
     });
 
@@ -87,7 +89,7 @@ describe('Higher or Lower engine', () => {
         expect(advanced.revealed).toBe(false);
     });
 
-    it('completes the Daily after ten answers and updates lifetime stats once', () => {
+    it('completes the Daily after nine answers and updates lifetime stats once', () => {
         const questions = buildDailyQuestions('2026-08-06');
         let run = createDailyRun('2026-08-06');
         questions.forEach((question, index) => {
@@ -96,15 +98,15 @@ describe('Higher or Lower engine', () => {
         });
 
         expect(run.completed).toBe(true);
-        expect(run.correctCount).toBe(10);
-        expect(run.score).toBe(1170);
+        expect(run.correctCount).toBe(9);
+        expect(run.score).toBe(1040);
         const stats = updateLifetimeStats({}, run);
         expect(stats).toMatchObject({
             runsPlayed: 1,
-            totalCorrect: 10,
-            totalQuestions: 10,
-            bestScore: 1170,
-            bestCombo: 10,
+            totalCorrect: 9,
+            totalQuestions: 9,
+            bestScore: 1040,
+            bestCombo: 9,
             perfectRuns: 1,
             lastCompletedDate: '2026-08-06'
         });
