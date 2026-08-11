@@ -1,0 +1,122 @@
+/* Planner-local roster, canvas shell, and responsive layer. */
+
+.workspace-planner #cwl-available-players {
+    display: grid;
+    gap: 6px;
+    max-height: min(70vh, 720px);
+    min-width: 0;
+    overflow: auto;
+    padding-right: 2px;
+    scrollbar-gutter: stable;
+}
+
+.workspace-planner .cwl-clan-article {
+    background: var(--surface, #151c25) !important;
+    border: 1px solid var(--planner-border) !important;
+    border-radius: 9px !important;
+    box-shadow: none !important;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.workspace-planner .cwl-clan-info-card {
+    align-items: center;
+    background: var(--surface-raised, #1a222d) !important;
+    border-bottom: 1px solid var(--planner-border);
+    display: grid !important;
+    gap: 12px;
+    grid-template-columns: 40px minmax(0, 1fr) auto auto auto;
+    min-width: 0;
+    padding: 12px 14px !important;
+}
+
+.workspace-planner .cwl-clan-logo { height: 36px; object-fit: contain; width: 36px; }
+.workspace-planner .cwl-clan-title { min-width: 0; }
+.workspace-planner .cwl-clan-title h3 { font-size: .96rem; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.workspace-planner .cwl-clan-title p { color: var(--planner-muted); font-family: var(--font-mono, monospace); font-size: .72rem; margin: 3px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.workspace-planner .cwl-clan-league { margin-left: 6px; }
+.workspace-planner .cwl-clan-format { display: grid; gap: 4px; }
+.workspace-planner .cwl-clan-format > span { color: var(--planner-muted); font-size: .68rem; }
+.workspace-planner .cwl-clan-capacity { min-height: 36px; }
+.workspace-planner .cwl-amount-of-players-in-clan { color: var(--planner-muted); font-size: .78rem; margin: 0; white-space: nowrap; }
+.workspace-planner .cwl-delete-clan { min-height: 36px; min-width: 36px; }
+
+.workspace-planner .cwl-player-article {
+    align-items: center;
+    background: var(--surface, #151c25) !important;
+    border: 1px solid var(--planner-border) !important;
+    border-radius: 7px !important;
+    box-shadow: none !important;
+    display: grid !important;
+    gap: 8px;
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    min-height: 58px;
+    min-width: 0;
+    padding: 7px !important;
+    transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.workspace-planner .cwl-player-article:hover,
+.workspace-planner .cwl-player-article:focus-within { background: var(--surface-hover, #202a36) !important; border-color: var(--border-focus, #d8ac55) !important; }
+.workspace-planner .cwl-player-townhall-foto { height: 30px !important; object-fit: contain; width: 30px !important; }
+.workspace-planner .cwl-player-info { min-width: 0; }
+.workspace-planner .cwl-player-name { font-size: .82rem !important; font-weight: 700; margin: 0 !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.workspace-planner .cwl-player-clan,
+.workspace-planner .cwl-player-hashtag { color: var(--planner-muted); font-family: var(--font-mono, monospace); font-size: .68rem !important; margin: 2px 0 0 !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.workspace-planner .cwl-player-control-group { display: flex !important; flex-wrap: wrap; gap: 4px; justify-content: end; min-width: 0; }
+.workspace-planner .cwl-player-control-group select { max-width: 104px; min-height: 36px; min-width: 36px; overflow: hidden; text-overflow: ellipsis; }
+.workspace-planner .cwl-delete-player { min-height: 36px; min-width: 36px; }
+.workspace-planner .cwl-availability-indicator { color: var(--planner-muted); font-size: .66rem; grid-column: 2 / -1; }
+.workspace-planner .cwl-player-article.cwl-player-dragging { border-color: var(--accent, #d8ac55) !important; opacity: .96; }
+.workspace-planner .cwl-mobile-close-pool,
+.workspace-planner .cwl-mobile-planner-sequence { display: none; }
+
+@media (max-width: 1100px) {
+    .workspace-planner .cwl-context-toolbar { grid-template-columns: minmax(12rem, 1fr) minmax(13rem, 1fr) auto; }
+    .workspace-planner .cwl-plan-summary { grid-column: 1 / -1; grid-row: 2; }
+    .workspace-planner .cwl-toolbar-actions { grid-column: 3; grid-row: 1; }
+    .workspace-planner .cwl-planner-layout { grid-template-columns: minmax(16rem, 18rem) minmax(0, 1fr); }
+    .workspace-planner .cwl-clan-info-card { grid-template-columns: 36px minmax(0, 1fr) auto auto; }
+    .workspace-planner .cwl-clan-format { grid-column: 3; }
+    .workspace-planner .cwl-amount-of-players-in-clan { grid-column: 4; grid-row: 1; }
+    .workspace-planner .cwl-delete-clan { grid-column: 4; grid-row: 2; }
+}
+
+@media (max-width: 900px) {
+    .workspace-planner { padding: 16px 16px 32px; }
+    .workspace-planner .button,
+    .workspace-planner .cwl-context-toolbar select,
+    .workspace-planner .cwl-context-toolbar input,
+    .workspace-planner .cwl-roster-tools select,
+    .workspace-planner .cwl-roster-tools input,
+    .workspace-planner .cwl-player-control-group select,
+    .workspace-planner .cwl-delete-player,
+    .workspace-planner .cwl-delete-clan { min-height: 44px; }
+    .workspace-planner .cwl-page-header { align-items: start; display: grid; gap: 12px; }
+    .workspace-planner .cwl-header-actions { justify-content: start; }
+    .workspace-planner .cwl-context-toolbar { display: grid; grid-template-columns: 1fr; }
+    .workspace-planner .cwl-plan-fields { display: grid; grid-template-columns: 1fr; }
+    .workspace-planner .cwl-plan-summary,
+    .workspace-planner .cwl-toolbar-actions { grid-column: auto; grid-row: auto; }
+    .workspace-planner .cwl-toolbar-actions { justify-content: stretch; }
+    .workspace-planner .cwl-toolbar-actions > *,
+    .workspace-planner .cwl-tools-menu { flex: 1; }
+    .workspace-planner .cwl-tools-menu summary { text-align: center; }
+    .workspace-planner .cwl-tools-menu-content { left: 0; right: auto; width: min(280px, calc(100vw - 32px)); }
+    .workspace-planner .cwl-planner-layout { display: block; }
+    .workspace-planner .cwl-roster-panel { border-radius: 10px 10px 0 0; bottom: 0; box-shadow: 0 -14px 32px rgba(0, 0, 0, .22); left: 0; max-height: min(86dvh, 720px); overflow: auto; padding: 16px; position: fixed; right: 0; top: auto; transform: translateY(105%); transition: transform 160ms ease; z-index: 60; }
+    .workspace-planner .cwl-roster-panel.is-open { transform: translateY(0); }
+    .workspace-planner .cwl-roster-panel[aria-hidden="false"] { visibility: visible; }
+    .workspace-planner .cwl-mobile-close-pool { display: block; margin-left: auto; min-height: 44px; }
+    .workspace-planner .cwl-board { padding: 16px; }
+    .workspace-planner .cwl-board-heading { display: none; }
+    .workspace-planner #cwl-all-clans { display: none; }
+    .workspace-planner .cwl-mobile-planner-sequence { display: block; }
+    .workspace-planner .cwl-mobile-sequence-heading { align-items: start; display: flex; gap: 12px; justify-content: space-between; }
+    .workspace-planner .cwl-mobile-sequence-controls { display: grid; gap: 8px; grid-template-columns: 1fr 6rem; margin-top: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .workspace-planner .cwl-player-article,
+    .workspace-planner .cwl-roster-panel { transition: none; }
+}
