@@ -29,7 +29,7 @@ describe('Achievements workspace page', () => {
     });
 
     it('keeps unavailable sources separate from zero progress', () => {
-        const source = readFileSync('src/assets/js/pages/achievements.js', 'utf8');
+        const source = readFileSync('src/assets/js/pages/achievements-renderer.js', 'utf8');
         expect(source).toContain("'live_profile'");
         expect(source).toContain("'cwl_history'");
         expect(source).toContain("'raid_history'");
@@ -56,7 +56,7 @@ describe('Achievements workspace page', () => {
     });
 
     it('paginates the large achievement library instead of mounting every card', () => {
-        const source = readFileSync('src/assets/js/pages/achievements.js', 'utf8');
+        const source = `${readFileSync('src/assets/js/pages/achievements.js', 'utf8')}\n${readFileSync('src/assets/js/pages/achievements-renderer.js', 'utf8')}`;
         expect(source).toContain('const PAGE_SIZE = 48');
         expect(source).toContain('filtered.slice(0, state.visibleLimit)');
         expect(source).toContain('state.visibleLimit += PAGE_SIZE');

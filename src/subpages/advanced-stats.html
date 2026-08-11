@@ -24,50 +24,62 @@
 <body class="workspace-app advanced-stats-page" data-workspace-page="advancedStats" data-advanced-stats-page="true">
 <main class="advanced-stats" id="main-content">
     <header class="workspace-page-header advanced-stats__hero">
-        <div>
+        <div class="advanced-stats__hero-copy">
             <p class="page-kicker" data-i18n="advancedStats.kicker">Player intelligence</p>
             <h1 data-i18n="advancedStats.title">Advanced Stats</h1>
             <p data-i18n="advancedStats.subtitle">Your long-term Clash history, built from attacks tracked by ClashPanel.</p>
         </div>
         <div class="advanced-stats__account-control">
             <label for="advanced-stats-account" data-i18n="advancedStats.account">Linked account</label>
-            <select id="advanced-stats-account" disabled></select>
+            <div class="advanced-stats__account-row">
+                <select id="advanced-stats-account" disabled></select>
+                <button id="advanced-stats-refresh" class="cp-button cp-button--secondary" type="button" data-i18n="advancedStats.refresh">Refresh</button>
+            </div>
             <small data-i18n="advancedStats.accountHint">Tracking is private and only available for accounts linked to your ClashPanel profile.</small>
         </div>
     </header>
 
     <section id="advanced-stats-no-accounts" class="advanced-stats__empty-state" hidden>
-        <div class="advanced-stats__empty-icon" aria-hidden="true">#</div>
+        <img src="../assets/placeholders/account.svg" alt="" width="40" height="40">
         <div>
             <h2 data-i18n="advancedStats.noAccountsTitle">Link a Clash account first</h2>
             <p data-i18n="advancedStats.noAccountsText">Advanced Stats only tracks accounts you have already verified in your profile.</p>
         </div>
-        <button id="advanced-stats-open-profile" class="advanced-stats__primary" type="button" data-i18n="advancedStats.openProfile">Open profile</button>
+        <button id="advanced-stats-open-profile" class="cp-button cp-button--primary" type="button" data-i18n="advancedStats.openProfile">Open profile</button>
     </section>
 
     <section id="advanced-stats-profile-error" class="advanced-stats__empty-state" role="alert" hidden>
-        <div class="advanced-stats__empty-icon" aria-hidden="true">!</div>
+        <img src="../assets/icons/stats/data-quality.svg" alt="" width="40" height="40">
         <div>
             <h2 data-i18n="advancedStats.profileLoadFailedTitle">Your accounts could not be loaded</h2>
             <p data-i18n="advancedStats.profileLoadFailedText">Your profile may be temporarily unavailable. No account data was changed.</p>
         </div>
-        <button id="advanced-stats-profile-retry" class="advanced-stats__primary" type="button" data-i18n="advancedStats.retry">Try again</button>
+        <button id="advanced-stats-profile-retry" class="cp-button cp-button--primary" type="button" data-i18n="advancedStats.retry">Try again</button>
     </section>
 
     <p id="advanced-stats-page-status" class="advanced-stats__page-status" role="status" aria-live="polite" data-i18n="advancedStats.loadingTracking">Checking tracking status…</p>
 
+    <section id="advanced-stats-tracking-error" class="advanced-stats__empty-state" role="alert" hidden>
+        <img src="../assets/icons/stats/data-quality.svg" alt="" width="40" height="40">
+        <div>
+            <h2 data-i18n="advancedStats.loadFailed">Advanced Stats could not be loaded. Try again.</h2>
+            <p data-i18n="advancedStats.profileLoadFailedText">Your saved statistics remain unchanged. Try checking again.</p>
+        </div>
+        <button id="advanced-stats-tracking-retry" class="cp-button cp-button--primary" type="button" data-i18n="advancedStats.retry">Try again</button>
+    </section>
+
     <section id="advanced-stats-not-tracking" class="advanced-stats__setup" hidden>
+        <img src="../assets/icons/stats/tracking.svg" alt="" width="40" height="40">
         <div class="advanced-stats__setup-copy">
-            <span class="advanced-stats__eyebrow" data-i18n="advancedStats.trackedLifetime">Tracked lifetime</span>
             <h2 data-i18n="advancedStats.notTrackingTitle">Build your tracked lifetime history</h2>
             <p data-i18n="advancedStats.notTrackingText">Start tracking to see your attack performance, favorite armies and trends over time.</p>
             <small data-i18n="advancedStats.startNote">Tracking starts from now. ClashPanel cannot reconstruct your complete lifetime before tracking began.</small>
         </div>
-        <button id="advanced-stats-start" class="advanced-stats__primary advanced-stats__primary--large" type="button" data-i18n="advancedStats.start">Start Advanced Stats Tracking</button>
+        <button id="advanced-stats-start" class="cp-button cp-button--primary cp-button--large" type="button" data-i18n="advancedStats.start">Start Advanced Stats Tracking</button>
     </section>
 
-    <section id="advanced-stats-initializing" class="advanced-stats__setup advanced-stats__setup--initializing" hidden>
-        <div class="advanced-stats__pulse" aria-hidden="true"><i></i><i></i><i></i></div>
+    <section id="advanced-stats-initializing" class="advanced-stats__setup advanced-stats__setup--initializing" aria-busy="true" hidden>
+        <img src="../assets/icons/stats/history.svg" alt="" width="40" height="40">
         <div>
             <h2 data-i18n="advancedStats.initializingTitle">Preparing your history</h2>
             <p data-i18n="advancedStats.initializingText">ClashPanel is adding your recent attacks. Your stats will appear here shortly.</p>
@@ -86,62 +98,59 @@
             <dl class="advanced-stats__tracking-meta">
                 <div><dt data-i18n="advancedStats.trackingSince">Tracking since</dt><dd id="advanced-stats-started-at">—</dd></div>
                 <div><dt data-i18n="advancedStats.lastUpdated">Last refreshed</dt><dd id="advanced-stats-updated-at">—</dd></div>
-                <div><dt data-i18n="advancedStats.trackedBattles">Tracked attacks</dt><dd id="advanced-stats-battles-processed">0</dd></div>
+                <div><dt data-i18n="advancedStats.trackedBattles">Tracked attacks</dt><dd id="advanced-stats-battles-processed">—</dd></div>
             </dl>
-            <div class="advanced-stats__tracking-actions">
-                <button id="advanced-stats-refresh" type="button" data-i18n="advancedStats.refresh">Refresh</button>
-                <button id="advanced-stats-pause" type="button" data-i18n="advancedStats.pause">Pause</button>
-                <button id="advanced-stats-resume" type="button" data-i18n="advancedStats.resume" hidden>Resume tracking</button>
-                <button id="advanced-stats-stop" type="button" data-i18n="advancedStats.stop">Stop tracking</button>
-                <button id="advanced-stats-delete" class="advanced-stats__danger" type="button" data-i18n="advancedStats.delete">Delete tracked data</button>
-            </div>
+            <details class="advanced-stats__tracking-menu" id="advanced-stats-tracking-menu">
+                <summary class="cp-button cp-button--ghost" data-i18n="advancedStats.trackedLifetime">Tracked history</summary>
+                <div class="advanced-stats__tracking-actions">
+                    <button id="advanced-stats-pause" class="cp-button cp-button--secondary" type="button" data-i18n="advancedStats.pause">Pause</button>
+                    <button id="advanced-stats-resume" class="cp-button cp-button--secondary" type="button" data-i18n="advancedStats.resume" hidden>Resume tracking</button>
+                    <button id="advanced-stats-stop" class="cp-button cp-button--secondary" type="button" data-i18n="advancedStats.stop">Stop tracking</button>
+                    <button id="advanced-stats-delete" class="cp-button cp-button--danger" type="button" data-i18n="advancedStats.delete">Delete tracked data</button>
+                </div>
+            </details>
         </section>
 
         <section id="advanced-stats-warning" class="advanced-stats__warning" role="status" hidden>
-            <strong id="advanced-stats-warning-title"></strong>
-            <p id="advanced-stats-warning-text"></p>
-            <span id="advanced-stats-complete-since"></span>
+            <img src="../assets/icons/stats/data-quality.svg" alt="" width="20" height="20">
+            <div><strong id="advanced-stats-warning-title"></strong><p id="advanced-stats-warning-text"></p><span id="advanced-stats-complete-since"></span></div>
         </section>
 
         <div class="advanced-stats__toolbar">
             <div>
                 <strong data-i18n="advancedStats.periodLabel">Time range</strong>
                 <div class="advanced-stats__segmented" id="advanced-stats-periods" role="group" aria-label="Time range" data-i18n-aria-label="advancedStats.periodLabel">
-                    <button type="button" data-period="7d" data-i18n="advancedStats.period7d">7 days</button>
-                    <button type="button" data-period="30d" class="is-active" aria-pressed="true" data-i18n="advancedStats.period30d">30 days</button>
-                    <button type="button" data-period="90d" data-i18n="advancedStats.period90d">90 days</button>
-                    <button type="button" data-period="all" data-i18n="advancedStats.periodAll">All tracked time</button>
+                    <button class="cp-button cp-button--secondary" type="button" data-period="7d" aria-pressed="false" data-i18n="advancedStats.period7d">7 days</button>
+                    <button class="cp-button cp-button--secondary is-active" type="button" data-period="30d" aria-pressed="true" data-i18n="advancedStats.period30d">30 days</button>
+                    <button class="cp-button cp-button--secondary" type="button" data-period="90d" aria-pressed="false" data-i18n="advancedStats.period90d">90 days</button>
+                    <button class="cp-button cp-button--secondary" type="button" data-period="all" aria-pressed="false" data-i18n="advancedStats.periodAll">All tracked time</button>
                 </div>
             </div>
             <span id="advanced-stats-data-status" class="advanced-stats__data-status" role="status" aria-live="polite"></span>
         </div>
 
         <section id="advanced-stats-summary-section" class="advanced-stats__section" aria-labelledby="advanced-stats-summary-title">
-            <div class="advanced-stats__section-heading">
-                <div><p class="page-kicker" data-i18n="advancedStats.trackedLifetime">Tracked lifetime</p><h2 id="advanced-stats-summary-title" data-i18n="advancedStats.summaryTitle">Attack overview</h2></div>
-                <p data-i18n="advancedStats.summaryText">Performance across the selected tracked period.</p>
-            </div>
+            <div class="advanced-stats__section-heading"><div><h2 id="advanced-stats-summary-title" data-i18n="advancedStats.summaryTitle">Attack overview</h2><p data-i18n="advancedStats.summaryText">Performance across the selected tracked period.</p></div></div>
             <div class="advanced-stats__kpis">
-                <article><span data-i18n="advancedStats.attacks">Attacks</span><strong id="advanced-stats-kpi-attacks">0</strong></article>
-                <article><span data-i18n="advancedStats.avgStars">Average stars</span><strong id="advanced-stats-kpi-stars">0.00</strong></article>
-                <article><span data-i18n="advancedStats.threeStarRate">3-star rate</span><strong id="advanced-stats-kpi-three-star">0%</strong></article>
-                <article><span data-i18n="advancedStats.avgDestruction">Average destruction</span><strong id="advanced-stats-kpi-destruction">0%</strong></article>
+                <article><span data-i18n="advancedStats.attacks">Attacks</span><strong id="advanced-stats-kpi-attacks">—</strong></article>
+                <article><span data-i18n="advancedStats.avgStars">Average stars</span><strong id="advanced-stats-kpi-stars">—</strong></article>
+                <article><span data-i18n="advancedStats.threeStarRate">3-star rate</span><strong id="advanced-stats-kpi-three-star">—</strong></article>
+                <article><span data-i18n="advancedStats.avgDestruction">Average destruction</span><strong id="advanced-stats-kpi-destruction">—</strong></article>
             </div>
             <div class="advanced-stats__favorites">
-                <article><span data-i18n="advancedStats.favoriteTroop">Favorite troop</span><strong id="advanced-stats-favorite-troop">—</strong><small id="advanced-stats-favorite-troop-meta"></small></article>
-                <article><span data-i18n="advancedStats.favoriteSpell">Favorite spell</span><strong id="advanced-stats-favorite-spell">—</strong><small id="advanced-stats-favorite-spell-meta"></small></article>
-                <article><span data-i18n="advancedStats.favoriteSiege">Favorite siege</span><strong id="advanced-stats-favorite-siege">—</strong><small id="advanced-stats-favorite-siege-meta"></small></article>
-                <article><span data-i18n="advancedStats.favoriteArmy">Favorite army</span><strong id="advanced-stats-favorite-army">—</strong><small id="advanced-stats-favorite-army-meta"></small></article>
+                <article><div class="advanced-stats__favorite-image" id="advanced-stats-favorite-troop-image"></div><span data-i18n="advancedStats.favoriteTroop">Favorite troop</span><strong id="advanced-stats-favorite-troop">—</strong><small id="advanced-stats-favorite-troop-meta"></small></article>
+                <article><div class="advanced-stats__favorite-image" id="advanced-stats-favorite-spell-image"></div><span data-i18n="advancedStats.favoriteSpell">Favorite spell</span><strong id="advanced-stats-favorite-spell">—</strong><small id="advanced-stats-favorite-spell-meta"></small></article>
+                <article><div class="advanced-stats__favorite-image" id="advanced-stats-favorite-siege-image"></div><span data-i18n="advancedStats.favoriteSiege">Favorite siege</span><strong id="advanced-stats-favorite-siege">—</strong><small id="advanced-stats-favorite-siege-meta"></small></article>
+                <article><div class="advanced-stats__favorite-image advanced-stats__favorite-image--army" id="advanced-stats-favorite-army-image"></div><span data-i18n="advancedStats.favoriteArmy">Favorite army</span><strong id="advanced-stats-favorite-army">—</strong><small id="advanced-stats-favorite-army-meta"></small></article>
             </div>
         </section>
 
         <div class="advanced-stats__two-column">
             <section id="advanced-stats-trends-section" class="advanced-stats__section" aria-labelledby="advanced-stats-trends-title">
                 <div class="advanced-stats__section-heading"><div><h2 id="advanced-stats-trends-title" data-i18n="advancedStats.trendsTitle">Performance trend</h2><p data-i18n="advancedStats.trendsText">Daily tracked attack results.</p></div></div>
-                <div id="advanced-stats-trend-chart" class="advanced-stats__trend-chart" role="img" aria-label="Performance trend" data-i18n-aria-label="advancedStats.trendsTitle"></div>
+                <div id="advanced-stats-trend-chart" class="advanced-stats__trend-chart" role="group" aria-label="Performance trend" data-i18n-aria-label="advancedStats.trendsTitle"></div>
                 <p id="advanced-stats-trend-empty" class="advanced-stats__empty-copy" data-i18n="advancedStats.noTrendData" hidden>No tracked attacks in this period yet.</p>
             </section>
-
             <section id="advanced-stats-armies-section" class="advanced-stats__section" aria-labelledby="advanced-stats-armies-title">
                 <div class="advanced-stats__section-heading"><div><h2 id="advanced-stats-armies-title" data-i18n="advancedStats.armiesTitle">Favorite armies</h2><p data-i18n="advancedStats.armiesText">The army compositions you use most in this period.</p></div></div>
                 <div id="advanced-stats-armies" class="advanced-stats__army-list"></div>
@@ -152,35 +161,36 @@
         <section id="advanced-stats-units-section" class="advanced-stats__section" aria-labelledby="advanced-stats-units-title">
             <div class="advanced-stats__section-heading advanced-stats__section-heading--filters">
                 <div><h2 id="advanced-stats-units-title" data-i18n="advancedStats.usageTitle">Unit usage</h2><p data-i18n="advancedStats.usageText">See which units appear in your armies and how often you use them.</p></div>
-                <select id="advanced-stats-unit-category" aria-labelledby="advanced-stats-units-title">
-                    <option value="ALL" data-i18n="advancedStats.categoryAll">All</option>
-                    <option value="TROOP" data-i18n="advancedStats.categoryTroops">Troops</option>
-                    <option value="SUPER_TROOP" data-i18n="advancedStats.categorySuperTroops">Super Troops</option>
-                    <option value="SPELL" data-i18n="advancedStats.categorySpells">Spells</option>
-                    <option value="SIEGE" data-i18n="advancedStats.categorySiege">Siege</option>
-                    <option value="HERO" data-i18n="advancedStats.categoryHeroes">Heroes</option>
-                    <option value="PET" data-i18n="advancedStats.categoryPets">Pets</option>
-                    <option value="EQUIPMENT" data-i18n="advancedStats.categoryEquipment">Equipment</option>
-                </select>
+                <label><span class="sr-only" data-i18n="advancedStats.unit">Unit category</span><select id="advanced-stats-unit-category" aria-labelledby="advanced-stats-units-title">
+                    <option value="ALL" data-i18n="advancedStats.categoryAll">All</option><option value="TROOP" data-i18n="advancedStats.categoryTroops">Troops</option><option value="SUPER_TROOP" data-i18n="advancedStats.categorySuperTroops">Super Troops</option><option value="SPELL" data-i18n="advancedStats.categorySpells">Spells</option><option value="SIEGE" data-i18n="advancedStats.categorySiege">Siege</option><option value="HERO" data-i18n="advancedStats.categoryHeroes">Heroes</option><option value="PET" data-i18n="advancedStats.categoryPets">Pets</option><option value="EQUIPMENT" data-i18n="advancedStats.categoryEquipment">Equipment</option>
+                </select></label>
             </div>
-            <div class="advanced-stats__table-wrap">
-                <table class="advanced-stats__table">
-                    <thead><tr><th data-i18n="advancedStats.unit">Unit</th><th data-i18n="advancedStats.quantity">Total used</th><th data-i18n="advancedStats.battlesPresent">Used in attacks</th><th data-i18n="advancedStats.usageRate">Usage rate</th></tr></thead>
-                    <tbody id="advanced-stats-units"></tbody>
-                </table>
+            <div id="advanced-stats-units-table-wrap" class="advanced-stats__table-wrap">
+                <table class="advanced-stats__table"><thead><tr><th data-i18n="advancedStats.unit">Unit</th><th data-i18n="advancedStats.quantity">Total used</th><th data-i18n="advancedStats.battlesPresent">Used in attacks</th><th data-i18n="advancedStats.usageRate">Usage rate</th></tr></thead><tbody id="advanced-stats-units"></tbody></table>
             </div>
+            <div id="advanced-stats-units-mobile" class="advanced-stats__units-mobile"></div>
             <p id="advanced-stats-units-empty" class="advanced-stats__empty-copy" data-i18n="advancedStats.noUnits" hidden>No unit usage is available for this period.</p>
             <p class="advanced-stats__footnote" data-i18n="advancedStats.armyCompositionNote">Usage is based on the saved army, not on the order or number of troops deployed.</p>
         </section>
 
         <section id="advanced-stats-battles-section" class="advanced-stats__section" aria-labelledby="advanced-stats-timeline-title">
-            <div class="advanced-stats__section-heading"><div><h2 id="advanced-stats-timeline-title" data-i18n="advancedStats.timelineTitle">Battle timeline</h2></div></div>
+            <div class="advanced-stats__section-heading"><div><h2 id="advanced-stats-timeline-title" data-i18n="advancedStats.timelineTitle">Battle timeline</h2><p data-i18n="advancedStats.armyCompositionNote">Army details appear only when the saved composition is available.</p></div></div>
             <div id="advanced-stats-battles" class="advanced-stats__timeline"></div>
             <p id="advanced-stats-battles-empty" class="advanced-stats__empty-copy" data-i18n="advancedStats.noBattles" hidden>No tracked attacks in this period yet.</p>
-            <button id="advanced-stats-load-more" class="advanced-stats__load-more" type="button" data-i18n="advancedStats.loadMore" hidden>Load more</button>
+            <button id="advanced-stats-load-more" class="cp-button cp-button--secondary advanced-stats__load-more" type="button" data-i18n="advancedStats.loadMore" hidden>Load more</button>
         </section>
     </div>
 </main>
+
+<dialog id="advanced-stats-confirm-dialog" class="advanced-stats__dialog" aria-labelledby="advanced-stats-dialog-title" aria-describedby="advanced-stats-dialog-copy">
+    <form method="dialog" id="advanced-stats-confirm-form">
+        <h2 id="advanced-stats-dialog-title"></h2>
+        <p id="advanced-stats-dialog-copy"></p>
+        <label id="advanced-stats-delete-field" hidden><span data-i18n="advancedStats.deletePrompt">Type DELETE to confirm permanent deletion.</span><input id="advanced-stats-delete-input" autocomplete="off" spellcheck="false"></label>
+        <p id="advanced-stats-dialog-error" class="advanced-stats__dialog-error" role="alert" hidden></p>
+        <div class="advanced-stats__dialog-actions"><button id="advanced-stats-dialog-cancel" class="cp-button cp-button--secondary" value="cancel" type="submit">Cancel</button><button id="advanced-stats-dialog-confirm" class="cp-button cp-button--danger" value="confirm" type="submit">Confirm</button></div>
+    </form>
+</dialog>
 <div class="profile-placeholder"></div>
 </body>
 </html>

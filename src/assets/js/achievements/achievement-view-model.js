@@ -86,7 +86,9 @@ export function collectLinkedAccounts(input) {
             });
         }
 
-        if ('accounts' in value) visit(value.accounts);
+        for (const key of ['accounts', 'bases', 'base', 'account', 'linkedAccounts']) {
+            if (key in value) visit(value[key]);
+        }
     };
 
     visit(input);
@@ -197,6 +199,7 @@ export function groupAchievementFamilies(rows) {
             description: familyDescription(tiers),
             category: first.category,
             categoryLabel: first.categoryLabel,
+            entity: currentTier?.entity || first.entity || null,
             scope: first.scope,
             source: currentTier?.source || first.source,
             sourceCodes: currentTier?.sourceCodes || first.sourceCodes,

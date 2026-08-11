@@ -34,10 +34,11 @@ describe('Advanced Stats workspace page', () => {
 
     it('keeps profile errors separate and preserves last-good partial data', () => {
         const source = readFileSync('src/assets/js/pages/advanced-stats.js', 'utf8');
-        expect(source).toContain("show(elements['advanced-stats-profile-error'], true)");
-        expect(source).toContain("show(elements['advanced-stats-no-accounts'], false)");
-        expect(source).toContain("addEventListener('click', retryProfileLoad)");
-        expect(source).toContain("if (overview.status === 'fulfilled') state.overview = overview.value");
+        const renderer = readFileSync('src/assets/js/pages/advanced-stats-renderer.js', 'utf8');
+        expect(source).toContain('state.profileError = true');
+        expect(renderer).toContain('show(elements.profileError, state.profileError === true)');
+        expect(source).toContain('elements.profileRetry?.addEventListener');
+        expect(source).toContain("if (overview.status === 'fulfilled') { state.overview = overview.value;");
         expect(source).toContain("if (units.status === 'fulfilled') {");
         expect(source).toContain('state.unitCatalog = arrayValue(units.value?.items)');
         expect(source).not.toContain("state.overview = overview.status === 'fulfilled' ? overview.value : null");
@@ -51,7 +52,7 @@ describe('Advanced Stats workspace page', () => {
         const trend = document.querySelector('#advanced-stats-trend-chart');
         const unitFilter = document.querySelector('#advanced-stats-unit-category');
 
-        expect(trend?.getAttribute('role')).toBe('img');
+        expect(trend?.getAttribute('role')).toBe('group');
         expect(trend?.getAttribute('data-i18n-aria-label')).toBe('advancedStats.trendsTitle');
         expect(unitFilter?.getAttribute('aria-labelledby')).toBe('advanced-stats-units-title');
         expect(document.querySelector('#advanced-stats-page-status')?.getAttribute('aria-live')).toBe('polite');
@@ -60,14 +61,16 @@ describe('Advanced Stats workspace page', () => {
 
     it('shows meaningful army names without developer metadata', () => {
         const source = readFileSync('src/assets/js/pages/advanced-stats.js', 'utf8');
-        expect(source).toContain("import { isPlayerFacingUnitName, presentArmy } from './advanced-stats-army-view.js?v=20260809-4'");
-        expect(source).toContain("getAdvancedStatsUnits(state.playerTag, state.period, 'ALL')");
-        expect(source).toContain("formatDate(tracking.lastSuccessfulPollAt");
-        expect(source).toContain('.filter(item => item.presentation.units.length > 0)');
-        expect(source).toContain('isPlayerFacingUnitName(unit?.name || unit?.unitName)');
-        expect(source).not.toContain('pieces.push(battle.battleType)');
-        expect(source).not.toContain("pieces.push(t('advancedStats.bootstrap'))");
-        expect(source).not.toContain("t('advancedStats.unitsCount'");
+        const renderer = readFileSync('src/assets/js/pages/advanced-stats-renderer.js', 'utf8');
+        const armyView = readFileSync('src/assets/js/pages/advanced-stats-army-view.js', 'utf8');
+        expect(source).toContain("getUnits: (tag, period) => getAdvancedStatsUnits(tag, period, 'ALL')");
+        expect(renderer).toContain("formatDate(tracking.lastSuccessfulPollAt");
+        expect(renderer).toContain('.filter(item => item.presentation.units.length)');
+        expect(renderer).toContain('isPlayerFacingUnitName(unit?.name || unit?.unitName)');
+        expect(armyView).toContain('export function displayArmyUnits');
+        expect(renderer).not.toContain('pieces.push(battle.battleType)');
+        expect(renderer).not.toContain("pieces.push(t('advancedStats.bootstrap'))");
+        expect(renderer).not.toContain("t('advancedStats.unitsCount'");
     });
 
     it('versions the complete Advanced Stats translation graph', () => {

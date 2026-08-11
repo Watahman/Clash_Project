@@ -4,7 +4,10 @@ const DISPLAY_CATEGORIES = new Set([
     'SPELL',
     'SIEGE',
     'CLAN_CASTLE_TROOP',
-    'CLAN_CASTLE_SPELL'
+    'CLAN_CASTLE_SPELL',
+    'HERO',
+    'PET',
+    'EQUIPMENT'
 ]);
 
 const CORE_CATEGORIES = new Set(['TROOP', 'SUPER_TROOP']);
@@ -14,7 +17,10 @@ const CATEGORY_ORDER = new Map([
     ['SPELL', 2],
     ['SIEGE', 3],
     ['CLAN_CASTLE_TROOP', 4],
-    ['CLAN_CASTLE_SPELL', 5]
+    ['CLAN_CASTLE_SPELL', 5],
+    ['HERO', 6],
+    ['PET', 7],
+    ['EQUIPMENT', 8]
 ]);
 
 function normalizedCategory(value) {
@@ -42,16 +48,18 @@ function unitNameLookup(unitCatalog) {
     return names;
 }
 
-export function presentArmy(army, unitCatalog, fallbackLabel) {
+export function displayArmyUnits(army, unitCatalog) {
     const names = unitNameLookup(unitCatalog);
-    const units = (Array.isArray(army?.units) ? army.units : [])
+    return (Array.isArray(army?.units) ? army.units : [])
         .map(unit => ({
             category: normalizedCategory(unit?.category),
             key: String(unit?.key || unit?.unitKey || '').trim(),
             name: String(unit?.name || unit?.unitName || names.get(unitIdentity(unit)) || '').trim(),
             quantity: Math.max(0, Number(unit?.quantity || 0))
         }))
-        .filter(unit => DISPLAY_CATEGORIES.has(unit.category) && isPlayerFacingUnitName(unit.name))
+        .filter(unit => DISPLAY_CATEGORIES.has(unit.category)
+            && isPlayerFacingUnitName(unit.name)
+            && unit.quantity > 0)
         .sort((left, right) => {
             const categoryDifference = (CATEGORY_ORDER.get(left.category) ?? 99)
                 - (CATEGORY_ORDER.get(right.category) ?? 99);
@@ -59,6 +67,10 @@ export function presentArmy(army, unitCatalog, fallbackLabel) {
             if (right.quantity !== left.quantity) return right.quantity - left.quantity;
             return left.name.localeCompare(right.name);
         });
+}
+
+export function presentArmy(army, unitCatalog, fallbackLabel) {
+    const units = displayArmyUnits(army, unitCatalog);
 
     const core = units.filter(unit => CORE_CATEGORIES.has(unit.category));
     const headlineUnits = (core.length ? core : units).slice(0, 2);

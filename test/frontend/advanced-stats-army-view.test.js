@@ -28,9 +28,12 @@ describe('Advanced Stats army presentation', () => {
         expect(presentation.units).toEqual([
             '8× Root Rider',
             '4× Valkyrie',
-            '3× Freeze Spell'
+            '3× Freeze Spell',
+            '1× Archer Queen',
+            '1× Unicorn',
+            '2× Frozen Arrow'
         ]);
-        expect(presentation.units.join(' ')).not.toMatch(/hero|pet|equipment/i);
+        expect(presentation.units.join(' ')).toMatch(/Archer Queen|Unicorn|Frozen Arrow/);
     });
 
     it('uses a player-facing fallback when names are unavailable', () => {
