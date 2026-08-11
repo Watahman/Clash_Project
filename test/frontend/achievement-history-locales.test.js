@@ -45,9 +45,10 @@ describe('Achievement history and locale integration', () => {
     it('marks the workspace page for translated achievement rendering', () => {
         const html = readFileSync('src/subpages/achievements.html', 'utf8');
         const page = readFileSync('src/assets/js/pages/achievements.js', 'utf8');
+        const renderer = readFileSync('src/assets/js/pages/achievements-renderer.js', 'utf8');
         expect(html).toContain('data-workspace-page="achievements"');
         expect(html).toContain('data-i18n="achievements.title"');
         expect(page).toContain("window.addEventListener('clashtools:language-changed'");
-        expect(page).toContain('achievements.family.${family.familyKey}.title');
+        expect(renderer).toContain('achievements.family.${family.familyKey}.title');
     });
 });
