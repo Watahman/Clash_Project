@@ -104,7 +104,7 @@ describe('War page load controller', () => {
         expect(harness.refs.content.hidden).toBe(false);
         expect(harness.refs.empty.hidden).toBe(true);
         expect(harness.status).toHaveBeenLastCalledWith(
-            'History unavailable',
+            'Historical performance could not be loaded.',
             true
         );
     });

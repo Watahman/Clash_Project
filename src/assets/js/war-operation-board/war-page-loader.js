@@ -1,4 +1,5 @@
 import { getClanCurrentWarRequest, getClanWarLogRequest } from '../API/API-Clan.js';
+import { competeT as t } from '../operation-board/compete-locales.js';
 import { enrichWithHistoricalPerformance } from '../operation-board/operation-board-performance.js?v=20260729-2';
 import { getWarAssignments } from '../Supabase/Supabase-WarAssignments.js';
 import { fixtureWar, setEmptyState } from './war-page-utils.js';
@@ -28,6 +29,7 @@ export function createWarLoadController({
     let report = null;
     let historyData = null;
     let assignments = [];
+    let lastEmptyCopy = null;
 
     function getState() {
         return { report, historyData, assignments };
@@ -69,14 +71,11 @@ export function createWarLoadController({
         refs.content.classList.remove('is-refreshing');
         refs.content.hidden = true;
         refs.empty.hidden = false;
-        setEmpty(
-            refs.empty,
-            forceRefresh ? 'Refreshing current war' : 'Loading current war',
-            'The board will show the latest official state when it is ready.'
+        setEmptyCopy(
+            forceRefresh ? 'war.refreshingTitle' : 'war.loadingTitle',
+            forceRefresh ? 'war.refreshingCopy' : 'war.loadingCopy'
         );
-        setStatus(
-            forceRefresh ? 'Refreshing live war data…' : 'Loading current war…'
-        );
+        setStatus(t(forceRefresh ? 'war.refreshingCurrent' : 'war.loadingCurrent'));
     }
 
     async function load(forceRefresh = false) {
@@ -96,7 +95,7 @@ export function createWarLoadController({
             if (!isCurrent(token, signal)) return;
             showReport();
             if (!report.wars.length) return showHistoryOnly();
-            setStatus('Live war data synced from the official Clash of Clans API.');
+            setStatus(t('war.statusSynced'));
             if (fixture) return;
             await enrichLoadedReport(report, token, signal);
         } catch (error) {
@@ -121,15 +120,14 @@ export function createWarLoadController({
     }
 
     function showReport() {
+        lastEmptyCopy = null;
         refs.empty.hidden = true;
         refs.content.hidden = false;
         renderCurrent();
     }
 
     function showHistoryOnly() {
-        setStatus(
-            'This clan is not in a public regular Clan War. Recent history is still available.'
-        );
+        setStatus(t('war.statusHistoryAvailable'));
         selectHistoryTab();
     }
 
@@ -141,10 +139,7 @@ export function createWarLoadController({
             renderCurrent();
         } catch (error) {
             if (!isCurrent(token, signal)) return;
-            setStatus(
-                error?.message || 'Historical performance could not be loaded.',
-                true
-            );
+            setStatus(t('war.historyUnavailable'), true);
         }
     }
 
@@ -154,20 +149,25 @@ export function createWarLoadController({
         refs.empty.hidden = false;
         refs.content.hidden = true;
         if (error instanceof ActiveCwlWarError || error?.code === 'ACTIVE_CWL_WAR') {
-            setStatus(`${error.message} `, true, true);
-            setEmpty(
-                refs.empty,
-                'This clan is in an active CWL war',
-                'Regular War Board is for regular wars. Continue in CWL Tracker for the active league war.',
-                true
-            );
+            setStatus(t('war.activeCwlStatus'), true, true);
+            setEmptyCopy('war.activeCwlTitle', 'war.activeCwlCopy', true);
             return;
         }
-        setStatus(error?.message || 'The current war could not be loaded.', true);
-        setEmpty(
-            refs.empty,
-            'The current war is unavailable',
-            error?.message || 'Try refreshing when the official API is available.'
+        setStatus(t('war.currentUnavailable'), true);
+        setEmptyCopy('war.currentUnavailable', 'war.tryRefresh');
+    }
+
+    function setEmptyCopy(titleKey, copyKey, cwlLink = false) {
+        lastEmptyCopy = { titleKey, copyKey, cwlLink };
+        setEmpty(refs.empty, t(titleKey), t(copyKey), cwlLink);
+    }
+
+    function refreshLabels() {
+        if (!lastEmptyCopy) return;
+        setEmptyCopy(
+            lastEmptyCopy.titleKey,
+            lastEmptyCopy.copyKey,
+            lastEmptyCopy.cwlLink
         );
     }
 
@@ -186,6 +186,7 @@ export function createWarLoadController({
         getState,
         load,
         removeAssignment,
+        refreshLabels,
         replaceAssignment
     };
 }

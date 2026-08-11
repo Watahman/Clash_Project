@@ -1,4 +1,4 @@
-import { t } from '../i18n/i18n.js';
+import { competeT as t } from './compete-locales.js';
 import {
     lower,
     number
@@ -27,10 +27,10 @@ export function syncRosterMode(refs, report, selectedClan = null) {
             '[data-op-roster-column-label]'
         );
         if (label) {
-            label.textContent = historical ? 'Participation' : t('op.planning');
+            label.textContent = historical ? t('cwl.participation') : t('op.planning');
         } else {
             refs.rosterPlanningHeader.textContent = historical
-                ? 'Participation'
+                ? t('cwl.participation')
                 : t('op.planning');
         }
     }
@@ -42,7 +42,7 @@ export function syncRosterMode(refs, report, selectedClan = null) {
             '[data-op-roster-defense-label]'
         );
         if (label) {
-            label.textContent = historical ? 'Average defense' : t('op.missed');
+            label.textContent = historical ? t('cwl.averageDefense') : t('op.missed');
         }
         defenseHeader.dataset.opRosterSort = historical ? 'defense' : 'missed';
         const table = defenseHeader.closest('table');

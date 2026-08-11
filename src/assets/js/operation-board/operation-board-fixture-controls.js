@@ -1,4 +1,5 @@
 import { normalizePlan } from './operation-board-plan-model.js';
+import { competeT as t } from './compete-locales.js';
 import {
     renderPlanOptions,
     renderStandaloneMode
@@ -28,12 +29,12 @@ export async function applyCwlFixture(
     const source = fixture.data?.source;
     if (!source) {
         renderPlanOptions(refs, []);
-        setHelp('Choose a saved plan or load a clan tag to start the CWL tracker.');
+        setHelp(t('cwl.noSourceHelp'));
         return;
     }
     const clan = source.clan || null;
     if (!clan?.tag) {
-        setHelp('This CWL fixture has no clan source.', true);
+        setHelp(t('cwl.fixtureNoClan'), true);
         return;
     }
     setSelectedClan(clan);

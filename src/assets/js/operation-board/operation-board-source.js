@@ -19,11 +19,12 @@ import {
     normalizeLeaguePhase,
     normalizeTag
 } from './operation-board-utils.js';
+import { competeT as t } from './compete-locales.js';
 import { loadCwlFixture } from './operation-board-fixtures.js';
 
 export class NoActiveCwlError extends Error {
     constructor() {
-        super('No active CWL is available');
+        super(t('cwl.noActive'));
         this.name = 'NoActiveCwlError';
         this.code = 'NO_ACTIVE_CWL';
     }
@@ -99,7 +100,7 @@ export async function loadOperationSource({ clan, plan = null, signal }) {
 
 function loadFixtureSource(fixture, requestedClan, requestedPlan) {
     const source = fixture.data?.source;
-    if (!source) throw new Error('CWL source is unavailable in this fixture');
+    if (!source) throw new Error(t('cwl.sourceUnavailable'));
     if (source.noActive) throw new NoActiveCwlError();
     const fixtureClan = source.clan || requestedClan;
     const clan = {

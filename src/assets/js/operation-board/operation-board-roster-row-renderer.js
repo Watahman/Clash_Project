@@ -1,4 +1,4 @@
-import { t } from '../i18n/i18n.js';
+import { competeT as t } from './compete-locales.js';
 import {
     escapeHtml,
     number
@@ -42,10 +42,10 @@ export function renderPlayerRow(player, display, report, standalone) {
             <strong class="cwl-player-name">${escapeHtml(player.name)}</strong>
             <span>${escapeHtml(player.tag)}</span>
         </button></td>
-        <td><img class="compete-townhall" src="${getTownHallAsset(player.townHall)}" alt="Town Hall ${escapeHtml(townHall)}"> TH${escapeHtml(townHall)}</td>
+        <td><img class="compete-townhall" src="${getTownHallAsset(player.townHall)}" alt="${escapeHtml(t('cwl.townHall', { level: townHall }))}"> ${escapeHtml(t('cwl.townHallShort'))}${escapeHtml(townHall)}</td>
         ${planningCell}
         <td>${attackFraction(display.attacksUsed, display.availableAttacks)}</td>
-        <td>${number(display.stars, 0)} stars</td>
+        <td>${number(display.stars, 0)} ${escapeHtml(t('cwl.starsUnit'))}</td>
         <td>${number(display.destruction, 0).toFixed(1)}%</td>
         <td>${report.mode === 'historical'
             ? defenseValue(display.avgDefense)
@@ -70,12 +70,12 @@ function defenseValue(input) {
 function historicalParticipation(player, totalRounds) {
     const rounds = number(player.roundsPlayed, 0);
     const status = rounds === 0
-        ? ['not-fielded', 'Not fielded']
+        ? ['not-fielded', t('cwl.notFielded')]
         : player.missed == null
-            ? ['unknown', 'Attack usage unknown']
+            ? ['unknown', t('cwl.attackUsageUnknown')]
             : number(player.missed, 0) > 0
-                ? ['attention', 'Missed attacks']
-                : ['complete', 'Complete'];
+                ? ['attention', t('cwl.missedAttacks')]
+                : ['complete', t('cwl.complete')];
     return `<td><span class="op-history-participation" data-state="${status[0]}">
         <strong>${rounds}/${number(totalRounds, 0)}</strong>
         <small>${escapeHtml(status[1])}</small>
@@ -84,7 +84,7 @@ function historicalParticipation(player, totalRounds) {
 
 function townHallLabel(value) {
     const parsed = number(value, 0);
-    return parsed > 0 ? String(parsed) : 'unknown';
+    return parsed > 0 ? String(parsed) : t('war.unknown');
 }
 
 function finite(value) {

@@ -1,3 +1,5 @@
+import { competeT as t } from '../operation-board/compete-locales.js';
+
 export function fixtureWar(fixture) {
     const raw = fixture?.data?.currentWar || { state: 'notInWar' };
     if (!raw.clan && !raw.opponent) return raw;
@@ -18,7 +20,7 @@ export function setEmptyState(element, title, copy, cwlLink = false) {
     if (cwlLink) {
         const link = document.createElement('a');
         link.href = '/app/cwl-tracker';
-        link.textContent = ' Open CWL Tracker';
+        link.textContent = ` ${t('war.openCwlTracker')}`;
         copyElement.append(link);
     }
 }

@@ -1,5 +1,5 @@
 import { parseClashTime } from '../cwl/cwl-war-state.js';
-import { t } from '../i18n/i18n.js';
+import { competeT as t } from './compete-locales.js';
 import { buildLiveView } from './operation-board-live-model.js';
 import {
     buildProjectedOutcome
@@ -59,7 +59,7 @@ function sideMarkup(side) {
     return `
         <article class="op-live-side">
             <h2>${escapeHtml(side.name || '—')}</h2>
-            <strong>${hasData ? number(side.stars, 0) : '—'}<small> stars</small></strong>
+            <strong>${hasData ? number(side.stars, 0) : '—'}<small> ${escapeHtml(t('cwl.starsUnit'))}</small></strong>
             <dl>
                 <div><dt>${escapeHtml(t('op.destruction'))}</dt><dd>${hasData ? `${number(side.destruction, 0).toFixed(1)}%` : '—'}</dd></div>
                 <div><dt>${escapeHtml(t('op.attacks'))}</dt><dd>${number(side.attacksUsed, 0)} / ${number(side.availableAttacks, 0)}</dd></div>
@@ -109,7 +109,7 @@ function winConditionMarkup(condition, live) {
                 <dl class="op-live-facts">
                     <div><dt>${escapeHtml(t('op.ownAttacksLeft'))}</dt><dd>${condition.ownRemaining}</dd></div>
                     <div><dt>${escapeHtml(t('op.enemyAttacksLeft'))}</dt><dd>${condition.opponentRemaining}</dd></div>
-                    <div><dt>${escapeHtml(t('op.maxStarImprovement'))}</dt><dd>+${number(condition.maxStarImprovement, 0)} stars</dd></div>
+                    <div><dt>${escapeHtml(t('op.maxStarImprovement'))}</dt><dd>+${number(condition.maxStarImprovement, 0)} ${escapeHtml(t('cwl.starsUnit'))}</dd></div>
                 </dl>
             </div>
         </section>`;
@@ -126,7 +126,7 @@ function projectionMarkup(projection) {
                 </span>
             </div>
             <div class="op-projection-score">
-                <strong>${number(projection.own.stars, 0).toFixed(1)}<small> stars</small></strong>
+                <strong>${number(projection.own.stars, 0).toFixed(1)}<small> ${escapeHtml(t('cwl.starsUnit'))}</small></strong>
                 <span>${number(projection.own.destruction, 0).toFixed(1)}%</span>
                 <small>${escapeHtml(t('op.projectedOpponent', {
                     stars: number(projection.opponent.stars, 0).toFixed(1),

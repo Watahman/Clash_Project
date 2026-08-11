@@ -2,6 +2,11 @@ import { syncAuthSession } from '../auth/auth-client.js';
 import { initPlayerPerformancePopover } from '../cwl/cwl-player-performance-popover.js';
 import { initI18n } from '../i18n/i18n.js';
 import { looksLikeClashTag, normalizeTag } from '../operation-board/operation-board-utils.js';
+import {
+    competeT,
+    findCompeteKey,
+    initCompeteI18n
+} from '../operation-board/compete-locales.js';
 import { profileHTML } from '../profile/profile_popup.js';
 import {
     deleteWarAssignment,
@@ -27,6 +32,7 @@ let mapSide = 'enemy';
 let selectedPosition = 1;
 let activeFixture = null;
 let warLoader;
+let lastStatusCopy = null;
 
 async function init() {
     collectRefs();
@@ -45,6 +51,7 @@ async function init() {
         renderCurrent,
         selectHistoryTab: () => selectTab('history')
     });
+    initCompeteI18n(document, refreshLabels);
     bindWarPageEvents({
         refs,
         selectClan,
@@ -109,14 +116,14 @@ async function loadClanOptions() {
             refs.clanSelect.appendChild(option);
         });
     } catch {
-        refs.clanSelect.options[0].textContent = 'Enter a clan tag';
+        refs.clanSelect.options[0].textContent = competeT('war.enterClanTag');
     }
 }
 
 function submitClan(value) {
     const tag = normalizeTag(value);
     if (!looksLikeClashTag(tag)) {
-        setStatus('Enter a valid Clash of Clans clan tag.', true);
+        setStatus(competeT('war.invalidTag'), true);
         return;
     }
     void selectClan(tag);
@@ -180,9 +187,9 @@ async function handleAssignmentSubmit(event) {
         });
         warLoader.replaceAssignment(saved);
         renderCurrent();
-        setStatus('Assignment saved.');
-    } catch (error) {
-        setStatus(error?.message || 'Assignment could not be saved.', true);
+        setStatus(competeT('war.assignmentSaved'));
+    } catch {
+        setStatus(competeT('war.assignmentSaveFailed'), true);
     }
 }
 
@@ -191,9 +198,9 @@ async function removeAssignment(assignmentId) {
         await deleteWarAssignment(assignmentId);
         warLoader.removeAssignment(assignmentId);
         renderCurrent();
-        setStatus('Assignment removed.');
-    } catch (error) {
-        setStatus(error?.message || 'Assignment could not be removed.', true);
+        setStatus(competeT('war.assignmentRemoved'));
+    } catch {
+        setStatus(competeT('war.assignmentRemoveFailed'), true);
     }
 }
 
@@ -209,14 +216,32 @@ function selectTab(tab) {
 }
 
 function setStatus(message, error = false, cwlLink = false) {
+    const key = findCompeteKey(String(message || ''));
+    lastStatusCopy = key ? { key, error, cwlLink } : null;
+    renderStatus(message, error, cwlLink);
+}
+
+function renderStatus(message, error = false, cwlLink = false) {
     refs.status.classList.toggle('is-error', error);
     refs.status.replaceChildren(document.createTextNode(String(message || '')));
     if (cwlLink) {
         const link = document.createElement('a');
         link.href = '/app/cwl-tracker';
-        link.textContent = 'Open CWL Tracker';
+        link.textContent = competeT('war.openCwlTracker');
         refs.status.append(' ', link);
     }
+}
+
+function refreshLabels() {
+    warLoader?.refreshLabels();
+    if (lastStatusCopy) {
+        renderStatus(
+            competeT(lastStatusCopy.key),
+            lastStatusCopy.error,
+            lastStatusCopy.cwlLink
+        );
+    }
+    renderCurrent();
 }
 
 const initialPageLoad = init();

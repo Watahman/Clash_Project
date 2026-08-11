@@ -11,6 +11,7 @@ import {
     buildHistoricalSeasonModel,
     formatSeason
 } from './historical-cwl-season-model.js';
+import { competeT as t } from './compete-locales.js';
 
 export function createOperationBoardHistoryController({
                                                           refs,
@@ -39,7 +40,7 @@ export function createOperationBoardHistoryController({
         if (!refs.seasonSelect) return;
         refs.seasonSelect.disabled = true;
         refs.seasonSelect.replaceChildren(
-            option('current', 'Current CWL', true)
+            option('current', t('cwl.currentSeason'), true)
         );
     }
 
@@ -165,11 +166,11 @@ export function createOperationBoardHistoryController({
             resetForClan();
             return;
         }
-        const options = [option('overview', 'Overview')];
+        const options = [option('overview', t('cwl.overviewPhase'))];
         if (hasCurrent) {
             const label = currentSeason
-                ? `${formatSeason(currentSeason)} · Current`
-                : 'Current CWL';
+                ? `${formatSeason(currentSeason)} · ${t('cwl.currentSeason')}`
+                : t('cwl.currentSeason');
             options.push(option('current', label));
         }
         seasonIndex

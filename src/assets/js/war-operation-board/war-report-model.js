@@ -1,9 +1,10 @@
 import { normalizeWarState } from '../cwl/cwl-war-state.js';
+import { competeT as t } from '../operation-board/compete-locales.js';
 import { getWarSide, normalizeTag, number } from '../operation-board/operation-board-utils.js';
 
 export class ActiveCwlWarError extends Error {
     constructor() {
-        super('This clan is currently in a CWL war. Open the CWL operation board instead.');
+        super(t('war.activeCwlStatus'));
         this.code = 'ACTIVE_CWL_WAR';
     }
 }
@@ -62,7 +63,7 @@ export function currentWarPlayerContext(report, playerTag) {
     const attackLimit = Math.max(1, number(war?.attacksPerMember, 2));
     const totalStars = attacks.reduce((sum, attack) => sum + number(attack.stars), 0);
     return {
-        heading: 'Current Clan War',
+        heading: t('war.currentClanWar'),
         stars: totalStars,
         avgStars: attacks.length ? totalStars / attacks.length : null,
         avgDestruction: attacks.length

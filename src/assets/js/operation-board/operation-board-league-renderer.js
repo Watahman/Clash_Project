@@ -1,6 +1,6 @@
 import { renderRankingHistoryChart } from '../cwl/cwl-ranking-history.js';
 import { renderStarsPerDayChart } from '../cwl/cwl-stars-chart.js';
-import { t } from '../i18n/i18n.js';
+import { competeT as t } from './compete-locales.js';
 import {
     escapeHtml,
     number
@@ -35,17 +35,17 @@ export function renderLeagueSections(refs, report) {
     if (refs.finishMetric) refs.finishMetric.hidden = historical;
     if (refs.positionLabel) {
         refs.positionLabel.textContent = historical
-            ? 'Final position'
+            ? t('cwl.finalPosition')
             : t('op.currentPosition');
     }
     if (refs.starsChartNote) {
         refs.starsChartNote.textContent = historical
-            ? 'Only completed war days from ClashKing history are shown.'
+            ? t('cwl.completedDaysHelp')
             : t('op.starsChartHelp');
     }
     if (refs.positionChartNote) {
         refs.positionChartNote.textContent = historical
-            ? 'Daily positions are shown only when historical snapshots exist.'
+            ? t('cwl.dailyPositionsHelp')
             : t('op.positionChartHelp');
     }
     if (refs.positionChartPanel) {
@@ -81,7 +81,11 @@ export function clearLeagueSections(refs) {
     refs.currentPosition.textContent = '-';
     refs.projectedFinish.textContent = '-';
     refs.completedRounds.textContent = '0/7';
-    refs.record.textContent = '0W · 0L · 0D';
+    refs.record.textContent = t('cwl.recordFormat', {
+        wins: 0,
+        losses: 0,
+        draws: 0
+    });
     refs.finishProbabilities.textContent = '';
     refs.finishProbabilities.hidden = true;
     refs.starsChart.setAttribute('aria-busy', 'false');
@@ -141,7 +145,7 @@ function renderStandings(refs, report) {
             <span class="op-standing-rank">#${row.rank}</span>
             <strong>${escapeHtml(row.name)}</strong>
             <span>${formatRecord(row)}</span>
-            <span>${number(row.stars, 0)} stars</span>
+            <span>${number(row.stars, 0)} ${t('cwl.starsUnit')}</span>
             <span>${number(row.destruction, 0).toFixed(1)}%</span>`;
         refs.standingsList.appendChild(item);
     });
@@ -177,8 +181,8 @@ function renderRounds(refs, rounds, predictionState = 'idle') {
             <p class="op-round-opponent-name">${escapeHtml(round.opponent || '-')}</p>
             <div class="op-round-stats">
                 <span><strong>${number(round.stars, 0)}</strong>${t('op.stars')}</span>
-                <span><strong>${number(round.destruction, 0).toFixed(1)}%</strong>Dest</span>
-                <span><strong>${number(round.attacksUsed, 0)}/${number(round.availableAttacks, 0)}</strong>Atk</span>
+                <span><strong>${number(round.destruction, 0).toFixed(1)}%</strong>${t('cwl.destructionShort')}</span>
+                <span><strong>${number(round.attacksUsed, 0)}/${number(round.availableAttacks, 0)}</strong>${t('cwl.attacksShort')}</span>
             </div>
             ${round.state === 'completed'
                 ? `<p class="op-result-text">${escapeHtml(resultText(round.result))}</p>`
@@ -200,12 +204,12 @@ function historicalRoundMarkup(round) {
         <p class="op-round-opponent-name">${escapeHtml(round.opponent || '-')}</p>
         <p class="op-history-round-score">
             <strong>${number(round.stars, 0)}–${number(round.starsConceded, 0)}</strong>
-            <span>earned – conceded</span>
+            <span>${t('cwl.earnedConceded')}</span>
         </p>
         <div class="op-round-stats">
-            <span><strong>${number(round.destruction, 0).toFixed(1)}%</strong>Earned</span>
-            <span><strong>${number(round.destructionConceded, 0).toFixed(1)}%</strong>Conceded</span>
-            <span><strong>${available}</strong>Atk</span>
+            <span><strong>${number(round.destruction, 0).toFixed(1)}%</strong>${t('cwl.earned')}</span>
+            <span><strong>${number(round.destructionConceded, 0).toFixed(1)}%</strong>${t('cwl.conceded')}</span>
+            <span><strong>${available}</strong>${t('cwl.attacksShort')}</span>
         </div>`;
 }
 
@@ -237,7 +241,11 @@ function predictionMarkup(round, predictionState) {
 }
 
 function formatRecord(record) {
-    return `${number(record?.wins, 0)}W · ${number(record?.losses, 0)}L · ${number(record?.draws, 0)}D`;
+    return t('cwl.recordFormat', {
+        wins: number(record?.wins, 0),
+        losses: number(record?.losses, 0),
+        draws: number(record?.draws, 0)
+    });
 }
 
 function formatProjectedFinish(forecast) {

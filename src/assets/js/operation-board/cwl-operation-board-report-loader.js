@@ -1,4 +1,4 @@
-import { t } from '../i18n/i18n.js';
+import { competeT as t } from './compete-locales.js';
 import { enrichWithHistoricalPerformance } from './operation-board-performance.js';
 import { buildReport } from './operation-board-report-model.js';
 import { loadOperationSource, NoActiveCwlError } from './operation-board-source.js';
@@ -98,7 +98,7 @@ export function createCwlOperationBoardReportLoader({
         setCurrentReport(null);
         renderPhase('unknown');
         setState('idle');
-        setHelp('Loading CWL history…');
+        setHelp(t('cwl.loadingHistory'));
         await getHistoryController()?.syncForCurrentReport(
             null,
             { defaultToOverview: true }

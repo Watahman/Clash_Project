@@ -10,6 +10,7 @@ import { bindOperationBoardEvents } from '../operation-board/operation-board-pag
 import { initOperationBoardRefs } from '../operation-board/operation-board-page-refs.js';
 import { createOperationBoardAutoRefresh } from '../operation-board/operation-board-auto-refresh.js';
 import { createOperationPlanStore } from '../operation-board/operation-board-plan-store.js';
+import { initCompeteI18n } from '../operation-board/compete-locales.js';
 import { getPlanClans, normalizePlan } from '../operation-board/operation-board-plan-model.js';
 import {
     clearBoard, refreshBoardLabels, renderBoard, renderFilteredRoster,
@@ -210,6 +211,7 @@ async function init() {
         refresh: () => void refreshClanReport(selectedClan)
     });
     initI18n();
+    initCompeteI18n(document, refreshLabels);
     initPlayerPerformancePopover({
         getCurrentContext: tag => historyController?.getPlayerContext(tag)
     });
