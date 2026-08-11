@@ -3,6 +3,16 @@
   "note": "Reference scenario catalog. Connect through a dev-only adapter to real view-model boundaries.",
   "scenarios": [
     {
+      "id": "profile-full",
+      "module": "profile",
+      "purpose": "Verified accounts, friends, requests, Clan Family membership and settings"
+    },
+    {
+      "id": "profile-empty",
+      "module": "profile",
+      "purpose": "New profile without linked accounts, friends or Clan Families"
+    },
+    {
       "id": "planner-empty",
       "module": "planner",
       "purpose": "No saved plan, no roster, no clans"

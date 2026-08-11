@@ -37,11 +37,6 @@ function initThemeButton() {
     updateThemeButton();
 }
 
-function initProfileShortcuts() {
-    const profileButton = document.querySelector('#profile-btn');
-    document.querySelector('#workspace-profile-shortcut')?.addEventListener('click', () => profileButton?.click());
-}
-
 async function protectRoute() {
     if (isRedesignFixtureRequested()) return true;
     const session = await syncAuthSession().catch(() => null);
@@ -94,7 +89,6 @@ function initMountedShell(body, sidebar, backdrop, currentPage) {
     initThemeButton();
     initDesktopSidebar(sidebar);
     initMobileSidebar(sidebar, backdrop);
-    initProfileShortcuts();
     initNotificationsPopover();
     subscribeWorkspaceUserIdentity();
     window.addEventListener('clashtools:language-changed', updateThemeButton);

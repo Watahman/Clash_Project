@@ -8,7 +8,8 @@ export const APP_ASSETS = new Map([
     ["/app/war-board", "/subpages/war-operation-board"],
     ["/app/brackets", "/subpages/bracket-generator"],
     ["/app/achievements", "/subpages/achievements"],
-    ["/app/advanced-stats", "/subpages/advanced-stats"]
+    ["/app/advanced-stats", "/subpages/advanced-stats"],
+    ["/app/profile", "/subpages/profile"]
 ]);
 export const APP_ALIASES = new Map([
     ["/dashboard.html", "/dashboard"],
@@ -30,5 +31,6 @@ export const APP_ALIASES = new Map([
     ["/app/bracket-generator.html", "/app/brackets"],
     ["/app/brackets.html", "/app/brackets"],
     ["/app/achievements.html", "/app/achievements"],
-    ["/app/advanced-stats.html", "/app/advanced-stats"]
+    ["/app/advanced-stats.html", "/app/advanced-stats"],
+    ["/app/profile.html", "/app/profile"]
 ]);

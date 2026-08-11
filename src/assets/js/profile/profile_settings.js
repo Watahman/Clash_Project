@@ -105,7 +105,8 @@ async function saveName() {
             name
         };
 
-        q('#po-username').textContent = name;
+        const profileName = q('#po-username');
+        if (profileName) profileName.textContent = name;
 
         onProfileUpdated?.(currentProfile);
 

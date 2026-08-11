@@ -11,7 +11,8 @@ const icons = Object.freeze({
     bracket: icon('M6 5h4v4H6V5Zm8 10h4v4h-4v-4Zm0-10h4v4h-4V5ZM10 7h2v10h2M12 7h2'),
     minigames: icon('M8.5 8.5h7a5 5 0 0 1 4.8 3.6l1 3.5a3 3 0 0 1-5.1 2.9l-1.5-1.7H9.3l-1.5 1.7a3 3 0 0 1-5.1-2.9l1-3.5a5 5 0 0 1 4.8-3.6Zm-1 3v3M6 13h3m7-1h.01m2 2h.01M9 6h6'),
     advancedStats: icon('M5 18.5V14m4.7 4.5V9.5m4.6 9V12m4.7 6.5V5.5M5 10l4.7-3 4.6 2.1L19 4.5'),
-    achievements: icon('M8 4h8v5a4 4 0 0 1-8 0V4Zm0 2H5v1.5A3.5 3.5 0 0 0 8.5 11M16 6h3v1.5a3.5 3.5 0 0 1-3.5 3.5M12 13v4m-3 3h6')
+    achievements: icon('M8 4h8v5a4 4 0 0 1-8 0V4Zm0 2H5v1.5A3.5 3.5 0 0 0 8.5 11M16 6h3v1.5a3.5 3.5 0 0 1-3.5 3.5M12 13v4m-3 3h6'),
+    profile: icon('M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0')
 });
 
 const sections = Object.freeze([
@@ -34,7 +35,8 @@ const modules = Object.freeze([
     ['bracket', 'nav.bracket', 'Brackets', 'compete', '/app/brackets', true],
     ['minigames', 'nav.minigames', 'Games', 'play', '/minigames', true],
     ['advancedStats', 'nav.advancedStats', 'Advanced Stats', 'progress', '/app/advanced-stats', true],
-    ['achievements', 'nav.achievements', 'Achievements', 'progress', '/app/achievements', true]
+    ['achievements', 'nav.achievements', 'Achievements', 'progress', '/app/achievements', true],
+    ['profile', 'profile.title', 'Profile', 'home', '/app/profile', false]
 ].map(([id, key, fallback, section, href, available]) => Object.freeze({
     id,
     key,

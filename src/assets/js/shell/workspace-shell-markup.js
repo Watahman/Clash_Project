@@ -21,7 +21,7 @@ function sidebarMarkup() {
         <a class="workspace-brand" href="/dashboard"><img src="../assets/css/pictures/clashtools-logo.png" alt=""><span><strong>ClashPanel</strong><small>Tools &amp; community</small></span></a>
         <button class="workspace-sidebar-toggle" id="workspace-sidebar-toggle" type="button" aria-controls="workspace-sidebar" aria-expanded="true">${shellIcons.collapse}</button>
         <nav class="workspace-nav" id="workspace-navigation" aria-label="Application navigation" data-i18n-aria-label="shell.navigation">${navigationMarkup()}</nav>
-        <div class="workspace-sidebar-bottom"><button class="workspace-profile-button" id="profile-btn" type="button" data-i18n-aria-label="shell.openProfile"><span class="workspace-avatar" aria-hidden="true">CT</span><span class="workspace-profile-copy"><strong data-i18n="header.user">User</strong><small data-i18n="shell.profileAccounts">Profile &amp; accounts</small></span><span class="workspace-profile-arrow" aria-hidden="true">›</span></button></div>
+        <div class="workspace-sidebar-bottom"><a class="workspace-profile-button" id="profile-btn" href="/app/profile" data-i18n-aria-label="shell.openProfile"><span class="workspace-avatar" aria-hidden="true">CT</span><span class="workspace-profile-copy"><strong data-i18n="header.user">User</strong><small data-i18n="shell.profileAccounts">Profile &amp; accounts</small></span><span class="workspace-profile-arrow" aria-hidden="true">›</span></a></div>
     </aside>`;
 }
 
@@ -42,7 +42,7 @@ function topbarMarkup(currentPage) {
                     <div class="workspace-notifications-list" id="workspace-notifications-list"></div>
                 </section>
             </div>
-            <button class="workspace-avatar workspace-avatar-top" id="workspace-profile-shortcut" type="button" data-i18n-aria-label="shell.openProfile">CT</button>
+            <a class="workspace-avatar workspace-avatar-top" id="workspace-profile-shortcut" href="/app/profile" data-i18n-aria-label="shell.openProfile">CT</a>
         </div>
     </header>`;
 }
