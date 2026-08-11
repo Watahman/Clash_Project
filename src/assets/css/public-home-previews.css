@@ -74,7 +74,9 @@
 .game-mini strong { margin-top: .2rem; }
 .game-mini b { border-radius: .35rem; background: var(--accent); padding: .45rem .65rem; color: var(--accent-contrast, #17130b); font-size: .65rem; }
 .progress-mini div { flex: 1; }
-.progress-mini div > span { display: block; height: .42rem; margin-bottom: .55rem; border-radius: 999px; background: linear-gradient(90deg, var(--accent) var(--progress), var(--border) var(--progress)); }
+.progress-trace { display: flex; gap: .35rem; margin-bottom: .55rem; }
+.progress-trace i { width: .55rem; height: .55rem; border: 2px solid var(--accent); border-radius: 50%; background: var(--surface); }
+.progress-trace i + i { border-color: color-mix(in srgb, var(--accent) 60%, var(--border)); }
 .progress-mini > img:last-child { width: 2rem; height: 2rem; }
 @media (max-width: 45rem) {
     .home3-product-stage { padding: 1.4rem 0 2.5rem; }

@@ -19,4 +19,14 @@ describe('Clan Family redesign fixtures', () => {
         expect(buildClanFamilyFixture('family-large').entries[0].members).toHaveLength(64);
         expect(buildClanFamilyFixture('family-large').entries[0].clans).toHaveLength(6);
     });
+
+    it('isolates fixture state between renders', () => {
+        const first = buildClanFamilyFixture('family-active-poll');
+        first.entries[0].polls[0].answers['fixture-member'].accounts[0].days[1] = false;
+        first.entries[0].members[0].profile.accounts.push({ name: 'Temporary', tag: '#TEMP' });
+
+        const second = buildClanFamilyFixture('family-active-poll');
+        expect(second.entries[0].polls[0].answers['fixture-member'].accounts[0].days[1]).toBe(true);
+        expect(second.entries[0].members[0].profile.accounts).toHaveLength(1);
+    });
 });

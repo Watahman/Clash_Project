@@ -139,13 +139,51 @@ describe('Clan Family workspace', () => {
 
     it('keeps the responsive and reduced-motion contracts in the module stylesheet', () => {
         const css = readFileSync('src/assets/css/pages/clan-family.css', 'utf8');
+        const content = readFileSync('src/assets/css/pages/clan-family-content.css', 'utf8');
         const overlays = readFileSync('src/assets/css/pages/clan-family-overlays.css', 'utf8');
 
-        expect(css).toContain('@media (max-width: 720px)');
-        expect(css).toContain('min-height: 70px');
-        expect(css).toContain('@media (prefers-reduced-motion: reduce)');
+        expect(content).toContain('@media (max-width: 720px)');
+        expect(content).toContain('min-height: 70px');
+        expect(content).toContain('.groups-member-item');
+        expect(content).toContain('.cf-poll-matrix-row');
+        expect(content).toContain('.cf-settings-section');
+        expect(content).toContain('@media (prefers-reduced-motion: reduce)');
+        expect(css).not.toContain('.cf-poll-matrix-row');
         expect(overlays).toContain('min-height: 44px');
         expect(overlays).toContain('@media (max-width: 600px)');
+    });
+
+    it('keeps extracted controllers and stylesheets below the follow-up review ceiling', () => {
+        const sources = [
+            'src/assets/js/pages/groups.js',
+            'src/assets/js/groups/groups-polls.js',
+            'src/assets/js/groups/groups-polls-actions.js',
+            'src/assets/js/groups/groups-polls-render.js',
+            'src/assets/js/groups/groups-polls-state.js',
+            'src/assets/js/groups/clan-family-actions.js',
+            'src/assets/js/groups/clan-family-list.js',
+            'src/assets/css/pages/clan-family.css',
+            'src/assets/css/pages/clan-family-content.css'
+        ];
+        sources.forEach(path => expect(readFileSync(path, 'utf8').split(/\r?\n/).length).toBeLessThanOrEqual(300));
+
+        const html = readFileSync('src/subpages/groups.html', 'utf8');
+        expect(html.indexOf('pages/clan-family.css')).toBeLessThan(html.indexOf('pages/clan-family-content.css'));
+        expect(html.indexOf('pages/clan-family-content.css')).toBeLessThan(html.indexOf('pages/clan-family-overlays.css'));
+    });
+
+    it('keeps UI permission hints advisory while writes stay on authoritative seams', () => {
+        const lifecycle = readFileSync('src/assets/js/groups/clan-family-actions.js', 'utf8');
+        const pollActions = readFileSync('src/assets/js/groups/groups-polls-actions.js', 'utf8');
+        const pollBackend = readFileSync('src/Java/SUPABASE_GroupPolls.java', 'utf8');
+
+        expect(lifecycle).toContain('api.createGroup');
+        expect(lifecycle).toContain('api.joinGroup');
+        expect(lifecycle).toContain('api.leaveGroup');
+        expect(pollActions).toContain('isGroupAdmin');
+        expect(pollActions).toContain('createGroupPoll');
+        expect(pollActions).toContain('state.entry?.fixture');
+        expect(pollBackend).toContain('access.requireAdmin(groupId, actorId)');
     });
 
     it('binds tab navigation once and switches panels without loading data', () => {
