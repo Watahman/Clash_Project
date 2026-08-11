@@ -71,10 +71,9 @@ describe('Privacy-aware third-party loading', () => {
         expect(bootstrap).toContain('display=optional');
     });
 
-    it('preloads the homepage LCP artwork with high priority', () => {
+    it('does not preload the removed battle artwork on the product-led homepage', () => {
         const homepage = readFileSync('src/index.html', 'utf8');
-        expect(homepage).toMatch(
-            /<link rel="preload" as="image" href="\/assets\/css\/pictures\/hero\.[a-f0-9]{10}\.avif" fetchpriority="high">/
-        );
+        expect(homepage).toContain('class="home3-product-stage"');
+        expect(homepage).not.toMatch(/rel="preload"[^>]+\/assets\/css\/pictures\/hero\./);
     });
 });

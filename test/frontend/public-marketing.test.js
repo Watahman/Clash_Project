@@ -23,7 +23,6 @@ const applicationPages = [
 ];
 
 const cinematicPages = [
-    'src/index.html',
     'src/cwl-planner.html',
     'src/cwl-tracker.html',
     'src/clan-management.html',
@@ -49,12 +48,25 @@ describe('Public marketing shell', () => {
         const document = documentFor('src/index.html');
 
         expect(document.querySelector('h1')?.textContent.replace(/\s+/g, ' ').trim())
-            .toBe('Plan better. Win more wars.');
-        expect(document.querySelector('#workflow')).not.toBeNull();
-        expect(document.querySelector('#features')).not.toBeNull();
-        expect(document.querySelectorAll('.home-v2-product-section')).toHaveLength(3);
-        expect(document.querySelector('.home-v2-tool-links')).not.toBeNull();
-        expect(document.querySelector('.home-v2-bottom-cta')).not.toBeNull();
+            .toBe('Everything your Clash life needs. One place.');
+        expect(document.querySelector('.home3-product-stage')).not.toBeNull();
+        expect(document.querySelectorAll('.home3-pillar-grid > a')).toHaveLength(5);
+        expect(document.querySelectorAll('.home3-feature')).toHaveLength(3);
+        expect(document.querySelector('.home3-ecosystem')).not.toBeNull();
+        expect(document.querySelector('.home3-play-progress')).not.toBeNull();
+        expect(document.querySelector('.home3-trust')).not.toBeNull();
+        expect(document.querySelector('.home3-final')).not.toBeNull();
+        expect(document.querySelector('.home-v2-hero-background')).toBeNull();
+    });
+
+    it('loads the dedicated connected-product homepage theme', () => {
+        const document = documentFor('src/index.html');
+        const stylesheets = [...document.querySelectorAll('link[rel="stylesheet"]')]
+            .map(link => link.getAttribute('href'));
+
+        expect(stylesheets).toContain('/assets/css/public-home-v3.css');
+        expect(stylesheets).toContain('/assets/css/public-home-previews.css');
+        expect(document.querySelector('body.public-home-v3')).not.toBeNull();
     });
 
     it.each(cinematicPages)('%s loads the approved cinematic public theme', path => {
