@@ -1,0 +1,1611 @@
+{
+  "_meta": {
+    "generatedAt": "2026-08-10T20:42:55.857Z",
+    "sourcePackage": "clash-of-clans-data",
+    "sourceVersion": "0.16.0",
+    "entityCount": 195,
+    "notes": [
+      "Underlying Clash of Clans imagery is Supercell intellectual property.",
+      "Use assets in accordance with the Supercell Fan Content Policy.",
+      "Dynamic clan badges are intentionally not copied."
+    ]
+  },
+  "entities": {
+    "action-figure": {
+      "id": "action-figure",
+      "name": "Action Figure",
+      "category": "equipment",
+      "image": "/assets/game/equipment/action-figure.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/action-figure/icon.png"
+    },
+    "air-bomb": {
+      "id": "air-bomb",
+      "name": "Air Bomb",
+      "category": "trap",
+      "image": "/assets/game/traps/air-bomb.webp",
+      "aliases": [],
+      "sourcePath": "images/home/traps/air-bomb/normal/level-13.png"
+    },
+    "air-defense": {
+      "id": "air-defense",
+      "name": "Air Defense",
+      "category": "defense",
+      "image": "/assets/game/defenses/air-defense.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/air-defense/normal/level-16.png"
+    },
+    "air-sweeper": {
+      "id": "air-sweeper",
+      "name": "Air Sweeper",
+      "category": "defense",
+      "image": "/assets/game/defenses/air-sweeper.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/air-sweeper/normal/level-7.png"
+    },
+    "angry-jelly": {
+      "id": "angry-jelly",
+      "name": "Angry Jelly",
+      "category": "pet",
+      "image": "/assets/game/pets/angry-jelly.webp",
+      "aliases": [],
+      "sourcePath": "images/home/pets/angry-jelly/icon.png"
+    },
+    "apprentice-warden": {
+      "id": "apprentice-warden",
+      "name": "Apprentice Warden",
+      "category": "troop",
+      "image": "/assets/game/troops/apprentice-warden.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/apprentice-warden/icon.png"
+    },
+    "archer": {
+      "id": "archer",
+      "name": "Archer",
+      "category": "troop",
+      "image": "/assets/game/troops/archer.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/archer/icon.png"
+    },
+    "archer-puppet": {
+      "id": "archer-puppet",
+      "name": "Archer Puppet",
+      "category": "equipment",
+      "image": "/assets/game/equipment/archer-puppet.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/archer-puppet/icon.png"
+    },
+    "archer-queen": {
+      "id": "archer-queen",
+      "name": "Archer Queen",
+      "category": "hero",
+      "image": "/assets/game/heroes/archer-queen.webp",
+      "aliases": [],
+      "sourcePath": "images/home/heroes/archer-queen/icon.png"
+    },
+    "archer-tower": {
+      "id": "archer-tower",
+      "name": "Archer Tower",
+      "category": "defense",
+      "image": "/assets/game/defenses/archer-tower.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/archer-tower/normal/level-21.png"
+    },
+    "army-camp": {
+      "id": "army-camp",
+      "name": "Army Camp",
+      "category": "building",
+      "image": "/assets/game/buildings/army-camp.webp",
+      "aliases": [],
+      "sourcePath": "images/home/army-buildings/army-camp/normal/level-13.png"
+    },
+    "baby-dragon": {
+      "id": "baby-dragon",
+      "name": "Baby Dragon",
+      "category": "troop",
+      "image": "/assets/game/troops/baby-dragon.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/baby-dragon/icon.png"
+    },
+    "balloon": {
+      "id": "balloon",
+      "name": "Balloon",
+      "category": "troop",
+      "image": "/assets/game/troops/balloon.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/balloon/icon.png"
+    },
+    "barbarian": {
+      "id": "barbarian",
+      "name": "Barbarian",
+      "category": "troop",
+      "image": "/assets/game/troops/barbarian.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/barbarian/icon.png"
+    },
+    "barbarian-king": {
+      "id": "barbarian-king",
+      "name": "Barbarian King",
+      "category": "hero",
+      "image": "/assets/game/heroes/barbarian-king.webp",
+      "aliases": [],
+      "sourcePath": "images/home/heroes/barbarian-king/icon.png"
+    },
+    "barbarian-puppet": {
+      "id": "barbarian-puppet",
+      "name": "Barbarian Puppet",
+      "category": "equipment",
+      "image": "/assets/game/equipment/barbarian-puppet.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/barbarian-puppet/icon.png"
+    },
+    "barracks": {
+      "id": "barracks",
+      "name": "Barracks",
+      "category": "building",
+      "image": "/assets/game/buildings/barracks.webp",
+      "aliases": [],
+      "sourcePath": "images/home/army-buildings/barracks/normal/level-19.png"
+    },
+    "bat-spell": {
+      "id": "bat-spell",
+      "name": "Bat Spell",
+      "category": "spell",
+      "image": "/assets/game/spells/bat-spell.webp",
+      "aliases": [],
+      "sourcePath": "images/home/spells/bat-spell/icon.png"
+    },
+    "battle-blimp": {
+      "id": "battle-blimp",
+      "name": "Battle Blimp",
+      "category": "siege-machine",
+      "image": "/assets/game/siege-machines/battle-blimp.webp",
+      "aliases": [],
+      "sourcePath": "images/home/siege-machines/battle-blimp/icon.png"
+    },
+    "battle-drill": {
+      "id": "battle-drill",
+      "name": "Battle Drill",
+      "category": "siege-machine",
+      "image": "/assets/game/siege-machines/battle-drill.webp",
+      "aliases": [],
+      "sourcePath": "images/home/siege-machines/battle-drill/icon.png"
+    },
+    "blacksmith": {
+      "id": "blacksmith",
+      "name": "Blacksmith",
+      "category": "building",
+      "image": "/assets/game/buildings/blacksmith.webp",
+      "aliases": [],
+      "sourcePath": "images/home/army-buildings/blacksmith/normal/level-9.png"
+    },
+    "bomb": {
+      "id": "bomb",
+      "name": "Bomb",
+      "category": "trap",
+      "image": "/assets/game/traps/bomb.webp",
+      "aliases": [],
+      "sourcePath": "images/home/traps/bomb/normal/level-14.png"
+    },
+    "bomb-tower": {
+      "id": "bomb-tower",
+      "name": "Bomb Tower",
+      "category": "defense",
+      "image": "/assets/game/defenses/bomb-tower.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/bomb-tower/normal/level-13.png"
+    },
+    "bowler": {
+      "id": "bowler",
+      "name": "Bowler",
+      "category": "troop",
+      "image": "/assets/game/troops/bowler.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/bowler/icon.png"
+    },
+    "builders-hut": {
+      "id": "builders-hut",
+      "name": "Builder's Hut",
+      "category": "defense",
+      "image": "/assets/game/defenses/builders-hut.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/builders-hut/normal/level-7.png"
+    },
+    "cannon": {
+      "id": "cannon",
+      "name": "Cannon",
+      "category": "defense",
+      "image": "/assets/game/defenses/cannon.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/cannon/normal/level-21.png"
+    },
+    "clan-castle": {
+      "id": "clan-castle",
+      "name": "Clan Castle",
+      "category": "building",
+      "image": "/assets/game/buildings/clan-castle.webp",
+      "aliases": [],
+      "sourcePath": "images/home/resource-buildings/clan-castle/normal/level-14.png"
+    },
+    "clone-spell": {
+      "id": "clone-spell",
+      "name": "Clone Spell",
+      "category": "spell",
+      "image": "/assets/game/spells/clone-spell.webp",
+      "aliases": [],
+      "sourcePath": "images/home/spells/clone-spell/icon.png"
+    },
+    "crafting-station": {
+      "id": "crafting-station",
+      "name": "Crafting Station",
+      "category": "defense",
+      "image": "/assets/game/defenses/crafting-station.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/crafting-station/normal/level-1.png"
+    },
+    "dark-barracks": {
+      "id": "dark-barracks",
+      "name": "Dark Barracks",
+      "category": "building",
+      "image": "/assets/game/buildings/dark-barracks.webp",
+      "aliases": [],
+      "sourcePath": "images/home/army-buildings/dark-barracks/normal/level-12.png"
+    },
+    "dark-crown": {
+      "id": "dark-crown",
+      "name": "Dark Crown",
+      "category": "equipment",
+      "image": "/assets/game/equipment/dark-crown.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/dark-crown/icon.png"
+    },
+    "dark-elixir-drill": {
+      "id": "dark-elixir-drill",
+      "name": "Dark Elixir Drill",
+      "category": "building",
+      "image": "/assets/game/buildings/dark-elixir-drill.webp",
+      "aliases": [],
+      "sourcePath": "images/home/resource-buildings/dark-elixir-drill/normal/level-11.png"
+    },
+    "dark-elixir-storage": {
+      "id": "dark-elixir-storage",
+      "name": "Dark Elixir Storage",
+      "category": "building",
+      "image": "/assets/game/buildings/dark-elixir-storage.webp",
+      "aliases": [],
+      "sourcePath": "images/home/resource-buildings/dark-elixir-storage/normal/level-13.png"
+    },
+    "dark-orb": {
+      "id": "dark-orb",
+      "name": "Dark Orb",
+      "category": "equipment",
+      "image": "/assets/game/equipment/dark-orb.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/dark-orb/icon.png"
+    },
+    "dark-spell-factory": {
+      "id": "dark-spell-factory",
+      "name": "Dark Spell Factory",
+      "category": "building",
+      "image": "/assets/game/buildings/dark-spell-factory.webp",
+      "aliases": [],
+      "sourcePath": "images/home/army-buildings/dark-spell-factory/normal/level-7.png"
+    },
+    "diggy": {
+      "id": "diggy",
+      "name": "Diggy",
+      "category": "pet",
+      "image": "/assets/game/pets/diggy.webp",
+      "aliases": [],
+      "sourcePath": "images/home/pets/diggy/icon.png"
+    },
+    "dragon": {
+      "id": "dragon",
+      "name": "Dragon",
+      "category": "troop",
+      "image": "/assets/game/troops/dragon.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/dragon/icon.png"
+    },
+    "dragon-duke": {
+      "id": "dragon-duke",
+      "name": "Dragon Duke",
+      "category": "hero",
+      "image": "/assets/game/heroes/dragon-duke.webp",
+      "aliases": [],
+      "sourcePath": "images/home/heroes/dragon-duke/icon.png"
+    },
+    "dragon-rider": {
+      "id": "dragon-rider",
+      "name": "Dragon Rider",
+      "category": "troop",
+      "image": "/assets/game/troops/dragon-rider.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/dragon-rider/icon.png"
+    },
+    "druid": {
+      "id": "druid",
+      "name": "Druid",
+      "category": "troop",
+      "image": "/assets/game/troops/druid.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/druid/icon.png"
+    },
+    "eagle-artillery": {
+      "id": "eagle-artillery",
+      "name": "Eagle Artillery",
+      "category": "defense",
+      "image": "/assets/game/defenses/eagle-artillery.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/eagle-artillery/normal/level-7.png"
+    },
+    "earthquake-boots": {
+      "id": "earthquake-boots",
+      "name": "Earthquake Boots",
+      "category": "equipment",
+      "image": "/assets/game/equipment/earthquake-boots.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/earthquake-boots/icon.png"
+    },
+    "earthquake-spell": {
+      "id": "earthquake-spell",
+      "name": "Earthquake Spell",
+      "category": "spell",
+      "image": "/assets/game/spells/earthquake-spell.webp",
+      "aliases": [],
+      "sourcePath": "images/home/spells/earthquake-spell/icon.png"
+    },
+    "electro-boots": {
+      "id": "electro-boots",
+      "name": "Electro Boots",
+      "category": "equipment",
+      "image": "/assets/game/equipment/electro-boots.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/electro-boots/icon.png"
+    },
+    "electro-dragon": {
+      "id": "electro-dragon",
+      "name": "Electro Dragon",
+      "category": "troop",
+      "image": "/assets/game/troops/electro-dragon.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/electro-dragon/icon.png"
+    },
+    "electro-owl": {
+      "id": "electro-owl",
+      "name": "Electro Owl",
+      "category": "pet",
+      "image": "/assets/game/pets/electro-owl.webp",
+      "aliases": [],
+      "sourcePath": "images/home/pets/electro-owl/icon.png"
+    },
+    "electro-titan": {
+      "id": "electro-titan",
+      "name": "Electro Titan",
+      "category": "troop",
+      "image": "/assets/game/troops/electro-titan.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/electro-titan/icon.png"
+    },
+    "elixir-collector": {
+      "id": "elixir-collector",
+      "name": "Elixir Collector",
+      "category": "building",
+      "image": "/assets/game/buildings/elixir-collector.webp",
+      "aliases": [],
+      "sourcePath": "images/home/resource-buildings/elixir-collector/normal/level-17.png"
+    },
+    "elixir-storage": {
+      "id": "elixir-storage",
+      "name": "Elixir Storage",
+      "category": "building",
+      "image": "/assets/game/buildings/elixir-storage.webp",
+      "aliases": [],
+      "sourcePath": "images/home/resource-buildings/elixir-storage/normal/level-19.png"
+    },
+    "eternal-tome": {
+      "id": "eternal-tome",
+      "name": "Eternal Tome",
+      "category": "equipment",
+      "image": "/assets/game/equipment/eternal-tome.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/eternal-tome/icon.png"
+    },
+    "fire-heart": {
+      "id": "fire-heart",
+      "name": "Fire Heart",
+      "category": "equipment",
+      "image": "/assets/game/equipment/fire-heart.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/fire-heart/icon.png"
+    },
+    "fireball": {
+      "id": "fireball",
+      "name": "Fireball",
+      "category": "equipment",
+      "image": "/assets/game/equipment/fireball.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/fireball/icon.png"
+    },
+    "firespitter": {
+      "id": "firespitter",
+      "name": "Firespitter",
+      "category": "defense",
+      "image": "/assets/game/defenses/firespitter.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/firespitter/normal/level-3.png"
+    },
+    "flame-blower": {
+      "id": "flame-blower",
+      "name": "Flame Blower",
+      "category": "equipment",
+      "image": "/assets/game/equipment/flame-blower.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/flame-blower/icon.png"
+    },
+    "flame-flinger": {
+      "id": "flame-flinger",
+      "name": "Flame Flinger",
+      "category": "siege-machine",
+      "image": "/assets/game/siege-machines/flame-flinger.webp",
+      "aliases": [],
+      "sourcePath": "images/home/siege-machines/flame-flinger/icon.png"
+    },
+    "freeze-spell": {
+      "id": "freeze-spell",
+      "name": "Freeze Spell",
+      "category": "spell",
+      "image": "/assets/game/spells/freeze-spell.webp",
+      "aliases": [],
+      "sourcePath": "images/home/spells/freeze-spell/icon.png"
+    },
+    "frost-flake": {
+      "id": "frost-flake",
+      "name": "Frost Flake",
+      "category": "equipment",
+      "image": "/assets/game/equipment/frost-flake.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/frost-flake/icon.png"
+    },
+    "frosty": {
+      "id": "frosty",
+      "name": "Frosty",
+      "category": "pet",
+      "image": "/assets/game/pets/frosty.webp",
+      "aliases": [],
+      "sourcePath": "images/home/pets/frosty/icon.png"
+    },
+    "frozen-arrow": {
+      "id": "frozen-arrow",
+      "name": "Frozen Arrow",
+      "category": "equipment",
+      "image": "/assets/game/equipment/frozen-arrow.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/frozen-arrow/icon.png"
+    },
+    "furnace": {
+      "id": "furnace",
+      "name": "Furnace",
+      "category": "troop",
+      "image": "/assets/game/troops/furnace.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/furnace/icon.png"
+    },
+    "giant": {
+      "id": "giant",
+      "name": "Giant",
+      "category": "troop",
+      "image": "/assets/game/troops/giant.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/giant/icon.png"
+    },
+    "giant-arrow": {
+      "id": "giant-arrow",
+      "name": "Giant Arrow",
+      "category": "equipment",
+      "image": "/assets/game/equipment/giant-arrow.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/giant-arrow/icon.png"
+    },
+    "giant-bomb": {
+      "id": "giant-bomb",
+      "name": "Giant Bomb",
+      "category": "trap",
+      "image": "/assets/game/traps/giant-bomb.webp",
+      "aliases": [],
+      "sourcePath": "images/home/traps/giant-bomb/normal/level-11.png"
+    },
+    "giant-gauntlet": {
+      "id": "giant-gauntlet",
+      "name": "Giant Gauntlet",
+      "category": "equipment",
+      "image": "/assets/game/equipment/giant-gauntlet.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/giant-gauntlet/icon.png"
+    },
+    "giga-bomb": {
+      "id": "giga-bomb",
+      "name": "Giga Bomb",
+      "category": "trap",
+      "image": "/assets/game/traps/giga-bomb.webp",
+      "aliases": [],
+      "sourcePath": "images/home/traps/giga-bomb/normal/level-4.png"
+    },
+    "goblin": {
+      "id": "goblin",
+      "name": "Goblin",
+      "category": "troop",
+      "image": "/assets/game/troops/goblin.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/goblin/icon.png"
+    },
+    "gold-mine": {
+      "id": "gold-mine",
+      "name": "Gold Mine",
+      "category": "building",
+      "image": "/assets/game/buildings/gold-mine.webp",
+      "aliases": [],
+      "sourcePath": "images/home/resource-buildings/gold-mine/normal/level-17.png"
+    },
+    "gold-storage": {
+      "id": "gold-storage",
+      "name": "Gold Storage",
+      "category": "building",
+      "image": "/assets/game/buildings/gold-storage.webp",
+      "aliases": [],
+      "sourcePath": "images/home/resource-buildings/gold-storage/normal/level-19.png"
+    },
+    "golem": {
+      "id": "golem",
+      "name": "Golem",
+      "category": "troop",
+      "image": "/assets/game/troops/golem.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/golem/icon.png"
+    },
+    "grand-warden": {
+      "id": "grand-warden",
+      "name": "Grand Warden",
+      "category": "hero",
+      "image": "/assets/game/heroes/grand-warden.webp",
+      "aliases": [],
+      "sourcePath": "images/home/heroes/grand-warden/icon.png"
+    },
+    "greedy-raven": {
+      "id": "greedy-raven",
+      "name": "Greedy Raven",
+      "category": "pet",
+      "image": "/assets/game/pets/greedy-raven.webp",
+      "aliases": [],
+      "sourcePath": "images/home/pets/greedy-raven/icon.png"
+    },
+    "haste-spell": {
+      "id": "haste-spell",
+      "name": "Haste Spell",
+      "category": "spell",
+      "image": "/assets/game/spells/haste-spell.webp",
+      "aliases": [],
+      "sourcePath": "images/home/spells/haste-spell/icon.png"
+    },
+    "haste-vial": {
+      "id": "haste-vial",
+      "name": "Haste Vial",
+      "category": "equipment",
+      "image": "/assets/game/equipment/haste-vial.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/haste-vial/icon.png"
+    },
+    "headhunter": {
+      "id": "headhunter",
+      "name": "Headhunter",
+      "category": "troop",
+      "image": "/assets/game/troops/headhunter.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/headhunter/icon.png"
+    },
+    "healer": {
+      "id": "healer",
+      "name": "Healer",
+      "category": "troop",
+      "image": "/assets/game/troops/healer.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/healer/icon.png"
+    },
+    "healer-puppet": {
+      "id": "healer-puppet",
+      "name": "Healer Puppet",
+      "category": "equipment",
+      "image": "/assets/game/equipment/healer-puppet.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/healer-puppet/icon.png"
+    },
+    "healing-spell": {
+      "id": "healing-spell",
+      "name": "Healing Spell",
+      "category": "spell",
+      "image": "/assets/game/spells/healing-spell.webp",
+      "aliases": [],
+      "sourcePath": "images/home/spells/healing-spell/icon.png"
+    },
+    "healing-tome": {
+      "id": "healing-tome",
+      "name": "Healing Tome",
+      "category": "equipment",
+      "image": "/assets/game/equipment/healing-tome.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/healing-tome/icon.png"
+    },
+    "henchmen-puppet": {
+      "id": "henchmen-puppet",
+      "name": "Henchmen Puppet",
+      "category": "equipment",
+      "image": "/assets/game/equipment/henchmen-puppet.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/henchmen-puppet/icon.png"
+    },
+    "hero-hall": {
+      "id": "hero-hall",
+      "name": "Hero Hall",
+      "category": "building",
+      "image": "/assets/game/buildings/hero-hall.webp",
+      "aliases": [],
+      "sourcePath": "images/home/army-buildings/hero-hall/normal/level-12.png"
+    },
+    "heroic-torch": {
+      "id": "heroic-torch",
+      "name": "Heroic Torch",
+      "category": "equipment",
+      "image": "/assets/game/equipment/heroic-torch.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/heroic-torch/icon.png"
+    },
+    "hidden-tesla": {
+      "id": "hidden-tesla",
+      "name": "Hidden Tesla",
+      "category": "defense",
+      "image": "/assets/game/defenses/hidden-tesla.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/hidden-tesla/normal/level-17.png"
+    },
+    "hog-rider": {
+      "id": "hog-rider",
+      "name": "Hog Rider",
+      "category": "troop",
+      "image": "/assets/game/troops/hog-rider.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/hog-rider/icon.png"
+    },
+    "hog-rider-puppet": {
+      "id": "hog-rider-puppet",
+      "name": "Hog Rider Puppet",
+      "category": "equipment",
+      "image": "/assets/game/equipment/hog-rider-puppet.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/hog-rider-puppet/icon.png"
+    },
+    "ice-block-spell": {
+      "id": "ice-block-spell",
+      "name": "Ice Block Spell",
+      "category": "spell",
+      "image": "/assets/game/spells/ice-block-spell.webp",
+      "aliases": [],
+      "sourcePath": "images/home/spells/ice-block-spell/icon.png"
+    },
+    "ice-golem": {
+      "id": "ice-golem",
+      "name": "Ice Golem",
+      "category": "troop",
+      "image": "/assets/game/troops/ice-golem.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/ice-golem/icon.png"
+    },
+    "ice-hound": {
+      "id": "ice-hound",
+      "name": "Ice Hound",
+      "category": "super-troop",
+      "image": "/assets/game/super-troops/ice-hound.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/lava-hound/super-icon.png"
+    },
+    "inferno-dragon": {
+      "id": "inferno-dragon",
+      "name": "Inferno Dragon",
+      "category": "super-troop",
+      "image": "/assets/game/super-troops/inferno-dragon.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/baby-dragon/super-icon.png"
+    },
+    "inferno-tower": {
+      "id": "inferno-tower",
+      "name": "Inferno Tower",
+      "category": "defense",
+      "image": "/assets/game/defenses/inferno-tower.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/inferno-tower/normal/level-12.png"
+    },
+    "invisibility-spell": {
+      "id": "invisibility-spell",
+      "name": "Invisibility Spell",
+      "category": "spell",
+      "image": "/assets/game/spells/invisibility-spell.webp",
+      "aliases": [],
+      "sourcePath": "images/home/spells/invisibility-spell/icon.png"
+    },
+    "invisibility-vial": {
+      "id": "invisibility-vial",
+      "name": "Invisibility Vial",
+      "category": "equipment",
+      "image": "/assets/game/equipment/invisibility-vial.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/invisibility-vial/icon.png"
+    },
+    "jump-spell": {
+      "id": "jump-spell",
+      "name": "Jump Spell",
+      "category": "spell",
+      "image": "/assets/game/spells/jump-spell.webp",
+      "aliases": [],
+      "sourcePath": "images/home/spells/jump-spell/icon.png"
+    },
+    "laboratory": {
+      "id": "laboratory",
+      "name": "Laboratory",
+      "category": "building",
+      "image": "/assets/game/buildings/laboratory.webp",
+      "aliases": [],
+      "sourcePath": "images/home/army-buildings/laboratory/normal/level-16.png"
+    },
+    "lassi": {
+      "id": "lassi",
+      "name": "L.A.S.S.I",
+      "category": "pet",
+      "image": "/assets/game/pets/lassi.webp",
+      "aliases": [],
+      "sourcePath": "images/home/pets/lassi/icon.png"
+    },
+    "lava-hound": {
+      "id": "lava-hound",
+      "name": "Lava Hound",
+      "category": "troop",
+      "image": "/assets/game/troops/lava-hound.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/lava-hound/icon.png"
+    },
+    "lavaloon-puppet": {
+      "id": "lavaloon-puppet",
+      "name": "Lavaloon Puppet",
+      "category": "equipment",
+      "image": "/assets/game/equipment/lavaloon-puppet.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/lavaloon-puppet/icon.png"
+    },
+    "life-gem": {
+      "id": "life-gem",
+      "name": "Life Gem",
+      "category": "equipment",
+      "image": "/assets/game/equipment/life-gem.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/life-gem/icon.png"
+    },
+    "lightning-spell": {
+      "id": "lightning-spell",
+      "name": "Lightning Spell",
+      "category": "spell",
+      "image": "/assets/game/spells/lightning-spell.webp",
+      "aliases": [],
+      "sourcePath": "images/home/spells/lightning-spell/icon.png"
+    },
+    "log-launcher": {
+      "id": "log-launcher",
+      "name": "Log Launcher",
+      "category": "siege-machine",
+      "image": "/assets/game/siege-machines/log-launcher.webp",
+      "aliases": [],
+      "sourcePath": "images/home/siege-machines/log-launcher/icon.png"
+    },
+    "magic-mirror": {
+      "id": "magic-mirror",
+      "name": "Magic Mirror",
+      "category": "equipment",
+      "image": "/assets/game/equipment/magic-mirror.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/magic-mirror/icon.png"
+    },
+    "metal-pants": {
+      "id": "metal-pants",
+      "name": "Metal Pants",
+      "category": "equipment",
+      "image": "/assets/game/equipment/metal-pants.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/metal-pants/icon.png"
+    },
+    "meteor-golem": {
+      "id": "meteor-golem",
+      "name": "Meteor Golem",
+      "category": "troop",
+      "image": "/assets/game/troops/meteor-golem.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/meteor-golem/icon.png"
+    },
+    "meteor-staff": {
+      "id": "meteor-staff",
+      "name": "Meteor Staff",
+      "category": "equipment",
+      "image": "/assets/game/equipment/meteor-staff.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/meteor-staff/icon.png"
+    },
+    "mighty-yak": {
+      "id": "mighty-yak",
+      "name": "Mighty Yak",
+      "category": "pet",
+      "image": "/assets/game/pets/mighty-yak.webp",
+      "aliases": [],
+      "sourcePath": "images/home/pets/mighty-yak/icon.png"
+    },
+    "miner": {
+      "id": "miner",
+      "name": "Miner",
+      "category": "troop",
+      "image": "/assets/game/troops/miner.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/miner/icon.png"
+    },
+    "minion": {
+      "id": "minion",
+      "name": "Minion",
+      "category": "troop",
+      "image": "/assets/game/troops/minion.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/minion/icon.png"
+    },
+    "minion-prince": {
+      "id": "minion-prince",
+      "name": "Minion Prince",
+      "category": "hero",
+      "image": "/assets/game/heroes/minion-prince.webp",
+      "aliases": [],
+      "sourcePath": "images/home/heroes/minion-prince/icon.png"
+    },
+    "monolith": {
+      "id": "monolith",
+      "name": "Monolith",
+      "category": "defense",
+      "image": "/assets/game/defenses/monolith.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/monolith/normal/level-4.png"
+    },
+    "mortar": {
+      "id": "mortar",
+      "name": "Mortar",
+      "category": "defense",
+      "image": "/assets/game/defenses/mortar.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/mortar/normal/level-18.png"
+    },
+    "multi-archer-tower": {
+      "id": "multi-archer-tower",
+      "name": "Multi-Archer Tower",
+      "category": "defense",
+      "image": "/assets/game/defenses/multi-archer-tower.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/multi-archer-tower/normal/level-4.png"
+    },
+    "multi-gear-tower": {
+      "id": "multi-gear-tower",
+      "name": "Multi-Gear Tower",
+      "category": "defense",
+      "image": "/assets/game/defenses/multi-gear-tower.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/multi-gear-tower/normal/level-3.png"
+    },
+    "noble-iron": {
+      "id": "noble-iron",
+      "name": "Noble Iron",
+      "category": "equipment",
+      "image": "/assets/game/equipment/noble-iron.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/noble-iron/icon.png"
+    },
+    "overgrowth-spell": {
+      "id": "overgrowth-spell",
+      "name": "Overgrowth Spell",
+      "category": "spell",
+      "image": "/assets/game/spells/overgrowth-spell.webp",
+      "aliases": [],
+      "sourcePath": "images/home/spells/overgrowth-spell/icon.png"
+    },
+    "pekka": {
+      "id": "pekka",
+      "name": "P.E.K.K.A",
+      "category": "troop",
+      "image": "/assets/game/troops/pekka.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/pekka/icon.png"
+    },
+    "pet-house": {
+      "id": "pet-house",
+      "name": "Pet House",
+      "category": "building",
+      "image": "/assets/game/buildings/pet-house.webp",
+      "aliases": [],
+      "sourcePath": "images/home/army-buildings/pet-house/normal/level-12.png"
+    },
+    "phoenix": {
+      "id": "phoenix",
+      "name": "Phoenix",
+      "category": "pet",
+      "image": "/assets/game/pets/phoenix.webp",
+      "aliases": [],
+      "sourcePath": "images/home/pets/phoenix/icon.png"
+    },
+    "poison-lizard": {
+      "id": "poison-lizard",
+      "name": "Poison Lizard",
+      "category": "pet",
+      "image": "/assets/game/pets/poison-lizard.webp",
+      "aliases": [],
+      "sourcePath": "images/home/pets/poison-lizard/icon.png"
+    },
+    "poison-spell": {
+      "id": "poison-spell",
+      "name": "Poison Spell",
+      "category": "spell",
+      "image": "/assets/game/spells/poison-spell.webp",
+      "aliases": [],
+      "sourcePath": "images/home/spells/poison-spell/icon.png"
+    },
+    "rage-gem": {
+      "id": "rage-gem",
+      "name": "Rage Gem",
+      "category": "equipment",
+      "image": "/assets/game/equipment/rage-gem.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/rage-gem/icon.png"
+    },
+    "rage-spell": {
+      "id": "rage-spell",
+      "name": "Rage Spell",
+      "category": "spell",
+      "image": "/assets/game/spells/rage-spell.webp",
+      "aliases": [],
+      "sourcePath": "images/home/spells/rage-spell/icon.png"
+    },
+    "rage-vial": {
+      "id": "rage-vial",
+      "name": "Rage Vial",
+      "category": "equipment",
+      "image": "/assets/game/equipment/rage-vial.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/rage-vial/icon.png"
+    },
+    "recall-spell": {
+      "id": "recall-spell",
+      "name": "Recall Spell",
+      "category": "spell",
+      "image": "/assets/game/spells/recall-spell.webp",
+      "aliases": [],
+      "sourcePath": "images/home/spells/recall-spell/icon.png"
+    },
+    "revenge-tower": {
+      "id": "revenge-tower",
+      "name": "Revenge Tower",
+      "category": "defense",
+      "image": "/assets/game/defenses/revenge-tower.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/revenge-tower/normal/level-2.png"
+    },
+    "revive-spell": {
+      "id": "revive-spell",
+      "name": "Revive Spell",
+      "category": "spell",
+      "image": "/assets/game/spells/revive-spell.webp",
+      "aliases": [],
+      "sourcePath": "images/home/spells/revive-spell/icon.png"
+    },
+    "ricochet-cannon": {
+      "id": "ricochet-cannon",
+      "name": "Ricochet Cannon",
+      "category": "defense",
+      "image": "/assets/game/defenses/ricochet-cannon.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/ricochet-cannon/normal/level-4.png"
+    },
+    "rocket-backpack": {
+      "id": "rocket-backpack",
+      "name": "Rocket Backpack",
+      "category": "equipment",
+      "image": "/assets/game/equipment/rocket-backpack.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/rocket-backpack/icon.png"
+    },
+    "rocket-balloon": {
+      "id": "rocket-balloon",
+      "name": "Rocket Balloon",
+      "category": "super-troop",
+      "image": "/assets/game/super-troops/rocket-balloon.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/balloon/super-icon.png"
+    },
+    "rocket-spear": {
+      "id": "rocket-spear",
+      "name": "Rocket Spear",
+      "category": "equipment",
+      "image": "/assets/game/equipment/rocket-spear.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/rocket-spear/icon.png"
+    },
+    "root-rider": {
+      "id": "root-rider",
+      "name": "Root Rider",
+      "category": "troop",
+      "image": "/assets/game/troops/root-rider.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/root-rider/icon.png"
+    },
+    "royal-champion": {
+      "id": "royal-champion",
+      "name": "Royal Champion",
+      "category": "hero",
+      "image": "/assets/game/heroes/royal-champion.webp",
+      "aliases": [],
+      "sourcePath": "images/home/heroes/royal-champion/icon.png"
+    },
+    "royal-gem": {
+      "id": "royal-gem",
+      "name": "Royal Gem",
+      "category": "equipment",
+      "image": "/assets/game/equipment/royal-gem.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/royal-gem/icon.png"
+    },
+    "scattershot": {
+      "id": "scattershot",
+      "name": "Scattershot",
+      "category": "defense",
+      "image": "/assets/game/defenses/scattershot.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/scattershot/normal/level-6.png"
+    },
+    "seeking-air-mine": {
+      "id": "seeking-air-mine",
+      "name": "Seeking Air Mine",
+      "category": "trap",
+      "image": "/assets/game/traps/seeking-air-mine.webp",
+      "aliases": [],
+      "sourcePath": "images/home/traps/seeking-air-mine/normal/level-8.png"
+    },
+    "seeking-shield": {
+      "id": "seeking-shield",
+      "name": "Seeking Shield",
+      "category": "equipment",
+      "image": "/assets/game/equipment/seeking-shield.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/seeking-shield/icon.png"
+    },
+    "siege-barracks": {
+      "id": "siege-barracks",
+      "name": "Siege Barracks",
+      "category": "siege-machine",
+      "image": "/assets/game/siege-machines/siege-barracks.webp",
+      "aliases": [],
+      "sourcePath": "images/home/siege-machines/siege-barracks/icon.png"
+    },
+    "skeleton-spell": {
+      "id": "skeleton-spell",
+      "name": "Skeleton Spell",
+      "category": "spell",
+      "image": "/assets/game/spells/skeleton-spell.webp",
+      "aliases": [],
+      "sourcePath": "images/home/spells/skeleton-spell/icon.png"
+    },
+    "skeleton-trap": {
+      "id": "skeleton-trap",
+      "name": "Skeleton Trap",
+      "category": "trap",
+      "image": "/assets/game/traps/skeleton-trap.webp",
+      "aliases": [],
+      "sourcePath": "images/home/traps/skeleton-trap/normal/level-5.png"
+    },
+    "snake-bracelet": {
+      "id": "snake-bracelet",
+      "name": "Snake Bracelet",
+      "category": "equipment",
+      "image": "/assets/game/equipment/snake-bracelet.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/snake-bracelet/icon.png"
+    },
+    "sneaky-goblin": {
+      "id": "sneaky-goblin",
+      "name": "Sneaky Goblin",
+      "category": "super-troop",
+      "image": "/assets/game/super-troops/sneaky-goblin.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/goblin/super/icon.png"
+    },
+    "sneezy": {
+      "id": "sneezy",
+      "name": "Sneezy",
+      "category": "pet",
+      "image": "/assets/game/pets/sneezy.webp",
+      "aliases": [],
+      "sourcePath": "images/home/pets/sneezy/icon.png"
+    },
+    "spell-factory": {
+      "id": "spell-factory",
+      "name": "Spell Factory",
+      "category": "building",
+      "image": "/assets/game/buildings/spell-factory.webp",
+      "aliases": [],
+      "sourcePath": "images/home/army-buildings/spell-factory/normal/level-9.png"
+    },
+    "spell-tower": {
+      "id": "spell-tower",
+      "name": "Spell Tower",
+      "category": "defense",
+      "image": "/assets/game/defenses/spell-tower.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/spell-tower/normal/level-4.png"
+    },
+    "spiky-ball": {
+      "id": "spiky-ball",
+      "name": "Spiky Ball",
+      "category": "equipment",
+      "image": "/assets/game/equipment/spiky-ball.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/spiky-ball/icon.png"
+    },
+    "spirit-fox": {
+      "id": "spirit-fox",
+      "name": "Spirit Fox",
+      "category": "pet",
+      "image": "/assets/game/pets/spirit-fox.webp",
+      "aliases": [],
+      "sourcePath": "images/home/pets/spirit-fox/icon.png"
+    },
+    "spring-trap": {
+      "id": "spring-trap",
+      "name": "Spring Trap",
+      "category": "trap",
+      "image": "/assets/game/traps/spring-trap.webp",
+      "aliases": [],
+      "sourcePath": "images/home/traps/spring-trap/normal/level-13.png"
+    },
+    "stick-horse": {
+      "id": "stick-horse",
+      "name": "Stick Horse",
+      "category": "equipment",
+      "image": "/assets/game/equipment/stick-horse.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/stick-horse/icon.png"
+    },
+    "stone-slammer": {
+      "id": "stone-slammer",
+      "name": "Stone Slammer",
+      "category": "siege-machine",
+      "image": "/assets/game/siege-machines/stone-slammer.webp",
+      "aliases": [],
+      "sourcePath": "images/home/siege-machines/stone-slammer/icon.png"
+    },
+    "stun-blaster": {
+      "id": "stun-blaster",
+      "name": "Stun Blaster",
+      "category": "equipment",
+      "image": "/assets/game/equipment/stun-blaster.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/stun-blaster/icon.png"
+    },
+    "super-archer": {
+      "id": "super-archer",
+      "name": "Super Archer",
+      "category": "super-troop",
+      "image": "/assets/game/super-troops/super-archer.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/archer/super/icon.png"
+    },
+    "super-barbarian": {
+      "id": "super-barbarian",
+      "name": "Super Barbarian",
+      "category": "super-troop",
+      "image": "/assets/game/super-troops/super-barbarian.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/barbarian/super/icon.png"
+    },
+    "super-bowler": {
+      "id": "super-bowler",
+      "name": "Super Bowler",
+      "category": "super-troop",
+      "image": "/assets/game/super-troops/super-bowler.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/bowler/super-icon.png"
+    },
+    "super-dragon": {
+      "id": "super-dragon",
+      "name": "Super Dragon",
+      "category": "super-troop",
+      "image": "/assets/game/super-troops/super-dragon.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/dragon/super-icon.png"
+    },
+    "super-giant": {
+      "id": "super-giant",
+      "name": "Super Giant",
+      "category": "super-troop",
+      "image": "/assets/game/super-troops/super-giant.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/giant/super/icon.png"
+    },
+    "super-hog-rider": {
+      "id": "super-hog-rider",
+      "name": "Super Hog Rider",
+      "category": "super-troop",
+      "image": "/assets/game/super-troops/super-hog-rider.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/hog-rider/super-icon.png"
+    },
+    "super-miner": {
+      "id": "super-miner",
+      "name": "Super Miner",
+      "category": "super-troop",
+      "image": "/assets/game/super-troops/super-miner.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/miner/super-icon.png"
+    },
+    "super-minion": {
+      "id": "super-minion",
+      "name": "Super Minion",
+      "category": "super-troop",
+      "image": "/assets/game/super-troops/super-minion.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/minion/super-icon.png"
+    },
+    "super-valkyrie": {
+      "id": "super-valkyrie",
+      "name": "Super Valkyrie",
+      "category": "super-troop",
+      "image": "/assets/game/super-troops/super-valkyrie.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/valkyrie/super-icon.png"
+    },
+    "super-wall-breaker": {
+      "id": "super-wall-breaker",
+      "name": "Super Wall Breaker",
+      "category": "super-troop",
+      "image": "/assets/game/super-troops/super-wall-breaker.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/wall-breaker/super/icon.png"
+    },
+    "super-witch": {
+      "id": "super-witch",
+      "name": "Super Witch",
+      "category": "super-troop",
+      "image": "/assets/game/super-troops/super-witch.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/witch/super-icon.png"
+    },
+    "super-wizard": {
+      "id": "super-wizard",
+      "name": "Super Wizard",
+      "category": "super-troop",
+      "image": "/assets/game/super-troops/super-wizard.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/wizard/super-icon.png"
+    },
+    "super-wizard-tower": {
+      "id": "super-wizard-tower",
+      "name": "Super Wizard Tower",
+      "category": "defense",
+      "image": "/assets/game/defenses/super-wizard-tower.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/super-wizard-tower/normal/level-2.png"
+    },
+    "super-yeti": {
+      "id": "super-yeti",
+      "name": "Super Yeti",
+      "category": "super-troop",
+      "image": "/assets/game/super-troops/super-yeti.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/yeti/super-icon.png"
+    },
+    "thrower": {
+      "id": "thrower",
+      "name": "Thrower",
+      "category": "troop",
+      "image": "/assets/game/troops/thrower.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/thrower/icon.png"
+    },
+    "tornado-trap": {
+      "id": "tornado-trap",
+      "name": "Tornado Trap",
+      "category": "trap",
+      "image": "/assets/game/traps/tornado-trap.webp",
+      "aliases": [],
+      "sourcePath": "images/home/traps/tornado-trap/normal/level-3.png"
+    },
+    "totem-spell": {
+      "id": "totem-spell",
+      "name": "Totem Spell",
+      "category": "spell",
+      "image": "/assets/game/spells/totem-spell.webp",
+      "aliases": [],
+      "sourcePath": "images/home/spells/totem-spell/icon.png"
+    },
+    "town-hall-1": {
+      "id": "town-hall-1",
+      "name": "Town Hall 1",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-1.webp",
+      "aliases": [
+        "TH1"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-1.png"
+    },
+    "town-hall-10": {
+      "id": "town-hall-10",
+      "name": "Town Hall 10",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-10.webp",
+      "aliases": [
+        "TH10"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-10.png"
+    },
+    "town-hall-11": {
+      "id": "town-hall-11",
+      "name": "Town Hall 11",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-11.webp",
+      "aliases": [
+        "TH11"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-11.png"
+    },
+    "town-hall-12": {
+      "id": "town-hall-12",
+      "name": "Town Hall 12",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-12.webp",
+      "aliases": [
+        "TH12"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-12.png"
+    },
+    "town-hall-13": {
+      "id": "town-hall-13",
+      "name": "Town Hall 13",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-13.webp",
+      "aliases": [
+        "TH13"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-13.png"
+    },
+    "town-hall-14": {
+      "id": "town-hall-14",
+      "name": "Town Hall 14",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-14.webp",
+      "aliases": [
+        "TH14"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-14.png"
+    },
+    "town-hall-15": {
+      "id": "town-hall-15",
+      "name": "Town Hall 15",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-15.webp",
+      "aliases": [
+        "TH15"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-15.png"
+    },
+    "town-hall-16": {
+      "id": "town-hall-16",
+      "name": "Town Hall 16",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-16.webp",
+      "aliases": [
+        "TH16"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-16.png"
+    },
+    "town-hall-17": {
+      "id": "town-hall-17",
+      "name": "Town Hall 17",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-17.webp",
+      "aliases": [
+        "TH17"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-17.png"
+    },
+    "town-hall-18": {
+      "id": "town-hall-18",
+      "name": "Town Hall 18",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-18.webp",
+      "aliases": [
+        "TH18"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-18.png"
+    },
+    "town-hall-2": {
+      "id": "town-hall-2",
+      "name": "Town Hall 2",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-2.webp",
+      "aliases": [
+        "TH2"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-2.png"
+    },
+    "town-hall-3": {
+      "id": "town-hall-3",
+      "name": "Town Hall 3",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-3.webp",
+      "aliases": [
+        "TH3"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-3.png"
+    },
+    "town-hall-4": {
+      "id": "town-hall-4",
+      "name": "Town Hall 4",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-4.webp",
+      "aliases": [
+        "TH4"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-4.png"
+    },
+    "town-hall-5": {
+      "id": "town-hall-5",
+      "name": "Town Hall 5",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-5.webp",
+      "aliases": [
+        "TH5"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-5.png"
+    },
+    "town-hall-6": {
+      "id": "town-hall-6",
+      "name": "Town Hall 6",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-6.webp",
+      "aliases": [
+        "TH6"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-6.png"
+    },
+    "town-hall-7": {
+      "id": "town-hall-7",
+      "name": "Town Hall 7",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-7.webp",
+      "aliases": [
+        "TH7"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-7.png"
+    },
+    "town-hall-8": {
+      "id": "town-hall-8",
+      "name": "Town Hall 8",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-8.webp",
+      "aliases": [
+        "TH8"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-8.png"
+    },
+    "town-hall-9": {
+      "id": "town-hall-9",
+      "name": "Town Hall 9",
+      "category": "town-hall",
+      "image": "/assets/game/town-halls/town-hall-9.webp",
+      "aliases": [
+        "TH9"
+      ],
+      "sourcePath": "images/home/town-hall/normal/level-9.png"
+    },
+    "troop-launcher": {
+      "id": "troop-launcher",
+      "name": "Troop Launcher",
+      "category": "siege-machine",
+      "image": "/assets/game/siege-machines/troop-launcher.webp",
+      "aliases": [],
+      "sourcePath": "images/home/siege-machines/troop-launcher/icon.png"
+    },
+    "unicorn": {
+      "id": "unicorn",
+      "name": "Unicorn",
+      "category": "pet",
+      "image": "/assets/game/pets/unicorn.webp",
+      "aliases": [],
+      "sourcePath": "images/home/pets/unicorn/icon.png"
+    },
+    "valkyrie": {
+      "id": "valkyrie",
+      "name": "Valkyrie",
+      "category": "troop",
+      "image": "/assets/game/troops/valkyrie.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/valkyrie/icon.png"
+    },
+    "vampstache": {
+      "id": "vampstache",
+      "name": "Vampstache",
+      "category": "equipment",
+      "image": "/assets/game/equipment/vampstache.webp",
+      "aliases": [],
+      "sourcePath": "images/home/hero-equipment/vampstache/icon.png"
+    },
+    "wall-breaker": {
+      "id": "wall-breaker",
+      "name": "Wall Breaker",
+      "category": "troop",
+      "image": "/assets/game/troops/wall-breaker.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/wall-breaker/icon.png"
+    },
+    "wall-wrecker": {
+      "id": "wall-wrecker",
+      "name": "Wall Wrecker",
+      "category": "siege-machine",
+      "image": "/assets/game/siege-machines/wall-wrecker.webp",
+      "aliases": [],
+      "sourcePath": "images/home/siege-machines/wall-wrecker/icon.png"
+    },
+    "witch": {
+      "id": "witch",
+      "name": "Witch",
+      "category": "troop",
+      "image": "/assets/game/troops/witch.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/witch/icon.png"
+    },
+    "wizard": {
+      "id": "wizard",
+      "name": "Wizard",
+      "category": "troop",
+      "image": "/assets/game/troops/wizard.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/wizard/icon.png"
+    },
+    "wizard-tower": {
+      "id": "wizard-tower",
+      "name": "Wizard Tower",
+      "category": "defense",
+      "image": "/assets/game/defenses/wizard-tower.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/wizard-tower/normal/level-17.png"
+    },
+    "workshop": {
+      "id": "workshop",
+      "name": "Workshop",
+      "category": "building",
+      "image": "/assets/game/buildings/workshop.webp",
+      "aliases": [],
+      "sourcePath": "images/home/army-buildings/workshop/normal/level-8.png"
+    },
+    "x-bow": {
+      "id": "x-bow",
+      "name": "X-Bow",
+      "category": "defense",
+      "image": "/assets/game/defenses/x-bow.webp",
+      "aliases": [],
+      "sourcePath": "images/home/defenses/x-bow/normal/level-12.png"
+    },
+    "yeti": {
+      "id": "yeti",
+      "name": "Yeti",
+      "category": "troop",
+      "image": "/assets/game/troops/yeti.webp",
+      "aliases": [],
+      "sourcePath": "images/home/troops/yeti/icon.png"
+    }
+  }
+}

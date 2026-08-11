@@ -4,10 +4,12 @@
     const html = document.documentElement;
     const PAGE_PATHS = [
         '/dashboard',
+        '/app/explore',
         '/app/cwl-planner',
         '/app/cwl-planner-drafts',
         '/app/cwl-tracker',
-        '/app/war-operation-board',
+        '/app/war-board',
+        '/app/brackets',
         '/app/clan-management'
     ];
 

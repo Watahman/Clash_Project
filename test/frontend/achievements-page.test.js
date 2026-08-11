@@ -68,9 +68,11 @@ describe('Achievements workspace page', () => {
         expect(source).toContain("setStatus(successMessage, 'success');");
     });
 
-    it('is discoverable from the dashboard', () => {
-        const document = documentFor('src/subpages/dashboard.html');
-        expect(document.querySelector('a[href="/app/achievements"]')).not.toBeNull();
+    it('is discoverable from the central Progress navigation and Explore', () => {
+        const registry = readFileSync('src/assets/js/shell/module-registry.js', 'utf8');
+        const explore = readFileSync('src/assets/js/pages/explore.js', 'utf8');
+        expect(registry).toContain("['achievements', 'nav.achievements', 'Achievements', 'progress'");
+        expect(explore).toContain("'advancedStats', 'achievements'");
     });
 
     it('serves the clean private route through the worker', async () => {

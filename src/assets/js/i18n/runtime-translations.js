@@ -1,5 +1,3 @@
-import '../shell/achievements-navigation.js';
-import '../shell/advanced-stats-navigation.js';
 import { en } from './locales/en.js';
 import { nl } from './locales/nl.js';
 import { fr } from './locales/fr.js';

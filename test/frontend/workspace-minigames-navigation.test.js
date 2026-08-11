@@ -4,15 +4,11 @@ import { workspaceLocales } from '../../src/assets/js/i18n/workspace-locales.js'
 
 describe('workspace Minigames navigation', () => {
     it('shows Minigames as a normal workspace link', () => {
-        const shell = readFileSync(
-            'src/assets/js/shell/workspace-shell.js',
-            'utf8'
-        );
+        const registry = readFileSync('src/assets/js/shell/module-registry.js', 'utf8');
 
-        expect(shell).toContain("minigames: { key: 'nav.minigames'");
-        expect(shell).toContain('<p data-player-progress-nav-section data-i18n="shell.progression">Progression</p>');
-        expect(shell).toContain("navLink('minigames', '/minigames')");
-        expect(shell).not.toContain("comingSoonNavItem('minigames')");
+        expect(registry).toContain("['minigames', 'nav.minigames', 'Games', 'play', '/minigames', true]");
+        expect(registry).toContain("['advancedStats', 'nav.advancedStats'");
+        expect(registry).toContain("['achievements', 'nav.achievements'");
     });
 
     it.each(['en', 'nl', 'fr', 'de', 'es'])(
@@ -22,13 +18,14 @@ describe('workspace Minigames navigation', () => {
         }
     );
 
-    it('keeps Games, Achievements and Advanced Stats in one deterministic Player group', () => {
-        const achievements = readFileSync('src/assets/js/shell/achievements-navigation.js', 'utf8');
-        const advancedStats = readFileSync('src/assets/js/shell/advanced-stats-navigation.js', 'utf8');
+    it('keeps Games and Progress tools in deterministic registry sections', () => {
+        const registry = readFileSync('src/assets/js/shell/module-registry.js', 'utf8');
+        const shell = readFileSync('src/assets/js/shell/workspace-shell-markup.js', 'utf8');
 
-        expect(achievements).toContain("navigation.querySelector('[data-workspace-nav=\"minigames\"]')");
-        expect(advancedStats).toContain("navigation.querySelector('[data-player-progress-nav-section]')");
-        expect(advancedStats).toContain("navigation.querySelector('[data-workspace-nav=\"achievements\"]')");
-        expect(advancedStats).toContain("heading.dataset.i18n = 'shell.progression'");
+        expect(registry).toContain("['minigames', 'nav.minigames', 'Games', 'play'");
+        expect(registry).toContain("['advancedStats', 'nav.advancedStats', 'Advanced Stats', 'progress'");
+        expect(registry).toContain("['achievements', 'nav.achievements', 'Achievements', 'progress'");
+        expect(shell).toContain('getWorkspaceSections().map');
+        expect(shell).not.toContain('MutationObserver');
     });
 });

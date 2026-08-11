@@ -106,12 +106,11 @@ describe('Advanced Stats workspace page', () => {
         expect(document.querySelector('#advanced-stats-delete')?.classList.contains('advanced-stats__danger')).toBe(true);
     });
 
-    it('is discoverable through the workspace navigation installer', () => {
-        const source = readFileSync('src/assets/js/shell/advanced-stats-navigation.js', 'utf8');
-        expect(source).toContain("const ADVANCED_STATS_PATH = '/app/advanced-stats'");
-        expect(source).toContain('data-workspace-nav');
-        expect(source).toContain('nav.advancedStats');
-        expect(source).toContain('removeAttribute(\'aria-current\')');
+    it('is discoverable through the central workspace module registry', () => {
+        const source = readFileSync('src/assets/js/shell/module-registry.js', 'utf8');
+        expect(source).toContain("['advancedStats', 'nav.advancedStats'");
+        expect(source).toContain("'/app/advanced-stats'");
+        expect(source).toContain("'progress'");
     });
 
     it('serves the clean private route through the worker', async () => {

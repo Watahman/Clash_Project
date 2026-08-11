@@ -1,3 +1,5 @@
+import { APP_ALIASES, APP_ASSETS } from './app-routes.js';
+
 const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 const PERMANENT_REDIRECT_STATUS = 301;
 const CANONICAL_HOST = "clashpanel.com";
@@ -24,40 +26,14 @@ const PUBLIC_REDIRECTS = new Map([
     ["/subpages/contact.html", "/subpages/contact"],
     ["/subpages/dashboard", "/dashboard"],
     ["/subpages/dashboard.html", "/dashboard"],
+    ["/subpages/explore", "/app/explore"],
+    ["/subpages/explore.html", "/app/explore"],
     ["/subpages/cwl-planner-drafts", "/app/cwl-planner-drafts"],
     ["/subpages/cwl-planner-drafts.html", "/app/cwl-planner-drafts"],
     ["/subpages/achievements", "/app/achievements"],
     ["/subpages/achievements.html", "/app/achievements"],
     ["/subpages/advanced-stats", "/app/advanced-stats"],
     ["/subpages/advanced-stats.html", "/app/advanced-stats"]
-]);
-
-const APP_ASSETS = new Map([
-    ["/dashboard", "/subpages/dashboard"],
-    ["/app/cwl-planner", "/subpages/cwl-planner"],
-    ["/app/cwl-planner-drafts", "/subpages/cwl-planner-drafts"],
-    ["/app/cwl-tracker", "/subpages/cwl-operation-board"],
-    ["/app/clan-management", "/subpages/groups"],
-    ["/app/war-operation-board", "/subpages/war-operation-board"],
-    ["/app/achievements", "/subpages/achievements"],
-    ["/app/advanced-stats", "/subpages/advanced-stats"]
-]);
-
-const APP_ALIASES = new Map([
-    ["/dashboard.html", "/dashboard"],
-    ["/app/dashboard", "/dashboard"],
-    ["/app/dashboard.html", "/dashboard"],
-    ["/app/cwl-planner.html", "/app/cwl-planner"],
-    ["/app/cwl-planner-drafts.html", "/app/cwl-planner-drafts"],
-    ["/app/cwl-operation-board", "/app/cwl-tracker"],
-    ["/app/cwl-operation-board.html", "/app/cwl-tracker"],
-    ["/app/cwl-tracker.html", "/app/cwl-tracker"],
-    ["/app/groups", "/app/clan-management"],
-    ["/app/groups.html", "/app/clan-management"],
-    ["/app/clan-management.html", "/app/clan-management"],
-    ["/app/war-operation-board.html", "/app/war-operation-board"],
-    ["/app/achievements.html", "/app/achievements"],
-    ["/app/advanced-stats.html", "/app/advanced-stats"]
 ]);
 
 function jsonError(status, code, error) {

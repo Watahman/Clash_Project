@@ -1,0 +1,30 @@
+.cp-field { display: grid; gap: 8px; }
+.cp-field > label { color: var(--cp-text-1); font-size: .75rem; font-weight: 650; }
+.cp-field-help,
+.cp-field-error { font-size: .75rem; margin: 0; }
+.cp-field-help { color: var(--cp-text-3); }
+.cp-field-error { color: var(--cp-danger); }
+
+.cp-input,
+.cp-select,
+.cp-textarea {
+    background: var(--cp-surface-2);
+    border: 1px solid var(--cp-border-1);
+    border-radius: 8px;
+    color: var(--cp-text-1);
+    font: 400 .875rem/1.4 var(--cp-font-ui);
+    min-width: 0;
+    width: 100%;
+}
+
+.cp-input,
+.cp-select { height: 42px; padding: 0 12px; }
+.cp-textarea { min-height: 104px; padding: 12px; resize: vertical; }
+.cp-input::placeholder,
+.cp-textarea::placeholder { color: var(--cp-text-3); }
+.cp-input:hover,
+.cp-select:hover,
+.cp-textarea:hover { border-color: var(--cp-border-2); }
+[aria-invalid="true"].cp-input,
+[aria-invalid="true"].cp-select,
+[aria-invalid="true"].cp-textarea { border-color: var(--cp-danger); }

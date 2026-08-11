@@ -28,6 +28,11 @@ function initRefs() {
     refs.groupList = document.querySelector('#dashboard-group-list');
     refs.accountLine = document.querySelector('#dashboard-account-line');
     refs.accountCount = document.querySelector('#dashboard-account-count');
+    refs.nextTitle = document.querySelector('#dashboard-next-title');
+    refs.nextCopy = document.querySelector('#dashboard-next-copy');
+    refs.nextAction = document.querySelector('#dashboard-next-action');
+    refs.attention = document.querySelector('.dashboard-attention');
+    refs.attentionCopy = document.querySelector('#dashboard-attention-copy');
 }
 
 function formatUpdatedAt(value) {
@@ -181,10 +186,35 @@ function renderUser() {
     refs.accountLine.hidden = accounts.length === 0;
 }
 
+function setNextAction(titleKey, copyKey, actionKey, href) {
+    refs.nextTitle.textContent = t(titleKey);
+    refs.nextCopy.textContent = t(copyKey);
+    refs.nextAction.textContent = t(actionKey);
+    refs.nextAction.href = href;
+}
+
+function renderDashboardPriority() {
+    if (state.plans.length) {
+        setNextAction('dashboard.v2ContinueTitle', 'dashboard.v2ContinueCopy', 'dashboard.v2ContinueAction', '/app/cwl-planner');
+        refs.nextAction.onclick = () => selectPlan(state.plans[0].id);
+    } else if (state.groups.length) {
+        setNextAction('dashboard.v2FamilyTitle', 'dashboard.v2FamilyCopy', 'dashboard.v2FamilyAction', '/app/clan-management');
+        refs.nextAction.onclick = null;
+    } else {
+        setNextAction('dashboard.v2StartTitle', 'dashboard.v2StartCopy', 'dashboard.v2StartAction', '/app/cwl-planner');
+        refs.nextAction.onclick = null;
+    }
+
+    const hasError = state.plansError || state.groupsError;
+    refs.attention.dataset.state = hasError ? 'error' : 'clear';
+    refs.attentionCopy.textContent = t(hasError ? 'dashboard.v2LoadIssue' : 'dashboard.v2Nothing');
+}
+
 function renderAll() {
     renderUser();
     renderPlans();
     renderGroups();
+    renderDashboardPriority();
     window.dispatchEvent(new CustomEvent('clashtools:dashboard-state', {
         detail: {
             loggedIn: state.loggedIn,

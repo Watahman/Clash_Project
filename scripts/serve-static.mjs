@@ -4,6 +4,7 @@ import { createServer } from 'node:http';
 import { request as httpRequest } from 'node:http';
 import { request as httpsRequest } from 'node:https';
 import { extname, resolve, sep } from 'node:path';
+import { APP_ALIASES, APP_ASSETS } from '../worker/app-routes.js';
 
 const root = resolve(process.env.STATIC_ROOT || 'src');
 const port = Number(process.env.STATIC_PORT || 5173);
@@ -58,7 +59,9 @@ async function serveFile(request, response) {
         response.end('Bad request');
         return;
     }
-    const requested = resolve(root, `.${pathname === '/' ? '/index.html' : pathname}`);
+    const canonical = APP_ALIASES.get(pathname) || pathname;
+    const mapped = APP_ASSETS.get(canonical) || canonical;
+    const requested = resolve(root, `.${mapped === '/' ? '/index.html' : mapped}`);
     if (requested !== root && !requested.startsWith(`${root}${sep}`)) {
         response.writeHead(403);
         response.end('Forbidden');

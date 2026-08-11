@@ -11,16 +11,12 @@ import { buildMathematicalWarStatus } from '../../src/assets/js/war-operation-bo
 import { applyCwlPredictions } from '../../src/assets/js/cwl/cwl-performance-prediction.js';
 
 describe('regular Clan War operation board', () => {
-    it('keeps the WAR operation board unavailable behind the shared coming-soon navigation state', () => {
-        const shell = readFileSync(
-            'src/assets/js/shell/workspace-shell.js',
-            'utf8'
-        );
-
-        expect(shell).toContain("comingSoonNavItem('warOperation')");
-        expect(shell).not.toContain(
-            "navLink('warOperation', './war-operation-board.html')"
-        );
+    it('exposes the verified engine through the central canonical route', () => {
+        const registry = readFileSync('src/assets/js/shell/module-registry.js', 'utf8');
+        const routes = readFileSync('worker/app-routes.js', 'utf8');
+        expect(registry).toContain("['warOperation', 'nav.warOperation', 'War Board', 'compete', '/app/war-board', true]");
+        expect(routes).toContain('["/app/war-board", "/subpages/war-operation-board"]');
+        expect(routes).toContain('["/app/war-operation-board", "/app/war-board"]');
     });
 
     it('normalizes the selected clan and calculates net stars in attack order', () => {

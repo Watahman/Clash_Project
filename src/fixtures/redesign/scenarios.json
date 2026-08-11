@@ -1,0 +1,291 @@
+{
+  "version": 1,
+  "note": "Reference scenario catalog. Connect through a dev-only adapter to real view-model boundaries.",
+  "scenarios": [
+    {
+      "id": "planner-empty",
+      "module": "planner",
+      "purpose": "No saved plan, no roster, no clans"
+    },
+    {
+      "id": "planner-normal",
+      "module": "planner",
+      "purpose": "One clan, 20-player free roster, valid 7-day planning"
+    },
+    {
+      "id": "planner-large",
+      "module": "planner",
+      "purpose": "3 clans, 65 players, mixed TH levels and availability"
+    },
+    {
+      "id": "planner-multi-clan",
+      "module": "planner",
+      "purpose": "Multiple active clans with day-by-day rosters"
+    },
+    {
+      "id": "planner-conflicts",
+      "module": "planner",
+      "purpose": "Full days/clans plus unavailable players and capacity conflicts"
+    },
+    {
+      "id": "planner-poll-partial",
+      "module": "planner",
+      "purpose": "Clan Family availability poll with confirmed, unavailable and unknown days"
+    },
+    {
+      "id": "planner-auto-preview",
+      "module": "planner",
+      "purpose": "Generated automatic/guided Auto Plan preview"
+    },
+    {
+      "id": "planner-optimize",
+      "module": "planner",
+      "purpose": "Optimize suggestions with accepted and rejected changes"
+    },
+    {
+      "id": "cwl-active",
+      "module": "cwl-tracker",
+      "purpose": "Active CWL, 3 completed days, projections, live roster"
+    },
+    {
+      "id": "cwl-no-source",
+      "module": "cwl-tracker",
+      "purpose": "No saved plan or direct clan selected"
+    },
+    {
+      "id": "cwl-direct-clan",
+      "module": "cwl-tracker",
+      "purpose": "Direct clan mode; no planning-specific columns"
+    },
+    {
+      "id": "cwl-no-current",
+      "module": "cwl-tracker",
+      "purpose": "Valid clan with no current CWL"
+    },
+    {
+      "id": "cwl-partial",
+      "module": "cwl-tracker",
+      "purpose": "Partial history/projection data"
+    },
+    {
+      "id": "cwl-complete",
+      "module": "cwl-tracker",
+      "purpose": "Completed seven-day league week with final standings"
+    },
+    {
+      "id": "cwl-history",
+      "module": "cwl-tracker",
+      "purpose": "Multiple previous seasons with league movement"
+    },
+    {
+      "id": "war-no-current",
+      "module": "war-board",
+      "purpose": "Valid clan, no current war"
+    },
+    {
+      "id": "war-preparation",
+      "module": "war-board",
+      "purpose": "War preparation state"
+    },
+    {
+      "id": "war-live",
+      "module": "war-board",
+      "purpose": "Live war with map, attacks remaining and selected base"
+    },
+    {
+      "id": "war-finished",
+      "module": "war-board",
+      "purpose": "Completed regular war with final result and history context"
+    },
+    {
+      "id": "war-active-cwl",
+      "module": "war-board",
+      "purpose": "Selected clan is in CWL and must be handed off to CWL Tracker"
+    },
+    {
+      "id": "war-missed-attacks",
+      "module": "war-board",
+      "purpose": "Ended/live-late war with missed attacks"
+    },
+    {
+      "id": "family-member",
+      "module": "clan-family",
+      "purpose": "Normal member, limited controls"
+    },
+    {
+      "id": "family-empty",
+      "module": "clan-family",
+      "purpose": "User has no Clan Family and sees create/join onboarding"
+    },
+    {
+      "id": "family-admin",
+      "module": "clan-family",
+      "purpose": "Leader/admin with management controls"
+    },
+    {
+      "id": "family-active-poll",
+      "module": "clan-family",
+      "purpose": "Active 7-day CWL poll with mixed responses"
+    },
+    {
+      "id": "family-poll-partial",
+      "module": "clan-family",
+      "purpose": "Partially answered availability poll with reminder candidates"
+    },
+    {
+      "id": "family-audit-issues",
+      "module": "clan-family",
+      "purpose": "Linked clans plus unlinked-account audit issues"
+    },
+    {
+      "id": "family-large",
+      "module": "clan-family",
+      "purpose": "Large family with many members/accounts/clans"
+    },
+    {
+      "id": "stats-not-tracking",
+      "module": "advanced-stats",
+      "purpose": "Verified account before tracking starts"
+    },
+    {
+      "id": "stats-no-account",
+      "module": "advanced-stats",
+      "purpose": "No verified linked Clash account"
+    },
+    {
+      "id": "stats-initializing",
+      "module": "advanced-stats",
+      "purpose": "Tracking setup/initial ingestion"
+    },
+    {
+      "id": "stats-active",
+      "module": "advanced-stats",
+      "purpose": "30d populated stats"
+    },
+    {
+      "id": "stats-paused",
+      "module": "advanced-stats",
+      "purpose": "Tracking paused while historical data remains visible"
+    },
+    {
+      "id": "stats-degraded",
+      "module": "advanced-stats",
+      "purpose": "Tracking degraded with existing data and collection warning"
+    },
+    {
+      "id": "stats-error",
+      "module": "advanced-stats",
+      "purpose": "Lifecycle error with preserved data and recovery action"
+    },
+    {
+      "id": "stats-partial",
+      "module": "advanced-stats",
+      "purpose": "Partial data with complete-since warning"
+    },
+    {
+      "id": "stats-no-attacks",
+      "module": "advanced-stats",
+      "purpose": "Active tracking but selected range has no attacks"
+    },
+    {
+      "id": "stats-rich-90d",
+      "module": "advanced-stats",
+      "purpose": "Dense trends, armies, units and paginated timeline"
+    },
+    {
+      "id": "achievements-new",
+      "module": "achievements",
+      "purpose": "New account with little progress"
+    },
+    {
+      "id": "achievements-no-account",
+      "module": "achievements",
+      "purpose": "No verified linked Clash account"
+    },
+    {
+      "id": "achievements-mid",
+      "module": "achievements",
+      "purpose": "Mixed locked/in-progress/unlocked/waiting states"
+    },
+    {
+      "id": "achievements-rich",
+      "module": "achievements",
+      "purpose": "Large library and high XP"
+    },
+    {
+      "id": "achievements-missing-source",
+      "module": "achievements",
+      "purpose": "At least one source unavailable; affected items waiting"
+    },
+    {
+      "id": "achievements-import-valid",
+      "module": "achievements",
+      "purpose": "Valid base snapshot parsed and ready to save"
+    },
+    {
+      "id": "achievements-import-invalid",
+      "module": "achievements",
+      "purpose": "Malformed or wrong-player snapshot validation error"
+    },
+    {
+      "id": "entity-mid",
+      "module": "minigames",
+      "purpose": "Entity Guesser after several guesses and one hint"
+    },
+    {
+      "id": "entity-fresh",
+      "module": "minigames",
+      "purpose": "Fresh Daily Entity Guesser"
+    },
+    {
+      "id": "entity-won",
+      "module": "minigames",
+      "purpose": "Completed successful Daily"
+    },
+    {
+      "id": "entity-lost",
+      "module": "minigames",
+      "purpose": "Completed Daily after all attempts are used"
+    },
+    {
+      "id": "higher-lower-fresh",
+      "module": "minigames",
+      "purpose": "Fresh Higher or Lower Daily at question one"
+    },
+    {
+      "id": "higher-lower-correct",
+      "module": "minigames",
+      "purpose": "Correct reveal with combo"
+    },
+    {
+      "id": "higher-lower-final",
+      "module": "minigames",
+      "purpose": "Final 9/9 result"
+    },
+    {
+      "id": "bracket-4",
+      "module": "bracket",
+      "purpose": "Small complete first-round bracket"
+    },
+    {
+      "id": "bracket-8",
+      "module": "bracket",
+      "purpose": "Eight-participant bracket without BYEs"
+    },
+    {
+      "id": "bracket-12-byes",
+      "module": "bracket",
+      "purpose": "Non-power-of-two bracket with BYEs"
+    },
+    {
+      "id": "bracket-32",
+      "module": "bracket",
+      "purpose": "Large horizontal stress case"
+    },
+    {
+      "id": "bracket-complete",
+      "module": "bracket",
+      "purpose": "Champion resolved"
+    }
+  ]
+}
