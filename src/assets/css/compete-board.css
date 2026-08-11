@@ -1,0 +1,273 @@
+/* Scoped polish for the two compete routes. Legacy module CSS supplies detail rules. */
+.operation-workspace-page,
+.war-board--webby {
+    --compete-accent: var(--accent, #d97706);
+    --compete-accent-strong: var(--accent-strong, #b45309);
+    --compete-accent-soft: var(--accent-soft, #fff7ed);
+    --compete-surface: var(--surface, #fff);
+    --compete-subtle: var(--surface-subtle, #f6f7f9);
+    --compete-raised: var(--surface-raised, #fff);
+    --compete-text: var(--text, #17202a);
+    --compete-muted: var(--text-muted, #647181);
+    --compete-border: var(--border, #dfe3e8);
+    --compete-border-strong: var(--border-strong, #c5ccd4);
+    --compete-radius: 12px;
+    color: var(--compete-text);
+}
+
+.operation-workspace-page {
+    margin-inline: auto;
+    max-width: 1440px;
+    padding: 28px clamp(12px, 3vw, 40px) 64px;
+}
+
+.operation-workspace-page .op-page-header,
+.war-board--webby .war-board-header { align-items: flex-start; gap: 24px; margin-bottom: 20px; }
+.operation-workspace-page .op-page-header h1,
+.war-board--webby .war-board-header h1 { letter-spacing: -.03em; line-height: 1.08; }
+.operation-actions,
+.war-board--webby .war-board-controls { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; }
+.operation-actions button,
+.war-board--webby button,
+.war-board--webby input,
+.war-board--webby select { min-height: 40px; }
+
+.compete-contextbar,
+.operation-workspace-page .op-context-toolbar {
+    align-items: end;
+    background: var(--compete-surface);
+    border: 1px solid var(--compete-border);
+    border-radius: var(--compete-radius);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px;
+}
+
+.compete-source-switch { display: flex; gap: 4px; min-height: 40px; }
+.compete-source-switch button {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: var(--compete-muted);
+    min-height: 40px;
+    padding: 8px 12px;
+}
+.compete-source-switch button[aria-pressed="true"] {
+    background: var(--compete-accent-soft);
+    border-color: color-mix(in srgb, var(--compete-accent) 32%, var(--compete-border));
+    color: var(--compete-accent-strong);
+    font-weight: 700;
+}
+
+.operation-workspace-page .op-context-toolbar label,
+.war-board--webby .war-clan-control {
+    color: var(--compete-muted);
+    display: grid;
+    font-size: .72rem;
+    font-weight: 700;
+    gap: 5px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+.operation-workspace-page .op-context-toolbar select,
+.operation-workspace-page .op-context-toolbar input,
+.war-board--webby .war-board-controls input,
+.war-board--webby .war-board-controls select {
+    background: var(--compete-raised);
+    border: 1px solid var(--compete-border-strong);
+    border-radius: 8px;
+    color: var(--compete-text);
+    font: inherit;
+    letter-spacing: normal;
+    min-height: 40px;
+    min-width: 150px;
+    padding: 8px 10px;
+    text-transform: none;
+}
+.operation-workspace-page .op-inline-control { display: flex; gap: 6px; }
+.operation-workspace-page .op-toolbar-spacer { flex: 1 1 16px; }
+.operation-workspace-page .op-sync-state,
+.war-board--webby .war-status-line { color: var(--compete-muted); min-height: 40px; }
+.operation-workspace-page .operation-help { color: var(--compete-muted); margin: 10px 2px 18px; }
+
+.operation-workspace-page .op-board-tabs,
+.war-board--webby .war-tabs {
+    border-bottom: 1px solid var(--compete-border);
+    display: flex;
+    gap: 4px;
+    margin: 18px 0 20px;
+    overflow-x: auto;
+}
+.operation-workspace-page .op-board-tabs button,
+.war-board--webby .war-tabs button {
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    color: var(--compete-muted);
+    flex: 0 0 auto;
+    min-height: 42px;
+    padding: 10px 14px;
+}
+.operation-workspace-page .op-board-tabs button[aria-selected="true"],
+.war-board--webby .war-tabs button[aria-selected="true"] {
+    border-bottom-color: var(--compete-accent);
+    color: var(--compete-text);
+    font-weight: 750;
+}
+
+.operation-workspace-page .op-flat-section,
+.war-board--webby .war-primary-panel,
+.war-board--webby .war-detail-panel,
+.war-board--webby .war-map-page,
+.war-board--webby .war-stat-card,
+.war-board--webby .war-history-summary,
+.war-board--webby .war-history-list {
+    background: var(--compete-surface);
+    border: 1px solid var(--compete-border);
+    border-radius: var(--compete-radius);
+    box-shadow: none;
+}
+.operation-workspace-page .op-flat-section { padding: clamp(14px, 2vw, 22px); }
+.operation-workspace-page .op-live-versus,
+.operation-workspace-page .op-live-analysis,
+.operation-workspace-page .op-history-grid,
+.operation-workspace-page .op-league-layout { gap: 16px; }
+.operation-workspace-page .op-live-side { background: var(--compete-subtle); border: 1px solid var(--compete-border); border-radius: 10px; padding: 16px; }
+.operation-workspace-page .op-live-side > strong,
+.operation-workspace-page .op-projection-score > strong { color: var(--compete-accent-strong); font-variant-numeric: tabular-nums; }
+.operation-workspace-page .op-projection-score small,
+.operation-workspace-page .op-probability,
+.operation-workspace-page .op-advice-note,
+.operation-workspace-page .op-stars-chart-note { color: var(--compete-muted); }
+
+.operation-workspace-page .op-table-wrap { border: 1px solid var(--compete-border); border-radius: 10px; overflow-x: auto; }
+.operation-workspace-page .op-table { min-width: 720px; }
+.operation-workspace-page .op-table th { background: var(--compete-subtle); color: var(--compete-muted); font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; }
+.operation-workspace-page .op-table td,
+.operation-workspace-page .op-table th { min-height: 48px; padding: 10px 12px; }
+.operation-workspace-page .compete-townhall { height: 28px; object-fit: contain; vertical-align: middle; width: 28px; }
+
+.workspace-app:has(.compete-module) { background: var(--bg, #f6f7f9) !important; }
+.war-board--webby {
+    background: transparent;
+    margin-inline: auto;
+    max-width: 1440px;
+    padding: 28px clamp(12px, 3vw, 40px) 64px;
+}
+.war-board--webby::before,
+.war-board--webby::after,
+.war-board--webby .war-board-header::before,
+.war-board--webby .war-empty-state::after,
+.war-board--webby .war-score-strip::before { display: none; }
+.war-board--webby .war-board-header { display: flex; justify-content: space-between; }
+.war-board--webby .war-board-controls { justify-content: flex-end; }
+.war-board--webby .war-tag-form { align-items: end; display: flex; gap: 6px; }
+.war-board--webby .war-tag-form button,
+.war-board--webby .war-refresh-button { background: var(--compete-surface); box-shadow: none; }
+.war-board--webby .war-empty-state { background: var(--compete-surface); border: 1px dashed var(--compete-border-strong); border-radius: var(--compete-radius); padding: 24px; }
+.war-board--webby .war-empty-mark { display: none; }
+.war-board--webby .war-empty-state h2 { color: var(--compete-text); margin: 0 0 6px; }
+
+.war-board--webby .war-score-strip {
+    align-items: center;
+    background: var(--compete-surface);
+    border: 1px solid var(--compete-border);
+    border-radius: var(--compete-radius);
+    box-shadow: none;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: minmax(150px, 1fr) minmax(150px, auto) minmax(150px, 1fr);
+    padding: 16px;
+}
+.war-board--webby .war-score-side { align-items: center; display: flex; gap: 10px; min-width: 0; }
+.war-board--webby .war-score-opponent { justify-content: flex-end; text-align: right; }
+.war-board--webby .war-score-side img { height: 36px; object-fit: contain; width: 36px; }
+.war-board--webby .war-score-main { font-variant-numeric: tabular-nums; text-align: center; }
+.war-board--webby .war-score-main span { font-size: clamp(1.35rem, 3vw, 2rem); font-weight: 800; }
+.war-board--webby .war-score-main small,
+.war-board--webby .war-score-meta,
+.war-board--webby .war-score-side small { color: var(--compete-muted); display: block; font-size: .75rem; }
+.war-board--webby .war-score-meta { display: flex; flex-wrap: wrap; gap: 8px 12px; grid-column: 1 / -1; justify-content: center; }
+
+.war-board--webby .war-live-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); }
+.war-board--webby .war-primary-panel,
+.war-board--webby .war-detail-panel,
+.war-board--webby .war-map-page { min-width: 0; padding: 16px; }
+.war-board--webby .war-map { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); padding: 16px; }
+.war-board--webby .war-base { align-items: center; display: grid; gap: 8px; grid-template-columns: 28px 48px minmax(0, 1fr); min-height: 64px; padding: 8px; text-align: left; }
+.war-board--webby .war-base:hover,
+.war-board--webby .war-base.is-selected { background: var(--compete-accent-soft); border-color: var(--compete-accent); }
+.war-board--webby .war-base-emblem { align-items: center; display: grid; gap: 2px; justify-items: center; }
+.war-board--webby .compete-townhall { height: 32px; object-fit: contain; width: 32px; }
+.war-board--webby .war-base-copy,
+.war-board--webby .war-player-main span:nth-child(2) { min-width: 0; }
+.war-board--webby .war-base-copy strong,
+.war-board--webby .war-base-copy small,
+.war-board--webby .war-player-main strong,
+.war-board--webby .war-player-main small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.war-board--webby .war-base-copy small,
+.war-board--webby .war-player-main small,
+.war-board--webby .war-player-metrics small { color: var(--compete-muted); font-size: .75rem; }
+
+.war-board--webby .war-stats-grid { display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 16px; }
+.war-board--webby .war-stat-card { min-width: 0; padding: 16px; }
+.war-board--webby .war-roster { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.war-board--webby .war-player-card { align-items: center; display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr) auto; padding: 10px; }
+.war-board--webby .war-player-main { align-items: center; background: transparent; border: 0; display: flex; gap: 10px; min-height: 44px; min-width: 0; padding: 4px; text-align: left; }
+.war-board--webby .war-player-metrics { display: flex; flex-wrap: wrap; gap: 8px 12px; grid-column: 1 / -1; }
+.war-board--webby .war-player-metrics span { display: grid; gap: 2px; min-width: 70px; }
+.war-board--webby .war-player-status { color: var(--compete-muted); font-size: .72rem; }
+.war-board--webby .war-history-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: hidden; }
+.war-board--webby .war-history-summary article { padding: 14px; }
+.war-board--webby .war-history-list { margin-top: 12px; overflow: hidden; }
+.war-board--webby .war-history-row { align-items: center; border-bottom: 1px solid var(--compete-border); display: grid; gap: 12px; grid-template-columns: 34px minmax(0, 1fr) minmax(140px, auto) 90px; min-height: 56px; padding: 10px 14px; }
+.war-board--webby .war-history-row:last-child { border-bottom: 0; }
+.war-board--webby .war-history-row small { color: var(--compete-muted); display: block; }
+
+.operation-workspace-page button:focus-visible,
+.war-board--webby button:focus-visible,
+.war-board--webby input:focus-visible,
+.war-board--webby select:focus-visible { outline: 3px solid color-mix(in srgb, var(--compete-accent) 42%, transparent); outline-offset: 2px; }
+
+@media (max-width: 900px) {
+    .war-board--webby .war-live-grid { grid-template-columns: 1fr; }
+    .war-board--webby .war-board-header { display: block; }
+    .war-board--webby .war-board-controls { justify-content: flex-start; margin-top: 14px; }
+    .war-board--webby .war-stats-grid { grid-template-columns: 1fr 1fr; }
+    .war-board--webby .war-stat-card:last-child { grid-column: 1 / -1; }
+}
+
+@media (max-width: 620px) {
+    .operation-actions,
+    .operation-actions button,
+    .war-board--webby .war-board-controls,
+    .war-board--webby .war-board-controls > *,
+    .war-board--webby .war-tag-form { width: 100%; }
+    .operation-actions button,
+    .war-board--webby .war-board-controls button,
+    .war-board--webby .war-board-controls input,
+    .war-board--webby .war-board-controls select { min-height: 44px; }
+    .operation-workspace-page .op-context-toolbar { align-items: stretch; display: grid; }
+    .operation-workspace-page .op-context-toolbar label,
+    .operation-workspace-page .op-inline-control,
+    .operation-workspace-page .op-inline-control input,
+    .operation-workspace-page .op-inline-control button { width: 100%; }
+    .compete-source-switch { display: grid; grid-template-columns: 1fr 1fr; }
+    .compete-source-switch button { min-height: 44px; }
+    .operation-workspace-page .op-live-versus { grid-template-columns: 1fr; }
+    .operation-workspace-page .op-live-versus-mark { text-align: center; }
+    .war-board--webby .war-score-strip { grid-template-columns: 1fr 1fr; }
+    .war-board--webby .war-score-main { grid-column: 1 / -1; grid-row: 1; }
+    .war-board--webby .war-stats-grid,
+    .war-board--webby .war-history-summary { grid-template-columns: 1fr; }
+    .war-board--webby .war-history-row { grid-template-columns: 34px minmax(0, 1fr); }
+    .war-board--webby .war-history-row > :nth-child(n + 3) { grid-column: 2; }
+    .war-board--webby .war-base { min-height: 56px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .operation-workspace-page *,
+    .war-board--webby * { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}

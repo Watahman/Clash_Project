@@ -11,8 +11,13 @@ import {
     setWarAssignment
 } from '../Supabase/Supabase-WarAssignments.js';
 import { loadLinkedWarClans } from '../war-operation-board/war-clan-source.js';
+import {
+    fixtureWar,
+    setEmptyState
+} from '../war-operation-board/war-page-utils.js';
 import { buildWarHistory } from '../war-operation-board/war-history-model.js';
 import { renderWarHistory } from '../war-operation-board/war-history-renderer.js';
+import { loadWarFixture } from '../operation-board/operation-board-fixtures.js';
 import {
     ActiveCwlWarError,
     buildWarBoardReport,
@@ -35,11 +40,16 @@ let mapSide = 'enemy';
 let selectedPosition = 1;
 let controller = null;
 let requestToken = 0;
+let activeFixture = null;
 
 async function init() {
     collectRefs();
+    activeFixture = await loadWarFixture().catch(error => {
+        console.error(error);
+        return null;
+    });
     initI18n();
-    await Promise.resolve(syncAuthSession()).catch(() => null);
+    if (!activeFixture) await Promise.resolve(syncAuthSession()).catch(() => null);
     profileHTML();
     bindEvents();
     initPlayerPerformancePopover({
@@ -47,9 +57,11 @@ async function init() {
     });
     await loadClanOptions();
     const queryTag = normalizeTag(new URLSearchParams(location.search).get('clan') || '');
-    if (queryTag) {
-        refs.tagInput.value = queryTag;
-        await selectClan(queryTag);
+    const fixtureTag = normalizeTag(activeFixture?.data?.clan?.tag || '');
+    const initialTag = queryTag || fixtureTag;
+    if (initialTag) {
+        refs.tagInput.value = initialTag;
+        await selectClan(initialTag);
     }
 }
 
@@ -76,10 +88,14 @@ function collectRefs() {
 
 async function loadClanOptions() {
     try {
-        const clans = await loadLinkedWarClans();
-        refs.clanSelect.insertAdjacentHTML('beforeend', clans.map(clan =>
-            `<option value="${clan.tag}">${escapeOption(clan.name)} · ${clan.tag}</option>`
-        ).join(''));
+        const fixtureClan = activeFixture?.data?.clan;
+        const clans = fixtureClan ? [fixtureClan] : await loadLinkedWarClans();
+        clans.forEach(clan => {
+            const option = document.createElement('option');
+            option.value = clan.tag;
+            option.textContent = `${clan.name || clan.tag} · ${clan.tag}`;
+            refs.clanSelect.appendChild(option);
+        });
     } catch {
         refs.clanSelect.options[0].textContent = 'Enter a clan tag';
     }
@@ -103,6 +119,22 @@ function bindEvents() {
         const button = event.target.closest('[data-war-tab]');
         if (button) selectTab(button.dataset.warTab);
     });
+    document.querySelectorAll('[data-war-tab]').forEach(button => {
+        button.addEventListener('keydown', event => {
+            const tabs = Array.from(document.querySelectorAll('[data-war-tab]'));
+            const index = tabs.indexOf(button);
+            const next = event.key === 'ArrowRight'
+                ? tabs[(index + 1) % tabs.length]
+                : event.key === 'ArrowLeft'
+                    ? tabs[(index - 1 + tabs.length) % tabs.length]
+                    : event.key === 'Home' ? tabs[0]
+                        : event.key === 'End' ? tabs[tabs.length - 1] : null;
+            if (!next) return;
+            event.preventDefault();
+            selectTab(next.dataset.warTab);
+            next.focus();
+        });
+    });
     document.querySelector('.war-side-switch').addEventListener('click', event => {
         const button = event.target.closest('[data-map-side]');
         if (!button) return;
@@ -125,7 +157,9 @@ async function selectClan(tag) {
     refs.tagInput.value = selectedTag;
     refs.clanSelect.value = Array.from(refs.clanSelect.options)
         .some(option => option.value === selectedTag) ? selectedTag : '';
-    window.history.replaceState(null, '', `?clan=${encodeURIComponent(selectedTag)}`);
+    const nextUrl = new URL(window.location.href);
+    nextUrl.searchParams.set('clan', selectedTag);
+    window.history.replaceState(null, '', nextUrl);
     await loadWar();
 }
 
@@ -134,24 +168,35 @@ async function loadWar(forceRefresh = false) {
     controller?.abort();
     controller = new AbortController();
     const token = ++requestToken;
+    report = null;
+    historyData = null;
+    assignments = [];
     refs.refresh.disabled = true;
-    refs.content.classList.toggle('is-refreshing', Boolean(report));
+    refs.content.classList.remove('is-refreshing');
+    refs.content.hidden = true;
+    refs.empty.hidden = false;
+    setEmptyState(refs.empty,
+        forceRefresh ? 'Refreshing current war' : 'Loading current war',
+        'The board will show the latest official state when it is ready.'
+    );
     setStatus(forceRefresh ? 'Refreshing live war data…' : 'Loading current war…');
     try {
-        const [rawWar, rawHistory] = await Promise.all([
-            getClanCurrentWarRequest(selectedTag, {
-                signal: controller.signal,
-                forceRefresh
-            }),
-            getClanWarLogRequest(selectedTag, {
-                signal: controller.signal,
-                forceRefresh
-            })
-        ]);
+        const [rawWar, rawHistory] = activeFixture
+            ? [fixtureWar(activeFixture), activeFixture.data?.warLog || []]
+            : await Promise.all([
+                getClanCurrentWarRequest(selectedTag, {
+                    signal: controller.signal,
+                    forceRefresh
+                }),
+                getClanWarLogRequest(selectedTag, {
+                    signal: controller.signal,
+                    forceRefresh
+                })
+            ]);
         if (token !== requestToken) return;
         report = buildWarBoardReport(rawWar, selectedTag);
         historyData = buildWarHistory(rawHistory, selectedTag);
-        assignments = report.warKey
+        assignments = !activeFixture && report.warKey
             ? await getWarAssignments(report.clan.tag, report.warKey).catch(() => [])
             : [];
         refs.empty.hidden = true;
@@ -163,18 +208,32 @@ async function loadWar(forceRefresh = false) {
             return;
         }
         setStatus('Live war data synced from the official Clash of Clans API.');
+        if (activeFixture) return;
         const enriched = await enrichWithHistoricalPerformance(report);
         if (token !== requestToken) return;
         report = enriched;
         renderCurrent();
     } catch (error) {
         if (error?.name === 'AbortError') return;
-        refs.empty.hidden = Boolean(report);
-        refs.content.hidden = !report;
+        if (token !== requestToken) return;
+        report = null;
+        historyData = null;
+        assignments = [];
+        refs.empty.hidden = false;
+        refs.content.hidden = true;
         if (error instanceof ActiveCwlWarError) {
             setStatus(`${error.message} `, true, true);
+            setEmptyState(refs.empty,
+                'This clan is in an active CWL war',
+                'Regular War Board is for regular wars. Continue in CWL Tracker for the active league war.',
+                true
+            );
         } else {
             setStatus(error?.message || 'The current war could not be loaded.', true);
+            setEmptyState(refs.empty,
+                'The current war is unavailable',
+                error?.message || 'Try refreshing when the official API is available.'
+            );
         }
     } finally {
         if (token === requestToken) {
@@ -245,9 +304,11 @@ async function removeAssignment(assignmentId) {
 }
 
 function selectTab(tab) {
-    document.querySelectorAll('[data-war-tab]').forEach(button =>
-        button.setAttribute('aria-selected', String(button.dataset.warTab === tab))
-    );
+    document.querySelectorAll('[data-war-tab]').forEach(button => {
+        const selected = button.dataset.warTab === tab;
+        button.setAttribute('aria-selected', String(selected));
+        button.tabIndex = selected ? 0 : -1;
+    });
     document.querySelectorAll('[data-war-panel]').forEach(panel => {
         panel.hidden = panel.dataset.warPanel !== tab;
     });
@@ -255,15 +316,13 @@ function selectTab(tab) {
 
 function setStatus(message, error = false, cwlLink = false) {
     refs.status.classList.toggle('is-error', error);
-    refs.status.innerHTML = `${escapeOption(message)}${cwlLink
-        ? '<a href="/app/cwl-tracker">Open CWL operation board →</a>'
-        : ''}`;
-}
-
-function escapeOption(value) {
-    return String(value || '').replace(/[&<>"']/g, character => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-    })[character]);
+    refs.status.replaceChildren(document.createTextNode(String(message || '')));
+    if (cwlLink) {
+        const link = document.createElement('a');
+        link.href = '/app/cwl-tracker';
+        link.textContent = 'Open CWL Tracker';
+        refs.status.append(' ', link);
+    }
 }
 
 const initialPageLoad = init();

@@ -3,7 +3,12 @@ import { buildWinCondition } from '../operation-board/operation-board-win-condit
 import { buildProjectedOutcome } from '../operation-board/operation-board-live-projection.js';
 import { buildImportantAttacks } from '../operation-board/operation-board-live-recommendations.js';
 import { escapeHtml, number } from '../operation-board/operation-board-utils.js';
-import { parseClashTime } from '../cwl/cwl-war-state.js';
+import { normalizeWarState, parseClashTime } from '../cwl/cwl-war-state.js';
+import {
+    ASSET_FALLBACKS,
+    getTownHallAsset,
+    installImageFallback
+} from '../assets/entity-assets.js';
 import { buildWarContributions, attacksByOrder } from './war-contribution.js';
 import { buildWarMap } from './war-map-model.js';
 import { assignmentState } from './war-assignments.js';
@@ -34,7 +39,7 @@ export function renderScoreStrip(element, report) {
         <div class="war-score-meta">
             <span class="war-state-pill is-${escapeHtml(live.state)}">${stateLabel(live.state)}</span>
             <span>${timeLabel(live)}</span>
-            <span>Max: ${condition?.maxFinalStars ?? live.own.stars}★</span>
+            <span>Max: ${stars(condition?.maxFinalStars ?? live.own.stars)}</span>
             <span class="war-math-status is-${mathematical?.status || 'open'}">${mathLabel(mathematical?.status)}</span>
             <span>${projection?.winProbability == null ? 'Projection building' : `${projection.winProbability}% projected win`}</span>
         </div>`;
@@ -49,11 +54,12 @@ export function renderWarMap(element, report, sideName, selectedPosition, assign
         return `<button class="war-base is-${base.state} ${base.mapPosition === selectedPosition ? 'is-selected' : ''}"
             type="button" data-base-position="${base.mapPosition}" style="--base-index:${index}">
             <span class="war-base-position">${base.mapPosition}</span>
-            <span class="war-base-emblem"><b>TH${base.townHall}</b><i>${base.stars}★</i></span>
+            <span class="war-base-emblem"><img class="compete-townhall" src="${getTownHallAsset(base.townHall)}" alt="Town Hall ${base.townHall}"><i>${stars(base.stars)}</i></span>
             <span class="war-base-copy"><strong>${escapeHtml(base.name)}</strong><small>${percent(base.destruction)} · ${base.opponentAttacks} hit${base.opponentAttacks === 1 ? '' : 's'}</small></span>
             ${assignmentCount ? `<span class="war-base-assigned">${assignmentCount} assigned</span>` : ''}
         </button>`;
     }).join('');
+    installAssetFallbacks(element);
 }
 
 export function renderBaseDetail(element, report, sideName, position, assignments) {
@@ -74,7 +80,7 @@ export function renderBaseDetail(element, report, sideName, position, assignment
     element.innerHTML = `
         <header>
             <div><p>Base ${base.mapPosition}</p><h2>${escapeHtml(base.name)}</h2><span>${escapeHtml(base.tag)}</span></div>
-            <span class="war-detail-th">TH${base.townHall}</span>
+            <span class="war-detail-th"><img class="compete-townhall" src="${getTownHallAsset(base.townHall)}" alt="Town Hall ${base.townHall}"> TH${base.townHall}</span>
         </header>
         <div class="war-detail-score"><strong>${stars(base.stars)}</strong><span>${percent(base.destruction)} best destruction</span></div>
         <section><h3>Attack history</h3>${base.attacks.length ? base.attacks.map(attack => `
@@ -89,7 +95,8 @@ export function renderBaseDetail(element, report, sideName, position, assignment
                 <button type="submit">Assign</button>
             </form></section>` : ''}
         ${recommendations.length ? `<section><h3>Recommended matchup</h3>${recommendations.slice(0, 2).map(item => `
-            <div class="war-recommendation"><strong>${escapeHtml(item.attacker.name)}</strong><span>${item.expectedStars.toFixed(1)}★ expected · +${item.expectedNetStars.toFixed(1)} net</span><small>${reasonLabel(item.reason)} · ${item.confidence} confidence</small></div>`).join('')}</section>` : ''}`;
+            <div class="war-recommendation"><strong>${escapeHtml(item.attacker.name)}</strong><span>${item.expectedStars.toFixed(1)} stars expected · +${item.expectedNetStars.toFixed(1)} net</span><small>${reasonLabel(item.reason)} · ${item.confidence} confidence</small></div>`).join('')}</section>` : ''}`;
+    installAssetFallbacks(element);
 }
 
 export function renderRoster(element, report, filter = 'all') {
@@ -103,20 +110,21 @@ export function renderRoster(element, report, filter = 'all') {
         return true;
     });
     element.innerHTML = filtered.map(player => `
-        <article class="war-player-card cwl-player-article" data-performance-card="true" data-planner-card="true"
+        <article class="war-player-card cwl-player-article" data-performance-card="true"
             data-player-tag="${player.tag}" data-town-hall="${player.townHall}">
             <button class="war-player-main" type="button" data-performance-trigger>
                 <span class="war-player-position">${player.mapPosition}</span>
-                <span><strong class="cwl-player-name">${escapeHtml(player.name)}</strong><small>TH${player.townHall} · ${escapeHtml(player.tag)}</small></span>
+                <span><strong class="cwl-player-name"><img class="compete-townhall" src="${getTownHallAsset(player.townHall)}" alt="Town Hall ${player.townHall}">${escapeHtml(player.name)}</strong><small>TH${player.townHall} · ${escapeHtml(player.tag)}</small></span>
             </button>
             <div class="war-player-metrics">
                 <span><small>Attacks</small><strong>${player.attacksUsed}/${limit}</strong></span>
-                <span><small>Stars</small><strong>${player.stars}★</strong></span>
+                <span><small>Stars</small><strong>${stars(player.stars)}</strong></span>
                 <span><small>Net stars</small><strong>+${player.netStars}</strong></span>
                 <span><small>Avg. destruction</small><strong>${player.avgDestruction == null ? '—' : percent(player.avgDestruction)}</strong></span>
             </div>
-            <span class="war-player-status is-${attention(player) ? 'attention' : player.attacksUsed >= limit ? 'done' : player.attacksUsed ? 'active' : 'ready'}">${attention(player) ? 'Needs attention' : player.attacksUsed >= limit ? 'Done' : player.attacksUsed ? 'In progress' : 'Ready'}</span>
+            <span class="war-player-status is-${attention(player) ? 'attention' : player.attacksUsed >= limit ? 'done' : player.attacksUsed ? 'active' : 'ready'}">${statusLabel(report, player, limit, attention(player))}</span>
         </article>`).join('') || '<p class="war-muted">No players match this filter.</p>';
+    installAssetFallbacks(element);
 }
 
 export function renderStats(element, report) {
@@ -130,7 +138,7 @@ export function renderStats(element, report) {
     element.innerHTML = `
         <article class="war-stat-card"><p>Attack usage</p><strong>${Math.round(use)}%</strong><div class="war-progress"><i style="width:${use}%"></i></div><small>${live?.own.attacksUsed || 0} of ${live?.own.availableAttacks || 0} attacks used</small></article>
         <article class="war-stat-card war-chart-card"><p>Stars by attack order</p>${sparkline(points)}<small>${attacks.length ? `${attacks.length} recorded attacks` : 'Waiting for the first attack'}</small></article>
-        <article class="war-stat-card"><p>Important next attacks</p>${recommendations.length ? recommendations.map(item => `<div class="war-mini-row"><span>${escapeHtml(item.attacker.name)} → #${item.target.mapPosition}</span><strong>+${item.expectedNetStars.toFixed(1)}★</strong></div>`).join('') : '<small>No recommendation needed right now.</small>'}</article>`;
+        <article class="war-stat-card"><p>Important next attacks</p>${recommendations.length ? recommendations.map(item => `<div class="war-mini-row"><span>${escapeHtml(item.attacker.name)} → #${item.target.mapPosition}</span><strong>${item.expectedNetStars.toFixed(1)} net stars</strong></div>`).join('') : '<small>No recommendation needed right now.</small>'}</article>`;
 }
 
 function cumulativePoints(attacks) {
@@ -153,12 +161,12 @@ function sparkline(points) {
 
 function badge(clan) {
     return clan?.badgeUrl
-        ? `<img src="${escapeHtml(clan.badgeUrl)}" alt="">`
-        : '<span class="war-score-fallback">⚔</span>';
+        ? `<img src="${escapeHtml(clan.badgeUrl)}" alt="${escapeHtml(clan.name || 'Clan')} badge" loading="lazy">`
+        : `<img src="${ASSET_FALLBACKS.clan}" alt="Clan badge unavailable">`;
 }
 
 function stars(value) {
-    return `${number(value)}★`;
+    return `${number(value)} stars`;
 }
 
 function percent(value) {
@@ -197,9 +205,28 @@ function assignmentLabel(assignment, position) {
         : `base #${position}`;
 }
 
+function installAssetFallbacks(element) {
+    element.querySelectorAll('img.compete-townhall').forEach(image =>
+        installImageFallback(image, ASSET_FALLBACKS.entity)
+    );
+    element.querySelectorAll('.war-score-side img').forEach(image =>
+        installImageFallback(image, ASSET_FALLBACKS.clan)
+    );
+}
+
+function statusLabel(report, player, limit, attention) {
+    const ended = normalizeWarState(report?.wars?.[0]) === 'completed';
+    if (ended && player.attacksUsed < limit) return 'Missed attacks';
+    if (attention) return 'Needs attention';
+    if (player.attacksUsed >= limit) return 'Done';
+    return player.attacksUsed ? 'In progress' : 'Ready';
+}
+
 function needsAttention(report, player, limit) {
     const war = report?.wars?.[0];
-    if (String(war?.state || '').toLowerCase() !== 'inwar') return false;
+    const state = normalizeWarState(war);
+    if (state === 'completed') return player.attacksUsed < limit;
+    if (state !== 'live') return false;
     const end = String(war?.endTime || '').match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/);
     if (!end) return false;
     const endTime = Date.UTC(

@@ -25,6 +25,7 @@
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
     <link rel="stylesheet" href="../assets/css/workspace-v2.css">
+    <link rel="stylesheet" href="../assets/css/compete-board.css">
 </head>
 <body class="workspace-app" data-workspace-page="operation">
 <header>
@@ -32,7 +33,7 @@
     <nav class="center"><a href="./cwl-planner.html" data-i18n="nav.cwl">CWL planner</a><a href="./cwl-operation-board.html" aria-current="page" data-i18n="nav.operation">Operation board</a><a href="./groups.html" data-i18n="nav.groups">Clan Family</a></nav>
     <div class="right"><button type="button" data-language-control data-i18n="header.language">Language</button><button id="profile-btn" type="button"><img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt=""><span data-i18n="header.user">User</span></button></div>
 </header>
-<main class="operation-main operation-live-main operation-workspace-page" id="main-content">
+<main class="operation-main operation-live-main operation-workspace-page compete-module" id="main-content">
     <header class="op-page-header">
         <div>
             <p class="op-page-kicker" data-i18n="op.kicker">Live CWL tracker</p>
@@ -48,15 +49,19 @@
         </div>
     </header>
 
-    <section class="op-context-toolbar" aria-label="Setup" data-i18n-aria-label="op.setup">
-        <label><span data-i18n="op.selectPlan">Planning</span><select id="op-plan-select"></select></label>
-        <label><span data-i18n="op.selectClan">Clan</span><select id="op-clan-select" disabled></select></label>
+    <section class="op-context-toolbar compete-contextbar" aria-label="Setup" data-i18n-aria-label="op.setup">
+        <div class="compete-source-switch" role="group" aria-label="CWL source">
+            <button type="button" data-op-source-mode="plan" aria-pressed="true" data-i18n="op.selectPlan">Planning</button>
+            <button type="button" data-op-source-mode="direct" aria-pressed="false" data-i18n="op.standaloneClan">Single clan</button>
+        </div>
+        <label data-source-control="plan"><span data-i18n="op.selectPlan">Planning</span><select id="op-plan-select"></select></label>
+        <label data-source-control="plan"><span data-i18n="op.selectClan">Clan</span><select id="op-clan-select" disabled></select></label>
         <label class="op-season-control"><span>Season</span><select id="op-season-select" disabled><option value="current">Current CWL</option></select></label>
-        <label class="op-standalone-control"><span data-i18n="op.standaloneClan">Single clan</span><span class="op-inline-control"><input id="op-standalone-clan-tag" type="text" data-i18n-placeholder="op.standalonePlaceholder" placeholder="Clan tag: #ABC123"><button id="op-standalone-load" type="button" class="button button-secondary" data-i18n="op.loadClan">Load clan</button></span></label>
+        <label class="op-standalone-control" data-source-control="direct"><span data-i18n="op.standaloneClan">Single clan</span><span class="op-inline-control"><input id="op-standalone-clan-tag" type="text" data-i18n-placeholder="op.standalonePlaceholder" placeholder="Clan tag: #ABC123"><button id="op-standalone-load" type="button" class="button button-secondary" data-i18n="op.loadClan">Load clan</button></span></label>
         <span class="op-toolbar-spacer"></span>
         <span id="op-live-state" class="op-sync-state" role="status" aria-live="polite" data-state="idle" data-i18n="op.syncIdle">Not synchronized yet</span>
     </section>
-    <p class="operation-help" id="op-help" data-i18n="op.help">Select a planning first, then a clan. The board loads live data when possible.</p>
+    <p class="operation-help" id="op-help" data-i18n="op.help" aria-live="polite">Select a planning first, then a clan. The board loads live data when possible.</p>
     <p class="op-board-context" id="op-board-context" hidden></p>
 
     <nav class="op-board-tabs" id="op-board-tabs" role="tablist" aria-label="Operation Board views" data-i18n-aria-label="op.tabsLabel" hidden>

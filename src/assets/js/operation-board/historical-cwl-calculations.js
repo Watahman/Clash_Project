@@ -16,8 +16,8 @@ export function calculateHistoricalSeason(data) {
         number(war.clan?.stars, 0) - number(war.opponent?.stars, 0)
     ));
     const destructionDifferential = average(wars.map(war =>
-        number(war.clan?.destruction, 0)
-        - number(war.opponent?.destruction, 0)
+        number(war.clan?.destruction, number(war.clan?.destructionPercentage, 0))
+        - number(war.opponent?.destruction, number(war.opponent?.destructionPercentage, 0))
     ));
     return {
         season: data?.season || '',

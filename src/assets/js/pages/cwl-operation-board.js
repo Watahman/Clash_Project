@@ -10,6 +10,10 @@ import { createOperationBoardHistoryPage } from '../operation-board/operation-bo
 import { initOperationBoardRefs } from '../operation-board/operation-board-page-refs.js';
 import { createOperationPlanStore } from '../operation-board/operation-board-plan-store.js';
 import { getPlanClans, normalizePlan } from '../operation-board/operation-board-plan-model.js';
+import {
+    applyCwlFixture,
+    setSourceMode
+} from '../operation-board/operation-board-fixture-controls.js';
 import { buildReport } from '../operation-board/operation-board-report-model.js';
 import {
     clearBoard, refreshBoardLabels, renderBoard, renderFilteredRoster,
@@ -20,6 +24,7 @@ import {
     renderPlanOptions, renderPlanRequired, renderStandaloneMode
 } from '../operation-board/operation-board-source-controls.js';
 import { loadOperationSource, NoActiveCwlError } from '../operation-board/operation-board-source.js';
+import { loadCwlFixture } from '../operation-board/operation-board-fixtures.js';
 import { applyOperationTabState, getBoardIdentity, getDefaultOperationTab, hasUsableBoardData } from '../operation-board/operation-board-tabs.js';
 import { looksLikeClashTag, normalizeTag } from '../operation-board/operation-board-utils.js';
 import { profileHTML } from '../profile/profile_popup.js';
@@ -39,6 +44,7 @@ let activeTab = null;
 let activeBoardKey = '';
 let historyController;
 let importController;
+let activeFixture = null;
 const AUTO_REFRESH_INTERVAL_MS = 60_000;
 const AUTO_REFRESH_STORAGE_KEY = 'clashtools_op_auto_refresh_paused';
 let autoRefreshPaused = localStorage.getItem(AUTO_REFRESH_STORAGE_KEY) === 'true';
@@ -104,6 +110,7 @@ async function selectPlan(planId) {
     const full = await planStore.resolve(planId);
     if (token !== planSelectToken) return;
     selectedPlan = normalizePlan(full);
+    setSourceMode('plan');
     renderClanSelector(selectedPlan, token);
 }
 
@@ -143,6 +150,7 @@ function loadStandaloneClan() {
     currentReport = null;
     historyController?.resetForClan();
     renderStandaloneMode(refs);
+    setSourceMode('direct');
     void refreshClanReport(selectedClan);
 }
 
@@ -162,12 +170,17 @@ async function refreshClanReport(clan) {
         });
         if (token !== requestToken || signal.aborted) return;
         selectedClan = raw.clan;
-        currentReport = { ...buildReport(raw), predictionState: 'loading' };
+        currentReport = {
+            ...buildReport(raw),
+            predictionState: raw.fixture
+                ? raw.predictionState || 'unavailable'
+                : 'loading'
+        };
         latestReport = currentReport;
         renderLatestReport();
         setState('ready');
         void historyController?.syncForCurrentReport(currentReport);
-        void enrichPredictions(latestReport, token, signal);
+        if (!raw.fixture) void enrichPredictions(latestReport, token, signal);
     } catch (error) {
         if (error?.name === 'AbortError' || token !== requestToken) return;
         if (error instanceof NoActiveCwlError || error?.code === 'NO_ACTIVE_CWL') {
@@ -274,6 +287,11 @@ export function applyImportedJson(data) {
 
 async function init() {
     refs = initOperationBoardRefs();
+    activeFixture = await loadCwlFixture().catch(error => {
+        console.error(error);
+        return null;
+    });
+    setSourceMode('plan');
     initI18n();
     initPlayerPerformancePopover({
         getCurrentContext: tag => historyController?.getPlayerContext(tag)
@@ -304,7 +322,7 @@ async function init() {
         setState,
         setHelp: (message, error = false) => setHelp(refs, message, error)
     });
-    await Promise.resolve(syncAuthSession()).catch(() => null);
+    if (!activeFixture) await Promise.resolve(syncAuthSession()).catch(() => null);
     profileHTML();
     bindOperationBoardEvents(refs, {
         selectPlan,
@@ -328,9 +346,23 @@ async function init() {
         selectTab: selectBoardTab,
         refreshLabels
     });
+    document.querySelectorAll('[data-op-source-mode]').forEach(button => {
+        button.addEventListener('click', () => setSourceMode(button.dataset.opSourceMode));
+    });
     clearReport(false);
     refreshLabels();
-    await loadPlans();
+    if (activeFixture) {
+        await applyCwlFixture(activeFixture, {
+            refs,
+            renderClanSelector,
+            refreshClanReport,
+            setSelectedPlan: plan => { selectedPlan = plan; },
+            setSelectedClan: clan => { selectedClan = clan; },
+            setHelp: (message, error = false) => setHelp(refs, message, error)
+        });
+    } else {
+        await loadPlans();
+    }
     renderPhase(refs, 'unknown');
     setState('idle');
     syncAutoRefreshControl();

@@ -1,0 +1,55 @@
+import { normalizePlan } from './operation-board-plan-model.js';
+import {
+    renderPlanOptions,
+    renderStandaloneMode
+} from './operation-board-source-controls.js';
+
+export function setSourceMode(mode, root = document) {
+    root.querySelectorAll('[data-op-source-mode]').forEach(button => {
+        const selected = button.dataset.opSourceMode === mode;
+        button.setAttribute('aria-pressed', String(selected));
+    });
+    root.querySelectorAll('[data-source-control]').forEach(control => {
+        control.hidden = control.dataset.sourceControl !== mode;
+    });
+}
+
+export async function applyCwlFixture(
+    fixture,
+    {
+        refs,
+        renderClanSelector,
+        refreshClanReport,
+        setSelectedPlan,
+        setSelectedClan,
+        setHelp
+    }
+) {
+    const source = fixture.data?.source;
+    if (!source) {
+        renderPlanOptions(refs, []);
+        setHelp('Choose a saved plan or load a clan tag to start the CWL tracker.');
+        return;
+    }
+    const clan = source.clan || null;
+    if (!clan?.tag) {
+        setHelp('This CWL fixture has no clan source.', true);
+        return;
+    }
+    setSelectedClan(clan);
+    if (source.plan && !source.clan?.standalone) {
+        const plan = normalizePlan(source.plan);
+        setSelectedPlan(plan);
+        renderPlanOptions(refs, [plan]);
+        refs.planSelect.value = plan.id;
+        renderClanSelector(plan);
+        refs.clanSelect.value = clan.tag;
+        setSourceMode('plan');
+    } else {
+        setSelectedPlan(null);
+        refs.standaloneInput.value = clan.tag;
+        renderStandaloneMode(refs);
+        setSourceMode('direct');
+    }
+    await refreshClanReport(clan);
+}

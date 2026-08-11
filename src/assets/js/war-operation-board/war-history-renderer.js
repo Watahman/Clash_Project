@@ -12,7 +12,7 @@ export function renderWarHistory(summaryElement, listElement, history) {
         <article class="war-history-row is-${war.result}">
             <span class="war-history-result">${war.result === 'win' ? 'W' : war.result === 'loss' ? 'L' : 'D'}</span>
             <span><strong>${escapeHtml(war.opponent.name)}</strong><small>${dateLabel(war.endTime)} · ${war.teamSize}v${war.teamSize}</small></span>
-            <span><strong>${war.own.stars}★ — ${war.opponent.stars}★</strong><small>${war.own.destruction.toFixed(1)}% — ${war.opponent.destruction.toFixed(1)}%</small></span>
+            <span><strong>${war.own.stars} stars — ${war.opponent.stars} stars</strong><small>${war.own.destruction.toFixed(1)}% — ${war.opponent.destruction.toFixed(1)}%</small></span>
             <span><strong>${war.attackUsage.toFixed(0)}%</strong><small>attack usage</small></span>
         </article>`).join('') : '<p class="war-muted">No public regular-war history is available for this clan.</p>';
 }

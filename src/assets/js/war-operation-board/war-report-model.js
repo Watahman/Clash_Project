@@ -28,14 +28,20 @@ export function buildWarBoardReport(rawWar, clanTag, historicalPerformance = {})
     return {
         kind: 'regular-war',
         clan: {
-            tag: normalizeTag(normalizedSide.self.tag),
-            name: normalizedSide.self.name || selectedTag,
-            badgeUrl: normalizedSide.self.badgeUrls?.small || normalizedSide.self.badgeUrls?.medium || ''
+        tag: normalizeTag(normalizedSide.self.tag),
+        name: normalizedSide.self.name || selectedTag,
+            badgeUrl: normalizedSide.self.badgeUrls?.small
+                || normalizedSide.self.badgeUrls?.medium
+                || normalizedSide.self.badgeUrl
+                || ''
         },
         opponent: {
             tag: normalizeTag(normalizedSide.opponent.tag),
             name: normalizedSide.opponent.name || normalizeTag(normalizedSide.opponent.tag),
-            badgeUrl: normalizedSide.opponent.badgeUrls?.small || normalizedSide.opponent.badgeUrls?.medium || ''
+            badgeUrl: normalizedSide.opponent.badgeUrls?.small
+                || normalizedSide.opponent.badgeUrls?.medium
+                || normalizedSide.opponent.badgeUrl
+                || ''
         },
         state: normalizeWarState(normalizedWar),
         warKey: buildWarKey(normalizedWar, selectedTag),

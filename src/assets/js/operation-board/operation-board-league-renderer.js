@@ -124,7 +124,7 @@ function renderStandings(refs, report) {
             <span class="op-standing-rank">#${row.rank}</span>
             <strong>${escapeHtml(row.name)}</strong>
             <span>${formatRecord(row)}</span>
-            <span>${number(row.stars, 0)}★</span>
+            <span>${number(row.stars, 0)} stars</span>
             <span>${number(row.destruction, 0).toFixed(1)}%</span>`;
         refs.standingsList.appendChild(item);
     });

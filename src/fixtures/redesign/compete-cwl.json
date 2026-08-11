@@ -1,0 +1,50 @@
+{
+  "cwl-no-source": { "source": null, "history": { "seasons": [], "overview": [] } },
+  "cwl-active": {
+    "source": {
+      "fixture": true, "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians", "badgeUrl": "/assets/placeholders/clan-badge.svg", "standalone": false,
+        "players": [
+          { "tag": "#F001", "name": "Aster", "townHall": 17, "planned": true },
+          { "tag": "#F002", "name": "Beryl", "townHall": 16, "planned": true },
+          { "tag": "#F003", "name": "Cobalt", "townHall": 16, "planned": true }
+        ]
+      },
+      "plan": { "id": "fixture-plan", "name": "Fixture CWL plan", "info": true, "clans": [{ "tag": "#FIXCWL", "name": "Fixture Guardians", "players": [{ "tag": "#F001", "name": "Aster", "townHall": 17 }, { "tag": "#F002", "name": "Beryl", "townHall": 16 }, { "tag": "#F003", "name": "Cobalt", "townHall": 16 }] }] },
+      "members": [{ "tag": "#F001", "name": "Aster", "townHallLevel": 17 }, { "tag": "#F002", "name": "Beryl", "townHallLevel": 16 }, { "tag": "#F003", "name": "Cobalt", "townHallLevel": 16 }],
+      "leagueGroup": { "state": "inWar", "season": "2099-01", "clans": [{ "tag": "#FIXCWL", "name": "Fixture Guardians" }, { "tag": "#FIXNORTH", "name": "North Star" }, { "tag": "#FIXEAST", "name": "East Watch" }, { "tag": "#FIXSOUTH", "name": "South Gate" }], "rounds": [{ "warTags": ["#FIXD1", "#FIXD1B"] }, { "warTags": ["#FIXD2", "#FIXD2B"] }, { "warTags": ["#FIXD3", "#FIXD3B"] }, { "warTags": ["#FIXD4", "#FIXD4B"] }, { "warTags": ["#0", "#0"] }, { "warTags": ["#0", "#0"] }, { "warTags": ["#0", "#0"] }] },
+      "leagueWars": [
+        { "_round": 1, "_warTag": "#FIXD1", "state": "warEnded", "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians", "stars": 31, "destructionPercentage": 91.2, "attacks": 3, "members": [] }, "opponent": { "tag": "#FIXNORTH", "name": "North Star", "stars": 28, "destructionPercentage": 87.4, "attacks": 3, "members": [] } },
+        { "_round": 2, "_warTag": "#FIXD2", "state": "warEnded", "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians", "stars": 27, "destructionPercentage": 84.1, "attacks": 3, "members": [] }, "opponent": { "tag": "#FIXEAST", "name": "East Watch", "stars": 30, "destructionPercentage": 89.5, "attacks": 3, "members": [] } },
+        { "_round": 3, "_warTag": "#FIXD3", "state": "warEnded", "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians", "stars": 33, "destructionPercentage": 95.8, "attacks": 3, "members": [] }, "opponent": { "tag": "#FIXSOUTH", "name": "South Gate", "stars": 25, "destructionPercentage": 80.2, "attacks": 3, "members": [] } },
+        { "_round": 4, "_warTag": "#FIXD4", "state": "inWar", "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians", "stars": 12, "destructionPercentage": 68.4, "attacks": 2, "members": [{ "tag": "#F001", "name": "Aster", "townhallLevel": 17, "mapPosition": 1, "attacks": [{ "defenderTag": "#N001", "stars": 3, "destructionPercentage": 100, "order": 1 }] }, { "tag": "#F002", "name": "Beryl", "townhallLevel": 16, "mapPosition": 2, "attacks": [{ "defenderTag": "#N002", "stars": 2, "destructionPercentage": 82, "order": 2 }] }, { "tag": "#F003", "name": "Cobalt", "townhallLevel": 16, "mapPosition": 3, "attacks": [] }] }, "opponent": { "tag": "#FIXNORTH", "name": "North Star", "stars": 10, "destructionPercentage": 64.2, "attacks": 2, "members": [{ "tag": "#N001", "name": "Quartz", "townhallLevel": 17, "mapPosition": 1, "attacks": [] }, { "tag": "#N002", "name": "Rook", "townhallLevel": 16, "mapPosition": 2, "attacks": [] }, { "tag": "#N003", "name": "Sable", "townhallLevel": 16, "mapPosition": 3, "attacks": [] }] } }
+      ],
+      "wars": [], "phase": "live", "bonusRecipients": 1, "predictionState": "ready"
+    },
+    "history": { "seasons": [{ "season": "2098-12", "league": { "name": "Crystal League II" }, "position": 3 }], "overview": [{ "season": "2098-12", "league": { "name": "Crystal League II" }, "position": 3, "standings": [] }] }
+  },
+  "cwl-direct-clan": {
+    "source": {
+      "fixture": true, "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians", "badgeUrl": "/assets/placeholders/clan-badge.svg", "standalone": true, "players": [] }, "plan": null,
+      "members": [{ "tag": "#F001", "name": "Aster", "townHallLevel": 17 }, { "tag": "#F002", "name": "Beryl", "townHallLevel": 16 }],
+      "leagueGroup": { "state": "inWar", "season": "2099-01", "clans": [{ "tag": "#FIXCWL", "name": "Fixture Guardians" }, { "tag": "#FIXNORTH", "name": "North Star" }], "rounds": [{ "warTags": ["#FIXD1"] }] },
+      "leagueWars": [{ "_round": 1, "_warTag": "#FIXD1", "state": "inWar", "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians", "stars": 4, "destructionPercentage": 72, "attacks": 2, "members": [{ "tag": "#F001", "name": "Aster", "townhallLevel": 17, "attacks": [{ "defenderTag": "#N001", "stars": 3, "destructionPercentage": 100 }] }, { "tag": "#F002", "name": "Beryl", "townhallLevel": 16, "attacks": [{ "defenderTag": "#N002", "stars": 1, "destructionPercentage": 44 }] }] }, "opponent": { "tag": "#FIXNORTH", "name": "North Star", "stars": 3, "destructionPercentage": 65, "attacks": 1, "members": [] }}], "wars": [], "phase": "live", "predictionState": "ready"
+    }, "history": { "seasons": [], "overview": [] }
+  },
+  "cwl-no-current": { "source": { "fixture": true, "noActive": true, "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians", "standalone": true, "players": [] } }, "history": { "seasons": [{ "season": "2098-12", "league": { "name": "Crystal League II" }, "position": 3 }], "overview": [{ "season": "2098-12", "league": { "name": "Crystal League II" }, "position": 3, "standings": [] }] } },
+  "cwl-partial": { "source": { "fixture": true, "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians", "standalone": true, "players": [] }, "members": [], "leagueGroup": { "state": "inWar", "season": "2099-01", "clans": [{ "tag": "#FIXCWL", "name": "Fixture Guardians" }], "rounds": [{ "warTags": ["#FIXD1"] }, { "warTags": ["#0"] }] }, "leagueWars": [{ "_round": 1, "_warTag": "#FIXD1", "state": "warEnded", "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians", "stars": 24, "destructionPercentage": 79 }, "opponent": { "tag": "#FIXNORTH", "name": "North Star", "stars": 25, "destructionPercentage": 82 } }], "wars": [], "phase": "live", "predictionState": "ready" }, "history": { "seasons": [], "overview": [] } },
+  "cwl-complete": { "source": { "fixture": true, "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians", "standalone": true, "players": [] }, "members": [], "leagueGroup": { "state": "completed", "season": "2098-12", "clans": [{ "tag": "#FIXCWL", "name": "Fixture Guardians" }, { "tag": "#FIXNORTH", "name": "North Star" }], "rounds": [{ "warTags": ["#FIXD1"] }] }, "leagueWars": [{ "_round": 1, "_warTag": "#FIXD1", "state": "warEnded", "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians", "stars": 30, "destructionPercentage": 90 }, "opponent": { "tag": "#FIXNORTH", "name": "North Star", "stars": 26, "destructionPercentage": 86 } }], "wars": [], "phase": "completed", "predictionState": "ready" }, "history": { "seasons": [], "overview": [] } },
+  "cwl-history": {
+    "source": { "fixture": true, "noActive": true, "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians", "standalone": true, "players": [] } },
+    "history": {
+      "seasons": [{ "season": "2099-01", "league": { "name": "Crystal League I" }, "position": 2 }, { "season": "2098-12", "league": { "name": "Crystal League II" }, "position": 3 }],
+      "overview": [
+        { "season": "2099-01", "league": { "name": "Crystal League I" }, "position": 2, "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians" }, "standings": [{ "tag": "#FIXCWL", "name": "Fixture Guardians", "rank": 2, "stars": 119, "destruction": 88.4 }], "wars": [{ "day": 1, "state": "warEnded", "teamSize": 3, "attacksPerMember": 1, "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians", "stars": 29, "destructionPercentage": 89.2, "attacks": 3 }, "opponent": { "tag": "#FIXNORTH", "name": "North Star", "stars": 27, "destructionPercentage": 84.5, "attacks": 3 } }] },
+        { "season": "2098-12", "league": { "name": "Crystal League II" }, "position": 3, "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians" }, "standings": [{ "tag": "#FIXCWL", "name": "Fixture Guardians", "rank": 3, "stars": 107, "destruction": 83.1 }], "wars": [{ "day": 1, "state": "warEnded", "teamSize": 3, "attacksPerMember": 1, "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians", "stars": 25, "destructionPercentage": 81.2, "attacks": 3 }, "opponent": { "tag": "#FIXEAST", "name": "East Watch", "stars": 26, "destructionPercentage": 82.7, "attacks": 3 } }] }
+      ],
+      "details": {
+        "2099-01": { "season": "2099-01", "league": { "name": "Crystal League I" }, "position": 2, "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians" }, "standings": [{ "tag": "#FIXCWL", "name": "Fixture Guardians", "rank": 2, "stars": 119, "destruction": 88.4 }], "wars": [{ "day": 1, "state": "warEnded", "teamSize": 3, "attacksPerMember": 1, "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians", "stars": 29, "destructionPercentage": 89.2, "attacks": 3 }, "opponent": { "tag": "#FIXNORTH", "name": "North Star", "stars": 27, "destructionPercentage": 84.5, "attacks": 3 } }] },
+        "2098-12": { "season": "2098-12", "league": { "name": "Crystal League II" }, "position": 3, "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians" }, "standings": [{ "tag": "#FIXCWL", "name": "Fixture Guardians", "rank": 3, "stars": 107, "destruction": 83.1 }], "wars": [{ "day": 1, "state": "warEnded", "teamSize": 3, "attacksPerMember": 1, "clan": { "tag": "#FIXCWL", "name": "Fixture Guardians", "stars": 25, "destructionPercentage": 81.2, "attacks": 3 }, "opponent": { "tag": "#FIXEAST", "name": "East Watch", "stars": 26, "destructionPercentage": 82.7, "attacks": 3 } }] }
+      }
+    }
+  }
+}

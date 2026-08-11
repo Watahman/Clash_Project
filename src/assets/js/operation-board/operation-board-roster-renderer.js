@@ -10,6 +10,11 @@ import {
     stateText
 } from './operation-board-render-utils.js';
 import { matchesRosterView } from './operation-board-roster-filter.js';
+import {
+    ASSET_FALLBACKS,
+    getTownHallAsset,
+    installImageFallback
+} from '../assets/entity-assets.js';
 
 export function isStandaloneMode(report, selectedClan = null) {
     return Boolean(
@@ -188,14 +193,16 @@ function renderPlayerRow(player, display, report) {
             <strong class="cwl-player-name">${escapeHtml(player.name)}</strong>
             <span>${escapeHtml(player.tag)}</span>
         </button></td>
-        <td>TH${player.townHall || '-'}</td>
+        <td><img class="compete-townhall" src="${getTownHallAsset(player.townHall)}" alt="Town Hall ${player.townHall || 'unknown'}"> TH${player.townHall || '-'}</td>
         ${planningCell}
         <td>${attackFraction(display.attacksUsed, display.availableAttacks)}</td>
-        <td>${number(display.stars, 0)}★</td>
+        <td>${number(display.stars, 0)} stars</td>
         <td>${number(display.destruction, 0).toFixed(1)}%</td>
         <td>${report.mode === 'historical'
             ? defenseValue(display.avgDefense)
             : display.missed == null ? '—' : number(display.missed, 0)}</td>`;
+    const image = row.querySelector('img.compete-townhall');
+    installImageFallback(image, ASSET_FALLBACKS.entity);
     return row;
 }
 
