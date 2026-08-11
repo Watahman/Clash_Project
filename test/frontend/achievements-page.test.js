@@ -55,6 +55,14 @@ describe('Achievements workspace page', () => {
         expect(source).toContain("getAchievements(tag, { deepHistory: true, loading: 'background' })");
     });
 
+    it('connects the summary renderer refs to the page controls', () => {
+        const source = readFileSync('src/assets/js/pages/achievements.js', 'utf8');
+        expect(source).toContain("summaryLevel: '#achievement-level'");
+        expect(source).toContain("summaryLevelProgress: '#achievement-level-progress'");
+        expect(source).toContain("summaryXp: '#achievement-total-xp'");
+        expect(source).toContain("summaryImported: '#achievement-last-import'");
+    });
+
     it('paginates the large achievement library instead of mounting every card', () => {
         const source = `${readFileSync('src/assets/js/pages/achievements.js', 'utf8')}\n${readFileSync('src/assets/js/pages/achievements-renderer.js', 'utf8')}`;
         expect(source).toContain('const PAGE_SIZE = 48');

@@ -87,6 +87,7 @@ describe('Advanced Stats extracted renderers', () => {
         expect(known.getAttribute('aria-valuenow')).toBe('88');
         expect(known.getAttribute('aria-valuetext')).toContain('88%');
         expect(unknown.getAttribute('aria-valuenow')).toBeNull();
+        expect(unknown.getAttribute('aria-valuetext')).toContain('1 attack');
         expect(unknown.getAttribute('aria-valuetext')).toContain('—');
         expect(unknown.dataset.known).toBe('false');
     });

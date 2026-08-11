@@ -42,9 +42,9 @@ function captureRefs() {
         importButton: '#achievement-import-submit', importFeedback: '#achievement-import-feedback', importPreview: '#achievement-import-preview',
         sourceList: '#achievement-source-list', sourceSummary: '#achievement-source-summary', grid: '#achievement-grid', emptyState: '#achievement-empty-state',
         resultsCount: '#achievement-results-count', loadMore: '#achievement-load-more', search: '#achievement-search', category: '#achievement-category',
-        rarity: '#achievement-rarity', status: '#achievement-status', source: '#achievement-source', progressPanel: '.achievement-progress-panel', level: '#achievement-level',
-        levelProgress: '#achievement-level-progress', levelCopy: '#achievement-level-copy', totalXp: '#achievement-total-xp', unlocked: '#achievement-unlocked',
-        completed: '#achievement-completed', lastImport: '#achievement-last-import', featured: '#achievement-featured', filterToggle: '#achievement-filter-toggle',
+        rarity: '#achievement-rarity', status: '#achievement-status', source: '#achievement-source', progressPanel: '.achievement-progress-panel', summaryLevel: '#achievement-level',
+        summaryLevelProgress: '#achievement-level-progress', summaryLevelCopy: '#achievement-level-copy', summaryXp: '#achievement-total-xp', summaryUnlocked: '#achievement-unlocked',
+        summaryCompleted: '#achievement-completed', summaryImported: '#achievement-last-import', featured: '#achievement-featured', filterToggle: '#achievement-filter-toggle',
         filterDialog: '#achievement-filter-dialog', filterClose: '#achievement-filter-close'
     };
     Object.entries(selectors).forEach(([key, selector]) => { refs[key] = document.querySelector(selector); });

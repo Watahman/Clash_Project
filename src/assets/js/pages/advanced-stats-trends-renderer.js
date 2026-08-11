@@ -14,7 +14,9 @@ function setVisibility(element, visible) {
 }
 
 export function trendLabel(point, destructionKnown, destruction) {
-    return `${formatDate(point?.date)} · ${formatNumber(point?.attacks)} ${t('advancedStats.attacks').toLowerCase()} · ${formatDecimal(point?.averageStars)} · ${formatPercent(destructionKnown ? destruction : null)}`;
+    const attacks = Number(point?.attacks) || 0;
+    const attackLabel = t(attacks === 1 ? 'advancedStats.attack' : 'advancedStats.attacks').toLowerCase();
+    return `${formatDate(point?.date)} · ${formatNumber(attacks)} ${attackLabel} · ${formatDecimal(point?.averageStars)} · ${formatPercent(destructionKnown ? destruction : null)}`;
 }
 
 export function createTrendValue(point, index) {
