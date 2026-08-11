@@ -84,6 +84,8 @@
 .advanced-stats__tracking-menu[open] summary { background: var(--cp-surface-hover); }
 .advanced-stats__tracking-actions { background: var(--cp-surface-2); border: 1px solid var(--cp-border-2); border-radius: 8px; display: grid; gap: 6px; min-width: 220px; padding: 8px; position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; }
 .advanced-stats__tracking-actions .cp-button { justify-content: flex-start; width: 100%; }
+.advanced-stats__danger { border-color: color-mix(in srgb, var(--cp-danger) 48%, var(--cp-border-2)); }
+.advanced-stats__danger:hover { background: var(--cp-danger-soft); border-color: var(--cp-danger); }
 .advanced-stats__warning { align-items: start; background: var(--cp-warning-soft); border: 1px solid color-mix(in srgb, var(--cp-warning) 38%, var(--cp-border-1)); border-radius: 10px; display: flex; gap: 10px; padding: 12px 14px; }
 .advanced-stats__warning img { flex: 0 0 20px; margin-top: 2px; }
 .advanced-stats__warning p { color: var(--cp-text-2); margin: 4px 0; }

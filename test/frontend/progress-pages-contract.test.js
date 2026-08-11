@@ -6,6 +6,7 @@ const read = path => readFileSync(path, 'utf8');
 describe('Progress workspace page contracts', () => {
     it('covers every required Advanced Stats lifecycle and source-quality state', () => {
         const renderer = read('src/assets/js/pages/advanced-stats-renderer.js');
+        const trendRenderer = read('src/assets/js/pages/advanced-stats-trends-renderer.js');
         const controller = read('src/assets/js/pages/advanced-stats.js');
 
         for (const status of ['INITIALIZING', 'ACTIVE', 'PAUSED', 'DEGRADED', 'STOPPED', 'ERROR']) {
@@ -14,6 +15,7 @@ describe('Progress workspace page contracts', () => {
         expect(renderer).toContain('trackingExists');
         expect(renderer).toContain("status === 'INITIALIZING' && !hasHistory");
         expect(renderer).toContain('aria-valuetext');
+        expect(trendRenderer).toContain('aria-valuetext');
         expect(controller).toContain('Promise.allSettled');
         expect(controller).toContain('data-load-error');
         expect(controller).toContain('resetRangeData({ clearTracking: true })');

@@ -36,7 +36,7 @@ describe('Advanced Stats workspace page', () => {
         const source = readFileSync('src/assets/js/pages/advanced-stats.js', 'utf8');
         const renderer = readFileSync('src/assets/js/pages/advanced-stats-renderer.js', 'utf8');
         expect(source).toContain('state.profileError = true');
-        expect(renderer).toContain('show(elements.profileError, state.profileError === true)');
+        expect(renderer).toContain('setVisibility(elements.profileError, state.profileError === true)');
         expect(source).toContain('elements.profileRetry?.addEventListener');
         expect(source).toContain("if (overview.status === 'fulfilled') { state.overview = overview.value;");
         expect(source).toContain("if (units.status === 'fulfilled') {");
@@ -62,11 +62,15 @@ describe('Advanced Stats workspace page', () => {
     it('shows meaningful army names without developer metadata', () => {
         const source = readFileSync('src/assets/js/pages/advanced-stats.js', 'utf8');
         const renderer = readFileSync('src/assets/js/pages/advanced-stats-renderer.js', 'utf8');
+        const specializedRenderers = [
+            readFileSync('src/assets/js/pages/advanced-stats-armies-renderer.js', 'utf8'),
+            readFileSync('src/assets/js/pages/advanced-stats-battles-renderer.js', 'utf8')
+        ].join('\n');
         const armyView = readFileSync('src/assets/js/pages/advanced-stats-army-view.js', 'utf8');
         expect(source).toContain("getUnits: (tag, period) => getAdvancedStatsUnits(tag, period, 'ALL')");
         expect(renderer).toContain("formatDate(tracking.lastSuccessfulPollAt");
-        expect(renderer).toContain('.filter(item => item.presentation.units.length)');
-        expect(renderer).toContain('isPlayerFacingUnitName(unit?.name || unit?.unitName)');
+        expect(specializedRenderers).toContain('.filter(item => item.presentation.units.length)');
+        expect(specializedRenderers).toContain('isPlayerFacingUnitName(unit?.name || unit?.unitName)');
         expect(armyView).toContain('export function displayArmyUnits');
         expect(renderer).not.toContain('pieces.push(battle.battleType)');
         expect(renderer).not.toContain("pieces.push(t('advancedStats.bootstrap'))");
@@ -107,6 +111,17 @@ describe('Advanced Stats workspace page', () => {
         expect(document.querySelector('#advanced-stats-stop')).not.toBeNull();
         expect(document.querySelector('#advanced-stats-delete')).not.toBeNull();
         expect(document.querySelector('#advanced-stats-delete')?.classList.contains('advanced-stats__danger')).toBe(true);
+    });
+
+    it('does not apply stale tracking or statistics responses to newer state', () => {
+        const source = readFileSync('src/assets/js/pages/advanced-stats.js', 'utf8');
+        const trackingRequest = source.indexOf('const tracking = await state.api.getTracking');
+        const trackingAssignment = source.indexOf('state.tracking = tracking');
+
+        expect(trackingRequest).toBeGreaterThanOrEqual(0);
+        expect(source).toContain('if (version !== state.requestVersion) return;');
+        expect(trackingAssignment).toBeGreaterThan(trackingRequest);
+        expect(source).toContain('if (requestVersion !== state.requestVersion) {');
     });
 
     it('is discoverable through the central workspace module registry', () => {

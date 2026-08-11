@@ -20,9 +20,11 @@ import {
     renderStatistics,
     renderTracking,
     syncPeriodButtons
-} from './advanced-stats-renderer.js?v=20260811-1';
+} from './advanced-stats-renderer.js?v=20260811-2';
 import { arrayValue } from './advanced-stats-formatters.js?v=20260811-1';
 import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260809-4';
+import { accountsFromProfile, normalizeTag, selectInitialAccount } from './advanced-stats-account.js?v=20260811-2';
+import { createTrackingActions } from './advanced-stats-actions.js?v=20260811-2';
 
 const PERIOD_DEFAULT = '30d';
 const ACCOUNT_STORAGE_KEY = 'clashpanel_advanced_stats_account';
@@ -47,7 +49,7 @@ const state = {
     api: realApi,
     accounts: [],
     playerTag: '',
-    period: readStorage(PERIOD_STORAGE_KEY) || PERIOD_DEFAULT,
+    period: readPreference(PERIOD_STORAGE_KEY) || PERIOD_DEFAULT,
     category: 'ALL',
     tracking: null,
     overview: null,
@@ -66,6 +68,7 @@ const state = {
 };
 
 const elements = {};
+let trackingActions;
 
 function emptySectionStates() {
     return { overview: 'idle', units: 'idle', armies: 'idle', trends: 'idle', battles: 'idle' };
@@ -95,41 +98,34 @@ function cacheElements() {
     Object.entries(ids).forEach(([key, id]) => { elements[key] = typeof id === 'string' ? document.getElementById(id) : id; });
 }
 
-function normalizeTag(value) {
-    const tag = String(value || '').trim().toUpperCase();
-    return tag ? (tag.startsWith('#') ? tag : `#${tag}`) : '';
+function readPreference(key) {
+    try {
+        return localStorage.getItem(key) || '';
+    } catch {
+        return '';
+    }
 }
 
-function collectAccount(value, output) {
-    if (!value) return;
-    if (typeof value === 'string') { const tag = normalizeTag(value); if (tag) output.push({ tag, name: tag }); return; }
-    if (Array.isArray(value)) { value.forEach(item => collectAccount(item, output)); return; }
-    if (typeof value !== 'object') return;
-    const tag = normalizeTag(value.tag || value.playerTag || value.accountTag || value.clashTag);
-    if (tag) output.push({ tag, name: String(value.name || value.playerName || value.accountName || value.baseName || tag).trim() || tag, townHallLevel: value.townHallLevel || value.townhall || value.townHall || value.th });
-    collectAccount(value.base, output);
-    collectAccount(value.account, output);
+function writePreference(key, value) {
+    try {
+        localStorage.setItem(key, value);
+    } catch {
+        // Preferences are optional when storage is unavailable.
+    }
 }
 
-function accountsFromProfile(result) {
-    const profile = Array.isArray(result) ? result[0] : result;
-    const collected = [];
-    collectAccount(profile?.accounts, collected);
-    collectAccount(profile?.bases, collected);
-    return [...new Map(collected.map(account => [account.tag, account])).values()];
+function setPageStatus(message = '', type = '') {
+    if (!elements.pageStatus) return;
+    elements.pageStatus.textContent = message;
+    elements.pageStatus.dataset.state = type;
+    elements.pageStatus.hidden = !message;
 }
 
-function selectInitialAccount(accounts) {
-    const query = new URLSearchParams(window.location.search).get('playerTag');
-    const preferred = [query, readStorage(ACCOUNT_STORAGE_KEY)].map(normalizeTag).filter(Boolean);
-    return preferred.find(tag => accounts.some(account => account.tag === tag)) || accounts[0]?.tag || '';
+function setDataStatus(message = '', type = '') {
+    if (!elements.dataStatus) return;
+    elements.dataStatus.textContent = message;
+    elements.dataStatus.dataset.state = type;
 }
-
-function readStorage(key) { try { return localStorage.getItem(key); } catch { return ''; } }
-function writeStorage(key, value) { try { localStorage.setItem(key, value); } catch { /* preference only */ } }
-function show(element, visible) { if (element) element.hidden = !visible; }
-function setPageStatus(message = '', type = '') { elements.pageStatus.textContent = message; elements.pageStatus.dataset.state = type; elements.pageStatus.hidden = !message; }
-function setDataStatus(message = '', type = '') { elements.dataStatus.textContent = message; elements.dataStatus.dataset.state = type; }
 
 function setBusy(busy) {
     state.busy = busy;
@@ -161,6 +157,7 @@ function resetRangeData({ clearTracking = false } = {}) {
 
 async function initialize() {
     cacheElements();
+    trackingActions = createTrackingActions({ state, elements, setBusy, setDataStatus, refreshTrackingAndData });
     applyI18n(document);
     bindEvents();
     setPageStatus(t('advancedStats.loadingTracking'));
@@ -175,8 +172,8 @@ async function initialize() {
         console.error('advanced_stats_profile_load_failed', error); state.profileError = true; state.accounts = []; setPageStatus(''); renderPage(); return;
     }
     if (!state.accounts.length) { setPageStatus(''); renderPage(); return; }
-    state.playerTag = selectInitialAccount(state.accounts);
-    writeStorage(ACCOUNT_STORAGE_KEY, state.playerTag);
+    state.playerTag = selectInitialAccount(state.accounts, readPreference(ACCOUNT_STORAGE_KEY));
+    writePreference(ACCOUNT_STORAGE_KEY, state.playerTag);
     renderPage();
     await refreshTrackingAndData();
 }
@@ -186,8 +183,8 @@ async function retryProfileLoad() {
     setBusy(true); state.profileError = false; setPageStatus(t('advancedStats.loadingTracking'));
     try {
         state.accounts = accountsFromProfile(await checkUserId(getCurrentUserId()));
-        state.playerTag = selectInitialAccount(state.accounts);
-        writeStorage(ACCOUNT_STORAGE_KEY, state.playerTag);
+        state.playerTag = selectInitialAccount(state.accounts, readPreference(ACCOUNT_STORAGE_KEY));
+        writePreference(ACCOUNT_STORAGE_KEY, state.playerTag);
         renderPage();
         if (state.playerTag) await refreshTrackingAndData({ preserveBusy: true }); else setPageStatus('');
     } catch (error) { console.error('advanced_stats_profile_load_failed', error); state.profileError = true; setPageStatus(''); renderPage(); }
@@ -200,9 +197,10 @@ async function refreshTrackingAndData({ preserveBusy = false } = {}) {
     if (!preserveBusy) setBusy(true);
     setPageStatus(t('advancedStats.loadingTracking'));
     try {
-        state.tracking = await state.api.getTracking(state.playerTag);
-        state.trackingError = false;
+        const tracking = await state.api.getTracking(state.playerTag);
         if (version !== state.requestVersion) return;
+        state.tracking = tracking;
+        state.trackingError = false;
         renderPage();
         setPageStatus('');
         const status = String(state.tracking?.status || 'DISABLED').toUpperCase();
@@ -210,8 +208,9 @@ async function refreshTrackingAndData({ preserveBusy = false } = {}) {
         if (state.tracking?.trackingExists && (status !== 'INITIALIZING' || hasHistory)) await loadStatistics({ requestVersion: version, manageBusy: false });
         else { clearStatisticsState(); renderPage(); }
     } catch (error) {
+        if (version !== state.requestVersion) return;
         console.error('advanced_stats_tracking_load_failed', error); state.trackingError = true; setPageStatus(t('advancedStats.loadFailed'), 'error'); renderPage();
-    } finally { if (!preserveBusy) setBusy(false); }
+    } finally { if (!preserveBusy && version === state.requestVersion) setBusy(false); }
 }
 
 async function loadStatistics({ requestVersion = ++state.requestVersion, manageBusy = true } = {}) {
@@ -223,7 +222,6 @@ async function loadStatistics({ requestVersion = ++state.requestVersion, manageB
         state.api.getTrends(state.playerTag, state.period), state.api.getBattles(state.playerTag, state.period, { limit: BATTLE_PAGE_SIZE })
     ]);
     if (requestVersion !== state.requestVersion) {
-        if (manageBusy) setBusy(false);
         return;
     }
     const [overview, units, armies, trends, battles] = requests;
@@ -247,63 +245,38 @@ function filteredUnits() {
 
 async function loadMoreBattles() {
     if (!state.nextCursor || state.busy) return;
+    const version = state.requestVersion;
     setBusy(true);
     try {
         const response = await state.api.getBattles(state.playerTag, state.period, { limit: BATTLE_PAGE_SIZE, cursor: state.nextCursor });
+        if (version !== state.requestVersion) return;
         state.battles.push(...arrayValue(response?.items)); state.nextCursor = response?.nextCursor || null; state.hasMore = Boolean(response?.hasMore && state.nextCursor); renderPage();
-    } catch (error) { console.error('advanced_stats_battles_more_failed', error); setDataStatus(t('advancedStats.loadFailed'), 'error'); }
-    finally { setBusy(false); }
-}
-
-async function runTrackingAction(action) {
-    if (!state.playerTag || state.busy) return;
-    setBusy(true); setDataStatus(t('advancedStats.loadingTracking'));
-    try { await state.api[action](state.playerTag); await refreshTrackingAndData({ preserveBusy: true }); }
-    catch (error) { console.error('advanced_stats_action_failed', error); setDataStatus(error?.code === 'ADVANCED_STATS_ROLLOUT_RESTRICTED' ? t('advancedStats.rolloutRestricted') : t('advancedStats.actionFailed'), 'error'); }
-    finally { setBusy(false); }
-}
-
-function openConfirmation(action) {
-    state.confirmAction = action;
-    const deleting = action === 'deleteTracking';
-    elements.dialogTitle.textContent = t(deleting ? 'advancedStats.delete' : 'advancedStats.stop');
-    elements.dialogCopy.textContent = t(deleting ? 'advancedStats.confirmDelete' : 'advancedStats.confirmStop');
-    elements.dialogConfirm.textContent = t(deleting ? 'advancedStats.delete' : 'advancedStats.stop');
-    elements.dialogConfirm.dataset.action = action;
-    elements.deleteField.hidden = !deleting;
-    elements.deleteInput.value = '';
-    elements.dialogError.hidden = true;
-    elements.dialog.showModal();
-    (deleting ? elements.deleteInput : elements.dialogCancel).focus();
-}
-
-function submitConfirmation(event) {
-    if (event.submitter?.value !== 'confirm') return;
-    event.preventDefault();
-    if (state.confirmAction === 'deleteTracking' && elements.deleteInput.value.trim() !== t('advancedStats.deleteKeyword')) {
-        elements.dialogError.textContent = t('advancedStats.deletePrompt'); elements.dialogError.hidden = false; elements.deleteInput.focus(); return;
+    } catch (error) {
+        if (version !== state.requestVersion) return;
+        console.error('advanced_stats_battles_more_failed', error);
+        setDataStatus(t('advancedStats.loadFailed'), 'error');
     }
-    const action = state.confirmAction;
-    elements.dialog.close();
-    void runTrackingAction(action);
+    finally {
+        if (version === state.requestVersion) setBusy(false);
+    }
 }
 
 function bindEvents() {
-    elements.account.addEventListener('change', () => { state.playerTag = normalizeTag(elements.account.value); writeStorage(ACCOUNT_STORAGE_KEY, state.playerTag); resetRangeData({ clearTracking: true }); void refreshTrackingAndData(); });
+    elements.account.addEventListener('change', () => { state.playerTag = normalizeTag(elements.account.value); writePreference(ACCOUNT_STORAGE_KEY, state.playerTag); resetRangeData({ clearTracking: true }); void refreshTrackingAndData(); });
     elements.openProfile?.addEventListener('click', () => document.querySelector('#profile-btn')?.click());
     elements.profileRetry?.addEventListener('click', retryProfileLoad);
     elements.trackingRetry?.addEventListener('click', () => void refreshTrackingAndData());
-    elements.start?.addEventListener('click', () => void runTrackingAction('startTracking'));
-    elements.pause?.addEventListener('click', () => void runTrackingAction('pauseTracking'));
-    elements.resume?.addEventListener('click', () => void runTrackingAction('resumeTracking'));
+    elements.start?.addEventListener('click', trackingActions.start);
+    elements.pause?.addEventListener('click', trackingActions.pause);
+    elements.resume?.addEventListener('click', trackingActions.resume);
     elements.refresh?.addEventListener('click', () => void refreshTrackingAndData());
-    elements.stop?.addEventListener('click', () => openConfirmation('stopTracking'));
-    elements.delete?.addEventListener('click', () => openConfirmation('deleteTracking'));
-    elements.dialogForm?.addEventListener('submit', submitConfirmation);
+    elements.stop?.addEventListener('click', trackingActions.openStopConfirmation);
+    elements.delete?.addEventListener('click', trackingActions.openDeleteConfirmation);
+    elements.dialogForm?.addEventListener('submit', trackingActions.submitConfirmation);
     elements.periods?.addEventListener('click', event => {
         const period = event.target.closest('[data-period]')?.dataset.period;
         if (!period || period === state.period) return;
-        state.period = period; writeStorage(PERIOD_STORAGE_KEY, period); resetRangeData(); void loadStatistics();
+        state.period = period; writePreference(PERIOD_STORAGE_KEY, period); resetRangeData(); void loadStatistics();
     });
     elements.unitCategory?.addEventListener('change', () => { state.category = elements.unitCategory.value || 'ALL'; state.units = filteredUnits(); renderStatistics(elements, state); });
     elements.loadMore?.addEventListener('click', loadMoreBattles);
