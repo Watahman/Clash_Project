@@ -49,7 +49,7 @@ html[data-theme="light"] {
     --cp-surface-hover: #e9ece7;
     --cp-text-1: #17202a;
     --cp-text-2: #5e6975;
-    --cp-text-3: #7a858f;
+    --cp-text-3: #64717d;
     --cp-border-1: rgb(23 32 42 / 9%);
     --cp-border-2: rgb(23 32 42 / 16%);
     --cp-border-focus: rgb(141 101 30 / 58%);
@@ -57,13 +57,13 @@ html[data-theme="light"] {
     --cp-brand-hover: #745015;
     --cp-brand-strong: #68470f;
     --cp-brand-soft: rgb(141 101 30 / 10%);
-    --cp-success: #2d8458;
+    --cp-success: #287a50;
     --cp-warning: #95631e;
     --cp-danger: #b04d4d;
-    --cp-info: #3578b8;
-    --cp-manage: #377f73;
+    --cp-info: #2d6ca8;
+    --cp-manage: #2f7267;
     --cp-plan: #8d651e;
     --cp-compete: #a85645;
     --cp-play: #6658b6;
-    --cp-progress: #3578b8;
+    --cp-progress: #2d6ca8;
 }

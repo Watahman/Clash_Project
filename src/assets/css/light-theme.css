@@ -9,7 +9,7 @@
     --surface-hover: #e8edf1;
     --text: #19232e;
     --text-muted: #5f6d7a;
-    --text-subtle: #7f8b97;
+    --text-subtle: #64717d;
     --border: rgba(25, 35, 46, 0.11);
     --border-strong: rgba(25, 35, 46, 0.19);
     --accent: #e1ad45;
@@ -53,8 +53,8 @@
     --blue-dim: rgba(39, 111, 159, 0.10);
     --text-1: #19232e;
     --text-2: #465563;
-    --text-3: #6b7885;
-    --text-4: #929ca6;
+    --text-3: #64717d;
+    --text-4: #64717d;
     --text-on-dark: #f5f7fa;
     --text-muted-on-dark: #b9c2cc;
     --input-bg: #ffffff;
@@ -542,7 +542,7 @@
 }
 
 :root[data-theme="light"] body.workspace-app .workspace-nav p {
-    color: #778592;
+    color: #5d6a76;
 }
 
 :root[data-theme="light"] body.workspace-app .workspace-nav a {
@@ -592,7 +592,7 @@
 
 :root[data-theme="light"] body.workspace-app .workspace-profile-copy small,
 :root[data-theme="light"] body.workspace-app .workspace-profile-arrow {
-    color: #6e7c89;
+    color: #64717d;
 }
 
 :root[data-theme="light"] body.workspace-app .workspace-avatar {
