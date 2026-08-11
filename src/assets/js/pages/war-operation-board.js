@@ -1,28 +1,18 @@
-import { getClanCurrentWarRequest, getClanWarLogRequest } from '../API/API-Clan.js';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { initPlayerPerformancePopover } from '../cwl/cwl-player-performance-popover.js';
 import { initI18n } from '../i18n/i18n.js';
-import { enrichWithHistoricalPerformance } from '../operation-board/operation-board-performance.js?v=20260729-2';
 import { looksLikeClashTag, normalizeTag } from '../operation-board/operation-board-utils.js';
 import { profileHTML } from '../profile/profile_popup.js';
 import {
     deleteWarAssignment,
-    getWarAssignments,
     setWarAssignment
 } from '../Supabase/Supabase-WarAssignments.js';
 import { loadLinkedWarClans } from '../war-operation-board/war-clan-source.js';
-import {
-    fixtureWar,
-    setEmptyState
-} from '../war-operation-board/war-page-utils.js';
-import { buildWarHistory } from '../war-operation-board/war-history-model.js';
+import { createWarLoadController } from '../war-operation-board/war-page-loader.js';
+import { bindWarPageEvents } from '../war-operation-board/war-page-events.js';
 import { renderWarHistory } from '../war-operation-board/war-history-renderer.js';
 import { loadWarFixture } from '../operation-board/operation-board-fixtures.js';
-import {
-    ActiveCwlWarError,
-    buildWarBoardReport,
-    currentWarPlayerContext
-} from '../war-operation-board/war-report-model.js';
+import { currentWarPlayerContext } from '../war-operation-board/war-report-model.js';
 import {
     renderBaseDetail,
     renderRoster,
@@ -33,14 +23,10 @@ import {
 
 const refs = {};
 let selectedTag = '';
-let report = null;
-let historyData = null;
-let assignments = [];
 let mapSide = 'enemy';
 let selectedPosition = 1;
-let controller = null;
-let requestToken = 0;
 let activeFixture = null;
+let warLoader;
 
 async function init() {
     collectRefs();
@@ -51,9 +37,35 @@ async function init() {
     initI18n();
     if (!activeFixture) await Promise.resolve(syncAuthSession()).catch(() => null);
     profileHTML();
-    bindEvents();
+    warLoader = createWarLoadController({
+        refs,
+        getSelectedTag: () => selectedTag,
+        getFixture: () => activeFixture,
+        setStatus,
+        renderCurrent,
+        selectHistoryTab: () => selectTab('history')
+    });
+    bindWarPageEvents({
+        refs,
+        selectClan,
+        submitClan,
+        loadWar,
+        selectTab,
+        onMapSide: side => {
+            mapSide = side;
+            selectedPosition = 1;
+        },
+        renderCurrent,
+        getReport: () => warLoader?.getState().report,
+        handleBoardClick,
+        handleAssignmentSubmit,
+        renderRoster
+    });
     initPlayerPerformancePopover({
-        getCurrentContext: tag => currentWarPlayerContext(report, tag)
+        getCurrentContext: tag => currentWarPlayerContext(
+            warLoader.getState().report,
+            tag
+        )
     });
     await loadClanOptions();
     const queryTag = normalizeTag(new URLSearchParams(location.search).get('clan') || '');
@@ -101,55 +113,13 @@ async function loadClanOptions() {
     }
 }
 
-function bindEvents() {
-    refs.clanSelect.addEventListener('change', () => {
-        if (refs.clanSelect.value) void selectClan(refs.clanSelect.value);
-    });
-    refs.tagForm.addEventListener('submit', event => {
-        event.preventDefault();
-        const tag = normalizeTag(refs.tagInput.value);
-        if (!looksLikeClashTag(tag)) {
-            setStatus('Enter a valid Clash of Clans clan tag.', true);
-            return;
-        }
-        void selectClan(tag);
-    });
-    refs.refresh.addEventListener('click', () => void loadWar(true));
-    document.querySelector('.war-tabs').addEventListener('click', event => {
-        const button = event.target.closest('[data-war-tab]');
-        if (button) selectTab(button.dataset.warTab);
-    });
-    document.querySelectorAll('[data-war-tab]').forEach(button => {
-        button.addEventListener('keydown', event => {
-            const tabs = Array.from(document.querySelectorAll('[data-war-tab]'));
-            const index = tabs.indexOf(button);
-            const next = event.key === 'ArrowRight'
-                ? tabs[(index + 1) % tabs.length]
-                : event.key === 'ArrowLeft'
-                    ? tabs[(index - 1 + tabs.length) % tabs.length]
-                    : event.key === 'Home' ? tabs[0]
-                        : event.key === 'End' ? tabs[tabs.length - 1] : null;
-            if (!next) return;
-            event.preventDefault();
-            selectTab(next.dataset.warTab);
-            next.focus();
-        });
-    });
-    document.querySelector('.war-side-switch').addEventListener('click', event => {
-        const button = event.target.closest('[data-map-side]');
-        if (!button) return;
-        mapSide = button.dataset.mapSide;
-        document.querySelectorAll('[data-map-side]').forEach(item =>
-            item.setAttribute('aria-pressed', String(item === button))
-        );
-        selectedPosition = 1;
-        renderCurrent();
-    });
-    document.addEventListener('click', handleBoardClick);
-    document.addEventListener('submit', handleAssignmentSubmit);
-    refs.rosterFilter.addEventListener('change', () =>
-        renderRoster(refs.roster, report, refs.rosterFilter.value)
-    );
+function submitClan(value) {
+    const tag = normalizeTag(value);
+    if (!looksLikeClashTag(tag)) {
+        setStatus('Enter a valid Clash of Clans clan tag.', true);
+        return;
+    }
+    void selectClan(tag);
 }
 
 async function selectClan(tag) {
@@ -163,87 +133,12 @@ async function selectClan(tag) {
     await loadWar();
 }
 
-async function loadWar(forceRefresh = false) {
-    if (!selectedTag) return;
-    controller?.abort();
-    controller = new AbortController();
-    const token = ++requestToken;
-    report = null;
-    historyData = null;
-    assignments = [];
-    refs.refresh.disabled = true;
-    refs.content.classList.remove('is-refreshing');
-    refs.content.hidden = true;
-    refs.empty.hidden = false;
-    setEmptyState(refs.empty,
-        forceRefresh ? 'Refreshing current war' : 'Loading current war',
-        'The board will show the latest official state when it is ready.'
-    );
-    setStatus(forceRefresh ? 'Refreshing live war data…' : 'Loading current war…');
-    try {
-        const [rawWar, rawHistory] = activeFixture
-            ? [fixtureWar(activeFixture), activeFixture.data?.warLog || []]
-            : await Promise.all([
-                getClanCurrentWarRequest(selectedTag, {
-                    signal: controller.signal,
-                    forceRefresh
-                }),
-                getClanWarLogRequest(selectedTag, {
-                    signal: controller.signal,
-                    forceRefresh
-                })
-            ]);
-        if (token !== requestToken) return;
-        report = buildWarBoardReport(rawWar, selectedTag);
-        historyData = buildWarHistory(rawHistory, selectedTag);
-        assignments = !activeFixture && report.warKey
-            ? await getWarAssignments(report.clan.tag, report.warKey).catch(() => [])
-            : [];
-        refs.empty.hidden = true;
-        refs.content.hidden = false;
-        renderCurrent();
-        if (!report.wars.length) {
-            setStatus('This clan is not in a public regular Clan War. Recent history is still available.');
-            selectTab('history');
-            return;
-        }
-        setStatus('Live war data synced from the official Clash of Clans API.');
-        if (activeFixture) return;
-        const enriched = await enrichWithHistoricalPerformance(report);
-        if (token !== requestToken) return;
-        report = enriched;
-        renderCurrent();
-    } catch (error) {
-        if (error?.name === 'AbortError') return;
-        if (token !== requestToken) return;
-        report = null;
-        historyData = null;
-        assignments = [];
-        refs.empty.hidden = false;
-        refs.content.hidden = true;
-        if (error instanceof ActiveCwlWarError) {
-            setStatus(`${error.message} `, true, true);
-            setEmptyState(refs.empty,
-                'This clan is in an active CWL war',
-                'Regular War Board is for regular wars. Continue in CWL Tracker for the active league war.',
-                true
-            );
-        } else {
-            setStatus(error?.message || 'The current war could not be loaded.', true);
-            setEmptyState(refs.empty,
-                'The current war is unavailable',
-                error?.message || 'Try refreshing when the official API is available.'
-            );
-        }
-    } finally {
-        if (token === requestToken) {
-            refs.refresh.disabled = false;
-            refs.content.classList.remove('is-refreshing');
-        }
-    }
+function loadWar(forceRefresh = false) {
+    return warLoader?.load(forceRefresh);
 }
 
 function renderCurrent() {
+    const { report, historyData, assignments } = warLoader?.getState() || {};
     if (!report) return;
     renderScoreStrip(refs.score, report);
     renderWarMap(refs.liveMap, report, mapSide, selectedPosition, assignments);
@@ -255,6 +150,7 @@ function renderCurrent() {
 }
 
 function handleBoardClick(event) {
+    const { report } = warLoader?.getState() || {};
     const base = event.target.closest('[data-base-position]');
     if (base && report) {
         selectedPosition = Number(base.dataset.basePosition);
@@ -268,6 +164,7 @@ function handleBoardClick(event) {
 }
 
 async function handleAssignmentSubmit(event) {
+    const { report } = warLoader?.getState() || {};
     const form = event.target.closest('.war-assignment-form');
     if (!form || !report) return;
     event.preventDefault();
@@ -281,10 +178,7 @@ async function handleAssignmentSubmit(event) {
                 ? Number(form.dataset.assignmentPosition)
                 : null
         });
-        assignments = assignments.filter(item =>
-            !(item.playerTag === saved.playerTag
-                && item.attackSlot === saved.attackSlot)
-        ).concat(saved);
+        warLoader.replaceAssignment(saved);
         renderCurrent();
         setStatus('Assignment saved.');
     } catch (error) {
@@ -295,7 +189,7 @@ async function handleAssignmentSubmit(event) {
 async function removeAssignment(assignmentId) {
     try {
         await deleteWarAssignment(assignmentId);
-        assignments = assignments.filter(item => item.id !== assignmentId);
+        warLoader.removeAssignment(assignmentId);
         renderCurrent();
         setStatus('Assignment removed.');
     } catch (error) {

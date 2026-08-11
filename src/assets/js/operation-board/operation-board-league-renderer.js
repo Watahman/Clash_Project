@@ -12,6 +12,23 @@ import {
 } from './operation-board-render-utils.js';
 import { buildLeagueModel } from './operation-board-league-model.js';
 
+const ROUND_RESULT_CLASSES = new Set([
+    'draw',
+    'loss',
+    'notAvailable',
+    'notStarted',
+    'pending',
+    'win'
+]);
+const ROUND_STATE_CLASSES = new Set([
+    'completed',
+    'live',
+    'notAvailable',
+    'notStarted',
+    'preparation',
+    'unknown'
+]);
+
 export function renderLeagueSections(refs, report) {
     const league = buildLeagueModel(report);
     const historical = report.mode === 'historical';
@@ -137,7 +154,15 @@ function renderRounds(refs, rounds, predictionState = 'idle') {
     refs.roundsList.replaceChildren();
     rounds.forEach(round => {
         const card = document.createElement('article');
-        card.className = `op-round-card op-round-${round.result} op-round-state-${round.state}`;
+        card.className = `op-round-card op-round-${classToken(
+            round.result,
+            ROUND_RESULT_CLASSES,
+            'notAvailable'
+        )} op-round-state-${classToken(
+            round.state,
+            ROUND_STATE_CLASSES,
+            'unknown'
+        )}`;
         card.setAttribute(
             'aria-label',
             `${t('op.day')} ${round.day}: ${resultText(round.result)}`
@@ -229,4 +254,8 @@ function compactProbabilities(probabilities) {
         .filter(item => item.rank >= 4)
         .reduce((sum, item) => sum + item.probability, 0);
     return lower ? [...top, { label: '#4+', probability: lower }] : top;
+}
+
+function classToken(value, allowed, fallback) {
+    return allowed.has(String(value)) ? String(value) : fallback;
 }

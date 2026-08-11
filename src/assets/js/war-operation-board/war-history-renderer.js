@@ -1,5 +1,7 @@
 import { escapeHtml, number } from '../operation-board/operation-board-utils.js';
 
+const RESULT_CLASSES = new Set(['draw', 'loss', 'win']);
+
 export function renderWarHistory(summaryElement, listElement, history) {
     const summary = history?.summary || {};
     summaryElement.innerHTML = `
@@ -9,12 +11,16 @@ export function renderWarHistory(summaryElement, listElement, history) {
         ${metric('Avg. attack use', summary.avgUsage == null ? '—' : `${number(summary.avgUsage).toFixed(0)}%`)}`;
     const wars = history?.wars || [];
     listElement.innerHTML = wars.length ? wars.map(war => `
-        <article class="war-history-row is-${war.result}">
+        <article class="war-history-row is-${resultClass(war.result)}">
             <span class="war-history-result">${war.result === 'win' ? 'W' : war.result === 'loss' ? 'L' : 'D'}</span>
-            <span><strong>${escapeHtml(war.opponent.name)}</strong><small>${dateLabel(war.endTime)} · ${war.teamSize}v${war.teamSize}</small></span>
-            <span><strong>${war.own.stars} stars — ${war.opponent.stars} stars</strong><small>${war.own.destruction.toFixed(1)}% — ${war.opponent.destruction.toFixed(1)}%</small></span>
-            <span><strong>${war.attackUsage.toFixed(0)}%</strong><small>attack usage</small></span>
+            <span><strong>${escapeHtml(war.opponent.name)}</strong><small>${dateLabel(war.endTime)} · ${number(war.teamSize, 0)}v${number(war.teamSize, 0)}</small></span>
+            <span><strong>${number(war.own.stars)} stars — ${number(war.opponent.stars)} stars</strong><small>${number(war.own.destruction).toFixed(1)}% — ${number(war.opponent.destruction).toFixed(1)}%</small></span>
+            <span><strong>${number(war.attackUsage).toFixed(0)}%</strong><small>attack usage</small></span>
         </article>`).join('') : '<p class="war-muted">No public regular-war history is available for this clan.</p>';
+}
+
+function resultClass(result) {
+    return RESULT_CLASSES.has(String(result)) ? String(result) : 'draw';
 }
 
 function metric(label, value) {
