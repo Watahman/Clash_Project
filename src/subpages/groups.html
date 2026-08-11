@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="robots" content="noindex">
-    <script src="../assets/js/Data/analytics.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Manage ClashPanel Clan Families, members, roles, linked clans, polls and reminders.">
+    <script src="../assets/js/Data/analytics.js"></script>
     <link rel="stylesheet" href="../assets/css/workspace-loading.css">
     <script src="../assets/js/shell/workspace-bootstrap.js"></script>
-    <title>Clan Families · ClashPanel</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <title>Clan Families - ClashPanel</title>
     <link rel="stylesheet" href="../assets/css/Main-css.css">
     <link rel="stylesheet" href="../assets/css/profile-overlay.css">
-    <link rel="stylesheet" href="../assets/css/groups.css">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
-    <link rel="stylesheet" href="../assets/css/groups-workspace-v1.css">
+    <link rel="stylesheet" href="../assets/css/light-theme.css">
+    <link rel="stylesheet" href="../assets/css/workspace-polish.css">
+    <link rel="stylesheet" href="../assets/css/workspace-v2.css">
+    <link rel="stylesheet" href="../assets/css/pages/clan-family.css">
+    <link rel="stylesheet" href="../assets/css/pages/clan-family-overlays.css">
     <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
     <script src="../assets/js/Data/runtime-config.js"></script>
     <script type="module" src="../assets/js/shell/workspace-shell.js"></script>
     <script type="module" src="../assets/js/pages/groups.js"></script>
-    <link rel="stylesheet" href="../assets/css/light-theme.css">
-    <link rel="stylesheet" href="../assets/css/workspace-polish.css">
-    <link rel="stylesheet" href="../assets/css/workspace-v2.css">
 </head>
 <body class="workspace-app" data-workspace-page="groups">
 <header>
@@ -32,191 +31,89 @@
 
 <main id="groups-main" class="groups-page">
     <header class="groups-page-header">
-        <div>
-            <p class="groups-page-kicker" data-i18n="groups.workspaceKicker">Clan network</p>
-            <h1 data-i18n="groups.workspaceTitle">Clan Families</h1>
-            <p data-i18n="groups.workspaceIntro">Members, accounts, polls and clans in one master-detail workspace.</p>
-        </div>
-        <div class="groups-page-actions">
-            <button class="button button-primary groups-add-button" id="groups-new-btn" type="button">
-                <svg class="groups-add-button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-                <span data-i18n="groups.newGroup">Add Clan Family</span>
-            </button>
-        </div>
+        <div><p class="groups-page-kicker" data-family-copy="linkedPreview">Clan network</p><h1 data-i18n="groups.workspaceTitle">Clan Families</h1><p data-i18n="groups.workspaceIntro">Members, accounts, polls and clans in one shared workspace.</p></div>
+        <button class="button button-primary" id="groups-new-btn" type="button"><img src="../assets/icons/ui/add.svg" alt="" width="18" height="18"><span data-i18n="groups.newGroup">Add Clan Family</span></button>
     </header>
-    <p id="groups-page-status" role="status" aria-live="polite" hidden></p>
+    <p id="groups-page-status" class="cf-page-status" role="status" aria-live="polite" hidden></p>
 
     <div class="groups-workspace">
-        <aside id="groups-sidebar" class="group-index" aria-labelledby="groups-index-title">
-            <button class="groups-index-toggle" id="groups-index-toggle" type="button" aria-controls="groups-sidebar" aria-expanded="true" aria-label="Collapse Clan Families">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="m14.5 6-6 6 6 6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </button>
-            <div class="group-index-heading">
-                <div><p class="groups-section-kicker" data-i18n="groups.yourNetwork">Your network</p><h2 id="groups-index-title" data-i18n="groups.title">Your Clan Families</h2></div>
-                <span id="groups-list-count">0</span>
-            </div>
-            <div id="groups-list" class="group-list" role="listbox" aria-label="Your Clan Families" data-i18n-aria-label="groups.title">
-                <p class="groups-empty" data-i18n="groups.none">No Clan Families</p>
-            </div>
+        <aside id="groups-sidebar" class="cf-family-index" aria-labelledby="groups-index-title">
+            <div class="cf-index-header"><div><p class="groups-section-kicker" data-i18n="groups.yourNetwork">Your network</p><h2 id="groups-index-title" data-i18n="groups.title">Your Clan Families</h2></div><span id="groups-list-count" class="cf-count-badge">0</span></div>
+            <div id="groups-list" class="cf-family-list" role="listbox" aria-label="Your Clan Families" data-i18n-aria-label="groups.title"><p class="groups-empty" data-i18n="groups.none">No Clan Families</p></div>
+            <button class="button button-secondary button-full" id="groups-join-shortcut" type="button"><img src="../assets/icons/ui/user-plus.svg" alt="" width="16" height="16"><span data-i18n="groups.join">Join a Clan Family</span></button>
+            <button class="cf-index-toggle" id="groups-index-toggle" type="button" aria-controls="groups-sidebar" aria-expanded="true"><img src="../assets/icons/ui/chevron-left.svg" alt="" width="16" height="16"><span class="sr-only" data-i18n="groups.collapseFamilyList">Collapse family list</span></button>
         </aside>
 
-        <section id="groups-detail" class="group-detail" aria-live="polite">
-            <div id="groups-detail-empty" class="groups-detail-empty">
-                <span aria-hidden="true">◇</span><h2 data-i18n="groups.select">Select a Clan Family</h2><p data-i18n="groups.selectHelp">Choose a Clan Family on the left to open members, availability and management.</p>
-            </div>
+        <section id="groups-detail" class="cf-family-detail" aria-live="polite">
+            <div id="groups-detail-empty" class="cf-empty-state"><img src="../assets/icons/ui/users.svg" alt="" width="28" height="28"><h2 id="groups-detail-empty-title" data-i18n="groups.select">Select a Clan Family</h2><p id="groups-detail-empty-body" data-i18n="groups.selectHelp">Choose a Clan Family to view readiness, members, clans and polls.</p><div class="cf-empty-actions"><button class="button button-primary" id="groups-empty-create" type="button" data-i18n="groups.createBtn">Create Clan Family</button><button class="button button-secondary" id="groups-empty-join" type="button" data-i18n="groups.joinBtn">Join Clan Family</button></div></div>
 
             <div id="groups-detail-content" class="hidden">
-                <header class="group-detail-header">
-                    <div
-                            class="groups-detail-logo group-avatar-large"
-                            id="groups-detail-logo"
-                            aria-hidden="true"
-                    >
-                        CT
-                    </div>
-
-                    <div class="groups-detail-info">
-                        <div class="groups-detail-title-row">
-                            <h2 class="groups-detail-name" id="groups-detail-name">
-                                Clan Family name
-                            </h2>
-
-                            <span class="groups-role-badge" id="groups-detail-role">
-                                Member
-                            </span>
-                        </div>
-
-                        <div class="groups-detail-meta">
-                            <span id="groups-detail-count">0 members</span>
-                            <span aria-hidden="true">·</span>
-                            <span class="groups-since" id="groups-detail-since">
-                                since —
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="groups-header-actions">
-                        <button
-                                class="groups-code-pill"
-                                id="groups-detail-code"
-                                type="button"
-                                title="Copy code"
-                                data-i18n-title="groups.copyCode"
-                                data-copy-state="idle"
-                        >
-                            <span id="groups-detail-code-text">------</span>
-
-                            <img
-                                    src="../assets/css/pictures/copy.svg"
-                                    id="groups-detail-copy"
-                                    alt=""
-                                    aria-hidden="false"
-                            >
-
-                            <img
-                                    src="../assets/css/pictures/checkmark_blank.svg"
-                                    id="groups-detail-checkmark"
-                                    class="hidden"
-                                    alt=""
-                                    hidden
-                                    aria-hidden="true"
-                                    style="display: none !important;"
-                            >
-                        </button>
-
-                        <button
-                                class="groups-icon-button groups-danger"
-                                id="groups-leave-btn"
-                                type="button"
-                                title="Leave Clan Family"
-                                data-i18n-title="groups.leaveGroup"
-                                data-i18n-aria-label="groups.leaveGroup"
-                        >
-                            <img
-                                    src="../assets/css/pictures/leaving-door.svg"
-                                    alt=""
-                            >
-                        </button>
-                    </div>
+                <header class="cf-family-header">
+                    <div class="cf-family-heading"><div id="groups-detail-logo" class="cf-family-badge" aria-hidden="true"></div><div><p class="groups-section-kicker" data-family-copy="linkedPreview">Clan Family</p><div class="cf-title-line"><h2 id="groups-detail-name">Clan Family</h2><span class="groups-role-badge" id="groups-detail-role">Member</span></div><div class="cf-family-meta"><span id="groups-detail-count">0 members</span><span aria-hidden="true">/</span><span id="groups-detail-since">since -</span></div></div></div>
+                    <div class="cf-family-actions"><button class="cf-code-button" id="groups-detail-code" type="button" title="Copy invite code" data-i18n-title="groups.copyCode"><span class="groups-section-kicker" data-family-copy="invite">Invite</span><strong id="groups-detail-code-text">------</strong><img src="../assets/icons/ui/copy.svg" alt="" width="16" height="16"></button><div class="cf-menu-wrap"><button class="cf-icon-button" id="groups-family-menu-button" type="button" aria-expanded="false" aria-controls="groups-family-menu" data-family-aria-label="moreActions"><img src="../assets/icons/ui/more-horizontal.svg" alt="" width="18" height="18"></button><div id="groups-family-menu" class="cf-menu hidden"><button id="groups-settings-shortcut" type="button"><img src="../assets/icons/ui/settings.svg" alt="" width="16" height="16"><span data-family-copy="settings">Settings</span></button><button id="groups-leave-shortcut" type="button" class="cf-danger-action"><img src="../assets/icons/ui/remove.svg" alt="" width="16" height="16"><span data-i18n="groups.leaveGroup">Leave Clan Family</span></button></div></div></div>
                 </header>
 
-                <nav class="groups-detail-tabs" aria-label="Clan Family sections" data-i18n-aria-label="groups.sections">
-                    <button class="is-active" data-group-tab="members" type="button"><span data-i18n="groups.membersTab">Members</span><b id="groups-detail-tab-member-count">0</b></button>
-                    <button data-group-tab="availability" type="button"><span data-i18n="groups.availability">Availability</span><b id="groups-detail-tab-availability-count" class="groups-tab-notification-count hidden" aria-label="0" aria-live="polite">0</b></button>
-                    <button data-group-tab="polls" type="button"><span data-i18n="groups.polls">Polls</span></button>
-                    <button data-group-tab="clans" type="button"><span data-i18n="groups.linkedClans">Linked clans</span><b id="groups-detail-tab-clan-count">0</b></button>
+                <div class="cf-metric-strip" aria-label="Clan Family summary"><div><span data-i18n="groups.membersTab">Members</span><strong id="cf-metric-members">0</strong><span id="groups-inspector-members" class="sr-only">0</span></div><div><span data-i18n="groups.accounts">Accounts</span><strong id="cf-metric-accounts">0</strong><span id="groups-inspector-accounts" class="sr-only">0</span></div><div><span data-i18n="groups.linkedClans">Linked clans</span><strong id="cf-metric-clans">0</strong><span id="groups-inspector-clans" class="sr-only">0</span></div><div><span data-family-copy="activePoll">Active poll</span><strong id="cf-metric-polls">0</strong></div></div>
+
+                <nav class="groups-detail-tabs" role="tablist" aria-label="Clan Family sections" data-i18n-aria-label="groups.sections">
+                    <button id="groups-tab-overview" role="tab" aria-selected="true" aria-controls="groups-panel-overview" data-group-tab="overview" type="button"><span data-family-copy="overview">Overview</span></button>
+                    <button id="groups-tab-members" role="tab" aria-selected="false" aria-controls="groups-panel-members" data-group-tab="members" type="button"><span data-i18n="groups.membersTab">Members</span><b id="groups-detail-tab-member-count">0</b></button>
+                    <button id="groups-tab-clans" role="tab" aria-selected="false" aria-controls="groups-panel-clans" data-group-tab="clans" type="button"><span data-i18n="groups.linkedClans">Clans</span><b id="groups-detail-tab-clan-count">0</b></button>
+                    <button id="groups-tab-polls" role="tab" aria-selected="false" aria-controls="groups-panel-polls" data-group-tab="polls" type="button"><span data-i18n="groups.polls">Polls</span><b id="groups-detail-tab-poll-count" class="groups-tab-notification-count hidden" aria-live="polite">0</b></button>
+                    <button id="groups-tab-settings" role="tab" aria-selected="false" aria-controls="groups-panel-settings" data-group-tab="settings" type="button"><span data-family-copy="settings">Settings</span></button>
                 </nav>
 
-                <div class="groups-tab-panel is-visible" data-group-panel="members">
-                    <div class="groups-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.memberList">Member list</p><h2 data-i18n="groups.allMembers">All members</h2></div><span id="groups-members-summary">0 members</span></div>
-                    <div id="groups-member-list" class="groups-member-list"><p class="groups-empty" data-i18n="groups.noMembers">No members</p></div>
-                </div>
+                <section id="groups-panel-overview" class="groups-tab-panel cf-panel" data-group-panel="overview" role="tabpanel" aria-labelledby="groups-tab-overview">
+                    <div class="cf-overview-grid"><section class="cf-section" aria-labelledby="cf-readiness-title"><div class="cf-section-heading"><div><p class="groups-section-kicker" data-family-copy="readiness">Readiness</p><h3 id="cf-readiness-title" data-family-copy="nextActions">Next actions</h3></div><span id="cf-readiness-status" class="cf-status-chip">-</span></div><div id="cf-readiness-list" class="cf-action-list"></div></section><section class="cf-section" aria-labelledby="cf-attention-title"><div class="cf-section-heading"><div><p class="groups-section-kicker" data-family-copy="attention">Needs attention</p><h3 id="cf-attention-title" data-family-copy="keepReady">Keep the family ready</h3></div></div><div id="cf-attention-list" class="cf-action-list"></div></section></div>
+                    <div class="cf-overview-grid cf-overview-lower"><section class="cf-section" aria-labelledby="cf-poll-title"><div class="cf-section-heading"><div><p class="groups-section-kicker" data-family-copy="activePoll">Active availability poll</p><h3 id="cf-poll-title" data-i18n="groups.polls">Polls</h3></div><div class="cf-heading-actions"><button class="button button-secondary button-small" type="button" data-family-action="polls" data-family-copy="view">View</button><a class="button button-secondary button-small" href="/app/cwl-planner" data-i18n="nav.cwl">Open CWL Planner</a></div></div><div id="groups-poll-empty" class="cf-inline-empty"><img src="../assets/icons/ui/calendar.svg" alt="" width="18" height="18"><strong data-family-copy="noActivePoll">No active availability poll</strong><span data-family-copy="pollHelp">Create a CWL availability poll so members can answer for each linked account and day.</span></div><div id="groups-poll-notice" class="cf-poll-notice hidden"><div><strong id="groups-poll-notice-title">CWL availability</strong><span id="groups-poll-notice-progress"></span></div><button class="button button-primary" id="groups-poll-answer-btn" type="button" data-i18n="groups.answerPoll">Answer poll</button></div></section><section class="cf-section" aria-labelledby="cf-clan-preview-title"><div class="cf-section-heading"><div><p class="groups-section-kicker" data-family-copy="linkedPreview">Linked clans</p><h3 id="cf-clan-preview-title" data-i18n="groups.linkedClans">Clan network</h3></div><button class="button button-secondary button-small" type="button" data-family-action="clans" data-family-copy="view">View</button></div><div id="cf-overview-clans" class="cf-preview-list"></div></section></div>
+                    <section class="cf-permission-note" aria-labelledby="cf-permission-title"><img src="../assets/icons/ui/info.svg" alt="" width="18" height="18"><div><strong id="cf-permission-title" data-i18n="groups.rolesPermissions">Roles and permissions</strong><p id="cf-overview-permission" data-family-copy="permissionMember">Members can view family information and answer polls. Leaders and co-leaders manage members.</p></div></section>
+                </section>
 
-                <div class="groups-tab-panel" data-group-panel="availability">
-                    <div class="groups-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.pollActive">Active CWL poll</p><h2 data-i18n="groups.availability">Availability</h2></div></div>
-                    <div class="groups-detail-empty groups-panel-empty" id="groups-availability-empty"><span aria-hidden="true">○</span><h3 data-i18n="groups.noActivePoll">No active poll</h3><p data-i18n="groups.noActivePollHelp">When a leader opens a CWL poll, every member can answer here per account.</p></div>
-                    <div class="groups-poll-notice hidden" id="groups-poll-notice"><div><span class="groups-admin-kicker" data-i18n="groups.pollActive">Active CWL poll</span><strong id="groups-poll-notice-title">CWL availability</strong><p id="groups-poll-notice-copy" data-i18n="groups.pollNoticeText">Tell the Clan Family per account whether you can play CWL.</p></div><button class="button button-primary" id="groups-poll-answer-btn" type="button" data-i18n="groups.answerPoll">Answer poll</button></div>
-                    <section class="groups-admin-only hidden groups-results-section" aria-labelledby="groups-results-title">
-                        <div class="groups-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.pollResults">Poll results</p><h2 id="groups-results-title" data-i18n="groups.availabilityPerAccount">Per account and CWL day</h2></div><button class="button button-secondary button-small" id="groups-poll-reminder-btn" type="button" data-i18n="groups.sendReminder">Send reminder</button></div>
-                        <div class="groups-poll-results" id="groups-poll-results"><p class="groups-empty" data-i18n="groups.noPollSelected">Select or create a poll.</p></div>
-                    </section>
-                </div>
+                <section id="groups-panel-members" class="groups-tab-panel cf-panel" data-group-panel="members" role="tabpanel" aria-labelledby="groups-tab-members" hidden>
+                    <div class="cf-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.memberList">Member list</p><h3 data-i18n="groups.allMembers">All members</h3></div><span id="groups-members-filter-count" class="cf-muted-count">0 members</span></div>
+                    <div class="cf-filter-bar"><label class="cf-search"><img src="../assets/icons/ui/search.svg" alt="" width="16" height="16"><span class="sr-only" data-family-copy="searchMembers">Search members</span><input id="groups-member-search" type="search" data-family-placeholder="searchMembers" placeholder="Search members"></label><label><span class="sr-only" data-family-copy="role">Role</span><select id="groups-member-role-filter" data-family-aria-label="role"><option value="all" data-i18n="groups.allRoles">All roles</option><option value="leader" data-i18n="groups.roleLeader">Leader</option><option value="co_leader" data-i18n="groups.roleCoLeader">Co-leader</option><option value="member" data-i18n="groups.member">Member</option></select></label><label><span class="sr-only" data-family-copy="accountLinkStatus">Account link status</span><select id="groups-member-link-filter" data-family-aria-label="accountLinkStatus"><option value="all" data-i18n="groups.allAccounts">All accounts</option><option value="linked" data-i18n="groups.linkedAccounts">Linked accounts</option><option value="unlinked" data-i18n="groups.unlinkedAccounts">Unlinked accounts</option></select></label></div>
+                    <p id="groups-members-filter-empty" class="groups-empty" hidden data-i18n="groups.noMembers">No members match these filters.</p><div id="groups-member-list" class="cf-member-list"><p class="groups-empty" data-i18n="groups.noMembers">No members</p></div><p id="groups-members-summary" class="sr-only">0 members</p>
+                </section>
 
-                <div class="groups-tab-panel" data-group-panel="polls">
-                    <div class="groups-member-only groups-permission-message"><strong data-i18n="groups.polls">Polls</strong><span data-i18n="groups.pollMemberHelp">Answer active polls under Availability. Only leaders manage polls and results.</span></div>
-                    <div class="groups-admin-only hidden groups-management-grid">
-                        <section class="groups-management-section"><div class="groups-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.polls">Polls</p><h2 data-i18n="groups.createPoll">Create CWL poll</h2></div></div><div class="groups-inline-form"><input id="groups-poll-title-input" type="text" data-i18n-placeholder="groups.pollTitlePlaceholder" placeholder="CWL availability"><input id="groups-poll-rounds-input" type="number" min="1" max="7" value="7" aria-label="CWL days"><button class="button button-primary" id="groups-poll-create-btn" type="button" aria-describedby="groups-poll-create-help groups-poll-limit-feedback" data-i18n="groups.createPollBtn">Create poll</button></div><p class="groups-admin-help" id="groups-poll-create-help" data-i18n="groups.pollCreateHelp">By default the poll asks availability for 7 CWL days. A Clan Family can keep up to 3 polls.</p><p class="groups-admin-help groups-poll-limit-feedback" id="groups-poll-limit-feedback" role="status" data-i18n="groups.pollLimitReached" hidden>You already have 3 polls. Delete an existing poll before creating a new one.</p></section>
-                        <section class="groups-management-section"><div class="groups-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.pollOverview">Poll overview</p><h2 data-i18n="groups.openAndClosedPolls">Open and closed polls</h2></div></div><div class="groups-admin-members" id="groups-admin-polls-list"></div></section>
-                    </div>
-                </div>
+                <section id="groups-panel-clans" class="groups-tab-panel cf-panel" data-group-panel="clans" role="tabpanel" aria-labelledby="groups-tab-clans" hidden>
+                    <div class="cf-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.clanNetwork">Clan network</p><h3 data-i18n="groups.linkedClans">Linked clans</h3></div><button id="groups-clans-retry" class="button button-secondary button-small" type="button" data-family-copy="retry">Retry</button></div>
+                    <p class="cf-section-help" data-i18n="groups.clansSharedHelp">Linked clans belong to this Clan Family and are visible to every member.</p>
+                    <div class="cf-inline-form groups-admin-only hidden" data-role-visible="leader,co_leader"><label class="sr-only" for="groups-admin-clan-tag" data-i18n="groups.clanTagPlaceholder">Clan tag</label><input id="groups-admin-clan-tag" type="text" placeholder="Clan tag: #ABC123" data-i18n-placeholder="groups.clanTagPlaceholder"><button class="button button-primary" id="groups-admin-add-clan" type="button" data-i18n="groups.addClan">Add clan</button></div>
+                    <p id="groups-clan-status" class="cf-inline-status" role="status" aria-live="polite"></p><div id="groups-clan-list" class="cf-row-list"><p class="groups-empty" data-i18n="groups.noLinkedClans">No clans linked yet</p></div>
+                    <section class="cf-audit-section groups-admin-only hidden" data-role-visible="leader,co_leader" aria-labelledby="cf-audit-title"><div class="cf-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.accountAudit">Account audit</p><h3 id="cf-audit-title" data-i18n="groups.unlinkedAccounts">Unlinked accounts</h3></div><button class="button button-secondary button-small" id="groups-admin-scan-unlinked" type="button" data-i18n="groups.scanUnlinked">Scan</button></div><p class="cf-section-help" data-i18n="groups.unlinkedHelp">Compares live clan members with accounts from Clan Family members.</p><p id="groups-audit-status" class="cf-audit-status" data-state="not-run" data-family-copy="auditNotRun">Run a scan to compare live clan members with linked family accounts.</p><div id="groups-unlinked-accounts" class="cf-row-list"><p class="groups-empty" data-i18n="groups.scanFirst">Start a scan to see missing links.</p></div></section>
+                </section>
 
-                <div class="groups-tab-panel" data-group-panel="clans">
-                    <div class="groups-management-grid">
-                        <section class="groups-management-section"><div class="groups-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.clanNetwork">Clan network</p><h2 data-i18n="groups.linkedClans">Linked clans</h2></div></div><p class="groups-admin-help" data-i18n="groups.clansSharedHelp">Linked clans belong to this Clan Family and are visible to every member.</p><div class="groups-inline-form groups-admin-only hidden"><input id="groups-admin-clan-tag" type="text" placeholder="Clan tag: #ABC123" data-i18n-placeholder="groups.clanTagPlaceholder"><button class="button button-primary" id="groups-admin-add-clan" type="button" data-i18n="groups.addClan">Add clan</button></div><div class="groups-linked-clans" id="groups-linked-clans"><p class="groups-empty" data-i18n="groups.noLinkedClans">No clans linked yet</p></div></section>
-                        <section class="groups-management-section groups-admin-only hidden"><div class="groups-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.accountAudit">Account audit</p><h2 data-i18n="groups.unlinkedAccounts">Unlinked accounts</h2></div><button class="button button-secondary button-small" id="groups-admin-scan-unlinked" type="button" data-i18n="groups.scanUnlinked">Scan</button></div><p class="groups-admin-help" data-i18n="groups.unlinkedHelp">Compares live clan members with accounts from Clan Family members.</p><div class="groups-unlinked-accounts" id="groups-unlinked-accounts"><p class="groups-empty" data-i18n="groups.scanFirst">Start a scan to see missing links.</p></div></section>
-                    </div>
-                </div>
+                <section id="groups-panel-polls" class="groups-tab-panel cf-panel" data-group-panel="polls" role="tabpanel" aria-labelledby="groups-tab-polls" hidden>
+                    <div class="cf-section-heading"><div><p class="groups-section-kicker" data-family-copy="activePoll">CWL availability</p><h3 data-i18n="groups.polls">Polls</h3></div><button class="button button-secondary button-small" id="groups-polls-retry" type="button" data-family-copy="retry">Retry</button></div>
+                    <p class="cf-section-help" data-family-copy="permissionMember">Members can view family information and answer polls. Leaders and co-leaders manage members.</p>
+                    <section class="cf-poll-management groups-admin-only hidden" data-role-visible="leader,co_leader" aria-labelledby="cf-poll-create-title"><div class="cf-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.polls">Polls</p><h3 id="cf-poll-create-title" data-i18n="groups.createPoll">Create CWL poll</h3></div></div><div class="cf-inline-form"><label class="sr-only" for="groups-poll-title-input" data-i18n="groups.pollTitlePlaceholder">Poll title</label><input id="groups-poll-title-input" type="text" data-i18n-placeholder="groups.pollTitlePlaceholder" placeholder="CWL availability"><label class="sr-only" for="groups-poll-rounds-input" data-family-copy="cwlDays">CWL days</label><input id="groups-poll-rounds-input" type="number" min="1" max="7" value="7" data-family-aria-label="cwlDays"><button class="button button-primary" id="groups-poll-create-btn" type="button" data-i18n="groups.createPollBtn">Create poll</button></div><p class="cf-section-help" id="groups-poll-create-help" data-i18n="groups.pollCreateHelp">By default the poll asks availability for 7 CWL days. A Clan Family can keep up to 3 polls.</p><p class="cf-inline-status" id="groups-poll-limit-feedback" role="status" hidden data-i18n="groups.pollLimitReached">You already have 3 polls. Delete an existing poll before creating a new one.</p></section>
+                    <section class="cf-poll-list-section" aria-labelledby="cf-poll-list-title"><div class="cf-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.pollOverview">Poll overview</p><h3 id="cf-poll-list-title" data-i18n="groups.openAndClosedPolls">Open and closed polls</h3></div></div><div id="groups-admin-polls-list" class="cf-row-list"><p class="groups-empty" data-i18n="groups.loading">Loading polls...</p></div></section>
+                    <section class="cf-results-section groups-admin-only hidden" data-role-visible="leader,co_leader" aria-labelledby="cf-results-title"><div class="cf-section-heading"><div><p class="groups-section-kicker" data-i18n="groups.pollResults">Poll results</p><h3 id="cf-results-title" data-i18n="groups.availabilityPerAccount">Per account and CWL day</h3></div><button class="button button-secondary button-small" id="groups-poll-reminder-btn" type="button" data-i18n="groups.sendReminder">Send reminder</button></div><div id="groups-poll-results" class="cf-results-list"><p class="groups-empty" data-i18n="groups.noPollSelected">Select or create a poll.</p></div></section>
+                </section>
+
+                <section id="groups-panel-settings" class="groups-tab-panel cf-panel" data-group-panel="settings" role="tabpanel" aria-labelledby="groups-tab-settings" hidden>
+                    <div class="cf-section-heading"><div><p class="groups-section-kicker" data-family-copy="settings">Settings</p><h3 data-family-copy="familySettings">Clan Family settings</h3></div></div>
+                    <section class="cf-settings-section"><h4 data-family-copy="identity">Identity</h4><dl class="cf-settings-list"><div><dt data-family-copy="familyName">Clan Family name</dt><dd id="groups-settings-family-name">-</dd></div><div><dt data-i18n="groups.inviteCode">Invitation code</dt><dd><span id="groups-settings-code-text">------</span><button class="button button-secondary button-small" id="groups-settings-copy-code" type="button" data-family-copy="copyInvite">Copy invite code</button></dd></div></dl><p class="cf-section-help" data-family-copy="inviteHelp">Share this code with someone who should join the Clan Family.</p></section>
+                    <section class="cf-settings-section"><h4 data-i18n="groups.rolesPermissions">Roles and permissions</h4><div class="cf-role-table"><div><strong data-i18n="groups.roleLeader">Leader</strong><span data-family-copy="permissionLeader">Leaders manage roles, members, linked clans and family settings.</span></div><div><strong data-i18n="groups.roleCoLeader">Co-leader</strong><span data-family-copy="permissionCoLeader">Co-leaders can manage normal members. Leaders manage roles and transfer leadership.</span></div><div><strong data-i18n="groups.member">Member</strong><span data-family-copy="permissionMember">Members can view family information and answer polls. Leaders and co-leaders manage members.</span></div></div></section>
+                    <section class="cf-settings-section cf-danger-section"><h4 data-family-copy="dangerZone">Leave Clan Family</h4><p data-i18n="groups.leaveDesc">You can join again with the Clan Family code.</p><button class="button button-danger" id="groups-leave-btn" type="button" data-i18n="groups.leaveGroup">Leave Clan Family</button></section>
+                </section>
             </div>
         </section>
-
-        <aside class="group-inspector" id="groups-inspector" aria-labelledby="groups-inspector-title">
-            <p class="groups-section-kicker" data-i18n="groups.groupInfo">Clan Family info</p><h2 id="groups-inspector-title"><span id="groups-inspector-name">—</span></h2><p class="group-description" id="groups-inspector-description" data-i18n="groups.inspectorEmpty">Select a Clan Family to view its key details.</p>
-            <dl class="groups-inspector-stats"><div><dt data-i18n="groups.membersTab">Members</dt><dd id="groups-inspector-members">—</dd></div><div><dt data-i18n="groups.accounts">Accounts</dt><dd id="groups-inspector-accounts">—</dd></div><div><dt data-i18n="groups.leaders">Leaders</dt><dd id="groups-inspector-leaders">—</dd></div><div><dt data-i18n="groups.linkedClans">Linked clans</dt><dd id="groups-inspector-clans">—</dd></div></dl>
-            <div id="groups-inspector-management" class="hidden"><hr><p class="groups-section-kicker" data-i18n="groups.management">Management</p><button class="groups-inspector-link groups-admin-only hidden" id="groups-inspector-roles" type="button"><span data-i18n="groups.rolesPermissions">Roles and permissions</span><span aria-hidden="true">→</span></button><button class="groups-inspector-link" id="groups-inspector-code" type="button"><span data-i18n="groups.inviteCode">Invitation code</span><span aria-hidden="true">→</span></button><button class="groups-inspector-link groups-danger-text" id="groups-inspector-leave" type="button"><span data-i18n="groups.leaveGroup">Leave Clan Family</span><span aria-hidden="true">→</span></button></div>
-        </aside>
     </div>
 </main>
 
-<div class="overlay hidden" id="groups-admin-overlay">
-    <section class="overlay-container groups-admin-panel" id="groups-admin-panel" data-i18n-aria-label="groups.adminTitle" aria-label="Clan Family admin" role="dialog" aria-modal="true">
-        <div class="groups-admin-header"><div><span class="groups-admin-kicker" data-i18n="groups.adminKicker">Leader tools</span><h3 id="groups-admin-title" data-i18n="groups.adminTitle">Clan Family admin</h3><p id="groups-admin-subtitle" data-i18n="groups.adminSubtitle">Manage this Clan Family.</p></div><button class="groups-icon-button" id="groups-admin-close" type="button" data-i18n-title="groups.closeAdmin" data-i18n-aria-label="groups.closeAdmin"><span aria-hidden="true">×</span></button></div>
-        <p class="groups-admin-message" id="groups-admin-message"></p>
-        <div class="groups-admin-section" id="groups-admin-section-members" data-admin-section="members"><article class="groups-admin-card"><div class="groups-admin-card-header"><h4 data-i18n="groups.manageMembers">Manage members</h4><p class="groups-admin-help" id="groups-admin-role-help"></p></div><div class="groups-admin-members" id="groups-admin-members"><p class="groups-empty" data-i18n="groups.loading">Loading Clan Families...</p></div></article></div>
-    </section>
-</div>
+<div class="overlay hidden" id="groups-overlay-new" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="groups-create-join-title"><div class="overlay-container cf-dialog"><div class="cf-dialog-header"><div><p class="groups-section-kicker" data-family-copy="createJoin">Clan Family</p><h2 id="groups-create-join-title" data-family-copy="createJoinTitle">Create or join a Clan Family</h2></div><button class="cf-icon-button" type="button" data-dialog-close data-family-aria-label="close"><img src="../assets/icons/ui/close.svg" alt="" width="18" height="18"></button></div><div class="cf-dialog-tabs" role="tablist"><button class="is-active" id="groups-tab-create" role="tab" aria-selected="true" type="button" data-i18n="groups.create">Create</button><button id="groups-tab-join" role="tab" aria-selected="false" type="button" data-i18n="groups.join">Join</button></div><section id="groups-panel-create" class="cf-dialog-panel"><div class="cf-choice-row"><button class="is-active" id="groups-create-opt-name" type="button" data-i18n="groups.groupName">Clan Family name</button><button id="groups-create-opt-clan" type="button" data-i18n="groups.clan">Clash of Clans clan</button></div><div id="groups-create-by-name"><label for="groups-input-name" data-family-copy="familyName">Clan Family name</label><input id="groups-input-name" type="text" data-family-placeholder="familyName" placeholder="Clan Family name"></div><div id="groups-create-by-clan" class="hidden"><label for="groups-input-clan-tag" data-i18n="groups.clanTagPlaceholder">Clan tag</label><input id="groups-input-clan-tag" type="text" data-i18n-placeholder="groups.clanTagPlaceholder" placeholder="Clan tag: #ABC123"><p id="groups-clan-hint" class="cf-inline-status"></p></div><button class="button button-primary button-full" id="groups-overlay-create-btn" type="button" data-i18n="groups.createBtn">Create</button></section><section id="groups-panel-join" class="cf-dialog-panel hidden"><label for="groups-input-join-code" data-i18n="groups.inviteCode">Invitation code</label><input id="groups-input-join-code" type="text" data-i18n-placeholder="groups.joinCodePlaceholder" placeholder="Clan Family code: ######"><button class="button button-primary button-full" id="groups-overlay-join-btn" type="button" data-i18n="groups.joinBtn">Join</button></section></div></div>
 
-<div class="overlay hidden" id="groups-overlay-new">
-    <div class="overlay-container groups-overlay-tabbed" role="dialog" aria-modal="true" data-i18n-aria-label="groups.createJoinAria" aria-label="Create or join a Clan Family">
-        <div class="groups-overlay-tabs" role="tablist"><button class="groups-overlay-tab groups-overlay-tab-active" id="groups-tab-create" type="button" data-i18n="groups.create">Create</button><button class="groups-overlay-tab" id="groups-tab-join" type="button" data-i18n="groups.join">Join</button></div>
-        <div class="groups-overlay-panel" id="groups-panel-create"><div class="groups-create-options"><button class="groups-create-option groups-create-option-active" id="groups-create-opt-name" type="button"><span data-i18n="groups.groupName">Clan Family name</span></button><button class="groups-create-option" id="groups-create-opt-clan" type="button"><span data-i18n="groups.clan">Clash of Clans clan</span></button></div><div id="groups-create-by-name"><input id="groups-input-name" type="text" data-i18n-placeholder="groups.groupName" placeholder="Clan Family name"></div><div id="groups-create-by-clan" class="hidden"><input id="groups-input-clan-tag" type="text" data-i18n-placeholder="groups.clanTagPlaceholder" placeholder="Clan tag: #ABC123"><p class="groups-clan-hint" id="groups-clan-hint"></p></div><button class="button button-primary button-full" id="groups-overlay-create-btn" type="button" data-i18n="groups.createBtn">Create</button></div>
-        <div class="groups-overlay-panel hidden" id="groups-panel-join"><input id="groups-input-join-code" type="text" data-i18n-placeholder="groups.joinCodePlaceholder" placeholder="Clan Family code: ######"><button class="button button-primary button-full" id="groups-overlay-join-btn" type="button" data-i18n="groups.joinBtn">Join</button></div>
-    </div>
-</div>
+<div class="overlay hidden" id="groups-overlay-leave" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="groups-leave-title"><div class="overlay-container cf-dialog cf-confirm-dialog"><h2 id="groups-leave-title" data-i18n="groups.leaveTitle">Leave Clan Family?</h2><p data-i18n="groups.leaveDesc">Are you sure you want to leave this Clan Family? You can join again with the Clan Family code.</p><div class="cf-dialog-actions"><button class="button button-secondary" id="groups-leave-cancel-btn" type="button" data-dialog-close data-i18n="groups.cancel">Cancel</button><button class="button button-danger" id="groups-leave-confirm-btn" type="button" data-i18n="groups.leave">Leave</button></div></div></div>
+
+<div class="overlay hidden" id="groups-role-confirm-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="groups-role-confirm-title"><div class="overlay-container cf-dialog cf-confirm-dialog"><h2 id="groups-role-confirm-title" data-i18n="groups.transferTitle">Transfer leadership?</h2><p id="groups-role-confirm-text"></p><div class="cf-dialog-actions"><button class="button button-secondary" id="groups-role-confirm-cancel" type="button" data-dialog-close data-i18n="groups.cancel">Cancel</button><button class="button button-primary" id="groups-role-confirm-accept" type="button"><span id="groups-role-confirm-accept-text" data-i18n="groups.transferConfirm">Transfer</span></button></div></div></div>
+
+<div class="overlay hidden" id="groups-poll-answer-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="groups-poll-answer-title"><div class="overlay-container cf-dialog cf-poll-dialog"><div class="cf-dialog-header"><div><p class="groups-section-kicker" data-i18n="groups.pollTypeCwl">CWL availability</p><h2 id="groups-poll-answer-title">CWL poll</h2><p id="groups-poll-answer-group"></p></div><button class="cf-icon-button" id="groups-poll-answer-close" type="button" data-dialog-close data-family-aria-label="close"><img src="../assets/icons/ui/close.svg" alt="" width="18" height="18"></button></div><div id="groups-poll-answer-body" class="cf-poll-answer-body"></div><div class="cf-dialog-actions"><button class="button button-secondary" id="groups-poll-answer-cancel" type="button" data-i18n="groups.cancel">Cancel</button><button class="button button-primary" id="groups-poll-answer-save" type="button" data-i18n="groups.savePollAnswer">Save answer</button></div></div></div>
+
+<div class="overlay hidden" id="groups-member-drawer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="groups-member-drawer-name"><aside class="cf-drawer"><div class="cf-drawer-header"><div><p class="groups-section-kicker" data-family-copy="memberDrawer">Member details</p><div class="cf-drawer-title"><div id="groups-member-drawer-avatar" class="cf-drawer-avatar" aria-hidden="true">?</div><div><h2 id="groups-member-drawer-name">Member</h2><p id="groups-member-drawer-code"></p></div></div></div><button class="cf-icon-button" id="groups-member-drawer-close" type="button" data-dialog-close data-family-aria-label="close"><img src="../assets/icons/ui/close.svg" alt="" width="18" height="18"></button></div><div class="cf-drawer-meta"><span class="groups-role-badge" id="groups-member-drawer-role">Member</span><span id="groups-member-drawer-joined">Joined -</span></div><section class="cf-drawer-section"><h3 data-i18n="groups.accounts">Accounts</h3><div id="groups-member-drawer-accounts" class="cf-drawer-accounts"></div></section><section class="cf-drawer-section"><h3 data-family-copy="actions">Actions</h3><div id="groups-member-drawer-actions" class="cf-drawer-actions"></div><p id="groups-member-drawer-status" class="cf-inline-status" role="status"></p></section></aside></div>
 
 <div class="profile-placeholder"></div>
-
-<template id="groups-item-template"><button class="groups-item group-index-row" type="button" role="option" aria-selected="false"><div class="groups-item-logo group-avatar">CT</div><div class="groups-item-info"><span class="groups-item-name">Name</span><span class="groups-item-meta">0 members</span></div><span class="groups-role-badge">Member</span></button></template>
-
-<template id="groups-member-template"><article class="groups-member-item"><div class="groups-member-avatar" aria-hidden="true">?</div><div class="groups-member-identity"><strong class="groups-member-name">Username</strong><span class="groups-member-code">—</span></div><span class="groups-role-badge">Member</span><div class="groups-member-activity is-loading" data-activity-state="loading"><span class="groups-member-activity-label" data-i18n="groups.lastIngameActivity">Last ingame activity</span><strong class="groups-member-activity-value">Checking...</strong></div><div class="groups-member-accounts"></div></article></template>
-
-<div class="overlay hidden" id="groups-overlay-leave"><div class="overlay-container groups-overlay-leave-container" role="dialog" aria-modal="true"><h3 class="groups-leave-title" data-i18n="groups.leaveTitle">Leave Clan Family?</h3><p class="groups-leave-desc" data-i18n="groups.leaveDesc">Are you sure you want to leave this Clan Family? You can join again with the Clan Family code.</p><div class="groups-leave-actions"><button class="button button-secondary" id="groups-leave-cancel-btn" type="button" data-i18n="groups.cancel">Cancel</button><button class="button groups-leave-confirm-btn" id="groups-leave-confirm-btn" type="button"><span data-i18n="groups.leave">Leave</span></button></div></div></div>
-
-<div class="overlay hidden" id="groups-role-confirm-overlay"><div class="overlay-container groups-overlay-leave-container" role="dialog" aria-modal="true" aria-labelledby="groups-role-confirm-title"><h3 class="groups-leave-title" id="groups-role-confirm-title" data-i18n="groups.transferTitle">Transfer leadership?</h3><p class="groups-leave-desc" id="groups-role-confirm-text"></p><div class="groups-leave-actions"><button class="button button-secondary" id="groups-role-confirm-cancel" type="button" data-i18n="groups.cancel">Cancel</button><button class="button button-primary" id="groups-role-confirm-accept" type="button"><span id="groups-role-confirm-accept-text" data-i18n="groups.transferConfirm">Transfer</span></button></div></div></div>
-
-<div class="overlay hidden" id="groups-poll-answer-overlay"><div class="overlay-container groups-poll-answer-container" role="dialog" aria-modal="true" data-i18n-aria-label="groups.answerPoll" aria-label="Answer poll"><div class="groups-admin-header"><div><span class="groups-admin-kicker" data-i18n="groups.pollTypeCwl">CWL availability</span><h3 class="groups-leave-title" id="groups-poll-answer-title">CWL poll</h3><p class="groups-leave-desc" id="groups-poll-answer-group"></p></div><button class="groups-icon-button" id="groups-poll-answer-close" type="button" data-i18n-title="groups.closeAdmin" data-i18n-aria-label="groups.closeAdmin"><span aria-hidden="true">×</span></button></div><div class="groups-poll-answer-body" id="groups-poll-answer-body"></div><div class="groups-leave-actions"><button class="button button-secondary" id="groups-poll-answer-cancel" type="button" data-i18n="groups.cancel">Cancel</button><button class="button button-primary" id="groups-poll-answer-save" type="button" data-i18n="groups.savePollAnswer">Save answer</button></div></div></div>
+<template id="groups-item-template"><button class="groups-item" type="button" role="option" aria-selected="false"><span class="groups-item-logo" aria-hidden="true"></span><span class="groups-item-info"><strong class="groups-item-name">Name</strong><span class="groups-item-meta">0 members</span></span><span class="groups-role-badge">Member</span><img class="groups-item-chevron" src="../assets/icons/ui/chevron-right.svg" alt="" width="16" height="16"></button></template>
+<template id="groups-member-template"><button class="groups-member-item" type="button"><span class="groups-member-avatar" aria-hidden="true">?</span><span class="groups-member-identity"><strong class="groups-member-name">Username</strong><span class="groups-member-code">-</span></span><span class="groups-role-badge">Member</span><span class="groups-member-activity is-loading" data-activity-state="loading"><span class="groups-member-activity-label" data-i18n="groups.lastIngameActivity">Last ingame activity</span><strong class="groups-member-activity-value">Checking...</strong></span><span class="groups-member-accounts"></span><img src="../assets/icons/ui/chevron-right.svg" alt="" width="16" height="16"></button></template>
 </body>
 </html>

@@ -27,6 +27,7 @@ vi.mock('../../src/assets/js/groups/groups-roles.js', () => ({
     isGroupAdmin: role => role === 'leader' || role === 'co_leader'
 }));
 vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
+    getLanguage: () => 'en',
     t: (key, params = {}) => {
         const values = {
             'groups.deletePoll': 'Delete',
@@ -34,6 +35,8 @@ vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
             'groups.viewResults': 'Results',
             'groups.closePoll': 'Close',
             'groups.openPoll': 'Reopen',
+            'groups.answerPoll': 'Answer',
+            'groups.editPollAnswer': 'Edit answer',
             'groups.noPolls': 'No polls',
             'groups.noPollSelected': 'No poll selected',
             'groups.loading': 'Loading',
@@ -51,8 +54,12 @@ describe('Clan Family poll management', () => {
             <input id="groups-poll-title-input">
             <input id="groups-poll-rounds-input" value="7">
             <p id="groups-poll-limit-feedback" hidden></p>
+            <div id="groups-poll-empty" class="hidden"></div>
             <div id="groups-poll-notice" class="hidden"></div>
-            <div id="groups-availability-empty"></div>
+            <strong id="groups-poll-notice-title"></strong>
+            <span id="groups-poll-notice-progress"></span>
+            <button id="groups-poll-answer-btn"></button>
+            <button id="groups-polls-retry"></button>
             <div id="groups-admin-polls-list"></div>
             <div id="groups-poll-results"></div>
             <button id="groups-poll-reminder-btn"></button>`;
@@ -84,11 +91,11 @@ describe('Clan Family poll management', () => {
         const limitFeedback = document.querySelector('#groups-poll-limit-feedback');
         await vi.waitFor(() => expect(createButton.disabled).toBe(true));
         expect(limitFeedback.hidden).toBe(false);
-        expect(document.querySelectorAll('.btn-groups-danger')).toHaveLength(3);
+        expect(document.querySelectorAll('.button-danger')).toHaveLength(3);
 
-        const closedPoll = [...document.querySelectorAll('.groups-admin-member')]
+        const closedPoll = [...document.querySelectorAll('.cf-poll-row')]
             .find(node => node.textContent.includes('June CWL'));
-        closedPoll.querySelector('.btn-groups-danger').click();
+        closedPoll.querySelector('.button-danger').click();
 
         await vi.waitFor(() => expect(mocks.deleteGroupPoll).toHaveBeenCalledWith(
             'group-1',
