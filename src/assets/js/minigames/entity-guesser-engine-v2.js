@@ -4,6 +4,8 @@ import {
     getCategory,
     getEntities
 } from './entity-guesser-catalog.js?v=20260809-3';
+import { buildEntityHint } from './entity-guesser-hints.js?v=20260811-2';
+import { formatLocalizedValue } from './entity-guesser-value-copy.js?v=20260811-2';
 
 export const DAILY_STORAGE_KEY = 'clashpanel:minigames:entity-guesser:daily:v2';
 export const STATS_STORAGE_KEY = 'clashpanel:minigames:entity-guesser:stats:v2';
@@ -87,11 +89,8 @@ export function getPracticeEntity(category, random = Math.random) {
     return entities[Math.floor(random() * entities.length) % entities.length];
 }
 
-export function formatValue(value) {
-    if (Array.isArray(value)) return value.join(' & ');
-    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-    if (value === null || value === undefined || value === '') return 'N/A';
-    return String(value);
+export function formatValue(value, locale = 'en') {
+    return formatLocalizedValue(value, locale);
 }
 
 function setsOverlap(left, right) {
@@ -140,11 +139,11 @@ export function compareValue(guessValue, answerValue, column) {
     };
 }
 
-export function compareEntity(guess, answer, category) {
+export function compareEntity(guess, answer, category, locale = 'en') {
     return category.columns.map(column => ({
         key: column.key,
         value: guess[column.key],
-        displayValue: formatValue(guess[column.key]),
+        displayValue: formatValue(guess[column.key], locale),
         ...compareValue(guess[column.key], answer[column.key], column)
     }));
 }
@@ -170,27 +169,8 @@ export function availableHintCount(attempts, usedHints, maxAttempts = 6) {
     return Math.max(0, unlocked - usedHints);
 }
 
-export function buildHint(answer, category, hintNumber) {
-    const hintBuilders = {
-        defenses: [
-            entity => `${entity.kind} · targets ${formatValue(entity.targets).toLowerCase()} · ${entity.impact.toLowerCase()} effect.`,
-            entity => `${entity.coverage.toLowerCase()} coverage · ${entity.feature.toLowerCase()} · ${entity.visibility.toLowerCase()}.`
-        ],
-        otherBuildings: [
-            entity => `${entity.kind} building · ${entity.system.toLowerCase()} system.`,
-            entity => `${entity.function} · ${entity.footprint} footprint · ${entity.countClass.toLowerCase()} count.`
-        ],
-        troopsHeroes: [
-            entity => `${entity.kind} · ${entity.movement.toLowerCase()} movement · targets ${formatValue(entity.targets).toLowerCase()}.`,
-            entity => `${entity.role} role · ${entity.attackStyle.toLowerCase()} attack · favors ${entity.favorite.toLowerCase()}.`
-        ],
-        spellsEquipment: [
-            entity => `${entity.kind} · ${entity.activation.toLowerCase()} activation · ${entity.effect.toLowerCase()} effect.`,
-            entity => `${entity.role} role · affects ${formatValue(entity.affects).toLowerCase()} · ${entity.origin.toLowerCase()} source.`
-        ]
-    };
-    const builders = hintBuilders[category.id] || [];
-    return builders[Math.max(0, hintNumber - 1)]?.(answer) || `Starts with “${answer.name.charAt(0)}”.`;
+export function buildHint(answer, category, hintNumber, locale = 'en') {
+    return buildEntityHint(answer, category, hintNumber, locale);
 }
 
 export function updateStreak(stats, completedDateKey, won, categoryId) {

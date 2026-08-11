@@ -25,7 +25,7 @@ import {
     isLocalFixtureHost,
     isRedesignFixtureRequested
 } from '../fixtures/redesign-fixture-mode.js';
-import { getHigherLowerGameFixture } from '../minigames/minigames-fixtures.js?v=20260809-3';
+import { getHigherLowerGameFixture } from '../minigames/minigames-fixtures.js?v=20260811-2';
 import { HIGHER_LOWER_COPY } from '../minigames/higher-lower-copy.js?v=20260811-1';
 import { createHigherLowerRenderer } from '../minigames/higher-lower-renderer.js?v=20260811-1';
 import {

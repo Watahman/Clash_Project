@@ -21,14 +21,14 @@ import {
     searchEntities,
     updateStreak,
     utcDateKey
-} from '../minigames/entity-guesser-engine-v2.js?v=20260809-3';
+} from '../minigames/entity-guesser-engine-v2.js?v=20260811-2';
 import { getEntityAsset, installImageFallback } from '../assets/entity-assets.js';
 import {
     getRedesignFixture,
     isLocalFixtureHost,
     isRedesignFixtureRequested
 } from '../fixtures/redesign-fixture-mode.js';
-import { getEntityGameFixture } from '../minigames/minigames-fixtures.js?v=20260809-3';
+import { getEntityGameFixture } from '../minigames/minigames-fixtures.js?v=20260811-2';
 import {
     ENTITY_CATEGORY_LABELS,
     ENTITY_GUESSER_COPY
@@ -48,7 +48,6 @@ import {
     writeJson,
     writeString
 } from '../minigames/minigames-storage.js?v=20260811-1';
-
 const result = document.querySelector('[data-result]');
 const elements = {
     root: document.querySelector('.game-shell[data-minigame-view="entity"]'),
@@ -90,7 +89,6 @@ function language() {
     const code = document.documentElement.lang?.slice(0, 2).toLowerCase();
     return ENTITY_GUESSER_COPY[code] ? code : 'en';
 }
-
 function text(key) {
     return ENTITY_GUESSER_COPY[language()]?.[key]
         || ENTITY_GUESSER_COPY.en[key]
@@ -98,18 +96,15 @@ function text(key) {
         || ENTITY_GUESSER_COLUMN_COPY.en[key]
         || key;
 }
-
 function categoryLabel(id) {
     return ENTITY_CATEGORY_LABELS[language()]?.[id]
         || ENTITY_CATEGORY_LABELS.en[id]
         || id;
 }
-
 function message(value, type = 'neutral') {
     elements.message.textContent = value;
     elements.message.dataset.type = type;
 }
-
 function saveDailyState() {
     if (!shouldPersistDailyState(state.mode, fixtureActive)) return;
     writeJson(DAILY_STORAGE_KEY, state);
@@ -158,7 +153,9 @@ const board = createEntityGuessBoard({
     getState: () => state,
     getEntities: () => entities,
     getAnswer: () => answer,
-    compareEntity,
+    compareEntity: (guess, answer, currentCategory) => (
+        compareEntity(guess, answer, currentCategory, language())
+    ),
     text,
     appendImage
 });
@@ -187,6 +184,8 @@ const renderer = createEntityGuesserRenderer({
     getAnswer: () => answer,
     getStats: () => readJson(STATS_STORAGE_KEY, { currentStreak: 0, bestStreak: 0 }),
     availableHintCount,
+    buildHint,
+    getLocale: language,
     message,
     picker,
     board,
@@ -204,6 +203,7 @@ const actions = createEntityGuesserActions({
     isFixtureActive: () => fixtureActive,
     availableHintCount,
     buildHint,
+    getLocale: language,
     calculateScore,
     readJson,
     writeJson,
@@ -268,7 +268,7 @@ async function share() {
 function handleFixture(fixture) {
     if (!isLocalFixtureHost() || fixture?.module !== 'minigames') return;
     if (!fixture.id?.startsWith('entity-')) return;
-    const fixtureState = getEntityGameFixture(fixture.id, utcDateKey());
+    const fixtureState = getEntityGameFixture(fixture.id, utcDateKey(), language());
     if (!fixtureState) return;
     fixtureActive = true;
     hydrate(fixtureState);

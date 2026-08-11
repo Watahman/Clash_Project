@@ -8,6 +8,8 @@ export function createEntityGuesserRenderer({
     getAnswer,
     getStats,
     availableHintCount,
+    buildHint,
+    getLocale = () => 'en',
     message,
     picker,
     board,
@@ -40,11 +42,11 @@ export function createEntityGuesserRenderer({
         elements.categoryPicker.hidden = state.mode === 'daily';
     }
 
-    function renderHints(state, category) {
+    function renderHints(state, category, answer) {
         elements.hints.replaceChildren();
-        state.hints.forEach(value => {
+        state.hints.forEach((unused, index) => {
             const item = document.createElement('li');
-            item.textContent = value;
+            item.textContent = buildHint(answer, category, index + 1, getLocale());
             elements.hints.append(item);
         });
         const available = availableHintCount(
@@ -111,12 +113,13 @@ export function createEntityGuesserRenderer({
     function render() {
         const state = getState();
         const category = getCategory();
+        const answer = getAnswer();
         translate(category);
         renderMode(state);
         renderCategory(state, category);
         board.render();
-        renderHints(state, category);
-        renderResult(state, getAnswer());
+        renderHints(state, category, answer);
+        renderResult(state, answer);
         renderStats(state, category);
 
         if (elements.root.hidden) {

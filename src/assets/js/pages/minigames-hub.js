@@ -9,7 +9,7 @@ import {
 import {
     DAILY_STORAGE_KEY,
     getDailyCategory
-} from '../minigames/entity-guesser-engine-v2.js?v=20260809-3';
+} from '../minigames/entity-guesser-engine-v2.js?v=20260811-2';
 import { ENTITY_GUESSER_DATA_VERSION } from '../minigames/entity-guesser-catalog.js?v=20260809-3';
 import { getRedesignFixture, isLocalFixtureHost, isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 import { readJson, removeStoredValue } from '../minigames/minigames-storage.js?v=20260811-1';

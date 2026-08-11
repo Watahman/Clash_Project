@@ -8,7 +8,7 @@ import {
     getDailyCategory,
     getDailyEntity,
     utcDateKey
-} from './entity-guesser-engine-v2.js?v=20260809-3';
+} from './entity-guesser-engine-v2.js?v=20260811-2';
 import {
     advanceRun,
     applyChoice,
@@ -41,7 +41,7 @@ function entityBase(dateKey, category, answer) {
     };
 }
 
-function buildEntityFixture(id, dateKey) {
+function buildEntityFixture(id, dateKey, locale = 'en') {
     if (!ENTITY_FIXTURES.has(id)) return null;
     const category = getDailyCategory(dateKey);
     const answer = getDailyEntity(dateKey, category);
@@ -49,7 +49,7 @@ function buildEntityFixture(id, dateKey) {
 
     if (id === 'entity-mid') {
         state.guesses = wrongEntityIds(category, answer.id, 3);
-        state.hints = [buildHint(answer, category, 1)];
+        state.hints = [buildHint(answer, category, 1, locale)];
     }
 
     if (id === 'entity-won') {
@@ -82,8 +82,8 @@ function answerDailyQuestions(id, dateKey) {
     return run;
 }
 
-export function getEntityGameFixture(id, dateKey = utcDateKey()) {
-    return buildEntityFixture(id, dateKey);
+export function getEntityGameFixture(id, dateKey = utcDateKey(), locale = 'en') {
+    return buildEntityFixture(id, dateKey, locale);
 }
 
 export function getHigherLowerGameFixture(id, dateKey = utcDateKey()) {

@@ -15,7 +15,7 @@ describe('ClashPanel minigames public page', () => {
     const hubController = readFileSync('src/assets/js/pages/minigames-hub.js', 'utf8');
 
     it('loads the game hub, Entity Guesser and Higher or Lower controllers', () => {
-        expect(page).toContain('/assets/js/pages/minigames-hub.js?v=20260811-1');
+        expect(page).toContain('/assets/js/pages/minigames-hub.js?v=20260811-2');
         expect(page).toContain('/assets/js/pages/minigames-phase2b.js');
         expect(page).toContain('/assets/js/pages/higher-lower.js');
         expect(page).toContain('/assets/css/minigames-entity-guesser.css');
@@ -118,13 +118,13 @@ describe('ClashPanel minigames public page', () => {
     });
 
     it('versions the changed module graph so existing browsers cannot keep the broken picker', () => {
-        expect(page).toContain('/assets/js/pages/minigames-phase2b.js?v=20260811-1');
-        expect(page).toContain('/assets/js/pages/higher-lower.js?v=20260811-1');
+        expect(page).toContain('/assets/js/pages/minigames-phase2b.js?v=20260811-2');
+        expect(page).toContain('/assets/js/pages/higher-lower.js?v=20260811-2');
         expect(page).toContain('/assets/css/minigames.css?v=20260811-1');
         expect(hubController).toContain("higher-lower-engine.js?v=20260809-3");
         expect(hubController).toContain("minigames-state.js?v=20260809-3");
         expect(entityController).toContain("entity-guesser-catalog.js?v=20260809-3");
-        expect(entityController).toContain("entity-guesser-engine-v2.js?v=20260809-3");
+        expect(entityController).toContain("entity-guesser-engine-v2.js?v=20260811-2");
         expect(entityEngine).toContain("entity-guesser-catalog.js?v=20260809-3");
         expect(higherLowerController).toContain("higher-lower-engine.js?v=20260809-3");
         expect(higherLowerEngine).toContain("entity-guesser-catalog.js?v=20260809-3");

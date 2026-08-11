@@ -5,6 +5,7 @@ export function createEntityGuesserActions({
     isFixtureActive,
     availableHintCount,
     buildHint,
+    getLocale = () => 'en',
     calculateScore,
     readJson,
     writeJson,
@@ -44,7 +45,7 @@ export function createEntityGuesserActions({
             category.maxAttempts
         );
         if (available <= 0 || state.completed) return;
-        state.hints.push(buildHint(getAnswer(), category, state.hints.length + 1));
+        state.hints.push(buildHint(getAnswer(), category, state.hints.length + 1, getLocale()));
         saveDailyState();
         announce();
     }
