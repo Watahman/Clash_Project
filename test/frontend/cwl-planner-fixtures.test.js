@@ -6,6 +6,7 @@ import {
 } from '../../src/assets/js/fixtures/planner-fixtures.js';
 import { clearActiveCwlPoll, getPlayerAvailability } from '../../src/assets/js/cwl/cwl-availability.js';
 import { initPlannerSchedule } from '../../src/assets/js/cwl/cwl-planner-schedule.js';
+import { normalizePlayer } from '../../src/assets/js/cwl/cwl-utils.js';
 
 describe('CWL planner redesign fixtures', () => {
     beforeEach(() => {
@@ -71,6 +72,7 @@ describe('CWL planner redesign fixtures', () => {
         schedule.refresh();
         expect(normal.info.freePlayers).toHaveLength(20);
         expect(document.querySelectorAll('#cwl-available-players .cwl-player-article')).toHaveLength(20);
+        expect(normalizePlayer({ tag: '#TEST' }).clanName).toBe('');
         expect(document.querySelectorAll('.cwl-clan-article')).toHaveLength(1);
         expect(document.querySelectorAll('.cwl-day-column')).toHaveLength(7);
 

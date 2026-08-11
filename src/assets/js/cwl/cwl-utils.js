@@ -41,7 +41,7 @@ export function normalizePlayer(player, fallbackClanName = '') {
         ...player,
         tag,
         name: player?.name || player?.playerName || player?.accountName || tag,
-        clanName: player?.clanName || player?.clan?.name || fallbackClanName || 'No clan',
+        clanName: player?.clanName || player?.clan?.name || fallbackClanName || '',
         townHallLevel: Number(player?.townHallLevel || player?.townHall || player?.townhall || player?.th || 1)
     };
 }

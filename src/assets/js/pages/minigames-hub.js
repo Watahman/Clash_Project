@@ -13,6 +13,7 @@ import {
 import { ENTITY_GUESSER_DATA_VERSION } from '../minigames/entity-guesser-catalog.js?v=20260809-3';
 import { getRedesignFixture, isLocalFixtureHost, isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 import { readJson, removeStoredValue } from '../minigames/minigames-storage.js?v=20260811-1';
+import { ENTITY_CATEGORY_LABELS } from '../minigames/entity-guesser-copy.js';
 
 const COPY = {
     en: {
@@ -23,7 +24,7 @@ const COPY = {
         practiceNote: 'Practice is unlimited and never overwrites your Daily result.', entityCard: 'Identify the hidden item from fair comparisons.', higherCard: 'Compare nine values and build a combo.',
         helpTitle: 'What can I do here?', helpSubtitle: 'A quick guide to both games', helpEntityTitle: 'Find the hidden Clash entity.', helpEntityBody: 'Choose one of four broad categories, then search or tap an answer. Every attempt compares shared clues. You have six tries and two optional hints.',
         helpHigherTitle: 'Judge nine fair comparisons.', helpHigherBody: 'Use the shown value to decide whether the hidden value is higher or lower. Correct answers build your combo; equal-value pairs are excluded.',
-        dailyLabel: 'Daily', dailyHelp: 'gives everyone the same challenge and resets at 00:00 UTC.', practiceLabel: 'Practice', practiceHelp: 'lets you choose a category and play freely without changing the daily result.', catalogKicker: 'The shared catalog',
+        dailyLabel: 'Daily', dailyHelp: 'gives everyone the same challenge and resets at 00:00 UTC.', practiceLabel: 'Practice', practiceHelp: 'lets you choose a category and play freely without changing the daily result.', catalogKicker: 'The shared catalog', catalogTitle: 'Four broad categories. Less menu, more guessing.', catalogBody: 'Related Clash items now play together, while every comparison still uses a fair shared property.', comparisonTable: 'Guess comparison table', categoryDefenses: 'Defenses', categoryBuildings: 'Other buildings', categoryTroopsHeroes: 'Troops & Heroes', categorySpellsEquipment: 'Spells & Equipment', testState: 'Test state', policy: 'These are unofficial, text-and-statistics based fan quizzes. Images are recognition aids from the central local entity library and fall back gracefully when unavailable. ClashPanel is not endorsed by Supercell.',
         ready: 'Ready to play', inProgress: 'In progress', solved: 'Solved', complete: 'Complete'
     },
     nl: {
@@ -34,7 +35,7 @@ const COPY = {
         practiceNote: 'Oefenen is onbeperkt en overschrijft je dagelijkse resultaat niet.', entityCard: 'Vind het verborgen item via eerlijke vergelijkingen.', higherCard: 'Vergelijk negen waarden en bouw een combo.',
         helpTitle: 'Wat kan ik hier doen?', helpSubtitle: 'Een korte gids voor beide games', helpEntityTitle: 'Vind het verborgen Clash-item.', helpEntityBody: 'Kies een van vier brede categorieën en zoek of tik een antwoord. Elke poging vergelijkt gedeelde aanwijzingen. Je hebt zes pogingen en twee optionele hints.',
         helpHigherTitle: 'Beoordeel negen eerlijke vergelijkingen.', helpHigherBody: 'Gebruik de getoonde waarde om te bepalen of de verborgen waarde hoger of lager is. Juiste antwoorden bouwen je combo; gelijke waarden worden uitgesloten.',
-        dailyLabel: 'Dagelijks', dailyHelp: 'geeft iedereen dezelfde uitdaging en reset om 00:00 UTC.', practiceLabel: 'Oefenen', practiceHelp: 'laat je een categorie kiezen zonder het dagelijkse resultaat te wijzigen.', catalogKicker: 'De gedeelde catalogus',
+        dailyLabel: 'Dagelijks', dailyHelp: 'geeft iedereen dezelfde uitdaging en reset om 00:00 UTC.', practiceLabel: 'Oefenen', practiceHelp: 'laat je een categorie kiezen zonder het dagelijkse resultaat te wijzigen.', catalogKicker: 'De gedeelde catalogus', catalogTitle: 'Vier brede categorieën. Minder menu’s, meer raden.', catalogBody: 'Verwante Clash-items spelen nu samen, terwijl elke vergelijking een eerlijke gedeelde eigenschap gebruikt.', comparisonTable: 'Vergelijkingstabel met pogingen', categoryDefenses: 'Verdedigingen', categoryBuildings: 'Andere gebouwen', categoryTroopsHeroes: 'Troepen & helden', categorySpellsEquipment: 'Spreuken & uitrusting', testState: 'Teststatus', policy: 'Dit zijn onofficiële fanquizzen op basis van tekst en statistieken. Afbeeldingen helpen bij herkenning, komen uit de centrale lokale entiteitsbibliotheek en krijgen een nette terugval wanneer ze ontbreken. ClashPanel wordt niet ondersteund door Supercell.',
         ready: 'Klaar om te spelen', inProgress: 'Bezig', solved: 'Opgelost', complete: 'Voltooid'
     },
     de: {
@@ -45,7 +46,7 @@ const COPY = {
         practiceNote: 'Üben ist unbegrenzt und überschreibt dein Daily-Ergebnis nicht.', entityCard: 'Erkenne das verborgene Element durch faire Vergleiche.', higherCard: 'Vergleiche neun Werte und baue eine Combo auf.',
         helpTitle: 'Was kann ich hier tun?', helpSubtitle: 'Ein kurzer Leitfaden für beide Spiele', helpEntityTitle: 'Finde das verborgene Clash-Element.', helpEntityBody: 'Wähle eine von vier breiten Kategorien und suche oder tippe eine Antwort. Jeder Versuch vergleicht gemeinsame Hinweise. Du hast sechs Versuche und zwei optionale Hinweise.',
         helpHigherTitle: 'Beurteile neun faire Vergleiche.', helpHigherBody: 'Nutze den angezeigten Wert, um zu entscheiden, ob der verborgene Wert höher oder niedriger ist. Richtige Antworten bauen deine Combo auf; gleiche Werte werden ausgeschlossen.',
-        dailyLabel: 'Daily', dailyHelp: 'gibt allen dieselbe Aufgabe und wird um 00:00 UTC zurückgesetzt.', practiceLabel: 'Üben', practiceHelp: 'lässt dich eine Kategorie wählen, ohne das Daily-Ergebnis zu ändern.', catalogKicker: 'Die gemeinsame Katalog',
+        dailyLabel: 'Daily', dailyHelp: 'gibt allen dieselbe Aufgabe und wird um 00:00 UTC zurückgesetzt.', practiceLabel: 'Üben', practiceHelp: 'lässt dich eine Kategorie wählen, ohne das Daily-Ergebnis zu ändern.', catalogKicker: 'Der gemeinsame Katalog', catalogTitle: 'Vier breite Kategorien. Weniger Menüs, mehr Rätsel.', catalogBody: 'Verwandte Clash-Elemente spielen jetzt zusammen, während jeder Vergleich weiterhin eine faire gemeinsame Eigenschaft nutzt.', comparisonTable: 'Vergleichstabelle der Versuche', categoryDefenses: 'Verteidigungen', categoryBuildings: 'Andere Gebäude', categoryTroopsHeroes: 'Truppen & Helden', categorySpellsEquipment: 'Zauber & Ausrüstung', testState: 'Teststatus', policy: 'Dies sind inoffizielle Fan-Quizze auf Basis von Text und Statistiken. Bilder dienen als Erkennungshilfe, stammen aus der zentralen lokalen Elementbibliothek und werden bei Bedarf zuverlässig ersetzt. ClashPanel wird nicht von Supercell unterstützt.',
         ready: 'Bereit zum Spielen', inProgress: 'In Bearbeitung', solved: 'Gelöst', complete: 'Abgeschlossen'
     },
     fr: {
@@ -56,7 +57,7 @@ const COPY = {
         practiceNote: 'L’entraînement est illimité et ne remplace pas votre résultat quotidien.', entityCard: 'Identifiez l’élément caché grâce à des comparaisons justes.', higherCard: 'Comparez neuf valeurs et construisez un combo.',
         helpTitle: 'Que puis-je faire ici ?', helpSubtitle: 'Un guide rapide des deux jeux', helpEntityTitle: 'Trouvez l’élément Clash caché.', helpEntityBody: 'Choisissez l’une des quatre grandes catégories, puis recherchez ou touchez une réponse. Chaque essai compare des indices communs. Vous avez six essais et deux indices optionnels.',
         helpHigherTitle: 'Jugez neuf comparaisons équitables.', helpHigherBody: 'Utilisez la valeur affichée pour décider si la valeur cachée est plus élevée ou plus basse. Les bonnes réponses construisent votre combo ; les valeurs égales sont exclues.',
-        dailyLabel: 'Quotidien', dailyHelp: 'offre le même défi à tout le monde et se réinitialise à 00:00 UTC.', practiceLabel: 'Entraînement', practiceHelp: 'permet de choisir une catégorie sans modifier le résultat quotidien.', catalogKicker: 'Le catalogue commun',
+        dailyLabel: 'Quotidien', dailyHelp: 'offre le même défi à tout le monde et se réinitialise à 00:00 UTC.', practiceLabel: 'Entraînement', practiceHelp: 'permet de choisir une catégorie sans modifier le résultat quotidien.', catalogKicker: 'Le catalogue commun', catalogTitle: 'Quatre grandes catégories. Moins de menus, plus de réflexion.', catalogBody: 'Les éléments Clash associés jouent désormais ensemble, tandis que chaque comparaison utilise une propriété commune équitable.', comparisonTable: 'Tableau comparatif des essais', categoryDefenses: 'Défenses', categoryBuildings: 'Autres bâtiments', categoryTroopsHeroes: 'Troupes et héros', categorySpellsEquipment: 'Sorts et équipements', testState: 'État de test', policy: 'Ces quiz non officiels reposent sur du texte et des statistiques. Les images facilitent la reconnaissance, proviennent de la bibliothèque locale centrale et disposent d’un remplacement fiable. ClashPanel n’est pas approuvé par Supercell.',
         ready: 'Prêt à jouer', inProgress: 'En cours', solved: 'Résolu', complete: 'Terminé'
     },
     es: {
@@ -67,7 +68,7 @@ const COPY = {
         practiceNote: 'La práctica es ilimitada y no sobrescribe tu resultado diario.', entityCard: 'Identifica el elemento oculto mediante comparaciones justas.', higherCard: 'Compara nueve valores y crea un combo.',
         helpTitle: '¿Qué puedo hacer aquí?', helpSubtitle: 'Guía rápida de los dos juegos', helpEntityTitle: 'Encuentra el elemento oculto de Clash.', helpEntityBody: 'Elige una de cuatro categorías amplias y busca o toca una respuesta. Cada intento compara pistas compartidas. Tienes seis intentos y dos pistas opcionales.',
         helpHigherTitle: 'Juzga nueve comparaciones justas.', helpHigherBody: 'Usa el valor mostrado para decidir si el valor oculto es mayor o menor. Las respuestas correctas crean tu combo; se excluyen los valores iguales.',
-        dailyLabel: 'Diario', dailyHelp: 'ofrece el mismo desafío a todos y se reinicia a las 00:00 UTC.', practiceLabel: 'Práctica', practiceHelp: 'te permite elegir una categoría sin cambiar el resultado diario.', catalogKicker: 'El catálogo compartido',
+        dailyLabel: 'Diario', dailyHelp: 'ofrece el mismo desafío a todos y se reinicia a las 00:00 UTC.', practiceLabel: 'Práctica', practiceHelp: 'te permite elegir una categoría sin cambiar el resultado diario.', catalogKicker: 'El catálogo compartido', catalogTitle: 'Cuatro categorías amplias. Menos menús, más deducción.', catalogBody: 'Los elementos relacionados de Clash ahora juegan juntos, mientras cada comparación mantiene una propiedad común justa.', comparisonTable: 'Tabla comparativa de intentos', categoryDefenses: 'Defensas', categoryBuildings: 'Otros edificios', categoryTroopsHeroes: 'Tropas y héroes', categorySpellsEquipment: 'Hechizos y equipamiento', testState: 'Estado de prueba', policy: 'Estos cuestionarios no oficiales se basan en texto y estadísticas. Las imágenes ayudan al reconocimiento, proceden de la biblioteca local central y cuentan con un reemplazo fiable. ClashPanel no está respaldado por Supercell.',
         ready: 'Listo para jugar', inProgress: 'En curso', solved: 'Resuelto', complete: 'Completado'
     }
 };
@@ -136,8 +137,17 @@ function higherLowerStatus(dateKey) {
 
 function fixtureStatus(game) {
     if (!activeFixtureId.startsWith(game)) return '';
-    const state = activeFixtureId.replace(`${game}-`, '').replace('-', ' ');
-    return `Fixture · ${state}`;
+    const state = activeFixtureId.replace(`${game}-`, '');
+    const stateKey = ({
+        fresh: 'ready', mid: 'inProgress', correct: 'inProgress',
+        won: 'solved', lost: 'complete', final: 'complete'
+    })[state] || 'ready';
+    return `${text('testState')} · ${text(stateKey)}`;
+}
+
+function localizedCategory(categoryId) {
+    const labels = ENTITY_CATEGORY_LABELS[language()] || ENTITY_CATEGORY_LABELS.en;
+    return labels[categoryId] || ENTITY_CATEGORY_LABELS.en[categoryId] || categoryId;
 }
 
 function renderHub() {
@@ -156,7 +166,7 @@ function renderHub() {
     const category = getDailyCategory(dateKey);
     const dateNode = document.querySelector('[data-hub-date]');
     const summary = document.querySelector('[data-hub-daily-summary]');
-    if (dateNode) dateNode.textContent = `${dateKey} UTC · ${category.shortLabel}`;
+    if (dateNode) dateNode.textContent = `${dateKey} UTC · ${localizedCategory(category.id)}`;
     if (summary) summary.textContent = `${text('entity')}: ${entityStatus(dateKey)} · ${text('higherLower')}: ${higherLowerStatus(dateKey)}`;
 
     const entityStatusNode = document.querySelector('[data-hub-game-status="entity"]');
