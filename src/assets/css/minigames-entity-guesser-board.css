@@ -1,0 +1,31 @@
+/* Entity Guesser comparison grid, feedback, and result. */
+.game-scroll-help { display: none; margin: 0 0 .55rem; color: var(--text-muted); font-size: .75rem; }
+.guess-scroll { min-width: 0; overflow-x: auto; overscroll-behavior-inline: contain; padding-bottom: .45rem; scrollbar-color: var(--border-strong) transparent; }
+.guess-grid { min-width: 70rem; display: grid; gap: .4rem; }
+.guess-grid + .guess-grid { margin-top: .4rem; }
+.guess-grid-header { position: sticky; top: 0; z-index: 1; }
+.guess-grid-header > div { padding: .5rem .55rem; color: var(--text-subtle); font-size: .64rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.guess-cell { min-height: 3.75rem; display: flex; gap: .35rem; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 6px; padding: .45rem; background: var(--surface-subtle); color: var(--text-muted); font-size: .73rem; font-weight: 700; text-align: center; transition: background-color 160ms var(--cp-ease-standard, ease), border-color 160ms var(--cp-ease-standard, ease), color 160ms var(--cp-ease-standard, ease); }
+.guess-name { justify-content: flex-start; gap: .5rem; background: var(--surface); color: var(--text); font-family: Manrope, sans-serif; text-align: left; }
+.guess-name span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.guess-entity-image { width: 2rem; height: 2rem; flex: 0 0 2rem; object-fit: contain; order: 2; }
+.guess-state-glyph { display: inline-grid; width: 1.05rem; height: 1.05rem; place-items: center; border-radius: 50%; font-size: .7rem; font-weight: 900; }
+.guess-cell b { color: currentColor; font-size: .95rem; }
+.guess-cell.is-correct { border-color: color-mix(in srgb, var(--success) 70%, var(--border)); background: var(--success-soft); color: var(--success); }
+.guess-cell.is-close,
+.guess-cell.is-partial { border-color: color-mix(in srgb, var(--warning) 68%, var(--border)); background: var(--warning-soft); color: var(--warning); }
+.guess-cell.is-wrong { color: var(--text-muted); }
+.guess-cell.is-notComparable { border-style: dashed; color: var(--text-subtle); }
+.guess-grid-row.is-latest .guess-cell { animation: game-feedback-in 220ms var(--cp-ease-emphasized, ease-out) both; }
+.game-support { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-top: 1rem; }
+.game-hints { margin: .85rem 0 0; padding-left: 1.2rem; color: var(--text-muted); font-size: .78rem; line-height: 1.5; }
+.game-result { display: flex; min-height: 5.4rem; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.3rem; border: 1px solid color-mix(in srgb, var(--game-accent) 42%, var(--border)); border-radius: 10px; padding: .9rem 1rem; background: var(--game-accent-soft); }
+.game-result[hidden] { display: none; }
+.game-result.is-visible { animation: result-in 260ms var(--cp-ease-emphasized, ease-out) both; }
+.game-result h3 { margin: 0 0 .2rem; font-size: 1rem; }
+.game-result p { margin: 0; color: var(--text-muted); font-size: .8rem; }
+.game-result-image { width: 4.5rem; height: 4.5rem; display: grid; flex: 0 0 4.5rem; place-items: center; margin: 0; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.game-result-image img { width: 4rem; height: 4rem; object-fit: contain; }
+
+@keyframes game-feedback-in { from { opacity: .35; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes result-in { from { opacity: .35; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }

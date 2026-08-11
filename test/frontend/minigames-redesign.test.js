@@ -7,8 +7,16 @@ import {
 import { isValidHigherLowerDailyRun } from '../../src/assets/js/minigames/minigames-state.js';
 
 const page = readFileSync('src/minigames.html', 'utf8');
-const gameStyles = readFileSync('src/assets/css/minigames.css', 'utf8');
-const higherLowerStyles = readFileSync('src/assets/css/minigames-higher-lower.css', 'utf8');
+const gameStyles = [
+    'minigames.css',
+    'minigames-entity-guesser.css',
+    'minigames-entity-guesser-board.css',
+    'minigames-entity-guesser-responsive.css'
+].map(file => readFileSync(`src/assets/css/${file}`, 'utf8')).join('\n');
+const higherLowerStyles = [
+    'minigames-higher-lower.css',
+    'minigames-higher-lower-responsive.css'
+].map(file => readFileSync(`src/assets/css/${file}`, 'utf8')).join('\n');
 
 describe('Minigames redesign boundaries', () => {
     const dateKey = '2026-08-11';
@@ -46,12 +54,12 @@ describe('Minigames redesign boundaries', () => {
         expect(filter).toBeGreaterThan(higherLowerSection);
         expect(layout).toBeGreaterThan(filter);
         expect(gameStyles).toMatch(/@media \(max-width: 70rem\)[\s\S]*\.game-sidebar \{ order: 2;[\s\S]*\.game-board \{ order: 1;/);
-        expect(higherLowerStyles).toContain('.hl-arena { display: grid; grid-template-columns: minmax(0, 360px) auto minmax(0, 360px);');
-        expect(higherLowerStyles).toMatch(/@media \(max-width: 42rem\)[\s\S]*\.hl-arena \{ grid-template-columns: 1fr;/);
+        expect(higherLowerStyles).toMatch(/\.hl-arena\s*\{[\s\S]*grid-template-columns:\s*minmax\(0, 360px\) auto minmax\(0, 360px\);/);
+        expect(higherLowerStyles).toMatch(/@media \(max-width: 42rem\)[\s\S]*\.hl-arena \{[\s\S]*grid-template-columns: 1fr;/);
     });
 
     it('routes game imagery through the central resolver and leaves hidden Entity Guesser imagery unset until result', () => {
-        expect(readFileSync('src/assets/js/pages/minigames-phase2b.js', 'utf8')).toMatch(/entity-assets\.js/);
+        expect(readFileSync('src/assets/js/minigames/entity-guesser-images.js', 'utf8')).toMatch(/entity-assets|getEntityAsset/);
         expect(readFileSync('src/assets/js/pages/higher-lower.js', 'utf8')).toMatch(/entity-assets\.js/);
         expect(page).toContain('data-result-image alt=""');
         expect(page).toContain('data-hl-left-image alt=""');

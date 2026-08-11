@@ -12,6 +12,7 @@ import {
 } from '../minigames/entity-guesser-engine-v2.js?v=20260809-3';
 import { ENTITY_GUESSER_DATA_VERSION } from '../minigames/entity-guesser-catalog.js?v=20260809-3';
 import { getRedesignFixture, isLocalFixtureHost, isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
+import { readJson, removeStoredValue } from '../minigames/minigames-storage.js?v=20260811-1';
 
 const COPY = {
     en: {
@@ -93,11 +94,7 @@ function selectedFromUrl() {
 }
 
 function readSaved(key) {
-    try {
-        return JSON.parse(localStorage.getItem(key));
-    } catch {
-        return null;
-    }
+    return readJson(key);
 }
 
 function validEntityDailyRun(run, dateKey, categoryId) {
@@ -176,11 +173,7 @@ function sanitizeSavedHigherLowerRun() {
     if (isRedesignFixtureRequested()) return;
     const saved = readSavedHigherLowerRun();
     if (saved && !isValidHigherLowerDailyRun(saved, utcDateKey())) {
-        try {
-            localStorage.removeItem(HIGHER_LOWER_DAILY_KEY);
-        } catch {
-            // Storage may be unavailable in strict privacy contexts.
-        }
+        removeStoredValue(HIGHER_LOWER_DAILY_KEY);
     }
 }
 
