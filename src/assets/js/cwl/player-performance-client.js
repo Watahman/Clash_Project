@@ -1,5 +1,6 @@
 import { requestJson } from '../utils/request-json.js';
 import * as config from '../Data/config.js';
+import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 
 const performanceByTag = new Map();
 const pendingTags = new Set();
@@ -86,6 +87,7 @@ export async function flushPlayerPerformanceBatch() {
 
 export async function loadPlayerPerformanceBatch(tags = []) {
     const normalized = Array.from(new Set(tags.map(normalizeTag).filter(Boolean)));
+    if (isRedesignFixtureRequested()) return Object.fromEntries(normalized.map(tag => [tag, null]));
     schedulePlayerPerformanceBatch(normalized);
     const queuedRequest = flushPlayerPerformanceBatch();
     const activeRequests = normalized
@@ -105,6 +107,7 @@ export function primePlannerPlayerPerformance(root = document) {
 }
 
 export function initPlayerPerformanceClient(root = document) {
+    if (isRedesignFixtureRequested()) return;
     void primePlannerPlayerPerformance(root);
     const refresh = () => {
         void primePlannerPlayerPerformance(root);

@@ -39,6 +39,7 @@
 .workspace-planner .cwl-clan-format > span { color: var(--planner-muted); font-size: .68rem; }
 .workspace-planner .cwl-clan-capacity { min-height: 36px; }
 .workspace-planner .cwl-amount-of-players-in-clan { color: var(--planner-muted); font-size: .78rem; margin: 0; white-space: nowrap; }
+.workspace-planner .cwl-amount-of-players-in-clan[data-capacity-conflict="true"] { background: var(--danger-soft); border-color: var(--danger); color: var(--danger); }
 .workspace-planner .cwl-delete-clan { min-height: 36px; min-width: 36px; }
 
 .workspace-planner .cwl-player-article {

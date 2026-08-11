@@ -103,6 +103,7 @@
 
 .workspace-planner .cwl-day-player strong { font-size: .67rem; }
 .workspace-planner .cwl-day-player span { color: var(--planner-muted, #94a0ad); font-family: var(--font-mono, monospace); font-size: .58rem; }
+.workspace-planner .cwl-day-player[data-availability-conflict="true"] { background: var(--danger-soft, rgba(228, 117, 117, .12)); border-color: var(--danger, #e47575); }
 
 .workspace-planner .cwl-mobile-sequence-heading .button { min-height: 44px; }
 .workspace-planner .cwl-mobile-day-list { display: grid; gap: 6px; margin-top: 14px; }

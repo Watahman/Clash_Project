@@ -17,9 +17,11 @@ import {
 import { makePlayerDraggable } from './cwl-player-drag.js';
 import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js';
 import { getTownHallAsset, installImageFallback } from '../assets/entity-assets.js';
+import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 
-export function createPlayerCard(playerInfo, clanUuid) {
+export function createPlayerCard(playerInfo, clanUuid, options = {}) {
     const players = uniquePlayers(playerInfo);
+    const persist = options.persist !== false && !isRedesignFixtureRequested();
     let plannerChanged = false;
     let skipped = 0;
     let added = 0;
@@ -57,12 +59,12 @@ export function createPlayerCard(playerInfo, clanUuid) {
 
     if (plannerChanged) {
         updateAllPlayerCounters();
-        rememberPlannerPlayers();
+        if (persist) rememberPlannerPlayers();
         window.dispatchEvent(new CustomEvent(
             'clashtools:cwl-player-added',
             { detail: { added, skipped } }
         ));
-        savePlan();
+        if (persist) savePlan();
     }
     if (skipped > 0) {
         window.dispatchEvent(new CustomEvent(

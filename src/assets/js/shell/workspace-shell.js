@@ -47,6 +47,7 @@ async function protectRoute() {
 }
 
 async function loadInitialWorkspaceData() {
+    if (isRedesignFixtureRequested()) return;
     if (!await protectRoute()) return;
     await Promise.allSettled([
         loadWorkspaceUserIdentity(),
@@ -90,7 +91,7 @@ function initMountedShell(body, sidebar, backdrop, currentPage) {
     initDesktopSidebar(sidebar);
     initMobileSidebar(sidebar, backdrop);
     initNotificationsPopover();
-    subscribeWorkspaceUserIdentity();
+    if (!isRedesignFixtureRequested()) subscribeWorkspaceUserIdentity();
     window.addEventListener('clashtools:language-changed', updateThemeButton);
 }
 

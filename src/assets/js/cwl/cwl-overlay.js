@@ -4,6 +4,7 @@ import { initAddPlayersOverlay as initPlayerPicker, resetPlayerOverlayState } fr
 import { initOverlayDismissal } from "./cwl-overlay-interactions.js";
 import { t } from "../i18n/i18n.js";
 import { allowsThirtyPlayerCwl } from "./cwl-league-rules.js";
+import { isRedesignFixtureRequested } from "../fixtures/redesign-fixture-mode.js";
 
 export function initOverlayHide() {
     initOverlayDismissal(resetCwlOverlayState);
@@ -57,6 +58,7 @@ function openAddClanOverlay(selectAmountPlayers, input) {
 }
 
 function submitAddClan({ button, input, select }) {
+    if (isRedesignFixtureRequested()) return;
     const clanId = input.value.trim();
     if (clanId === "") {
         setClanMessage(t('cwl.tagLabel'), 'error');

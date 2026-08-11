@@ -6,6 +6,7 @@ import { initGroupOverlay } from "./cwl-group.js";
 import { getCurrentUserId } from "../utils/user.js";
 import { uniquePlayers } from "./cwl-utils.js";
 import { t } from "../i18n/i18n.js";
+import { isRedesignFixtureRequested } from "../fixtures/redesign-fixture-mode.js";
 
 let accountLoadToken = 0;
 let activeAccountSource = 'user';
@@ -17,7 +18,7 @@ export function initAddPlayersOverlay(refs, onReset = resetPlayerOverlayState) {
     bindPlayerPickerTabs(refs.modalTabBtn, refs.segBtns, refs.addSelectedBtn);
     bindPlayerPickerActions(refs, onReset);
     loadAccountSources(refs.addSelectedBtn);
-    initGroupOverlay(refs.selectGroup, refs);
+    if (!isRedesignFixtureRequested()) initGroupOverlay(refs.selectGroup, refs);
 }
 
 function bindPlayerPickerToggle({ addPlayersBtn, cwlInputTag, addSelectedBtn }) {
@@ -74,6 +75,7 @@ export function resetPlayerOverlayState() {
 }
 
 function addPlayersByTag(input, button, onReset) {
+    if (isRedesignFixtureRequested()) return;
     const tag = input.value.trim();
     if (!tag) {
         setOverlayMessage(t('cwl.tagLabel'), 'error');
@@ -196,6 +198,7 @@ function loadAccountSources(addSelectedBtn) {
     const token = ++accountLoadToken;
     const userId = getCurrentUserId();
     resetAccountList();
+    if (isRedesignFixtureRequested()) return;
     if (!userId) return;
 
     getUserBases(userId)

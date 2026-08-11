@@ -15,6 +15,7 @@ import {
     syncPlayerRosterStatus
 } from '../cwl-player-controls.js';
 import { getCardTag, normalizeTag } from '../cwl-utils.js';
+import { isRedesignFixtureRequested } from '../../fixtures/redesign-fixture-mode.js';
 
 export async function collectAutoPlanInput(root = document) {
     const clanCards = Array.from(root.querySelectorAll('.cwl-clan-article'));
@@ -23,10 +24,13 @@ export async function collectAutoPlanInput(root = document) {
         '.cwl-player-article[data-planner-card="true"]'
     ));
     const tags = playerCards.map(getCardTag).filter(Boolean);
-    const [, lockData] = await Promise.all([
-        loadPlayerPerformanceBatch(tags),
-        loadCwlRegistrationLocks(clans)
-    ]);
+    let lockData = emptyLocks();
+    if (!isRedesignFixtureRequested()) {
+        [, lockData] = await Promise.all([
+            loadPlayerPerformanceBatch(tags),
+            loadCwlRegistrationLocks(clans)
+        ]);
+    }
     const players = playerCards.map(card => readPlayer(card, getPlayerPerformance(getCardTag(card))));
     const rounds = Math.max(
         1,
@@ -143,7 +147,7 @@ function readPlayer(card, performance) {
         plannedDays: normalizePlannedDays(card.dataset.plannedDays),
         hasPlannedDays: Object.hasOwn(card.dataset, 'plannedDays'),
         availability: getPlayerAvailability(tag),
-        performance: performance || { status: 'unavailable' }
+        performance: performance || card._cwlPlayer?.performance || { status: 'unavailable' }
     };
 }
 
@@ -154,4 +158,8 @@ function clanId(card) {
 function isStartedGroup(group) {
     if (!group || group.error || !Array.isArray(group.clans)) return false;
     return !['ended', 'completed'].includes(String(group.state || '').toLowerCase());
+}
+
+function emptyLocks() {
+    return { assignments: {}, roles: {}, reasons: {}, startedClanIds: [] };
 }

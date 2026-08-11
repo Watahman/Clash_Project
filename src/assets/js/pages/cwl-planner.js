@@ -12,6 +12,11 @@ import { initPlayerPerformancePopover } from "../cwl/cwl-player-performance-popo
 import { initAutoPlan } from "../cwl/auto-plan/cwl-auto-plan-ui.js";
 import { initOptimizePlan } from "../cwl/optimize-plan/cwl-optimize-plan-ui.js";
 import { initPlannerSurface } from "../cwl/cwl-planner-ui.js";
+import {
+    applyPlannerFixture,
+    getRequestedPlannerFixture
+} from '../fixtures/planner-fixtures.js';
+import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 
 export { savePlan };
 
@@ -60,10 +65,17 @@ function labelInit() {
 
 async function init() {
     initI18n();
-    await syncAuthSession().catch(() => null);
+    const fixture = isRedesignFixtureRequested() ? await getRequestedPlannerFixture() : null;
+    if (!fixture) await syncAuthSession().catch(() => null);
+    const restoreFixtureStorage = fixture ? preservePlannerStorage() : null;
+    if (fixture) {
+        conf.setCanAutosave(false);
+        window.addEventListener('clashtools:cwl-plan-loaded', () => restoreFixtureStorage(), { passive: true });
+    }
     labelInit();
     initOverlayHide();
     initPlanIO({ availablePlayers, allClans, totalPlayerAmount, planName, loadPlan });
+    restoreFixtureStorage?.();
     initAddPlayersOverlay({
         addPlayersBtn, modalTabBtn, segBtns, selectGroup, overlayConfirmTagBtn,
         cwlInputTag, addSelectedBtn, accountList, modalAccountListEmpty,
@@ -93,10 +105,23 @@ async function init() {
     initPlanNameSync();
     initPlannerHeaderState();
     window.addEventListener('clashtools:cwl-active-poll-changed', () => savePlan());
-    guessCwlSize();
-    await loadAllPlans();
+    guessCwlSize(fixture);
+    if (fixture) {
+        applyPlannerFixture(fixture);
+    } else {
+        await loadAllPlans();
+    }
     loadPlanListener();
-    profileHTML();
+    if (!fixture) profileHTML();
+}
+
+function preservePlannerStorage() {
+    const keys = ['planner_id', 'clashtools_planner_cache', 'clashtools_planner_recovery_v1', 'clashtools_last_planner_players'];
+    const values = keys.map(key => localStorage.getItem(key));
+    return () => keys.forEach((key, index) => {
+        if (values[index] === null) localStorage.removeItem(key);
+        else localStorage.setItem(key, values[index]);
+    });
 }
 
 function initPlanNameSync() {
@@ -247,7 +272,8 @@ function updateSaveButtonState() {
     savePlanBtn.title = canSave ? t('cwl.save') : t('cwl.saveDisabledReason');
 }
 
-function guessCwlSize() {
+function guessCwlSize(fixture = null) {
+    if (fixture) return;
     let timer;
     cwlInputClanCode.addEventListener("input", (event) => {
         clearTimeout(timer);

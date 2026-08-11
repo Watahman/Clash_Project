@@ -1,4 +1,5 @@
 import { t } from '../i18n/i18n.js';
+import { getPlayerAvailability } from './cwl-availability.js';
 import { getCardTag } from './cwl-utils.js';
 import {
     PLANNER_DAYS,
@@ -58,7 +59,7 @@ function createDayDropzone(article, players, day) {
     dropzone.tabIndex = 0;
     dropzone.setAttribute('aria-label', t('autoPlan.dayShort', { day }));
     getPlayersForDay(players, day).forEach(player => {
-        dropzone.appendChild(createDayPlayer(player));
+        dropzone.appendChild(createDayPlayer(player, day));
     });
     return dropzone;
 }
@@ -67,11 +68,15 @@ function getPlayersForDay(players, day) {
     return players.filter(player => plannedDaysForCard(player).includes(day));
 }
 
-function createDayPlayer(card) {
+function createDayPlayer(card, day) {
     const player = card.ownerDocument.createElement('button');
     player.type = 'button';
     player.className = 'cwl-day-player';
     player.dataset.playerTag = getCardTag(card);
+    const availability = getPlayerAvailability(getCardTag(card));
+    const availabilityConflict = availability.state !== 'unknown'
+        && !availability.availableDays.includes(day);
+    player.dataset.availabilityConflict = String(availabilityConflict);
     player.title = `${card.querySelector('.cwl-player-name')?.textContent || ''} · ${getCardTag(card)}`;
     player.setAttribute('aria-label', player.title);
     const name = card.ownerDocument.createElement('strong');
