@@ -10,15 +10,18 @@ import {
     getTownHallAsset,
     installImageFallback
 } from '../assets/entity-assets.js';
-import { buildWarContributions, attacksByOrder } from './war-contribution.js';
+import { buildWarContributions } from './war-contribution.js';
 import { buildWarMap } from './war-map-model.js';
 import { assignmentState } from './war-assignments.js';
 import { buildMathematicalWarStatus } from './war-outcome-model.js';
+import { renderStats as renderStatsSection } from './war-stats-renderer.js';
 
 const WAR_STATE_CLASSES = new Set(['completed', 'live', 'preparation']);
 const BASE_STATE_CLASSES = new Set(['cleared', 'damaged', 'untouched']);
 const MATH_STATE_CLASSES = new Set(['lost', 'open', 'won']);
 const ASSIGNMENT_STATE_CLASSES = new Set(['changed', 'completed', 'planned']);
+
+export { renderStatsSection as renderStats };
 
 export function renderScoreStrip(element, report) {
     const live = buildLiveView(report);
@@ -60,7 +63,6 @@ export function renderScoreStrip(element, report) {
                 : t('war.projectedWin', { probability: projection.winProbability }))}</span>
         </div>`;
 }
-
 export function renderWarMap(element, report, sideName, selectedPosition, assignments) {
     const bases = buildWarMap(report, sideName);
     element.innerHTML = bases.map((base, index) => {
@@ -144,38 +146,6 @@ export function renderRoster(element, report, filter = 'all') {
             <span class="war-player-status is-${attention(player) ? 'attention' : player.attacksUsed >= limit ? 'done' : player.attacksUsed ? 'active' : 'ready'}">${statusLabel(report, player, limit, attention(player))}</span>
         </article>`).join('') || `<p class="war-muted">${escapeHtml(t('war.noPlayersMatch'))}</p>`;
     installAssetFallbacks(element);
-}
-
-export function renderStats(element, report) {
-    const live = buildLiveView(report);
-    const attacks = attacksByOrder(report);
-    const recommendations = buildImportantAttacks(report, 3);
-    const use = live?.own.availableAttacks
-        ? live.own.attacksUsed / live.own.availableAttacks * 100
-        : 0;
-    const points = cumulativePoints(attacks);
-    element.innerHTML = `
-        <article class="war-stat-card"><p>${escapeHtml(t('war.attackUsage'))}</p><strong>${Math.round(use)}%</strong><div class="war-progress"><i style="width:${use}%"></i></div><small>${escapeHtml(t('war.attacksUsed', { used: live?.own.attacksUsed || 0, available: live?.own.availableAttacks || 0 }))}</small></article>
-        <article class="war-stat-card war-chart-card"><p>${escapeHtml(t('war.starsByAttack'))}</p>${sparkline(points)}<small>${attacks.length ? escapeHtml(t('war.recordedAttacks', { count: attacks.length })) : escapeHtml(t('war.waitingFirstAttack'))}</small></article>
-        <article class="war-stat-card"><p>${escapeHtml(t('war.importantNextAttacks'))}</p>${recommendations.length ? recommendations.map(item => `<div class="war-mini-row"><span>${escapeHtml(item.attacker.name)} → #${item.target.mapPosition}</span><strong>${escapeHtml(t('war.netStars', { count: item.expectedNetStars.toFixed(1) }))}</strong></div>`).join('') : `<small>${escapeHtml(t('war.noRecommendation'))}</small>`}</article>`;
-}
-
-function cumulativePoints(attacks) {
-    let total = 0;
-    return attacks.map((attack, index) => {
-        total += number(attack.netStars);
-        return [index, total];
-    });
-}
-
-function sparkline(points) {
-    if (!points.length) return '<div class="war-chart-empty"></div>';
-    const maxX = Math.max(1, points.length - 1);
-    const maxY = Math.max(1, ...points.map(point => point[1]));
-    const path = points.map(([x, y], index) =>
-        `${index ? 'L' : 'M'} ${(x / maxX * 240).toFixed(1)} ${(64 - y / maxY * 52).toFixed(1)}`
-    ).join(' ');
-    return `<svg class="war-sparkline" viewBox="0 0 240 72" role="img" aria-label="${escapeHtml(t('war.cumulativeNetStars'))}"><path d="${path}"/></svg>`;
 }
 
 function badge(clan) {
