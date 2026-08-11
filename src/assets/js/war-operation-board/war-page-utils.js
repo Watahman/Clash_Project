@@ -6,6 +6,7 @@ export function fixtureWar(fixture) {
     const badgeUrl = fixture.data?.clan?.badgeUrl || '';
     return {
         ...raw,
+        fixtureReferenceTime: fixture.data?.referenceTime || '',
         clan: { ...raw.clan, badgeUrl: raw.clan?.badgeUrl || badgeUrl },
         opponent: { ...raw.opponent }
     };

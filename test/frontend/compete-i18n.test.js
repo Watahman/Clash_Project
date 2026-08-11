@@ -9,6 +9,7 @@ import {
     initCompeteI18n
 } from '../../src/assets/js/operation-board/compete-locales.js';
 import { buildWarBoardReport } from '../../src/assets/js/war-operation-board/war-report-model.js';
+import { fixtureWar } from '../../src/assets/js/war-operation-board/war-page-utils.js';
 import { buildWarHistory } from '../../src/assets/js/war-operation-board/war-history-model.js';
 import {
     renderBaseDetail,
@@ -192,6 +193,18 @@ describe('Compete i18n coverage', () => {
                 });
             }
         }
+    });
+
+    it('renders live fixture time relative to its deterministic reference clock', async () => {
+        await useLanguage('en');
+        const fixture = { data: WAR_FIXTURES['war-live'] };
+        const report = buildWarBoardReport(fixtureWar(fixture), '#FIXWAR');
+        const score = document.createElement('section');
+
+        renderScoreStrip(score, report);
+
+        expect(score.textContent).toContain('6h 0m remaining');
+        expect(score.textContent).not.toContain('634608');
     });
 });
 

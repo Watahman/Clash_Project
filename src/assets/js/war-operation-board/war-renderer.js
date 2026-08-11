@@ -53,7 +53,7 @@ export function renderScoreStrip(element, report) {
         </div>
         <div class="war-score-meta">
             <span class="war-state-pill is-${liveState}">${stateLabel(live.state)}</span>
-            <span>${timeLabel(live)}</span>
+            <span>${timeLabel(live, report.wars?.[0]?.fixtureReferenceTime)}</span>
             <span>${escapeHtml(t('war.maxStars', {
                 stars: number(condition?.maxFinalStars ?? live.own.stars)
             }))}</span>
@@ -172,10 +172,11 @@ function stateLabel(state) {
     return t(key);
 }
 
-function timeLabel(live) {
+function timeLabel(live, referenceTime = '') {
     const date = live.state === 'preparation' ? live.startTime : live.endTime;
     if (!date) return t('war.timeUnavailable');
-    const remaining = (parseClashTime(date)?.getTime() || 0) - Date.now();
+    const fixtureNow = parseClashTime(referenceTime)?.getTime();
+    const remaining = (parseClashTime(date)?.getTime() || 0) - (fixtureNow || Date.now());
     if (remaining <= 0) return live.state === 'completed' ? t('war.warEnded') : t('war.updating');
     const hours = Math.floor(remaining / 3_600_000);
     const minutes = Math.floor(remaining % 3_600_000 / 60_000);

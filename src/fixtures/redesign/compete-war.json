@@ -5,6 +5,7 @@
     "warLog": [{ "endTime": "20981231T000000.000Z", "teamSize": 3, "attacksPerMember": 2, "clan": { "tag": "#FIXWAR", "name": "Fixture Guardians", "stars": 7, "destructionPercentage": 91.5, "attacks": 6 }, "opponent": { "tag": "#FIXOLD", "name": "Old Watch", "stars": 5, "destructionPercentage": 86.2, "attacks": 5 } }]
   },
   "war-preparation": {
+    "referenceTime": "20990101T180000.000Z",
     "clan": { "tag": "#FIXWAR", "name": "Fixture Guardians", "badgeUrl": "/assets/placeholders/clan-badge.svg" },
     "currentWar": {
       "state": "preparation", "teamSize": 3, "attacksPerMember": 2,
@@ -27,6 +28,7 @@
     "warLog": []
   },
   "war-live": {
+    "referenceTime": "20990102T180000.000Z",
     "clan": { "tag": "#FIXWAR", "name": "Fixture Guardians", "badgeUrl": "/assets/placeholders/clan-badge.svg" },
     "currentWar": {
       "state": "inWar", "teamSize": 3, "attacksPerMember": 2,
