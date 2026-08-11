@@ -59,11 +59,71 @@ describe('single-elimination bracket engine', () => {
         expect(importBracket(JSON.stringify(bracket))).toEqual(bracket);
     });
 
+    it('round-trips a valid BYE bracket without rewriting it', () => {
+        const bracket = createBracket(['A', 'B', 'C', 'D', 'E']);
+        const imported = importBracket(JSON.stringify(bracket));
+        expect(imported).toEqual(bracket);
+        expect(imported.rounds[0].slice(0, 3).map(match => match.winner))
+            .toEqual(['A', 'B', 'C']);
+    });
+
+    it('round-trips shuffled exports and legacy shuffled exports', () => {
+        const bracket = createBracket(['A', 'B', 'C', 'D', 'E'], {
+            shuffle: true,
+            random: () => 0
+        });
+        expect(bracket.drawOrder).not.toEqual(bracket.participants);
+        expect(importBracket(JSON.stringify(bracket))).toEqual(bracket);
+
+        const legacy = structuredClone(bracket);
+        delete legacy.drawOrder;
+        expect(importBracket(legacy)).toEqual(legacy);
+    });
+
     it('rejects malformed imports without accepting unknown participants', () => {
         const bracket = createBracket(['A', 'B', 'C', 'D']);
         const invalid = structuredClone(bracket);
         invalid.rounds[0][0].players[0] = 'Unknown';
         expect(() => importBracket(invalid)).toThrow(/unknown participant/i);
         expect(bracket.rounds[0][0].players[0]).toBe('A');
+    });
+
+    it('rejects duplicate or reordered opening placement', () => {
+        const bracket = createBracket(['A', 'B', 'C', 'D']);
+        const invalid = structuredClone(bracket);
+        invalid.rounds[0][1].players = ['A', 'D'];
+        expect(() => importBracket(invalid)).toThrow(/opening.*seeds|BYEs/i);
+        expect(invalid.rounds[0][1].players).toEqual(['A', 'D']);
+    });
+
+    it('rejects later-round players that do not follow prior winners', () => {
+        const bracket = createBracket(['A', 'B', 'C', 'D']);
+        const invalid = structuredClone(bracket);
+        invalid.rounds[1][0].players = ['A', null];
+        expect(() => importBracket(invalid)).toThrow(/later round|previous round/i);
+        expect(bracket.rounds[1][0].players).toEqual([null, null]);
+    });
+
+    it('rejects malformed match IDs and round metadata', () => {
+        const bracket = createBracket(['A', 'B', 'C', 'D']);
+        const invalidBracketId = structuredClone(bracket);
+        invalidBracketId.id = 'bracket" onmouseover="alert(1)';
+        expect(() => importBracket(invalidBracketId)).toThrow(/metadata/i);
+
+        const invalidId = structuredClone(bracket);
+        invalidId.rounds[0][0].id = 'r1m99';
+        expect(() => importBracket(invalidId)).toThrow(/match.*valid/i);
+
+        const invalidRound = structuredClone(bracket);
+        invalidRound.rounds[1][0].round = 1;
+        expect(() => importBracket(invalidRound)).toThrow(/match.*valid/i);
+    });
+
+    it('does not mutate an object rejected for impossible propagation', () => {
+        const invalid = structuredClone(createBracket(['A', 'B', 'C', 'D']));
+        invalid.rounds[1][0].winner = 'A';
+        const beforeImport = structuredClone(invalid);
+        expect(() => importBracket(invalid)).toThrow(/winner|previous round|later round/i);
+        expect(invalid).toEqual(beforeImport);
     });
 });

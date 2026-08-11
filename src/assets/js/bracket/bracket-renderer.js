@@ -167,6 +167,9 @@ function connectorPath(svg, source, target, active, sourceId) {
 export function drawBracketConnectors(board, bracket) {
     const svg = board.querySelector('.bracket-connectors');
     if (!svg || !bracket) return;
+    const matchElements = new Map(
+        [...board.querySelectorAll('.bracket-match')].map(element => [element.dataset.matchId, element])
+    );
     const width = Math.max(board.clientWidth, board.scrollWidth);
     const height = Math.max(board.clientHeight, board.scrollHeight);
     svg.setAttribute('width', String(width));
@@ -175,9 +178,9 @@ export function drawBracketConnectors(board, bracket) {
     svg.replaceChildren();
     bracket.rounds.slice(0, -1).forEach((round, roundIndex) => {
         round.forEach((match, matchIndex) => {
-            const source = board.querySelector(`[data-match-id="${match.id}"]`);
+            const source = matchElements.get(match.id);
             const targetMatch = bracket.rounds[roundIndex + 1][Math.floor(matchIndex / 2)];
-            const target = board.querySelector(`[data-match-id="${targetMatch.id}"]`);
+            const target = matchElements.get(targetMatch.id);
             if (!source || !target) return;
             connectorPath(
                 svg,
