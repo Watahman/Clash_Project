@@ -15,6 +15,7 @@ import {
     normalizeRosterStatus,
     validatePlanDocument
 } from './cwl-plan-schema.js';
+import { getTownHallAsset, installImageFallback } from '../assets/entity-assets.js';
 
 const PLAN_CACHE_KEY = 'clashtools_planner_cache';
 const PLAN_RECOVERY_KEY = 'clashtools_planner_recovery_v1';
@@ -595,7 +596,8 @@ async function enrichPlayer(tag, token, signal) {
 
             const image = card.querySelector('.cwl-player-townhall-foto');
             if (image) {
-                image.src = `../assets/css/pictures/townhalls/Town_Hall${townHallLevel}.png`;
+                image.src = getTownHallAsset(townHallLevel);
+                installImageFallback(image);
             }
         });
     } catch (error) {

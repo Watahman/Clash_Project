@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
     <link rel="stylesheet" href="../assets/css/workspace-v2.css">
+    <link rel="stylesheet" href="../assets/css/cwl-saved-plans.css">
 </head>
 <body class="workspace-app" data-workspace-page="drafts">
 <header>
@@ -27,7 +28,7 @@
     <nav class="center"><a href="./cwl-planner.html" aria-current="page" data-i18n="nav.cwl">CWL planner</a><a href="./cwl-operation-board.html" data-i18n="nav.operation">Operation board</a><a href="./groups.html" data-i18n="nav.groups">Clan Family</a></nav>
     <div class="right"><button type="button" data-language-control data-i18n="header.language">Language</button><button type="button" data-i18n="profile.settings">Settings</button><button id="profile-btn" type="button"><img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt=""><span data-i18n="header.user">User</span></button></div>
 </header>
-<main class="drafts-main" id="main-content">
+<main class="drafts-main saved-plans-page" id="main-content">
     <section class="drafts-shell">
         <div class="drafts-header workspace-page-header-row">
             <div>
@@ -35,7 +36,7 @@
                 <h1 data-i18n="drafts.title">Saved war plans</h1>
                 <p data-i18n="drafts.subtitle">Open, rename, copy or delete your CWL plans.</p>
             </div>
-            <a class="button button-primary" href="./cwl-planner.html" data-i18n="drafts.new">New plan</a>
+            <a class="button button-primary" id="drafts-new-plan-link" href="./cwl-planner.html" data-new-plan="true" data-i18n="drafts.new">New plan</a>
         </div>
         <p id="drafts-status" class="drafts-status" role="status" aria-live="polite" data-i18n="drafts.loading">Loading plans...</p>
         <section class="workspace-section-block drafts-table-block" aria-labelledby="drafts-table-title">
@@ -56,5 +57,15 @@
 </main>
 <footer></footer>
 <div class="profile-placeholder"></div>
+<dialog class="saved-plan-delete-dialog" id="saved-plan-delete-dialog" aria-labelledby="saved-plan-delete-title" aria-describedby="saved-plan-delete-message">
+    <form method="dialog">
+        <h2 id="saved-plan-delete-title" data-i18n="drafts.delete">Delete plan</h2>
+        <p id="saved-plan-delete-message"></p>
+        <div class="saved-plan-dialog-actions">
+            <button type="button" class="button button-secondary" data-delete-cancel data-i18n="drafts.cancel">Cancel</button>
+            <button type="button" class="button button-danger" data-delete-confirm data-i18n="drafts.delete">Delete</button>
+        </div>
+    </form>
+</dialog>
 </body>
 </html>

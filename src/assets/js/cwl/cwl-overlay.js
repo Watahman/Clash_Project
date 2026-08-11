@@ -21,6 +21,23 @@ export function initOverlayHide() {
             resetCwlOverlayState();
         });
     });
+    document.querySelectorAll('[data-overlay-close]').forEach(button => {
+        button.addEventListener('click', () => {
+            const overlay = document.getElementById(button.dataset.overlayClose);
+            overlay?.classList.add('hidden');
+            resetCwlOverlayState();
+        });
+    });
+    document.addEventListener('keydown', event => {
+        const overlay = document.querySelector('.overlay:not(.hidden)');
+        if (!overlay) return;
+        if (event.key === 'Escape') {
+            overlay.classList.add('hidden');
+            resetCwlOverlayState();
+            return;
+        }
+        if (event.key === 'Tab') trapOverlayFocus(event, overlay);
+    });
 }
 
 export function initAddPlayersOverlay(refs) {
@@ -35,7 +52,10 @@ export function initAddPlayersOverlay(refs) {
         overlay.classList.toggle("hidden");
         setOverlayMessage('');
         updateAddSelectedButton(addSelectedBtn);
-        if (!overlay.classList.contains('hidden')) loadAccountSources(addSelectedBtn);
+        if (!overlay.classList.contains('hidden')) {
+            loadAccountSources(addSelectedBtn);
+            cwlInputTag?.focus();
+        }
     };
 
     modalTabBtn.forEach(tab => {
@@ -54,16 +74,22 @@ export function initAddPlayersOverlay(refs) {
 
     overlayConfirmTagBtn.onclick = () => {
         const tag = cwlInputTag.value.trim();
-        if (!tag) return;
+        if (!tag) {
+            setOverlayMessage(t('cwl.tagLabel'), 'error');
+            cwlInputTag.focus();
+            return;
+        }
         setButtonBusy(overlayConfirmTagBtn, true);
         getPlayerBasicData(tag)
             .then(data => {
-                const result = createPlayerCard(data);
+                const result = createPlayerCard({ ...data, source: 'tag' });
                 handlePlayerAddResult(result);
             })
             .catch(() => {
                 getClanMembersBasicData(tag)
-                    .then(players => handlePlayerAddResult(createPlayerCard(players)))
+                    .then(players => handlePlayerAddResult(createPlayerCard(
+                        players.map(player => ({ ...player, source: 'tag' }))
+                    )))
                     .catch(error => {
                         console.error(error);
                         setOverlayMessage(t('cwl.playerAddError'), 'error');
@@ -77,7 +103,10 @@ export function initAddPlayersOverlay(refs) {
             .map(card => card._cwlPlayer)
             .filter(Boolean);
         if (!selected.length) return;
-        const result = createPlayerCard(uniquePlayers(selected));
+        const result = createPlayerCard(uniquePlayers(selected).map(player => ({
+            ...player,
+            source: activeAccountSource === 'friends' ? 'friends' : 'userBase'
+        })));
         document.querySelectorAll('#cwl-account-list .cwl-player-article.selected')
             .forEach(card => card.classList.remove('selected'));
         updateAddSelectedButton(addSelectedBtn);
@@ -104,10 +133,19 @@ function showMainTab(tabName, modalTabBtn) {
     document.querySelector(".modal-tab-btn.active")?.classList.remove("active");
     Array.from(modalTabBtn).find(tab => tab.dataset.tab === tabName)?.classList.add("active");
     document.querySelector("#modal-tab-tag").classList.toggle("hidden", tabName !== "tag");
-    document.querySelector("#modal-tab-accounts").classList.toggle("hidden", tabName !== "accounts");
+    document.querySelector("#modal-tab-accounts").classList.toggle(
+        "hidden",
+        tabName !== "accounts" && tabName !== "friends"
+    );
     document.querySelector("#modal-tab-group").classList.toggle("hidden", tabName !== "group");
     document.querySelector(".modal-group-preview-list")?.classList.toggle("hidden", tabName !== "group");
-    if (tabName === "accounts") showAccountSource(activeAccountSource);
+    if (tabName === "accounts" || tabName === "friends") {
+        if (tabName === 'friends') {
+            activeAccountSource = 'friends';
+            document.querySelector('.modal-seg-btn[data-seg="friends"]')?.click();
+        }
+        showAccountSource(activeAccountSource);
+    }
 }
 
 function showAccountSource(source) {
@@ -216,7 +254,10 @@ function loadAccountSources(addSelectedBtn) {
                 updateAddSelectedButton(addSelectedBtn);
             }
         })
-        .catch(error => console.error(error));
+        .catch(error => {
+            console.error(error);
+            setOverlayMessage(t('cwl.playerAddError'), 'error');
+        });
 
     getFriends(userId)
         .then(data => {
@@ -232,10 +273,16 @@ function loadAccountSources(addSelectedBtn) {
                         showAccountSource(activeAccountSource);
                         updateAddSelectedButton(addSelectedBtn);
                     }
+                }).catch(error => {
+                    console.error(error);
+                    setOverlayMessage(t('cwl.playerAddError'), 'error');
                 });
             });
         })
-        .catch(error => console.error(error));
+        .catch(error => {
+            console.error(error);
+            setOverlayMessage(t('cwl.playerAddError'), 'error');
+        });
 }
 
 export function initAddClanButton(refs) {
@@ -243,14 +290,20 @@ export function initAddClanButton(refs) {
 
     addClanBtn.addEventListener("click", () => {
         document.querySelector("#cwl-overlay-add-clan").classList.remove("hidden");
+        setClanMessage('');
         ensureCwlSizeOptions(selectAmountPlayers);
+        cwlInputClanCode?.focus();
     });
 
     overlayAddClanBtn.addEventListener("click", () => {
         const clanID = cwlInputClanCode.value.trim();
-        if (clanID !== "") {
-            setButtonBusy(overlayAddClanBtn, true);
-            getClanInfoRequest(clanID)
+        if (clanID === "") {
+            setClanMessage(t('cwl.tagLabel'), 'error');
+            cwlInputClanCode?.focus();
+            return;
+        }
+        setButtonBusy(overlayAddClanBtn, true);
+        getClanInfoRequest(clanID)
                 .then(data => {
                     const leagueName = data?.warLeague?.name || "";
                     const allowThirty = allowsThirtyPlayerCwl(leagueName);
@@ -260,10 +313,35 @@ export function initAddClanButton(refs) {
                     cwlInputClanCode.value = "";
                     applyCwlSizeRestriction(selectAmountPlayers, true);
                 })
-                .catch(error => console.error(error))
-                .finally(() => setButtonBusy(overlayAddClanBtn, false));
-        }
+                .catch(error => {
+                    console.error(error);
+                    setClanMessage(t('cwl.playerAddError'), 'error');
+                })
+            .finally(() => setButtonBusy(overlayAddClanBtn, false));
     });
+}
+
+function setClanMessage(message, state = '') {
+    const node = document.querySelector('#cwl-add-clan-status');
+    if (!node) return;
+    node.textContent = message;
+    node.dataset.state = state;
+}
+
+function trapOverlayFocus(event, overlay) {
+    const focusable = Array.from(overlay.querySelectorAll(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+    ));
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable.at(-1);
+    if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+    }
 }
 
 export function ensureCwlSizeOptions(selectAmountPlayers) {

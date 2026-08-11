@@ -6,6 +6,7 @@ import { getCurrentUserId } from "../utils/user.js";
 import { clearActiveCwlPoll, getActiveCwlPollMeta, setActiveCwlPoll } from "./cwl-availability.js";
 import { escapeCssIdentifier, normalizeTag, uniquePlayers } from "./cwl-utils.js";
 import { t } from "../i18n/i18n.js";
+import { ASSET_FALLBACKS } from "../assets/entity-assets.js";
 
 let refs = {};
 let currentUserId = '';
@@ -177,7 +178,7 @@ function renderGroupPreview(groupId) {
     }
     refs.groupPreview?.classList.add('hidden');
     refs.groupPreviewList?.classList.remove('hidden');
-    createPlayerCard(state.players, `group|${groupId}`);
+    createPlayerCard(state.players.map(player => ({ ...player, source: 'group' })), `group|${groupId}`);
     refs.groupPreviewList?.querySelectorAll(`[data-clanuuid="${escapeCssIdentifier(groupId)}"]`)
         .forEach(card => card.classList.remove('hidden'));
 }
@@ -243,7 +244,7 @@ function addSelectedGroupToPlanner() {
     const groupId = refs.selectGroup?.value || '';
     const state = groupState.get(groupId);
     if (!state) return;
-    createPlayerCard(state.players);
+    createPlayerCard(state.players.map(player => ({ ...player, source: 'group' })));
     state.clans.forEach(clan => createClanCard(toPlannerClan(clan), 15));
     activateSelectedPoll(false);
     window.dispatchEvent(new CustomEvent('clashtools:cwl-close-add-player-overlay'));
@@ -253,7 +254,7 @@ function toPlannerClan(clan) {
     return {
         name: clan.clan_name || normalizeTag(clan.clan_tag),
         tag: normalizeTag(clan.clan_tag),
-        badgeUrls: { small: clan.badge_url || '../assets/css/pictures/default-clan-banner.png' }
+        badgeUrls: { small: clan.badge_url || ASSET_FALLBACKS.clan }
     };
 }
 

@@ -11,6 +11,7 @@ import { initPlayerPerformanceClient } from "../cwl/player-performance-client.js
 import { initPlayerPerformancePopover } from "../cwl/cwl-player-performance-popover.js";
 import { initAutoPlan } from "../cwl/auto-plan/cwl-auto-plan-ui.js";
 import { initOptimizePlan } from "../cwl/optimize-plan/cwl-optimize-plan-ui.js";
+import { initPlannerSurface } from "../cwl/cwl-planner-ui.js";
 
 export { savePlan };
 
@@ -88,7 +89,9 @@ async function init() {
     initPlayerPerformancePopover();
     initAutoPlan();
     initOptimizePlan();
+    initPlannerSurface({ root: document });
     initPlanNameSync();
+    initPlannerHeaderState();
     window.addEventListener('clashtools:cwl-active-poll-changed', () => savePlan());
     guessCwlSize();
     await loadAllPlans();
@@ -136,6 +139,34 @@ function syncPlanTitle() {
     pageTitle.textContent = planName?.value.trim() || t('cwl.unnamedPlan');
 }
 
+function initPlannerHeaderState() {
+    const state = document.querySelector('.cwl-plan-state');
+    const saveStatus = document.querySelector('#cwl-save-status');
+    const limitFeedback = document.querySelector('#cwl-plan-limit-feedback');
+    if (!state || !saveStatus) return;
+    const sync = () => {
+        const saveState = saveStatus.dataset.state;
+        const label = limitFeedback && !limitFeedback.hidden
+            ? t('cwl.planLimitReached')
+            : saveState === 'saving'
+                ? t('cwl.saving')
+                : saveState === 'error' || saveState === 'conflict'
+                    ? t(saveState === 'conflict' ? 'cwl.saveConflict' : 'cwl.saveError')
+                    : loadPlan?.value
+                        ? t('cwl.saved')
+                        : t('planner.draft');
+        state.textContent = label;
+        state.dataset.state = saveState || 'draft';
+    };
+    const observer = new MutationObserver(sync);
+    observer.observe(saveStatus, { attributes: true, attributeFilter: ['data-state'] });
+    if (limitFeedback) observer.observe(limitFeedback, { attributes: true, attributeFilter: ['hidden'] });
+    window.addEventListener('clashtools:cwl-plan-loaded', sync);
+    window.addEventListener('clashtools:cwl-plan-name-defaulted', sync);
+    window.addEventListener('clashtools:language-changed', sync);
+    sync();
+}
+
 function initPlayerSorting() {
     const sorting = document.querySelector('#cwl-player-sorting');
     if (!sorting || !availablePlayers) return;
@@ -155,7 +186,7 @@ function initPlayerSorting() {
     window.addEventListener('clashtools:cwl-plan-loaded', sortPlayers);
 }
 function getName(card) { return card.querySelector('.cwl-player-name')?.textContent?.trim().toLowerCase() || ''; }
-function getTownHall(card) { const m=(card.querySelector('.cwl-player-townhall-foto')?.getAttribute('src')||'').match(/Town_Hall(\d+)\.png/i); return m ? Number(m[1]) : 0; }
+function getTownHall(card) { return Number(card.dataset.townHall || 0); }
 
 function savePlanButton() {
     savePlanBtn.addEventListener("click", async () => {

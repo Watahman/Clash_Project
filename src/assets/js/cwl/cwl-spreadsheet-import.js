@@ -189,6 +189,7 @@ export function initSpreadsheetImport() {
     openButton.addEventListener('click', () => {
         resetImporter();
         overlay.classList.remove('hidden');
+        dropzone.focus();
     });
 
     bindBackdropClick(overlay, () => {
@@ -431,7 +432,10 @@ async function importSelected() {
     try {
         const playerRows = selected.filter(result => result.selectedType === 'player' && result.playerData);
         if (playerRows.length) {
-            const playerResult = createPlayerCard(playerRows.map(result => result.playerData));
+            const playerResult = createPlayerCard(playerRows.map(result => ({
+                ...result.playerData,
+                source: 'spreadsheet'
+            })));
             importedPlayers += playerResult.added || 0;
             skipped += playerResult.skipped || 0;
             completed += playerRows.length;

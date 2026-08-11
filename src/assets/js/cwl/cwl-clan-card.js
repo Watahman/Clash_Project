@@ -9,6 +9,7 @@ import {
     updateAllPlayerCounters,
     updateClanCapacityCounter
 } from './cwl-planner-card-state.js';
+import { ASSET_FALLBACKS, installImageFallback } from '../assets/entity-assets.js';
 
 export function applyClanLeagueRestriction(article, leagueName, options = {}) {
     const select = article?.querySelector('.cwl-clan-capacity');
@@ -44,9 +45,9 @@ export function createClanCard(clanInfo, playerAmount, uuid = '') {
     const clanUuid = uuid || crypto.randomUUID();
 
     const logo = template.querySelector('.cwl-clan-logo');
-    logo.src = clanInfo?.badgeUrls?.small
-        || '../assets/css/pictures/default-clan-banner.png';
+    logo.src = clanInfo?.badgeUrls?.small || ASSET_FALLBACKS.clan;
     logo.alt = clanName;
+    installImageFallback(logo, ASSET_FALLBACKS.clan);
     template.querySelector('.cwl-clan-name').textContent = clanName;
     template.querySelector('.cwl-clan-tag').textContent = clanTag;
     template.querySelector('.cwl-clan-league').textContent =

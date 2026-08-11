@@ -16,6 +16,7 @@ import {
 } from './cwl-player-controls.js';
 import { makePlayerDraggable } from './cwl-player-drag.js';
 import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js';
+import { getTownHallAsset, installImageFallback } from '../assets/entity-assets.js';
 
 export function createPlayerCard(playerInfo, clanUuid) {
     const players = uniquePlayers(playerInfo);
@@ -108,13 +109,9 @@ function buildPlayerElement(player, targetInfo) {
     const element = template.querySelector('.cwl-player-article');
     const normalized = normalizePlayer(player);
     const townHallImage = element.querySelector('.cwl-player-townhall-foto');
-    townHallImage.src =
-        `../assets/css/pictures/townhalls/Town_Hall${normalized.townHallLevel}.png`;
-    townHallImage.addEventListener('error', () => {
-        if (!townHallImage.src.endsWith('/Town_Hall1.png')) {
-            townHallImage.src = '../assets/css/pictures/townhalls/Town_Hall1.png';
-        }
-    }, { once: true });
+    townHallImage.src = getTownHallAsset(normalized.townHallLevel);
+    townHallImage.alt = `${t('cwl.sortTownhall')} ${normalized.townHallLevel}`;
+    installImageFallback(townHallImage);
 
     const tagElement = element.querySelector('.cwl-player-hashtag');
     const nameElement = element.querySelector('.cwl-player-name');
@@ -134,10 +131,12 @@ function buildPlayerElement(player, targetInfo) {
         'aria-label',
         t('performance.openForPlayer', { player: normalized.name })
     );
+    infoElement.setAttribute('aria-controls', 'cwl-player-inspector');
+    element.setAttribute('aria-controls', 'cwl-player-inspector');
 
     element.dataset.playerTag = normalized.tag;
     element.dataset.townHall = String(normalized.townHallLevel);
-    element.dataset.source = targetInfo.source;
+    element.dataset.source = normalized.source || normalized.origin || targetInfo.source;
     element._cwlPlayer = normalized;
     targetInfo.classes.forEach(className => element.classList.add(className));
     if (targetInfo.groupId) element.dataset.clanuuid = targetInfo.groupId;

@@ -24,6 +24,8 @@ function initRefs() {
     refs.search = document.querySelector('#drafts-search');
     refs.sort = document.querySelector('#drafts-sort');
     refs.filterStatus = document.querySelector('#drafts-filter-status');
+    refs.deleteDialog = document.querySelector('#saved-plan-delete-dialog');
+    refs.deleteDialogMessage = document.querySelector('#saved-plan-delete-message');
 }
 
 function setStatus(message = '', state = '') {
@@ -32,10 +34,10 @@ function setStatus(message = '', state = '') {
     refs.status.hidden = !message;
 }
 
-function openPlanLink(planId) {
+function openPlanLink(planId, className = 'button button-small button-primary') {
     const link = document.createElement('a');
     link.href = './cwl-planner.html';
-    link.className = 'button button-small button-primary';
+    link.className = className;
     link.textContent = t('drafts.open');
     link.addEventListener('click', () => localStorage.setItem('planner_id', planId));
     return link;
@@ -136,6 +138,9 @@ function bindListControls() {
         listState.sort = event.currentTarget.value;
         render();
     });
+    document.querySelector('[data-new-plan]')?.addEventListener('click', () => {
+        localStorage.removeItem('planner_id');
+    });
 }
 
 function cell(label, value) {
@@ -150,23 +155,35 @@ function renderPlan(plan) {
     row.dataset.planId = plan.id;
 
     const name = cell('plans.name', '');
+    const nameLink = openPlanLink(plan.id, 'draft-plan-name-link');
     const heading = document.createElement('strong');
     heading.textContent = plan.name || t('plans.unnamed');
+    nameLink.replaceChildren(heading);
     const access = document.createElement('small');
     access.textContent = t(plan.isOwner ? 'drafts.owner' : 'drafts.shared');
-    name.append(heading, access);
+    name.append(nameLink, access);
 
     const actions = document.createElement('td');
     actions.className = 'draft-actions workspace-row-actions';
     actions.appendChild(openPlanLink(plan.id));
+    const more = document.createElement('details');
+    more.className = 'draft-plan-actions-menu';
+    const summary = document.createElement('summary');
+    summary.textContent = '…';
+    summary.setAttribute('aria-label', 'More plan actions');
+    more.appendChild(summary);
+    const menu = document.createElement('div');
+    menu.className = 'draft-plan-actions-menu-content';
     if (plan.isOwner) {
-        actions.appendChild(actionButton(t('drafts.rename'), 'button button-small', () => showRename(row, plan)));
+        menu.appendChild(actionButton(t('drafts.rename'), 'button button-small', () => showRename(row, plan)));
     }
-    actions.appendChild(actionButton(t('drafts.copy'), 'button button-small', () => void copyExistingPlan(plan)));
-    actions.appendChild(actionButton(t('drafts.export'), 'button button-small', () => exportPlan(plan)));
+    menu.appendChild(actionButton(t('drafts.copy'), 'button button-small', () => void copyExistingPlan(plan)));
+    menu.appendChild(actionButton(t('drafts.export'), 'button button-small', () => exportPlan(plan)));
     if (plan.isOwner) {
-        actions.appendChild(actionButton(t('drafts.delete'), 'button button-small draft-delete', () => void removePlan(plan)));
+        menu.appendChild(actionButton(t('drafts.delete'), 'button button-small draft-delete', () => void removePlan(plan)));
     }
+    more.appendChild(menu);
+    actions.appendChild(more);
 
     row.append(
         name,
@@ -200,7 +217,13 @@ function showRename(row, plan) {
     form.addEventListener('submit', async event => {
         event.preventDefault();
         const name = input.value.trim();
-        if (!name) return;
+        if (!name) {
+            input.setCustomValidity(t('drafts.actionError'));
+            input.reportValidity?.();
+            setStatus(t('drafts.actionError'), 'error');
+            return;
+        }
+        input.setCustomValidity('');
         setBusy(form, true);
         try {
             await renamePlan(plan.id, name, userId);
@@ -240,7 +263,7 @@ async function copyExistingPlan(plan) {
 }
 
 async function removePlan(plan) {
-    if (!window.confirm(t('drafts.deleteConfirm', { name: plan.name }))) return;
+    if (!await confirmDeletePlan(plan)) return;
     setStatus(t('drafts.working'));
     try {
         await deletePlan(plan.id, userId);
@@ -252,6 +275,37 @@ async function removePlan(plan) {
     } catch (error) {
         setStatus(error?.message || t('drafts.actionError'), 'error');
     }
+}
+
+async function confirmDeletePlan(plan) {
+    const dialog = refs.deleteDialog;
+    if (!dialog || typeof dialog.showModal !== 'function') {
+        return window.confirm(t('drafts.deleteConfirm', { name: plan.name }));
+    }
+    if (refs.deleteDialogMessage) {
+        refs.deleteDialogMessage.textContent = t('drafts.deleteConfirm', { name: plan.name });
+    }
+    dialog.showModal();
+    return new Promise(resolve => {
+        const cancelButton = dialog.querySelector('[data-delete-cancel]');
+        const confirmButton = dialog.querySelector('[data-delete-confirm]');
+        const onCancel = () => finish(false);
+        const onCancelClick = () => finish(false);
+        const onConfirmClick = () => finish(true);
+        const cleanup = () => {
+            cancelButton?.removeEventListener('click', onCancelClick);
+            confirmButton?.removeEventListener('click', onConfirmClick);
+            dialog.removeEventListener('cancel', onCancel);
+        };
+        const finish = value => {
+            cleanup();
+            dialog.close();
+            resolve(value);
+        };
+        cancelButton?.addEventListener('click', onCancelClick);
+        confirmButton?.addEventListener('click', onConfirmClick);
+        dialog.addEventListener('cancel', onCancel);
+    });
 }
 
 function setBusy(root, busy) {

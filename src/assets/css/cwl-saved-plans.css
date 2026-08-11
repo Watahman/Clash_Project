@@ -1,0 +1,121 @@
+.saved-plans-page {
+    --saved-border: var(--border, #2a3542);
+    --saved-muted: var(--text-muted, #94a0ad);
+    min-width: 0;
+    padding: 28px 32px 52px;
+}
+
+.saved-plans-page,
+.saved-plans-page * { box-sizing: border-box; }
+
+.saved-plans-page .drafts-shell {
+    margin: 0 auto;
+    max-width: 1180px;
+}
+
+.saved-plans-page .drafts-header {
+    align-items: end;
+    border-bottom: 1px solid var(--saved-border);
+    display: flex;
+    gap: 24px;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+}
+
+.saved-plans-page .hero-eyebrow {
+    color: var(--saved-muted);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.saved-plans-page h1 { font-size: clamp(1.45rem, 2vw, 1.9rem); letter-spacing: -.02em; margin: 0; }
+.saved-plans-page .drafts-header p { color: var(--saved-muted); font-size: .88rem; margin: 7px 0 0; }
+.saved-plans-page .drafts-header .button { min-height: 44px; }
+.saved-plans-page .button-danger { background: var(--danger, #b94a4a); border-color: var(--danger, #b94a4a); color: #fff; }
+.saved-plans-page .drafts-status { color: var(--saved-muted); min-height: 1.3em; }
+.saved-plans-page .drafts-status[data-state="error"] { color: var(--danger, #e47575); }
+.saved-plans-page .drafts-status[data-state="success"] { color: var(--success, #70bb8b); }
+
+.saved-plans-page .drafts-table-block {
+    background: var(--surface, #151c25);
+    border: 1px solid var(--saved-border);
+    border-radius: 10px;
+    min-width: 0;
+    overflow: visible;
+    padding: 16px;
+}
+
+.saved-plans-page .drafts-controls {
+    align-items: end;
+    border-bottom: 1px solid var(--saved-border);
+    display: grid;
+    gap: 12px;
+    grid-template-columns: minmax(16rem, 1fr) 14rem minmax(12rem, auto);
+    margin-bottom: 4px;
+    padding-bottom: 14px;
+}
+
+.saved-plans-page .drafts-controls label { color: var(--saved-muted); display: grid; font-size: .72rem; font-weight: 700; gap: 5px; }
+.saved-plans-page .drafts-controls input,
+.saved-plans-page .drafts-controls select { background: var(--surface-subtle, #111720); border: 1px solid var(--saved-border); border-radius: 6px; color: var(--text, #e7edf4); min-height: 42px; padding: 8px 10px; }
+.saved-plans-page .drafts-filter-status { color: var(--saved-muted); font-size: .78rem; margin: 0; text-align: right; }
+.saved-plans-page .workspace-table-wrap { overflow: visible; }
+.saved-plans-page .drafts-table { border-collapse: collapse; min-width: 680px; width: 100%; }
+.saved-plans-page .drafts-table th { color: var(--saved-muted); font-size: .7rem; letter-spacing: .06em; padding: 12px 10px; text-align: left; text-transform: uppercase; }
+.saved-plans-page .drafts-table td { border-top: 1px solid var(--saved-border); font-size: .82rem; padding: 12px 10px; vertical-align: middle; }
+.saved-plans-page .drafts-table td:first-child { min-width: 220px; }
+.saved-plans-page .drafts-table td[data-label="Plan"] { white-space: normal; }
+.saved-plans-page .drafts-table strong { display: block; font-size: .88rem; }
+.saved-plans-page .drafts-table small { color: var(--saved-muted); display: block; font-size: .7rem; margin-top: 3px; }
+.saved-plans-page .draft-plan-name-link { color: var(--text, #e7edf4); text-decoration: none; }
+.saved-plans-page .draft-plan-name-link:hover,
+.saved-plans-page .draft-plan-name-link:focus-visible { color: var(--accent-strong, #f1cf84); text-decoration: underline; }
+.saved-plans-page .draft-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.saved-plans-page .draft-actions .button { min-height: 38px; }
+.saved-plans-page .draft-plan-actions-menu { position: relative; }
+.saved-plans-page .draft-plan-actions-menu summary { align-items: center; border: 1px solid var(--saved-border); border-radius: 6px; cursor: pointer; display: flex; font-size: 1.1rem; justify-content: center; list-style: none; min-height: 38px; min-width: 38px; }
+.saved-plans-page .draft-plan-actions-menu summary::-webkit-details-marker { display: none; }
+.saved-plans-page .draft-plan-actions-menu-content { background: var(--surface-raised, #1a222d); border: 1px solid var(--saved-border); border-radius: 8px; box-shadow: var(--shadow-md, 0 12px 28px rgba(0, 0, 0, .18)); display: grid; gap: 4px; min-width: 150px; padding: 6px; position: absolute; right: 0; top: calc(100% + 5px); z-index: 20; }
+.saved-plans-page .draft-plan-actions-menu-content .button { justify-content: flex-start; width: 100%; }
+.saved-plans-page .workspace-empty-row td { color: var(--saved-muted); padding: 32px 16px; text-align: center; }
+.saved-plans-page .workspace-empty-row p { margin: 0 0 8px; }
+
+.saved-plan-delete-dialog { background: var(--surface, #151c25); border: 1px solid var(--saved-border); border-radius: 10px; color: var(--text, #e7edf4); max-width: min(440px, calc(100vw - 32px)); padding: 22px; width: 100%; }
+.saved-plan-delete-dialog::backdrop { background: rgba(7, 11, 16, .56); }
+.saved-plan-delete-dialog h2 { font-size: 1rem; margin: 0; }
+.saved-plan-delete-dialog p { color: var(--saved-muted); line-height: 1.5; margin: 12px 0 20px; }
+.saved-plan-dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.saved-plan-dialog-actions .button { min-height: 44px; }
+
+@media (max-width: 760px) {
+    .saved-plans-page { padding: 16px 16px 36px; }
+    .saved-plans-page .drafts-header { align-items: start; display: grid; gap: 14px; }
+    .saved-plans-page .drafts-header .button { justify-self: start; }
+    .saved-plans-page .drafts-table-block { border-radius: 8px; padding: 12px; }
+    .saved-plans-page .drafts-controls { grid-template-columns: 1fr; }
+    .saved-plans-page .drafts-controls input,
+    .saved-plans-page .drafts-controls select { min-height: 44px; }
+    .saved-plans-page .drafts-filter-status { text-align: left; }
+    .saved-plans-page .workspace-table-wrap { overflow: visible; }
+    .saved-plans-page .drafts-table { display: block; min-width: 0; }
+    .saved-plans-page .drafts-table thead { display: none; }
+    .saved-plans-page .drafts-table tbody,
+    .saved-plans-page .drafts-table tr,
+    .saved-plans-page .drafts-table td { display: block; width: 100%; }
+    .saved-plans-page .drafts-table tr[data-plan-id] { border-bottom: 1px solid var(--saved-border); padding: 14px 0; }
+    .saved-plans-page .drafts-table tr[data-plan-id]:last-child { border-bottom: 0; }
+    .saved-plans-page .drafts-table td { border: 0; min-width: 0; padding: 4px 0 4px 7.5rem; position: relative; text-align: right; }
+    .saved-plans-page .drafts-table td:first-child { padding-left: 0; text-align: left; }
+    .saved-plans-page .drafts-table td:not(:first-child)::before { color: var(--saved-muted); content: attr(data-label); font-size: .68rem; left: 0; position: absolute; text-align: left; text-transform: uppercase; top: 7px; }
+    .saved-plans-page .drafts-table td.draft-actions { justify-content: flex-start; padding-left: 0; text-align: left; }
+    .saved-plans-page .drafts-table td.draft-actions::before { display: none; }
+    .saved-plans-page .drafts-table .draft-actions .button { min-height: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .saved-plans-page .draft-plan-actions-menu-content { transition: none; }
+}

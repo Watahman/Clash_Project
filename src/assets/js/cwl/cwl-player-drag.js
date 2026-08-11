@@ -2,6 +2,10 @@ import { savePlan } from './cwl-plan-io.js';
 import { normalizeRosterStatus } from './cwl-plan-schema.js';
 import { syncPlayerRosterStatus } from './cwl-player-controls.js';
 import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js';
+import {
+    applyPlannerDayDrop,
+    getPlannerDayDropValidation
+} from './cwl-planner-schedule.js';
 
 const CONTROL_SELECTOR = '.cwl-delete-player, .cwl-move-player, .cwl-roster-status';
 
@@ -9,6 +13,7 @@ export function makePlayerDraggable(element) {
     let offsetX;
     let offsetY;
     let dragging = false;
+    let activeTarget = null;
     element.originalContainer = element.parentElement;
     element.classList.add('draggable');
 
@@ -40,16 +45,33 @@ export function makePlayerDraggable(element) {
         const onMouseMove = moveEvent => {
             element.style.left = `${moveEvent.clientX - offsetX}px`;
             element.style.top = `${moveEvent.clientY - offsetY}px`;
+            activeTarget = findDropTarget(moveEvent.clientX, moveEvent.clientY);
+            updateDropFeedback(element, activeTarget);
         };
         const onMouseUp = upEvent => {
             dragging = false;
             const previousContainer = element.originalContainer;
-            const targetContainer = findDropTarget(upEvent.clientX, upEvent.clientY);
-            const finalContainer = targetContainer || previousContainer;
+            const targetContainer = activeTarget
+                || findDropTarget(upEvent.clientX, upEvent.clientY);
+            const validation = getPlannerDayDropValidation(element, targetContainer);
+            let scheduleDrop = false;
+            let dropAllowed = validation.legal;
+            let dropReason = validation.reason;
+            if (targetContainer?.matches('.cwl-day-dropzone') && validation.legal) {
+                const result = applyPlannerDayDrop(element, targetContainer);
+                scheduleDrop = Boolean(result.applied);
+                dropAllowed = result.legal;
+                dropReason = result.reason;
+            }
+            const finalContainer = scheduleDrop
+                ? element.parentElement
+                : dropAllowed && !targetContainer?.matches('.cwl-day-dropzone')
+                    ? targetContainer || previousContainer
+                    : previousContainer;
             const previousStatus = normalizeRosterStatus(element.dataset.rosterStatus);
-            finalContainer.appendChild(element);
+            if (finalContainer) finalContainer.appendChild(element);
             element.originalContainer = finalContainer;
-            syncPlayerRosterStatus(element, {
+            if (!scheduleDrop && dropAllowed) syncPlayerRosterStatus(element, {
                 preferredStatus: previousStatus,
                 autoReserve: Boolean(
                     targetContainer
@@ -57,19 +79,24 @@ export function makePlayerDraggable(element) {
                     && targetContainer.matches('.cwl-clan-player-list')
                 )
             });
+            if (!dropAllowed) announceDropFeedback(dropReason);
 
             element.classList.remove('cwl-player-dragging');
+            clearDropFeedback();
             for (const property of [
                 'position', 'left', 'top', 'width', 'height', 'z-index', 'pointer-events'
             ]) {
                 element.style.removeProperty(property);
             }
-            updateAllPlayerCounters();
-            rememberPlannerPlayers();
-            window.dispatchEvent(new CustomEvent('clashtools:cwl-player-added'));
-            savePlan();
+            if (!scheduleDrop && dropAllowed) {
+                updateAllPlayerCounters();
+                rememberPlannerPlayers();
+                window.dispatchEvent(new CustomEvent('clashtools:cwl-player-added'));
+                savePlan();
+            }
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
+            activeTarget = null;
         };
 
         document.addEventListener('mousemove', onMouseMove);
@@ -78,7 +105,9 @@ export function makePlayerDraggable(element) {
 }
 
 function findDropTarget(x, y) {
-    const lists = document.querySelectorAll('.cwl-clan-player-list, #cwl-available-players');
+    const lists = document.querySelectorAll(
+        '.cwl-clan-player-list, #cwl-available-players, .cwl-day-dropzone'
+    );
     for (const list of lists) {
         const rect = list.getBoundingClientRect();
         if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
@@ -86,4 +115,25 @@ function findDropTarget(x, y) {
         }
     }
     return null;
+}
+
+function updateDropFeedback(card, target) {
+    clearDropFeedback();
+    if (!target) return;
+    const validation = getPlannerDayDropValidation(card, target);
+    target.classList.add(validation.legal ? 'cwl-drop-valid' : 'cwl-drop-invalid');
+    if (!validation.legal) target.dataset.dropReason = validation.reason;
+}
+
+function clearDropFeedback() {
+    document.querySelectorAll('.cwl-drop-valid, .cwl-drop-invalid').forEach(target => {
+        target.classList.remove('cwl-drop-valid', 'cwl-drop-invalid');
+        delete target.dataset.dropReason;
+    });
+}
+
+function announceDropFeedback(message) {
+    window.dispatchEvent(new CustomEvent('clashtools:cwl-drop-feedback', {
+        detail: { message }
+    }));
 }
