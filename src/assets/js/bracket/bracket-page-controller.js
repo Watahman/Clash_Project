@@ -94,8 +94,10 @@ class BracketController {
     }
 
     renderResultHeading() {
-        const title = this.state.bracket?.name || this.refs.name.value.trim() || t('bracket.title');
         const count = this.state.bracket?.participants.length || participantEntries(this.refs).length;
+        const title = this.state.fixtureMode
+            ? bracketText('fixtureName', { count })
+            : this.state.bracket?.name || this.refs.name.value.trim() || t('bracket.title');
         this.refs.resultTitle.textContent = title;
         this.refs.resultCount.textContent = String(count);
     }
@@ -262,6 +264,9 @@ class BracketController {
 
     languageChanged() {
         renderModuleCopy(this.documentRef, this.refs, this.state.setupCollapsed);
+        if (this.state.fixtureMode) {
+            this.refs.name.value = bracketText('fixtureName', { count: this.state.bracket?.participants.length || 0 });
+        }
         this.render();
         updateGuidanceCopy(this.documentRef);
     }

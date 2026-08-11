@@ -1,4 +1,16 @@
-.bracket-result-header { gap: 24px; border-bottom: 1px solid var(--cp-border-1); }
+.bracket-result-header {
+    position: static;
+    z-index: auto;
+    height: auto;
+    min-height: 112px;
+    grid-template-columns: none;
+    align-items: flex-start;
+    gap: 24px;
+    border-bottom: 1px solid var(--cp-border-1);
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+}
 .bracket-result-heading { min-width: 0; }
 .bracket-result-heading > p { max-width: 620px; margin: 8px 0 0; color: var(--cp-text-2); font-size: .8125rem; line-height: 1.55; }
 .bracket-result-meta { display: flex; flex: 0 0 auto; gap: 24px; }
