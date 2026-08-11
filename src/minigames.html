@@ -31,9 +31,7 @@
     <link rel="stylesheet" href="/assets/css/workspace-polish.css">
     <link rel="stylesheet" href="/assets/css/public-marketing.css">
     <link rel="stylesheet" href="/assets/css/minigames.css?v=20260809-3">
-    <link rel="stylesheet" href="/assets/css/minigames-phase2.css">
-    <link rel="stylesheet" href="/assets/css/minigames-phase2b.css">
-    <link rel="stylesheet" href="/assets/css/minigames-higher-lower.css">
+    <link rel="stylesheet" href="/assets/css/minigames-higher-lower.css?v=20260809-3">
     <link rel="stylesheet" href="/assets/css/public-v2.css">
 </head>
 <body class="public-site minigames-page">
@@ -51,237 +49,150 @@
 </header>
 
 <main id="main-content" class="minigames-main">
-    <section class="minigames-hero">
+    <section class="minigames-hero" aria-labelledby="games-hub-title">
         <div class="minigames-hero-copy">
-            <p class="eyebrow">ClashPanel Daily Games</p>
-            <h1>Daily challenges built around game knowledge.</h1>
-            <p>Deduce a hidden entity or compare two values across the Home Village catalog. Both games use text, verified identity data and their own spoiler-free daily results.</p>
+            <p class="eyebrow" data-hub-i18n="kicker">ClashPanel Games</p>
+            <h1 id="games-hub-title" data-hub-i18n="title">A different Clash challenge every day.</h1>
+            <p data-hub-i18n="lead">Solve the Entity Guesser or test your stat knowledge in Higher or Lower, then switch to practice whenever you want.</p>
+            <div class="games-daily-status" role="status" aria-live="polite">
+                <img src="/assets/icons/games/daily.svg" alt="" aria-hidden="true" width="24" height="24">
+                <div>
+                    <strong data-hub-i18n="today">Today's daily</strong>
+                    <span data-hub-date>UTC date</span>
+                </div>
+                <p data-hub-daily-summary>Both games share a daily challenge. Your progress stays on this device.</p>
+                <span class="games-daily-reset" data-hub-i18n="reset">Resets at 00:00 UTC</span>
+            </div>
         </div>
-        <div class="minigames-orbit" aria-hidden="true">
-            <div class="minigames-core"><span>?</span></div>
-            <span class="minigames-node">Guess</span>
-            <span class="minigames-node">Compare</span>
-            <span class="minigames-node">Daily</span>
-            <span class="minigames-node">Practice</span>
+        <div class="minigames-hero-note" aria-label="How the games work">
+            <div class="hero-note-row">
+                <img src="/assets/icons/games/guess.svg" alt="" aria-hidden="true" width="24" height="24">
+                <div><strong data-hub-i18n="entityName">Entity Guesser</strong><span data-hub-i18n="entityDescription">Use shared clues to identify a hidden Clash item in up to six attempts.</span></div>
+            </div>
+            <div class="hero-note-row">
+                <img src="/assets/icons/games/higher-lower.svg" alt="" aria-hidden="true" width="24" height="24">
+                <div><strong data-hub-i18n="higherName">Higher or Lower</strong><span data-hub-i18n="higherDescription">Read the shown metric, choose a direction, and build a combo across nine comparisons.</span></div>
+            </div>
+            <p class="hero-note-foot" data-hub-i18n="practiceNote">Practice is unlimited and never overwrites your Daily result.</p>
         </div>
     </section>
 
     <nav class="minigame-switcher" role="tablist" aria-label="Choose a minigame">
-        <button class="minigame-switch-button" type="button" role="tab" data-minigame-select="entity">
-            <span class="minigame-switch-icon" aria-hidden="true">?</span>
-            <span><strong data-minigame-label>Entity Guesser</strong><small>Deduce the hidden answer in up to six attempts.</small></span>
+        <button class="minigame-switch-button" type="button" role="tab" data-minigame-select="entity" aria-controls="minigame-panel-entity">
+            <span class="minigame-switch-icon"><img src="/assets/icons/games/guess.svg" alt="" aria-hidden="true" width="22" height="22"></span>
+            <span class="minigame-switch-copy"><strong data-minigame-label>Entity Guesser</strong><small data-hub-i18n="entityCard">Identify the hidden item from fair comparisons.</small><em data-hub-game-status="entity">Ready to play</em></span>
         </button>
-        <button class="minigame-switch-button" type="button" role="tab" data-minigame-select="higher-lower">
-            <span class="minigame-switch-icon" aria-hidden="true">↕</span>
-            <span><strong data-minigame-label>Higher or Lower</strong><small>Compare nine values and build a combo.</small></span>
+        <button class="minigame-switch-button" type="button" role="tab" data-minigame-select="higher-lower" aria-controls="minigame-panel-higher-lower">
+            <span class="minigame-switch-icon"><img src="/assets/icons/games/higher-lower.svg" alt="" aria-hidden="true" width="22" height="22"></span>
+            <span class="minigame-switch-copy"><strong data-minigame-label>Higher or Lower</strong><small data-hub-i18n="higherCard">Compare nine values and build a combo.</small><em data-hub-game-status="higher-lower">Ready to play</em></span>
         </button>
     </nav>
 
     <details class="minigames-help">
         <summary>
-            <span>
-                <strong>What can I do here?</strong>
-                <small>A quick guide to both games</small>
-            </span>
-            <span class="minigames-help-toggle" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-            </span>
+            <span data-hub-help-title><strong>What can I do here?</strong><small data-hub-i18n="helpSubtitle">A quick guide to both games</small></span>
+            <span class="minigames-help-toggle" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span>
         </summary>
         <div class="minigames-help-content">
             <article>
-                <p class="eyebrow">Entity Guesser</p>
-                <h2>Find the hidden Clash entity.</h2>
-                <p>Choose one of four broad categories, then search or tap an answer. Every attempt compares shared clues. You have six tries and two optional hints.</p>
+                <p class="eyebrow" data-hub-i18n="entityName">Entity Guesser</p>
+                <h2 data-hub-i18n="helpEntityTitle">Find the hidden Clash entity.</h2>
+                <p data-hub-i18n="helpEntityBody">Choose one of four broad categories, then search or tap an answer. Every attempt compares shared clues. You have six tries and two optional hints.</p>
             </article>
             <article>
-                <p class="eyebrow">Higher or Lower</p>
-                <h2>Judge nine fair comparisons.</h2>
-                <p>Use the shown value to decide whether the hidden value is higher or lower. Correct answers build your combo; equal-value pairs are excluded.</p>
+                <p class="eyebrow" data-hub-i18n="higherName">Higher or Lower</p>
+                <h2 data-hub-i18n="helpHigherTitle">Judge nine fair comparisons.</h2>
+                <p data-hub-i18n="helpHigherBody">Use the shown value to decide whether the hidden value is higher or lower. Correct answers build your combo; equal-value pairs are excluded.</p>
             </article>
-            <p class="minigames-help-note"><strong>Daily</strong> gives everyone the same challenge and resets at 00:00 UTC. <strong>Practice</strong> lets you choose a category and play freely without changing the daily result.</p>
+            <p class="minigames-help-note"><strong data-hub-i18n="dailyLabel">Daily</strong> <span data-hub-i18n="dailyHelp">gives everyone the same challenge and resets at 00:00 UTC.</span> <strong data-hub-i18n="practiceLabel">Practice</strong> <span data-hub-i18n="practiceHelp">lets you choose a category and play freely without changing the daily result.</span></p>
         </div>
     </details>
 
     <section class="game-shell" aria-labelledby="game-title" data-minigame-view="entity">
         <div class="game-toolbar">
-            <div class="game-mode-tabs" role="tablist" aria-label="Game mode">
-                <button type="button" role="tab" data-game-mode="daily" data-game-i18n="daily">Daily</button>
-                <button type="button" role="tab" data-game-mode="practice" data-game-i18n="practice">Practice</button>
+            <div class="game-toolbar-leading">
+                <span class="game-toolbar-icon"><img src="/assets/icons/games/guess.svg" alt="" aria-hidden="true" width="20" height="20"></span>
+                <div class="game-mode-tabs" role="tablist" aria-label="Entity Guesser mode">
+                    <button type="button" role="tab" data-game-mode="daily" data-game-i18n="daily">Daily</button>
+                    <button type="button" role="tab" data-game-mode="practice" data-game-i18n="practice">Practice</button>
+                </div>
             </div>
             <p class="game-toolbar-note" data-mode-note></p>
         </div>
 
         <div class="game-content">
-            <aside class="game-sidebar">
-                <p class="eyebrow" data-game-i18n="phase">Entity Guesser</p>
-                <h2 data-category-title>Troops &amp; Heroes</h2>
-                <p data-game-i18n="instructions">Compare each property. Arrows show whether the hidden value is higher or lower.</p>
+            <aside class="game-sidebar" aria-labelledby="entity-sidebar-title">
+                <div class="game-sidebar-heading"><span class="game-sidebar-icon"><img src="/assets/icons/games/streak.svg" alt="" aria-hidden="true" width="20" height="20"></span><div><p class="eyebrow" data-game-i18n="phase">Entity Guesser</p><h2 id="entity-sidebar-title" data-category-title>Troops &amp; Heroes</h2></div></div>
+                <p class="game-sidebar-copy" data-game-i18n="instructions">Compare each property. Arrows show whether the hidden value is higher or lower.</p>
 
-                <label class="game-category-picker" data-category-picker>
-                    <span data-game-i18n="selectCategory">Practice category</span>
-                    <select data-category-select aria-label="Practice category"></select>
-                </label>
+                <label class="game-category-picker" data-category-picker><span data-game-i18n="selectCategory">Practice category</span><select data-category-select aria-label="Practice category"></select></label>
 
-                <div class="game-stat-grid">
+                <div class="game-stat-grid" aria-label="Entity Guesser stats">
                     <div class="game-stat"><span data-game-i18n="attempts">Attempts</span><strong data-attempts-value>0/6</strong></div>
                     <div class="game-stat"><span data-game-i18n="score">Score</span><strong data-score-value>0</strong></div>
                     <div class="game-stat"><span data-game-i18n="streak">Streak</span><strong data-streak-value>0</strong></div>
                     <div class="game-stat"><span data-game-i18n="best">Best</span><strong data-best-value>0</strong></div>
                 </div>
                 <div class="game-legend" aria-label="Feedback legend">
-                    <div><span class="legend-dot correct"></span><span data-game-i18n="correct">Exact match</span></div>
-                    <div><span class="legend-dot close"></span><span data-game-i18n="close">Close value</span></div>
-                    <div><span class="legend-dot partial"></span><span data-game-i18n="partial">Partial match</span></div>
-                    <div><span class="legend-dot wrong"></span><span data-game-i18n="wrong">Different</span></div>
+                    <div><span class="legend-dot correct" aria-hidden="true">✓</span><span data-game-i18n="correct">Exact match</span></div>
+                    <div><span class="legend-dot close" aria-hidden="true">≈</span><span data-game-i18n="close">Close value</span></div>
+                    <div><span class="legend-dot partial" aria-hidden="true">~</span><span data-game-i18n="partial">Partial match</span></div>
+                    <div><span class="legend-dot wrong" aria-hidden="true">×</span><span data-game-i18n="wrong">Different</span></div>
                 </div>
             </aside>
 
-            <div class="game-board">
-                <div class="game-board-top">
-                    <div>
-                        <p class="eyebrow">Category-specific comparisons · two optional hints</p>
-                        <h2 id="game-title" data-game-title>Which entity is hidden?</h2>
-                    </div>
-                    <button type="button" class="game-action secondary" data-new-practice hidden data-game-i18n="newPractice">New practice round</button>
-                </div>
+            <div class="game-board" data-entity-board>
+                <div class="game-board-top"><div><p class="game-context" data-game-i18n="boardContext">Category comparisons · two optional hints</p><h2 id="game-title" data-game-title>Which entity is hidden?</h2></div><button type="button" class="game-action secondary" data-new-practice hidden data-game-i18n="newPractice">New practice round</button></div>
 
                 <form class="guess-form" data-guess-form autocomplete="off">
                     <label class="guess-input-label" for="entity-guess" data-guess-input-label>Choose an answer</label>
-                    <div class="guess-entry-row">
-                        <div class="entity-answer-picker" data-answer-picker>
-                            <input id="entity-guess" data-guess-input maxlength="60" required
-                                   role="combobox" aria-autocomplete="list" aria-expanded="false"
-                                   aria-controls="entity-suggestions" aria-describedby="entity-picker-help">
-                            <div class="entity-suggestions" id="entity-suggestions" data-guess-suggestions
-                                 role="listbox" aria-label="Available answers" hidden></div>
-                        </div>
-                        <button class="game-action" type="submit" data-game-i18n="submit">Submit guess</button>
-                    </div>
+                    <div class="guess-entry-row"><div class="entity-answer-picker" data-answer-picker><input id="entity-guess" data-guess-input maxlength="60" required role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="entity-suggestions" aria-describedby="entity-picker-help"><div class="entity-suggestions" id="entity-suggestions" data-guess-suggestions role="listbox" aria-label="Available answers" hidden></div></div><button class="game-action" type="submit" data-game-i18n="submit">Submit guess</button></div>
                     <p class="guess-picker-help" id="entity-picker-help" data-picker-help>Type to filter or tap an answer.</p>
                 </form>
                 <p class="game-message" data-game-message aria-live="polite"></p>
 
                 <p class="game-scroll-help" data-game-i18n="scrollHelp">Swipe the comparison sideways to see every clue.</p>
-                <div class="guess-scroll" tabindex="0" aria-label="Guess comparison table">
-                    <div class="guess-grid guess-grid-header" data-guess-header aria-hidden="true"></div>
-                    <div data-guess-rows></div>
-                </div>
+                <div class="guess-scroll" tabindex="0" role="region" aria-labelledby="guess-grid-label"><span id="guess-grid-label" class="visually-hidden">Guess comparison table</span><div class="guess-grid guess-grid-header" data-guess-header aria-hidden="true"></div><div data-guess-rows></div></div>
 
-                <div class="game-support">
-                    <button type="button" class="game-action secondary" data-hint-button data-game-i18n="hint" disabled>Reveal hint</button>
-                    <button type="button" class="game-action secondary" data-share-result data-game-i18n="share" hidden>Share result</button>
-                </div>
-                <ol class="game-hints" data-hints></ol>
-                <div class="game-result" data-result hidden>
-                    <h3 data-result-heading></h3>
-                    <p data-result-body></p>
-                </div>
+                <div class="game-support"><button type="button" class="game-action secondary" data-hint-button data-game-i18n="hint" disabled>Reveal hint</button><button type="button" class="game-action secondary" data-share-result data-game-i18n="share" hidden>Share result</button></div>
+                <ol class="game-hints" data-hints aria-live="polite"></ol>
+                <div class="game-result" data-result hidden role="status" aria-live="polite"><div><h3 data-result-heading></h3><p data-result-body></p></div><figure class="game-result-image"><img data-result-image alt="" aria-hidden="true" loading="lazy" width="72" height="72"></figure></div>
             </div>
         </div>
     </section>
 
     <section class="game-shell higher-lower-shell" aria-labelledby="hl-title" data-minigame-view="higher-lower" data-higher-lower-game hidden>
         <div class="game-toolbar">
-            <div class="game-mode-tabs" role="tablist" aria-label="Higher or Lower mode">
-                <button type="button" role="tab" data-hl-mode="daily" data-hl-i18n="daily">Daily</button>
-                <button type="button" role="tab" data-hl-mode="practice" data-hl-i18n="practice">Practice</button>
-            </div>
+            <div class="game-toolbar-leading"><span class="game-toolbar-icon"><img src="/assets/icons/games/higher-lower.svg" alt="" aria-hidden="true" width="20" height="20"></span><div class="game-mode-tabs" role="tablist" aria-label="Higher or Lower mode"><button type="button" role="tab" data-hl-mode="daily" data-hl-i18n="daily">Daily</button><button type="button" role="tab" data-hl-mode="practice" data-hl-i18n="practice">Practice</button></div></div>
+            <label class="hl-filter" data-hl-filter-wrap hidden><span data-hl-i18n="filter">Practice category</span><select data-hl-filter aria-label="Higher or Lower practice category"></select></label>
             <p class="game-toolbar-note" data-hl-mode-note></p>
         </div>
 
         <div class="hl-layout">
-            <aside class="hl-sidebar">
-                <p class="eyebrow">Higher or Lower · Phase 3</p>
-                <h2>Nine comparisons. One value at a time.</h2>
-                <p>The first value is shown. Decide whether the second is higher or lower. Equal-value pairs are never used.</p>
-
-                <label class="hl-filter" data-hl-filter-wrap hidden>
-                    <span data-hl-i18n="filter">Practice category</span>
-                    <select data-hl-filter aria-label="Higher or Lower practice category"></select>
-                </label>
-
-                <div class="game-stat-grid">
-                    <div class="game-stat"><span data-hl-i18n="question">Question</span><strong data-hl-question>1/9</strong></div>
-                    <div class="game-stat"><span data-hl-i18n="score">Score</span><strong data-hl-score>0</strong></div>
-                    <div class="game-stat"><span data-hl-i18n="correct">Correct</span><strong data-hl-correct>0</strong></div>
-                    <div class="game-stat"><span data-hl-i18n="combo">Combo</span><strong data-hl-combo>0</strong></div>
-                </div>
+            <aside class="hl-sidebar" aria-labelledby="hl-sidebar-title">
+                <div class="game-sidebar-heading"><span class="game-sidebar-icon"><img src="/assets/icons/games/daily.svg" alt="" aria-hidden="true" width="20" height="20"></span><div><p class="eyebrow" data-hl-i18n="phase">Higher or Lower</p><h2 id="hl-sidebar-title" data-hl-sidebar-title>Nine comparisons. One value at a time.</h2></div></div>
+                <p class="game-sidebar-copy" data-hl-i18n="sidebarCopy">The first value is shown. Decide whether the second is higher or lower. Equal-value pairs are never used.</p>
+                <div class="game-stat-grid" aria-label="Higher or Lower stats"><div class="game-stat"><span data-hl-i18n="question">Question</span><strong data-hl-question>1/9</strong></div><div class="game-stat"><span data-hl-i18n="score">Score</span><strong data-hl-score>0</strong></div><div class="game-stat"><span data-hl-i18n="correct">Correct</span><strong data-hl-correct>0</strong></div><div class="game-stat"><span data-hl-i18n="combo">Combo</span><strong data-hl-combo>0</strong></div></div>
             </aside>
 
-            <div class="hl-board">
-                <div class="hl-board-header">
-                    <div>
-                        <p class="eyebrow">Verified comparable values</p>
-                        <h2 id="hl-title">Higher or Lower?</h2>
-                    </div>
-                    <span class="hl-metric" data-hl-metric></span>
-                </div>
-
+            <div class="hl-board" data-hl-board>
+                <div class="hl-board-header"><div><p class="game-context" data-hl-i18n="context">Verified comparable values</p><h2 id="hl-title">Higher or Lower?</h2></div><span class="hl-metric" data-hl-metric></span></div>
                 <p class="hl-prompt" data-hl-prompt></p>
 
-                <div class="hl-arena">
-                    <article class="hl-card">
-                        <span class="hl-card-label">Known value</span>
-                        <h3 data-hl-left-name></h3>
-                        <strong class="hl-card-value" data-hl-left-value></strong>
-                    </article>
-                    <span class="hl-versus" aria-hidden="true">VS</span>
-                    <article class="hl-card is-mystery">
-                        <span class="hl-card-label">Hidden value</span>
-                        <h3 data-hl-right-name></h3>
-                        <strong class="hl-card-value is-hidden-value" data-hl-right-value>?</strong>
-                    </article>
-                </div>
+                <div class="hl-arena"><article class="hl-card" data-hl-card="left"><div class="hl-card-media"><img data-hl-left-image alt="" aria-hidden="true" loading="lazy" width="96" height="96"></div><span class="hl-card-label" data-hl-i18n="knownItem">Known item</span><h3 data-hl-left-name></h3><strong class="hl-card-value" data-hl-left-value></strong></article><span class="hl-versus" aria-hidden="true">VS</span><article class="hl-card is-mystery" data-hl-card="right"><div class="hl-card-media"><img data-hl-right-image alt="" aria-hidden="true" loading="lazy" width="96" height="96"></div><span class="hl-card-label" data-hl-i18n="hiddenItem">Hidden value</span><h3 data-hl-right-name></h3><strong class="hl-card-value is-hidden-value" data-hl-right-value>?</strong></article></div>
 
-                <div class="hl-choice-row">
-                    <button class="hl-choice" type="button" data-hl-choice="higher" data-hl-i18n="higher">Higher</button>
-                    <button class="hl-choice" type="button" data-hl-choice="lower" data-hl-i18n="lower">Lower</button>
-                </div>
-
-                <p class="hl-feedback" data-hl-feedback data-state="neutral" aria-live="polite"></p>
-
-                <div class="hl-actions">
-                    <button class="game-action" type="button" data-hl-next hidden data-hl-i18n="next">Next comparison</button>
-                    <button class="game-action secondary" type="button" data-hl-reset hidden data-hl-i18n="newPractice">Reset practice</button>
-                    <button class="game-action secondary" type="button" data-hl-share hidden data-hl-i18n="share">Share result</button>
-                </div>
-
-                <div class="hl-result" data-hl-result hidden>
-                    <h3 data-hl-result-title></h3>
-                    <p data-hl-result-body></p>
-                </div>
+                <div class="hl-choice-row" role="group" aria-label="Choose higher or lower"><button class="hl-choice" type="button" data-hl-choice="higher" data-hl-i18n="higher">Higher</button><button class="hl-choice" type="button" data-hl-choice="lower" data-hl-i18n="lower">Lower</button></div>
+                <p class="hl-feedback" data-hl-feedback data-state="neutral" role="status" aria-live="polite"></p>
+                <div class="hl-actions"><button class="game-action" type="button" data-hl-next hidden data-hl-i18n="next">Next comparison</button><button class="game-action secondary" type="button" data-hl-reset hidden data-hl-i18n="newPractice">Reset practice</button><button class="game-action secondary" type="button" data-hl-share hidden data-hl-i18n="share">Share result</button></div>
+                <div class="hl-result" data-hl-result hidden role="status" aria-live="polite"><h3 data-hl-result-title></h3><p data-hl-result-body></p></div>
             </div>
         </div>
     </section>
 
-    <section class="minigames-category-summary" aria-labelledby="category-summary-title">
-        <div>
-            <p class="eyebrow">Shared game catalog</p>
-            <h2 id="category-summary-title">Four broad categories. Less menu, more guessing.</h2>
-            <p>Related Clash items now play together, while every comparison still uses a fair shared property.</p>
-        </div>
-        <ul>
-            <li><strong>29</strong><span>Defenses</span></li>
-            <li><strong>25</strong><span>Other buildings</span></li>
-            <li><strong>50</strong><span>Troops &amp; Heroes</span></li>
-            <li><strong>59</strong><span>Spells &amp; Equipment</span></li>
-        </ul>
-    </section>
-
-    <aside class="minigames-policy">
-        These are unofficial, text-and-statistics based fan quizzes. They use no official troop, Hero, Pet, Equipment, defense, building or trap artwork, no game audio and no recreated game interface. ClashPanel is not endorsed by Supercell.
-    </aside>
+    <section class="minigames-category-summary" aria-labelledby="category-summary-title"><div><p class="eyebrow" data-hub-i18n="catalogKicker">The shared catalog</p><h2 id="category-summary-title">Four broad categories. Less menu, more guessing.</h2><p>Related Clash items now play together, while every comparison still uses a fair shared property.</p></div><ul><li><strong>29</strong><span>Defenses</span></li><li><strong>25</strong><span>Other buildings</span></li><li><strong>50</strong><span>Troops &amp; Heroes</span></li><li><strong>59</strong><span>Spells &amp; Equipment</span></li></ul></section>
+    <aside class="minigames-policy">These are unofficial, text-and-statistics based fan quizzes. Images are recognition aids from the central local entity library and fall back gracefully when unavailable. ClashPanel is not endorsed by Supercell.</aside>
 </main>
 
-<footer class="public-footer">
-    <div class="public-footer-main">
-        <a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a>
-        <nav aria-label="Footer navigation">
-            <a href="/subpages/privacy">Privacy</a><a href="/subpages/cookies">Cookies</a><a href="/subpages/terms">Terms of use</a><a href="/subpages/contact">Contact</a><a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer">Supercell Fan Content Policy</a>
-        </nav>
-    </div>
-    <p class="public-disclaimer">ClashPanel is unofficial and is not endorsed by Supercell. For more information, see Supercell's Fan Content Policy.</p>
-    <p class="public-footer-meta">© 2026 ClashPanel · Not affiliated with Supercell</p>
-</footer>
+<footer class="public-footer"><div class="public-footer-main"><a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt=""><span>ClashPanel</span></a><nav aria-label="Footer navigation"><a href="/subpages/privacy">Privacy</a><a href="/subpages/cookies">Cookies</a><a href="/subpages/terms">Terms of use</a><a href="/subpages/contact">Contact</a><a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer">Supercell Fan Content Policy</a></nav></div><p class="public-disclaimer">ClashPanel is unofficial and is not endorsed by Supercell. For more information, see Supercell's Fan Content Policy.</p><p class="public-footer-meta">© 2026 ClashPanel · Not affiliated with Supercell</p></footer>
 </body>
 </html>
