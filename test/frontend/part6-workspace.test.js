@@ -18,8 +18,9 @@ describe('Part 6 bracket workspace', () => {
     });
 
     it('labels dynamic winner controls as pressed or unpressed', () => {
+        const renderer = readFileSync('src/assets/js/bracket/bracket-renderer.js', 'utf8');
         const source = readFileSync('src/assets/js/pages/bracket-generator.js', 'utf8');
-        expect(source).toContain("button.setAttribute('aria-pressed'");
+        expect(renderer).toContain("button.setAttribute('aria-pressed'");
         expect(source).toContain('setMatchWinner(bracket, match.id, player)');
     });
 });

@@ -1,0 +1,168 @@
+@media (max-width: 1199px) {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-layout {
+        grid-template-columns: minmax(260px, 280px) minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-section-heading,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-header {
+        padding: 16px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-setup-content {
+        padding: 16px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-board {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 899px) {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-page-header {
+        align-items: start;
+        flex-direction: column;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-header-note {
+        display: flex;
+        align-items: center;
+        justify-items: start;
+        gap: 8px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-layout {
+        grid-template-columns: 1fr;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-setup {
+        position: static;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-board {
+        min-height: 540px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round {
+        display: none;
+        flex: 1 1 auto;
+        min-height: 492px;
+        width: 100%;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round[data-active="true"] {
+        display: flex;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-matches {
+        justify-content: space-around;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-connectors {
+        display: none;
+    }
+}
+
+@media (max-width: 599px) {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-page-header h1 {
+        font-size: 24px !important;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-page-header {
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-section-heading,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-header {
+        gap: 12px;
+        padding: 16px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-setup-content {
+        padding: 16px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-header {
+        display: grid;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta {
+        gap: 16px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta > span {
+        min-width: 0;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation {
+        padding: 12px 16px 0;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation-controls {
+        gap: 8px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation-controls > .cp-button {
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-tabs {
+        gap: 16px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-board {
+        min-height: 480px;
+        padding: 16px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round {
+        min-height: 432px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-slot {
+        min-height: 44px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-primary-actions .cp-button,
+    body.workspace-app[data-workspace-page="bracket"] #bracket-setup-toggle,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab {
+        min-height: 44px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] #bracket-setup-toggle {
+        width: 44px;
+        min-width: 44px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-file-actions .cp-button {
+        flex: 1 1 calc(50% - 4px);
+        min-height: 44px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-file-actions .cp-button--danger {
+        margin-left: 0;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-dialog-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-dialog-actions .cp-button {
+        min-height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-match,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-slot-player,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-connector {
+        animation: none;
+        transition: none;
+    }
+}

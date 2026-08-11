@@ -14,7 +14,7 @@ const publicPages = new Map([
     ['src/subpages/contact.html', 'https://clashpanel.com/subpages/contact']
 ]);
 
-const comingSoonPages = new Map([
+const bracketPreviewPages = new Map([
     ['src/bracket-generator.html', 'https://clashpanel.com/bracket-generator']
 ]);
 
@@ -45,12 +45,12 @@ describe('Pre-launch static contract', () => {
         expect(document.querySelector('meta[name="twitter:card"]')?.content).toMatch(/^summary/);
     });
 
-    it.each([...comingSoonPages])('%s remains discoverable but not indexable before launch', (path, canonical) => {
+    it.each([...bracketPreviewPages])('%s remains discoverable but follows the existing preview index policy', (path, canonical) => {
         const document = documentFor(path);
         expect(document.querySelector('meta[name="robots"]')?.content).toMatch(/\bnoindex\b/i);
         expect(document.querySelector('meta[name="robots"]')?.content).toMatch(/\bfollow\b/i);
         expect(document.querySelector('link[rel="canonical"]')?.href).toBe(canonical);
-        expect(document.body.textContent).toContain('Coming soon');
+        expect(document.body.textContent).not.toMatch(/coming\s+soon/i);
         expect(
             [...document.querySelectorAll('script[type="application/ld+json"]')]
                 .map(script => script.textContent)
@@ -101,7 +101,7 @@ describe('Pre-launch static contract', () => {
     it('uses explicit button types in every HTML source', () => {
         const pages = [
             ...publicPages.keys(),
-            ...comingSoonPages.keys(),
+            ...bracketPreviewPages.keys(),
             ...privatePages,
             'src/subpages/popup_htmls/profile_popup.html'
         ];

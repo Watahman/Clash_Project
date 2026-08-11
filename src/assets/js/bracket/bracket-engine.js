@@ -1,5 +1,12 @@
 export const BRACKET_SCHEMA_VERSION = 1;
+export const BRACKET_MIN_PARTICIPANTS = 4;
 export const BRACKET_MAX_PARTICIPANTS = 128;
+
+function bracketError(message, code) {
+    const error = new Error(message);
+    error.code = code;
+    return error;
+}
 
 function nextPowerOfTwo(value) {
     let power = 1;
@@ -16,16 +23,46 @@ function shuffled(values, random = Math.random) {
     return result;
 }
 
-export function createBracket(participants, { shuffle = false, random = Math.random, name = 'Bracket' } = {}) {
-    const unique = [...new Set(
-        (Array.isArray(participants) ? participants : [])
-            .map(participant => String(participant || '').trim())
-            .filter(Boolean)
-    )];
-    if (unique.length < 2) throw new Error('Voeg minstens twee deelnemers toe.');
-    if (unique.length > BRACKET_MAX_PARTICIPANTS) {
-        throw new Error(`Een bracket kan maximaal ${BRACKET_MAX_PARTICIPANTS} deelnemers bevatten.`);
+function normalizedParticipants(participants) {
+    return (Array.isArray(participants) ? participants : [])
+        .map(participant => String(participant ?? '').trim())
+        .filter(Boolean);
+}
+
+function validateParticipants(participants) {
+    const values = normalizedParticipants(participants);
+    const seen = new Set();
+    const duplicates = new Set();
+    values.forEach(value => {
+        const key = value.toLocaleLowerCase();
+        if (seen.has(key)) duplicates.add(value);
+        seen.add(key);
+    });
+    if (duplicates.size) {
+        throw bracketError('Each participant must have a unique name.', 'duplicate-participants');
     }
+    if (values.length < BRACKET_MIN_PARTICIPANTS) {
+        throw bracketError(
+            `A bracket needs at least ${BRACKET_MIN_PARTICIPANTS} unique participants.`,
+            'too-few-participants'
+        );
+    }
+    if (values.length > BRACKET_MAX_PARTICIPANTS) {
+        throw bracketError(
+            `A bracket can contain at most ${BRACKET_MAX_PARTICIPANTS} participants.`,
+            'too-many-participants'
+        );
+    }
+    return values;
+}
+
+function createBracketId() {
+    if (typeof globalThis.crypto?.randomUUID === 'function') return globalThis.crypto.randomUUID();
+    return `bracket-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+export function createBracket(participants, { shuffle = false, random = Math.random, name = 'Bracket' } = {}) {
+    const unique = validateParticipants(participants);
     const seeded = shuffle ? shuffled(unique, random) : unique;
     const size = nextPowerOfTwo(seeded.length);
     const byeCount = size - seeded.length;
@@ -47,7 +84,7 @@ export function createBracket(participants, { shuffle = false, random = Math.ran
     }
     const bracket = {
         schemaVersion: BRACKET_SCHEMA_VERSION,
-        id: crypto.randomUUID(),
+        id: createBracketId(),
         name: String(name || 'Bracket').trim() || 'Bracket',
         participants: unique,
         createdAt: new Date().toISOString(),
@@ -60,8 +97,10 @@ export function createBracket(participants, { shuffle = false, random = Math.ran
 
 export function setMatchWinner(bracket, matchId, winner) {
     const match = bracket.rounds.flat().find(item => item.id === matchId);
-    if (!match) throw new Error('Match niet gevonden.');
-    if (!match.players.includes(winner)) throw new Error('Winnaar speelt niet in deze match.');
+    if (!match) throw bracketError('That match could not be found.', 'match-not-found');
+    if (!winner || !match.players.includes(winner)) {
+        throw bracketError('Choose a participant from this match.', 'invalid-winner');
+    }
     if (match.winner && match.winner !== winner) clearDownstream(bracket, match);
     match.winner = winner;
     placeWinnerInNextRound(bracket, match);
@@ -103,25 +142,59 @@ function propagateAutomaticWinners(bracket) {
     });
 }
 
-export function importBracket(value) {
-    const parsed = typeof value === 'string' ? JSON.parse(value) : value;
-    if (!parsed || parsed.schemaVersion !== BRACKET_SCHEMA_VERSION || !Array.isArray(parsed.rounds)) {
-        throw new Error('Invalid or unsupported bracket file.');
+function validateImportedRound(round, roundIndex, participantSet, expectedMatches) {
+    if (!Array.isArray(round) || round.length !== expectedMatches) {
+        throw bracketError('The bracket rounds are incomplete or out of order.', 'invalid-rounds');
     }
-    if (!Array.isArray(parsed.participants)
-            || parsed.participants.length < 2
-            || parsed.participants.length > BRACKET_MAX_PARTICIPANTS) {
-        throw new Error('Invalid number of participants.');
-    }
-    parsed.rounds.forEach(round => {
-        if (!Array.isArray(round)) throw new Error('Invalid bracket structure.');
-        round.forEach(match => {
-            if (!match?.id || !Array.isArray(match.players) || match.players.length !== 2) {
-                throw new Error('Invalid match structure.');
+    round.forEach((match, matchIndex) => {
+        const expectedId = `r${roundIndex + 1}m${matchIndex + 1}`;
+        if (!match || match.id !== expectedId || !Array.isArray(match.players) || match.players.length !== 2) {
+            throw bracketError('One match in the bracket file is not valid.', 'invalid-match');
+        }
+        match.players.forEach(player => {
+            if (player !== null && (!participantSet.has(player) || typeof player !== 'string')) {
+                throw bracketError('A match contains an unknown participant.', 'unknown-participant');
             }
         });
+        if (match.winner !== null && (!participantSet.has(match.winner) || !match.players.includes(match.winner))) {
+            throw bracketError('A match winner is not one of its participants.', 'invalid-winner');
+        }
     });
-    return structuredClone(parsed);
+}
+
+function validateImportedBracket(parsed) {
+    if (!parsed || typeof parsed !== 'object'
+            || parsed.schemaVersion !== BRACKET_SCHEMA_VERSION
+            || !Array.isArray(parsed.rounds)) {
+        throw bracketError('This bracket file is invalid or unsupported.', 'invalid-file');
+    }
+    const participants = normalizedParticipants(parsed.participants);
+    if (participants.length !== parsed.participants?.length) {
+        throw bracketError('This bracket file contains an invalid participant list.', 'invalid-participants');
+    }
+    const validatedParticipants = validateParticipants(participants);
+    const participantSet = new Set(validatedParticipants);
+    const size = nextPowerOfTwo(validatedParticipants.length);
+    const expectedRounds = Math.log2(size);
+    if (parsed.rounds.length !== expectedRounds) {
+        throw bracketError('The bracket rounds are incomplete or out of order.', 'invalid-rounds');
+    }
+    parsed.rounds.forEach((round, roundIndex) => {
+        validateImportedRound(round, roundIndex, participantSet, size / (2 ** (roundIndex + 1)));
+    });
+}
+
+export function importBracket(value) {
+    let parsed;
+    try {
+        parsed = typeof value === 'string' ? JSON.parse(value) : value;
+    } catch {
+        throw bracketError('This bracket file is not valid JSON.', 'invalid-json');
+    }
+    validateImportedBracket(parsed);
+    return typeof structuredClone === 'function'
+        ? structuredClone(parsed)
+        : JSON.parse(JSON.stringify(parsed));
 }
 
 export function bracketChampion(bracket) {

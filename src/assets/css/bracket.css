@@ -1,53 +1,205 @@
-.bracket-main {
-    display: grid;
-    grid-template-columns: minmax(17rem, 23rem) minmax(0, 1fr);
-    min-height: calc(100vh - var(--header-h));
-    gap: 1rem;
-    padding: var(--page-pad);
+body.workspace-app[data-workspace-page="bracket"] {
+    --bracket-accent: var(--cp-compete);
+    --bracket-accent-soft: var(--cp-compete-soft);
+    --bracket-line: color-mix(in srgb, var(--cp-compete) 34%, var(--cp-border-2));
 }
-.bracket-controls {
-    display: grid;
-    align-content: start;
-    gap: .65rem;
-    padding: 1rem;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    background: var(--surface-card);
+
+body.workspace-app[data-workspace-page="bracket"] .workspace-content > .bracket-workspace-page {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
 }
-.bracket-controls textarea { resize: vertical; }
-.bracket-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
-.bracket-actions button { flex: 1 1 9rem; }
-.bracket-board {
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-workspace-page { color: var(--cp-text-1); }
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-workspace-page :is(button, input, textarea):focus-visible {
+    outline: 2px solid var(--bracket-accent);
+    outline-offset: 2px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-page-header {
     display: flex;
-    align-items: stretch;
-    gap: 1rem;
+    min-height: 0;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+    margin: 0 0 24px;
+    border-bottom: 1px solid var(--cp-border-1);
+    padding: 0 0 24px;
+    background: transparent;
+    box-shadow: none;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-page-header::before,
+body.workspace-app[data-workspace-page="bracket"] .bracket-page-header::after { display: none; }
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-page-header > div:first-child { max-width: 760px; }
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-page-kicker,
+body.workspace-app[data-workspace-page="bracket"] .bracket-step {
+    display: block;
+    margin: 0 0 8px !important;
+    color: var(--bracket-accent) !important;
+    font-family: var(--cp-font-ui) !important;
+    font-size: .75rem !important;
+    font-weight: 750 !important;
+    letter-spacing: .08em !important;
+    line-height: 1.3 !important;
+    text-transform: uppercase !important;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-page-header h1 {
+    margin: 0 !important;
+    color: var(--cp-text-1) !important;
+    font-family: var(--cp-font-heading) !important;
+    font-size: 32px !important;
+    font-weight: 760 !important;
+    letter-spacing: -.03em !important;
+    line-height: 1.08 !important;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-page-header p:last-child {
+    max-width: 620px;
+    margin: 8px 0 0 !important;
+    color: var(--cp-text-2) !important;
+    font-size: .9375rem !important;
+    line-height: 1.6 !important;
+}
+
+.bracket-header-note { display: grid; flex: 0 0 auto; justify-items: end; gap: 12px; }
+.bracket-module-badge { background: var(--bracket-accent-soft); color: var(--bracket-accent); }
+.bracket-header-rule { display: block; width: 72px; height: 2px; background: var(--bracket-accent); }
+
+.bracket-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 300px) minmax(0, 1fr);
+    align-items: start;
+    gap: 24px;
+}
+
+.bracket-setup,
+.bracket-result {
     min-width: 0;
-    overflow: auto;
-    padding: 1rem;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    background: var(--surface-1);
+    border: 1px solid var(--cp-border-1);
+    border-radius: 12px;
+    background: var(--cp-surface-1);
 }
-.bracket-round {
+
+.bracket-setup { position: sticky; top: 80px; overflow: hidden; }
+
+.bracket-section-heading,
+.bracket-result-header {
     display: flex;
-    flex: 0 0 14rem;
-    flex-direction: column;
-    justify-content: space-around;
-    gap: 1rem;
+    align-items: start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px;
 }
-.bracket-round h2 { color: var(--text-3); font-size: .85rem; text-align: center; }
-.bracket-match {
+
+.bracket-section-heading { border-bottom: 1px solid var(--cp-border-1); }
+
+.bracket-section-heading h2,
+.bracket-result-heading h2 {
+    color: var(--cp-text-1);
+    font-family: var(--cp-font-heading);
+    font-size: 1.125rem;
+    font-weight: 720;
+    letter-spacing: -.02em;
+}
+
+.bracket-section-heading .bracket-step,
+.bracket-result-heading .bracket-step {
+    margin-bottom: 4px !important;
+    color: var(--bracket-accent) !important;
+    font-size: .6875rem !important;
+}
+
+.bracket-setup-heading-actions { display: flex; align-items: center; gap: 8px; }
+
+#bracket-participant-count {
     display: grid;
-    gap: .25rem;
-    padding: .4rem;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    background: var(--surface-2);
+    min-width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--bracket-accent) 32%, var(--cp-border-1));
+    border-radius: 8px;
+    background: var(--bracket-accent-soft);
+    color: var(--bracket-accent);
+    font-family: var(--cp-font-mono);
+    font-size: .75rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
 }
-.bracket-match button { width: 100%; justify-content: flex-start; overflow: hidden; text-overflow: ellipsis; }
-.bracket-match button.winner { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
-.bracket-empty { margin: auto; color: var(--text-3); }
-@media (max-width: 52rem) {
-    .bracket-main { grid-template-columns: 1fr; }
-    .bracket-board { min-height: 28rem; }
+
+#bracket-setup-toggle {
+    width: 40px;
+    min-width: 40px;
+    overflow: hidden;
+    border-color: var(--cp-border-1);
+    color: var(--cp-text-2);
+    font-size: 0;
 }
+
+#bracket-setup-toggle svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.bracket-setup-content { padding: 20px; }
+.bracket-fields { display: grid; gap: 16px; }
+.bracket-fields label > span { color: var(--cp-text-1); font-size: .75rem; font-weight: 700; }
+.bracket-fields .cp-input,
+.bracket-fields .cp-textarea { margin-top: 8px; }
+.bracket-fields .cp-textarea { min-height: 208px; }
+
+.bracket-field-help,
+.bracket-count-note,
+.bracket-action-help {
+    margin: 0;
+    color: var(--cp-text-3);
+    font-size: .75rem;
+    line-height: 1.5;
+}
+
+.bracket-count-note { color: var(--bracket-accent); font-family: var(--cp-font-mono); font-size: .6875rem; font-variant-numeric: tabular-nums; }
+.bracket-primary-actions { display: grid; gap: 8px; margin-top: 20px; }
+
+.bracket-primary-actions .cp-button,
+.bracket-file-actions .cp-button { min-width: 0; white-space: nowrap; }
+.bracket-primary-actions .cp-button { justify-content: flex-start; }
+
+.bracket-primary-actions svg,
+.bracket-file-actions svg {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.bracket-action-help { display: grid; gap: 4px; margin-top: 8px; padding-inline: 2px; }
+.bracket-action-help span::before { display: inline-block; width: 14px; margin-right: 4px; color: var(--bracket-accent); content: "·"; font-weight: 800; text-align: center; }
+
+.bracket-file-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 20px;
+    border-top: 1px solid var(--cp-border-1);
+    padding-top: 16px;
+}
+
+.bracket-file-actions .cp-button { min-height: 40px; padding-inline: 8px; font-size: .75rem; }
+.bracket-file-actions .cp-button--danger { margin-left: auto; }
+
+.bracket-status {
+    min-height: 24px;
+    margin: 16px 0 0;
+    color: var(--cp-text-2);
+    font-size: .75rem;
+    line-height: 1.5;
+}
+
+.bracket-status[data-state="success"] { color: var(--cp-success); }
+.bracket-status[data-state="error"] { color: var(--cp-danger); }
+.bracket-status[data-state="info"] { color: var(--cp-info); }
+.bracket-result { overflow: hidden; }

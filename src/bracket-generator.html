@@ -5,20 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="./assets/js/Data/analytics.js"></script>
     <title>Clash of Clans Bracket Generator | ClashPanel</title>
-    <meta name="description" content="Create a seeded or shuffled Clash of Clans knockout bracket, record each match winner and follow participants through every tournament round.">
+    <meta name="description" content="Create seeded or shuffled Clash of Clans knockout brackets, advance winners, handle BYEs, and export a local JSON bracket from ClashPanel.">
     <meta name="robots" content="noindex, follow">
-    <meta name="theme-color" content="#0d1117">
+    <meta name="theme-color" content="#0a0e13">
     <link rel="canonical" href="https://clashpanel.com/bracket-generator">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="ClashPanel">
     <meta property="og:url" content="https://clashpanel.com/bracket-generator">
-    <meta property="og:title" content="Clash of Clans Bracket Generator">
-    <meta property="og:description" content="Create seeded or shuffled knockout brackets and follow every match through to a champion.">
+    <meta property="og:title" content="Clash of Clans Bracket Generator | ClashPanel">
+    <meta property="og:description" content="Create seeded or shuffled Clash of Clans knockout brackets, advance winners, handle BYEs, and export a local JSON bracket from ClashPanel.">
     <meta property="og:image" content="https://clashpanel.com/assets/social/bracket-generator.png">
-    <meta property="og:image:alt" content="ClashPanel knockout bracket generator for Clash of Clans tournaments">
+    <meta property="og:image:alt" content="ClashPanel bracket editor preview with tournament rounds and winner progression">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Clash of Clans Bracket Generator">
-    <meta name="twitter:description" content="Create seeded or shuffled knockout brackets and follow every match through to a champion.">
+    <meta name="twitter:title" content="Clash of Clans Bracket Generator | ClashPanel">
+    <meta name="twitter:description" content="Create seeded or shuffled Clash of Clans knockout brackets, advance winners, handle BYEs, and export a local JSON bracket from ClashPanel.">
     <meta name="twitter:image" content="https://clashpanel.com/assets/social/bracket-generator.png">
     <script type="application/ld+json">
         {
@@ -36,12 +36,15 @@
     <link rel="stylesheet" href="/assets/css/workspace-system.css">
     <script src="/assets/js/Data/runtime-config.js"></script>
     <script type="module" src="/assets/js/pages/public-site.js" fetchpriority="low"></script>
+    <script type="module" src="/assets/js/pages/public-bracket.js"></script>
     <link rel="stylesheet" href="/assets/css/light-theme.css">
     <link rel="stylesheet" href="/assets/css/workspace-polish.css">
     <link rel="stylesheet" href="/assets/css/public-marketing.css">
     <link rel="stylesheet" href="/assets/css/public-home-v2.css">
     <link rel="stylesheet" href="/assets/css/public-feature-v2.css">
     <link rel="stylesheet" href="/assets/css/public-v2.css">
+    <link rel="stylesheet" href="/assets/css/bracket-public.css">
+    <link rel="stylesheet" href="/assets/css/bracket-public-content.css">
 </head>
 <body class="public-site public-home-v2 public-feature-v2 public-feature-bracket">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
@@ -56,84 +59,48 @@
     </div>
     <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" data-i18n-aria-label="public.openMenu" aria-label="Open menu"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
 </header>
+
 <main id="main-content">
-    <section class="home-v2-hero feature-v2-hero" id="product">
-        <div class="feature-v2-hero-media" aria-hidden="true">
-            <!-- IMAGE TIP: Wide tournament/trophy/battle-arena image. A strong focal point on the right works best. Replace only the src below. -->
-            <img src="/assets/css/pictures/public-pages/battle-charge.a426f5172d.avif" alt="" width="738" height="414">
+    <section class="home-v2-hero feature-v2-hero bracket-public-hero" id="product">
+        <div class="feature-v2-hero-media bracket-public-hero-media">
+            <div class="bracket-public-preview" aria-label="Example bracket preview">
+                <div class="bracket-public-preview-header"><div><span class="bracket-public-kicker">Compete</span><strong data-bracket-copy="preview">Example bracket preview</strong></div><span class="bracket-public-state">8 participants</span></div>
+                <div class="bracket-public-preview-canvas">
+                    <svg class="bracket-public-preview-connectors" viewBox="0 0 620 300" aria-hidden="true"><path d="M174 68h38v48h38M174 232h38v-48h38M384 116h38v34h38M384 184h38v-34h38"/></svg>
+                    <div class="bracket-public-preview-round"><small>Opening round</small><div class="bracket-public-preview-match"><span>Seed 01</span><span>Seed 02</span></div><div class="bracket-public-preview-match"><span>Seed 03</span><span>Seed 04</span></div></div>
+                    <div class="bracket-public-preview-round"><small>Round 2</small><div class="bracket-public-preview-match is-winner"><span>Seed 01</span><span>Waiting</span></div><div class="bracket-public-preview-match"><span>Seed 04</span><span>Seed 05</span></div></div>
+                    <div class="bracket-public-preview-round"><small>Final</small><div class="bracket-public-preview-match is-final"><span>Seed 01</span><span>Waiting</span></div></div>
+                </div>
+                <div class="bracket-public-preview-footer"><span>Winner progression</span><span>Local preview</span></div>
+            </div>
         </div>
         <div class="home-v2-hero-copy">
-            <p class="eyebrow" data-i18n="bracket.kicker">Clash of Clans Bracket Generator</p>
-            <h1 data-i18n="bracket.h1">Build a better bracket.</h1>
-            <p class="home-v2-lead" data-i18n="bracket.lead">A seeded or shuffled knockout bracket for Clash of Clans community tournaments, with automatic winner progression planned for release.</p>
-            <div class="hero-actions home-v2-actions"><span class="button button-primary button-large feature-v2-disabled" aria-disabled="true" data-i18n="bracket.primary">Coming soon</span>
-                <a class="button button-secondary button-large" href="/cwl-planner" data-i18n="bracket.secondary">Use CWL Planner instead</a></div>
-            <p class="hero-footnote" data-i18n="bracket.note">This page is a preview · the bracket generator is not publicly released yet</p>
+            <p class="eyebrow" data-bracket-copy="kicker">Compete · Brackets</p>
+            <h1 data-bracket-copy="title">Build the bracket. Follow every winner.</h1>
+            <p class="home-v2-lead" data-bracket-copy="lead">Create a seeded or shuffled knockout bracket in your workspace, choose winners match by match, and carry the path to a champion.</p>
+            <div class="hero-actions home-v2-actions"><a class="button button-primary button-large" href="/app/brackets" data-bracket-copy="primary">Open bracket editor</a><a class="button button-secondary button-large" href="/subpages/login.html?next=%2Fapp%2Fbrackets" data-bracket-copy="secondary">Sign in to continue</a></div>
+            <p class="hero-footnote" data-bracket-copy="note">Runs locally in your workspace. Export JSON when you need a portable copy.</p>
         </div>
     </section>
-    <section class="home-v2-signal-strip" aria-label="Clash of Clans Bracket Generator capabilities" data-reveal><span data-i18n="bracket.signal.seeded">Seeded brackets</span><span data-i18n="bracket.signal.shuffle">Shuffle participants</span><span data-i18n="bracket.signal.progression">Winner progression</span><span data-i18n="bracket.signal.rounds">Tournament rounds</span><span data-i18n="bracket.signal.json">JSON import & export</span><span data-i18n="bracket.signal.comingSoon">Coming soon</span></section>
-    <section class="home-v2-workflow feature-v2-workflow">
-        <div class="home-v2-section-head" data-reveal="left">
-            <p class="eyebrow" data-i18n="bracket.workflow.kicker">Tournament flow</p>
-            <h2 data-i18n="bracket.workflow.title">From participants to champion.</h2>
-            <p data-i18n="bracket.workflow.intro">The planned bracket workflow is deliberately simple: add participants, create the first matchups and advance winners until one remains.</p>
-            <figure class="home-v2-workflow-art" data-reveal="image">
-                <!-- IMAGE TIP: Competitive group or tournament-like army image that suggests multiple participants moving toward one winner. Replace only the src below. -->
-                <img src="/assets/css/pictures/public-pages/clan-march.98e06a9863.avif" alt="Clash of Clans troops moving together toward the final objective" loading="lazy" decoding="async" width="735" height="414">
-                <figcaption data-i18n="bracket.workflow.caption">One bracket, clear progression, one final winner.</figcaption>
-            </figure>
+
+    <section class="home-v2-signal-strip bracket-public-signal-strip" aria-label="Bracket capabilities"><span data-bracket-copy="signalSeeded">Seeded order</span><span data-bracket-copy="signalShuffle">Shuffle opening round</span><span data-bracket-copy="signalByes">Automatic BYEs</span><span data-bracket-copy="signalProgression">Winner progression</span><span data-bracket-copy="signalJson">JSON import &amp; export</span></section>
+
+    <section class="home-v2-workflow feature-v2-workflow bracket-public-workflow" id="workflow">
+        <div class="home-v2-section-head">
+            <p class="eyebrow" data-bracket-copy="workflowKicker">A clear tournament flow</p>
+            <h2 data-bracket-copy="workflowTitle">From roster to champion, one decision at a time.</h2>
+            <p data-bracket-copy="workflowIntro">The editor keeps setup compact and gives every round enough room to stay readable. Choose a participant, then move forward when the next match is ready.</p>
+            <figure class="bracket-public-mini-preview"><div class="bracket-public-mini-row"><span>01</span><i></i><strong>Opening matches</strong></div><div class="bracket-public-mini-row"><span>02</span><i></i><strong>Winner path</strong></div><div class="bracket-public-mini-row is-final"><span>03</span><i></i><strong>Champion</strong></div><figcaption data-bracket-copy="workflowCaption">Example bracket preview · no production data</figcaption></figure>
         </div>
-        <ol class="home-v2-workflow-list">
-            <li data-reveal style="--reveal-delay:60ms"><span>01</span><div><h3 data-i18n="bracket.workflow.step1.title">Add participants</h3><p data-i18n="bracket.workflow.step1.desc">Enter the players or clans that should take part in the tournament.</p></div></li>
-            <li data-reveal style="--reveal-delay:130ms"><span>02</span><div><h3 data-i18n="bracket.workflow.step2.title">Seed or shuffle</h3><p data-i18n="bracket.workflow.step2.desc">Keep the supplied order for seeded matchups or shuffle the opening round.</p></div></li>
-            <li data-reveal style="--reveal-delay:200ms"><span>03</span><div><h3 data-i18n="bracket.workflow.step3.title">Advance winners</h3><p data-i18n="bracket.workflow.step3.desc">Choose each match winner and let the bracket carry that participant into the next round.</p></div></li>
-        </ol>
+        <ol class="home-v2-workflow-list"><li><span>01</span><div><h3 data-bracket-copy="step1Title">Add participants</h3><p data-bracket-copy="step1Desc">Enter 4–128 unique player or clan names, one per line.</p></div></li><li><span>02</span><div><h3 data-bracket-copy="step2Title">Seed or shuffle</h3><p data-bracket-copy="step2Desc">Keep an existing order or create a neutral opening draw.</p></div></li><li><span>03</span><div><h3 data-bracket-copy="step3Title">Advance winners</h3><p data-bracket-copy="step3Desc">Pick a winner in each match and let the next round update automatically.</p></div></li></ol>
     </section>
-    <section class="home-v2-products"><article class="home-v2-product-section">
-        <div class="home-v2-product-copy" data-reveal="left">
-            <p class="eyebrow" data-i18n="bracket.matchups.kicker">Planned feature</p>
-            <h2 data-i18n="bracket.matchups.title">Seed it or shuffle it.</h2>
-            <p data-i18n="bracket.matchups.copy">Different community tournaments need different starts. The bracket is designed to support ordered seeds as well as a quick randomized draw.</p>
-            <div class="home-v2-feature-lines"><div><strong data-i18n="bracket.matchups.f1.title">Seeded order</strong><span data-i18n="bracket.matchups.f1.desc">Keep the participant order when the tournament already has rankings or seeds.</span></div><div><strong data-i18n="bracket.matchups.f2.title">Randomized draw</strong><span data-i18n="bracket.matchups.f2.desc">Shuffle the opening matchups when the event needs a neutral random start.</span></div><div><strong data-i18n="bracket.matchups.f3.title">Clear rounds</strong><span data-i18n="bracket.matchups.f3.desc">Keep quarter-finals, semi-finals and the final easy to follow as the bracket progresses.</span></div></div>
-        </div>
-        <div class="home-v2-artwork home-v2-artwork-planner" data-reveal="right">
-            <!-- IMAGE TIP: Main: opposing troops or competitive lineup. Inset: action scene for a single matchup. Replace only the two src values below. -->
-            <img class="home-v2-artwork-main" src="/assets/css/pictures/public-pages/pekka-barbarians.6446bf60da.avif" alt="Clash of Clans troops facing each other in a tournament-style matchup" loading="lazy" decoding="async" width="565" height="353">
-            <span class="home-v2-artwork-label" data-i18n="bracket.matchups.artLabel">Start with the right matchups</span>
-            <img class="home-v2-artwork-inset" src="/assets/css/pictures/public-pages/hog-rider-balloon-attack.3f83e0244b.avif" alt="Clash of Clans attack scene representing a tournament matchup" loading="lazy" decoding="async" width="600" height="600">
-        </div>
-    </article><article class="home-v2-product-section home-v2-product-operation">
-        <div class="home-v2-product-copy" data-reveal="right">
-            <p class="eyebrow" data-i18n="bracket.winner.kicker">Planned feature</p>
-            <h2 data-i18n="bracket.winner.title">Follow every winner forward.</h2>
-            <p data-i18n="bracket.winner.copy">The goal is to remove manual bracket bookkeeping: select a match winner and keep the path to the final visible.</p>
-            <div class="home-v2-feature-lines"><div><strong data-i18n="bracket.winner.f1.title">Automatic progression</strong><span data-i18n="bracket.winner.f1.desc">Move a selected winner into the correct next-round slot without rebuilding the bracket.</span></div><div><strong data-i18n="bracket.winner.f2.title">Simple tournament state</strong><span data-i18n="bracket.winner.f2.desc">Keep the current round, completed matchups and eventual champion visible in one view.</span></div><div><strong data-i18n="bracket.winner.f3.title">Import and export</strong><span data-i18n="bracket.winner.f3.desc">The planned workflow includes JSON import and export so a bracket can be saved and reopened.</span></div></div>
-        </div>
-        <div class="home-v2-artwork home-v2-artwork-operation" data-reveal="left">
-            <!-- IMAGE TIP: Main: trophy/victory image. Inset: clan/team scene suggesting the participants behind the bracket. Replace only the two src values below. -->
-            <img class="home-v2-artwork-main" src="/assets/css/pictures/public-pages/barbarian-sunset.4454ecb787.avif" alt="Clash of Clans Barbarian standing after battle at sunset" loading="lazy" decoding="async" width="710" height="444">
-            <span class="home-v2-artwork-label" data-i18n="bracket.winner.artLabel">Follow the path to one winner</span>
-            <img class="home-v2-artwork-inset" src="/assets/css/pictures/public-pages/clan-feast.092d5cc28b.avif" alt="Clash of Clans troops gathered together as tournament participants" loading="lazy" decoding="async" width="335" height="597">
-        </div>
-    </article></section>
-    <section class="home-v2-bottom-cta" data-reveal>
-        <div><p class="eyebrow" data-i18n="bracket.cta.kicker">Need a live tool now?</p><h2 data-i18n="bracket.cta.title">Plan your CWL while this ships.</h2><p data-i18n="bracket.cta.desc">The CWL Planner is already available for multi-clan roster planning, player roles and day-by-day availability.</p></div>
-        <a class="button button-primary button-large" href="/cwl-planner" data-i18n="bracket.cta.button">Open CWL Planner</a>
-    </section>
+
+    <section class="home-v2-products bracket-public-products"><article class="home-v2-product-section"><div class="home-v2-product-copy"><p class="eyebrow">Compete</p><h2 data-bracket-copy="seedTitle">Start with the right opening round.</h2><p data-bracket-copy="seedCopy">Use supplied order when your event already has seeds. Shuffle when the draw should be neutral. BYEs are placed and advanced for you.</p><div class="home-v2-feature-lines"><div><strong data-bracket-copy="seedLabel">Seeded or shuffled</strong><span data-bracket-copy="seedValue">Opening round ready</span></div><div><strong>4–128</strong><span>Unique participants with plain-language validation.</span></div></div></div><div class="bracket-public-feature-panel" aria-label="Seeded opening round preview"><header><span>Opening round</span><strong data-bracket-copy="seedValue">Opening round ready</strong></header><div class="bracket-public-feature-list"><div><b>01</b><span>Seed 01</span><em>Seed 1</em></div><div><b>02</b><span>Seed 02</span><em>Seed 2</em></div><div><b>03</b><span>Seed 03</span><em>Seed 3</em></div><div><b>04</b><span>Seed 04</span><em>Seed 4</em></div></div><footer><span>BYEs advance automatically</span><i aria-hidden="true"></i></footer></div></article><article class="home-v2-product-section home-v2-product-operation"><div class="home-v2-product-copy"><p class="eyebrow">Winner state</p><h2 data-bracket-copy="changeTitle">Change a winner without rebuilding.</h2><p data-bracket-copy="changeCopy">If a result changes, the affected path is cleared and the bracket stays honest. The final card only carries a champion when every decision is complete.</p><div class="home-v2-feature-lines"><div><strong data-bracket-copy="changeLabel">Winner change</strong><span data-bracket-copy="changeValue">Path updated</span></div><div><strong>Local restore</strong><span>Return to the last saved browser state or import a JSON copy.</span></div></div></div><div class="bracket-public-feature-panel bracket-public-feature-panel-change" aria-label="Winner change preview"><header><span>Winner state</span><strong class="bracket-public-success" data-bracket-copy="changeValue">Path updated</strong></header><div class="bracket-public-change-line"><span class="bracket-public-avatar">S</span><div><strong>Seed 01 replaces Seed 02</strong><small>Downstream match updated</small></div><b>→</b></div><div class="bracket-public-change-line is-muted"><span class="bracket-public-avatar">?</span><div><strong>Final</strong><small>Waiting for one more winner</small></div></div><footer><span>Champion emphasis stays restrained</span></footer></div></article></section>
+
+    <section class="home-v2-bottom-cta bracket-public-cta"><div><p class="eyebrow" data-bracket-copy="ctaKicker">Ready to run the bracket?</p><h2 data-bracket-copy="ctaTitle">Open the editor in your workspace.</h2><p data-bracket-copy="ctaCopy">Brackets are a local workspace tool with browser restore and JSON export. Cloud saves and spectator links are not part of this release.</p></div><a class="button button-primary button-large" href="/app/brackets" data-bracket-copy="ctaButton">Open bracket editor</a></section>
 </main>
 <footer class="public-footer">
-    <div class="public-footer-main">
-        <a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
-        <nav aria-label="Footer navigation" data-i18n-aria-label="public.footerNav">
-            <a href="/about" data-i18n="public.about">About</a>
-            <a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a>
-            <a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a>
-            <a href="/subpages/terms" data-i18n="public.terms">Terms of use</a>
-            <a href="/subpages/contact" data-i18n="public.contact">Contact</a>
-            <a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer" data-i18n="public.fanPolicy">Supercell Fan Content Policy</a>
-            <button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button>
-        </nav>
-    </div>
+    <div class="public-footer-main"><a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a><nav aria-label="Footer navigation" data-i18n-aria-label="public.footerNav"><a href="/about" data-i18n="public.about">About</a><a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a><a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a><a href="/subpages/terms" data-i18n="public.terms">Terms of use</a><a href="/subpages/contact" data-i18n="public.contact">Contact</a><a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer" data-i18n="public.fanPolicy">Supercell Fan Content Policy</a><button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button></nav></div>
     <p class="public-disclaimer" data-i18n="public.disclaimer">ClashPanel is unofficial and is not endorsed by Supercell. For more information, see Supercell's Fan Content Policy.</p>
     <p class="public-footer-meta" data-i18n="home.footer">© 2026 ClashPanel · Not affiliated with Supercell</p>
 </footer>

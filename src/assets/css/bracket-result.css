@@ -1,0 +1,26 @@
+.bracket-result-header { gap: 24px; border-bottom: 1px solid var(--cp-border-1); }
+.bracket-result-heading { min-width: 0; }
+.bracket-result-heading > p { max-width: 620px; margin: 8px 0 0; color: var(--cp-text-2); font-size: .8125rem; line-height: 1.55; }
+.bracket-result-meta { display: flex; flex: 0 0 auto; gap: 24px; }
+.bracket-result-meta > span { display: grid; align-content: start; gap: 4px; min-width: 92px; }
+.bracket-result-meta small { color: var(--cp-text-3); font-size: .6875rem; line-height: 1.35; }
+.bracket-result-meta strong { overflow: hidden; color: var(--cp-text-1); font-family: var(--cp-font-heading); font-size: 1rem; font-weight: 720; text-overflow: ellipsis; white-space: nowrap; }
+.bracket-result-meta .bracket-champion-meta strong { color: var(--bracket-accent); }
+.bracket-champion-meta small:last-child { max-width: 180px; color: var(--cp-text-3); font-size: .625rem; line-height: 1.4; }
+
+.bracket-round-navigation { display: grid; gap: 12px; border-bottom: 1px solid var(--cp-border-1); padding: 12px 20px 0; }
+.bracket-round-navigation-label { color: var(--cp-text-3); font-size: .6875rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.bracket-round-navigation-controls { display: flex; align-items: end; gap: 12px; min-width: 0; }
+.bracket-round-navigation-controls > .cp-button { width: 40px; min-width: 40px; height: 40px; padding: 0; }
+.bracket-round-navigation-controls svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.bracket-round-tabs { display: flex; min-width: 0; gap: 24px; overflow-x: auto; scrollbar-width: none; }
+.bracket-round-tabs::-webkit-scrollbar { display: none; }
+.bracket-round-tab { position: relative; flex: 0 0 auto; min-height: 40px; border: 0; background: transparent; padding: 0; color: var(--cp-text-3); cursor: pointer; font: 700 .75rem/1 var(--cp-font-ui); }
+.bracket-round-tab::after { position: absolute; right: 0; bottom: 0; left: 0; height: 2px; background: transparent; content: ""; }
+.bracket-round-tab:hover,
+.bracket-round-tab[aria-selected="true"] { color: var(--cp-text-1); }
+.bracket-round-tab[aria-selected="true"]::after { background: var(--bracket-accent); }
+
+.bracket-reset-dialog { color: var(--cp-text-1); }
+.bracket-reset-dialog > p { margin: 8px 0 24px; color: var(--cp-text-2); font-size: .875rem; }
+.bracket-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
