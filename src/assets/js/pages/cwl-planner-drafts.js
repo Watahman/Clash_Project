@@ -1,21 +1,20 @@
-import { getLanguage, initI18n, t } from '../i18n/i18n.js';
+import { initI18n, t } from '../i18n/i18n.js';
 import { profileHTML } from '../profile/profile_popup.js';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { getCurrentUserId } from '../utils/user.js';
 import { summarizePlan } from '../cwl/cwl-plan-summary.js';
-import { filterAndSortPlans } from '../cwl/cwl-plan-list.js';
-import { hasReachedPlanLimit } from '../cwl/cwl-plan-limits.js';
+import { createSavedPlansView } from './cwl-planner-drafts-view.js';
+import { createSavedPlansActions } from './cwl-planner-drafts-actions.js';
 import {
-    copyPlan,
-    deletePlan,
-    getAllPlansFromDatabase,
-    renamePlan
+    getAllPlansFromDatabase
 } from '../Supabase/Supabase-Plan.js';
 
 const refs = {};
 let plans = [];
 let userId = null;
 let activeController;
+let savedPlansView;
+let savedPlanActions;
 const listState = { query: '', sort: 'updated-desc' };
 
 function initRefs() {
@@ -26,6 +25,26 @@ function initRefs() {
     refs.filterStatus = document.querySelector('#drafts-filter-status');
     refs.deleteDialog = document.querySelector('#saved-plan-delete-dialog');
     refs.deleteDialogMessage = document.querySelector('#saved-plan-delete-message');
+    savedPlanActions = createSavedPlansActions({
+        refs,
+        getPlans: () => plans,
+        setPlans: nextPlans => { plans = nextPlans; },
+        getUserId: () => userId,
+        setStatus,
+        render,
+        setControlsEnabled: enabled => savedPlansView.setControlsEnabled(enabled),
+        reloadPlans: loadPlans
+    });
+    savedPlansView = createSavedPlansView({
+        refs,
+        getPlans: () => plans,
+        getUserId: () => userId,
+        listState,
+        setStatus,
+        onRename: savedPlanActions.rename,
+        onCopy: savedPlanActions.copy,
+        onDelete: savedPlanActions.remove
+    });
 }
 
 function setStatus(message = '', state = '') {
@@ -34,284 +53,16 @@ function setStatus(message = '', state = '') {
     refs.status.hidden = !message;
 }
 
-function openPlanLink(planId, className = 'button button-small button-primary') {
-    const link = document.createElement('a');
-    link.href = './cwl-planner.html';
-    link.className = className;
-    link.textContent = t('drafts.open');
-    link.addEventListener('click', () => localStorage.setItem('planner_id', planId));
-    return link;
-}
-
-function actionButton(label, className, handler) {
-    const element = document.createElement('button');
-    element.type = 'button';
-    element.className = className;
-    element.textContent = label;
-    element.addEventListener('click', handler);
-    return element;
-}
-
-function exportPlan(plan) {
-    const safeName = String(plan.name || 'cwl-plan').trim().replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'cwl-plan';
-    const payload = {
-        format: 'clashpanel-cwl-plan',
-        exportedAt: new Date().toISOString(),
-        name: plan.name || t('plans.unnamed'),
-        info: plan.info ?? plan.planInfo ?? null
-    };
-    const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }));
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${safeName}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-    setStatus(t('drafts.exported'), 'success');
-}
-
-function formatUpdatedAt(value) {
-    if (!value) return t('plans.unknownDate');
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return t('plans.unknownDate');
-    return new Intl.DateTimeFormat(getLanguage(), {
-        dateStyle: 'medium',
-        timeStyle: 'short'
-    }).format(date);
-}
-
-function emptyRow(messageKey, actionKey = '', actionHref = '') {
-    const row = document.createElement('tr');
-    row.className = 'workspace-empty-row';
-    const cell = document.createElement('td');
-    cell.colSpan = 5;
-    const message = document.createElement('p');
-    message.textContent = t(messageKey);
-    cell.appendChild(message);
-    if (actionKey && actionHref) {
-        const action = document.createElement('a');
-        action.href = actionHref;
-        action.textContent = t(actionKey);
-        cell.appendChild(action);
-    }
-    row.appendChild(cell);
-    return row;
-}
-
 function render() {
-    refs.container.replaceChildren();
-    if (!userId) {
-        updateFilterStatus(0, 0);
-        refs.container.appendChild(emptyRow('drafts.loginRequired', 'auth.login', '/subpages/login.html'));
-        return;
-    }
-    if (!plans.length) {
-        updateFilterStatus(0, 0);
-        refs.container.appendChild(emptyRow('drafts.empty', 'dashboard.createFirstPlan', './cwl-planner.html'));
-        return;
-    }
-    const visiblePlans = filterAndSortPlans(plans, { ...listState, language: getLanguage() });
-    updateFilterStatus(visiblePlans.length, plans.length);
-    if (!visiblePlans.length) {
-        refs.container.appendChild(emptyRow('drafts.noMatches'));
-        return;
-    }
-    visiblePlans.forEach(plan => refs.container.appendChild(renderPlan(plan)));
-}
-
-function updateFilterStatus(visible, total) {
-    if (!refs.filterStatus) return;
-    refs.filterStatus.textContent = total ? t('drafts.results', { visible, total }) : '';
-    refs.filterStatus.hidden = !total;
+    savedPlansView.render();
 }
 
 function setListControlsEnabled(enabled) {
-    if (refs.search) refs.search.disabled = !enabled;
-    if (refs.sort) refs.sort.disabled = !enabled;
+    savedPlansView.setControlsEnabled(enabled);
 }
 
 function bindListControls() {
-    refs.search?.addEventListener('input', event => {
-        listState.query = event.currentTarget.value;
-        render();
-    });
-    refs.sort?.addEventListener('change', event => {
-        listState.sort = event.currentTarget.value;
-        render();
-    });
-    document.querySelector('[data-new-plan]')?.addEventListener('click', () => {
-        localStorage.removeItem('planner_id');
-    });
-}
-
-function cell(label, value) {
-    const element = document.createElement('td');
-    element.dataset.label = t(label);
-    element.textContent = value;
-    return element;
-}
-
-function renderPlan(plan) {
-    const row = document.createElement('tr');
-    row.dataset.planId = plan.id;
-
-    const name = cell('plans.name', '');
-    const nameLink = openPlanLink(plan.id, 'draft-plan-name-link');
-    const heading = document.createElement('strong');
-    heading.textContent = plan.name || t('plans.unnamed');
-    nameLink.replaceChildren(heading);
-    const access = document.createElement('small');
-    access.textContent = t(plan.isOwner ? 'drafts.owner' : 'drafts.shared');
-    name.append(nameLink, access);
-
-    const actions = document.createElement('td');
-    actions.className = 'draft-actions workspace-row-actions';
-    actions.appendChild(openPlanLink(plan.id));
-    const more = document.createElement('details');
-    more.className = 'draft-plan-actions-menu';
-    const summary = document.createElement('summary');
-    summary.textContent = '…';
-    summary.setAttribute('aria-label', 'More plan actions');
-    more.appendChild(summary);
-    const menu = document.createElement('div');
-    menu.className = 'draft-plan-actions-menu-content';
-    if (plan.isOwner) {
-        menu.appendChild(actionButton(t('drafts.rename'), 'button button-small', () => showRename(row, plan)));
-    }
-    menu.appendChild(actionButton(t('drafts.copy'), 'button button-small', () => void copyExistingPlan(plan)));
-    menu.appendChild(actionButton(t('drafts.export'), 'button button-small', () => exportPlan(plan)));
-    if (plan.isOwner) {
-        menu.appendChild(actionButton(t('drafts.delete'), 'button button-small draft-delete', () => void removePlan(plan)));
-    }
-    more.appendChild(menu);
-    actions.appendChild(more);
-
-    row.append(
-        name,
-        cell('plans.clans', String(plan.clanCount)),
-        cell('plans.freeRoster', String(plan.freePlayerCount)),
-        cell('plans.updated', formatUpdatedAt(plan.updatedAt)),
-        actions
-    );
-    return row;
-}
-
-function showRename(row, plan) {
-    const cell = document.createElement('td');
-    cell.colSpan = 5;
-    const form = document.createElement('form');
-    form.className = 'draft-rename-form';
-    const label = document.createElement('label');
-    label.textContent = t('drafts.name');
-    const input = document.createElement('input');
-    input.value = plan.name;
-    input.maxLength = 40;
-    input.required = true;
-    label.appendChild(input);
-    const actions = document.createElement('div');
-    actions.className = 'draft-actions';
-    const save = actionButton(t('drafts.save'), 'button button-small button-primary', () => {});
-    save.type = 'submit';
-    const cancel = actionButton(t('drafts.cancel'), 'button button-small', render);
-    actions.append(save, cancel);
-    form.append(label, actions);
-    form.addEventListener('submit', async event => {
-        event.preventDefault();
-        const name = input.value.trim();
-        if (!name) {
-            input.setCustomValidity(t('drafts.actionError'));
-            input.reportValidity?.();
-            setStatus(t('drafts.actionError'), 'error');
-            return;
-        }
-        input.setCustomValidity('');
-        setBusy(form, true);
-        try {
-            await renamePlan(plan.id, name, userId);
-            plan.name = name;
-            render();
-            setStatus(t('drafts.renamed'), 'success');
-        } catch (error) {
-            setStatus(error?.message || t('drafts.actionError'), 'error');
-            setBusy(form, false);
-        }
-    });
-    cell.appendChild(form);
-    row.replaceChildren(cell);
-    input.focus();
-    input.select();
-}
-
-async function copyExistingPlan(plan) {
-    if (hasReachedPlanLimit(plans.filter(item => item.isOwner))) {
-        setStatus(t('cwl.planLimitReached'), 'error');
-        return;
-    }
-    setStatus(t('drafts.working'));
-    try {
-        const name = `${plan.name}${t('drafts.copySuffix')}`.slice(0, 40).trim();
-        await copyPlan(plan.id, name, userId);
-        await loadPlans();
-        setStatus(t('drafts.copied'), 'success');
-    } catch (error) {
-        setStatus(
-            error?.code === 'PLAN_LIMIT_REACHED'
-                ? t('cwl.planLimitReached')
-                : error?.message || t('drafts.actionError'),
-            'error'
-        );
-    }
-}
-
-async function removePlan(plan) {
-    if (!await confirmDeletePlan(plan)) return;
-    setStatus(t('drafts.working'));
-    try {
-        await deletePlan(plan.id, userId);
-        plans = plans.filter(item => item.id !== plan.id);
-        if (localStorage.getItem('planner_id') === plan.id) localStorage.removeItem('planner_id');
-        setListControlsEnabled(plans.length > 0);
-        render();
-        setStatus(t('drafts.deleted'), 'success');
-    } catch (error) {
-        setStatus(error?.message || t('drafts.actionError'), 'error');
-    }
-}
-
-async function confirmDeletePlan(plan) {
-    const dialog = refs.deleteDialog;
-    if (!dialog || typeof dialog.showModal !== 'function') {
-        return window.confirm(t('drafts.deleteConfirm', { name: plan.name }));
-    }
-    if (refs.deleteDialogMessage) {
-        refs.deleteDialogMessage.textContent = t('drafts.deleteConfirm', { name: plan.name });
-    }
-    dialog.showModal();
-    return new Promise(resolve => {
-        const cancelButton = dialog.querySelector('[data-delete-cancel]');
-        const confirmButton = dialog.querySelector('[data-delete-confirm]');
-        const onCancel = () => finish(false);
-        const onCancelClick = () => finish(false);
-        const onConfirmClick = () => finish(true);
-        const cleanup = () => {
-            cancelButton?.removeEventListener('click', onCancelClick);
-            confirmButton?.removeEventListener('click', onConfirmClick);
-            dialog.removeEventListener('cancel', onCancel);
-        };
-        const finish = value => {
-            cleanup();
-            dialog.close();
-            resolve(value);
-        };
-        cancelButton?.addEventListener('click', onCancelClick);
-        confirmButton?.addEventListener('click', onConfirmClick);
-        dialog.addEventListener('cancel', onCancel);
-    });
-}
-
-function setBusy(root, busy) {
-    root.querySelectorAll('button, input').forEach(element => {
-        element.disabled = busy;
-    });
+    savedPlansView.bindControls();
 }
 
 async function loadPlans() {
