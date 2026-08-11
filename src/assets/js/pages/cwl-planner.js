@@ -10,7 +10,7 @@ import * as conf from "../Data/config.js";
 import { initPlayerPerformanceClient } from "../cwl/player-performance-client.js";
 import { initPlayerPerformancePopover } from "../cwl/cwl-player-performance-popover.js";
 import { initAutoPlan } from "../cwl/auto-plan/cwl-auto-plan-ui.js";
-import { initOptimizePlan } from "../cwl/optimize-plan/cwl-optimize-plan-ui.js";
+import { initOptimizePlan } from "../cwl/optimize-plan/cwl-optimize-plan-ui.js?v=20260812-1";
 import { initPlannerSurface } from "../cwl/cwl-planner-ui.js";
 import {
     applyPlannerFixture,

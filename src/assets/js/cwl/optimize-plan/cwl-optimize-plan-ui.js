@@ -7,7 +7,7 @@ import {
     buildAcceptedOptimization,
     buildOptimizePlan
 } from './cwl-optimize-planner.js';
-import { renderOptimizePlanPreview } from './cwl-optimize-plan-renderer.js';
+import { renderOptimizePlanPreview } from './cwl-optimize-plan-renderer.js?v=20260812-1';
 
 let refs;
 let currentResult;

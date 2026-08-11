@@ -18,12 +18,13 @@ export function renderOptimizePlanPreview({
         renderComparison(result.comparison)
     );
     result.current.clans.forEach(clan => {
-        fragment.appendChild(renderClanSuggestions({
+        const section = renderClanSuggestions({
             clan,
             result,
             acceptedIds,
             ignoredIds
-        }));
+        });
+        if (section) fragment.appendChild(section);
     });
     container.appendChild(fragment);
 }
@@ -74,9 +75,13 @@ function renderClanSuggestions({
         )
     );
     section.appendChild(heading);
-    const suggestions = result.suggestions.filter(suggestion =>
+    const related = result.suggestions.filter(suggestion =>
         suggestion.clanIds.includes(clan.id)
     );
+    const suggestions = related.filter(suggestion =>
+        suggestion.clanIds[0] === clan.id
+    );
+    if (!suggestions.length && related.length) return null;
     if (!suggestions.length) {
         section.appendChild(renderNoChanges(result.clanAdvice[clan.id]));
         return section;
