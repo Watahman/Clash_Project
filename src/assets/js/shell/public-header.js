@@ -1,3 +1,5 @@
+import { THEME_TOGGLE_MARKUP } from '../theme/theme-toggle-markup.js';
+
 const PUBLIC_NAV_ITEMS = Object.freeze([
     { id: 'tools', href: '/#features', key: 'public.nav.tools', label: 'Tools' },
     { id: 'games', href: '/minigames', key: null, label: 'Games' },
@@ -67,9 +69,7 @@ export function normalizePublicHeader(root = document) {
         </nav>
         <div class="public-actions">
             <button type="button" data-language-control data-i18n="header.language">Language</button>
-            <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme">
-                <span aria-hidden="true">◐</span>
-            </button>
+            <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme">${THEME_TOGGLE_MARKUP}</button>
             <a class="link-button" href="/subpages/login.html" data-i18n="auth.login">Log in</a>
             <a class="button button-primary" href="/subpages/register.html" data-i18n="public.startFree">Start for free</a>
         </div>

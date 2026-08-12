@@ -1,7 +1,7 @@
 import { syncAuthSession } from '../auth/auth-client.js';
 import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 import { initI18n, t } from '../i18n/i18n.js?v=20260812-redesign';
-import { getThemePreference, setThemePreference } from '../theme/theme-manager.js';
+import { toggleTheme as toggleThemePreference } from '../theme/theme-manager.js';
 import { initWorkspaceGuidance } from './workspace-guidance.js?v=20260809-4';
 import {
     initNotificationsPopover,
@@ -30,8 +30,8 @@ function updateThemeButton() {
 }
 
 function initThemeButton() {
-    document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
-        setThemePreference(getThemePreference() === 'light' ? 'dark' : 'light');
+    document.querySelector('[data-theme-toggle]')?.addEventListener('click', event => {
+        toggleThemePreference(event.currentTarget);
         updateThemeButton();
     });
     updateThemeButton();
@@ -93,6 +93,7 @@ function initMountedShell(body, sidebar, backdrop, currentPage) {
     initNotificationsPopover();
     if (!isRedesignFixtureRequested()) subscribeWorkspaceUserIdentity();
     window.addEventListener('clashtools:language-changed', updateThemeButton);
+    window.addEventListener('clashtools:theme-changed', updateThemeButton);
 }
 
 function initWorkspaceShell() {
