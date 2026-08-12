@@ -109,7 +109,7 @@ export function createHigherLowerRenderer({
         const count = run.mode === 'daily'
             ? `${Math.min(run.currentIndex + 1, dailyQuestionCount)}/${dailyQuestionCount}`
             : String(run.currentIndex + 1);
-        elements.question.textContent = `${text('question')} ${count}`;
+        elements.question.textContent = count;
         elements.score.textContent = String(run.score);
         elements.correct.textContent = String(run.correctCount);
         elements.combo.textContent = String(run.combo);
