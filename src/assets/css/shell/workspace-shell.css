@@ -78,6 +78,11 @@ body.workspace-app.workspace-sidebar-collapsed {
     padding-inline: 12px;
 }
 @media (min-width: 62.001rem) {
+    .workspace-topbar {
+        padding-left: clamp(1rem, 2.5vw, 2rem);
+        transition: padding-left 220ms ease-out;
+    }
+
     .workspace-sidebar-collapsed .workspace-brand {
         width: var(--workspace-sidebar-width);
     }

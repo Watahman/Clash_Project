@@ -5,4 +5,4 @@
 @import url("./system/tables.css");
 @import url("./system/overlays.css");
 @import url("./system/motion.css");
-@import url("./shell/workspace-shell.css");
+@import url("./shell/workspace-shell.css?v=20260813-sidebar");
