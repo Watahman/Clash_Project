@@ -1,6 +1,6 @@
 import { syncAuthSession } from '../auth/auth-client.js';
 import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
-import { initI18n, t } from '../i18n/i18n.js?v=20260809-4';
+import { initI18n, t } from '../i18n/i18n.js?v=20260812-redesign';
 import { getThemePreference, setThemePreference } from '../theme/theme-manager.js';
 import { initWorkspaceGuidance } from './workspace-guidance.js?v=20260809-4';
 import {
@@ -18,7 +18,7 @@ import {
     subscribeWorkspaceUserIdentity
 } from './workspace-user.js';
 
-const GUIDANCE_STYLESHEET = '../assets/css/workspace-guidance.css';
+const GUIDANCE_STYLESHEET = '../assets/css/workspace-guidance.css?v=20260812-redesign';
 
 function updateThemeButton() {
     const button = document.querySelector('[data-theme-toggle]');

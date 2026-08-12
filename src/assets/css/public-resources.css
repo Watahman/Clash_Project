@@ -167,7 +167,10 @@
 
 @media (max-width: 58rem) {
     .resource-page { width: min(45rem, calc(100% - 2rem)); }
-    .resource-layout { gap: 2rem; }
+    .resource-layout { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+    .resource-toc { width: 100%; max-width: 100%; min-width: 0; }
+    .resource-content,
+    .resource-article { width: 100%; min-width: 0; }
 }
 
 @media (max-width: 38rem) {

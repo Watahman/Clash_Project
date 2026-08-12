@@ -1,4 +1,4 @@
-import { getLanguage } from '../i18n/i18n.js';
+import { getLanguage } from '../i18n/i18n.js?v=20260812-redesign';
 
 const COPY = {
     en: {

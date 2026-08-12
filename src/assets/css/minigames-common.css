@@ -5,7 +5,7 @@
 .game-toolbar-icon { width: 2rem; height: 2rem; display: grid; place-items: center; color: var(--game-accent); }
 .game-toolbar-icon img { width: 1.25rem; height: 1.25rem; }
 .game-mode-tabs { display: inline-flex; gap: .15rem; padding: .2rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
-.game-mode-tabs button { min-height: 2.5rem; border-radius: 6px; padding: 0 .85rem; background: transparent; color: var(--text-muted); font-weight: 750; }
+.game-mode-tabs button { min-height: 2.75rem; border-radius: 6px; padding: 0 .85rem; background: transparent; color: var(--text-muted); font-weight: 750; }
 .game-mode-tabs button:hover { color: var(--text); }
 .game-mode-tabs button.is-active { background: var(--game-accent-soft); color: var(--text); }
 .game-toolbar-note { max-width: 42rem; margin: 0; color: var(--text-muted); font-size: .75rem; line-height: 1.45; text-align: right; }

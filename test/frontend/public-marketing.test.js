@@ -41,7 +41,7 @@ describe('Public marketing shell', () => {
         expect(document.querySelector('body.public-site')).not.toBeNull();
         expect(document.querySelector('.public-header')).not.toBeNull();
         expect(document.querySelector('.public-footer')).not.toBeNull();
-        expect(document.querySelector('script[src$="/assets/js/pages/public-site.js"]')).not.toBeNull();
+        expect(document.querySelector('script[src*="/assets/js/pages/public-site.js?v=20260812-redesign"]')).not.toBeNull();
     });
 
     it('keeps the homepage product-led and follows the requested story', () => {

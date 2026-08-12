@@ -1,9 +1,9 @@
-import { initI18n, t } from '../i18n/i18n.js';
+import { initI18n, t } from '../i18n/i18n.js?v=20260812-redesign';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { getThemePreference, setThemePreference } from '../theme/theme-manager.js';
 import { normalizePublicShell } from '../shell/public-header.js';
 import { initPublicPageBindings } from './public-page-bindings.js';
-import { initPublicResourcePages } from './public-resource-pages.js';
+import { initPublicResourcePages } from './public-resource-pages.js?v=20260812-redesign';
 
 function toggleTheme() {
     const next = getThemePreference() === 'light' ? 'dark' : 'light';
