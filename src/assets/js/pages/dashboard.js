@@ -22,8 +22,11 @@ const state = {
 
 function initRefs() {
     refs.welcome = document.querySelector('#dashboard-welcome');
+    refs.priorityGrid = document.querySelector('.dashboard-priority-grid');
+    refs.planPanel = document.querySelector('#dashboard-plan-panel');
     refs.planStatus = document.querySelector('#dashboard-plan-status');
     refs.planList = document.querySelector('#dashboard-plan-list');
+    refs.groupPanel = document.querySelector('#dashboard-group-panel');
     refs.groupStatus = document.querySelector('#dashboard-group-status');
     refs.groupList = document.querySelector('#dashboard-group-list');
     refs.accountLine = document.querySelector('#dashboard-account-line');
@@ -51,13 +54,17 @@ function setStatus(element, key = '', stateName = '') {
     element.hidden = !key;
 }
 
+function setPanelEmpty(panel, empty) {
+    if (panel) panel.dataset.empty = empty ? 'true' : 'false';
+}
+
 function selectPlan(planId) {
     localStorage.setItem('planner_id', planId);
 }
 
 function tableMessage(key, actionKey = '', actionHref = '') {
     const row = document.createElement('tr');
-    row.className = 'workspace-empty-row';
+    row.className = 'workspace-empty-row dashboard-empty-row';
     const cell = document.createElement('td');
     cell.colSpan = 5;
     const message = document.createElement('p');
@@ -65,6 +72,7 @@ function tableMessage(key, actionKey = '', actionHref = '') {
     cell.appendChild(message);
     if (actionKey && actionHref) {
         const action = document.createElement('a');
+        action.className = 'workspace-row-link';
         action.href = actionHref;
         action.textContent = t(actionKey);
         cell.appendChild(action);
@@ -107,19 +115,23 @@ function planRow(plan) {
 function renderPlans() {
     refs.planList.replaceChildren();
     if (state.plansError) {
+        setPanelEmpty(refs.planPanel, true);
         setStatus(refs.planStatus, 'dashboard.plansError', 'error');
         refs.planList.appendChild(tableMessage('dashboard.plansUnavailable'));
         return;
     }
     setStatus(refs.planStatus);
     if (!state.loggedIn) {
+        setPanelEmpty(refs.planPanel, true);
         refs.planList.appendChild(tableMessage('dashboard.loginRequired', 'auth.login', '/subpages/login.html'));
         return;
     }
     if (!state.plans.length) {
+        setPanelEmpty(refs.planPanel, true);
         refs.planList.appendChild(tableMessage('dashboard.noPlans', 'dashboard.createFirstPlan', '/app/cwl-planner'));
         return;
     }
+    setPanelEmpty(refs.planPanel, false);
     state.plans.slice(0, 3).forEach(plan => refs.planList.appendChild(planRow(plan)));
 }
 
@@ -146,12 +158,13 @@ function groupRow(entry) {
 
 function groupMessage(key, actionKey = '', actionHref = '') {
     const container = document.createElement('div');
-    container.className = 'workspace-empty-state';
+    container.className = 'workspace-empty-state dashboard-compact-empty';
     const message = document.createElement('p');
     message.textContent = t(key);
     container.appendChild(message);
     if (actionKey && actionHref) {
         const action = document.createElement('a');
+        action.className = 'workspace-row-link';
         action.href = actionHref;
         action.textContent = t(actionKey);
         container.appendChild(action);
@@ -162,19 +175,23 @@ function groupMessage(key, actionKey = '', actionHref = '') {
 function renderGroups() {
     refs.groupList.replaceChildren();
     if (state.groupsError) {
+        setPanelEmpty(refs.groupPanel, true);
         setStatus(refs.groupStatus, 'dashboard.groupsError', 'error');
         refs.groupList.appendChild(groupMessage('dashboard.groupsUnavailable'));
         return;
     }
     setStatus(refs.groupStatus);
     if (!state.loggedIn) {
+        setPanelEmpty(refs.groupPanel, true);
         refs.groupList.appendChild(groupMessage('dashboard.loginRequired'));
         return;
     }
     if (!state.groups.length) {
+        setPanelEmpty(refs.groupPanel, true);
         refs.groupList.appendChild(groupMessage('dashboard.noGroups', 'dashboard.openGroups', '/app/clan-management'));
         return;
     }
+    setPanelEmpty(refs.groupPanel, false);
     state.groups.forEach(group => refs.groupList.appendChild(groupRow(group)));
 }
 
@@ -197,15 +214,14 @@ function renderDashboardPriority() {
     if (state.plans.length) {
         setNextAction('dashboard.v2ContinueTitle', 'dashboard.v2ContinueCopy', 'dashboard.v2ContinueAction', '/app/cwl-planner');
         refs.nextAction.onclick = () => selectPlan(state.plans[0].id);
-    } else if (state.groups.length) {
-        setNextAction('dashboard.v2FamilyTitle', 'dashboard.v2FamilyCopy', 'dashboard.v2FamilyAction', '/app/clan-management');
-        refs.nextAction.onclick = null;
     } else {
         setNextAction('dashboard.v2StartTitle', 'dashboard.v2StartCopy', 'dashboard.v2StartAction', '/app/cwl-planner');
         refs.nextAction.onclick = null;
     }
 
     const hasError = state.plansError || state.groupsError;
+    refs.priorityGrid.dataset.hasAttention = hasError ? 'true' : 'false';
+    refs.attention.hidden = !hasError;
     refs.attention.dataset.state = hasError ? 'error' : 'clear';
     refs.attentionCopy.textContent = t(hasError ? 'dashboard.v2LoadIssue' : 'dashboard.v2Nothing');
 }
