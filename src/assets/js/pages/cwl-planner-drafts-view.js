@@ -18,6 +18,7 @@ function renderPlanTable({ refs, getPlans, getUserId, listState, setStatus, opti
     refs.container.replaceChildren();
     const userId = getUserId();
     const plans = getPlans();
+    setEmptyState(refs, !userId || !plans.length);
     if (!userId) {
         updateFilterStatus(refs, 0, 0);
         refs.container.appendChild(emptyRow('drafts.loginRequired', 'auth.login', '/subpages/login.html'));
@@ -25,7 +26,7 @@ function renderPlanTable({ refs, getPlans, getUserId, listState, setStatus, opti
     }
     if (!plans.length) {
         updateFilterStatus(refs, 0, 0);
-        refs.container.appendChild(emptyRow('drafts.empty', 'dashboard.createFirstPlan', './cwl-planner.html'));
+        refs.container.appendChild(emptyRow('drafts.empty'));
         return;
     }
     const visiblePlans = filterAndSortPlans(plans, { ...listState, language: getLanguage() });
@@ -54,6 +55,11 @@ function bindListControls(refs, listState, render) {
 function setListControlsEnabled(refs, enabled) {
     if (refs.search) refs.search.disabled = !enabled;
     if (refs.sort) refs.sort.disabled = !enabled;
+}
+
+function setEmptyState(refs, empty) {
+    const block = refs.container?.closest('.drafts-table-block');
+    block?.classList.toggle('is-empty', empty);
 }
 
 function updateFilterStatus(refs, visible, total) {
