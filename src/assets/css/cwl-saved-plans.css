@@ -2,7 +2,7 @@
     --saved-border: var(--border, #2a3542);
     --saved-muted: var(--text-muted, #94a0ad);
     min-width: 0;
-    padding: 28px 32px 52px;
+    padding: 22px 32px 44px;
 }
 
 .saved-plans-page,
@@ -14,27 +14,27 @@
 }
 
 .saved-plans-page .drafts-header {
-    align-items: end;
+    align-items: center;
     border-bottom: 1px solid var(--saved-border);
     display: flex;
-    gap: 24px;
+    gap: 20px;
     justify-content: space-between;
-    margin-bottom: 18px;
-    padding-bottom: 18px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
 }
 
 .saved-plans-page .hero-eyebrow {
     color: var(--saved-muted);
-    font-size: .72rem;
+    font-size: .7rem;
     font-weight: 700;
-    letter-spacing: .08em;
-    margin-bottom: 5px;
+    letter-spacing: .07em;
+    margin-bottom: 4px;
     text-transform: uppercase;
 }
 
-.saved-plans-page h1 { font-size: clamp(1.45rem, 2vw, 1.9rem); letter-spacing: -.02em; margin: 0; }
-.saved-plans-page .drafts-header p { color: var(--saved-muted); font-size: .88rem; margin: 7px 0 0; }
-.saved-plans-page .drafts-header .button { min-height: 44px; }
+.saved-plans-page h1 { font-size: clamp(1.4rem, 1.8vw, 1.75rem); letter-spacing: -.02em; margin: 0; }
+.saved-plans-page .drafts-header p { color: var(--saved-muted); font-size: .84rem; margin: 5px 0 0; }
+.saved-plans-page .drafts-header .button { min-height: 42px; }
 .saved-plans-page .button-danger { background: var(--danger, #b94a4a); border-color: var(--danger, #b94a4a); color: #fff; }
 .saved-plans-page .drafts-status { color: var(--saved-muted); min-height: 1.3em; }
 .saved-plans-page .drafts-status[data-state="error"] { color: var(--danger, #e47575); }
@@ -46,27 +46,27 @@
     border-radius: 10px;
     min-width: 0;
     overflow: visible;
-    padding: 16px;
+    padding: 14px;
 }
 
 .saved-plans-page .drafts-controls {
     align-items: end;
     border-bottom: 1px solid var(--saved-border);
     display: grid;
-    gap: 12px;
+    gap: 10px;
     grid-template-columns: minmax(16rem, 1fr) 14rem minmax(12rem, auto);
-    margin-bottom: 4px;
-    padding-bottom: 14px;
+    margin-bottom: 2px;
+    padding-bottom: 12px;
 }
 
 .saved-plans-page .drafts-controls label { color: var(--saved-muted); display: grid; font-size: .72rem; font-weight: 700; gap: 5px; }
 .saved-plans-page .drafts-controls input,
-.saved-plans-page .drafts-controls select { background: var(--surface-subtle, #111720); border: 1px solid var(--saved-border); border-radius: 6px; color: var(--text, #e7edf4); min-height: 42px; padding: 8px 10px; }
-.saved-plans-page .drafts-filter-status { color: var(--saved-muted); font-size: .78rem; margin: 0; text-align: right; }
+.saved-plans-page .drafts-controls select { background: var(--surface-subtle, #111720); border: 1px solid var(--saved-border); border-radius: 6px; color: var(--text, #e7edf4); min-height: 40px; padding: 8px 10px; }
+.saved-plans-page .drafts-filter-status { color: var(--saved-muted); font-size: .76rem; margin: 0; text-align: right; }
 .saved-plans-page .workspace-table-wrap { overflow: visible; }
 .saved-plans-page .drafts-table { border-collapse: collapse; min-width: 680px; width: 100%; }
-.saved-plans-page .drafts-table th { color: var(--saved-muted); font-size: .7rem; letter-spacing: .06em; padding: 12px 10px; text-align: left; text-transform: uppercase; }
-.saved-plans-page .drafts-table td { border-top: 1px solid var(--saved-border); font-size: .82rem; padding: 12px 10px; vertical-align: middle; }
+.saved-plans-page .drafts-table th { color: var(--saved-muted); font-size: .68rem; letter-spacing: .05em; padding: 10px; text-align: left; text-transform: uppercase; }
+.saved-plans-page .drafts-table td { border-top: 1px solid var(--saved-border); font-size: .82rem; padding: 11px 10px; vertical-align: middle; }
 .saved-plans-page .drafts-table td:first-child { min-width: 220px; }
 .saved-plans-page .drafts-table td[data-label="Plan"] { white-space: normal; }
 .saved-plans-page .drafts-table strong { display: block; font-size: .88rem; }
@@ -81,8 +81,26 @@
 .saved-plans-page .draft-plan-actions-menu summary::-webkit-details-marker { display: none; }
 .saved-plans-page .draft-plan-actions-menu-content { background: var(--surface-raised, #1a222d); border: 1px solid var(--saved-border); border-radius: 8px; box-shadow: var(--shadow-md, 0 12px 28px rgba(0, 0, 0, .18)); display: grid; gap: 4px; min-width: 150px; padding: 6px; position: absolute; right: 0; top: calc(100% + 5px); z-index: 20; }
 .saved-plans-page .draft-plan-actions-menu-content .button { justify-content: flex-start; width: 100%; }
-.saved-plans-page .workspace-empty-row td { color: var(--saved-muted); padding: 32px 16px; text-align: center; }
+.saved-plans-page .workspace-empty-row td { color: var(--saved-muted); padding: 24px 16px; text-align: center; }
 .saved-plans-page .workspace-empty-row p { margin: 0 0 8px; }
+
+.saved-plans-page .drafts-table-block.is-empty {
+    padding: 0;
+}
+.saved-plans-page .drafts-table-block.is-empty .drafts-controls,
+.saved-plans-page .drafts-table-block.is-empty .drafts-table thead {
+    display: none;
+}
+.saved-plans-page .drafts-table-block.is-empty .drafts-table {
+    min-width: 0;
+}
+.saved-plans-page .drafts-table-block.is-empty .workspace-empty-row td {
+    border-top: 0;
+    padding: 22px 18px;
+}
+.saved-plans-page .drafts-table-block.is-empty .workspace-empty-row p {
+    margin: 0;
+}
 
 .saved-plan-delete-dialog { background: var(--surface, #151c25); border: 1px solid var(--saved-border); border-radius: 10px; color: var(--text, #e7edf4); max-width: min(440px, calc(100vw - 32px)); padding: 22px; width: 100%; }
 .saved-plan-delete-dialog::backdrop { background: rgba(7, 11, 16, .56); }
@@ -92,10 +110,11 @@
 .saved-plan-dialog-actions .button { min-height: 44px; }
 
 @media (max-width: 760px) {
-    .saved-plans-page { padding: 16px 16px 36px; }
-    .saved-plans-page .drafts-header { align-items: start; display: grid; gap: 14px; }
-    .saved-plans-page .drafts-header .button { justify-self: start; }
+    .saved-plans-page { padding: 14px 16px 32px; }
+    .saved-plans-page .drafts-header { align-items: start; display: grid; gap: 12px; }
+    .saved-plans-page .drafts-header .button { justify-self: start; min-height: 44px; }
     .saved-plans-page .drafts-table-block { border-radius: 8px; padding: 12px; }
+    .saved-plans-page .drafts-table-block.is-empty { padding: 0; }
     .saved-plans-page .drafts-controls { grid-template-columns: 1fr; }
     .saved-plans-page .drafts-controls input,
     .saved-plans-page .drafts-controls select { min-height: 44px; }
