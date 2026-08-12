@@ -1,131 +1,145 @@
-# Eindrapport ClashPanel-redesign
+# ClashPanel V2 redesign handoff
 
-Datum: 18 juli 2026
+Updated: 2026-08-12
 
-## Basis en branch
+Source branch: `redesign/clashpanel-v2`
 
-- Functionele basisbranch: `origin/fix/release-readiness-functional`
-- Functioneel basispunt: `d86bb30` (`fix: support legacy json account migration`)
-- Redesignbranch: `redesign/exact-workspace-from-functional`
-- Prototypebron: `.reference/clashtools-workspace-v2/ClashTools_Workspace_Prototype_v2_GroupsV1/`
-- Merge/deployment: niet uitgevoerd
+Deployed redesign commit: `5407e38`
 
-De redesign is schoon boven op de functionele releasebranch opgebouwd. Er is geen oude redesign- of prototypebranch gemerged, gerebased of gecherry-pickt.
+Production release: not performed
 
-## Commitreeks
+## Outcome
 
-| Onderdeel | Commit | Inhoud |
-|---|---|---|
-| 0 | `7375b29` | Functionele basisaudit en inventaris |
-| 1 | `0a9f697` | Publieke site, authenticatie-layout en app-shell |
-| 2 | `6f06ac1` | Dashboard en Opgeslagen plannen |
-| 3 | `30e4ada` | CWL Planner |
-| 4 | `8bdf70d` | Operation Board |
-| 5 | `10eb3b9` | Groups V1 |
-| 6 | `dc6c68d` | Bracket, profiel en instellingen |
-| 7 | `redesign: complete final visual audit` | Finale visuele correcties, screenshots en rapportage; dit is de commit die dit rapport bevat |
+The V2 redesign is complete on the repository's `Development` branch and is
+available in the isolated Google Cloud and Cloudflare development environments.
+The work preserves the existing product capabilities while replacing the public
+site, shared application shell, and core product workspaces with one coherent,
+responsive interface.
 
-## Gewijzigde pagina's
+The implementation follows the V2 master specification and the pre-redesign
+pack. It uses real development-only fixtures for data-heavy previews; no fixture
+or invented metric is presented as live user data.
 
-- Publieke homepage
-- Login en registratie
-- Gedeelde desktop- en mobiele app-shell
-- Dashboard
-- Opgeslagen plannen
-- CWL Planner
-- Operation Board
-- Groups
-- Bracketgenerator
-- Profiel, notificaties en instellingen
+## Delivered surfaces
 
-## Verbonden bestaande functies
+### Public product
 
-| Oppervlak | Verbonden werking |
-|---|---|
-| Auth en shell | E-mail/wachtwoordauth, bestaande OAuth-knop, wachtwoordreset, taal, thema, routes, mobiele navigatie en profieltoegang |
-| Dashboard | Echte plannen, Groups en gekoppelde accounts met loading-, lege en fouttoestanden |
-| Opgeslagen plannen | Openen, hernoemen, kopiëren, verwijderen met bevestiging en nieuw plan |
-| Planner | Plan laden/maken, naam, handmatig opslaan, autosave, clans, 15v15/30v30, spelersbronnen, polls, drag-and-drop en toegankelijke verplaatsbesturing |
-| Operation Board | Plan/clan/losse tag, refresh, import/export, echte CWL-statistieken, war days, roster, filters, stand en bonusadvies |
-| Groups | Laden, selecteren, maken, joincode, leden, rollen, polls, beschikbaarheid, reminders, gekoppelde clans en permissies |
-| Bracket | Naam, deelnemers, seeded/shuffle, winnaarpropagatie, reset en JSON-import/export |
-| Profiel | Gebruikersgegevens, accounts, vrienden en verzoeken, Groups, notificaties, instellingen, cachebeheer en uitloggen |
+- Homepage and public navigation
+- CWL Planner, CWL Tracker, and Clan Management product pages
+- Minigames and Bracket Generator product pages
+- Guides, Methodology, About, Changelog, Contact, and legal pages
+- Login, registration, language, and theme flows
+- Responsive product previews backed by controlled fixtures
 
-## Finale visuele vergelijking
+### Plan
 
-De finale beelden zijn gemaakt op dezelfde pixelresoluties als de prototypes: 1440×1000, 1600×1050, 1600×1150 en 390×844. De vergelijking omvatte structuur, sidebar, topbar, paneelbreedtes, spacing, typografie, borders, tabellen, knoppen en mobiele stapeling.
+- Dashboard and saved-plan entry points
+- CWL Planner roster, schedule, availability, import, Auto Plan, and optimization
+- CWL Tracker planning and progress surfaces
 
-Tijdens Onderdeel 7 zijn twee duidelijke afwijkingen gecorrigeerd:
+### Compete
 
-1. De Planner- en Operation Board-koppen waren merkbaar kleiner dan in het prototype. Beide gebruiken nu een vaste product-UI-schaal van 3 rem op desktop en 2,25 rem op mobiel.
-2. Operation Board forceerde op 1600 px horizontale scrollbalken voor war days en het roster. De minimumkolombreedtes zijn verkleind; beide secties passen nu zonder document- of paneeloverflow op de prototyperesolutie.
+- War Operation Board and CWL Operation Board
+- Historical CWL context and war-statistics presentation
+- Deterministic fixture states for visual verification
 
-Alle gecontroleerde routes hadden na de correcties `scrollWidth === clientWidth`. De browserconsole bevatte geen waarschuwingen of fouten.
+### Manage
 
-## Bewuste resterende visuele afwijkingen
+- Clan Families overview, setup guidance, members, roles, invitations, polls,
+  availability, linked clans, and Planner handoff
 
-- De Operation Board-grafieken uit het prototype zijn niet getoond. De benodigde historische databetrouwbaarheid is niet bewezen en fake lijnen zijn verboden.
-- Screenshots van datagedreven pagina's tonen de echte uitgelogde/lege toestand wanneer geen actieve sessie beschikbaar was; prototypevoorbeelddata is niet als productdata overgenomen.
-- De publieke header behoudt de bestaande taalkeuze. Die staat niet in de donkere prototypescreenshot, maar is bestaande productfunctionaliteit en daarom niet verwijderd.
-- De Groups-inspector volgt de breakpointlogica uit de prototypebron en kan op een brede CSS-viewport als derde kolom verschijnen.
-- De profielscreenshot gebruikt uitsluitend een tijdelijke, lokale visuele opening met generieke lege waarden; er is geen sessie of gebruikersdata gewijzigd.
+### Progress and play
 
-## Bestaande onvolledigheden buiten de redesign
+- Advanced Stats lifecycle, army, trends, and progress views
+- Achievements and entity-aware display states
+- Minigames hub, Entity Guesser, Higher or Lower, and sharing states
 
-Deze punten waren al in de functionele basisaudit onvolledig en zijn geen door het redesign veroorzaakte regressies:
+### Brackets and account
 
-- Supabase RLS/security-definer-controle is nog niet tegen staging en de security advisor bewezen.
-- OAuth-providerredirects, reset-e-mail en de registratietrigger zijn niet in een live productieomgeving gevalideerd.
-- Een bewaarde terugkeerroute na login is niet uniform voor iedere beveiligde route.
-- De echte API-tokencredentialflow en live wachtwoordwijziging zijn niet handmatig met productiecredentials bewezen.
-- De oude niet-werkende Groups-knop `Uitnodigen` is niet opnieuw getoond; er is geen nieuwe uitnodigingsfunctie gebouwd.
+- Bracket editor, import validation, fixtures, and public product preview
+- Profile, settings, notifications, friends, and linked-account surfaces
 
-## Bewust niet gebouwde nieuwe functies
+## Shared architecture
 
-- Vrij roster zoeken op naam of tag
-- Plannen zoeken en sorteren
-- Plan exporteren vanuit Opgeslagen plannen
-- Sterren per war day als lijngrafiek
-- Klassementspositie per war day als lijngrafiek
-- Mobiele bracketnavigatie per ronde
-- Leden zoeken/filteren in Groups
-- Onboarding
-- Aandachtfilter in Operation Board
-- Historische standingssnapshots
+- Public and authenticated routes share the same design tokens, typography,
+  motion rules, focus treatment, and responsive contracts.
+- Workspace navigation is grouped around user intent: Plan, Compete, Manage,
+  Progress, and Play.
+- Game imagery is resolved through the central entity asset layer. Dynamic clan
+  badges remain API-driven, and unavailable entities use the approved fallback.
+- English, Dutch, French, German, and Spanish copy is supported across the
+  redesigned surfaces.
+- Development fixtures are deterministic and visibly labelled. They do not
+  activate on normal production URLs.
 
-Deze functies blijven geparkeerd in `docs/NEW_FUNCTIONS_AFTER_REDESIGN.md` en vereisen expliciete goedkeuring voor Onderdeel 8.
+## Verification evidence
 
-## Finale controles
+The exact development candidate passed the following local gates before deploy:
 
-Uitgevoerd via `npm run check`:
+- `npm.cmd run check`: passed
+  - 31 ordered migrations checked
+  - 68 frontend endpoints and 7 auth endpoints checked
+  - 1,362 tracked paths checked for casing
+  - 109 test files and 603 tests passed
+  - production build passed
+  - static-output and SEO checks passed
+- `npm.cmd run verify:redesign -- --full`: 0 failures, 0 warnings
+- SEO output: 14 route definitions and 13 sitemap URLs
+- no GitHub Actions workflow exists
 
-- Migraties: 7 geordende SQL-migraties gevalideerd
-- Endpointcontract: 74 frontend/backend-constants gevalideerd
-- Frontendtests: 15 testbestanden, 43 tests, alles geslaagd
-- Productiebuild: Vite-build geslaagd, 133 modules verwerkt
-- Browserconsole: geen warnings of errors op de finale routecontrole
-- Horizontale documentoverflow: niet aangetroffen op de gecontroleerde desktop- en mobiele routes
+Browser verification covered public and authenticated surfaces at desktop,
+tablet, and 390px mobile widths in dark and light themes. The five supported
+languages were checked for layout stability, including long German labels.
+Checked pages had no document-level horizontal overflow. The final live Planner
+check reported matching client and scroll widths at both 1,425px and 375px.
 
-Java/Maven:
+Reference screenshots are stored in [`docs/redesign/final`](redesign/final).
 
-- `pom.xml` bestaat, maar `mvn` en een Maven-wrapper zijn niet beschikbaar in de huidige omgeving.
-- Daarom is `mvn test` niet opnieuw uitgevoerd en wordt er geen actueel Java-testresultaat geclaimd.
+## Development deployment
 
-## Screenshots
+### Google Cloud
 
-| Oppervlak | Bestand | Resolutie |
-|---|---|---:|
-| Homepage desktop | [homepage-desktop.png](redesign/final/homepage-desktop.png) | 1440×1000 |
-| Homepage mobiel | [homepage-mobile.png](redesign/final/homepage-mobile.png) | 390×844 |
-| Dashboard | [dashboard-desktop.png](redesign/final/dashboard-desktop.png) | 1440×1000 |
-| Planner desktop | [planner-desktop.png](redesign/final/planner-desktop.png) | 1600×1050 |
-| Planner mobiel | [planner-mobile.png](redesign/final/planner-mobile.png) | 390×844 |
-| Operation Board | [operation-desktop.png](redesign/final/operation-desktop.png) | 1600×1150 |
-| Groups desktop | [groups-desktop.png](redesign/final/groups-desktop.png) | 1440×1000 |
-| Groups mobiel | [groups-mobile.png](redesign/final/groups-mobile.png) | 390×844 |
-| Bracket | [bracket-desktop.png](redesign/final/bracket-desktop.png) | 1440×1000 |
-| Profiel | [profile-desktop.png](redesign/final/profile-desktop.png) | 1440×1000 |
+- Project: `clashpanel`
+- Service: `clashpanel-api`
+- Region: `europe-west1`
+- Development tag: `phase8`
+- Revision: `clashpanel-api-00059-toz`
+- URL: `https://phase8---clashpanel-api-rxco3fz7da-ew.a.run.app`
+- Normal production traffic: 0%
+- `/health`: 200
+- `/ready`: 200
+- Advanced Stats collection: off
+- Advanced Stats public enrollment: off
+- Scheduler secret: not attached to this revision
 
-## Conclusie
+### Cloudflare
 
-De volledige redesignscope van Onderdeel 1 tot en met 7 is geïmplementeerd, gecontroleerd en visueel vastgelegd. De branch kan nu door de gebruiker beoordeeld worden. Onderdeel 8 is niet gestart.
+- Worker: `clashpanel-phase8-preview`
+- Version: `b509918f-d002-41e7-ad88-97d7254f9b21`
+- URL: `https://clashpanel-phase8-preview.emile-vandewaetere.workers.dev`
+- Backend: the tagged `phase8` Cloud Run revision
+- Custom-domain route: none
+- Cron trigger: none
+- Search indexing: disabled with `X-Robots-Tag`
+
+Live checks returned 200 for the preview homepage, CWL Planner, Advanced Stats,
+and Minigames. The production custom domain and its 100% traffic revision were
+not changed.
+
+## Deliberate release boundaries
+
+- This is a development deployment, not a production release.
+- Do not move production traffic to the `phase8` revision until its separate
+  Advanced Stats observation gate is complete.
+- The public Bracket route remains excluded from the sitemap and search index
+  until a separate publishing decision is approved.
+- Google sign-in on the preview requires the exact preview callback URL to be
+  present in Supabase Authentication redirect configuration.
+- Database migrations, production Cloud Run traffic, and the `clashpanel.com`
+  Cloudflare Worker were not changed by this redesign deployment.
+
+## Recommended next review
+
+Use the Cloudflare preview for stakeholder acceptance. Test the primary flows
+with a normal account and real linked Clash of Clans data, then record any
+content or interaction changes before authorizing a production rollout.
