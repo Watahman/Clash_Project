@@ -1,0 +1,164 @@
+/* Prompt 6: Clan Family content/action hierarchy.
+   Keep existing behavior; reduce repeated calls-to-action and duplicated status. */
+
+body.workspace-app[data-workspace-page="groups"] #groups-new-btn {
+    background: transparent !important;
+    border-color: var(--cp-border-2) !important;
+    color: var(--cp-text-2) !important;
+    box-shadow: none !important;
+}
+body.workspace-app[data-workspace-page="groups"] #groups-new-btn:hover {
+    background: var(--cp-surface-hover) !important;
+    color: var(--cp-text-1) !important;
+}
+
+body.workspace-app[data-workspace-page="groups"] #groups-join-shortcut {
+    background: transparent;
+    border-color: transparent;
+    color: var(--cp-text-2);
+    min-height: 36px;
+    padding-inline: 9px;
+}
+body.workspace-app[data-workspace-page="groups"] #groups-join-shortcut:hover {
+    background: var(--cp-surface-hover);
+    border-color: var(--cp-border-1);
+    color: var(--cp-text-1);
+}
+
+/* Invite is a utility, not the main action for every visit. */
+body.workspace-app[data-workspace-page="groups"] .cf-code-button {
+    align-items: center;
+    flex-direction: row;
+    gap: 7px;
+    min-height: 38px;
+    min-width: 0;
+    padding: 0 9px;
+}
+body.workspace-app[data-workspace-page="groups"] .cf-code-button .groups-section-kicker {
+    color: var(--cp-text-3);
+    display: inline !important;
+    font-size: .68rem;
+    letter-spacing: 0;
+    margin: 0;
+    text-transform: none;
+}
+body.workspace-app[data-workspace-page="groups"] .cf-code-button strong {
+    font-size: .72rem;
+    letter-spacing: .06em;
+    margin: 0;
+}
+body.workspace-app[data-workspace-page="groups"] .cf-code-button img {
+    margin: 0;
+    position: static;
+}
+
+/* Poll state already has its own overview. Keep only durable family metrics here. */
+body.workspace-app[data-workspace-page="groups"] .cf-metric-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+body.workspace-app[data-workspace-page="groups"] .cf-metric-strip > div:last-child {
+    display: none;
+}
+
+/* Readiness and Needs attention previously repeated the same missing setup items. */
+body.workspace-app[data-workspace-page="groups"] #groups-panel-overview > .cf-overview-grid:first-child {
+    grid-template-columns: minmax(0, 1fr);
+}
+body.workspace-app[data-workspace-page="groups"] #groups-panel-overview > .cf-overview-grid:first-child > .cf-section[hidden] {
+    display: none;
+}
+body.workspace-app[data-workspace-page="groups"] #groups-panel-overview > .cf-overview-grid:first-child .cf-section-heading {
+    min-height: 54px;
+}
+body.workspace-app[data-workspace-page="groups"] #groups-panel-overview .cf-action-row {
+    min-height: 52px;
+}
+body.workspace-app[data-workspace-page="groups"] #groups-panel-overview .cf-action-row.is-complete {
+    background: transparent;
+}
+
+/* Overview buttons should navigate into detail, not compete with the real actions there. */
+body.workspace-app[data-workspace-page="groups"] #groups-panel-overview [data-family-action] {
+    background: transparent;
+    border-color: transparent;
+    color: var(--cp-text-2);
+    min-height: 34px;
+    padding-inline: 7px;
+}
+body.workspace-app[data-workspace-page="groups"] #groups-panel-overview [data-family-action]:hover {
+    background: var(--cp-surface-hover);
+    color: var(--cp-text-1);
+}
+body.workspace-app[data-workspace-page="groups"] #groups-panel-overview .cf-heading-actions a[href="/app/cwl-planner"] {
+    display: none;
+}
+
+/* The active poll preview has one job: identify the current poll and let the user answer/edit it. */
+body.workspace-app[data-workspace-page="groups"] .cf-poll-notice {
+    padding: 12px 0;
+}
+body.workspace-app[data-workspace-page="groups"] .cf-poll-notice .button-primary {
+    min-height: 38px;
+}
+body.workspace-app[data-workspace-page="groups"] #groups-poll-empty {
+    padding-block: 12px;
+}
+
+/* Poll administration remains fully available, but secondary/destructive actions no longer look equally primary. */
+body.workspace-app[data-workspace-page="groups"] .cf-poll-management,
+body.workspace-app[data-workspace-page="groups"] .cf-poll-list-section,
+body.workspace-app[data-workspace-page="groups"] .cf-results-section {
+    margin-top: 20px;
+    padding-top: 14px;
+}
+body.workspace-app[data-workspace-page="groups"] .cf-poll-row {
+    gap: 14px;
+    min-height: 60px;
+    padding-block: 8px;
+}
+body.workspace-app[data-workspace-page="groups"] .cf-poll-row-copy > span {
+    line-height: 1.45;
+}
+body.workspace-app[data-workspace-page="groups"] .cf-poll-row .cf-row-actions {
+    align-items: center;
+    gap: 4px;
+}
+body.workspace-app[data-workspace-page="groups"] .cf-poll-row .cf-row-actions .button {
+    min-height: 34px;
+    padding-inline: 8px;
+}
+body.workspace-app[data-workspace-page="groups"] .cf-poll-row .cf-row-actions .button-secondary {
+    background: transparent;
+    border-color: transparent;
+    color: var(--cp-text-2);
+}
+body.workspace-app[data-workspace-page="groups"] .cf-poll-row .cf-row-actions .button-secondary:hover {
+    background: var(--cp-surface-hover);
+    color: var(--cp-text-1);
+}
+body.workspace-app[data-workspace-page="groups"] .cf-poll-row .cf-row-actions .button-danger {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+/* Role information is useful, but does not need to read like another large setup card. */
+body.workspace-app[data-workspace-page="groups"] .cf-permission-note {
+    background: transparent;
+    border-color: var(--cp-border-1);
+    margin-top: 14px;
+    padding: 10px 12px;
+}
+
+@media (max-width: 720px) {
+    body.workspace-app[data-workspace-page="groups"] .groups-page-header #groups-new-btn {
+        width: auto;
+    }
+    body.workspace-app[data-workspace-page="groups"] .cf-metric-strip {
+        grid-template-columns: repeat(3, minmax(90px, 1fr));
+    }
+    body.workspace-app[data-workspace-page="groups"] .cf-poll-row .cf-row-actions {
+        justify-content: flex-start;
+        width: 100%;
+    }
+}

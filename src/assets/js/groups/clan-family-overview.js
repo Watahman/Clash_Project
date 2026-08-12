@@ -45,41 +45,45 @@ function renderOverview(detail, entry) {
     setMetric('accounts', summary.accounts);
     setMetric('clans', clans.length);
     setMetric('polls', activePolls.length);
-    renderReadiness(summary, clans, activePolls, entry);
-    renderAttention(summary, clans, activePolls, entry, detail?.currentUserId);
+    renderPriority(summary, clans, activePolls, entry, detail?.currentUserId);
     renderClanPreview(clans);
     renderPermission(detail?.currentRole || 'member');
 }
 
-function renderReadiness(summary, clans, polls, entry) {
+function renderPriority(summary, clans, polls, entry, currentUserId) {
     const items = [];
     if (!clans.length) items.push(actionItem('clans', t('groups.addClan'), t('groups.noLinkedClans')));
     if (!summary.accounts) items.push(actionItem('members', t('groups.accounts'), t('groups.noLinkedAccounts')));
-    if (!polls.length) items.push(actionItem('polls', familyCopy('activePoll'), familyCopy('pollHelp')));
+    if (!polls.length) {
+        items.push(actionItem('polls', familyCopy('activePoll'), familyCopy('pollHelp')));
+    } else {
+        const activePoll = polls[0];
+        if (currentUserId && !activePoll.answers?.[currentUserId]) {
+            const answered = Object.keys(activePoll.answers || {}).length;
+            const pending = Math.max(0, summary.members - answered);
+            items.push(actionItem(
+                'polls',
+                activePoll.title,
+                `${pending} ${familyCopy('responses')} ${familyCopy('pending')}`
+            ));
+        }
+    }
     if (Array.isArray(entry?.auditIssues) && entry.auditIssues.length) {
         items.push(actionItem('clans', t('groups.accountAudit'), familyCopy('auditIssues')));
     }
+
     const list = document.querySelector('#cf-readiness-list');
     list?.replaceChildren();
+    document.querySelector('#cf-attention-list')?.closest('.cf-section')?.setAttribute('hidden', '');
+
     if (!items.length) {
         list?.appendChild(actionItem('', familyCopy('ready'), t('groups.inspectorDescription', { name: 'Clan Family' }), 'is-complete'));
         setStatus(familyCopy('ready'), 'success');
-    } else {
-        items.forEach(item => list?.appendChild(item));
-        setStatus(familyCopy('needsAttention'), 'warning');
+        return;
     }
-}
 
-function renderAttention(summary, clans, polls, entry, currentUserId) {
-    const list = document.querySelector('#cf-attention-list');
-    list?.replaceChildren();
-    const activePoll = polls[0];
-    const answered = activePoll ? Object.keys(activePoll.answers || {}).length : 0;
-    if (activePoll && !activePoll.answers?.[currentUserId]) {
-        list?.appendChild(actionItem('polls', activePoll.title, `${Math.max(0, summary.members - answered)} ${familyCopy('responses')} ${familyCopy('pending')}`));
-    }
-    if (entry?.auditIssues?.length) list?.appendChild(actionItem('clans', t('groups.accountAudit'), `${entry.auditIssues.length} ${t('groups.unlinkedAccounts').toLowerCase()}`));
-    if (!list?.children.length) list?.appendChild(actionItem('', familyCopy('ready'), t('groups.noActivePollHelp'), 'is-quiet'));
+    items.forEach(item => list?.appendChild(item));
+    setStatus(familyCopy('needsAttention'), 'warning');
 }
 
 function renderClanPreview(clans) {
