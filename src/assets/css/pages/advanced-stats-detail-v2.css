@@ -1,0 +1,326 @@
+/* Advanced Stats detail hierarchy: armies, unit usage and battle timeline. */
+.advanced-stats-page #advanced-stats-armies-section,
+.advanced-stats-page #advanced-stats-units-section,
+.advanced-stats-page #advanced-stats-battles-section {
+    min-width: 0;
+}
+
+.advanced-stats-page #advanced-stats-armies-section .advanced-stats__section-heading,
+.advanced-stats-page #advanced-stats-units-section .advanced-stats__section-heading,
+.advanced-stats-page #advanced-stats-battles-section .advanced-stats__section-heading {
+    margin-bottom: 12px;
+}
+
+/* Favorite armies are a ranked list, not a stack of nested cards. */
+.advanced-stats-page .advanced-stats__army-list {
+    gap: 0;
+}
+
+.advanced-stats-page .advanced-stats__army-card {
+    background: transparent;
+    border-radius: 0;
+    display: grid;
+    gap: 7px;
+    padding: 11px 0;
+}
+
+.advanced-stats-page .advanced-stats__army-card + .advanced-stats__army-card {
+    border-top: 1px solid var(--cp-border-1);
+}
+
+.advanced-stats-page .advanced-stats__army-card:first-child {
+    padding-top: 0;
+}
+
+.advanced-stats-page .advanced-stats__army-card:last-child {
+    padding-bottom: 0;
+}
+
+.advanced-stats-page .advanced-stats__army-card header {
+    align-items: center;
+    display: grid;
+    gap: 6px 12px;
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.advanced-stats-page .advanced-stats__army-card h3 {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.advanced-stats-page .advanced-stats__army-uses {
+    color: var(--cp-text-3);
+    font-size: .7rem;
+    white-space: nowrap;
+}
+
+.advanced-stats-page .advanced-stats__army-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+}
+
+.advanced-stats-page .advanced-stats__army-metric {
+    align-items: baseline;
+    display: inline-flex;
+    gap: 6px;
+}
+
+.advanced-stats-page .advanced-stats__army-metric > span {
+    color: var(--cp-text-3);
+    font-size: .68rem;
+}
+
+.advanced-stats-page .advanced-stats__army-metric > strong {
+    color: var(--cp-text-1);
+    font-size: .78rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.advanced-stats-page .advanced-stats__army-units,
+.advanced-stats-page .advanced-stats__battle-army {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 5px;
+    min-width: 0;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    padding-bottom: 3px;
+    scrollbar-width: thin;
+}
+
+.advanced-stats-page .advanced-stats__unit-chip {
+    background: transparent;
+    border: 1px solid var(--cp-border-1);
+    border-radius: 6px;
+    flex: 0 0 auto;
+    padding: 3px 6px;
+    white-space: nowrap;
+}
+
+.advanced-stats-page .advanced-stats__unit-chip img {
+    height: 18px;
+    width: 18px;
+}
+
+/* Unit usage prioritizes the actual usage rate. */
+.advanced-stats-page #advanced-stats-units-section .advanced-stats__section-heading--filters label {
+    flex-basis: 170px;
+}
+
+.advanced-stats-page .advanced-stats__table th,
+.advanced-stats-page .advanced-stats__table td {
+    padding-block: 9px;
+}
+
+.advanced-stats-page .advanced-stats__table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.advanced-stats-page .advanced-stats__unit-name {
+    gap: 7px;
+}
+
+.advanced-stats-page .advanced-stats__unit-name img {
+    height: 25px;
+    width: 25px;
+}
+
+.advanced-stats-page .advanced-stats__table th:last-child,
+.advanced-stats-page .advanced-stats__table td:last-child {
+    width: min(210px, 28%);
+}
+
+.advanced-stats-page .advanced-stats__usage-rate {
+    align-items: center;
+    display: grid;
+    gap: 9px;
+    grid-template-columns: 44px minmax(64px, 1fr);
+    min-width: 112px;
+}
+
+.advanced-stats-page .advanced-stats__usage-rate > strong {
+    font-size: .76rem;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.advanced-stats-page .advanced-stats__usage-track {
+    background: var(--cp-surface-3);
+    border-radius: 999px;
+    display: block;
+    height: 5px;
+    overflow: hidden;
+}
+
+.advanced-stats-page .advanced-stats__usage-fill {
+    background: var(--cp-progress);
+    border-radius: inherit;
+    display: block;
+    height: 100%;
+    min-width: 2px;
+}
+
+.advanced-stats-page .advanced-stats__unit-item {
+    background: transparent;
+    border-bottom: 1px solid var(--cp-border-1);
+    border-radius: 0;
+    display: grid;
+    gap: 8px;
+    padding: 10px 0;
+}
+
+.advanced-stats-page .advanced-stats__unit-item:last-child {
+    border-bottom: 0;
+}
+
+.advanced-stats-page .advanced-stats__unit-item h3 {
+    margin: 0;
+}
+
+.advanced-stats-page .advanced-stats__usage-rate--compact {
+    grid-template-columns: 46px minmax(0, 1fr);
+    width: 100%;
+}
+
+.advanced-stats-page .advanced-stats__unit-item dl {
+    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.advanced-stats-page .advanced-stats__unit-item dt {
+    font-size: .66rem;
+}
+
+.advanced-stats-page .advanced-stats__unit-item dd {
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+.advanced-stats-page #advanced-stats-units-section .advanced-stats__footnote {
+    border-top: 1px solid var(--cp-border-1);
+    margin-top: 10px;
+    padding-top: 9px;
+}
+
+/* Battle timeline uses compact result rows; saved army stays available horizontally. */
+.advanced-stats-page .advanced-stats__timeline {
+    gap: 0;
+}
+
+.advanced-stats-page .advanced-stats__battle {
+    background: transparent;
+    border-radius: 0;
+    display: grid;
+    gap: 7px 14px;
+    grid-template-columns: minmax(180px, 1fr) auto auto;
+    padding: 11px 0;
+}
+
+.advanced-stats-page .advanced-stats__battle + .advanced-stats__battle {
+    border-top: 1px solid var(--cp-border-1);
+}
+
+.advanced-stats-page .advanced-stats__battle:first-child {
+    padding-top: 0;
+}
+
+.advanced-stats-page .advanced-stats__battle-main {
+    gap: 2px;
+}
+
+.advanced-stats-page .advanced-stats__battle-main strong {
+    font-size: .86rem;
+}
+
+.advanced-stats-page .advanced-stats__battle-main small {
+    color: var(--cp-text-3);
+    font-size: .69rem;
+}
+
+.advanced-stats-page .advanced-stats__battle-score {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+}
+
+.advanced-stats-page .advanced-stats__battle-stars {
+    color: var(--cp-text-1);
+    font-size: .86rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.advanced-stats-page .advanced-stats__battle-destruction {
+    color: var(--cp-text-2);
+    font-size: .78rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.advanced-stats-page .advanced-stats__battle-meta {
+    align-items: center;
+    align-self: center;
+    background: var(--cp-surface-2);
+    border: 1px solid var(--cp-border-1);
+    border-radius: 999px;
+    color: var(--cp-text-2);
+    display: inline-flex;
+    font-size: .67rem;
+    font-weight: 700;
+    min-height: 24px;
+    padding: 0 8px;
+    white-space: nowrap;
+}
+
+.advanced-stats-page .advanced-stats__battle-army {
+    grid-column: 1 / -1;
+}
+
+.advanced-stats-page .advanced-stats__load-more {
+    margin-top: 12px;
+}
+
+@media (max-width: 599px) {
+    .advanced-stats-page .advanced-stats__army-card header {
+        grid-template-columns: 1fr;
+    }
+
+    .advanced-stats-page .advanced-stats__army-uses {
+        justify-self: start;
+    }
+
+    .advanced-stats-page .advanced-stats__army-metrics {
+        gap: 5px 12px;
+    }
+
+    .advanced-stats-page .advanced-stats__units-mobile {
+        gap: 0;
+    }
+
+    .advanced-stats-page .advanced-stats__battle {
+        gap: 6px 10px;
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .advanced-stats-page .advanced-stats__battle-main {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .advanced-stats-page .advanced-stats__battle-meta {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .advanced-stats-page .advanced-stats__battle-score {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        justify-content: flex-start;
+    }
+
+    .advanced-stats-page .advanced-stats__battle-army {
+        grid-column: 1 / -1;
+        grid-row: 3;
+    }
+}
