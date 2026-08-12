@@ -28,6 +28,29 @@ function restoreHashPosition() {
     window.requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView());
 }
 
+function changelogBadges(main) {
+    const moduleKeys = {
+        'august-4': ['public.nav.guides', 'public.nav.methodology', 'public.nav.about'],
+        'august-3': ['public.nav.guides'],
+        'august-2': ['nav.operation', 'nav.cwl'],
+        'august-1': ['nav.cwl', 'nav.groups']
+    };
+    Object.entries(moduleKeys).forEach(([id, keys]) => {
+        const article = main.querySelector(`#${id}`);
+        const title = article?.querySelector('h2');
+        if (!title || article.querySelector('.changelog-module-badges')) return;
+        const badges = document.createElement('div');
+        badges.className = 'changelog-module-badges';
+        badges.setAttribute('aria-label', 'Modules');
+        keys.forEach(key => {
+            const badge = document.createElement('span');
+            badge.textContent = t(key);
+            badges.append(badge);
+        });
+        title.after(badges);
+    });
+}
+
 function renderGuides(main) {
     setDocumentCopy('guides');
     main.innerHTML = `
@@ -36,6 +59,12 @@ function renderGuides(main) {
             <h1>${t('guides.heroTitle')}</h1>
             <p>${t('guides.heroIntro')}</p>
             <p class="resource-meta">${t('guides.heroMeta')}</p>
+            <nav class="resource-categories" aria-label="Guide categories">
+                <a href="#fair-roster">${t('nav.cwl')}</a>
+                <a href="#availability">${t('nav.groups')}</a>
+                <a href="#seasons">${t('nav.operation')}</a>
+                <a href="/methodology">${t('public.nav.methodology')}</a>
+            </nav>
         </header>
         <div class="resource-layout">
             <nav class="resource-toc" aria-label="${t('guides.tocLabel')}">
@@ -86,6 +115,7 @@ function renderChangelog(main) {
                 ${t('changelog.article1Html')}
             </div>
         </div>`;
+    changelogBadges(main);
 }
 
 function renderMethodology(main) {

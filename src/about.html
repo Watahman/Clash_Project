@@ -35,6 +35,7 @@
     <link rel="stylesheet" href="/assets/css/workspace-system.css">
     <script src="/assets/js/Data/runtime-config.js"></script>
     <script type="module" src="/assets/js/pages/public-site.js" fetchpriority="low"></script>
+    <script type="module" src="/assets/js/pages/public-feature-previews.js"></script>
     <link rel="stylesheet" href="/assets/css/light-theme.css">
     <link rel="stylesheet" href="/assets/css/workspace-polish.css">
     <link rel="stylesheet" href="/assets/css/public-marketing.css">
@@ -57,11 +58,7 @@
     <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" data-i18n-aria-label="public.openMenu" aria-label="Open menu"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
 </header>
 <main id="main-content">
-    <section class="home-v2-hero feature-v2-hero" id="product">
-        <div class="feature-v2-hero-media" aria-hidden="true">
-            <!-- IMAGE TIP: Strategic Clash of Clans scene: war map, leader planning, or calm pre-battle image rather than a chaotic attack. Replace only the src below. -->
-            <img src="/assets/css/pictures/home/barbarian-strategy.aeb88b9e0b.avif" alt="" width="503" height="397">
-        </div>
+    <section class="home-v2-hero feature-v2-hero cp-feature-hero" id="product">
         <div class="home-v2-hero-copy">
             <p class="eyebrow" data-i18n="aboutPage.kicker">About ClashPanel</p>
             <h1 data-i18n="aboutPage.h1">Built for clan leaders.</h1>
@@ -70,6 +67,7 @@
                 <a class="button button-secondary button-large" href="/cwl-planner" data-i18n="aboutPage.secondary">See the CWL Planner</a></div>
             <p class="hero-footnote" data-i18n="aboutPage.note">Fan-made · web-based · not affiliated with Supercell</p>
         </div>
+        <div class="cp-product-preview" aria-label="ClashPanel principles summary"><div class="cp-preview-chrome"><strong data-i18n="aboutPage.kicker">About ClashPanel</strong><span data-i18n="aboutPage.signal.independent">Independent toolkit</span><span class="cp-preview-status" data-i18n="aboutPage.signal.fanMade">Fan-made project</span></div><div class="cp-family-content"><div><strong data-i18n="aboutPage.problem.f1.title">CWL Planner</strong><p data-i18n="aboutPage.problem.f1.desc">Build multi-clan roster plans with player roles, availability and optimization before league week starts.</p></div><div><strong data-i18n="aboutPage.problem.f2.title">CWL Tracker</strong><p data-i18n="aboutPage.problem.f2.desc">Follow live wars, standings, participation, bonus context and previous seasons.</p></div><div><strong data-i18n="aboutPage.problem.f3.title">Clan Families</strong><p data-i18n="aboutPage.problem.f3.desc">Keep members, linked accounts, clans and availability connected around the same workflow.</p></div><div><strong data-i18n="aboutPage.independent.f1.title">No official affiliation</strong><p data-i18n="aboutPage.independent.f1.desc">ClashPanel is not endorsed, sponsored or operated by Supercell.</p></div></div></div>
     </section>
     <section class="home-v2-signal-strip" aria-label="About ClashPanel capabilities" data-reveal><span data-i18n="aboutPage.signal.free">Free to use</span><span data-i18n="aboutPage.signal.leaders">Built for clan leaders</span><span data-i18n="aboutPage.signal.cwlFirst">CWL-first workflow</span><span data-i18n="aboutPage.signal.multiClan">Multi-clan support</span><span data-i18n="aboutPage.signal.fanMade">Fan-made project</span><span data-i18n="aboutPage.signal.independent">Independent toolkit</span></section>
     <section class="home-v2-workflow feature-v2-workflow">
@@ -77,11 +75,6 @@
             <p class="eyebrow" data-i18n="aboutPage.workflow.kicker">Why it exists</p>
             <h2 data-i18n="aboutPage.workflow.title">Less copying. More context.</h2>
             <p data-i18n="aboutPage.workflow.intro">CWL work gets messy when rosters, availability, attacks and clan relationships live in different places. ClashPanel is built to keep those parts connected.</p>
-            <figure class="home-v2-workflow-art" data-reveal="image">
-                <!-- IMAGE TIP: A broad clan-war scene that can represent the full cycle from planning to live war and review. Replace only the src below. -->
-                <img src="/assets/css/pictures/public-pages/clan-march.98e06a9863.avif" alt="Clash of Clans troops moving together toward a shared objective" loading="lazy" decoding="async" width="735" height="414">
-                <figcaption data-i18n="aboutPage.workflow.caption">Planning, live war and review should feel like one workflow.</figcaption>
-            </figure>
         </div>
         <ol class="home-v2-workflow-list">
             <li data-reveal style="--reveal-delay:60ms"><span>01</span><div><h3 data-i18n="aboutPage.workflow.step1.title">Plan the roster</h3><p data-i18n="aboutPage.workflow.step1.desc">Bring players, clans, roles and day-by-day availability into one CWL planning flow.</p></div></li>
@@ -96,24 +89,12 @@
             <p data-i18n="aboutPage.problem.copy">Each ClashPanel tool should solve a real task on its own. The bigger advantage comes from reusing the same roster, availability and clan relationships instead of entering them again.</p>
             <div class="home-v2-feature-lines"><div><strong data-i18n="aboutPage.problem.f1.title">CWL Planner</strong><span data-i18n="aboutPage.problem.f1.desc">Build multi-clan roster plans with player roles, availability and optimization before league week starts.</span></div><div><strong data-i18n="aboutPage.problem.f2.title">CWL Tracker</strong><span data-i18n="aboutPage.problem.f2.desc">Follow live wars, standings, participation, bonus context and previous seasons.</span></div><div><strong data-i18n="aboutPage.problem.f3.title">Clan Families</strong><span data-i18n="aboutPage.problem.f3.desc">Keep members, linked accounts, clans and availability connected around the same workflow.</span></div></div>
         </div>
-        <div class="home-v2-artwork home-v2-artwork-planner" data-reveal="right">
-            <!-- IMAGE TIP: Main: strategy/planning image. Inset: battle image to show the jump from planning to execution. Replace only the two src values below. -->
-            <img class="home-v2-artwork-main" src="/assets/css/pictures/public-pages/townhall-blueprints.8832d64e9a.avif" alt="Clash of Clans Town Hall blueprints representing planning and connected tools" loading="lazy" decoding="async" width="736" height="458">
-            <span class="home-v2-artwork-label" data-i18n="aboutPage.problem.artLabel">One connected workflow</span>
-            <img class="home-v2-artwork-inset" src="/assets/css/pictures/public-pages/battle-charge.a426f5172d.avif" alt="Clash of Clans battle scene representing execution after planning" loading="lazy" decoding="async" width="738" height="414">
-        </div>
     </article><article class="home-v2-product-section home-v2-product-operation">
         <div class="home-v2-product-copy" data-reveal="right">
             <p class="eyebrow" data-i18n="aboutPage.independent.kicker">Independent project</p>
             <h2 data-i18n="aboutPage.independent.title">Fan-made by design.</h2>
             <p data-i18n="aboutPage.independent.copy">ClashPanel is an independent community project and not a Supercell product. Game names and related assets belong to their respective owners and are used subject to the applicable fan-content rules.</p>
             <div class="home-v2-feature-lines"><div><strong data-i18n="aboutPage.independent.f1.title">No official affiliation</strong><span data-i18n="aboutPage.independent.f1.desc">ClashPanel is not endorsed, sponsored or operated by Supercell.</span></div><div><strong data-i18n="aboutPage.independent.f2.title">Built around real workflows</strong><span data-i18n="aboutPage.independent.f2.desc">Features are shaped around practical planning and clan-management problems rather than a generic dashboard.</span></div><div><strong data-i18n="aboutPage.independent.f3.title">Free starting point</strong><span data-i18n="aboutPage.independent.f3.desc">The core public positioning stays simple: try the tools first and decide whether they fit your clan workflow.</span></div></div>
-        </div>
-        <div class="home-v2-artwork home-v2-artwork-operation" data-reveal="left">
-            <!-- IMAGE TIP: Main: community/clan image. Inset: neutral Clash of Clans competitive image; avoid anything that suggests official Supercell ownership. Replace only the two src values below. -->
-            <img class="home-v2-artwork-main" src="/assets/css/pictures/public-pages/clan-campfire.0d358ff2d8.avif" alt="Clash of Clans troops gathered around a campfire as a community" loading="lazy" decoding="async" width="736" height="736">
-            <span class="home-v2-artwork-label" data-i18n="aboutPage.independent.artLabel">Built for the community</span>
-            <img class="home-v2-artwork-inset" src="/assets/css/pictures/public-pages/pekka-barbarians.6446bf60da.avif" alt="Clash of Clans troops together in a fan-made community scene" loading="lazy" decoding="async" width="565" height="353">
         </div>
     </article></section>
     <section class="resource-page" aria-labelledby="trust-title">

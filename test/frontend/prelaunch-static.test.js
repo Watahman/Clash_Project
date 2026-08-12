@@ -7,6 +7,7 @@ const publicPages = new Map([
     ['src/cwl-planner.html', 'https://clashpanel.com/cwl-planner'],
     ['src/cwl-tracker.html', 'https://clashpanel.com/cwl-tracker'],
     ['src/clan-management.html', 'https://clashpanel.com/clan-management'],
+    ['src/minigames.html', 'https://clashpanel.com/minigames'],
     ['src/about.html', 'https://clashpanel.com/about'],
     ['src/subpages/privacy.html', 'https://clashpanel.com/subpages/privacy'],
     ['src/subpages/cookies.html', 'https://clashpanel.com/subpages/cookies'],
@@ -72,8 +73,9 @@ describe('Pre-launch static contract', () => {
         expect(robots).toContain('Disallow: /subpages/popup_htmls/');
         expect(robots).toContain('https://clashpanel.com/sitemap.xml');
         expect(sitemap).not.toContain('replace-with-production-domain.invalid');
+        expect(sitemap).toContain('/minigames');
         expect(sitemap).not.toContain('/bracket-generator');
-        expect(sitemap.match(/https:\/\/clashpanel\.com/g)).toHaveLength(12);
+        expect(sitemap.match(/https:\/\/clashpanel\.com/g)).toHaveLength(13);
     });
 
     it('defines permanent static fallbacks for legacy legal URLs', () => {
