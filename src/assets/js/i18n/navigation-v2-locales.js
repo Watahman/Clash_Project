@@ -10,7 +10,13 @@ const en = Object.freeze({
     "shell.identity.drafts": "Saved Plans · ClashPanel",
     "shell.identity.operation": "CWL Tracker · ClashPanel",
     "shell.identity.cwlKicker": "CWL",
-    "shell.identity.savedPlansKicker": "CWL"
+    "shell.identity.savedPlansKicker": "CWL",
+    "explore.intro": "Search ClashPanel tools by what you want to do.",
+    "explore.catalogTitle": "All tools",
+    "explore.searchLabel": "Search tools",
+    "explore.searchPlaceholder": "Search tools",
+    "explore.noResults": "No tools match your search.",
+    "explore.clearSearch": "Clear search"
 });
 
 const nl = Object.freeze({
@@ -25,7 +31,13 @@ const nl = Object.freeze({
     "shell.identity.drafts": "Opgeslagen plannen · ClashPanel",
     "shell.identity.operation": "CWL Tracker · ClashPanel",
     "shell.identity.cwlKicker": "CWL",
-    "shell.identity.savedPlansKicker": "CWL"
+    "shell.identity.savedPlansKicker": "CWL",
+    "explore.intro": "Zoek ClashPanel-tools op basis van wat je wilt doen.",
+    "explore.catalogTitle": "Alle tools",
+    "explore.searchLabel": "Tools zoeken",
+    "explore.searchPlaceholder": "Tools zoeken",
+    "explore.noResults": "Geen tools gevonden voor deze zoekopdracht.",
+    "explore.clearSearch": "Zoekopdracht wissen"
 });
 
 const fr = Object.freeze({
@@ -40,7 +52,13 @@ const fr = Object.freeze({
     "shell.identity.drafts": "Plans enregistrés · ClashPanel",
     "shell.identity.operation": "CWL Tracker · ClashPanel",
     "shell.identity.cwlKicker": "CWL",
-    "shell.identity.savedPlansKicker": "CWL"
+    "shell.identity.savedPlansKicker": "CWL",
+    "explore.intro": "Recherchez les outils ClashPanel selon ce que vous voulez faire.",
+    "explore.catalogTitle": "Tous les outils",
+    "explore.searchLabel": "Rechercher des outils",
+    "explore.searchPlaceholder": "Rechercher des outils",
+    "explore.noResults": "Aucun outil ne correspond à votre recherche.",
+    "explore.clearSearch": "Effacer la recherche"
 });
 
 const de = Object.freeze({
@@ -55,7 +73,13 @@ const de = Object.freeze({
     "shell.identity.drafts": "Gespeicherte Pläne · ClashPanel",
     "shell.identity.operation": "CWL Tracker · ClashPanel",
     "shell.identity.cwlKicker": "CWL",
-    "shell.identity.savedPlansKicker": "CWL"
+    "shell.identity.savedPlansKicker": "CWL",
+    "explore.intro": "Durchsuche ClashPanel-Tools nach dem, was du erledigen möchtest.",
+    "explore.catalogTitle": "Alle Tools",
+    "explore.searchLabel": "Tools durchsuchen",
+    "explore.searchPlaceholder": "Tools durchsuchen",
+    "explore.noResults": "Keine Tools passen zu deiner Suche.",
+    "explore.clearSearch": "Suche löschen"
 });
 
 const es = Object.freeze({
@@ -70,7 +94,13 @@ const es = Object.freeze({
     "shell.identity.drafts": "Planes guardados · ClashPanel",
     "shell.identity.operation": "CWL Tracker · ClashPanel",
     "shell.identity.cwlKicker": "CWL",
-    "shell.identity.savedPlansKicker": "CWL"
+    "shell.identity.savedPlansKicker": "CWL",
+    "explore.intro": "Busca herramientas de ClashPanel según lo que quieras hacer.",
+    "explore.catalogTitle": "Todas las herramientas",
+    "explore.searchLabel": "Buscar herramientas",
+    "explore.searchPlaceholder": "Buscar herramientas",
+    "explore.noResults": "Ninguna herramienta coincide con tu búsqueda.",
+    "explore.clearSearch": "Borrar búsqueda"
 });
 
 export const navigationV2Locales = Object.freeze({ en, nl, fr, de, es });
