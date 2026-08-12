@@ -10,6 +10,7 @@ import {
     updateGuidanceCopy
 } from '../bracket/bracket-page-view.js';
 import { createBracketFixture } from '../bracket/bracket-fixtures.js';
+import { initBracketViewControls } from '../bracket/bracket-view-controls.js?v=20260812-bracket-view';
 import {
     getRedesignFixture,
     isRedesignFixtureRequested
@@ -40,6 +41,7 @@ export async function initBracketGenerator({
         controller.restore();
     }
     controller.render();
+    initBracketViewControls({ refs, controller, documentRef, windowRef });
     profileHTML();
     windowRef.setTimeout(() => updateGuidanceCopy(documentRef), 0);
     return controller;
