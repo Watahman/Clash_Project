@@ -1,0 +1,512 @@
+/* V2 review layer for Auto Plan and Optimize. Keeps planner engines and actions intact. */
+
+.workspace-planner .cwl-auto-plan-panel:not(.hidden),
+.workspace-planner .cwl-optimize-plan-panel:not(.hidden) {
+    top: 16px;
+    right: 16px;
+    bottom: 16px;
+    left: auto;
+    display: flex;
+    width: min(660px, calc(100vw - 32px));
+    max-height: none;
+    overflow: hidden;
+    flex-direction: column;
+    padding: 0;
+    border: 1px solid var(--cp-border-2);
+    border-radius: 12px;
+    background: var(--cp-surface-1);
+    box-shadow: var(--cp-shadow-floating);
+}
+
+.workspace-planner .cwl-auto-plan-header,
+.workspace-planner .cwl-optimize-plan-header {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px 14px;
+    flex: 0 0 auto;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--cp-border-1);
+    background: var(--cp-surface-2);
+}
+
+.workspace-planner .cwl-auto-plan-header {
+    grid-template-columns: minmax(0, 1fr) minmax(120px, 150px) auto;
+}
+
+.workspace-planner .cwl-auto-plan-header > div:first-child,
+.workspace-planner .cwl-optimize-plan-header > div:first-child {
+    min-width: 0;
+}
+
+.workspace-planner .cwl-auto-plan-header h2,
+.workspace-planner .cwl-optimize-plan-header h2 {
+    font-size: .95rem;
+    line-height: 1.2;
+}
+
+.workspace-planner .cwl-auto-plan-header p,
+.workspace-planner .cwl-optimize-plan-header p {
+    display: -webkit-box;
+    max-width: 52ch;
+    margin-top: 3px !important;
+    overflow: hidden;
+    color: var(--cp-text-2);
+    font-size: .7rem;
+    line-height: 1.35;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.workspace-planner .cwl-auto-plan-mode {
+    width: 100%;
+    gap: 3px;
+    font-size: .68rem;
+}
+
+.workspace-planner .cwl-auto-plan-mode select {
+    min-height: 36px;
+}
+
+.workspace-planner .cwl-auto-plan-actions,
+.workspace-planner .cwl-optimize-plan-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.workspace-planner .cwl-auto-plan-actions .button,
+.workspace-planner .cwl-optimize-plan-actions .button {
+    min-height: 36px;
+    padding: 7px 10px;
+    font-size: .74rem;
+    white-space: nowrap;
+}
+
+.workspace-planner .cwl-auto-plan-actions .button-secondary,
+.workspace-planner .cwl-optimize-plan-actions #cwl-optimize-plan-cancel {
+    border-color: transparent !important;
+    background: transparent;
+    color: var(--cp-text-2);
+}
+
+.workspace-planner .cwl-auto-plan-status,
+.workspace-planner .cwl-optimize-plan-status {
+    min-height: 0;
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--cp-border-1);
+    color: var(--cp-text-2);
+    background: var(--cp-surface-1);
+    font-size: .72rem;
+    line-height: 1.35;
+}
+
+.workspace-planner .cwl-auto-plan-status[data-state="warning"] {
+    color: var(--cp-warning);
+    background: var(--cp-warning-soft);
+}
+
+.workspace-planner .cwl-auto-plan-status[data-state="error"],
+.workspace-planner .cwl-optimize-plan-status[data-state="error"] {
+    color: var(--cp-danger);
+    background: var(--cp-danger-soft);
+}
+
+.workspace-planner .cwl-auto-plan-preview,
+.workspace-planner .cwl-optimize-plan-preview {
+    min-height: 0;
+    flex: 1 1 auto;
+    gap: 10px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 12px;
+    scrollbar-width: thin;
+}
+
+.workspace-planner .cwl-auto-plan-fill-summary {
+    font-size: .8rem;
+}
+
+.workspace-planner .cwl-auto-plan-group {
+    gap: 7px;
+}
+
+.workspace-planner .cwl-auto-plan-group-heading h3 {
+    font-size: .72rem;
+}
+
+.workspace-planner .cwl-auto-plan-group-heading span {
+    min-width: 22px;
+    min-height: 22px;
+    font-size: .64rem;
+}
+
+.workspace-planner .cwl-auto-plan-group.is-active .cwl-auto-plan-group-content {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+}
+
+.workspace-planner .cwl-auto-plan-clan,
+.workspace-planner .cwl-auto-plan-changes,
+.workspace-planner .cwl-optimize-comparison,
+.workspace-planner .cwl-optimize-clan {
+    border-color: var(--cp-border-1);
+    border-radius: 9px;
+    background: var(--cp-surface-1);
+    box-shadow: none;
+}
+
+.workspace-planner .cwl-auto-plan-clan-heading {
+    gap: 10px;
+    padding: 10px 12px;
+}
+
+.workspace-planner .cwl-auto-plan-clan-heading h3 {
+    font-size: .82rem;
+}
+
+.workspace-planner .cwl-auto-plan-clan-heading p {
+    margin-top: 2px !important;
+    font-size: .67rem;
+    line-height: 1.35;
+}
+
+.workspace-planner .cwl-auto-plan-readiness {
+    min-height: 24px;
+    padding: 3px 7px;
+    font-size: .64rem;
+}
+
+.workspace-planner .cwl-auto-plan-metrics {
+    gap: 3px 12px;
+    padding: 9px 12px;
+}
+
+.workspace-planner .cwl-auto-plan-metrics dt,
+.workspace-planner .cwl-auto-plan-metrics dd {
+    font-size: .69rem;
+    line-height: 1.3;
+}
+
+.workspace-planner .cwl-auto-plan-readiness-text {
+    padding: 0 12px 9px;
+    font-size: .68rem;
+    line-height: 1.4;
+}
+
+.workspace-planner .cwl-auto-plan-warnings {
+    gap: 2px;
+    padding: 8px 12px 8px 26px;
+    font-size: .68rem;
+    line-height: 1.35;
+}
+
+.workspace-planner .cwl-auto-plan-lineups summary,
+.workspace-planner .cwl-auto-plan-guided summary {
+    min-height: 38px;
+    padding: 9px 12px;
+    font-size: .7rem;
+}
+
+.workspace-planner .cwl-auto-plan-table-wrap {
+    max-height: 300px;
+}
+
+.workspace-planner .cwl-auto-plan-table-wrap table {
+    font-size: .66rem;
+}
+
+.workspace-planner .cwl-auto-plan-table-wrap th,
+.workspace-planner .cwl-auto-plan-table-wrap td {
+    padding: 6px 5px;
+}
+
+.workspace-planner .cwl-auto-plan-guided-content {
+    gap: 8px;
+    padding: 0 12px 10px;
+}
+
+.workspace-planner .cwl-auto-plan-override-row {
+    gap: 6px;
+}
+
+.workspace-planner .cwl-auto-plan-override-row select,
+.workspace-planner .cwl-auto-plan-override-row .button {
+    min-height: 36px;
+}
+
+.workspace-planner .cwl-auto-plan-changes {
+    padding: 10px 12px;
+}
+
+.workspace-planner .cwl-auto-plan-changes h3 {
+    font-size: .78rem;
+}
+
+.workspace-planner .cwl-auto-plan-changes p,
+.workspace-planner .cwl-auto-plan-changes ul {
+    margin-top: 7px;
+    font-size: .68rem;
+    line-height: 1.4;
+}
+
+.workspace-planner .cwl-auto-plan-changes ul {
+    columns: 2 15rem;
+    column-gap: 24px;
+}
+
+.workspace-planner .cwl-auto-plan-unused-clan {
+    grid-template-columns: minmax(9rem, .8fr) auto minmax(12rem, 1.2fr);
+    gap: 8px;
+    padding: 8px 10px;
+    border-color: var(--cp-border-1);
+    background: var(--cp-surface-1);
+}
+
+.workspace-planner .cwl-auto-plan-unused-clan h4 {
+    font-size: .72rem;
+}
+
+.workspace-planner .cwl-auto-plan-unused-clan p {
+    font-size: .66rem;
+}
+
+/* The status already reports the number of suggestions; this duplicate headline is noise. */
+.workspace-planner .cwl-optimize-summary {
+    display: none;
+}
+
+.workspace-planner .cwl-optimize-comparison {
+    grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr);
+}
+
+.workspace-planner .cwl-optimize-metric-set {
+    padding: 9px 10px;
+}
+
+.workspace-planner .cwl-optimize-metric-set h3 {
+    margin-bottom: 6px;
+    font-size: .68rem;
+}
+
+.workspace-planner .cwl-optimize-metric-set dl {
+    gap: 3px 8px;
+}
+
+.workspace-planner .cwl-optimize-metric-set dt,
+.workspace-planner .cwl-optimize-metric-set dd {
+    font-size: .66rem;
+}
+
+.workspace-planner .cwl-optimize-comparison-arrow {
+    width: 28px;
+    color: var(--cp-plan);
+    background: var(--cp-surface-2);
+}
+
+.workspace-planner .cwl-optimize-change-count {
+    padding: 6px 10px;
+    font-size: .66rem;
+}
+
+/* Clean clans add no decision to the review. Keep only clans with suggestions or risk advice. */
+.workspace-planner .cwl-optimize-clan:has(> .cwl-optimize-empty:not(.is-risk)) {
+    display: none;
+}
+
+.workspace-planner .cwl-optimize-clan-heading {
+    align-items: center;
+    padding: 8px 10px;
+}
+
+.workspace-planner .cwl-optimize-clan-heading h3 {
+    font-size: .76rem;
+}
+
+.workspace-planner .cwl-optimize-clan-heading p {
+    margin-top: 1px !important;
+    font-size: .64rem;
+}
+
+.workspace-planner .cwl-optimize-suggestion {
+    gap: 10px;
+    padding: 8px 10px;
+}
+
+.workspace-planner .cwl-optimize-suggestion[data-state="ignored"] {
+    opacity: 1;
+    background: var(--cp-surface-2);
+}
+
+.workspace-planner .cwl-optimize-suggestion[data-state="ignored"] h4,
+.workspace-planner .cwl-optimize-suggestion[data-state="ignored"] .cwl-optimize-reasons {
+    color: var(--cp-text-3);
+}
+
+.workspace-planner .cwl-optimize-suggestion[data-state="accepted"] {
+    background: var(--cp-success-soft);
+    box-shadow: inset 2px 0 0 var(--cp-success);
+}
+
+.workspace-planner .cwl-optimize-suggestion h4 {
+    font-size: .73rem;
+    line-height: 1.35;
+}
+
+.workspace-planner .cwl-optimize-reasons {
+    gap: 1px 8px;
+    margin-top: 3px;
+    font-size: .64rem;
+    line-height: 1.3;
+}
+
+.workspace-planner .cwl-optimize-suggestion-actions {
+    gap: 5px;
+}
+
+.workspace-planner .cwl-optimize-suggestion-actions .button {
+    min-height: 34px;
+    padding: 6px 9px;
+    font-size: .68rem;
+}
+
+.workspace-planner .cwl-optimize-suggestion-actions [data-optimize-action="accept"].is-selected {
+    border-color: color-mix(in srgb, var(--cp-success) 50%, var(--cp-border-2)) !important;
+    background: var(--cp-success-soft);
+    color: var(--cp-success);
+}
+
+.workspace-planner .cwl-optimize-suggestion-actions [data-optimize-action="ignore"].is-selected {
+    border-color: var(--cp-border-2) !important;
+    background: var(--cp-surface-3);
+    color: var(--cp-text-2);
+}
+
+.workspace-planner .cwl-optimize-empty {
+    padding: 9px 10px;
+    font-size: .68rem;
+}
+
+.workspace-planner .cwl-optimize-empty.is-risk {
+    color: var(--cp-warning);
+    background: var(--cp-warning-soft);
+}
+
+/* Keep bulk decisions visible while the proposal list scrolls. */
+.workspace-planner .cwl-auto-plan-header,
+.workspace-planner .cwl-optimize-plan-header {
+    position: sticky;
+    top: 0;
+}
+
+@media (max-width: 720px) {
+    .workspace-planner .cwl-auto-plan-panel:not(.hidden),
+    .workspace-planner .cwl-optimize-plan-panel:not(.hidden) {
+        top: auto;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: min(90dvh, 760px);
+        border-right: 0;
+        border-bottom: 0;
+        border-left: 0;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .workspace-planner .cwl-auto-plan-header,
+    .workspace-planner .cwl-optimize-plan-header {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: start;
+        padding: 10px 12px;
+    }
+
+    .workspace-planner .cwl-auto-plan-header {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .workspace-planner .cwl-auto-plan-header > div:first-child,
+    .workspace-planner .cwl-optimize-plan-header > div:first-child {
+        grid-column: 1;
+    }
+
+    .workspace-planner .cwl-auto-plan-mode {
+        grid-column: 1;
+        grid-row: 2;
+        width: min(180px, 100%);
+    }
+
+    .workspace-planner .cwl-auto-plan-actions,
+    .workspace-planner .cwl-optimize-plan-actions {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        align-self: center;
+        flex-direction: column;
+    }
+
+    .workspace-planner .cwl-auto-plan-actions .button,
+    .workspace-planner .cwl-optimize-plan-actions .button,
+    .workspace-planner .cwl-auto-plan-mode select,
+    .workspace-planner .cwl-auto-plan-override-row select,
+    .workspace-planner .cwl-auto-plan-override-row .button,
+    .workspace-planner .cwl-optimize-suggestion-actions .button {
+        min-height: 44px;
+    }
+
+    .workspace-planner .cwl-auto-plan-preview,
+    .workspace-planner .cwl-optimize-plan-preview {
+        padding: 9px;
+    }
+
+    .workspace-planner .cwl-auto-plan-override-row,
+    .workspace-planner .cwl-auto-plan-unused-clan {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .workspace-planner .cwl-auto-plan-changes ul {
+        columns: 1;
+    }
+
+    .workspace-planner .cwl-optimize-comparison {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .workspace-planner .cwl-optimize-comparison-arrow {
+        width: auto;
+        min-height: 24px;
+        border: 0;
+        border-block: 1px solid var(--cp-border-1);
+        font-size: 0;
+    }
+
+    .workspace-planner .cwl-optimize-comparison-arrow::before {
+        content: "↓";
+        font-size: .75rem;
+    }
+
+    .workspace-planner .cwl-optimize-suggestion,
+    .workspace-planner .cwl-optimize-clan-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .workspace-planner .cwl-optimize-suggestion-actions {
+        width: 100%;
+    }
+
+    .workspace-planner .cwl-optimize-suggestion-actions .button {
+        flex: 1 1 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .workspace-planner .cwl-auto-plan-preview,
+    .workspace-planner .cwl-optimize-plan-preview {
+        scroll-behavior: auto;
+    }
+}
