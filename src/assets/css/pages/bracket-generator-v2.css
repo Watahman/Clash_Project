@@ -1,0 +1,481 @@
+/* Bracket Generator V2 refinement. Loaded by bracket-view-controls.js after legacy bracket styles. */
+body.workspace-app[data-workspace-page="bracket"] .bracket-page-header {
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-page-header h1 {
+    font-size: clamp(1.55rem, 2.6vw, 1.9rem) !important;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-page-header p:last-child {
+    max-width: 560px;
+    margin-top: 6px !important;
+    font-size: .875rem !important;
+    line-height: 1.5 !important;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-page-kicker {
+    margin-bottom: 5px !important;
+    font-size: .6875rem !important;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-header-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-module-badge {
+    border-color: var(--cp-border-1);
+    background: var(--cp-surface-2);
+    color: var(--cp-text-3);
+    font-size: .6875rem;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-header-rule {
+    display: none;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-layout {
+    gap: 16px;
+}
+
+/* Once a bracket exists, the already-collapsed setup becomes a compact context bar. */
+body.workspace-app[data-workspace-page="bracket"] .bracket-layout:has(#bracket-setup-content[hidden]) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-setup:has(#bracket-setup-content[hidden]) {
+    position: static;
+    top: auto;
+    border-radius: 9px;
+    background: var(--cp-surface-1);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-setup:has(#bracket-setup-content[hidden]) .bracket-section-heading {
+    align-items: center;
+    min-height: 48px;
+    border-bottom: 0;
+    padding: 7px 10px 7px 14px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-setup:has(#bracket-setup-content[hidden]) .bracket-step {
+    display: none;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-setup:has(#bracket-setup-content[hidden]) .bracket-section-heading h2 {
+    font-family: var(--cp-font-ui);
+    font-size: .8125rem;
+    font-weight: 700;
+    letter-spacing: 0;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-setup:has(#bracket-setup-content[hidden]) #bracket-participant-count {
+    min-width: 32px;
+    height: 32px;
+    border-color: var(--cp-border-1);
+    background: var(--cp-surface-2);
+    color: var(--cp-text-2);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-setup:has(#bracket-setup-content[hidden]) #bracket-setup-toggle {
+    width: auto;
+    min-width: 0;
+    min-height: 34px;
+    gap: 6px;
+    padding-inline: 9px;
+    font-size: .75rem;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-setup:has(#bracket-setup-content[hidden]) #bracket-setup-toggle svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Expanded setup remains an editor, but no longer dominates the page. */
+body.workspace-app[data-workspace-page="bracket"] .bracket-setup-content {
+    padding: 16px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-fields {
+    gap: 12px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-fields .cp-textarea {
+    min-height: 176px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-primary-actions {
+    margin-top: 14px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-action-help {
+    margin-top: 6px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-file-actions {
+    margin-top: 14px;
+    padding-top: 12px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-status {
+    min-height: 18px;
+    margin-top: 10px;
+}
+
+/* Result header and champion state. */
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-header {
+    min-height: 0;
+    align-items: center;
+    gap: 18px;
+    padding: 14px 16px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-heading .bracket-step {
+    display: none;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-heading h2 {
+    font-size: 1rem;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-heading > p {
+    max-width: 520px;
+    margin-top: 4px;
+    font-size: .75rem;
+    line-height: 1.45;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta {
+    align-items: stretch;
+    gap: 8px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta > span {
+    min-width: 84px;
+    gap: 2px;
+    border-left: 1px solid var(--cp-border-1);
+    padding: 4px 0 4px 12px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta strong {
+    font-size: .9375rem;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta .bracket-champion-meta {
+    min-width: min(220px, 28vw);
+    transition: background-color 160ms var(--cp-ease-standard), border-color 160ms var(--cp-ease-standard);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta[data-champion-state="complete"] .bracket-champion-meta {
+    border: 1px solid color-mix(in srgb, var(--bracket-accent) 34%, var(--cp-border-1));
+    border-radius: 8px;
+    background: var(--bracket-accent-soft);
+    padding: 7px 10px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta[data-champion-state="complete"] .bracket-champion-meta strong {
+    color: var(--bracket-accent);
+    font-size: 1.0625rem;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta[data-champion-state="complete"] .bracket-champion-meta small:last-child {
+    color: var(--cp-text-2);
+}
+
+/* Round navigation becomes one compact toolbar with view controls. */
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation {
+    gap: 5px;
+    padding: 8px 12px 0;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation-topbar {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation-label {
+    overflow: hidden;
+    color: var(--cp-text-3);
+    font-size: .625rem;
+    letter-spacing: .03em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-view-controls {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 4px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-view-controls .cp-button {
+    min-height: 32px;
+    border-color: transparent;
+    padding: 0 8px;
+    color: var(--cp-text-2);
+    font-size: .6875rem;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-view-controls .cp-button:hover:not(:disabled) {
+    border-color: var(--cp-border-1);
+    background: var(--cp-surface-hover);
+    color: var(--cp-text-1);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-view-controls .bracket-view-icon-button {
+    width: 32px;
+    min-width: 32px;
+    padding: 0;
+    font-size: 1rem;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-view-zoom-level {
+    min-width: 46px;
+    color: var(--cp-text-3);
+    font-family: var(--cp-font-mono);
+    font-size: .625rem;
+    text-align: center;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation-controls {
+    align-items: center;
+    gap: 8px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation-controls > .cp-button {
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-tabs {
+    gap: 16px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab {
+    min-height: 34px;
+    font-size: .6875rem;
+}
+
+/* Canvas scale is layout-driven so SVG connectors keep using real DOM geometry. */
+body.workspace-app[data-workspace-page="bracket"] .bracket-board {
+    --bracket-round-width: 220px;
+    --bracket-round-gap: 48px;
+    --bracket-board-padding: 24px;
+    --bracket-match-min: 96px;
+    --bracket-slot-min: 40px;
+    min-height: min(620px, 66vh);
+    align-items: stretch;
+    gap: var(--bracket-round-gap);
+    padding: var(--bracket-board-padding);
+    background: var(--cp-bg-elevated);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-board:has(.bracket-empty-state) {
+    min-height: 300px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round {
+    flex-basis: var(--bracket-round-width);
+    min-height: 510px;
+    gap: 10px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-heading {
+    font-size: .75rem;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-matches {
+    gap: 10px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-match {
+    min-height: var(--bracket-match-min);
+    gap: 5px;
+    border-radius: 8px;
+    padding: 6px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-slot {
+    min-height: var(--bracket-slot-min);
+    border-radius: 5px;
+    padding-inline: 8px;
+    font-size: .75rem;
+}
+
+body.workspace-app[data-workspace-page="bracket"] button.bracket-slot-player {
+    font-size: .75rem;
+}
+
+body.workspace-app[data-workspace-page="bracket"] button.bracket-slot-player:hover {
+    transform: none;
+}
+
+body.workspace-app[data-workspace-page="bracket"] button.bracket-slot-player:active {
+    transform: none;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-match-state {
+    min-height: 11px;
+    font-size: .5625rem;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-connector {
+    stroke-width: 1.25;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-connector.is-active {
+    stroke-width: 1.75;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-match.is-champion {
+    border-color: var(--bracket-accent);
+    background: color-mix(in srgb, var(--bracket-accent-soft) 82%, var(--cp-surface-1));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bracket-accent) 18%, transparent);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-match.is-champion button.bracket-slot-player.is-winner {
+    border-color: var(--bracket-accent);
+    background: var(--bracket-accent-soft);
+    color: var(--bracket-accent);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-empty-state {
+    padding-block: 24px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-empty-icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 2px;
+}
+
+@media (max-width: 899px) {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-page-header {
+        gap: 10px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-layout,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-layout:has(#bracket-setup-content[hidden]) {
+        grid-template-columns: 1fr;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-header {
+        align-items: flex-start;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta .bracket-champion-meta {
+        min-width: 0;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-board {
+        min-height: min(540px, 64vh);
+        overflow-x: hidden;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round {
+        min-height: 470px;
+    }
+}
+
+@media (max-width: 599px) {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-page-header > div:first-child > p:last-child,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-module-badge {
+        display: none;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-page-header {
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-header {
+        gap: 10px;
+        padding: 12px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-heading > p {
+        display: none;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta {
+        display: grid;
+        width: 100%;
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta > span {
+        border-left: 0;
+        padding-left: 0;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation {
+        padding: 7px 10px 0;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation-topbar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-view-controls {
+        width: 100%;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-view-controls .cp-button,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-view-controls .bracket-view-icon-button,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation-controls > .cp-button,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab {
+        min-height: 44px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-view-controls .bracket-view-icon-button,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation-controls > .cp-button {
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-view-controls #bracket-view-fit,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-view-controls #bracket-view-reset {
+        flex: 1 1 auto;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-view-zoom-level {
+        min-width: 42px;
+        align-self: center;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-board {
+        min-height: min(480px, 60vh);
+        padding: 12px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round {
+        min-height: 420px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-slot {
+        min-height: 44px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-setup:has(#bracket-setup-content[hidden]) #bracket-setup-toggle {
+        min-height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta .bracket-champion-meta {
+        transition: none;
+    }
+}
