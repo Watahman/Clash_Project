@@ -29,7 +29,7 @@
   },
 
   "vars": {
-    "CLOUD_RUN_ORIGIN": "__PHASE8_CANDIDATE_URL__",
+    "CLOUD_RUN_ORIGIN": "https://phase8---clashpanel-api-rxco3fz7da-ew.a.run.app",
     "DISABLE_CANONICAL_REDIRECT": "true",
     "UPSTREAM_ORIGIN_OVERRIDE": "https://clashpanel.com"
   },
