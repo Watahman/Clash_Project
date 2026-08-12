@@ -24,7 +24,7 @@ import { advancedStatsLocales } from './advanced-stats-locales.js?v=20260809-4';
 import { advancedStatsExtraLocales } from './advanced-stats-extra-locales.js?v=20260809-4';
 import { advancedStatsUiLocales } from './advanced-stats-ui-locales.js?v=20260809-4';
 import { profilePageLocales } from './profile-page-locales.js';
-import { navigationV2Locales } from './navigation-v2-locales.js?v=20260812-explore-cleanup';
+import { navigationV2Locales } from './navigation-v2-locales.js?v=20260812-saved-plans';
 
 export const supportedLanguages = Object.freeze(['nl', 'en', 'fr', 'de', 'es']);
 
