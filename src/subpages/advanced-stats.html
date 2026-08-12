@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="../assets/css/profile-overlay.css">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
-    <link rel="stylesheet" href="../assets/css/advanced-stats.css">
+    <link rel="stylesheet" href="../assets/css/advanced-stats.css?v=20260812-stats-overview">
     <script src="../assets/js/Data/runtime-config.js"></script>
     <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260812-redesign"></script>
     <script type="module" src="../assets/js/pages/advanced-stats-bootstrap.js?v=20260809-4"></script>
@@ -129,12 +129,12 @@
             <span id="advanced-stats-data-status" class="advanced-stats__data-status" role="status" aria-live="polite"></span>
         </div>
 
-        <section id="advanced-stats-summary-section" class="advanced-stats__section" aria-labelledby="advanced-stats-summary-title">
+        <section id="advanced-stats-summary-section" class="advanced-stats__section advanced-stats__section--overview" aria-labelledby="advanced-stats-summary-title">
             <div class="advanced-stats__section-heading"><div><h2 id="advanced-stats-summary-title" data-i18n="advancedStats.summaryTitle">Attack overview</h2><p data-i18n="advancedStats.summaryText">Performance across the selected tracked period.</p></div></div>
             <div class="advanced-stats__kpis">
                 <article><span data-i18n="advancedStats.attacks">Attacks</span><strong id="advanced-stats-kpi-attacks">—</strong></article>
-                <article><span data-i18n="advancedStats.avgStars">Average stars</span><strong id="advanced-stats-kpi-stars">—</strong></article>
-                <article><span data-i18n="advancedStats.threeStarRate">3-star rate</span><strong id="advanced-stats-kpi-three-star">—</strong></article>
+                <article class="advanced-stats__kpi--primary"><span data-i18n="advancedStats.avgStars">Average stars</span><strong id="advanced-stats-kpi-stars">—</strong></article>
+                <article class="advanced-stats__kpi--primary"><span data-i18n="advancedStats.threeStarRate">3-star rate</span><strong id="advanced-stats-kpi-three-star">—</strong></article>
                 <article><span data-i18n="advancedStats.avgDestruction">Average destruction</span><strong id="advanced-stats-kpi-destruction">—</strong></article>
             </div>
             <div class="advanced-stats__favorites">
@@ -146,8 +146,11 @@
         </section>
 
         <div class="advanced-stats__two-column">
-            <section id="advanced-stats-trends-section" class="advanced-stats__section" aria-labelledby="advanced-stats-trends-title">
-                <div class="advanced-stats__section-heading"><div><h2 id="advanced-stats-trends-title" data-i18n="advancedStats.trendsTitle">Performance trend</h2><p data-i18n="advancedStats.trendsText">Daily tracked attack results.</p></div></div>
+            <section id="advanced-stats-trends-section" class="advanced-stats__section advanced-stats__section--trend" aria-labelledby="advanced-stats-trends-title">
+                <div class="advanced-stats__section-heading">
+                    <div><h2 id="advanced-stats-trends-title" data-i18n="advancedStats.trendsTitle">Performance trend</h2><p data-i18n="advancedStats.trendsText">Daily tracked attack results.</p></div>
+                    <span class="advanced-stats__chart-metric" data-i18n="advancedStats.avgDestruction">Average destruction</span>
+                </div>
                 <div id="advanced-stats-trend-chart" class="advanced-stats__trend-chart" role="group" aria-label="Performance trend" data-i18n-aria-label="advancedStats.trendsTitle"></div>
                 <p id="advanced-stats-trend-empty" class="advanced-stats__empty-copy" data-i18n="advancedStats.noTrendData" hidden>No tracked attacks in this period yet.</p>
             </section>
