@@ -27,12 +27,10 @@ function sidebarMarkup() {
 
 function topbarMarkup(currentPage) {
     const current = getWorkspaceModule(currentPage);
-    const section = getWorkspaceSections().find(candidate => candidate.id === current.section);
     return `<header class="workspace-topbar">
         <button class="workspace-mobile-menu" id="workspace-mobile-menu" type="button" aria-controls="workspace-sidebar" aria-expanded="false" data-i18n-aria-label="shell.openMenu">${shellIcons.menu}</button>
-        <div class="workspace-breadcrumbs"><span>ClashPanel</span><b>/</b><span data-workspace-current-section data-i18n="${section.key}">${section.fallback}</span><b>/</b><strong data-workspace-current data-i18n="${current.key}">${current.fallback}</strong></div>
+        <div class="workspace-breadcrumbs"><strong data-workspace-current data-i18n="${current.key}">${current.fallback}</strong></div>
         <div class="workspace-top-actions">
-            <span class="workspace-sync"><i></i><span data-i18n="shell.online">Online</span></span>
             <button type="button" data-language-control data-i18n="header.language">Language</button>
             <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle"><span aria-hidden="true">◐</span></button>
             <div class="workspace-notifications" id="workspace-notifications-root">

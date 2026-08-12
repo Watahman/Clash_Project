@@ -15,6 +15,30 @@ body.workspace-app {
 .workspace-brand strong { color: var(--cp-text-1); font-family: var(--cp-font-heading); }
 .workspace-brand small { color: var(--cp-text-3); }
 
+/* Keep the collapse action attached to the sidebar instead of presenting it as
+   a floating circular control in the content gutter. */
+.workspace-sidebar-toggle {
+    background: #080c11;
+    border-color: var(--cp-border-1) !important;
+    border-left-color: transparent !important;
+    border-radius: 0 8px 8px 0;
+    box-shadow: none !important;
+    color: var(--cp-text-3);
+    height: 44px;
+    right: -14px;
+    top: 84px;
+    transform: none;
+    width: 28px;
+}
+.workspace-sidebar-toggle:hover {
+    background: var(--cp-surface-2);
+    border-color: var(--cp-border-2) !important;
+    border-left-color: transparent !important;
+    color: var(--cp-text-1);
+    transform: none;
+}
+.workspace-sidebar-toggle:active { transform: none; }
+
 .workspace-nav { gap: 2px; padding: 16px 12px 24px; }
 .workspace-nav > p {
     color: var(--cp-text-3);
@@ -60,10 +84,54 @@ body.workspace-app {
     border-bottom: 1px solid var(--cp-border-1);
     height: 64px;
 }
-.workspace-content { margin-inline: auto; max-width: 1440px; padding: 32px; width: 100%; }
-.workspace-page-header { margin-bottom: 32px; max-width: none; min-height: auto; }
-.workspace-page-header h1 { font-size: 2rem; margin-top: 8px; }
-.workspace-page-header > p:last-child { color: var(--cp-text-2); margin: 8px 0 0; max-width: 760px; }
+.workspace-breadcrumbs { min-width: 0; }
+.workspace-breadcrumbs strong {
+    color: var(--cp-text-2);
+    font-size: .78rem;
+    font-weight: 650;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Utility controls stay available without competing with page actions. */
+.workspace-topbar .language-switcher-button,
+.workspace-topbar .theme-button,
+.workspace-topbar .workspace-icon-button {
+    background: transparent;
+    border-color: transparent !important;
+    color: var(--cp-text-3);
+}
+.workspace-topbar .language-switcher-button {
+    height: 36px;
+    min-width: 0;
+    padding-inline: 8px;
+}
+.workspace-topbar .language-switcher-current-name { display: none; }
+.workspace-topbar .theme-button,
+.workspace-topbar .workspace-icon-button { height: 36px; width: 36px; }
+.workspace-topbar .language-switcher-button:hover,
+.workspace-topbar .theme-button:hover,
+.workspace-topbar .workspace-icon-button:hover {
+    background: var(--cp-surface-2);
+    color: var(--cp-text-1);
+}
+
+.workspace-content { margin-inline: auto; max-width: 1440px; padding: 28px 32px 32px; width: 100%; }
+.workspace-page-header { margin-bottom: 24px; max-width: none; min-height: auto; }
+.workspace-page-header h1 { margin-top: 6px; }
+.workspace-page-header > p:last-child { color: var(--cp-text-2); margin: 6px 0 0; max-width: 760px; }
+
+/* V2 workspace titles are utility headings, not marketing heroes. Keep one
+   consistent scale even when older page styles request oversized H1 values. */
+body.workspace-app main h1 {
+    font-size: clamp(1.65rem, 2vw, 1.9rem) !important;
+    line-height: 1.1;
+}
+
+/* Page-level help opened the same drawer as the global topbar help control.
+   Keep one entry point so headers do not repeat the same action. */
+body.workspace-app .workspace-page-help-trigger { display: none !important; }
 
 .workspace-sidebar-collapsed { --workspace-sidebar-width: 72px; }
 .workspace-sidebar-collapsed .workspace-brand { justify-content: center; padding-inline: 12px; }
@@ -95,18 +163,19 @@ body.workspace-app {
     .workspace-sidebar .workspace-profile-copy,
     .workspace-sidebar .workspace-profile-arrow { display: none; }
     .workspace-sidebar .workspace-nav a { justify-content: center; padding: 0; }
+    .workspace-sidebar-toggle { right: -12px; width: 24px; }
 }
 
 @media (max-width: 899px) {
     body.workspace-app { display: block; }
     .workspace-sidebar { width: min(320px, calc(100vw - 48px)); }
-    .workspace-content { padding: 24px; }
+    .workspace-content { padding: 22px 24px 24px; }
 }
 
 @media (max-width: 599px) {
     .workspace-content { padding: 16px; }
-    .workspace-page-header { margin-bottom: 24px; }
-    .workspace-page-header h1 { font-size: 1.5rem; }
+    .workspace-page-header { margin-bottom: 20px; }
+    body.workspace-app main h1 { font-size: 1.5rem !important; }
     .workspace-topbar button,
     .workspace-topbar a { min-height: 44px; min-width: 44px; }
 }

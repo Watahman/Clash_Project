@@ -2,6 +2,7 @@ import { syncAuthSession } from '../auth/auth-client.js';
 import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 import { initI18n, t } from '../i18n/i18n.js?v=20260812-redesign';
 import { getThemePreference, setThemePreference } from '../theme/theme-manager.js';
+import { getWorkspaceModule } from './module-registry.js';
 import { initWorkspaceGuidance } from './workspace-guidance.js?v=20260809-4';
 import {
     initNotificationsPopover,
@@ -19,6 +20,39 @@ import {
 } from './workspace-user.js';
 
 const GUIDANCE_STYLESHEET = '../assets/css/workspace-guidance.css?v=20260812-redesign';
+const MODULE_TITLED_PAGES = new Set(['groups', 'drafts', 'operation']);
+const MODULE_KICKERS = Object.freeze({
+    drafts: { selector: '.hero-eyebrow', key: 'shell.identity.savedPlansKicker' },
+    operation: { selector: '.op-page-kicker', key: 'shell.identity.cwlKicker' }
+});
+
+function syncCanonicalWorkspaceIdentity(currentPage) {
+    if (!MODULE_TITLED_PAGES.has(currentPage)) return;
+    const module = getWorkspaceModule(currentPage);
+    const main = document.querySelector('main');
+    const heading = main?.querySelector('h1');
+    if (heading) {
+        heading.removeAttribute('data-compete-i18n');
+        heading.dataset.i18n = module.key;
+        heading.textContent = t(module.key);
+    }
+
+    const kickerConfig = MODULE_KICKERS[currentPage];
+    const kicker = kickerConfig ? main?.querySelector(kickerConfig.selector) : null;
+    if (kicker) {
+        kicker.removeAttribute('data-compete-i18n');
+        kicker.dataset.i18n = kickerConfig.key;
+        kicker.textContent = t(kickerConfig.key);
+    }
+
+    const title = document.querySelector('title');
+    const titleKey = `shell.identity.${currentPage}`;
+    if (title) {
+        title.removeAttribute('data-compete-i18n');
+        title.dataset.i18n = titleKey;
+        title.textContent = t(titleKey);
+    }
+}
 
 function updateThemeButton() {
     const button = document.querySelector('[data-theme-toggle]');
@@ -85,6 +119,7 @@ function mountShell(body, main, currentPage) {
 function initMountedShell(body, sidebar, backdrop, currentPage) {
     document.querySelector(`[data-workspace-nav="${currentPage}"]`)?.setAttribute('aria-current', 'page');
     initI18n(body);
+    syncCanonicalWorkspaceIdentity(currentPage);
     ensureGuidanceStyles();
     initWorkspaceGuidance(currentPage);
     initThemeButton();
@@ -92,7 +127,10 @@ function initMountedShell(body, sidebar, backdrop, currentPage) {
     initMobileSidebar(sidebar, backdrop);
     initNotificationsPopover();
     if (!isRedesignFixtureRequested()) subscribeWorkspaceUserIdentity();
-    window.addEventListener('clashtools:language-changed', updateThemeButton);
+    window.addEventListener('clashtools:language-changed', () => {
+        updateThemeButton();
+        syncCanonicalWorkspaceIdentity(currentPage);
+    });
 }
 
 function initWorkspaceShell() {
