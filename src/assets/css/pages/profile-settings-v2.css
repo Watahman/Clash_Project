@@ -1,0 +1,334 @@
+/* Profile / Settings — V2 refinement.
+   Presentation only: profile data, account linking, friend requests and settings behavior stay unchanged. */
+
+#profile-overlay .po-card {
+    width: min(100%, 40rem);
+    max-height: min(43rem, calc(100dvh - 2rem));
+}
+
+#profile-overlay .po-topbar {
+    min-height: 2.8rem;
+    padding-inline: 0.9rem;
+}
+
+#profile-overlay .po-header {
+    min-height: 5rem;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.8rem 1rem;
+}
+
+#profile-overlay .po-avatar {
+    width: 3rem;
+    height: 3rem;
+}
+
+#profile-overlay .po-avatar svg {
+    width: 1.45rem;
+    height: 1.45rem;
+}
+
+#profile-overlay #po-username {
+    font-size: 1.18rem;
+}
+
+#profile-overlay .po-tabs {
+    min-height: 2.7rem;
+    gap: 1rem;
+    padding-inline: 1rem;
+}
+
+#profile-overlay .po-tab {
+    min-height: 2.7rem;
+    font-size: 0.69rem;
+}
+
+#profile-overlay .po-panel {
+    min-height: 17rem;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem 0.85rem;
+}
+
+#profile-overlay .po-panel-content {
+    min-height: 11rem;
+}
+
+#profile-overlay .po-base-item {
+    min-height: 3.75rem !important;
+    grid-template-columns: 2.2rem minmax(0, 1fr) auto !important;
+    gap: 0.65rem !important;
+    padding: 0.52rem 0.2rem !important;
+}
+
+#profile-overlay .po-base-icon,
+#profile-overlay .po-friend-avatar,
+#profile-overlay .po-shield-icon {
+    width: 2.2rem !important;
+    height: 2.2rem !important;
+}
+
+#profile-overlay .po-base-img,
+#profile-overlay .po-base-icon img {
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+}
+
+#profile-overlay .po-base-name {
+    font-size: 0.76rem !important;
+}
+
+#profile-overlay .po-base-info {
+    font-size: 0.63rem !important;
+}
+
+#profile-overlay .po-empty {
+    min-height: 7rem;
+    padding: 1.25rem 0.75rem;
+}
+
+#profile-overlay #po-add-container {
+    align-items: center;
+    gap: 0.45rem;
+    padding-top: 0.1rem;
+}
+
+#profile-overlay #po-add,
+#profile-overlay #po-friend-requests-btn,
+#profile-overlay #po-friend-pending-btn {
+    min-height: 2.35rem;
+    flex: 0 1 auto;
+    padding-inline: 0.8rem;
+}
+
+#profile-overlay #po-add {
+    margin-right: auto;
+}
+
+#profile-overlay .po-footer {
+    padding: 0.6rem 1rem;
+}
+
+/* Settings become one compact preference surface rather than five equal cards. */
+#profile-overlay .po-settings {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    gap: 0;
+    overflow-y: auto;
+}
+
+#profile-overlay .po-settings-card {
+    gap: 0.55rem;
+    padding: 0.78rem 0.3rem;
+}
+
+#profile-overlay .po-settings-card:nth-of-type(1) {
+    padding-right: 0.75rem;
+}
+
+#profile-overlay .po-settings-card:nth-of-type(2) {
+    padding-left: 0.75rem;
+    border-left: 0.0625rem solid var(--border, var(--border-subtle));
+}
+
+#profile-overlay .po-settings-card:nth-of-type(n + 3),
+#profile-overlay .po-settings-message {
+    grid-column: 1 / -1;
+}
+
+#profile-overlay .po-settings-heading {
+    display: grid;
+    gap: 0.16rem;
+}
+
+#profile-overlay .po-settings-heading span {
+    font-size: 0.76rem;
+}
+
+#profile-overlay .po-settings-heading small,
+#profile-overlay #po-settings-email {
+    font-size: 0.64rem;
+    line-height: 1.35;
+}
+
+#profile-overlay .po-theme-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.4rem;
+}
+
+#profile-overlay .po-theme-option,
+#profile-overlay .po-settings-card button {
+    min-height: 2.25rem;
+}
+
+#profile-overlay .po-settings-inline {
+    gap: 0.45rem;
+}
+
+#profile-overlay .po-settings-inline input {
+    min-width: 0;
+}
+
+#profile-overlay .po-settings-inline #po-save-name {
+    flex: 0 0 auto;
+    min-width: 4.6rem;
+}
+
+#profile-overlay .po-password-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+}
+
+#profile-overlay .po-settings-card input,
+#profile-overlay .po-settings-card select {
+    min-height: 2.35rem;
+}
+
+#profile-overlay #po-save-password {
+    justify-self: start;
+    min-width: 9rem;
+}
+
+#profile-overlay .po-settings-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+}
+
+#profile-overlay .po-settings-actions button {
+    min-width: 0;
+}
+
+#profile-overlay #po-logout-btn {
+    width: 100%;
+}
+
+#profile-overlay #po-settings-message.po-settings-message:not(.hidden) {
+    margin-top: 0.55rem;
+    padding: 0.58rem 0.7rem;
+}
+
+/* Secondary profile overlays use the same compact hierarchy. */
+#po-friend-list .po-base-item {
+    min-height: 3.8rem !important;
+    grid-template-columns: 2.2rem minmax(0, 1fr) auto !important;
+    gap: 0.65rem !important;
+    padding: 0.52rem 0.2rem !important;
+}
+
+#po-friend-list .po-friend-avatar {
+    width: 2.2rem !important;
+    height: 2.2rem !important;
+}
+
+#po-friend-list .po-empty {
+    min-height: 6.5rem;
+    padding: 1.25rem 0.75rem;
+}
+
+/* Keep actionable controls comfortably tappable on touch layouts. */
+@media (max-width: 42rem) {
+    #profile-overlay {
+        padding: 0;
+    }
+
+    #profile-overlay .po-card {
+        max-height: 94dvh;
+        border-radius: 0.75rem 0.75rem 0 0;
+    }
+
+    #profile-overlay .po-topbar {
+        min-height: 3rem;
+    }
+
+    #profile-overlay #po-close,
+    #profile-overlay .po-notifications-btn {
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+
+    #profile-overlay .po-header {
+        min-height: 4.7rem;
+        padding-block: 0.7rem;
+    }
+
+    #profile-overlay .po-tabs {
+        min-height: 2.85rem;
+        gap: 0.9rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    #profile-overlay .po-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    #profile-overlay .po-tab {
+        min-height: 2.85rem;
+        padding-inline: 0.1rem;
+    }
+
+    #profile-overlay .po-panel {
+        padding: 0.7rem 0.85rem 0.8rem;
+    }
+
+    #profile-overlay .po-base-item {
+        min-height: 4rem !important;
+    }
+
+    #profile-overlay #po-add,
+    #profile-overlay #po-friend-requests-btn,
+    #profile-overlay #po-friend-pending-btn,
+    #profile-overlay .po-theme-option,
+    #profile-overlay .po-settings-card button,
+    #profile-overlay .po-settings-card input,
+    #profile-overlay .po-settings-card select {
+        min-height: 2.75rem;
+    }
+
+    #profile-overlay #po-add-container {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    #profile-overlay #po-add {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    #profile-overlay .po-settings {
+        grid-template-columns: 1fr;
+    }
+
+    #profile-overlay .po-settings-card:nth-of-type(1),
+    #profile-overlay .po-settings-card:nth-of-type(2) {
+        padding-inline: 0.25rem;
+        border-left: 0;
+    }
+
+    #profile-overlay .po-settings-card {
+        grid-column: 1;
+    }
+
+    #profile-overlay .po-password-grid,
+    #profile-overlay .po-settings-actions {
+        grid-template-columns: 1fr;
+    }
+
+    #profile-overlay .po-settings-inline {
+        flex-direction: column;
+    }
+
+    #profile-overlay .po-settings-inline #po-save-name,
+    #profile-overlay #po-save-password {
+        width: 100%;
+    }
+
+    #po-friend-list .po-friend-accept,
+    #po-friend-list .po-friend-reject,
+    #po-friend-list .po-friend-clock {
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+}

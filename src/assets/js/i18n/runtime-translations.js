@@ -24,6 +24,7 @@ import { advancedStatsLocales } from './advanced-stats-locales.js?v=20260809-4';
 import { advancedStatsExtraLocales } from './advanced-stats-extra-locales.js?v=20260809-4';
 import { advancedStatsUiLocales } from './advanced-stats-ui-locales.js?v=20260809-4';
 import { profilePageLocales } from './profile-page-locales.js';
+import { profilePopupV2Locales } from './profile-popup-v2-locales.js?v=20260812-profile';
 import { navigationV2Locales } from './navigation-v2-locales.js?v=20260812-saved-plans';
 
 export const supportedLanguages = Object.freeze(['nl', 'en', 'fr', 'de', 'es']);
@@ -50,6 +51,7 @@ function buildDictionary(language, base, workspace, publicCopy, completion = {})
         ...(publicResourceLocales[language] || {}),
         ...(achievementLocales[language] || {}),
         ...(profilePageLocales[language] || {}),
+        ...(profilePopupV2Locales[language] || {}),
         ...(navigationV2Locales[language] || {})
     });
 }
