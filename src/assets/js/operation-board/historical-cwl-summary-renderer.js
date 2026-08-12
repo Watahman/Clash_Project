@@ -25,7 +25,8 @@ export function renderHistoricalSummary(container, report) {
         </section>
         <dl class="op-history-key-stats">
             ${metric('Avg. stars / war', stars(summary.offense.starsPerWar, 1))}
-            ${metric('Avg. star differential', signed(summary.starDifferential, '★'))}
+            ${metric('Star differential / war', signed(summary.starDifferential, '★'))}
+            ${metric('Destruction differential', signed(summary.destructionDifferential, '%'))}
             ${metric('Attacks used', percent(summary.attackUsage))}
             ${metric('Missed attacks', value(summary.missedAttacks))}
         </dl>
@@ -36,7 +37,6 @@ export function renderHistoricalSummary(container, report) {
                     ${metric('Stars / attack', stars(summary.offense.avgStars, 2))}
                     ${metric('Destruction / attack', percentValue(summary.offense.avgDestruction))}
                     ${metric('Triple rate', rate(summary.offense.tripleRate))}
-                    ${metric('Stars / war', stars(summary.offense.starsPerWar, 1))}
                 </dl>
             </div>
             <div class="op-history-side op-history-defense">
@@ -45,14 +45,9 @@ export function renderHistoricalSummary(container, report) {
                     ${metric('Stars conceded / attack', stars(summary.defense.avgStars, 2))}
                     ${metric('Destruction conceded', percentValue(summary.defense.avgDestruction))}
                     ${metric('Tripled against', rate(summary.defense.tripleRate))}
-                    ${metric('Stars conceded / war', stars(summary.defense.starsPerWar, 1))}
                 </dl>` : `<p class="op-history-empty">Defense details are unavailable for this season.</p>`}
             </div>
-        </section>
-        <dl class="op-history-differentials">
-            ${metric('Star differential / war', signed(summary.starDifferential, '★'))}
-            ${metric('Destruction differential', signed(summary.destructionDifferential, '%'))}
-        </dl>`;
+        </section>`;
 }
 
 export function clearHistoricalSummary(container) {
