@@ -21,10 +21,32 @@ function createArmyHeader(presentation, army, index) {
     const heading = document.createElement('h3');
     heading.textContent = `${index + 1}. ${presentation.label}`;
     const meta = document.createElement('span');
+    meta.className = 'advanced-stats__army-uses';
     meta.textContent = t('advancedStats.armyUses', { count: formatNumber(army.battleCount) });
     const header = document.createElement('header');
     header.append(heading, meta);
     return header;
+}
+
+function createArmyMetric(label, value) {
+    const metric = document.createElement('span');
+    metric.className = 'advanced-stats__army-metric';
+    const name = document.createElement('span');
+    name.textContent = label;
+    const result = document.createElement('strong');
+    result.textContent = value;
+    metric.append(name, result);
+    return metric;
+}
+
+function createArmyMetrics(army) {
+    const metrics = document.createElement('div');
+    metrics.className = 'advanced-stats__army-metrics';
+    metrics.append(
+        createArmyMetric(t('advancedStats.avgStars'), formatDecimal(army.averageStars)),
+        createArmyMetric(t('advancedStats.avgDestruction'), formatPercent(army.averageDestruction))
+    );
+    return metrics;
 }
 
 function createArmyUnitChip(unit) {
@@ -41,13 +63,12 @@ function createArmyCard(entry, index, state) {
     const { army, presentation } = entry;
     const card = document.createElement('article');
     card.className = 'advanced-stats__army-card';
+    card.dataset.rank = String(index + 1);
     const units = document.createElement('div');
     units.className = 'advanced-stats__army-units';
     displayArmyUnits(army.army, state.unitCatalog).slice(0, 14)
         .forEach(unit => units.append(createArmyUnitChip(unit)));
-    const metrics = document.createElement('p');
-    metrics.textContent = `${formatDecimal(army.averageStars)} · ${formatPercent(army.averageDestruction)}`;
-    card.append(createArmyHeader(presentation, army, index), units, metrics);
+    card.append(createArmyHeader(presentation, army, index), createArmyMetrics(army), units);
     return card;
 }
 

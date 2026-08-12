@@ -28,6 +28,29 @@ function unitNameElement(unit) {
     return { element, name };
 }
 
+function normalizedUsageRate(value) {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? Math.max(0, Math.min(100, numeric)) : 0;
+}
+
+function usageRateElement(value, { compact = false } = {}) {
+    const wrapper = document.createElement('div');
+    wrapper.className = compact
+        ? 'advanced-stats__usage-rate advanced-stats__usage-rate--compact'
+        : 'advanced-stats__usage-rate';
+    const label = document.createElement('strong');
+    label.textContent = formatPercent(value);
+    const track = document.createElement('span');
+    track.className = 'advanced-stats__usage-track';
+    track.setAttribute('aria-hidden', 'true');
+    const fill = document.createElement('span');
+    fill.className = 'advanced-stats__usage-fill';
+    fill.style.width = `${normalizedUsageRate(value)}%`;
+    track.append(fill);
+    wrapper.append(label, track);
+    return wrapper;
+}
+
 function unitTableRow(unit) {
     const { element, name } = unitNameElement(unit);
     const row = document.createElement('tr');
@@ -35,7 +58,7 @@ function unitTableRow(unit) {
         tableCell(element),
         tableCell(formatNumber(unit.totalQuantity)),
         tableCell(formatNumber(unit.battlesPresent)),
-        tableCell(formatPercent(unit.usageRate))
+        tableCell(usageRateElement(unit.usageRate))
     );
     return { row, name };
 }
@@ -45,18 +68,18 @@ function unitMobileCard(unit, name) {
     item.className = 'advanced-stats__unit-item';
     const heading = document.createElement('h3');
     heading.append(entityImage(name, { alt: '' }), document.createTextNode(name));
+    const usage = usageRateElement(unit.usageRate, { compact: true });
     const metrics = document.createElement('dl');
     const values = [
-        ['advancedStats.quantity', formatNumber(unit.totalQuantity)],
         ['advancedStats.battlesPresent', formatNumber(unit.battlesPresent)],
-        ['advancedStats.usageRate', formatPercent(unit.usageRate)]
+        ['advancedStats.quantity', formatNumber(unit.totalQuantity)]
     ];
     values.forEach(([label, value]) => {
         const metric = document.createElement('div');
         metric.append(textElement('dt', t(label)), textElement('dd', value));
         metrics.append(metric);
     });
-    item.append(heading, metrics);
+    item.append(heading, usage, metrics);
     return item;
 }
 

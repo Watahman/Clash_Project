@@ -26,10 +26,13 @@ function battleMain(battle) {
 function battleScore(battle) {
     const score = document.createElement('div');
     score.className = 'advanced-stats__battle-score';
-    const stars = document.createElement('span');
+    const stars = document.createElement('strong');
     stars.className = 'advanced-stats__battle-stars';
-    stars.append(textElement('span', formatNumber(battle.stars)), textElement('small', t('advancedStats.avgStars')));
-    score.append(stars, textElement('span', formatPercent(battle.destructionPercentage)));
+    stars.textContent = `${formatNumber(battle.stars)} ★`;
+    const destruction = document.createElement('span');
+    destruction.className = 'advanced-stats__battle-destruction';
+    destruction.textContent = formatPercent(battle.destructionPercentage);
+    score.append(stars, destruction);
     return score;
 }
 
@@ -53,7 +56,7 @@ function battleElement(battle) {
     const item = document.createElement('article');
     item.className = 'advanced-stats__battle';
     const metaValue = battle.opponentTownHall ? `TH${battle.opponentTownHall}` : t('advancedStats.pending');
-    const meta = textElement('div', metaValue);
+    const meta = textElement('span', metaValue);
     meta.className = 'advanced-stats__battle-meta';
     item.append(battleMain(battle), battleScore(battle), meta);
     const army = battleArmy(battle);
