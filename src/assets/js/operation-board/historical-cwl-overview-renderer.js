@@ -21,7 +21,7 @@ export function renderHistoricalOverview(
                 <h2>${overview.count} season${overview.count === 1 ? '' : 's'}</h2>
                 <p>${overview.promotions} promotions · ${overview.relegations} relegations · ${averageFinish(overview)}</p>
             </div>
-            <span>ClashKing history · temporary cache</span>
+            <span>Completed CWL seasons</span>
         </section>
         <section class="op-flat-section op-history-progression">
             ${heading('League progression', 'League and final position per season')}
@@ -44,32 +44,20 @@ export function renderHistoricalOverview(
             </div>
             <div class="op-history-trend-chart"></div>
         </section>
-        <section class="op-history-overview-columns">
-            <div class="op-flat-section">
-                ${heading('Reliability', 'Attack usage and missed attacks')}
-                <div class="op-history-reliability-list">
-                    ${overview.seasons.map(reliabilityItem).join('')}
-                </div>
-            </div>
-            <div class="op-flat-section">
-                ${heading('War results', 'Record and average differentials')}
-                <div class="op-history-results-list">
-                    ${overview.seasons.map(resultItem).join('')}
-                </div>
+        <section class="op-flat-section op-history-performance">
+            ${heading('Season performance', 'Record, reliability and average differentials')}
+            <div class="op-history-performance-list">
+                ${overview.seasons.map(performanceItem).join('')}
             </div>
         </section>
         ${overview.insights.length ? `
             <section class="op-flat-section op-history-insights">
-                ${heading('Season insights', 'Deterministic facts from complete metrics')}
+                ${heading('Season insights', 'Notable facts from complete metrics')}
                 <div>${overview.insights.map(insightItem).join('')}</div>
             </section>` : ''}
         <section class="op-flat-section op-history-compare">
             ${heading('Compare seasons', 'The right-hand season is compared with the left')}
             <div class="op-history-compare-content"></div>
-        </section>
-        <section class="op-flat-section op-history-season-list">
-            ${heading('Season list', 'Open a completed CWL directly')}
-            <div>${overview.seasons.map(seasonItem).join('')}</div>
         </section>`;
     bindSeasonButtons(container, selectSeason);
     const chart = container.querySelector('.op-history-trend-chart');
@@ -102,46 +90,42 @@ function heading(title, description) {
 }
 
 function timelineItem(item) {
-    const change = item.change === 'promoted'
-        ? '↑ Promoted'
-        : item.change === 'relegated'
-            ? '↓ Relegated'
-            : item.change === 'same' ? 'No league change' : 'Change unknown';
     return `<button type="button" data-history-season="${item.data.season}">
         <span>${escapeHtml(shortSeason(item.data.season))}</span>
         <strong>${escapeHtml(item.summary.league?.name || 'League unavailable')}</strong>
         <em>${item.summary.position ? `#${item.summary.position}` : '—'}</em>
-        <small data-change="${item.change}">${escapeHtml(change)}</small>
+        <small data-change="${item.change}">${escapeHtml(changeLabel(item.change))}</small>
     </button>`;
 }
 
-function reliabilityItem(item) {
-    const usage = item.summary.attackUsage == null
+function performanceItem(item) {
+    const summary = item.summary;
+    const usage = summary.attackUsage == null
+        ? 'Usage unknown'
+        : `${(summary.attackUsage * 100).toFixed(0)}% used`;
+    const misses = summary.missedAttacks == null
+        ? 'misses unknown'
+        : `${summary.missedAttacks} missed`;
+    const reliabilityTone = summary.attackUsage == null || summary.missedAttacks == null
+        ? 'neutral'
+        : summary.attackUsage >= 0.95 && summary.missedAttacks === 0
+            ? 'complete'
+            : 'attention';
+    const league = summary.league?.name || 'League unavailable';
+    const position = summary.position ? `#${summary.position}` : '—';
+    const starsPerWar = summary.offense.starsPerWar == null
         ? '—'
-        : `${(item.summary.attackUsage * 100).toFixed(1)}%`;
-    const misses = item.summary.missedAttacks == null
-        ? 'Misses unknown'
-        : `${item.summary.missedAttacks} missed`;
-    const usageTone = item.summary.attackUsage == null
-        ? 'neutral'
-        : item.summary.attackUsage >= 0.95 ? 'complete' : 'attention';
-    const missTone = item.summary.missedAttacks == null
-        ? 'neutral'
-        : item.summary.missedAttacks === 0 ? 'complete' : 'attention';
-    return `<div>
-        <strong>${escapeHtml(item.label)}</strong>
-        <span data-tone="${usageTone}">${usage} used</span>
-        <small data-tone="${missTone}">${misses}</small>
-    </div>`;
-}
-
-function resultItem(item) {
-    const record = item.summary.record;
-    return `<div>
-        <strong>${escapeHtml(item.label)}</strong>
-        ${recordMarkup(record)}
-        <small>${signed(item.summary.starDifferential, '★')} · ${signed(item.summary.destructionDifferential, '%')}</small>
-    </div>`;
+        : `${summary.offense.starsPerWar.toFixed(1)}★ / war`;
+    return `<button type="button" data-history-season="${item.data.season}">
+        <span class="op-history-performance-season">
+            <strong>${escapeHtml(item.label)}</strong>
+            <small>${escapeHtml(league)} · ${position} · ${escapeHtml(changeLabel(item.change))}</small>
+        </span>
+        ${recordMarkup(summary.record)}
+        <span class="op-history-performance-reliability" data-tone="${reliabilityTone}">${usage} · ${misses}</span>
+        <span>${escapeHtml(starsPerWar)}</span>
+        <small class="op-history-performance-diff">${signed(summary.starDifferential, '★')} · ${signed(summary.destructionDifferential, '%')}</small>
+    </button>`;
 }
 
 function insightItem(insight) {
@@ -150,23 +134,6 @@ function insightItem(insight) {
         <strong>${escapeHtml(insight.season)}</strong>
         <em>${escapeHtml(insight.value)}</em>
     </article>`;
-}
-
-function seasonItem(item) {
-    const summary = item.summary;
-    const change = item.change === 'promoted'
-        ? ' · ↑ Promoted'
-        : item.change === 'relegated' ? ' · ↓ Relegated' : '';
-    const usage = summary.attackUsage == null
-        ? 'Attack usage unknown'
-        : `${(summary.attackUsage * 100).toFixed(0)}% attack usage`;
-    return `<button type="button" data-history-season="${item.data.season}">
-        <span><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(summary.dataQuality)}</small></span>
-        <span>${escapeHtml(summary.league?.name || 'League unavailable')} · ${summary.position ? `#${summary.position}` : '—'}${change}</span>
-        ${recordMarkup(summary.record)}
-        <span>${summary.offense.starsPerWar == null ? '—' : `${summary.offense.starsPerWar.toFixed(1)}★ / war`}</span>
-        <span>${usage}</span>
-    </button>`;
 }
 
 function recordMarkup(record = {}) {
@@ -193,6 +160,13 @@ function signed(value, suffix) {
     if (!Number.isFinite(value)) return '—';
     const sign = value > 0 ? '+' : '';
     return `${sign}${value.toFixed(1)}${suffix}`;
+}
+
+function changeLabel(change) {
+    if (change === 'promoted') return '↑ Promoted';
+    if (change === 'relegated') return '↓ Relegated';
+    if (change === 'same') return 'No league change';
+    return 'Change unknown';
 }
 
 function shortSeason(season) {
