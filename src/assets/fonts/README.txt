@@ -1,1 +1,0 @@
-ClashPanel local UI font assets are generated from the supplied Clash font files. Runtime files use WOFF2; this placeholder will be removed once binary assets are committed.

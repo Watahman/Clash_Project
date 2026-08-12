@@ -1,7 +1,44 @@
+@font-face {
+    font-family: "Clash";
+    src: url("../../fonts/clash-light.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Clash";
+    src: url("../../fonts/clash-regular.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Clash";
+    src: url("../../fonts/clash-bold.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Clash Heavy";
+    src: url("../../fonts/clash-heavy.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 900;
+    font-display: swap;
+}
+
 :root {
-    --cp-font-heading: "Manrope", "Inter", system-ui, sans-serif;
-    --cp-font-ui: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --cp-font-display: "Clash Heavy", "Clash", system-ui, sans-serif;
+    --cp-font-heading: "Clash", system-ui, sans-serif;
+    --cp-font-ui: "Clash", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --cp-font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+    /* Legacy aliases stay aligned until the final CSS ownership cleanup. */
+    --font-heading: var(--cp-font-heading);
+    --font-ui: var(--cp-font-ui);
+    --font-mono: var(--cp-font-mono);
     --cp-display-xl: clamp(3rem, 5.2vw, 4.75rem);
     --cp-display-lg: clamp(2.4rem, 4vw, 3.5rem);
     --cp-heading-xl: 2.25rem;
@@ -12,8 +49,12 @@
     --cp-body-sm: .8125rem;
     --cp-label: .75rem;
 }
-body {
-    color: var(--cp-text-1);
+
+body,
+body.public-site,
+body.auth-page,
+body.workspace-app {
+    color: var(--cp-text-1, var(--text));
     font-family: var(--cp-font-ui);
     font-size: var(--cp-body);
     line-height: 1.6;
@@ -23,25 +64,63 @@ body {
 h1,
 h2,
 h3,
-h4 {
-    color: var(--cp-text-1);
+h4,
+body.public-site h1,
+body.public-site h2,
+body.public-site h3,
+body.auth-page h1,
+body.auth-page h2,
+body.workspace-app h1,
+body.workspace-app h2,
+body.workspace-app h3,
+body.workspace-app h4 {
+    color: var(--cp-text-1, var(--text));
     font-family: var(--cp-font-heading);
     margin: 0;
     text-wrap: balance;
 }
 
-h1 { font-weight: 760; letter-spacing: -.035em; line-height: 1.08; }
-h2 { font-size: var(--cp-heading-md); font-weight: 720; letter-spacing: -.025em; line-height: 1.2; }
-h3 { font-size: 1rem; font-weight: 700; letter-spacing: -.015em; line-height: 1.3; }
+h1,
+body.public-site h1,
+body.auth-page h1,
+body.workspace-app h1 {
+    font-family: var(--cp-font-display);
+    font-weight: 900;
+    letter-spacing: -.025em;
+    line-height: 1.08;
+}
+
+h2,
+body.public-site h2,
+body.auth-page h2,
+body.workspace-app h2 {
+    font-size: var(--cp-heading-md);
+    font-weight: 700;
+    letter-spacing: -.015em;
+    line-height: 1.2;
+}
+
+h3,
+body.public-site h3,
+body.workspace-app h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    line-height: 1.3;
+}
 
 .page-kicker,
 .cp-eyebrow {
     color: var(--cp-text-3);
     font-size: .75rem;
-    font-weight: 750;
-    letter-spacing: .08em;
+    font-weight: 700;
+    letter-spacing: .06em;
     line-height: 1.3;
     text-transform: uppercase;
+}
+
+#profile-overlay #po-username {
+    font-family: var(--cp-font-heading);
 }
 
 .cp-code,
