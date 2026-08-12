@@ -30,12 +30,14 @@ function createButton(documentRef, id, text, className = 'cp-button cp-button--g
 }
 
 function ensureStyles(documentRef) {
-    if (documentRef.querySelector('#bracket-view-v2-styles')) return;
+    const existing = documentRef.querySelector('#bracket-view-v2-styles');
+    if (existing) return existing;
     const link = documentRef.createElement('link');
     link.id = 'bracket-view-v2-styles';
     link.rel = 'stylesheet';
     link.href = new URL('../../css/pages/bracket-generator-v2.css?v=20260812-bracket-view', import.meta.url).href;
     documentRef.head.appendChild(link);
+    return link;
 }
 
 function mountControls(documentRef, refs) {
@@ -118,7 +120,7 @@ export function initBracketViewControls({
     windowRef = globalThis.window
 } = {}) {
     if (!refs?.board || !refs?.roundNavigation) return null;
-    ensureStyles(documentRef);
+    const styleLink = ensureStyles(documentRef);
     const viewRefs = mountControls(documentRef, refs);
     if (!viewRefs) return null;
 
@@ -143,9 +145,14 @@ export function initBracketViewControls({
     updateControlCopy(viewRefs);
     updateChampionState(refs);
     applyScale(1);
+    if (styleLink?.sheet) redraw();
+    else styleLink?.addEventListener('load', redraw, { once: true });
 
-    const championObserver = new MutationObserver(() => updateChampionState(refs));
-    if (refs.resultChampion) {
+    const Observer = windowRef.MutationObserver || globalThis.MutationObserver;
+    const championObserver = Observer
+        ? new Observer(() => updateChampionState(refs))
+        : null;
+    if (refs.resultChampion && championObserver) {
         championObserver.observe(refs.resultChampion, {
             childList: true,
             characterData: true,
@@ -158,6 +165,6 @@ export function initBracketViewControls({
     return {
         fit: () => applyScale(fitScale(refs.board, windowRef)),
         reset: () => applyScale(1),
-        destroy: () => championObserver.disconnect()
+        destroy: () => championObserver?.disconnect()
     };
 }
