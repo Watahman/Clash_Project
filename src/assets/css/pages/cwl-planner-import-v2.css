@@ -1,0 +1,403 @@
+/* Prompt 8: simplify Add Players and spreadsheet import without changing their data flows. */
+
+body.workspace-app[data-workspace-page="planner"] #cwl-overlay-add-players:not(.hidden),
+body.workspace-app[data-workspace-page="planner"] #cwl-overlay-import-spreadsheet:not(.hidden) {
+    align-items: center;
+    padding: 20px;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players {
+    width: min(680px, calc(100vw - 40px));
+    max-height: min(720px, calc(100dvh - 40px));
+    overflow: auto;
+    border: 1px solid var(--cp-border-2);
+    border-radius: 12px;
+    background: var(--cp-surface-1);
+    box-shadow: var(--cp-shadow-raised);
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players .modal-header-row,
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .modal-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 58px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--cp-border-1);
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players .modal-title,
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .modal-title {
+    color: var(--cp-text-1);
+    font-size: 1rem;
+    font-weight: 740;
+    letter-spacing: -.01em;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players .cwl-overlay-close,
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-overlay-close {
+    min-height: 36px;
+    padding: 6px 8px;
+    color: var(--cp-text-3);
+    font-size: .78rem;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players .modal-tabs {
+    display: flex;
+    gap: 2px;
+    padding: 0 14px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--cp-border-1);
+    background: transparent;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players .modal-tab-btn {
+    position: relative;
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--cp-text-3);
+    font-size: .8rem;
+    font-weight: 680;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players .modal-tab-btn::after {
+    position: absolute;
+    right: 10px;
+    bottom: -1px;
+    left: 10px;
+    height: 2px;
+    background: transparent;
+    content: "";
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players .modal-tab-btn:hover {
+    color: var(--cp-text-1);
+    background: transparent;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players .modal-tab-btn.active {
+    border: 0;
+    background: transparent;
+    color: var(--cp-text-1);
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players .modal-tab-btn.active::after {
+    background: var(--cp-plan);
+}
+
+/* Friends is a source inside Accounts; do not present the same source twice. */
+body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players .modal-tab-btn[data-tab="friends"] {
+    display: none;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players .modal-tab-panel {
+    gap: 12px;
+    padding: 16px;
+}
+
+body.workspace-app[data-workspace-page="planner"] #modal-tab-tag {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 8px;
+}
+
+body.workspace-app[data-workspace-page="planner"] #modal-tab-tag.hidden {
+    display: none;
+}
+
+body.workspace-app[data-workspace-page="planner"] #modal-tab-tag .modal-field-label {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--cp-text-2);
+    font-size: .76rem;
+    font-weight: 650;
+}
+
+body.workspace-app[data-workspace-page="planner"] #modal-tab-tag #cwl-input-tag {
+    min-height: 42px;
+}
+
+body.workspace-app[data-workspace-page="planner"] #modal-tab-tag #cwl-overlay-confirm-tag-button {
+    min-height: 42px;
+    padding-inline: 16px;
+}
+
+body.workspace-app[data-workspace-page="planner"] #modal-tab-accounts .modal-segment {
+    display: inline-flex;
+    align-self: flex-start;
+    gap: 2px;
+    padding: 2px;
+    border: 1px solid var(--cp-border-1);
+    border-radius: 8px;
+    background: var(--cp-surface-2);
+}
+
+body.workspace-app[data-workspace-page="planner"] #modal-tab-accounts .modal-seg-btn {
+    min-height: 36px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--cp-text-3);
+    font-size: .76rem;
+    font-weight: 650;
+}
+
+body.workspace-app[data-workspace-page="planner"] #modal-tab-accounts .modal-seg-btn.active {
+    border: 0;
+    background: var(--cp-surface-3);
+    color: var(--cp-text-1);
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-account-list,
+body.workspace-app[data-workspace-page="planner"] #cwl-group-preview-list {
+    max-height: min(320px, 42dvh);
+    gap: 4px;
+    padding-right: 2px;
+}
+
+body.workspace-app[data-workspace-page="planner"] #modal-account-list-empty,
+body.workspace-app[data-workspace-page="planner"] #cwl-group-preview {
+    min-height: 84px;
+    padding: 18px 14px;
+    place-content: center;
+    border: 1px solid var(--cp-border-1);
+    border-radius: 8px;
+    background: var(--cp-surface-2);
+    color: var(--cp-text-3);
+    font-family: inherit;
+    font-size: .78rem;
+    letter-spacing: 0;
+    line-height: 1.45;
+    text-transform: none;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-overlay-add-selected-button,
+body.workspace-app[data-workspace-page="planner"] #cwl-overlay-load-group-button {
+    align-self: flex-end;
+    min-height: 42px;
+    padding-inline: 14px;
+}
+
+body.workspace-app[data-workspace-page="planner"] #modal-tab-group .modal-field-label {
+    margin: 0;
+    color: var(--cp-text-2);
+    font-size: .74rem;
+    font-weight: 650;
+}
+
+body.workspace-app[data-workspace-page="planner"] #modal-tab-group select {
+    min-height: 42px;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-group-linked-clans {
+    margin: 0;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players .cwl-overlay-message {
+    margin: 0 16px 16px;
+    padding: 9px 11px;
+    border: 1px solid var(--cp-border-1);
+    border-radius: 8px;
+    background: var(--cp-surface-2);
+    color: var(--cp-text-2);
+    font-size: .78rem;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players .cwl-overlay-message[data-state="error"] {
+    border-color: color-mix(in srgb, var(--cp-danger) 36%, var(--cp-border-1));
+    color: var(--cp-danger);
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players .cwl-overlay-message[data-state="warning"] {
+    border-color: color-mix(in srgb, var(--cp-warning) 36%, var(--cp-border-1));
+    color: var(--cp-warning);
+}
+
+/* Spreadsheet importer stays a modal instead of becoming a full-screen sub-workspace. */
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet,
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet.is-preview-mode {
+    display: flex;
+    width: min(900px, calc(100vw - 40px));
+    height: auto;
+    max-height: min(760px, calc(100dvh - 40px));
+    flex-direction: column;
+    overflow: auto;
+    border: 1px solid var(--cp-border-2);
+    border-radius: 12px;
+    background: var(--cp-surface-1);
+    box-shadow: var(--cp-shadow-raised);
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-overlay-import-spreadsheet.is-preview-mode {
+    padding: 20px;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-import-intro {
+    max-width: 680px;
+    margin: 14px 16px 12px;
+    color: var(--cp-text-2);
+    font-size: .8rem;
+    line-height: 1.5;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-dropzone {
+    min-height: 92px;
+    margin: 0 16px;
+    padding: 16px;
+    border: 1px dashed var(--cp-border-2);
+    border-radius: 8px;
+    background: var(--cp-surface-2);
+    transform: none;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-dropzone:hover,
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-dropzone:focus-visible,
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-dropzone.is-dragging {
+    border-color: var(--cp-plan);
+    background: var(--cp-plan-soft);
+    transform: none;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-dropzone strong {
+    font-size: .88rem;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-dropzone span {
+    color: var(--cp-text-3);
+    font-size: .76rem;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-import-status,
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-progress {
+    margin-inline: 16px;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-import-status {
+    padding: 8px 10px;
+    border: 1px solid var(--cp-border-1);
+    border-radius: 8px;
+    background: var(--cp-surface-2);
+    font-size: .78rem;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-preview-toolbar {
+    align-items: center;
+    margin: 14px 16px 8px;
+    gap: 12px;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-scope-control {
+    color: var(--cp-text-2);
+    font-size: .76rem;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-scope-control select {
+    min-width: 132px;
+    min-height: 40px;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-preview,
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet.is-preview-mode .cwl-sheet-preview {
+    flex: 0 1 auto;
+    min-height: 0;
+    max-height: min(390px, 45dvh);
+    margin: 0 16px;
+    padding: 0 2px 0 0;
+    overflow: auto;
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-result {
+    gap: 8px;
+    padding: 8px 9px;
+    border-color: var(--cp-border-1);
+    border-radius: 8px;
+    background: var(--cp-surface-2);
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-type {
+    border-radius: 6px;
+    background: var(--cp-surface-3);
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-import-actions,
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet.is-preview-mode .cwl-sheet-import-actions {
+    margin-top: 12px;
+    padding: 12px 16px 16px;
+    border-top: 1px solid var(--cp-border-1);
+}
+
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet.is-preview-mode .cwl-sheet-import-intro,
+body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet.is-preview-mode .cwl-sheet-dropzone {
+    display: none;
+}
+
+@media (max-width: 700px) {
+    body.workspace-app[data-workspace-page="planner"] #cwl-overlay-add-players:not(.hidden),
+    body.workspace-app[data-workspace-page="planner"] #cwl-overlay-import-spreadsheet:not(.hidden),
+    body.workspace-app[data-workspace-page="planner"] #cwl-overlay-import-spreadsheet.is-preview-mode {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players,
+    body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet,
+    body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet.is-preview-mode {
+        width: 100%;
+        max-height: 90dvh;
+        border-right: 0;
+        border-bottom: 0;
+        border-left: 0;
+        border-radius: 12px 12px 0 0;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players .cwl-overlay-close,
+    body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-overlay-close,
+    body.workspace-app[data-workspace-page="planner"] #cwl-container-add-players .modal-tab-btn {
+        min-height: 44px;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] #modal-tab-tag {
+        grid-template-columns: 1fr;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] #modal-tab-tag .modal-field-label {
+        grid-column: 1;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] #cwl-overlay-confirm-tag-button,
+    body.workspace-app[data-workspace-page="planner"] #cwl-overlay-add-selected-button,
+    body.workspace-app[data-workspace-page="planner"] #cwl-overlay-load-group-button {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-preview-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-scope-control {
+        justify-content: space-between;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-preview,
+    body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet.is-preview-mode .cwl-sheet-preview {
+        max-height: 48dvh;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-import-actions {
+        flex-wrap: wrap;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] #cwl-container-import-spreadsheet .cwl-sheet-import-actions .button {
+        flex: 1 1 180px;
+        min-height: 44px;
+    }
+}
