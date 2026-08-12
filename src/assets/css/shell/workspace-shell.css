@@ -1,5 +1,9 @@
 body.workspace-app {
+    /* Keep the V2 shell and legacy workspace tokens on one width contract. */
     --workspace-sidebar-width: 248px;
+    --workspace-sidebar-current-width: 248px;
+    --sidebar-width: 248px;
+    --sidebar-collapsed-width: 72px;
     background: var(--cp-bg);
     color: var(--cp-text-1);
     grid-template-columns: var(--workspace-sidebar-width) minmax(0, 1fr);
@@ -65,8 +69,20 @@ body.workspace-app {
 .workspace-page-header h1 { font-size: 2rem; margin-top: 8px; }
 .workspace-page-header > p:last-child { color: var(--cp-text-2); margin: 8px 0 0; max-width: 760px; }
 
-.workspace-sidebar-collapsed { --workspace-sidebar-width: 72px; }
-.workspace-sidebar-collapsed .workspace-brand { justify-content: center; padding-inline: 12px; }
+body.workspace-app.workspace-sidebar-collapsed {
+    --workspace-sidebar-width: 72px;
+    --workspace-sidebar-current-width: 72px;
+}
+.workspace-sidebar-collapsed .workspace-brand {
+    justify-content: center;
+    padding-inline: 12px;
+}
+@media (min-width: 62.001rem) {
+    .workspace-sidebar-collapsed .workspace-brand {
+        width: var(--workspace-sidebar-width);
+    }
+    .workspace-sidebar-collapsed .workspace-brand > span { display: none; }
+}
 
 .cp-fixture-badge {
     align-items: center;
@@ -88,7 +104,10 @@ body.workspace-app {
 .cp-fixture-badge[data-fixture-error="true"] { background: var(--cp-danger-soft); color: var(--cp-danger); }
 
 @media (max-width: 1099px) and (min-width: 900px) {
-    body.workspace-app { --workspace-sidebar-width: 72px; }
+    body.workspace-app {
+        --workspace-sidebar-width: 72px;
+        --workspace-sidebar-current-width: 72px;
+    }
     .workspace-sidebar .workspace-brand span,
     .workspace-sidebar .workspace-nav span,
     .workspace-sidebar .workspace-nav > p,
