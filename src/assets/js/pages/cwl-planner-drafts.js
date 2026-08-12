@@ -3,7 +3,7 @@ import { profileHTML } from '../profile/profile_popup.js';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { getCurrentUserId } from '../utils/user.js';
 import { summarizePlan } from '../cwl/cwl-plan-summary.js';
-import { createSavedPlansView } from './cwl-planner-drafts-view.js';
+import { createSavedPlansView } from './cwl-planner-drafts-view.js?v=20260812-saved-plans';
 import { createSavedPlansActions } from './cwl-planner-drafts-actions.js';
 import {
     getAllPlansFromDatabase
