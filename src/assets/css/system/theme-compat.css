@@ -1,0 +1,267 @@
+/* V2 compatibility bridge.
+   --cp-* is the authoritative theme contract for authenticated workspace pages.
+   Legacy page styles can keep their old variable names until the final CSS
+   ownership cleanup, but those names resolve back to the V2 design tokens. */
+:root,
+:root[data-theme="light"] {
+    --bg: var(--cp-bg);
+    --bg-2: var(--cp-bg-elevated);
+    --surface: var(--cp-surface-1);
+    --surface-subtle: var(--cp-surface-2);
+    --surface-raised: var(--cp-surface-3);
+    --surface-hover: var(--cp-surface-hover);
+    --surface-1: var(--cp-surface-1);
+    --surface-2: var(--cp-surface-2);
+    --surface-3: var(--cp-surface-3);
+    --surface-4: var(--cp-bg-elevated);
+    --surface-glass: var(--cp-surface-1);
+    --surface-card: var(--cp-surface-1);
+    --surface-elevated: var(--cp-surface-2);
+    --text: var(--cp-text-1);
+    --text-muted: var(--cp-text-2);
+    --text-subtle: var(--cp-text-3);
+    --text-1: var(--cp-text-1);
+    --text-2: var(--cp-text-2);
+    --text-3: var(--cp-text-3);
+    --text-4: var(--cp-text-3);
+    --border: var(--cp-border-1);
+    --border-subtle: var(--cp-border-1);
+    --border-strong: var(--cp-border-2);
+    --border-mid: var(--cp-border-2);
+    --border-visible: var(--cp-border-2);
+    --border-focus: var(--cp-border-focus);
+    --accent: var(--cp-brand);
+    --accent-2: var(--cp-brand-hover);
+    --accent-strong: var(--cp-brand-strong);
+    --accent-dark: var(--cp-brand-strong);
+    --accent-soft: var(--cp-brand-soft);
+    --accent-dim: var(--cp-brand-soft);
+    --accent-glow: var(--cp-brand-soft);
+    --success: var(--cp-success);
+    --success-soft: var(--cp-success-soft);
+    --warning: var(--cp-warning);
+    --warning-soft: var(--cp-warning-soft);
+    --danger: var(--cp-danger);
+    --danger-soft: var(--cp-danger-soft);
+    --purple: var(--cp-play);
+    --purple-dim: var(--cp-play-soft);
+    --purple-glow: var(--cp-play-soft);
+    --green: var(--cp-success);
+    --green-dim: var(--cp-success-soft);
+    --red: var(--cp-danger);
+    --red-dim: var(--cp-danger-soft);
+    --blue: var(--cp-info);
+    --blue-dim: var(--cp-info-soft);
+    --sidebar-bg: var(--cp-sidebar-bg);
+    --input-bg: var(--cp-control-bg);
+    --input-focus-bg: var(--cp-control-bg);
+    --button-bg: var(--cp-control-bg);
+    --button-hover-bg: var(--cp-control-hover);
+    --disabled-bg: var(--cp-disabled-bg);
+    --shadow-raised: var(--cp-shadow-raised);
+    --shadow-sm: none;
+    --shadow-md: var(--cp-shadow-raised);
+    --shadow-lg: var(--cp-shadow-floating);
+    --card-shadow: none;
+    --inner-line: none;
+}
+
+body.workspace-app .workspace-topbar {
+    background: var(--cp-bg);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-bottom-color: var(--cp-border-1);
+    box-shadow: none;
+}
+
+body.workspace-app .button-primary,
+body.workspace-app .workspace-gateway-links a:first-child {
+    background: var(--cp-brand) !important;
+    border-color: var(--cp-brand) !important;
+    color: var(--cp-brand-contrast) !important;
+    box-shadow: none !important;
+}
+
+body.workspace-app .button-primary:hover,
+body.workspace-app .workspace-gateway-links a:first-child:hover {
+    background: var(--cp-brand-hover) !important;
+    border-color: var(--cp-brand-hover) !important;
+    color: var(--cp-brand-contrast) !important;
+}
+
+body.workspace-app .button:disabled,
+body.workspace-app .button[aria-disabled="true"],
+body.workspace-app .cp-button:disabled,
+body.workspace-app .cp-button[aria-disabled="true"] {
+    background: var(--cp-disabled-bg) !important;
+    border-color: var(--cp-disabled-border) !important;
+    color: var(--cp-disabled-text) !important;
+    cursor: not-allowed;
+    opacity: 1;
+    transform: none;
+}
+
+body.workspace-app .cp-input:disabled,
+body.workspace-app .cp-select:disabled,
+body.workspace-app .cp-textarea:disabled {
+    background: var(--cp-disabled-bg) !important;
+    border-color: var(--cp-disabled-border) !important;
+    color: var(--cp-disabled-text) !important;
+    opacity: 1;
+}
+
+body.workspace-app .workspace-sidebar button:focus-visible,
+body.workspace-app .workspace-sidebar a:focus-visible,
+body.workspace-app .workspace-topbar button:focus-visible,
+body.workspace-app .workspace-topbar select:focus-visible,
+body.workspace-app .workspace-content button:focus-visible,
+body.workspace-app .workspace-content a:focus-visible,
+body.workspace-app .workspace-content input:focus-visible,
+body.workspace-app .workspace-content select:focus-visible,
+body.workspace-app .workspace-content textarea:focus-visible {
+    outline: 2px solid var(--cp-focus-ring);
+    outline-offset: 2px;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-sidebar {
+    background: var(--cp-sidebar-bg) !important;
+    border-right-color: var(--cp-border-1) !important;
+    box-shadow: none;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-brand,
+:root[data-theme="light"] body.workspace-app .workspace-sidebar-bottom {
+    background: var(--cp-sidebar-bg);
+    border-color: var(--cp-border-1);
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-brand strong,
+:root[data-theme="light"] body.workspace-app .workspace-profile-copy strong {
+    color: var(--cp-text-1);
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-brand small,
+:root[data-theme="light"] body.workspace-app .workspace-profile-copy small,
+:root[data-theme="light"] body.workspace-app .workspace-profile-arrow,
+:root[data-theme="light"] body.workspace-app .workspace-nav > p {
+    color: var(--cp-text-3);
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-nav a {
+    color: var(--cp-text-2);
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-nav a svg {
+    color: currentColor;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-nav a:hover {
+    background: var(--cp-surface-hover);
+    color: var(--cp-text-1);
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-nav a[aria-current="page"] {
+    background: var(--cp-surface-2);
+    color: var(--cp-text-1);
+    box-shadow: none;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-avatar {
+    background: var(--cp-brand-soft);
+    color: var(--cp-brand-strong);
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-sidebar-toggle {
+    background: var(--cp-sidebar-bg) !important;
+    border-color: var(--cp-border-1) !important;
+    border-left-color: transparent !important;
+    color: var(--cp-text-3) !important;
+    box-shadow: none !important;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-sidebar-toggle:hover {
+    background: var(--cp-surface-2) !important;
+    border-color: var(--cp-border-2) !important;
+    border-left-color: transparent !important;
+    color: var(--cp-text-1) !important;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-topbar {
+    background: var(--cp-bg);
+    border-bottom-color: var(--cp-border-1);
+    box-shadow: none;
+}
+
+:root[data-theme="light"] body.workspace-app input,
+:root[data-theme="light"] body.workspace-app select,
+:root[data-theme="light"] body.workspace-app textarea {
+    background-color: var(--cp-control-bg);
+    border-color: var(--cp-border-2);
+    color: var(--cp-text-1);
+}
+
+:root[data-theme="light"] body.workspace-app input::placeholder,
+:root[data-theme="light"] body.workspace-app textarea::placeholder {
+    color: var(--cp-text-3);
+    opacity: 1;
+}
+
+:root[data-theme="light"] body.workspace-app .button-primary,
+:root[data-theme="light"] body.workspace-app .workspace-planner .button-primary,
+:root[data-theme="light"] body.workspace-app .workspace-gateway-links a:first-child,
+:root[data-theme="light"] body.workspace-app .groups-page-add-button,
+:root[data-theme="light"] body.workspace-app .btn-groups-accent {
+    background: var(--cp-brand) !important;
+    border-color: var(--cp-brand) !important;
+    color: var(--cp-brand-contrast) !important;
+    box-shadow: none !important;
+}
+
+:root[data-theme="light"] body.workspace-app .button-primary:hover,
+:root[data-theme="light"] body.workspace-app .workspace-planner .button-primary:hover,
+:root[data-theme="light"] body.workspace-app .workspace-gateway-links a:first-child:hover,
+:root[data-theme="light"] body.workspace-app .groups-page-add-button:hover,
+:root[data-theme="light"] body.workspace-app .btn-groups-accent:hover {
+    background: var(--cp-brand-hover) !important;
+    border-color: var(--cp-brand-hover) !important;
+    color: var(--cp-brand-contrast) !important;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-launch-list > a:hover,
+:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] .groups-item.group-index-row.active {
+    background: var(--cp-selected-bg) !important;
+}
+
+:root[data-theme="light"] body.workspace-app .workspace-section-block,
+:root[data-theme="light"] body.workspace-app .workspace-gateway,
+:root[data-theme="light"] body.workspace-app .workspace-summary-panel,
+:root[data-theme="light"] body.workspace-app .workspace-table-panel,
+:root[data-theme="light"] body.workspace-app .cwl-planner-layout,
+:root[data-theme="light"] body.workspace-app .operation-panel,
+:root[data-theme="light"] body.workspace-app .op-score-card,
+:root[data-theme="light"] body.workspace-app .op-round-card,
+:root[data-theme="light"] body.workspace-app .groups-workspace,
+:root[data-theme="light"] body.workspace-app #profile-overlay .po-settings-card,
+:root[data-theme="light"] body.workspace-app #profile-overlay .po-base-item,
+:root[data-theme="light"] body.workspace-app #profile-overlay .po-card-clan,
+:root[data-theme="light"] body.workspace-app #profile-overlay .po-friend-item,
+:root[data-theme="light"] body.workspace-app #profile-overlay .po-group-item {
+    box-shadow: none !important;
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="planner"] .cwl-context-toolbar,
+:root[data-theme="light"] body.workspace-app[data-workspace-page="planner"] .cwl-panel-heading,
+:root[data-theme="light"] body.workspace-app[data-workspace-page="planner"] .cwl-board-heading {
+    background: var(--cp-surface-2) !important;
+}
+
+:root[data-theme="light"] body.workspace-app[data-workspace-page="planner"] .cwl-sidebar,
+:root[data-theme="light"] body.workspace-app[data-workspace-page="planner"] .cwl-board {
+    background: var(--cp-surface-1) !important;
+}
+
+:root[data-theme="light"] body.workspace-app #profile-overlay .po-theme-option.po-theme-active {
+    background: var(--cp-selected-bg);
+    border-color: var(--cp-selected-border);
+    color: var(--cp-brand-strong);
+}

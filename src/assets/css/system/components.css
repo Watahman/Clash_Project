@@ -15,13 +15,34 @@ a.cp-button {
     transition: background-color 160ms var(--cp-ease-standard), border-color 160ms var(--cp-ease-standard), color 160ms var(--cp-ease-standard), transform 160ms var(--cp-ease-standard);
 }
 
-.cp-button--primary { background: var(--cp-brand); color: #11161d; }
+.cp-button--primary { background: var(--cp-brand); color: var(--cp-brand-contrast); }
 .cp-button--primary:hover { background: var(--cp-brand-hover); transform: translateY(-1px); }
 .cp-button--secondary { background: var(--cp-surface-2); border-color: var(--cp-border-2); color: var(--cp-text-1); }
+.cp-button--secondary:hover { background: var(--cp-surface-hover); }
 .cp-button--ghost { background: transparent; color: var(--cp-text-2); }
+.cp-button--ghost:hover { background: var(--cp-surface-2); color: var(--cp-text-1); }
 .cp-button--danger { background: transparent; border-color: var(--cp-border-2); color: var(--cp-danger); }
+.cp-button--danger:hover { background: var(--cp-danger-soft); border-color: color-mix(in srgb, var(--cp-danger) 34%, transparent); }
 .cp-button--large { font-size: .875rem; height: 48px; padding-inline: 18px; }
 .cp-icon-button { height: 40px; padding: 0; width: 40px; }
+
+.cp-button:disabled,
+.cp-button[aria-disabled="true"] {
+    background: var(--cp-disabled-bg);
+    border-color: var(--cp-disabled-border);
+    color: var(--cp-disabled-text);
+    cursor: not-allowed;
+    opacity: 1;
+    transform: none;
+}
+
+.cp-button:disabled:hover,
+.cp-button[aria-disabled="true"]:hover {
+    background: var(--cp-disabled-bg);
+    border-color: var(--cp-disabled-border);
+    color: var(--cp-disabled-text);
+    transform: none;
+}
 
 .cp-panel {
     background: var(--cp-surface-1);
@@ -81,6 +102,6 @@ a.cp-button {
 .cp-empty-state p { color: var(--cp-text-2); margin: 0 0 24px; }
 
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-    outline: 2px solid var(--cp-brand);
+    outline: 2px solid var(--cp-focus-ring);
     outline-offset: 2px;
 }

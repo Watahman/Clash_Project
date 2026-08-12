@@ -5,7 +5,7 @@ body.workspace-app {
     grid-template-columns: var(--workspace-sidebar-width) minmax(0, 1fr);
 }
 .workspace-sidebar {
-    background: #080c11;
+    background: var(--cp-sidebar-bg);
     border-right: 1px solid var(--cp-border-1);
     width: var(--workspace-sidebar-width);
 }
@@ -18,7 +18,7 @@ body.workspace-app {
 /* Keep the collapse action attached to the sidebar instead of presenting it as
    a floating circular control in the content gutter. */
 .workspace-sidebar-toggle {
-    background: #080c11;
+    background: var(--cp-sidebar-bg);
     border-color: var(--cp-border-1) !important;
     border-left-color: transparent !important;
     border-radius: 0 8px 8px 0;
@@ -79,8 +79,9 @@ body.workspace-app {
 .workspace-nav svg { height: 20px; width: 20px; }
 
 .workspace-topbar {
-    background: color-mix(in srgb, var(--cp-bg) 88%, transparent);
-    backdrop-filter: blur(14px);
+    background: var(--cp-bg);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     border-bottom: 1px solid var(--cp-border-1);
     height: 64px;
 }
