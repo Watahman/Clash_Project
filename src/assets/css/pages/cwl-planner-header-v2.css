@@ -1,0 +1,211 @@
+/* CWL Planner V2 refinement: compact plan identity and first-use state. */
+body.workspace-app[data-workspace-page="planner"] .workspace-planner {
+    padding-top: 18px !important;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-page-header {
+    align-items: center;
+    border-bottom-color: var(--cp-border-1, var(--planner-border));
+    gap: 16px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-page-kicker,
+body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-page-header > div:first-child > p:last-child {
+    display: none !important;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-title-row {
+    gap: 8px;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-title-row h1 {
+    font-size: clamp(1.2rem, 1.7vw, 1.5rem) !important;
+    line-height: 1.15;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-plan-state {
+    background: var(--cp-surface-2, var(--surface-subtle));
+    border-color: var(--cp-border-1, var(--planner-border));
+    border-radius: 999px;
+    color: var(--cp-text-3, var(--planner-muted));
+    padding: 3px 7px;
+}
+
+/* The title badge is the visible save/draft state. Keep the live region for screen readers only. */
+body.workspace-app[data-workspace-page="planner"] .workspace-planner #cwl-save-status {
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    height: 1px !important;
+    margin: -1px !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    position: absolute !important;
+    white-space: nowrap !important;
+    width: 1px !important;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner #cwl-undo-plan-button:disabled {
+    display: none;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-header-actions {
+    gap: 6px;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-header-actions .button {
+    min-height: 38px;
+    padding-block: 7px;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-context-toolbar {
+    align-items: end;
+    border: 1px solid var(--cp-border-1, var(--planner-border));
+    gap: 10px;
+    grid-template-columns: minmax(0, 1fr) auto auto !important;
+    margin-bottom: 12px;
+    padding: 10px;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-plan-fields {
+    display: grid !important;
+    gap: 8px;
+    grid-column: 1 !important;
+    grid-row: auto !important;
+    grid-template-columns: minmax(10rem, .65fr) minmax(13rem, 1fr);
+    min-width: 0;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-plan-summary {
+    grid-column: 2 !important;
+    grid-row: auto !important;
+    justify-content: flex-end;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-toolbar-actions {
+    display: flex !important;
+    gap: 8px;
+    grid-column: 3 !important;
+    grid-row: auto !important;
+    justify-content: flex-end;
+    justify-self: auto !important;
+    width: auto !important;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-plan-limit-feedback {
+    grid-column: 1 / -1 !important;
+    grid-row: auto !important;
+}
+
+/* A brand-new plan should not look like two giant broken empty panels. */
+body.workspace-app[data-workspace-page="planner"] .workspace-planner:not(:has(.cwl-player-article)):not(:has(.cwl-clan-article)) .cwl-plan-summary {
+    display: none !important;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner:not(:has(.cwl-player-article)):not(:has(.cwl-clan-article)) .cwl-planner-layout {
+    grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr) !important;
+    min-height: 0 !important;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner:not(:has(.cwl-player-article)):not(:has(.cwl-clan-article)) .cwl-roster-tools {
+    display: none !important;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner:not(:has(.cwl-player-article)):not(:has(.cwl-clan-article)) .cwl-sidebar,
+body.workspace-app[data-workspace-page="planner"] .workspace-planner:not(:has(.cwl-player-article)):not(:has(.cwl-clan-article)) .cwl-board {
+    min-height: 0 !important;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner:not(:has(.cwl-player-article)):not(:has(.cwl-clan-article)) .cwl-panel-heading,
+body.workspace-app[data-workspace-page="planner"] .workspace-planner:not(:has(.cwl-player-article)):not(:has(.cwl-clan-article)) .cwl-board-heading {
+    min-height: 0;
+    margin-bottom: 0;
+    padding: 14px 16px 10px;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner:not(:has(.cwl-player-article)):not(:has(.cwl-clan-article)) .cwl-add-player-button {
+    margin: 10px 16px 4px;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner:not(:has(.cwl-player-article)):not(:has(.cwl-clan-article)) #cwl-available-players {
+    min-height: 0;
+    padding: 4px 16px 16px;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner:not(:has(.cwl-player-article)):not(:has(.cwl-clan-article)) #cwl-available-players:empty::before {
+    padding: 8px 0 0;
+    text-align: left;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner:not(:has(.cwl-player-article)):not(:has(.cwl-clan-article)) #cwl-all-clans {
+    min-height: 0 !important;
+    padding: 12px 16px 16px !important;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner:not(:has(.cwl-player-article)):not(:has(.cwl-clan-article)) #cwl-all-clans:empty::before {
+    padding: 8px 0;
+    text-align: left;
+}
+
+body.workspace-app[data-workspace-page="planner"] .workspace-planner:not(:has(.cwl-player-article)):not(:has(.cwl-clan-article)) #cwl-add-clan-button {
+    border-color: var(--cp-border-2, var(--planner-border)) !important;
+}
+
+@media (max-width: 1080px) {
+    body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-context-toolbar {
+        grid-template-columns: minmax(0, 1fr) auto !important;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-plan-fields {
+        grid-column: 1 / -1 !important;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-plan-summary {
+        grid-column: 1 !important;
+        justify-content: flex-start;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-toolbar-actions {
+        grid-column: 2 !important;
+    }
+}
+
+@media (max-width: 720px) {
+    body.workspace-app[data-workspace-page="planner"] .workspace-planner {
+        padding-top: 12px !important;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-page-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-header-actions {
+        width: 100%;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-header-actions .button {
+        min-height: 44px;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-context-toolbar {
+        grid-template-columns: 1fr !important;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-plan-fields {
+        grid-column: 1 !important;
+        grid-template-columns: 1fr;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-plan-summary,
+    body.workspace-app[data-workspace-page="planner"] .workspace-planner .cwl-toolbar-actions {
+        grid-column: 1 !important;
+        justify-content: flex-start;
+    }
+
+    body.workspace-app[data-workspace-page="planner"] .workspace-planner:not(:has(.cwl-player-article)):not(:has(.cwl-clan-article)) .cwl-planner-layout {
+        grid-template-columns: 1fr !important;
+    }
+}
