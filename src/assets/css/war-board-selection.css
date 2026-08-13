@@ -1,0 +1,36 @@
+/* Keep the regular-war selector aligned with the shared CWL context toolbar. */
+.war-board--webby .war-board-header {
+    align-items: flex-start;
+    display: block;
+    margin-bottom: 20px;
+}
+
+.war-board--webby .war-board-controls {
+    align-items: end;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: minmax(220px, 1fr) minmax(260px, 1fr) auto;
+    justify-content: initial;
+    margin-top: 20px;
+    padding: 12px;
+    width: 100%;
+}
+
+.war-board--webby .war-clan-control,
+.war-board--webby .war-tag-form { min-width: 0; }
+
+.war-board--webby .war-tag-form { align-items: end; display: flex; gap: 6px; }
+
+@media (max-width: 900px) {
+    .war-board--webby .war-board-controls { margin-top: 14px; }
+}
+
+@media (max-width: 620px) {
+    .war-board--webby .war-board-controls { grid-template-columns: 1fr 1fr; }
+    .war-board--webby .war-refresh-button { grid-column: 1 / -1; }
+}
+
+@media (max-width: 38rem) {
+    .war-board--webby .war-board-controls { grid-template-columns: 1fr; }
+    .war-board--webby .war-refresh-button { grid-column: auto; }
+}
