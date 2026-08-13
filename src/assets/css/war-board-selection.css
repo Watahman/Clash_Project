@@ -21,6 +21,21 @@
 
 .war-board--webby .war-tag-form { align-items: end; display: flex; gap: 6px; }
 
+body.workspace-app .war-board--webby .war-refresh-button {
+    border: 1px solid var(--compete-accent);
+    background: var(--compete-accent);
+    color: #18130a;
+}
+
+body.workspace-app .war-board--webby .war-refresh-button:disabled {
+    border-width: 1px;
+    border-color: color-mix(in srgb, var(--compete-accent) 38%, var(--compete-border-strong));
+    background: color-mix(in srgb, var(--compete-accent) 18%, var(--compete-surface));
+    color: var(--compete-accent-strong);
+    filter: none;
+    opacity: 1;
+}
+
 @media (max-width: 900px) {
     .war-board--webby .war-board-controls { margin-top: 14px; }
 }
