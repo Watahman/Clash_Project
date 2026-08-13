@@ -49,6 +49,19 @@ body.workspace-app .war-board--webby .war-refresh-button:disabled {
     background-size: cover;
 }
 
+.war-board--webby #war-live-map[data-war-map-side] {
+    background-size: 160% 100%;
+    transition: background-position .48s cubic-bezier(.22, 1, .36, 1);
+}
+
+.war-board--webby #war-live-map[data-war-map-side="own"] {
+    background-position: left center;
+}
+
+.war-board--webby #war-live-map[data-war-map-side="enemy"] {
+    background-position: right center;
+}
+
 .war-board--webby .war-map::before {
     content: "";
     position: absolute;
@@ -178,6 +191,31 @@ body.workspace-app .war-board--webby .war-base.is-selected {
     box-shadow: 0 .45rem .75rem rgba(23, 34, 51, .12);
 }
 
+.war-board--webby #war-live-map.is-side-switching .war-base {
+    animation-delay: calc(var(--base-index, 0) * 24ms);
+    animation-duration: .42s;
+    animation-fill-mode: both;
+    animation-timing-function: cubic-bezier(.22, 1, .36, 1);
+}
+
+.war-board--webby #war-live-map.is-shifting-to-own .war-base {
+    animation-name: war-base-enter-from-left;
+}
+
+.war-board--webby #war-live-map.is-shifting-to-enemy .war-base {
+    animation-name: war-base-enter-from-right;
+}
+
+@keyframes war-base-enter-from-left {
+    from { opacity: 0; transform: translateX(-1rem); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes war-base-enter-from-right {
+    from { opacity: 0; transform: translateX(1rem); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
 @media (max-width: 900px) {
     .war-board--webby .war-board-controls { margin-top: 14px; }
 }
@@ -211,4 +249,9 @@ body.workspace-app .war-board--webby .war-base.is-selected {
     }
     .war-board--webby #war-live-map { min-height: 0; }
     .war-board--webby .war-base { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .war-board--webby #war-live-map[data-war-map-side] { transition: none; }
+    .war-board--webby #war-live-map.is-side-switching .war-base { animation: none; }
 }

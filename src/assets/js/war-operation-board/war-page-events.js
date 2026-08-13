@@ -1,3 +1,5 @@
+const mapSwitchTimers = new WeakMap();
+
 export function bindWarPageEvents({
     refs,
     root = document,
@@ -52,15 +54,31 @@ function bindWarTabs(root, selectTab) {
 }
 
 function bindMapControls(root, onMapSide, renderCurrent) {
+    const liveMap = root.querySelector('#war-live-map');
     root.querySelector('.war-side-switch').addEventListener('click', event => {
         const button = event.target.closest('[data-map-side]');
         if (!button) return;
+        if (button.dataset.mapSide === liveMap?.dataset.warMapSide) return;
+        animateMapSideSwitch(liveMap, button.dataset.mapSide);
         onMapSide(button.dataset.mapSide);
         root.querySelectorAll('[data-map-side]').forEach(item =>
             item.setAttribute('aria-pressed', String(item === button))
         );
         renderCurrent();
     });
+}
+
+function animateMapSideSwitch(map, side) {
+    if (!map) return;
+    const timer = mapSwitchTimers.get(map);
+    if (timer) window.clearTimeout(timer);
+    map.classList.remove('is-side-switching', 'is-shifting-to-own', 'is-shifting-to-enemy');
+    void map.offsetWidth;
+    map.classList.add('is-side-switching', `is-shifting-to-${side}`);
+    mapSwitchTimers.set(map, window.setTimeout(() => {
+        map.classList.remove('is-side-switching', 'is-shifting-to-own', 'is-shifting-to-enemy');
+        mapSwitchTimers.delete(map);
+    }, 520));
 }
 
 function tabFromKey(key, tabs, index) {

@@ -65,6 +65,7 @@ export function renderScoreStrip(element, report) {
 }
 export function renderWarMap(element, report, sideName, selectedPosition, assignments) {
     const bases = buildWarMap(report, sideName);
+    element.dataset.warMapSide = sideName;
     element.innerHTML = bases.map((base, index) => {
         const assignmentCount = sideName === 'enemy'
             ? assignments.filter(item => Number(item.targetPosition) === base.mapPosition).length
