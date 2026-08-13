@@ -49,7 +49,7 @@ function renderMetrics(titleKey, metrics) {
     const list = node('dl');
     metric(list, t('autoPlan.expectedPerformance'), starValue(metrics.expectedPerformance));
     metric(list, t('autoPlan.reliability'), percentValue(metrics.reliability));
-    metric(list, t('autoPlan.lineupChanges'), metrics.lineupChanges);
+    metric(list, t('cwl.playersTitle'), metrics.assigned);
     metric(list, t('optimizePlan.readiness'), readinessLabel(metrics.readiness));
     section.appendChild(list);
     return section;
@@ -149,7 +149,7 @@ function suggestionTitle(title) {
     if (title.code === 'free') {
         return t('optimizePlan.suggestionFree', { player: title.playerName });
     }
-    return t('optimizePlan.suggestionSchedule');
+    return t('optimizePlan.noChanges');
 }
 
 function reasonText(reason) {
@@ -164,12 +164,6 @@ function reasonText(reason) {
     }
     if (reason.code === 'reliability') {
         return t('optimizePlan.reasonReliability', reason);
-    }
-    if (reason.code === 'lineup-changes') {
-        return t('optimizePlan.reasonLineupChanges', reason);
-    }
-    if (reason.code === 'risky-rounds') {
-        return t('optimizePlan.reasonRiskyRounds', { count: reason.count });
     }
     if (reason.code === 'stability-loss') {
         return t('optimizePlan.reasonStabilityLoss', { value: reason.value });

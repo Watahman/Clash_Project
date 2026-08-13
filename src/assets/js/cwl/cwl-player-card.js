@@ -11,7 +11,6 @@ import { t } from '../i18n/i18n.js';
 import {
     attachDeleteButton,
     attachMoveControl,
-    syncPlayerPlannedDays,
     syncPlayerRosterStatus
 } from './cwl-player-controls.js';
 import { makePlayerDraggable } from './cwl-player-drag.js';
@@ -49,10 +48,6 @@ export function createPlayerCard(playerInfo, clanUuid, options = {}) {
             preferredStatus,
             autoReserve: !preferredStatus
         });
-        syncPlayerPlannedDays(
-            element,
-            player.plannedDays || player.planned_days || player.days || []
-        );
         applyAvailabilityToCard(element);
         plannerChanged = true;
     });
@@ -138,7 +133,10 @@ function buildPlayerElement(player, targetInfo) {
 
     element.dataset.playerTag = normalized.tag;
     element.dataset.townHall = String(normalized.townHallLevel);
-    element.dataset.source = normalized.source || normalized.origin || targetInfo.source;
+        element.dataset.source = normalized.source || normalized.origin || targetInfo.source;
+    if (normalized.legacySchedule?.length) {
+        element.dataset.legacySchedule = normalized.legacySchedule.join(',');
+    }
     element._cwlPlayer = normalized;
     targetInfo.classes.forEach(className => element.classList.add(className));
     if (targetInfo.groupId) element.dataset.clanuuid = targetInfo.groupId;

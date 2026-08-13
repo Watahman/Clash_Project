@@ -1,14 +1,6 @@
-import { normalizePlannedDays } from './cwl-plan-schema.js';
 import { getCardTag } from './cwl-utils.js';
-import {
-    rememberPlannerPlayers,
-    updateAllPlayerCounters
-} from './cwl-planner-card-state.js';
-import { syncPlayerPlannedDays } from './cwl-player-controls.js';
-import { savePlan } from './cwl-plan-io.js';
 import { getPlayerPerformance } from './player-performance-client.js';
 import { t } from '../i18n/i18n.js';
-import { getPlannerDayAssignmentValidation } from './cwl-planner-schedule-rules.js';
 import { createPlayerInspectorController } from './cwl-player-inspector-controller.js';
 
 export function initPlayerInspector({ root = document } = {}) {
@@ -30,7 +22,6 @@ function renderInspector(container, card) {
         createInspectorPlayerHeader(card),
         createInspectorFacts(card),
         createInspectorActions(card),
-        createScheduleControls(card),
         createPerformanceSection(card)
     );
 }
@@ -107,73 +98,6 @@ function createRoleControl(card) {
     });
     wrapper.appendChild(select);
     return wrapper;
-}
-
-function createScheduleControls(card) {
-    const wrapper = card.ownerDocument.createElement('fieldset');
-    wrapper.className = 'cwl-inspector-schedule';
-    const legend = card.ownerDocument.createElement('legend');
-    legend.textContent = t('autoPlan.plannedDays', { days: '' }).replace(/: $/, '');
-    wrapper.appendChild(legend);
-    if (!card.closest('.cwl-clan-article')) {
-        const note = card.ownerDocument.createElement('p');
-        note.className = 'cwl-inspector-muted';
-        note.textContent = t('cwl.movePlayer');
-        wrapper.appendChild(note);
-        return wrapper;
-    }
-
-    const days = normalizePlannedDays(card.dataset.plannedDays);
-    const choices = createDayChoiceGrid(card, days);
-    wrapper.appendChild(choices);
-    return wrapper;
-}
-
-function createDayChoiceGrid(card, days) {
-    const choices = card.ownerDocument.createElement('div');
-    choices.className = 'cwl-day-choice-grid';
-    for (let day = 1; day <= 7; day += 1) {
-        choices.appendChild(createDayChoice(card, days, day));
-    }
-    return choices;
-}
-
-function createDayChoice(card, days, day) {
-    const label = card.ownerDocument.createElement('label');
-    const input = card.ownerDocument.createElement('input');
-    const validation = getPlannerDayAssignmentValidation(card, day);
-    input.type = 'checkbox';
-    input.value = String(day);
-    input.checked = days.includes(day);
-    input.disabled = !validation.legal && !input.checked;
-    input.addEventListener('change', () => updateScheduleDay(card, input, day));
-    const text = card.ownerDocument.createElement('span');
-    text.textContent = t('autoPlan.dayShort', { day });
-    label.append(input, text);
-    return label;
-}
-
-function updateScheduleDay(card, input, day) {
-    if (input.checked && !getPlannerDayAssignmentValidation(card, day).legal) {
-        input.checked = false;
-        return;
-    }
-    const next = normalizePlannedDays(card.dataset.plannedDays);
-    const index = next.indexOf(day);
-    if (input.checked && index === -1) next.push(day);
-    if (!input.checked && index !== -1) next.splice(index, 1);
-    syncPlayerPlannedDays(card, next);
-    updateAllPlayerCounters();
-    rememberPlannerPlayers();
-    dispatchScheduleChange(card, day);
-    savePlan();
-}
-
-function dispatchScheduleChange(card, day) {
-    const view = card?.ownerDocument?.defaultView || globalThis;
-    view.dispatchEvent(new CustomEvent('clashtools:cwl-planner-schedule-changed', {
-        detail: { tag: getCardTag(card), day }
-    }));
 }
 
 function createPerformanceSection(card) {

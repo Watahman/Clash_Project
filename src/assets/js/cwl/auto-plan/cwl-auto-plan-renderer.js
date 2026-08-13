@@ -60,7 +60,6 @@ function renderClan({ clan, result, guidedOverrides, registrationReasons }) {
         t('autoPlan.reliability'),
         clan.readiness.reliability == null ? '—' : `${clan.readiness.reliability}%`
     );
-    metric(metrics, t('autoPlan.lineupChanges'), clan.lineupChanges);
 
     section.append(
         heading,
@@ -74,7 +73,6 @@ function renderClan({ clan, result, guidedOverrides, registrationReasons }) {
         )
     );
     if (clan.warnings.length) section.appendChild(renderWarnings(clan.warnings));
-    section.appendChild(renderLineupMatrix(clan, result.rounds));
     if (result.mode === 'guided') {
         section.appendChild(renderGuidedControls({
             clan,
@@ -84,40 +82,6 @@ function renderClan({ clan, result, guidedOverrides, registrationReasons }) {
         }));
     }
     return section;
-}
-
-function renderLineupMatrix(clan, rounds) {
-    const details = node('details', 'cwl-auto-plan-lineups');
-    const wrap = node('div', 'cwl-auto-plan-table-wrap');
-    const table = node('table');
-    const head = node('thead');
-    const headRow = node('tr');
-    headRow.append(node('th', '', t('autoPlan.player')), node('th', '', t('autoPlan.role')));
-    for (let day = 1; day <= rounds; day += 1) {
-        headRow.appendChild(node('th', '', t('autoPlan.dayShort', { day })));
-    }
-    head.appendChild(headRow);
-    const body = node('tbody');
-    clan.players.forEach(player => {
-        const row = node('tr');
-        row.append(
-            node('th', '', player.name),
-            node('td', '', t(`autoPlan.role${capitalize(player.role)}`))
-        );
-        for (let day = 1; day <= rounds; day += 1) {
-            const planned = player.plannedDays.includes(day);
-            const cell = node('td', planned ? 'is-planned' : '', planned ? '●' : '—');
-            cell.setAttribute('aria-label', planned
-                ? t('autoPlan.playsDay', { player: player.name, day })
-                : t('autoPlan.sitsDay', { player: player.name, day }));
-            row.appendChild(cell);
-        }
-        body.appendChild(row);
-    });
-    table.append(head, body);
-    wrap.appendChild(table);
-    details.append(node('summary', '', t('autoPlan.sevenDayPreview')), wrap);
-    return details;
 }
 
 function renderGuidedControls({
@@ -188,15 +152,6 @@ function warningText(warning) {
             active: warning.active,
             required: warning.required
         });
-    }
-    if (warning.code === 'incomplete_day') {
-        return t('autoPlan.warningIncompleteDay', {
-            day: warning.day,
-            missing: warning.missing
-        });
-    }
-    if (warning.code === 'reserve_used') {
-        return t('autoPlan.warningReserveUsed', { day: warning.day });
     }
     return warning.message;
 }

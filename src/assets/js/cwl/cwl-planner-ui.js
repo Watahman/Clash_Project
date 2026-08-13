@@ -1,73 +1,30 @@
-import { initPlannerSchedule } from './cwl-planner-schedule.js';
 import { initPlayerInspector } from './cwl-player-inspector.js';
-import { getPlayerAvailability } from './cwl-availability.js';
-import { getCardTag } from './cwl-utils.js';
 
 export function initPlannerSurface({ root = document } = {}) {
-    if (!root) return { refresh: () => {} };
+    if (!root) return { openPlayer: () => {}, closePlayer: () => {} };
     const inspector = initPlayerInspector({ root });
-    const schedule = initPlannerSchedule({
-        root,
-        onPlayerSelect: inspector.open,
-        onRender: state => updatePlannerSummary(root, state)
-    });
-    initMobilePool(root);
-    initDropFeedback(root);
+    initMobileView(root);
     initToolKeyboard(root);
     initPlannerFixtureBoundary(root);
-    return {
-        refresh: schedule.refresh,
-        openPlayer: inspector.open,
-        closePlayer: inspector.close
+    return { openPlayer: inspector.open, closePlayer: inspector.close };
+}
+
+function initMobileView(root) {
+    const planner = root.querySelector('.cwl-planner-layout');
+    const tabs = root.querySelectorAll('[data-planner-mobile-view]');
+    if (!planner || !tabs.length) return;
+    const setView = view => {
+        planner.dataset.mobileView = view;
+        tabs.forEach(tab => {
+            const active = tab.dataset.plannerMobileView === view;
+            tab.classList.toggle('is-active', active);
+            tab.setAttribute('aria-selected', String(active));
+        });
     };
-}
-
-function updatePlannerSummary(root, state) {
-    const clanCount = root.querySelector('#cwl-summary-clans');
-    const playerCount = root.querySelector('#cwl-summary-players');
-    const issueCount = root.querySelector('#cwl-summary-issues');
-    if (clanCount) clanCount.textContent = String(state.clans.length);
-    if (playerCount) playerCount.textContent = String(state.players.length);
-    if (issueCount) {
-        const unavailable = state.players.filter(card => (
-            getPlayerAvailability(getCardTag(card)).state === 'no'
-        )).length;
-        issueCount.textContent = String(unavailable);
-        issueCount.closest('.cwl-summary-item')?.toggleAttribute('hidden', unavailable === 0);
-    }
-}
-
-function initMobilePool(root) {
-    const panel = root.querySelector('.cwl-roster-panel');
-    const openButton = root.querySelector('#cwl-mobile-open-pool');
-    const closeButton = root.querySelector('#cwl-mobile-close-pool');
-    if (!panel || !openButton) return;
-    const setOpen = open => {
-        panel.classList.toggle('is-open', open);
-        panel.setAttribute('aria-hidden', String(!open));
-        if (open) closeButton?.focus({ preventScroll: true });
-    };
-    if (window.innerWidth <= 900) setOpen(false);
-    openButton.addEventListener('click', () => setOpen(true));
-    closeButton?.addEventListener('click', () => setOpen(false));
-    panel.addEventListener('keydown', event => {
-        if (event.key !== 'Escape') return;
-        event.preventDefault();
-        setOpen(false);
-        openButton.focus({ preventScroll: true });
-    });
-    window.addEventListener('resize', () => {
-        if (window.innerWidth > 900) panel.removeAttribute('aria-hidden');
-        else if (!panel.classList.contains('is-open')) panel.setAttribute('aria-hidden', 'true');
-    });
-}
-
-function initDropFeedback(root) {
-    const live = root.querySelector('#cwl-drop-feedback');
-    if (!live) return;
-    window.addEventListener('clashtools:cwl-drop-feedback', event => {
-        live.textContent = event.detail?.message || '';
-    });
+    tabs.forEach(tab => tab.addEventListener('click', () => (
+        setView(tab.dataset.plannerMobileView)
+    )));
+    setView('players');
 }
 
 function initToolKeyboard(root) {
@@ -78,7 +35,7 @@ function initToolKeyboard(root) {
         if (!panel) return;
         if (event.key === 'Escape') {
             event.preventDefault();
-            panel.querySelector('[data-i18n="autoPlan.cancel"], #cwl-auto-plan-cancel, #cwl-optimize-plan-cancel')?.click();
+            panel.querySelector('#cwl-auto-plan-cancel, #cwl-optimize-plan-cancel')?.click();
             return;
         }
         if (event.key === 'Tab') trapFocus(event, panel);

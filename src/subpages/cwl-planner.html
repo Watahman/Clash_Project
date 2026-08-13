@@ -23,14 +23,13 @@
     <script src="../assets/js/Data/runtime-config.js"></script>
     <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260812-redesign"></script>
     <script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-    <script type="module" src="../assets/js/pages/cwl-planner.js?v=20260812-1"></script>
+    <script type="module" src="../assets/js/pages/cwl-planner.js?v=20260813-roster"></script>
     <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
     <link rel="stylesheet" href="../assets/css/workspace-v2.css?v=20260812-redesign">
-    <link rel="stylesheet" href="../assets/css/cwl-planner-redesign.css">
-    <link rel="stylesheet" href="../assets/css/cwl-planner-roster.css">
-    <link rel="stylesheet" href="../assets/css/cwl-planner-schedule.css">
+    <link rel="stylesheet" href="../assets/css/cwl-planner-redesign.css?v=20260813-roster2">
+    <link rel="stylesheet" href="../assets/css/cwl-planner-roster.css?v=20260813-roster2">
     <link rel="stylesheet" href="../assets/css/cwl-planner-drawers.css">
 </head>
 <body class="workspace-app" data-workspace-page="planner">
@@ -60,17 +59,8 @@
     <header class="cwl-page-header">
         <div>
             <p class="cwl-page-kicker" data-i18n="planner.kicker">CWL Planner</p>
-        <div class="cwl-title-row">
-            <h1 id="cwl-page-title" data-i18n="cwl.unnamedPlan">Untitled plan</h1>
-            <span class="cwl-plan-state" data-i18n="planner.draft">Draft</span>
-        </div>
-            <p data-i18n="planner.description">This plan can contain multiple clans. Roster format and limit are set per clan.</p>
-        </div>
-        <div class="cwl-header-actions">
-            <button class="button button-secondary" id="cwl-undo-plan-button" type="button" disabled data-i18n="cwl.undo">Undo last change</button>
-            <button class="button button-secondary" id="cwl-new-plan-button" type="button" data-i18n="cwl.newPlan">New plan</button>
-            <span class="cwl-save-status" id="cwl-save-status" role="status" aria-live="polite" data-state="idle" data-i18n="cwl.saved">Saved</span>
-            <button class="button button-primary" id="cwl-save-plan-button" type="button" data-i18n="cwl.save">Save</button>
+            <h1>CWL roster workspace</h1>
+            <p>Choose the players you are taking and assign each player to a CWL clan.</p>
         </div>
     </header>
 
@@ -79,12 +69,10 @@
             <label><span data-i18n="planner.plan">Plan</span><select id="cwl-load-plan" data-i18n-aria-label="cwl.loadPlan" aria-label="Load plan"></select></label>
             <label class="cwl-plan-name-field"><span data-i18n="planner.name">Name</span><input type="text" id="cwl-plan-name" data-i18n-placeholder="cwl.planPlaceholder" placeholder="Plan name..." maxlength="40"></label>
         </div>
-        <div class="cwl-plan-summary" aria-live="polite">
-            <span class="cwl-summary-item"><strong id="cwl-summary-clans">0</strong> <span data-i18n="cwl.clansTitle">Clans</span></span>
-            <span class="cwl-summary-item"><strong id="cwl-summary-players">0</strong> <span data-i18n="cwl.playersTitle">Players</span></span>
-            <span class="cwl-summary-item" hidden><strong id="cwl-summary-issues">0</strong> <span data-i18n="cwl.availabilityNo">Not available</span></span>
-        </div>
         <div class="cwl-toolbar-actions">
+            <button class="button button-secondary" id="cwl-undo-plan-button" type="button" disabled>Undo</button>
+            <button class="button button-secondary" id="cwl-new-plan-button" type="button" data-i18n="cwl.newPlan">New plan</button>
+            <button class="button button-secondary" id="cwl-add-players-button" type="button" data-i18n="cwl.addPlayers">Add players</button>
             <button class="button button-secondary" id="cwl-add-clan-button" type="button"><span aria-hidden="true">+</span><span data-i18n="cwl.addClan">Add clan</span></button>
             <details class="cwl-tools-menu">
                 <summary class="button button-secondary">Tools</summary>
@@ -94,6 +82,8 @@
                     <button class="button button-quiet" id="cwl-optimize-plan-button" type="button" data-i18n="optimizePlan.open">Optimize Plan</button>
                 </div>
             </details>
+            <span class="cwl-save-status" id="cwl-save-status" role="status" aria-live="polite" data-state="idle" data-i18n="cwl.saved">Saved</span>
+            <button class="button button-primary" id="cwl-save-plan-button" type="button" data-i18n="cwl.save">Save</button>
         </div>
         <p class="cwl-plan-limit-feedback" id="cwl-plan-limit-feedback" role="alert" data-i18n="cwl.planLimitReached" hidden>You can save up to 3 plans. Delete an existing plan before saving a new one.</p>
     </section>
@@ -102,7 +92,7 @@
         <header class="cwl-auto-plan-header">
             <div>
                 <h2 id="cwl-auto-plan-title" data-i18n="autoPlan.title">Auto Plan preview</h2>
-                <p data-i18n="autoPlan.description">Review the global clan distribution and seven-day lineups before applying it.</p>
+                <p>Review the proposed clan assignments and roster roles before applying them.</p>
             </div>
             <label class="cwl-auto-plan-mode">
                 <span data-i18n="autoPlan.control">Planning control</span>
@@ -136,13 +126,16 @@
         <div class="cwl-optimize-plan-preview" id="cwl-optimize-plan-preview"></div>
     </section>
 
-    <div class="cwl-planner-layout">
+    <div class="cwl-mobile-view-tabs" role="tablist" aria-label="Planner view">
+        <button type="button" role="tab" data-planner-mobile-view="players" aria-selected="true">Players</button>
+        <button type="button" role="tab" data-planner-mobile-view="clans" aria-selected="false">Clans</button>
+    </div>
+    <div class="cwl-planner-layout" data-mobile-view="players">
         <aside class="cwl-sidebar cwl-roster-panel" aria-labelledby="cwl-free-roster-title">
             <div class="cwl-panel-heading">
                 <div><p data-i18n="planner.source">Plan source</p><h2 id="cwl-free-roster-title" data-i18n="cwl.playersSub">Free roster</h2></div>
                 <span id="cwl-total-player-amount">0</span>
             </div>
-            <button class="cwl-mobile-close-pool" id="cwl-mobile-close-pool" type="button" data-i18n="common.close">Close</button>
             <div class="cwl-roster-tools">
                 <label class="cwl-roster-search"><span data-i18n="planner.searchRoster">Search free roster</span><input id="cwl-roster-search" type="search" autocomplete="off" aria-controls="cwl-available-players" data-i18n-placeholder="planner.searchRosterPlaceholder" placeholder="Search by name or tag"></label>
                 <div class="cwl-roster-select-row">
@@ -151,7 +144,6 @@
                 </div>
                 <p class="cwl-roster-filter-status" id="cwl-roster-filter-status" role="status" aria-live="polite"></p>
             </div>
-            <button class="cwl-add-player-button" id="cwl-add-players-button" type="button"><span aria-hidden="true">+</span><span data-i18n="cwl.addPlayers">Add players</span></button>
             <div id="cwl-available-players" aria-live="polite"></div>
         </aside>
 
@@ -159,17 +151,6 @@
             <div class="cwl-board-heading">
                 <div><p data-i18n="cwl.clansSub">Planning board</p><h2 id="cwl-clans-title" data-i18n="cwl.clansTitle">Clans</h2></div>
             </div>
-            <section class="cwl-mobile-planner-sequence" id="cwl-mobile-planner-sequence" aria-labelledby="cwl-mobile-sequence-title">
-                <div class="cwl-mobile-sequence-heading">
-                    <div><p data-i18n="cwl.clansSub">Planning board</p><h3 id="cwl-mobile-sequence-title" data-i18n="autoPlan.sevenDayPreview">7-day lineup preview</h3></div>
-                    <button class="button button-secondary" id="cwl-mobile-open-pool" type="button" data-i18n="cwl.playersTitle">Players</button>
-                </div>
-                <div class="cwl-mobile-sequence-controls">
-                    <label><span data-i18n="cwl.clan">Clan</span><select id="cwl-mobile-clan-select" data-i18n-aria-label="op.selectClanPlaceholder" aria-label="Select clan"></select></label>
-                    <label><span data-i18n="op.day">Day</span><select id="cwl-mobile-day-select" data-i18n-aria-label="op.day" aria-label="Select CWL day"><option value="1">D1</option><option value="2">D2</option><option value="3">D3</option><option value="4">D4</option><option value="5">D5</option><option value="6">D6</option><option value="7">D7</option></select></label>
-                </div>
-                <div class="cwl-mobile-day-list" id="cwl-mobile-day-list" aria-live="polite"></div>
-            </section>
             <article id="cwl-all-clans" aria-live="polite"></article>
         </section>
     </div>

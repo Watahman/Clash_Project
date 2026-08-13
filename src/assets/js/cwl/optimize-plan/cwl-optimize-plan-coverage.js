@@ -30,21 +30,9 @@ export function activePlayerCount(players, clanId, roleLocks = {}) {
 
 export function coverageGain(clan, assignedPlayers, player, roleLocks = {}) {
     if (roleLocks[player.tag] === 'reserve') return 0;
-    return Array.from({ length: 7 }, (_, index) => index + 1)
-        .filter(day => availableActiveCount(assignedPlayers, day, roleLocks) < clan.capacity)
-        .filter(day => isAvailable(player, day))
-        .length;
-}
-
-function availableActiveCount(players, day, roleLocks) {
-    return players.filter(player =>
-        player.currentRole !== 'reserve'
-        && roleLocks[player.tag] !== 'reserve'
-        && isAvailable(player, day)
+    const active = assignedPlayers.filter(assigned =>
+        assigned.currentRole !== 'reserve'
+        && roleLocks[assigned.tag] !== 'reserve'
     ).length;
-}
-
-function isAvailable(player, day) {
-    const days = player.availability?.availableDays;
-    return !Array.isArray(days) || days.includes(day);
+    return player.availability?.state === 'no' || active >= clan.capacity ? 0 : 1;
 }

@@ -5,15 +5,11 @@ import {
 } from '../player-performance-client.js';
 import { getPlayerAvailability } from '../cwl-availability.js';
 import { savePlan } from '../cwl-plan-io.js';
-import { normalizePlannedDays } from '../cwl-plan-schema.js';
 import {
     rememberPlannerPlayers,
     updateAllPlayerCounters
 } from '../cwl-planner-card-state.js';
-import {
-    syncPlayerPlannedDays,
-    syncPlayerRosterStatus
-} from '../cwl-player-controls.js';
+import { syncPlayerRosterStatus } from '../cwl-player-controls.js';
 import { getCardTag, normalizeTag } from '../cwl-utils.js';
 import { isRedesignFixtureRequested } from '../../fixtures/redesign-fixture-mode.js';
 
@@ -32,14 +28,9 @@ export async function collectAutoPlanInput(root = document) {
         ]);
     }
     const players = playerCards.map(card => readPlayer(card, getPlayerPerformance(getCardTag(card))));
-    const rounds = Math.max(
-        1,
-        ...players.map(player => Number(player.availability?.rounds) || 7)
-    );
     return {
         players,
         clans,
-        rounds: Math.min(7, rounds),
         locks: lockData
     };
 }
@@ -97,7 +88,6 @@ export function applyAutoPlanResult(result, root = document) {
         if (!card || !freeRoster) return;
         freeRoster.appendChild(card);
         syncPlayerRosterStatus(card);
-        syncPlayerPlannedDays(card, []);
     });
     result.clans.forEach(clan => {
         const target = clanById.get(clan.id)?.querySelector('.cwl-clan-player-list');
@@ -107,7 +97,6 @@ export function applyAutoPlanResult(result, root = document) {
             if (!card) return;
             target.appendChild(card);
             syncPlayerRosterStatus(card, { preferredStatus: player.role });
-            syncPlayerPlannedDays(card, player.plannedDays);
         });
     });
 
@@ -144,8 +133,6 @@ function readPlayer(card, performance) {
         townHallLevel: Number(card.dataset.townHall) || 1,
         currentClanId: currentClan ? clanId(currentClan) : null,
         currentRole: card.dataset.rosterStatus || '',
-        plannedDays: normalizePlannedDays(card.dataset.plannedDays),
-        hasPlannedDays: Object.hasOwn(card.dataset, 'plannedDays'),
         availability: getPlayerAvailability(tag),
         performance: performance || card._cwlPlayer?.performance || { status: 'unavailable' }
     };

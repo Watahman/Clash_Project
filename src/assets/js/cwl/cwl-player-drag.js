@@ -2,11 +2,6 @@ import { savePlan } from './cwl-plan-io.js';
 import { normalizeRosterStatus } from './cwl-plan-schema.js';
 import { syncPlayerRosterStatus } from './cwl-player-controls.js';
 import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js';
-import {
-    applyPlannerDayDrop,
-    clearPlannerDaysForContainerChange,
-    getPlannerDayDropValidation
-} from './cwl-planner-schedule.js';
 
 const CONTROL_SELECTOR = '.cwl-delete-player, .cwl-move-player, .cwl-roster-status';
 
@@ -75,41 +70,21 @@ function finishDrag(element, state, event, document) {
 
 function resolveDrop(element, state, event, document) {
     const target = state.activeTarget || findDropTarget(document, event.clientX, event.clientY);
-    const validation = getPlannerDayDropValidation(element, target);
-    if (target?.matches('.cwl-day-dropzone') && validation.legal) {
-        const applied = applyPlannerDayDrop(element, target, {
-            sourceContainer: state.previousContainer
-        });
-        const scheduleDrop = Boolean(applied.applied);
-        return {
-            scheduleDrop,
-            dropAllowed: applied.legal,
-            dropReason: applied.reason,
-            finalContainer: scheduleDrop ? element.parentElement : state.previousContainer
-        };
-    }
-    const dropAllowed = validation.legal;
     return {
-        scheduleDrop: false,
-        dropAllowed,
-        dropReason: validation.reason,
-        finalContainer: dropAllowed && !target?.matches('.cwl-day-dropzone')
-            ? target || state.previousContainer
-            : state.previousContainer
+        dropAllowed: Boolean(target),
+        finalContainer: target || state.previousContainer
     };
 }
 
 function commitDrop(element, state, result, document) {
-    const { finalContainer, scheduleDrop, dropAllowed, dropReason } = result;
+    const { finalContainer, dropAllowed } = result;
     const previousStatus = normalizeRosterStatus(element.dataset.rosterStatus);
     if (finalContainer) finalContainer.appendChild(element);
     element.originalContainer = finalContainer;
-    if (!scheduleDrop && dropAllowed) commitRosterDrop(element, state, finalContainer, previousStatus);
-    if (!dropAllowed) announceDropFeedback(document.defaultView, dropReason);
+    if (dropAllowed) commitRosterDrop(element, state, finalContainer, previousStatus);
 }
 
 function commitRosterDrop(element, state, finalContainer, previousStatus) {
-    clearPlannerDaysForContainerChange(element, state.previousContainer, finalContainer);
     syncPlayerRosterStatus(element, {
         preferredStatus: previousStatus,
         autoReserve: Boolean(
@@ -138,7 +113,7 @@ function cleanupDrag(element, state, document) {
 
 function findDropTarget(document, x, y) {
     const lists = document.querySelectorAll(
-        '.cwl-clan-player-list, #cwl-available-players, .cwl-day-dropzone'
+        '.cwl-clan-player-list, #cwl-available-players'
     );
     for (const list of lists) {
         const rect = list.getBoundingClientRect();
@@ -152,9 +127,7 @@ function findDropTarget(document, x, y) {
 function updateDropFeedback(card, target, document) {
     clearDropFeedback(document);
     if (!target) return;
-    const validation = getPlannerDayDropValidation(card, target);
-    target.classList.add(validation.legal ? 'cwl-drop-valid' : 'cwl-drop-invalid');
-    if (!validation.legal) target.dataset.dropReason = validation.reason;
+    target.classList.add('cwl-drop-valid');
 }
 
 function clearDropFeedback(document) {
@@ -162,10 +135,4 @@ function clearDropFeedback(document) {
         target.classList.remove('cwl-drop-valid', 'cwl-drop-invalid');
         delete target.dataset.dropReason;
     });
-}
-
-function announceDropFeedback(view, message) {
-    view?.dispatchEvent(new CustomEvent('clashtools:cwl-drop-feedback', {
-        detail: { message }
-    }));
 }

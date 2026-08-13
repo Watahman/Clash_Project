@@ -11,7 +11,6 @@ import { escapeCssIdentifier, getCardTag, normalizeTag } from './cwl-utils.js';
 import {
     CWL_PLAN_SCHEMA_VERSION,
     normalizePlanDocument,
-    normalizePlannedDays,
     normalizeRosterStatus,
     validatePlanDocument
 } from './cwl-plan-schema.js';
@@ -160,8 +159,11 @@ function readPlayerCard(player) {
     };
     const rosterStatus = normalizeRosterStatus(player.dataset.rosterStatus);
     if (rosterStatus) snapshot.rosterStatus = rosterStatus;
-    const plannedDays = normalizePlannedDays(player.dataset.plannedDays);
-    if (plannedDays.length) snapshot.plannedDays = plannedDays;
+    const legacySchedule = String(player.dataset.legacySchedule || '')
+        .split(',')
+        .map(Number)
+        .filter(day => Number.isInteger(day) && day >= 1 && day <= 7);
+    if (legacySchedule.length) snapshot.plannedDays = legacySchedule;
     return snapshot;
 }
 

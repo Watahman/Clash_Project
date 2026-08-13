@@ -164,8 +164,7 @@ function weakestActive(entries) {
 }
 
 function isEligible(player) {
-    return player.availability?.state !== 'no'
-        && (player.availability?.availableDays?.length ?? 7) > 0;
+    return player.availability?.state !== 'no';
 }
 
 function byTag(left, right) {

@@ -1,6 +1,6 @@
 import { savePlan } from './cwl-plan-io.js';
 import { escapeCssIdentifier } from './cwl-utils.js';
-import { normalizePlannedDays, normalizeRosterStatus } from './cwl-plan-schema.js';
+import { normalizeRosterStatus } from './cwl-plan-schema.js';
 import { t } from '../i18n/i18n.js';
 import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js';
 
@@ -104,19 +104,6 @@ export function syncPlayerRosterStatus(element, options = {}) {
     return status;
 }
 
-export function syncPlayerPlannedDays(element, plannedDays = []) {
-    const days = normalizePlannedDays(plannedDays);
-    const clan = element.closest('.cwl-clan-article');
-    element.querySelector('.cwl-planned-days')?.remove();
-    if (!clan || !days.length) {
-        delete element.dataset.plannedDays;
-        return [];
-    }
-
-    element.dataset.plannedDays = days.join(',');
-    return days;
-}
-
 export function attachDeleteButton(element) {
     if (element.querySelector('.cwl-delete-player')) return;
     const button = document.createElement('button');
@@ -188,7 +175,6 @@ export function attachMoveControl(element) {
             preferredStatus: previousStatus,
             autoReserve: target.matches('.cwl-clan-player-list')
         });
-        syncPlayerPlannedDays(element, []);
         updateAllPlayerCounters();
         rememberPlannerPlayers();
         window.dispatchEvent(new CustomEvent('clashtools:cwl-player-added'));

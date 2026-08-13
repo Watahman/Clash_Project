@@ -134,8 +134,8 @@ function buildMultiClan() {
         clan('north', 'North Guard', 'Master League I'),
         clan('south', 'South Watch', 'Crystal League I')
     ];
-    assignPlayers(players, clans, 15, 0, 14, true);
-    assignPlayers(players, clans, 15, 15, 14, true);
+    assignPlayers(players, clans, 15, 0, 14);
+    assignPlayers(players, clans, 15, 15, 14);
     return makeScenario('planner-multi-clan', 'Multi-clan roster fixture', clans, players);
 }
 
@@ -145,15 +145,15 @@ function buildConflicts() {
         clan('overlook', 'Overlook Keep', 'Master League I'),
         clan('watchtower', 'Watchtower', 'Crystal League I')
     ];
-    assignPlayers(players, clans, 16, 0, 16, false, true);
-    assignPlayers(players, clans, 16, 16, 16, false, true);
+    assignPlayers(players, clans, 16, 0, 16);
+    assignPlayers(players, clans, 16, 16, 16);
     return makeScenario('planner-conflicts', 'Conflict review fixture', clans, players);
 }
 
 function buildPollPartial() {
     const players = makePlayers(15, index => partialAvailability(index));
     const clans = [clan('poll', 'Poll Review', 'Master League I')];
-    assignPlayers(players, clans, 15, 0, 15, false, true);
+    assignPlayers(players, clans, 15, 0, 15);
     return makeScenario('planner-poll-partial', 'Partial poll fixture', clans, players);
 }
 
@@ -170,8 +170,8 @@ function buildOptimize() {
         clan('source', 'Source Guard', 'Master League I'),
         clan('target', 'Target Watch', 'Crystal League I')
     ];
-    assignPlayers(players, clans, 17, 0, 15, false, false, 2);
-    assignPlayers(players, clans, 14, 17, 14, false, false, 0);
+    assignPlayers(players, clans, 17, 0, 15, 2);
+    assignPlayers(players, clans, 14, 17, 14);
     return makeScenario('planner-optimize', 'Optimize preview fixture', clans, players, undefined, 'optimize');
 }
 
@@ -212,26 +212,21 @@ function makePlayers(count, availabilityFor) {
             clanName: '',
             currentClanId: null,
             rosterStatus: '',
-            plannedDays: [],
             availability: current,
             performance: { status: 'unavailable', scope: 'Fixture data' }
         };
     });
 }
 
-function assignPlayers(players, clans, count, start, roleCount, fullDays = false, forceConflict = false, reserveCount = 0) {
+function assignPlayers(players, clans, count, start, roleCount, reserveCount = 0) {
     const clan = clans[Math.floor(start / 15) % clans.length];
     players.slice(start, start + count).forEach((player, index) => {
         const reserve = reserveCount ? index >= count - reserveCount : false;
         const role = reserve ? 'reserve' : index < roleCount ? 'core' : 'rotation';
-        const days = forceConflict || fullDays || role === 'core'
-            ? ALL_DAYS
-            : player.availability.availableDays;
         Object.assign(player, {
             clanName: clan.name,
             currentClanId: clan.id,
-            rosterStatus: role,
-            plannedDays: [...days]
+            rosterStatus: role
         });
     });
 }

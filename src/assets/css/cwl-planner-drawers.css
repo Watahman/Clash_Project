@@ -35,14 +35,8 @@
 .cwl-inspector-facts dd { font-size: .78rem; margin: 0; max-width: 180px; overflow-wrap: anywhere; text-align: right; }
 .cwl-inspector-actions { display: grid; gap: 10px; }
 .cwl-inspector-control { display: grid; gap: 5px; }
-.cwl-inspector-control > span,
-.cwl-inspector-schedule legend { color: var(--planner-muted); font-size: .72rem; font-weight: 700; }
+.cwl-inspector-control > span { color: var(--planner-muted); font-size: .72rem; font-weight: 700; }
 .cwl-inspector-control select { min-height: 42px; width: 100%; }
-.cwl-inspector-schedule { border: 0; margin: 18px 0 0; padding: 0; }
-.cwl-inspector-schedule legend { margin-bottom: 8px; padding: 0; }
-.cwl-day-choice-grid { display: grid; gap: 6px; grid-template-columns: repeat(4, 1fr); }
-.cwl-day-choice-grid label { align-items: center; border: 1px solid var(--planner-border); border-radius: 6px; display: flex; gap: 5px; justify-content: center; min-height: 42px; padding: 5px; }
-.cwl-day-choice-grid input { accent-color: var(--accent, #d8ac55); }
 .cwl-inspector-muted,
 .cwl-inspector-performance p { color: var(--planner-muted); font-size: .78rem; }
 .cwl-inspector-performance { border-top: 1px solid var(--planner-border); margin-top: 18px; padding-top: 14px; }
