@@ -35,6 +35,10 @@ public class Config {
             env("CLASHKING_FALLBACK_TO_LEGACY"),
             "false"
     );
+    String _CLASHKING_COUNTER_INTERVAL_SECONDS = firstNonBlank(
+            env("CLASHKING_COUNTER_INTERVAL_SECONDS"),
+            "60"
+    );
     String _CACHE_ENABLED = firstNonBlank(env("CACHE_ENABLED"), "true");
     String _CACHE_MODE = firstNonBlank(env("CACHE_MODE"), "layered");
     String _CACHE_DB_PATH = firstNonBlank(
@@ -284,6 +288,10 @@ public class Config {
 
     public boolean isClashKingLegacyFallbackEnabled() {
         return "true".equalsIgnoreCase(_CLASHKING_FALLBACK_TO_LEGACY);
+    }
+
+    int getClashKingCounterIntervalSeconds() {
+        return boundedInt(_CLASHKING_COUNTER_INTERVAL_SECONDS, 60, 5, 3600);
     }
 
     boolean isAuthCookieSecure() {

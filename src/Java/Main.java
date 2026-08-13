@@ -3,6 +3,7 @@ package Java;
 import Java.achievements.AchievementCatalog;
 import Java.cwlhistory.HistoricalCwlProviderFactory;
 import Java.cwlhistory.HistoricalCwlService;
+import Java.performance.ClashKingRequestCounter;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
@@ -38,6 +39,7 @@ public class Main {
         Config conf;
         HttpServer server;
         conf = new Config(); // config initialiseren
+        ClashKingRequestCounter.configure(conf.getClashKingCounterIntervalSeconds());
         AchievementCatalog.definitions(); // Fail startup before readiness if the embedded v2 catalog is invalid.
         server = HttpServer.create(new InetSocketAddress(conf.getServerPort()), 0);
         int workerCount = Math.max(4, Math.min(32, Runtime.getRuntime().availableProcessors() * 2));

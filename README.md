@@ -48,6 +48,7 @@ Open `http://localhost:5173`. Set `DEV_API_TARGET` only when the Java API runs e
 | `CLASHKING_API_VERSION` | no | Historical provider: `legacy` (default) or `v2` |
 | `CLASHKING_LEGACY_BASE_URL`, `CLASHKING_V2_BASE_URL` | no | ClashKing provider base URLs |
 | `CLASHKING_FALLBACK_TO_LEGACY` | no | Retry the complete V2 batch through legacy without mixing datasets |
+| `CLASHKING_COUNTER_INTERVAL_SECONDS` | no | Console report interval for real outbound ClashKing requests; defaults to `60` seconds |
 | `SERVER_PORT` or `PORT` | no | Backend port; defaults to `8080` |
 | `PUBLIC_SITE_URL` | production | Absolute public origin used to generate `robots.txt` and `sitemap.xml` during the frontend build |
 | `ALLOWED_ORIGINS` | production | Comma-separated browser-origin allowlist |

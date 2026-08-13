@@ -13,6 +13,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 
 public final class ClashKingHttpClient {
+    private static final ClashKingRequestCounter REQUEST_COUNTER = ClashKingRequestCounter.shared();
     private final String baseUrl;
     private final String upstreamName;
     private final HttpClient client;
@@ -63,6 +64,7 @@ public final class ClashKingHttpClient {
     }
 
     private JsonElement send(HttpRequest request) throws Exception {
+        REQUEST_COUNTER.record(request.method());
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw HttpException.upstream(response.statusCode(), response.body(), upstreamName);
