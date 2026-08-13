@@ -21,7 +21,7 @@ body.workspace-app .workspace-content .workspace-planner .cwl-page-header {
     height: auto;
     justify-content: space-between;
     margin: 0;
-    padding: 16px 18px 10px;
+    padding: 24px 28px 20px !important;
     position: static;
 }
 
@@ -47,7 +47,7 @@ body.workspace-app .workspace-content .workspace-planner .cwl-page-header .cwl-p
     align-items: center;
     display: flex;
     gap: 16px;
-    justify-content: space-between;
+    justify-content: flex-start;
 }
 
 body.workspace-app .workspace-content .workspace-planner .cwl-page-header h1 {
@@ -239,14 +239,14 @@ body.workspace-app .workspace-content .workspace-planner .cwl-page-header > div:
 @media (max-width: 1180px) {
     .workspace-planner .cwl-context-toolbar { align-items: stretch; }
     .workspace-planner .cwl-plan-fields { flex-basis: 100%; }
-    .workspace-planner .cwl-toolbar-actions { flex: 1; justify-content: flex-start; }
+    .workspace-planner .cwl-toolbar-actions { flex: 1; justify-content: flex-end; }
     .workspace-planner .cwl-planner-layout { grid-template-columns: minmax(20rem, 38%) minmax(0, 1fr); }
 }
 
 @media (min-width: 1181px) {
     .workspace-planner .cwl-toolbar-actions {
         flex: 1;
-        justify-content: flex-start;
+        justify-content: flex-end;
     }
     .workspace-planner #cwl-undo-plan-button { border-left-color: var(--border-strong); margin-left: 8px; }
 }
@@ -282,7 +282,7 @@ body.workspace-app .workspace-content .workspace-planner .cwl-page-header > div:
 }
 
 @media (max-width: 620px) {
-    body.workspace-app .workspace-content .workspace-planner .cwl-page-header { padding-inline: 14px; }
+    body.workspace-app .workspace-content .workspace-planner .cwl-page-header { padding: 20px 18px 16px !important; }
     .workspace-planner .cwl-context-toolbar .button,
     .workspace-planner .cwl-tools-menu summary { min-height: 40px; }
     .workspace-planner .cwl-plan-fields { display: grid; grid-template-columns: 1fr; }

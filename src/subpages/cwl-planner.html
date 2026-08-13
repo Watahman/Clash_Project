@@ -28,7 +28,8 @@
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
     <link rel="stylesheet" href="../assets/css/workspace-v2.css?v=20260812-redesign">
-    <link rel="stylesheet" href="../assets/css/cwl-planner-redesign.css?v=20260813-roster2">
+    <link rel="stylesheet" href="../assets/css/cwl-planner-redesign.css?v=20260813-toolbar">
+    <link rel="stylesheet" href="../assets/css/cwl-planner-toolbar.css?v=20260813-toolbar">
     <link rel="stylesheet" href="../assets/css/cwl-planner-roster.css?v=20260813-roster3">
     <link rel="stylesheet" href="../assets/css/cwl-planner-drawers.css">
 </head>
@@ -61,7 +62,6 @@
             <p class="cwl-page-kicker" data-i18n="planner.kicker">CWL Planner</p>
             <div class="cwl-page-title-row">
                 <h1 id="cwl-page-title">CWL roster workspace</h1>
-                <span class="cwl-save-status" id="cwl-save-status" role="status" aria-live="polite" data-state="idle" data-i18n="cwl.saved">Saved</span>
             </div>
             <p>Build and balance your CWL clan rosters.</p>
         </div>
@@ -73,19 +73,24 @@
             <label class="cwl-plan-name-field"><span data-i18n="planner.name">Name</span><input type="text" id="cwl-plan-name" data-i18n-placeholder="cwl.planPlaceholder" placeholder="Plan name..." maxlength="40"></label>
         </div>
         <div class="cwl-toolbar-actions">
-            <button class="button button-secondary" id="cwl-add-players-button" type="button" data-i18n="cwl.addPlayers">Add players</button>
-            <button class="button button-secondary" id="cwl-add-clan-button" type="button"><span data-i18n="cwl.addClan">Add clan</span></button>
-            <details class="cwl-tools-menu">
-                <summary class="button button-secondary">Tools</summary>
-                <div class="cwl-tools-menu-content">
-                    <button class="button button-quiet" id="cwl-import-spreadsheet-button" type="button" data-i18n="cwl.sheetImport">Import spreadsheet</button>
-                    <button class="button button-quiet" id="cwl-auto-plan-button" type="button" data-i18n="autoPlan.open">Auto Plan</button>
-                    <button class="button button-quiet" id="cwl-optimize-plan-button" type="button" data-i18n="optimizePlan.open">Optimize Plan</button>
-                </div>
-            </details>
-            <button class="button button-secondary" id="cwl-undo-plan-button" type="button" disabled>Undo</button>
-            <button class="button button-secondary" id="cwl-new-plan-button" type="button" data-i18n="cwl.newPlan">New plan</button>
-            <button class="button button-primary" id="cwl-save-plan-button" type="button" data-i18n="cwl.save">Save</button>
+            <div class="cwl-toolbar-action-group cwl-toolbar-build-actions">
+                <button class="button button-secondary" id="cwl-add-players-button" type="button" data-i18n="cwl.addPlayers">Add players</button>
+                <button class="button button-secondary" id="cwl-add-clan-button" type="button"><span data-i18n="cwl.addClan">Add clan</span></button>
+                <details class="cwl-tools-menu">
+                    <summary class="button button-secondary">Tools</summary>
+                    <div class="cwl-tools-menu-content">
+                        <button class="button button-quiet" id="cwl-import-spreadsheet-button" type="button" data-i18n="cwl.sheetImport">Import spreadsheet</button>
+                        <button class="button button-quiet" id="cwl-auto-plan-button" type="button" data-i18n="autoPlan.open">Auto Plan</button>
+                        <button class="button button-quiet" id="cwl-optimize-plan-button" type="button" data-i18n="optimizePlan.open">Optimize Plan</button>
+                    </div>
+                </details>
+            </div>
+            <div class="cwl-toolbar-action-group cwl-toolbar-plan-actions">
+                <button class="button button-secondary" id="cwl-undo-plan-button" type="button" disabled>Undo</button>
+                <button class="button button-secondary" id="cwl-new-plan-button" type="button" data-i18n="cwl.newPlan">New plan</button>
+                <button class="button button-primary" id="cwl-save-plan-button" type="button" data-i18n="cwl.save">Save</button>
+                <span class="cwl-save-status" id="cwl-save-status" role="status" aria-live="polite" data-state="idle" data-i18n="cwl.saved">Saved</span>
+            </div>
         </div>
         <p class="cwl-plan-limit-feedback" id="cwl-plan-limit-feedback" role="alert" data-i18n="cwl.planLimitReached" hidden>You can save up to 3 plans. Delete an existing plan before saving a new one.</p>
     </section>
