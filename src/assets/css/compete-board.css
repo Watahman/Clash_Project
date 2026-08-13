@@ -93,6 +93,19 @@
     padding: 8px 10px;
     text-transform: none;
 }
+.operation-workspace-page .op-context-toolbar .op-standalone-control {
+    flex: 0 1 20rem;
+    max-width: 20rem;
+    min-width: 0;
+    width: 20rem;
+}
+.operation-workspace-page .op-standalone-control .op-inline-control {
+    display: grid;
+    gap: 6px;
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+.operation-workspace-page .op-standalone-control input { min-width: 0; }
+.operation-workspace-page .op-standalone-control button { white-space: nowrap; }
 .operation-workspace-page .op-inline-control { display: flex; gap: 6px; }
 .operation-workspace-page .op-toolbar-spacer { flex: 1 1 16px; }
 .operation-workspace-page .op-context-actions {
@@ -263,6 +276,11 @@
     .war-board--webby .war-board-controls input,
     .war-board--webby .war-board-controls select { min-height: 44px; }
     .operation-workspace-page .op-context-toolbar { align-items: stretch; display: grid; }
+    .operation-workspace-page .op-context-toolbar .op-standalone-control {
+        flex: none;
+        max-width: none;
+        width: 100%;
+    }
     .operation-workspace-page .op-context-toolbar label,
     .operation-workspace-page .op-inline-control,
     .operation-workspace-page .op-inline-control input,
