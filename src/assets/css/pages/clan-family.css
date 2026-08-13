@@ -145,7 +145,7 @@ body.workspace-app[data-workspace-page="groups"] .button:disabled { cursor: not-
 .is-group-index-collapsed .cf-family-index { width: 0; min-height: 72px; padding: 0; border-color: transparent; background: transparent; }
 .is-group-index-collapsed .cf-family-index > *:not(.cf-index-toggle) { visibility: hidden; opacity: 0; }
 .is-group-index-collapsed .cf-index-toggle { right: -18px; }
-.is-group-index-collapsed .cf-index-toggle img { transform: rotate(180deg); }
+.is-group-index-collapsed .cf-index-toggle-icon { transform: rotate(180deg); }
 
 .cf-family-detail { min-width: 0; }
 .cf-empty-state { display: grid; min-height: 420px; place-content: center; justify-items: center; border: 1px solid var(--cf-border); border-radius: 12px; background: var(--cf-surface); padding: 40px 24px; text-align: center; }
@@ -167,7 +167,13 @@ body.workspace-app[data-workspace-page="groups"] .button:disabled { cursor: not-
 .cf-code-button { position: relative; display: grid; min-width: 142px; min-height: 48px; gap: 3px; padding: 7px 36px 7px 11px; text-align: left; }
 .cf-code-button span { color: var(--cf-text-subtle); font-size: .625rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 .cf-code-button strong { font: 650 .8125rem/1 var(--cp-font-mono); letter-spacing: .06em; }
-.cf-code-button img { position: absolute; top: 16px; right: 11px; }
+.cf-code-icon { position: absolute; top: 15px; right: 11px; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; pointer-events: none; transition: opacity 140ms var(--cp-ease-standard), transform 140ms var(--cp-ease-standard), color 140ms var(--cp-ease-standard); }
+.cf-code-icon--copy { opacity: 1; transform: scale(1); }
+.cf-code-icon--check { color: var(--cp-success); opacity: 0; transform: scale(.72); }
+.cf-code-button[data-copy-state="copied"] .cf-code-icon--copy { opacity: 0; transform: scale(.72); }
+.cf-code-button[data-copy-state="copied"] .cf-code-icon--check { opacity: 1; transform: scale(1); }
+.cf-index-toggle-icon, .cf-more-icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.cf-index-toggle-icon { transition: transform 220ms var(--cp-ease-emphasized); }
 .cf-icon-button { display: grid; width: 40px; height: 40px; place-items: center; padding: 0; }
 .cf-code-button:hover, .cf-icon-button:hover { border-color: color-mix(in srgb, var(--cf-accent) 42%, var(--cf-border-strong)); background: var(--cp-surface-hover); }
 .cf-menu-wrap { position: relative; }

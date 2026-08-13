@@ -97,6 +97,7 @@ body.workspace-app[data-workspace-page="groups"] .overlay-container {
 }
 
 .cf-drawer-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.cf-close-icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 .cf-drawer-title { display: flex; min-width: 0; align-items: flex-start; gap: 11px; }
 .cf-drawer-title h2 { max-width: 280px; margin-top: 1px; overflow-wrap: anywhere; font-size: 1.1875rem; }
 .cf-drawer-title p { margin: 4px 0 0; color: var(--cf-text-muted); font-size: .75rem; }

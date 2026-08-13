@@ -130,9 +130,10 @@ async function copyInviteCode() {
     } catch {
         const input = document.createElement('textarea'); input.value = code; input.setAttribute('readonly', ''); input.className = 'sr-only'; document.body.appendChild(input); input.select(); document.execCommand('copy'); input.remove();
     }
-    refs.detailCode?.setAttribute('data-copy-state', 'copied');
-    setPageStatus(t('groups.copyCode'));
-    window.setTimeout(() => refs.detailCode?.setAttribute('data-copy-state', 'idle'), 1800);
+    const button = refs.detailCode;
+    button?.setAttribute('data-copy-state', 'copied');
+    clearTimeout(button?.copyFeedbackTimer);
+    if (button) button.copyFeedbackTimer = window.setTimeout(() => button.setAttribute('data-copy-state', 'copy'), 1000);
 }
 
 function bindNotifications() {
