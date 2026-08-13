@@ -1,7 +1,6 @@
 import { buildLiveView } from '../operation-board/operation-board-live-model.js';
 import { buildWinCondition } from '../operation-board/operation-board-win-condition.js';
 import { buildProjectedOutcome } from '../operation-board/operation-board-live-projection.js';
-import { buildImportantAttacks } from '../operation-board/operation-board-live-recommendations.js';
 import { escapeHtml, number } from '../operation-board/operation-board-utils.js';
 import { normalizeWarState, parseClashTime } from '../cwl/cwl-war-state.js';
 import { competeT as t } from '../operation-board/compete-locales.js';
@@ -12,14 +11,12 @@ import {
 } from '../assets/entity-assets.js';
 import { buildWarContributions } from './war-contribution.js';
 import { buildWarMap } from './war-map-model.js';
-import { assignmentState } from './war-assignments.js';
 import { buildMathematicalWarStatus } from './war-outcome-model.js';
 import { renderStats as renderStatsSection } from './war-stats-renderer.js';
 
 const WAR_STATE_CLASSES = new Set(['completed', 'live', 'preparation']);
 const BASE_STATE_CLASSES = new Set(['cleared', 'damaged', 'untouched']);
 const MATH_STATE_CLASSES = new Set(['lost', 'open', 'won']);
-const ASSIGNMENT_STATE_CLASSES = new Set(['changed', 'completed', 'planned']);
 
 export { renderStatsSection as renderStats };
 
@@ -62,63 +59,56 @@ export function renderScoreStrip(element, report) {
                 ? t('war.projectionBuilding')
                 : t('war.projectedWin', { probability: projection.winProbability }))}</span>
         </div>`;
-}
-export function renderWarMap(element, report, sideName, selectedPosition, assignments) {
-    const bases = buildWarMap(report, sideName);
-    element.dataset.warMapSide = sideName;
-    element.innerHTML = bases.map((base, index) => {
-        const assignmentCount = sideName === 'enemy'
-            ? assignments.filter(item => Number(item.targetPosition) === base.mapPosition).length
-            : 0;
-        const baseState = classToken(base.state, BASE_STATE_CLASSES, 'untouched');
-        const townHall = townHallLabel(base.townHall);
-        return `<button class="war-base is-${baseState} ${base.mapPosition === selectedPosition ? 'is-selected' : ''}"
-            type="button" data-base-position="${base.mapPosition}" style="--base-index:${index}">
-            <span class="war-base-position">${base.mapPosition}</span>
-            <span class="war-base-emblem"><img class="compete-townhall" src="${getTownHallAsset(base.townHall)}" alt="${escapeHtml(t('war.townHall', { level: townHall }))}"><i>${stars(base.stars)}</i></span>
-            <span class="war-base-copy"><strong>${escapeHtml(base.name)}</strong><small>${percent(base.destruction)} · ${base.opponentAttacks} ${escapeHtml(t(base.opponentAttacks === 1 ? 'war.hit' : 'war.hits'))}</small></span>
-            ${assignmentCount ? `<span class="war-base-assigned">${escapeHtml(t('war.assigned', { count: assignmentCount }))}</span>` : ''}
-        </button>`;
-    }).join('');
     installAssetFallbacks(element);
 }
 
-export function renderBaseDetail(element, report, sideName, position, assignments) {
+export function renderWarMap(element, report, sideName, selectedPosition) {
+    const bases = buildWarMap(report, sideName);
+    element.dataset.warMapSide = sideName;
+    element.innerHTML = bases.map((base, index) =>
+        renderBaseCard(base, index, selectedPosition)
+    ).join('');
+    installAssetFallbacks(element);
+}
+
+function renderBaseCard(base, index, selectedPosition) {
+    const baseState = classToken(base.state, BASE_STATE_CLASSES, 'untouched');
+    const townHall = townHallLabel(base.townHall);
+    return `<button class="war-base is-${baseState} ${base.mapPosition === selectedPosition ? 'is-selected' : ''}"
+        type="button" data-base-position="${base.mapPosition}" style="--base-index:${index}">
+        <span class="war-base-position">${base.mapPosition}</span>
+        <span class="war-base-emblem"><img class="compete-townhall" src="${getTownHallAsset(base.townHall)}" alt="${escapeHtml(t('war.townHall', { level: townHall }))}"><i>${stars(base.stars)}</i></span>
+        <span class="war-base-copy"><strong>${escapeHtml(base.name)}</strong><small>${percent(base.destruction)} · ${base.opponentAttacks} ${escapeHtml(t(base.opponentAttacks === 1 ? 'war.hit' : 'war.hits'))}</small></span>
+    </button>`;
+}
+
+export function renderBaseDetail(element, report, sideName, position) {
     const bases = buildWarMap(report, sideName);
     const base = bases.find(item => item.mapPosition === position) || bases[0];
     if (!base) {
         element.innerHTML = `<div class="war-detail-empty">${escapeHtml(t('war.selectBase'))}</div>`;
         return;
     }
-    const townHall = townHallLabel(base.townHall);
-    const recommendations = sideName === 'enemy'
-        ? buildImportantAttacks(report, 6).filter(item => item.target.mapPosition === base.mapPosition)
-        : [];
-    const assigned = assignments.filter(item =>
-        Number(item.targetPosition) === base.mapPosition
-        || ['hold', 'free'].includes(item.type)
-    );
-    const roster = report.roster || [];
-    element.innerHTML = `
-        <header>
-            <div><p>${escapeHtml(t('war.base', { position: base.mapPosition }))}</p><h2>${escapeHtml(base.name)}</h2><span>${escapeHtml(base.tag)}</span></div>
-            <span class="war-detail-th"><img class="compete-townhall" src="${getTownHallAsset(base.townHall)}" alt="${escapeHtml(t('war.townHall', { level: townHall }))}"> ${escapeHtml(t('war.townHallShort'))}${escapeHtml(townHall)}</span>
-        </header>
-        <div class="war-detail-score"><strong>${stars(base.stars)}</strong><span>${percent(base.destruction)} ${escapeHtml(t('war.bestDestruction'))}</span></div>
-        <section><h3>${escapeHtml(t('war.attackHistory'))}</h3>${base.attacks.length ? base.attacks.map(attack => `
-            <div class="war-detail-row"><span>${escapeHtml(attack.attackerName)} · ${escapeHtml(t('war.townHallShort'))}${attack.attackerTownHall}</span><strong>${stars(attack.stars)} · ${percent(attack.destructionPercentage)}</strong></div>`).join('') : `<p class="war-muted">${escapeHtml(t('war.noAttacks'))}</p>`}</section>
-        ${sideName === 'enemy' ? `<section><h3>${escapeHtml(t('war.assignments'))}</h3>
-            <div class="war-assignment-list">${assigned.length ? assigned.map(item => `
-                <div class="war-assignment-item"><span>${escapeHtml(roster.find(player => player.tag === item.playerTag)?.name || item.playerTag)} · ${escapeHtml(t('war.attackSlot', { slot: item.attackSlot }))} · ${assignmentLabel(item, base.mapPosition)}</span><em class="is-${assignmentClass(item, report)}">${escapeHtml(assignmentStateLabel(item, report))}</em><button type="button" data-remove-assignment="${escapeHtml(item.id)}" aria-label="${escapeHtml(t('war.removeAssignment'))}">×</button></div>`).join('') : `<p class="war-muted">${escapeHtml(t('war.nobodyAssigned'))}</p>`}</div>
-            <form class="war-assignment-form" data-assignment-position="${base.mapPosition}">
-                <select name="playerTag" required><option value="">${escapeHtml(t('war.assignAttacker'))}</option>${roster.map(player => `<option value="${escapeHtml(player.tag)}">${escapeHtml(player.name)}</option>`).join('')}</select>
-                <select name="attackSlot"><option value="1">${escapeHtml(t('war.attackOne'))}</option><option value="2">${escapeHtml(t('war.attackTwo'))}</option></select>
-                <select name="type"><option value="base">${escapeHtml(t('war.baseAssignment', { position: base.mapPosition }))}</option><option value="cleanup">${escapeHtml(t('war.cleanupAssignment', { position: base.mapPosition }))}</option><option value="hold">${escapeHtml(t('war.hold'))}</option><option value="free">${escapeHtml(t('war.freeAttack'))}</option></select>
-                <button type="submit">${escapeHtml(t('war.assign'))}</button>
-            </form></section>` : ''}
-        ${recommendations.length ? `<section><h3>${escapeHtml(t('war.recommendedMatchup'))}</h3>${recommendations.slice(0, 2).map(item => `
-            <div class="war-recommendation"><strong>${escapeHtml(item.attacker.name)}</strong><span>${escapeHtml(t('war.expectedStarsNet', { stars: item.expectedStars.toFixed(1), net: item.expectedNetStars.toFixed(1) }))}</span><small>${reasonLabel(item.reason)} · ${escapeHtml(t('war.confidence', { confidence: item.confidence }))}</small></div>`).join('')}</section>` : ''}`;
+    element.innerHTML = renderBaseDetailHtml(base, sideName);
     installAssetFallbacks(element);
+}
+
+function renderBaseDetailHtml(base, sideName) {
+    const townHall = townHallLabel(base.townHall);
+    const historyKey = sideName === 'own' ? 'war.defenseHistory' : 'war.attackHistory';
+    const history = base.attacks.length
+        ? base.attacks.map(renderAttackRow).join('')
+        : `<p class="war-muted">${escapeHtml(t('war.noAttacks'))}</p>`;
+    return `<header>
+        <div><p>${escapeHtml(t('war.base', { position: base.mapPosition }))}</p><h2>${escapeHtml(base.name)}</h2><span>${escapeHtml(base.tag)}</span></div>
+        <span class="war-detail-th"><img class="compete-townhall" src="${getTownHallAsset(base.townHall)}" alt="${escapeHtml(t('war.townHall', { level: townHall }))}"> ${escapeHtml(t('war.townHallShort'))}${escapeHtml(townHall)}</span>
+    </header>
+    <div class="war-detail-score"><strong>${stars(base.stars)}</strong><span>${percent(base.destruction)} ${escapeHtml(t('war.bestDestruction'))}</span></div>
+    <section><h3>${escapeHtml(t(historyKey))}</h3>${history}</section>`;
+}
+
+function renderAttackRow(attack) {
+    return `<div class="war-detail-row"><span>${escapeHtml(attack.attackerName)} · ${escapeHtml(t('war.townHallShort'))}${attack.attackerTownHall}</span><strong>${stars(attack.stars)} · ${percent(attack.destructionPercentage)}</strong></div>`;
 }
 
 export function renderRoster(element, report, filter = 'all') {
@@ -187,43 +177,10 @@ function timeLabel(live, referenceTime = '') {
     return t('war.timeRemaining', { duration });
 }
 
-function reasonLabel(reason) {
-    return t({
-        highImpact: 'war.reasonHighImpact',
-        goodMatchup: 'war.reasonGoodMatchup',
-        bestAvailable: 'war.reasonBestAvailable'
-    }[reason] || 'war.reasonRecommended');
-}
-
 function mathLabel(status) {
     return t(status === 'won'
         ? 'war.mathWon'
         : status === 'lost' ? 'war.mathLost' : 'war.mathOpen');
-}
-
-function assignmentLabel(assignment, position) {
-    if (assignment.type === 'hold') return t('war.hold');
-    if (assignment.type === 'free') return t('war.freeAttack');
-    return assignment.type === 'cleanup'
-        ? t('war.cleanupAssignment', { position: `#${position}` })
-        : t('war.baseAssignment', { position: `#${position}` });
-}
-
-function assignmentClass(assignment, report) {
-    return classToken(
-        assignmentState(assignment, report),
-        ASSIGNMENT_STATE_CLASSES,
-        'planned'
-    );
-}
-
-function assignmentStateLabel(assignment, report) {
-    const state = assignmentState(assignment, report);
-    return t({
-        planned: 'war.assignmentPlanned',
-        changed: 'war.assignmentChanged',
-        completed: 'war.assignmentCompleted'
-    }[state] || 'war.assignmentPlanned');
 }
 
 function classToken(value, allowed, fallback) {

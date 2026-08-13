@@ -1,7 +1,6 @@
 import { getClanCurrentWarRequest, getClanWarLogRequest } from '../API/API-Clan.js';
 import { competeT as t } from '../operation-board/compete-locales.js';
 import { enrichWithHistoricalPerformance } from '../operation-board/operation-board-performance.js?v=20260729-2';
-import { getWarAssignments } from '../Supabase/Supabase-WarAssignments.js';
 import { fixtureWar, setEmptyState } from './war-page-utils.js';
 import { buildWarHistory } from './war-history-model.js';
 import {
@@ -18,7 +17,6 @@ export function createWarLoadController({
     selectHistoryTab,
     fetchCurrentWar = getClanCurrentWarRequest,
     fetchWarLog = getClanWarLogRequest,
-    fetchAssignments = getWarAssignments,
     enrichReport = enrichWithHistoricalPerformance,
     buildReport = buildWarBoardReport,
     buildHistory = buildWarHistory,
@@ -28,22 +26,10 @@ export function createWarLoadController({
     let requestToken = 0;
     let report = null;
     let historyData = null;
-    let assignments = [];
     let lastEmptyCopy = null;
 
     function getState() {
-        return { report, historyData, assignments };
-    }
-
-    function replaceAssignment(saved) {
-        assignments = assignments.filter(item =>
-            !(item.playerTag === saved.playerTag
-                && item.attackSlot === saved.attackSlot)
-        ).concat(saved);
-    }
-
-    function removeAssignment(assignmentId) {
-        assignments = assignments.filter(item => item.id !== assignmentId);
+        return { report, historyData };
     }
 
     function cancel() {
@@ -63,7 +49,6 @@ export function createWarLoadController({
     function clearState() {
         report = null;
         historyData = null;
-        assignments = [];
     }
 
     function showLoading(forceRefresh) {
@@ -91,8 +76,6 @@ export function createWarLoadController({
             if (!isCurrent(token, signal)) return;
             report = buildReport(rawWar, getSelectedTag());
             historyData = buildHistory(rawHistory, getSelectedTag());
-            assignments = await loadAssignments(report, fixture);
-            if (!isCurrent(token, signal)) return;
             showReport();
             if (!report.wars.length) return showHistoryOnly();
             setStatus(t('war.statusSynced'));
@@ -111,12 +94,6 @@ export function createWarLoadController({
             fetchCurrentWar(clanTag, { signal, forceRefresh }),
             fetchWarLog(clanTag, { signal, forceRefresh })
         ]);
-    }
-
-    async function loadAssignments(currentReport, fixture) {
-        if (fixture || !currentReport.warKey) return [];
-        return fetchAssignments(currentReport.clan.tag, currentReport.warKey)
-            .catch(() => []);
     }
 
     function showReport() {
@@ -185,8 +162,6 @@ export function createWarLoadController({
         cancel,
         getState,
         load,
-        removeAssignment,
-        refreshLabels,
-        replaceAssignment
+        refreshLabels
     };
 }

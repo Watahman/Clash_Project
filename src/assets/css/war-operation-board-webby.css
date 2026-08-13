@@ -206,9 +206,7 @@
 .war-board--webby .war-tag-form input,
 .war-board--webby .war-tag-form button,
 .war-board--webby .war-refresh-button,
-.war-board--webby .war-roster-toolbar select,
-.war-board--webby .war-assignment-form select,
-.war-board--webby .war-assignment-form button {
+.war-board--webby .war-roster-toolbar select {
     min-height: 2.85rem;
     border-color: var(--wb-line);
     border-radius: .72rem;
@@ -237,8 +235,7 @@
     border-radius: .72rem;
 }
 
-.war-board--webby .war-tag-form button,
-.war-board--webby .war-assignment-form button {
+.war-board--webby .war-tag-form button {
     border-left: 1px solid rgba(231, 185, 75, .3);
     border-radius: .72rem;
     background: linear-gradient(135deg, rgba(231, 185, 75, .24), rgba(231, 185, 75, .1));
@@ -256,8 +253,7 @@
 }
 
 .war-board--webby .war-refresh-button:not(:disabled):hover,
-.war-board--webby .war-tag-form button:hover,
-.war-board--webby .war-assignment-form button:hover {
+.war-board--webby .war-tag-form button:hover {
     transform: translateY(-1px);
     box-shadow: 0 .65rem 1.4rem rgba(0, 0, 0, .14);
 }
@@ -558,17 +554,7 @@
     color: var(--wb-red);
 }
 
-/* Live workspace */
-.war-board--webby .war-live-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.65fr) minmax(18rem, .58fr);
-    gap: clamp(.8rem, 1.4vw, 1.2rem);
-    align-items: start;
-}
-
-.war-board--webby .war-primary-panel,
-.war-board--webby .war-detail-panel,
-.war-board--webby .war-map-page,
+/* Workspace panels */
 .war-board--webby .war-stat-card,
 .war-board--webby .war-player-card,
 .war-board--webby .war-history-row,
@@ -576,17 +562,6 @@
     border-color: var(--wb-line);
     background: var(--wb-panel);
     backdrop-filter: blur(.8rem);
-}
-
-.war-board--webby .war-primary-panel,
-.war-board--webby .war-map-page,
-.war-board--webby .war-detail-panel {
-    border-radius: var(--wb-radius-lg);
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, .1);
-}
-
-.war-board--webby .war-primary-panel {
-    overflow: hidden;
 }
 
 .war-board--webby .war-panel-heading,
@@ -611,6 +586,25 @@
     color: var(--wb-muted);
     line-height: 1.5;
 }
+
+/* Live map */
+.war-board--webby .war-live-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(18rem, .58fr);
+    gap: clamp(.8rem, 1.4vw, 1.2rem);
+    align-items: start;
+}
+
+.war-board--webby .war-primary-panel,
+.war-board--webby .war-detail-panel {
+    border-color: var(--wb-line);
+    background: var(--wb-panel);
+    backdrop-filter: blur(.8rem);
+    border-radius: var(--wb-radius-lg);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, .1);
+}
+
+.war-board--webby .war-primary-panel { overflow: hidden; }
 
 .war-board--webby .war-side-switch {
     gap: .2rem;
@@ -637,7 +631,6 @@
     box-shadow: 0 .25rem .8rem rgba(0, 0, 0, .1);
 }
 
-/* Battlefield */
 .war-board--webby .war-map {
     --wb-map-gap: clamp(.55rem, 1vw, .9rem);
     position: relative;
@@ -645,13 +638,6 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--wb-map-gap) clamp(2.7rem, 5vw, 5.7rem);
     padding: clamp(1.1rem, 2.3vw, 2rem) clamp(1rem, 2.6vw, 2.2rem) clamp(1.6rem, 3vw, 2.7rem);
-    background:
-        radial-gradient(ellipse at 50% 45%, rgba(231, 185, 75, .065), transparent 25%),
-        linear-gradient(90deg, transparent 49.85%, rgba(231, 185, 75, .095) 50%, transparent 50.15%),
-        linear-gradient(rgba(255, 255, 255, .012) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, .012) 1px, transparent 1px),
-        var(--wb-bg-soft);
-    background-size: auto, auto, 2rem 2rem, 2rem 2rem, auto;
 }
 
 .war-board--webby .war-map::before {
@@ -665,7 +651,6 @@
     font-size: .5rem;
     font-weight: 900;
     letter-spacing: .16em;
-    writing-mode: horizontal-tb;
 }
 
 .war-board--webby .war-map::after {
@@ -689,12 +674,7 @@
         rgba(17, 22, 31, .9);
     color: var(--wb-text);
     box-shadow: inset 0 1px rgba(255, 255, 255, .025);
-    transition:
-        transform .18s ease,
-        border-color .18s ease,
-        background-color .18s ease,
-        box-shadow .18s ease,
-        opacity .18s ease;
+    transition: transform .18s ease, border-color .18s ease, background-color .18s ease, box-shadow .18s ease, opacity .18s ease;
 }
 
 :root[data-theme="light"] .war-board--webby .war-base {
@@ -726,9 +706,7 @@
     background:
         linear-gradient(135deg, rgba(231, 185, 75, .09), transparent 58%),
         rgba(22, 27, 37, .98);
-    box-shadow:
-        0 0 0 1px rgba(231, 185, 75, .1),
-        0 1rem 2.8rem rgba(0, 0, 0, .2);
+    box-shadow: 0 0 0 1px rgba(231, 185, 75, .1), 0 1rem 2.8rem rgba(0, 0, 0, .2);
 }
 
 :root[data-theme="light"] .war-board--webby .war-base.is-selected {
@@ -742,19 +720,9 @@
     opacity: 1;
 }
 
-.war-board--webby .war-base.is-cleared {
-    opacity: .54;
-}
-
-.war-board--webby .war-base.is-cleared::before {
-    background: var(--wb-green);
-    opacity: .7;
-}
-
-.war-board--webby .war-base.is-damaged::before {
-    background: var(--wb-amber);
-    opacity: .85;
-}
+.war-board--webby .war-base.is-cleared { opacity: .54; }
+.war-board--webby .war-base.is-cleared::before { background: var(--wb-green); opacity: .7; }
+.war-board--webby .war-base.is-damaged::before { background: var(--wb-amber); opacity: .85; }
 
 .war-board--webby .war-base-position {
     width: 1.75rem;
@@ -771,15 +739,8 @@
     height: 3rem;
     border-color: rgba(231, 185, 75, .18);
     border-radius: .75rem;
-    background:
-        radial-gradient(circle at 35% 25%, rgba(231, 185, 75, .12), transparent 48%),
-        linear-gradient(145deg, #202632, #11151c);
+    background: radial-gradient(circle at 35% 25%, rgba(231, 185, 75, .12), transparent 48%), linear-gradient(145deg, #202632, #11151c);
     box-shadow: inset 0 1px rgba(255, 255, 255, .04);
-}
-
-.war-board--webby .war-base-emblem b {
-    color: var(--wb-gold-soft);
-    font-size: .66rem;
 }
 
 .war-board--webby .war-base-emblem i {
@@ -793,26 +754,9 @@
     text-align: center;
 }
 
-.war-board--webby .war-base-copy strong {
-    color: var(--wb-text);
-    font-size: .82rem;
-    letter-spacing: -.01em;
-}
+.war-board--webby .war-base-copy strong { color: var(--wb-text); font-size: .82rem; letter-spacing: -.01em; }
+.war-board--webby .war-base-copy small { color: var(--wb-muted); font-size: .63rem; }
 
-.war-board--webby .war-base-copy small {
-    color: var(--wb-muted);
-    font-size: .63rem;
-}
-
-.war-board--webby .war-base-assigned {
-    align-self: end;
-    color: var(--wb-gold-soft);
-    font-size: .57rem;
-    letter-spacing: .03em;
-    text-transform: uppercase;
-}
-
-/* Inspector */
 .war-board--webby .war-detail-panel {
     top: 5.6rem;
     max-height: calc(100vh - 7rem);
@@ -826,107 +770,21 @@
     min-height: 7rem;
     padding: 1.25rem;
     border-color: var(--wb-line);
-    background:
-        radial-gradient(circle at 85% 20%, rgba(231, 185, 75, .11), transparent 8rem),
-        linear-gradient(180deg, rgba(255, 255, 255, .02), transparent);
+    background: radial-gradient(circle at 85% 20%, rgba(231, 185, 75, .11), transparent 8rem), linear-gradient(180deg, rgba(255, 255, 255, .02), transparent);
 }
 
-.war-board--webby .war-detail-panel > header::after {
-    content: "TARGET";
-    position: absolute;
-    right: 1.2rem;
-    bottom: .8rem;
-    color: rgba(255, 255, 255, .04);
-    font-size: 1.8rem;
-    font-weight: 900;
-    letter-spacing: -.05em;
-}
+.war-board--webby .war-detail-panel header h2 { margin: .22rem 0; font-size: clamp(1.15rem, 2vw, 1.55rem); letter-spacing: -.035em; }
+.war-board--webby .war-detail-th { min-width: 3.2rem; min-height: 3.2rem; border-color: rgba(231, 185, 75, .25); border-radius: .8rem; background: rgba(231, 185, 75, .075); color: var(--wb-gold-soft) !important; font-weight: 850; }
+.war-board--webby .war-detail-score { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 1rem; padding: 1.2rem; border-color: var(--wb-line); }
+.war-board--webby .war-detail-score strong { color: var(--wb-gold-soft); font-size: clamp(1.6rem, 3vw, 2.4rem); letter-spacing: -.04em; }
+.war-board--webby .war-detail-score span { color: var(--wb-muted); font-size: .72rem; }
+.war-board--webby .war-detail-panel section { padding: 1.1rem 1.2rem 1.25rem; border-color: var(--wb-line); }
+.war-board--webby .war-detail-panel section h3 { margin-bottom: .75rem; color: var(--wb-muted-strong); font-size: .65rem; letter-spacing: .11em; text-transform: uppercase; }
+.war-board--webby .war-detail-row { border-color: var(--wb-line); }
 
-.war-board--webby .war-detail-panel header h2 {
-    margin: .22rem 0;
-    font-size: clamp(1.15rem, 2vw, 1.55rem);
-    letter-spacing: -.035em;
-}
-
-.war-board--webby .war-detail-th {
-    display: inline-grid;
-    min-width: 3.2rem;
-    min-height: 3.2rem;
-    place-items: center;
-    border: 1px solid rgba(231, 185, 75, .25);
-    border-radius: .8rem;
-    background: rgba(231, 185, 75, .075);
-    color: var(--wb-gold-soft) !important;
-    font-weight: 850;
-}
-
-.war-board--webby .war-detail-score {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    gap: 1rem;
-    padding: 1.2rem;
-    border-color: var(--wb-line);
-}
-
-.war-board--webby .war-detail-score strong {
-    color: var(--wb-gold-soft);
-    font-size: clamp(1.6rem, 3vw, 2.4rem);
-    letter-spacing: -.04em;
-}
-
-.war-board--webby .war-detail-score span {
-    color: var(--wb-muted);
-    font-size: .72rem;
-}
-
-.war-board--webby .war-detail-panel section {
-    padding: 1.1rem 1.2rem 1.25rem;
-    border-color: var(--wb-line);
-}
-
-.war-board--webby .war-detail-panel section h3 {
-    margin-bottom: .75rem;
-    color: var(--wb-muted-strong);
-    font-size: .65rem;
-    letter-spacing: .11em;
-    text-transform: uppercase;
-}
-
-.war-board--webby .war-detail-row,
-.war-board--webby .war-assignment-item,
-.war-board--webby .war-recommendation {
-    border-color: var(--wb-line);
-}
-
-.war-board--webby .war-assignment-item {
-    background: rgba(255, 255, 255, .02);
-    border-radius: .7rem;
-}
-
-.war-board--webby .war-assignment-form {
-    gap: .38rem;
-}
-
-.war-board--webby .war-assignment-form select,
-.war-board--webby .war-assignment-form button {
-    min-height: 2.45rem;
-    font-size: .7rem;
-}
-
-.war-board--webby .war-recommendation {
-    position: relative;
-    overflow: hidden;
-    border-radius: .75rem;
-    background: rgba(231, 185, 75, .045);
-}
-
-.war-board--webby .war-recommendation::before {
-    content: "";
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: .15rem;
-    background: var(--wb-gold);
+@media (prefers-reduced-motion: reduce) {
+    .war-board--webby #war-live-map[data-war-map-side] { transition: none; }
+    .war-board--webby #war-live-map.is-side-switching .war-base { animation: none; }
 }
 
 /* Stats — intentionally asymmetric */
@@ -1015,16 +873,6 @@
 
 .war-board--webby .war-mini-row strong {
     color: var(--wb-gold-soft);
-}
-
-/* Full map */
-.war-board--webby .war-map-page {
-    overflow: hidden;
-}
-
-.war-board--webby .war-map-expanded {
-    min-height: 30rem;
-    align-content: start;
 }
 
 /* Roster */
@@ -1262,34 +1110,6 @@
         flex: 0 0 auto;
     }
 
-    .war-board--webby .war-map {
-        gap: .55rem 2rem;
-        padding-inline: .75rem;
-    }
-
-    .war-board--webby .war-base {
-        grid-template-columns: auto minmax(0, 1fr);
-        min-height: 3.65rem;
-        gap: .5rem;
-    }
-
-    .war-board--webby .war-base-position {
-        display: none;
-    }
-
-    .war-board--webby .war-base-emblem {
-        width: 2.45rem;
-        height: 2.45rem;
-    }
-
-    .war-board--webby .war-base-copy {
-        grid-column: 2;
-    }
-
-    .war-board--webby .war-base-assigned {
-        grid-column: 2;
-    }
-
     .war-board--webby .war-stats-grid {
         grid-template-columns: 1fr;
     }
@@ -1342,26 +1162,6 @@
 
     .war-board--webby .war-score-meta {
         grid-row: 3;
-    }
-
-    .war-board--webby .war-map {
-        grid-template-columns: 1fr;
-        gap: .5rem;
-        background:
-            linear-gradient(rgba(255, 255, 255, .012) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, .012) 1px, transparent 1px),
-            var(--wb-bg-soft);
-        background-size: 2rem 2rem, 2rem 2rem, auto;
-    }
-
-    .war-board--webby .war-map::before,
-    .war-board--webby .war-map::after {
-        display: none;
-    }
-
-    .war-board--webby .war-base:nth-child(even),
-    .war-board--webby .war-base:nth-child(odd) {
-        grid-column: 1;
     }
 
     .war-board--webby .war-player-metrics {

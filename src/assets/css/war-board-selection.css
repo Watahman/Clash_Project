@@ -54,13 +54,8 @@ body.workspace-app .war-board--webby .war-refresh-button:disabled {
     transition: background-position .48s cubic-bezier(.22, 1, .36, 1);
 }
 
-.war-board--webby #war-live-map[data-war-map-side="own"] {
-    background-position: left center;
-}
-
-.war-board--webby #war-live-map[data-war-map-side="enemy"] {
-    background-position: right center;
-}
+.war-board--webby #war-live-map[data-war-map-side="own"] { background-position: left center; }
+.war-board--webby #war-live-map[data-war-map-side="enemy"] { background-position: right center; }
 
 .war-board--webby .war-map::before {
     content: "";
@@ -81,18 +76,9 @@ body.workspace-app .war-board--webby .war-refresh-button:disabled {
     opacity: .48;
 }
 
-.war-board--webby #war-live-map {
-    min-height: clamp(14rem, 17vw, 18rem);
-}
-
-.war-board--webby .war-primary-panel,
-.war-board--webby .war-map-page {
-    padding: 0;
-}
-
-.war-board--webby .war-map {
-    border-radius: 0 0 var(--wb-radius-lg) var(--wb-radius-lg);
-}
+.war-board--webby #war-live-map { min-height: clamp(14rem, 17vw, 18rem); }
+.war-board--webby .war-primary-panel { padding: 0; }
+.war-board--webby .war-map { border-radius: 0 0 var(--wb-radius-lg) var(--wb-radius-lg); }
 
 body.workspace-app .war-board--webby .war-base {
     width: min(100%, 31rem);
@@ -126,14 +112,8 @@ body.workspace-app .war-board--webby .war-base {
     pointer-events: none;
 }
 
-.war-board--webby .war-base-copy strong {
-    font-size: .88rem;
-    font-weight: 800;
-}
-
-.war-board--webby .war-base-copy small {
-    font-size: .66rem;
-}
+.war-board--webby .war-base-copy strong { font-size: .88rem; font-weight: 800; }
+.war-board--webby .war-base-copy small { font-size: .66rem; }
 
 .war-board--webby .war-base:hover,
 .war-board--webby .war-base:focus-visible {
@@ -152,44 +132,18 @@ body.workspace-app .war-board--webby .war-base.is-selected {
     opacity: 1;
     border: 1px solid var(--wb-gold);
     background: rgba(20, 26, 36, .88);
-    box-shadow:
-        0 0 0 2px rgba(231, 185, 75, .45),
-        0 .55rem .9rem rgba(0, 0, 0, .22);
+    box-shadow: 0 0 0 2px rgba(231, 185, 75, .45), 0 .55rem .9rem rgba(0, 0, 0, .22);
 }
 
 :root[data-theme="light"] body.workspace-app .war-board--webby .war-base.is-selected {
     border-color: var(--wb-gold);
     background: rgba(255, 255, 255, .92);
-    box-shadow:
-        0 0 0 2px rgba(168, 115, 19, .42),
-        0 .55rem .9rem rgba(23, 34, 51, .16);
+    box-shadow: 0 0 0 2px rgba(168, 115, 19, .42), 0 .55rem .9rem rgba(23, 34, 51, .16);
 }
 
-.war-board--webby .war-base.is-selected::before {
-    background: var(--wb-gold);
-    opacity: 1;
-}
-
-.war-board--webby .war-base.is-cleared {
-    opacity: .84;
-}
-
-.war-board--webby .war-base.is-cleared.is-selected {
-    opacity: 1;
-}
-
-.war-board--webby .war-detail-panel {
-    max-height: none;
-    overflow: visible;
-    background: rgba(17, 22, 31, .84);
-    backdrop-filter: blur(.45rem);
-    box-shadow: 0 .45rem .75rem rgba(0, 0, 0, .14);
-}
-
-:root[data-theme="light"] .war-board--webby .war-detail-panel {
-    background: rgba(255, 255, 255, .88);
-    box-shadow: 0 .45rem .75rem rgba(23, 34, 51, .12);
-}
+.war-board--webby .war-base.is-selected::before { background: var(--wb-gold); opacity: 1; }
+.war-board--webby .war-base.is-cleared { opacity: .84; }
+.war-board--webby .war-base.is-cleared.is-selected { opacity: 1; }
 
 .war-board--webby #war-live-map.is-side-switching .war-base {
     animation-delay: calc(var(--base-index, 0) * 24ms);
@@ -198,13 +152,8 @@ body.workspace-app .war-board--webby .war-base.is-selected {
     animation-timing-function: cubic-bezier(.22, 1, .36, 1);
 }
 
-.war-board--webby #war-live-map.is-shifting-to-own .war-base {
-    animation-name: war-base-enter-from-left;
-}
-
-.war-board--webby #war-live-map.is-shifting-to-enemy .war-base {
-    animation-name: war-base-enter-from-right;
-}
+.war-board--webby #war-live-map.is-shifting-to-own .war-base { animation-name: war-base-enter-from-left; }
+.war-board--webby #war-live-map.is-shifting-to-enemy .war-base { animation-name: war-base-enter-from-right; }
 
 @keyframes war-base-enter-from-left {
     from { opacity: 0; transform: translateX(-1rem); }
@@ -232,21 +181,14 @@ body.workspace-app .war-board--webby .war-base.is-selected {
         gap: .5rem;
     }
     body.workspace-app .war-board--webby .war-base-position { display: none; }
-    body.workspace-app .war-board--webby .war-base-emblem {
-        width: 2.45rem;
-        height: 2.45rem;
-    }
-    body.workspace-app .war-board--webby .war-base-copy,
-    body.workspace-app .war-board--webby .war-base-assigned { grid-column: 2; }
+    body.workspace-app .war-board--webby .war-base-emblem { width: 2.45rem; height: 2.45rem; }
+    body.workspace-app .war-board--webby .war-base-copy { grid-column: 2; }
 }
 
 @media (max-width: 38rem) {
     .war-board--webby .war-board-controls { grid-template-columns: 1fr; }
     .war-board--webby .war-refresh-button { grid-column: auto; }
-    .war-board--webby .war-map {
-        gap: .7rem;
-        padding: 1.1rem .8rem 1.35rem;
-    }
+    .war-board--webby .war-map { gap: .7rem; padding: 1.1rem .8rem 1.35rem; }
     .war-board--webby #war-live-map { min-height: 0; }
     .war-board--webby .war-base { width: 100%; }
 }

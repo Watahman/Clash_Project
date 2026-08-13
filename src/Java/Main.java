@@ -19,7 +19,6 @@ public class Main {
         SUPABASE_GroupActivity supaGroupActivity;
         SUPABASE_GroupPolls supaGroupPolls;
         SUPABASE_Notifications supaNotifications;
-        SUPABASE_WarAssignments supaWarAssignments;
         SUPABASE_Friend supaFriend;
         SUPABASE_CWLPlanner supaCWLPlanner;
         SUPABASE_User supaUser;
@@ -72,7 +71,6 @@ public class Main {
         supaGroupActivity = new SUPABASE_GroupActivity(server, conf);
         supaGroupPolls = new SUPABASE_GroupPolls(server, conf);
         supaNotifications = new SUPABASE_Notifications(server, conf);
-        supaWarAssignments = new SUPABASE_WarAssignments(server, conf);
 
         apiClan.getClanCurrentWarLeagueGroup();
         apiClan.searchClans();
@@ -164,9 +162,6 @@ public class Main {
         supaGroupPolls.deleteGroupPoll();
         supaNotifications.getNotifications();
         supaNotifications.markNotificationRead();
-        supaWarAssignments.getAssignments();
-        supaWarAssignments.saveAssignment();
-        supaWarAssignments.deleteAssignment();
 
         server.createContext("/health", exchange -> {
             byte[] response = "{\"status\":\"ok\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8);

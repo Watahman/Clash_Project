@@ -144,9 +144,6 @@
 }
 
 .operation-workspace-page .op-flat-section,
-.war-board--webby .war-primary-panel,
-.war-board--webby .war-detail-panel,
-.war-board--webby .war-map-page,
 .war-board--webby .war-stat-card,
 .war-board--webby .war-history-summary,
 .war-board--webby .war-history-list {
@@ -219,8 +216,7 @@
 
 .war-board--webby .war-live-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); }
 .war-board--webby .war-primary-panel,
-.war-board--webby .war-detail-panel,
-.war-board--webby .war-map-page { min-width: 0; padding: 16px; }
+.war-board--webby .war-detail-panel { min-width: 0; padding: 16px; }
 .war-board--webby .war-map { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); padding: 16px; }
 .war-board--webby .war-base { align-items: center; display: grid; gap: 8px; grid-template-columns: 28px 48px minmax(0, 1fr); min-height: 64px; padding: 8px; text-align: left; }
 .war-board--webby .war-base:hover,
@@ -263,6 +259,7 @@
     .war-board--webby .war-board-controls { justify-content: flex-start; margin-top: 14px; }
     .war-board--webby .war-stats-grid { grid-template-columns: 1fr 1fr; }
     .war-board--webby .war-stat-card:last-child { grid-column: 1 / -1; }
+    .war-board--webby .war-base { min-height: 56px; }
 }
 
 @media (max-width: 620px) {
@@ -295,7 +292,6 @@
     .war-board--webby .war-history-summary { grid-template-columns: 1fr; }
     .war-board--webby .war-history-row { grid-template-columns: 34px minmax(0, 1fr); }
     .war-board--webby .war-history-row > :nth-child(n + 3) { grid-column: 2; }
-    .war-board--webby .war-base { min-height: 56px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -55,7 +55,6 @@ const pageHelp = Object.freeze({
         items: [
             'guidance.war.itemLoad',
             'guidance.war.itemLive',
-            'guidance.war.itemMap',
             'guidance.war.itemRoster',
             'guidance.war.itemHistory'
         ]
@@ -108,7 +107,6 @@ const tabDescriptions = Object.freeze({
     },
     warOperation: {
         '[data-war-panel="live"]': 'guidance.tabs.warLive',
-        '[data-war-panel="map"]': 'guidance.tabs.warMap',
         '[data-war-panel="roster"]': 'guidance.tabs.warRoster',
         '[data-war-panel="history"]': 'guidance.tabs.warHistory'
     }

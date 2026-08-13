@@ -12,7 +12,6 @@ import { buildWarBoardReport } from '../../src/assets/js/war-operation-board/war
 import { fixtureWar } from '../../src/assets/js/war-operation-board/war-page-utils.js';
 import { buildWarHistory } from '../../src/assets/js/war-operation-board/war-history-model.js';
 import {
-    renderBaseDetail,
     renderRoster,
     renderScoreStrip,
     renderStats
@@ -151,11 +150,6 @@ describe('Compete i18n coverage', () => {
         const history = buildWarHistory([], '#FIXWAR');
         const forbiddenEnglish = [
             'Projection building',
-            'Attack history',
-            'No attacks on this base yet.',
-            'Assignments',
-            'Nobody assigned yet.',
-            'Recommended matchup',
             'No players match this filter.',
             'Attack usage',
             'No public regular-war history is available for this clan.',
@@ -165,25 +159,16 @@ describe('Compete i18n coverage', () => {
         for (const language of LANGUAGES) {
             await useLanguage(language);
             const score = document.createElement('section');
-            const detail = document.createElement('section');
             const roster = document.createElement('section');
             const stats = document.createElement('section');
             const historySummary = document.createElement('section');
             const historyList = document.createElement('section');
-            const assignment = {
-                id: 'assignment-1',
-                playerTag: '#F001',
-                attackSlot: 1,
-                targetPosition: 1,
-                type: 'base'
-            };
 
             renderScoreStrip(score, report);
-            renderBaseDetail(detail, report, 'enemy', 1, [assignment]);
             renderRoster(roster, report);
             renderStats(stats, report);
             renderWarHistory(historySummary, historyList, history);
-            const output = [score, detail, roster, stats, historySummary, historyList]
+            const output = [score, roster, stats, historySummary, historyList]
                 .map(element => element.textContent)
                 .join(' ');
 

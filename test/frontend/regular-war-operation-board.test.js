@@ -30,12 +30,6 @@ describe('regular Clan War operation board', () => {
         expect(report.roster.map(player => player.name)).toEqual(['Alpha', 'Bravo']);
         expect(first.netStars).toBe(2);
         expect(second.netStars).toBe(1);
-        expect(buildWarMap(report, 'enemy')[0]).toMatchObject({
-            name: 'Enemy one',
-            stars: 3,
-            destruction: 100,
-            state: 'cleared'
-        });
     });
 
     it('keeps missed attacks hidden until the regular war has ended', () => {
@@ -56,6 +50,17 @@ describe('regular Clan War operation board', () => {
         expect(status.ownPotential).toBe(3);
         expect(status.opponentPotential).toBe(4);
         expect(status.status).toBe('open');
+    });
+
+    it('builds both live map sides from the selected clan perspective', () => {
+        const report = buildWarBoardReport(warFixture(), '#AAA');
+        const ownBases = buildWarMap(report, 'own');
+        const enemyBases = buildWarMap(report, 'enemy');
+
+        expect(ownBases[0].name).toBe('Alpha');
+        expect(ownBases[0].attacks[0].attackerName).toBe('Enemy one');
+        expect(enemyBases[0].name).toBe('Enemy one');
+        expect(enemyBases[0].attacks[0].attackerName).toBe('Alpha');
     });
 
     it('rejects a CWL war instead of leaking it into the regular-war board', () => {

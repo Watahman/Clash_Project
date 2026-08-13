@@ -61,8 +61,7 @@ describe('War page load controller', () => {
 
         expect(harness.controller.getState()).toEqual({
             report: null,
-            historyData: null,
-            assignments: []
+            historyData: null
         });
         expect(harness.refs.empty.hidden).toBe(false);
         expect(harness.refs.content.hidden).toBe(true);

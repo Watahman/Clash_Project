@@ -111,6 +111,3 @@ export const _EXT_SUPA_GROUP_POLL_REMIND = "/SupabaseGroupPollRemind";
 export const _EXT_SUPA_GROUP_POLL_DELETE = "/SupabaseGroupPollDelete";
 export const _EXT_SUPA_NOTIFICATIONS_GET = "/SupabaseNotificationsGet";
 export const _EXT_SUPA_NOTIFICATION_READ = "/SupabaseNotificationRead";
-export const _EXT_SUPA_WAR_ASSIGNMENTS_GET = "/SupabaseWarAssignmentsGet";
-export const _EXT_SUPA_WAR_ASSIGNMENT_SAVE = "/SupabaseWarAssignmentSave";
-export const _EXT_SUPA_WAR_ASSIGNMENT_DELETE = "/SupabaseWarAssignmentDelete";

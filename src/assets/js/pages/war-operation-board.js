@@ -8,10 +8,6 @@ import {
     initCompeteI18n
 } from '../operation-board/compete-locales.js';
 import { profileHTML } from '../profile/profile_popup.js';
-import {
-    deleteWarAssignment,
-    setWarAssignment
-} from '../Supabase/Supabase-WarAssignments.js';
 import { loadLinkedWarClans } from '../war-operation-board/war-clan-source.js';
 import { createWarLoadController } from '../war-operation-board/war-page-loader.js';
 import { bindWarPageEvents } from '../war-operation-board/war-page-events.js';
@@ -28,7 +24,7 @@ import {
 
 const refs = {};
 let selectedTag = '';
-let mapSide = 'enemy';
+let mapSide = 'own';
 let selectedPosition = 1;
 let activeFixture = null;
 let warLoader;
@@ -65,7 +61,6 @@ async function init() {
         renderCurrent,
         getReport: () => warLoader?.getState().report,
         handleBoardClick,
-        handleAssignmentSubmit,
         renderRoster
     });
     initPlayerPerformancePopover({
@@ -95,7 +90,6 @@ function collectRefs() {
         score: document.querySelector('#war-score-strip'),
         status: document.querySelector('#war-status-line'),
         liveMap: document.querySelector('#war-live-map'),
-        fullMap: document.querySelector('#war-full-map'),
         detail: document.querySelector('#war-base-detail'),
         stats: document.querySelector('#war-stats-grid'),
         roster: document.querySelector('#war-roster'),
@@ -145,12 +139,11 @@ function loadWar(forceRefresh = false) {
 }
 
 function renderCurrent() {
-    const { report, historyData, assignments } = warLoader?.getState() || {};
+    const { report, historyData } = warLoader?.getState() || {};
     if (!report) return;
+    renderWarMap(refs.liveMap, report, mapSide, selectedPosition);
+    renderBaseDetail(refs.detail, report, mapSide, selectedPosition);
     renderScoreStrip(refs.score, report);
-    renderWarMap(refs.liveMap, report, mapSide, selectedPosition, assignments);
-    renderWarMap(refs.fullMap, report, 'enemy', selectedPosition, assignments);
-    renderBaseDetail(refs.detail, report, mapSide, selectedPosition, assignments);
     renderStats(refs.stats, report);
     renderRoster(refs.roster, report, refs.rosterFilter.value);
     renderWarHistory(refs.historySummary, refs.historyList, historyData);
@@ -159,49 +152,9 @@ function renderCurrent() {
 function handleBoardClick(event) {
     const { report } = warLoader?.getState() || {};
     const base = event.target.closest('[data-base-position]');
-    if (base && report) {
-        selectedPosition = Number(base.dataset.basePosition);
-        renderCurrent();
-        return;
-    }
-    const remove = event.target.closest('[data-remove-assignment]');
-    if (remove && report) {
-        void removeAssignment(remove.dataset.removeAssignment);
-    }
-}
-
-async function handleAssignmentSubmit(event) {
-    const { report } = warLoader?.getState() || {};
-    const form = event.target.closest('.war-assignment-form');
-    if (!form || !report) return;
-    event.preventDefault();
-    const data = new FormData(form);
-    try {
-        const saved = await setWarAssignment(report.clan.tag, report.warKey, {
-            playerTag: data.get('playerTag'),
-            attackSlot: Number(data.get('attackSlot')),
-            type: data.get('type'),
-            targetPosition: ['base', 'cleanup'].includes(data.get('type'))
-                ? Number(form.dataset.assignmentPosition)
-                : null
-        });
-        warLoader.replaceAssignment(saved);
-        renderCurrent();
-        setStatus(competeT('war.assignmentSaved'));
-    } catch {
-        setStatus(competeT('war.assignmentSaveFailed'), true);
-    }
-}
-
-async function removeAssignment(assignmentId) {
-    try {
-        await deleteWarAssignment(assignmentId);
-        warLoader.removeAssignment(assignmentId);
-        renderCurrent();
-        setStatus(competeT('war.assignmentRemoved'));
-    } catch {
-        setStatus(competeT('war.assignmentRemoveFailed'), true);
-    }
+    if (!base || !report) return;
+    selectedPosition = Number(base.dataset.basePosition);
+    renderCurrent();
 }
 
 function selectTab(tab) {
