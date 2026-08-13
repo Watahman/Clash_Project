@@ -40,13 +40,6 @@
             <div class="op-title-row"><h1 data-compete-i18n="cwl.title">CWL Operation Board</h1><span id="op-cwl-phase" class="op-phase-badge" data-state="unknown">-</span></div>
             <p data-i18n="op.subtitle">Track 7 war days, attacks, stars, destruction, rotation and bonus medals.</p>
         </div>
-        <div class="operation-actions">
-            <button id="op-import-json" class="button button-secondary" type="button" data-i18n="op.import">Import JSON</button>
-            <input id="op-import-file" class="hidden" type="file" accept="application/json,.json" data-compete-aria-label="cwl.chooseJsonFile" aria-label="Choose Operation Board JSON file">
-            <button id="op-export" class="button button-secondary" type="button" data-i18n="op.export">Export JSON</button>
-            <button id="op-refresh" class="button button-primary" type="button" data-i18n="op.refresh">Refresh live data</button>
-            <button id="op-auto-refresh" class="button button-secondary" type="button" aria-pressed="false" data-i18n="op.pauseAutoRefresh">Pause auto refresh</button>
-        </div>
     </header>
 
     <section class="op-context-toolbar compete-contextbar" aria-label="Setup" data-i18n-aria-label="op.setup">
@@ -60,9 +53,16 @@
         <label data-source-control="plan"><span data-compete-i18n="cwl.sourcePlan">Planning</span><select id="op-plan-select"></select></label>
         <label data-source-control="plan"><span data-i18n="op.selectClan">Clan</span><select id="op-clan-select" disabled></select></label>
         <label class="op-season-control"><span data-compete-i18n="cwl.season">Season</span><select id="op-season-select" disabled><option value="current" data-compete-i18n="cwl.currentSeason">Current CWL</option></select></label>
-        <label class="op-standalone-control" data-source-control="direct"><span data-compete-i18n="cwl.sourceDirect">Single clan</span><span class="op-inline-control"><input id="op-standalone-clan-tag" type="text" data-i18n-placeholder="op.standalonePlaceholder" placeholder="Clan tag: #ABC123"><button id="op-standalone-load" type="button" class="button button-secondary" data-i18n="op.loadClan">Load clan</button></span></label>
+        <label class="op-standalone-control" data-source-control="direct" hidden><span data-compete-i18n="cwl.sourceDirect">Single clan</span><span class="op-inline-control"><input id="op-standalone-clan-tag" type="text" data-i18n-placeholder="op.standalonePlaceholder" placeholder="Clan tag: #ABC123"><button id="op-standalone-load" type="button" class="button button-secondary" data-i18n="op.loadClan">Load clan</button></span></label>
         <span class="op-toolbar-spacer"></span>
         <span id="op-live-state" class="op-sync-state" role="status" aria-live="polite" data-state="idle" data-i18n="op.syncIdle">Not synchronized yet</span>
+        <div class="operation-actions op-context-actions">
+            <button id="op-import-json" class="button button-secondary" type="button" data-i18n="op.import">Import JSON</button>
+            <input id="op-import-file" class="hidden" type="file" accept="application/json,.json" data-compete-aria-label="cwl.chooseJsonFile" aria-label="Choose Operation Board JSON file">
+            <button id="op-export" class="button button-secondary" type="button" data-i18n="op.export">Export JSON</button>
+            <button id="op-refresh" class="button button-primary" type="button" data-i18n="op.refresh">Refresh live data</button>
+            <button id="op-auto-refresh" class="button button-secondary" type="button" aria-pressed="false" data-i18n="op.pauseAutoRefresh">Pause auto refresh</button>
+        </div>
     </section>
     <p class="operation-help" id="op-help" data-i18n="op.help" aria-live="polite">Select a planning first, then a clan. The board loads live data when possible.</p>
     <p class="op-board-context" id="op-board-context" hidden></p>
