@@ -150,10 +150,10 @@
     border-radius: var(--radius-small) !important;
     box-shadow: none !important;
     display: grid !important;
-    gap: 6px 10px !important;
-    grid-template-areas: "avatar info delete" "avatar availability controls";
-    grid-template-columns: 36px minmax(0, 1fr) auto !important;
-    min-height: 72px !important;
+    gap: 8px !important;
+    grid-template-areas: "avatar info availability controls delete";
+    grid-template-columns: 34px minmax(0, 1fr) auto minmax(76px, 96px) 34px !important;
+    min-height: 58px !important;
     padding: 9px 10px !important;
     width: 100% !important;
 }
@@ -200,8 +200,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.workspace-planner .cwl-player-hashtag { font-family: var(--font-mono); }
-.workspace-planner .cwl-clan-player-list .cwl-player-clan { display: none; } .workspace-planner .cwl-clan-player-list .cwl-player-hashtag { display: block; margin-top: 2px !important; }
+.workspace-planner .cwl-player-hashtag { display: none !important; }
 .workspace-planner .cwl-availability-indicator {
     align-self: center;
     color: var(--planner-muted);
@@ -215,8 +214,8 @@
 }
 .workspace-planner .cwl-clan-player-list .cwl-availability-indicator {
     grid-area: availability !important;
-    max-width: none;
-    text-align: left;
+    max-width: 5.5rem;
+    text-align: center;
 }
 .workspace-planner .cwl-player-control-group {
     align-items: center;
@@ -230,6 +229,7 @@
 .workspace-planner .cwl-clan-player-list .cwl-player-control-group {
     flex-wrap: nowrap;
     grid-area: controls !important;
+    width: 100%;
 }
 .workspace-planner .cwl-player-control-group select {
     background: transparent !important;
@@ -241,7 +241,7 @@
     min-height: 32px;
     padding: 4px 7px;
 }
-.workspace-planner .cwl-clan-player-list .cwl-player-control-group select { background: var(--surface) !important; border-color: var(--planner-border) !important; font-weight: 700; max-width: 86px; min-height: 30px; padding: 3px 22px 3px 8px; }
+.workspace-planner .cwl-clan-player-list .cwl-player-control-group select { background: var(--surface) !important; border-color: var(--planner-border) !important; font-weight: 700; max-width: none; min-height: 30px; padding: 3px 22px 3px 8px; width: 100%; }
 .workspace-planner .cwl-player-control-group .cwl-move-player { max-width: 120px; }
 .workspace-planner .cwl-player-control-group select:hover,
 .workspace-planner .cwl-player-control-group select:focus-visible {
