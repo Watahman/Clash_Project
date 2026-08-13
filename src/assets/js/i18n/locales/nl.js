@@ -49,6 +49,7 @@ export const nl = Object.freeze({
   "op.loadClan": "Laad clan",
   "op.standaloneInvalid": "Vul een geldige clantag in.",
   "op.standaloneMode": "Losse clan actief",
+  "op.standaloneHelp": "Vul een clantag in en laad die om de board te starten.",
   "op.setup": "Setup",
   "op.refresh": "Refresh live data",
   "op.kicker": "Live CWL tracker",

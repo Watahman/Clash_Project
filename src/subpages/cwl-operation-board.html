@@ -50,9 +50,12 @@
     </header>
 
     <section class="op-context-toolbar compete-contextbar" aria-label="Setup" data-i18n-aria-label="op.setup">
-        <div class="compete-source-switch" role="group" data-compete-aria-label="cwl.source" aria-label="CWL source">
-            <button type="button" data-op-source-mode="plan" aria-pressed="true" data-compete-i18n="cwl.sourcePlan">Planning</button>
-            <button type="button" data-op-source-mode="direct" aria-pressed="false" data-compete-i18n="cwl.sourceDirect">Single clan</button>
+        <div class="compete-source-control">
+            <span data-compete-i18n="cwl.source">CWL source</span>
+            <div class="compete-source-switch" role="group" data-compete-aria-label="cwl.source" aria-label="CWL source">
+                <button type="button" data-op-source-mode="plan" aria-pressed="true" data-compete-i18n="cwl.sourcePlan">Planning</button>
+                <button type="button" data-op-source-mode="direct" aria-pressed="false" data-compete-i18n="cwl.sourceDirect">Single clan</button>
+            </div>
         </div>
         <label data-source-control="plan"><span data-compete-i18n="cwl.sourcePlan">Planning</span><select id="op-plan-select"></select></label>
         <label data-source-control="plan"><span data-i18n="op.selectClan">Clan</span><select id="op-clan-select" disabled></select></label>

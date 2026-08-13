@@ -49,6 +49,7 @@ export const fr = Object.freeze({
   "op.loadClan": "Charger clan",
   "op.standaloneInvalid": "Entre un tag clan valide.",
   "op.standaloneMode": "Mode clan seul actif",
+  "op.standaloneHelp": "Saisissez un tag de clan et chargez-le pour demarrer le tableau.",
   "op.setup": "Configuration",
   "op.refresh": "Actualiser donnees live",
   "op.kicker": "Tracker CWL live",

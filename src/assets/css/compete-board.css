@@ -44,6 +44,14 @@
     padding: 12px;
 }
 
+.compete-source-control { display: grid; gap: 5px; }
+.compete-source-control > span {
+    color: var(--compete-muted);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
 .compete-source-switch { display: flex; gap: 4px; min-height: 40px; }
 .compete-source-switch button {
     background: transparent;

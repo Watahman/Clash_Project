@@ -128,6 +128,51 @@ function loadStandaloneClan() {
     void refreshClanReport(selectedClan);
 }
 
+function changeSourceMode(mode) {
+    resetSourceState();
+    if (mode === 'plan') {
+        preparePlanSource();
+        return;
+    }
+    prepareDirectSource();
+}
+
+function resetSourceState() {
+    cancelReportLoad();
+    selectedPlan = null;
+    selectedClan = null;
+    currentReport = null;
+    latestReport = null;
+    planSelectToken += 1;
+    activeTab = null;
+    activeBoardKey = '';
+    historyController?.resetForClan();
+    clearReport();
+    setState('idle');
+}
+
+function preparePlanSource() {
+    refs.standaloneInput.value = '';
+    refs.planSelect.value = '';
+    renderPlanRequired(refs);
+    setHelp(refs, t('op.help'));
+    if (!hasLoadedPlans()) void loadPlans();
+    refs.planSelect.focus();
+}
+
+function prepareDirectSource() {
+    renderStandaloneMode(refs);
+    refs.standaloneInput.value = '';
+    setHelp(refs, t('op.standaloneHelp'));
+    refs.standaloneInput.focus();
+}
+
+function hasLoadedPlans() {
+    return Array.from(refs.planSelect.options || []).some(
+        option => option.value && !option.disabled
+    );
+}
+
 function refreshClanReport(clan) {
     return reportLoader?.refreshClanReport(clan);
 }
@@ -199,7 +244,8 @@ async function init() {
         loadPlans,
         setSelectedPlan: plan => { selectedPlan = plan; },
         setSelectedClan: clan => { selectedClan = clan; },
-        setHelp: (message, error = false) => setHelp(refs, message, error)
+        setHelp: (message, error = false) => setHelp(refs, message, error),
+        onSourceModeChange: changeSourceMode
     });
     await sourceBootstrap.loadFixture();
     autoRefresh = createOperationBoardAutoRefresh({

@@ -49,6 +49,7 @@ export const de = Object.freeze({
   "op.loadClan": "Clan laden",
   "op.standaloneInvalid": "Gib einen gueltigen Clantag ein.",
   "op.standaloneMode": "Einzelclan aktiv",
+  "op.standaloneHelp": "Gib einen Clantag ein und lade ihn, um das Board zu starten.",
   "op.setup": "Einrichtung",
   "op.refresh": "Live-Daten aktualisieren",
   "op.kicker": "Live CWL Tracker",

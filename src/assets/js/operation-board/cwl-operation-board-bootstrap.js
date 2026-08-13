@@ -12,6 +12,7 @@ export function createCwlOperationBoardBootstrap({
     setSelectedPlan,
     setSelectedClan,
     setHelp,
+    onSourceModeChange,
     root = document
 }) {
     let activeFixture = null;
@@ -35,9 +36,12 @@ export function createCwlOperationBoardBootstrap({
 
     function bindSourceMode() {
         root.querySelectorAll('[data-op-source-mode]').forEach(button => {
-            button.addEventListener('click', () =>
-                setSourceMode(button.dataset.opSourceMode, root)
-            );
+            button.addEventListener('click', () => {
+                const mode = button.dataset.opSourceMode;
+                const wasActive = button.getAttribute('aria-pressed') === 'true';
+                setSourceMode(mode, root);
+                if (!wasActive) onSourceModeChange?.(mode);
+            });
         });
     }
 
