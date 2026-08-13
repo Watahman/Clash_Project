@@ -36,6 +36,16 @@ body.workspace-app .war-board--webby .war-refresh-button:disabled {
     opacity: 1;
 }
 
+.war-board--webby .war-map {
+    background-color: var(--war-canvas);
+    background-image:
+        linear-gradient(90deg, rgba(255, 247, 220, .08), transparent 48%, rgba(18, 13, 12, .1)),
+        url("pictures/war-map-background.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
 @media (max-width: 900px) {
     .war-board--webby .war-board-controls { margin-top: 14px; }
 }
