@@ -1,0 +1,298 @@
+/* Clan Family uses the same calm workspace language as the V2 shell. */
+body.workspace-app[data-workspace-page="groups"] {
+    --cf-accent: var(--cp-manage);
+    --cf-accent-soft: var(--cp-manage-soft);
+    --cf-surface: var(--cp-surface-1);
+    --cf-surface-raised: var(--cp-surface-2);
+    --cf-border: var(--cp-border-1);
+    --cf-border-strong: var(--cp-border-2);
+    --cf-text: var(--cp-text-1);
+    --cf-text-muted: var(--cp-text-2);
+    --cf-text-subtle: var(--cp-text-3);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-page {
+    color: var(--cf-text);
+    font-family: var(--cp-font-ui);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-page :is(h1, h2, h3, h4, strong) {
+    font-family: var(--cp-font-heading);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-page-header {
+    align-items: flex-end;
+    gap: 24px;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-page-header .button,
+body.workspace-app[data-workspace-page="groups"] .cf-inline-form .button {
+    min-height: 42px;
+    border-radius: 8px;
+    font-family: var(--cp-font-ui);
+    transition: background-color 160ms var(--cp-ease-standard), border-color 160ms var(--cp-ease-standard), color 160ms var(--cp-ease-standard), transform 160ms var(--cp-ease-standard);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-page-header .button-primary,
+body.workspace-app[data-workspace-page="groups"] .button-primary {
+    border-color: var(--cp-brand);
+    background: var(--cp-brand);
+    color: #11161d;
+}
+
+body.workspace-app[data-workspace-page="groups"] .button-primary:hover {
+    border-color: var(--cp-brand-hover);
+    background: var(--cp-brand-hover);
+    transform: translateY(-1px);
+}
+
+body.workspace-app[data-workspace-page="groups"] .button-secondary {
+    border-color: var(--cf-border-strong);
+    background: var(--cf-surface-raised);
+    color: var(--cf-text);
+}
+
+body.workspace-app[data-workspace-page="groups"] .button-secondary:hover {
+    border-color: color-mix(in srgb, var(--cf-accent) 46%, var(--cf-border-strong));
+    background: var(--cp-surface-hover);
+    color: var(--cf-text);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-workspace {
+    min-width: 0;
+    gap: 24px;
+    align-items: stretch;
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-family-index,
+body.workspace-app[data-workspace-page="groups"] .cf-family-detail {
+    border: 1px solid var(--cf-border);
+    border-radius: 12px;
+    background: var(--cf-surface);
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-family-index {
+    padding: 18px;
+    overflow: visible;
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-family-detail {
+    min-width: 0;
+    overflow: hidden;
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-index-header {
+    padding: 2px 2px 16px;
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-index-header h2 {
+    font-size: 1rem;
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-count-badge {
+    border-color: var(--cf-border);
+    border-radius: 999px;
+    background: var(--cf-surface-raised);
+    color: var(--cf-text-muted);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-item {
+    min-height: 64px;
+    padding: 10px 8px;
+    border-radius: 8px;
+    color: var(--cf-text);
+    transition: background-color 160ms var(--cp-ease-standard), border-color 160ms var(--cp-ease-standard), transform 160ms var(--cp-ease-standard);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-item:hover {
+    border-color: var(--cf-border);
+    background: var(--cp-surface-hover);
+    transform: translateX(2px);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-item.active {
+    border-color: color-mix(in srgb, var(--cf-accent) 46%, var(--cf-border));
+    background: var(--cf-accent-soft);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-item-logo,
+body.workspace-app[data-workspace-page="groups"] .cf-family-badge {
+    border-color: var(--cf-border-strong);
+    border-radius: 8px;
+    background: var(--cf-surface-raised);
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-family-header {
+    padding: 24px 28px 20px;
+    background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--cf-accent) 12%, transparent), transparent 42%), var(--cf-surface);
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-family-heading {
+    gap: 16px;
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-family-badge {
+    width: 60px;
+    height: 60px;
+    flex-basis: 60px;
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-title-line h2 {
+    font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-family-meta {
+    color: var(--cf-text-muted);
+    font-size: .8rem;
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-code-button,
+body.workspace-app[data-workspace-page="groups"] .cf-icon-button {
+    border-color: var(--cf-border-strong);
+    border-radius: 8px;
+    background: var(--cf-surface-raised);
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-code-button:hover,
+body.workspace-app[data-workspace-page="groups"] .cf-icon-button:hover {
+    border-color: color-mix(in srgb, var(--cf-accent) 46%, var(--cf-border-strong));
+    background: var(--cp-surface-hover);
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-metric-strip {
+    background: var(--cf-surface-raised);
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-metric-strip > div {
+    min-height: 72px;
+    padding: 14px 20px;
+    border-color: var(--cf-border);
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-metric-strip span {
+    color: var(--cf-text-muted);
+    font-size: .75rem;
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-metric-strip strong {
+    color: var(--cf-text);
+    font-family: var(--cp-font-heading);
+    font-size: 1.3rem;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-detail-tabs {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    gap: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    background: var(--cf-surface-raised);
+    padding-inline: 16px;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-detail-tabs::-webkit-scrollbar { display: none; }
+
+body.workspace-app[data-workspace-page="groups"] .groups-detail-tabs button {
+    flex: 0 0 auto;
+    min-height: 52px;
+    padding-inline: 14px;
+    color: var(--cf-text-muted);
+    font-family: var(--cp-font-ui);
+    font-size: .8rem;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-detail-tabs button.is-active {
+    color: var(--cf-text);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-detail-tabs button.is-active::after {
+    right: 14px;
+    left: 14px;
+    background: var(--cf-accent);
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-panel {
+    padding: 28px;
+    background: var(--cf-surface);
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-section-heading {
+    min-height: 72px;
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-section-heading h3 {
+    font-size: 1.06rem;
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-action-row,
+body.workspace-app[data-workspace-page="groups"] .cf-clan-row,
+body.workspace-app[data-workspace-page="groups"] .cf-poll-row,
+body.workspace-app[data-workspace-page="groups"] .cf-audit-row {
+    border-color: var(--cf-border);
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-action-row {
+    min-height: 62px;
+    padding: 10px 12px;
+    border-radius: 8px;
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-action-row:hover {
+    background: var(--cp-surface-hover);
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-inline-empty,
+body.workspace-app[data-workspace-page="groups"] .cf-permission-note {
+    border: 1px solid var(--cf-border);
+    border-radius: 8px;
+    background: var(--cf-surface-raised);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-member-item {
+    min-height: 74px;
+    padding: 12px;
+    border: 1px solid transparent;
+    border-bottom-color: var(--cf-border);
+    border-radius: 8px;
+    transition: background-color 160ms var(--cp-ease-standard), border-color 160ms var(--cp-ease-standard);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-member-item:hover {
+    border-color: var(--cf-border);
+    background: var(--cp-surface-hover);
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-member-name {
+    color: var(--cf-text);
+    font-family: var(--cp-font-heading);
+    font-size: .9rem;
+    font-weight: 720;
+}
+
+body.workspace-app[data-workspace-page="groups"] .groups-member-code {
+    color: var(--cf-text-muted);
+    font-family: var(--cp-font-mono);
+    font-size: .7rem;
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-filter-bar select,
+body.workspace-app[data-workspace-page="groups"] .cf-filter-bar input,
+body.workspace-app[data-workspace-page="groups"] .cf-inline-form input,
+body.workspace-app[data-workspace-page="groups"] .cf-dialog input {
+    border-color: var(--cf-border-strong);
+    border-radius: 8px;
+    background: var(--cf-surface-raised);
+    color: var(--cf-text);
+    font-family: var(--cp-font-ui);
+}
+
+body.workspace-app[data-workspace-page="groups"] .cf-dialog input:focus,
+body.workspace-app[data-workspace-page="groups"] .cf-filter-bar input:focus,
+body.workspace-app[data-workspace-page="groups"] .cf-filter-bar select:focus {
+    border-color: var(--cf-accent);
+    outline: 2px solid color-mix(in srgb, var(--cf-accent) 36%, transparent);
+    outline-offset: 1px;
+}
