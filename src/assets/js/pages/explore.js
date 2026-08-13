@@ -7,14 +7,26 @@ const visibleIds = new Set([
     'bracket', 'minigames', 'advancedStats', 'achievements'
 ]);
 
+const EXPLORE_ART = Object.freeze({
+    groups: `<svg viewBox="0 0 240 170" fill="none" focusable="false"><path d="m28 72 55-34 62 27 45-25M28 72l58 37 62-34 42 23M86 109V65m62 34V65"/><circle cx="28" cy="72" r="8"/><circle cx="83" cy="38" r="8"/><circle cx="145" cy="65" r="8"/><circle cx="190" cy="40" r="8"/><circle cx="86" cy="109" r="8"/><circle cx="148" cy="99" r="8"/></svg>`,
+    planner: `<svg viewBox="0 0 240 170" fill="none" focusable="false"><rect x="30" y="30" width="166" height="112" rx="10"/><path d="M30 62h166M30 90h166M30 118h166M72 30v112M114 30v112M156 30v112"/><circle cx="51" cy="46" r="4"/><circle cx="93" cy="76" r="4"/><circle cx="135" cy="104" r="4"/><circle cx="177" cy="132" r="4"/></svg>`,
+    operation: `<svg viewBox="0 0 240 170" fill="none" focusable="false"><path d="M28 137h184M36 120V48M36 120h166M48 106l31-32 27 20 38-47 38 22"/><path d="M48 106h.01M79 74h.01M106 94h.01M144 47h.01M182 69h.01"/><path d="M166 39h36v36"/></svg>`,
+    warOperation: `<svg viewBox="0 0 240 170" fill="none" focusable="false"><path d="M120 22 62 47v39c0 29 21 51 58 65 37-14 58-36 58-65V47l-58-25Z"/><path d="m84 108 72-58M93 50l54 58M120 49v58M91 79h58"/><circle cx="120" cy="79" r="17"/></svg>`,
+    bracket: `<svg viewBox="0 0 240 170" fill="none" focusable="false"><path d="M31 34h32v22h30v29h34v29h52M31 136h32v-22h30V85h34V56h52M63 45h18M63 125h18M127 85h21"/><circle cx="31" cy="34" r="7"/><circle cx="31" cy="136" r="7"/><circle cx="127" cy="85" r="7"/><circle cx="179" cy="114" r="7"/><circle cx="179" cy="56" r="7"/></svg>`,
+    minigames: `<svg viewBox="0 0 240 170" fill="none" focusable="false"><path d="M67 59h106c17 0 28 12 32 29l8 31c4 16-15 26-26 14l-18-20H71l-18 20c-11 12-30 2-26-14l8-31c4-17 15-29 32-29Z"/><path d="M73 80v25M60.5 92.5h25M151 83h.01M170 101h.01"/><circle cx="170" cy="83" r="3"/><path d="M104 49h32"/></svg>`,
+    advancedStats: `<svg viewBox="0 0 240 170" fill="none" focusable="false"><path d="M30 139h182M40 124V50M52 121V94h23v27M91 121V72h23v49M130 121V57h23v64M169 121V38h23v83"/><path d="m44 83 34-27 35 20 39-38 38 17"/><circle cx="44" cy="83" r="5"/><circle cx="78" cy="56" r="5"/><circle cx="113" cy="76" r="5"/><circle cx="152" cy="38" r="5"/><circle cx="190" cy="55" r="5"/></svg>`,
+    achievements: `<svg viewBox="0 0 240 170" fill="none" focusable="false"><path d="M87 31h66v41c0 24-14 39-33 39S87 96 87 72V31Z"/><path d="M87 43H63v10c0 17 10 28 27 28M153 43h24v10c0 17-10 28-27 28M120 111v24M91 145h58M104 31V18M120 31V13M136 31V18"/><path d="m42 44 12 8M198 44l-12 8M44 95l13-4M196 95l-13-4"/></svg>`
+});
+
 function cardMarkup(module) {
     const descriptionKey = `explore.${module.id}.description`;
     const section = WORKSPACE_SECTIONS.find(candidate => candidate.id === module.section);
-    return `<a class="cp-module-card" data-pillar="${module.section}" data-explore-card="${module.section}" href="${module.href}">
+    return `<a class="cp-module-card explore-card explore-card--${module.id}" data-pillar="${module.section}" data-explore-card="${module.section}" href="${module.href}">
         <span class="explore-card-heading">${module.icon}<span class="page-kicker" data-i18n="${section.key}">${section.fallback}</span></span>
         <h2 data-i18n="${module.key}">${module.fallback}</h2>
         <p data-i18n="${descriptionKey}">${t(descriptionKey)}</p>
         <strong data-i18n="explore.open">Open →</strong>
+        <span class="explore-card-art" aria-hidden="true">${EXPLORE_ART[module.id]}</span>
     </a>`;
 }
 

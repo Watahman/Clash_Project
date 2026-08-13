@@ -14,7 +14,42 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.explore-grid .cp-module-card { min-height: 216px; }
+.explore-grid .cp-module-card {
+    min-height: 216px;
+    overflow: hidden;
+    isolation: isolate;
+    background-color: var(--cp-surface-1);
+    background:
+        radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--cp-module-accent) 11%, transparent), transparent 56%),
+        var(--cp-surface-1);
+}
+.explore-grid .explore-card > :not(.explore-card-art) { position: relative; z-index: 1; }
+.explore-card-art {
+    position: absolute;
+    z-index: 0;
+    right: -1.5rem;
+    bottom: -1rem;
+    width: 58%;
+    height: 82%;
+    color: var(--cp-module-accent);
+    opacity: .15;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 25%, #000 100%);
+    mask-image: linear-gradient(90deg, transparent 0%, #000 25%, #000 100%);
+    transform: translate3d(6px, 2px, 0);
+    transition: opacity 180ms var(--cp-ease-standard), transform 180ms var(--cp-ease-standard);
+}
+.explore-card-art svg { display: block; width: 100%; height: 100%; overflow: visible; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.explore-card:hover .explore-card-art,
+.explore-card:focus-visible .explore-card-art { opacity: .24; transform: translate3d(0, 0, 0); }
+.explore-card--groups .explore-card-art { top: 19%; bottom: auto; width: 57%; }
+.explore-card--planner .explore-card-art { width: 57%; height: 78%; }
+.explore-card--operation .explore-card-art { top: 21%; bottom: auto; width: 58%; height: 75%; }
+.explore-card--warOperation .explore-card-art { top: 10%; bottom: auto; width: 56%; height: 84%; }
+.explore-card--bracket .explore-card-art { top: 12%; bottom: auto; right: -1rem; width: 59%; height: 80%; }
+.explore-card--minigames .explore-card-art { width: 59%; height: 79%; }
+.explore-card--advancedStats .explore-card-art { width: 60%; height: 82%; }
+.explore-card--achievements .explore-card-art { top: 8%; bottom: auto; width: 56%; height: 86%; }
 .explore-card-heading { align-items: center; display: flex; gap: 10px; margin-bottom: 24px; }
 .explore-card-heading svg { color: var(--cp-module-accent); height: 24px; stroke: currentColor; width: 24px; }
 .explore-card-heading .page-kicker { color: var(--cp-module-accent); }
@@ -31,4 +66,11 @@
     .explore-filters { top: 56px; }
     .explore-grid { grid-template-columns: 1fr; }
     .explore-grid .cp-module-card { min-height: 184px; }
+    .explore-card-art { right: -2.5rem; width: 50%; height: 76%; opacity: .12; }
+    .explore-card:hover .explore-card-art,
+    .explore-card:focus-visible .explore-card-art { opacity: .18; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .explore-card-art { transition: none; }
 }
