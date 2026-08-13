@@ -234,7 +234,10 @@
     margin-bottom: var(--space-4);
     border-bottom: 1px solid var(--border-strong);
     overflow-x: auto;
+    scrollbar-width: none;
 }
+
+.op-board-tabs::-webkit-scrollbar { display: none; }
 
 .op-board-tabs[hidden] { display: none; }
 
