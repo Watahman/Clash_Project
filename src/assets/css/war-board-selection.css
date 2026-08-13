@@ -37,13 +37,145 @@ body.workspace-app .war-board--webby .war-refresh-button:disabled {
 }
 
 .war-board--webby .war-map {
-    background-color: var(--war-canvas);
-    background-image:
-        linear-gradient(90deg, rgba(255, 247, 220, .08), transparent 48%, rgba(18, 13, 12, .1)),
-        url("pictures/war-map-background.png");
+    --wb-map-gap: clamp(.8rem, 1.35vw, 1.15rem);
+    align-content: start;
+    gap: var(--wb-map-gap) clamp(3.2rem, 6.5vw, 6.5rem);
+    padding: clamp(1.35rem, 2.5vw, 2rem) clamp(1.45rem, 3.5vw, 3rem) clamp(2rem, 3.4vw, 2.8rem);
+    background-color: var(--wb-bg-soft);
+    background-image: url("pictures/war-map-background.png");
+    background-blend-mode: normal;
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
+}
+
+.war-board--webby .war-map::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(180deg, rgba(7, 9, 13, .16), transparent 14%, transparent 84%, rgba(7, 9, 13, .2)),
+        linear-gradient(90deg, rgba(7, 9, 13, .08), transparent 10%, transparent 90%, rgba(7, 9, 13, .08));
+}
+
+.war-board--webby .war-map::after {
+    top: 2.25rem;
+    bottom: 2.25rem;
+    z-index: 0;
+    background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, .3) 18%, rgba(255, 255, 255, .3) 82%, transparent);
+    opacity: .48;
+}
+
+.war-board--webby #war-live-map {
+    min-height: clamp(14rem, 17vw, 18rem);
+}
+
+.war-board--webby .war-primary-panel,
+.war-board--webby .war-map-page {
+    padding: 0;
+}
+
+.war-board--webby .war-map {
+    border-radius: 0 0 var(--wb-radius-lg) var(--wb-radius-lg);
+}
+
+body.workspace-app .war-board--webby .war-base {
+    width: min(100%, 31rem);
+    justify-self: center;
+    min-height: clamp(3.65rem, 5vw, 4.25rem);
+    padding: .5rem .7rem;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: .78rem;
+    background: rgba(10, 14, 20, .8);
+    backdrop-filter: blur(.35rem);
+    box-shadow: 0 .45rem .75rem rgba(0, 0, 0, .2);
+}
+
+:root[data-theme="light"] .war-board--webby .war-map::before {
+    background:
+        linear-gradient(180deg, rgba(241, 244, 247, .2), transparent 14%, transparent 84%, rgba(241, 244, 247, .26)),
+        linear-gradient(90deg, rgba(241, 244, 247, .12), transparent 10%, transparent 90%, rgba(241, 244, 247, .12));
+}
+
+:root[data-theme="light"] .war-board--webby .war-base {
+    border-color: rgba(29, 39, 55, .18);
+    background: rgba(255, 255, 255, .84);
+    box-shadow: 0 .45rem .75rem rgba(23, 34, 51, .14);
+}
+
+.war-board--webby .war-base::before {
+    inset: .55rem .55rem auto auto;
+    width: .4rem;
+    height: .4rem;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.war-board--webby .war-base-copy strong {
+    font-size: .88rem;
+    font-weight: 800;
+}
+
+.war-board--webby .war-base-copy small {
+    font-size: .66rem;
+}
+
+.war-board--webby .war-base:hover,
+.war-board--webby .war-base:focus-visible {
+    border-color: var(--wb-line-strong);
+    background: rgba(20, 26, 36, .88);
+    box-shadow: 0 .5rem .85rem rgba(0, 0, 0, .22);
+}
+
+:root[data-theme="light"] .war-board--webby .war-base:hover,
+:root[data-theme="light"] .war-board--webby .war-base:focus-visible {
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 .5rem .85rem rgba(23, 34, 51, .16);
+}
+
+body.workspace-app .war-board--webby .war-base.is-selected {
+    opacity: 1;
+    border: 1px solid var(--wb-gold);
+    background: rgba(20, 26, 36, .88);
+    box-shadow:
+        0 0 0 2px rgba(231, 185, 75, .45),
+        0 .55rem .9rem rgba(0, 0, 0, .22);
+}
+
+:root[data-theme="light"] body.workspace-app .war-board--webby .war-base.is-selected {
+    border-color: var(--wb-gold);
+    background: rgba(255, 255, 255, .92);
+    box-shadow:
+        0 0 0 2px rgba(168, 115, 19, .42),
+        0 .55rem .9rem rgba(23, 34, 51, .16);
+}
+
+.war-board--webby .war-base.is-selected::before {
+    background: var(--wb-gold);
+    opacity: 1;
+}
+
+.war-board--webby .war-base.is-cleared {
+    opacity: .84;
+}
+
+.war-board--webby .war-base.is-cleared.is-selected {
+    opacity: 1;
+}
+
+.war-board--webby .war-detail-panel {
+    max-height: none;
+    overflow: visible;
+    background: rgba(17, 22, 31, .84);
+    backdrop-filter: blur(.45rem);
+    box-shadow: 0 .45rem .75rem rgba(0, 0, 0, .14);
+}
+
+:root[data-theme="light"] .war-board--webby .war-detail-panel {
+    background: rgba(255, 255, 255, .88);
+    box-shadow: 0 .45rem .75rem rgba(23, 34, 51, .12);
 }
 
 @media (max-width: 900px) {
@@ -55,7 +187,28 @@ body.workspace-app .war-board--webby .war-refresh-button:disabled {
     .war-board--webby .war-refresh-button { grid-column: 1 / -1; }
 }
 
+@media (max-width: 56rem) {
+    body.workspace-app .war-board--webby .war-base {
+        grid-template-columns: auto minmax(0, 1fr);
+        min-height: 3.65rem;
+        gap: .5rem;
+    }
+    body.workspace-app .war-board--webby .war-base-position { display: none; }
+    body.workspace-app .war-board--webby .war-base-emblem {
+        width: 2.45rem;
+        height: 2.45rem;
+    }
+    body.workspace-app .war-board--webby .war-base-copy,
+    body.workspace-app .war-board--webby .war-base-assigned { grid-column: 2; }
+}
+
 @media (max-width: 38rem) {
     .war-board--webby .war-board-controls { grid-template-columns: 1fr; }
     .war-board--webby .war-refresh-button { grid-column: auto; }
+    .war-board--webby .war-map {
+        gap: .7rem;
+        padding: 1.1rem .8rem 1.35rem;
+    }
+    .war-board--webby #war-live-map { min-height: 0; }
+    .war-board--webby .war-base { width: 100%; }
 }
