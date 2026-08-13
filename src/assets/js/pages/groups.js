@@ -1,17 +1,17 @@
 import { initI18n, t } from '../i18n/i18n.js';
 import { profileHTML } from '../profile/profile_popup.js';
 import { getCurrentUserId } from '../utils/user.js';
-import { initGroupPolls } from '../groups/groups-polls.js';
+import { initGroupPolls } from '../groups/groups-polls.js?v=20260813-redesign';
 import { createClanAdmin } from '../groups/groups-admin-clans.js';
-import { initGroupMemberDrawer } from '../groups/groups-member-drawer.js';
-import { initClanFamilyOverview } from '../groups/clan-family-overview.js';
+import { initGroupMemberDrawer } from '../groups/groups-member-drawer.js?v=20260813-redesign';
+import { initClanFamilyOverview } from '../groups/clan-family-overview.js?v=20260813-redesign';
 import { initClanFamilyMembers } from '../groups/clan-family-members.js';
 import { applyFamilyCopy, familyCopy } from '../groups/clan-family-copy.js';
 import { activateGroupTab, bindGroupTabs, normalizeGroupTab } from '../groups/groups-tabs.js';
 import { initGroupIndexSlider } from '../groups/groups-index-slider.js';
 import { syncAuthSession } from '../auth/auth-client.js';
-import { initClanFamilyActions } from '../groups/clan-family-actions.js';
-import { createClanFamilyListController } from '../groups/clan-family-list.js';
+import { initClanFamilyActions } from '../groups/clan-family-actions.js?v=20260813-redesign';
+import { createClanFamilyListController } from '../groups/clan-family-list.js?v=20260813-redesign';
 import {
     GROUP_TAB_STORAGE_PREFIX, OPEN_GROUP_STORAGE_KEY, OPEN_POLL_STORAGE_KEY,
     readGroupPollTarget, unreadPollNotificationCount
@@ -168,7 +168,7 @@ function resetGroupDetail() {
     state.group = null; state.members = []; state.entry = {}; state.currentRole = 'member';
     refs.detailEmpty?.classList.remove('hidden'); refs.detailContent?.classList.add('hidden'); refs.familyMenu?.classList.add('hidden');
     refs.emptyCreate?.classList.remove('hidden'); refs.emptyJoin?.classList.remove('hidden');
-    refs.list?.querySelectorAll('.groups-item.active').forEach(item => { item.classList.remove('active'); item.setAttribute('aria-selected', 'false'); });
+    refs.list?.querySelectorAll('.groups-item.active').forEach(item => { item.classList.remove('active'); item.setAttribute('aria-pressed', 'false'); });
     refs.pollCount?.classList.add('hidden');
 }
 
@@ -208,7 +208,7 @@ function queryRefs() {
         detailCodeText: document.querySelector('#groups-detail-code-text'),
         settingsCopy: document.querySelector('#groups-settings-copy-code'),
         settingsName: document.querySelector('#groups-settings-family-name'),
-        metaClans: document.querySelector('#groups-detail-meta-clans'),
+        metaClans: document.querySelector('#cf-metric-clans'),
         tabClanCount: document.querySelector('#groups-detail-tab-clan-count'),
         pollCount: document.querySelector('#groups-detail-tab-poll-count'),
         newButton: document.querySelector('#groups-new-btn'),

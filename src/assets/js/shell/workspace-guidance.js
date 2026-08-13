@@ -504,7 +504,7 @@ function mountGroupChecklist() {
     const details = document.createElement('details');
     details.id = 'groups-setup-checklist';
     details.className = 'workspace-setup-checklist';
-    details.open = true;
+    details.open = false;
     details.innerHTML = `
         <summary><span><strong></strong><small></small></span><span aria-hidden="true">⌄</span></summary>
         <ol>

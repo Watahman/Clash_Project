@@ -1,7 +1,7 @@
 import { t } from '../i18n/i18n.js';
 import { familyCopy } from './clan-family-copy.js';
 import { renderBadge } from './groups-badges.js';
-import { groupMemberSummary } from '../templates/GroupTemplates.js';
+import { groupMemberSummary } from '../templates/GroupTemplates.js?v=20260813-redesign';
 
 let currentEntry = null;
 let currentDetail = null;
@@ -48,7 +48,6 @@ function renderOverview(detail, entry) {
     renderReadiness(summary, clans, activePolls, entry);
     renderAttention(summary, clans, activePolls, entry, detail?.currentUserId);
     renderClanPreview(clans);
-    renderPermission(detail?.currentRole || 'member');
 }
 
 function renderReadiness(summary, clans, polls, entry) {
@@ -100,16 +99,6 @@ function renderClanPreview(clans) {
         row.append(badge, copy);
         list?.appendChild(row);
     });
-}
-
-function renderPermission(role) {
-    const node = document.querySelector('#cf-overview-permission');
-    if (!node) return;
-    node.textContent = role === 'leader'
-        ? familyCopy('permissionLeader')
-        : role === 'co_leader'
-            ? familyCopy('permissionCoLeader')
-            : familyCopy('permissionMember');
 }
 
 function actionItem(tab, title, body, className = '') {

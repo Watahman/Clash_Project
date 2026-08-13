@@ -5,8 +5,8 @@ import { getCurrentUserId } from '../utils/user.js';
 import { withGlobalLoading } from '../utils/loading-state.js';
 import { applyRoleBadge, canManageGroupMembers, canManageGroupRoles, getCurrentUserRole, normalizeGroupRole, ROLE_CO_LEADER, ROLE_MEMBER } from './groups-roles.js';
 import { familyCopy } from './clan-family-copy.js';
-import { closeGroupDialog, bindGroupDialog, openGroupDialog } from './groups-dialog.js';
-import { memberAccounts } from '../templates/GroupTemplates.js';
+import { closeGroupDialog, bindGroupDialog, openGroupDialog } from './groups-dialog.js?v=20260813-redesign';
+import { memberAccounts } from '../templates/GroupTemplates.js?v=20260813-redesign';
 import { getNameInitials } from '../utils/name-initials.js';
 
 export function initGroupMemberDrawer(emptyMessage = () => document.createElement('p')) {

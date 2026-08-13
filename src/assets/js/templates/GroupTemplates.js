@@ -79,10 +79,10 @@ async function hydrateGroups(groupsInfo) {
 function selectGroup(item, entry, currentUserId, fixture) {
     document.querySelectorAll('.groups-item.active').forEach(activeItem => {
         activeItem.classList.remove('active');
-        activeItem.setAttribute('aria-selected', 'false');
+        activeItem.setAttribute('aria-pressed', 'false');
     });
     item.classList.add('active');
-    item.setAttribute('aria-selected', 'true');
+    item.setAttribute('aria-pressed', 'true');
     renderGroupView(entry.group, entry.members, { ...entry, currentUserId, fixture: fixture || entry.fixture || null });
     window.dispatchEvent(new CustomEvent('clashtools:group-selected', { detail: { groupId: entry.group.id } }));
 }
@@ -99,11 +99,11 @@ export function renderGroupView(group, members, options = {}) {
     setText('#groups-detail-name', group.name);
     renderBadge(document.querySelector('#groups-detail-logo'), group.badge, group.badge_url);
     setText('#groups-detail-count', memberLabel(summary.members));
-    setText('#groups-detail-meta-members', String(summary.members));
-    setText('#groups-detail-meta-accounts', String(summary.accounts));
+    setText('#cf-metric-members', String(summary.members));
+    setText('#cf-metric-accounts', String(summary.accounts));
     setText('#groups-inspector-members', String(summary.members));
     setText('#groups-inspector-accounts', String(summary.accounts));
-    setText('#groups-detail-meta-clans', String(options.clans?.length || 0));
+    setText('#cf-metric-clans', String(options.clans?.length || 0));
     setText('#groups-inspector-clans', String(options.clans?.length || 0));
     setText('#groups-detail-tab-clan-count', String(options.clans?.length || 0));
     setText('#groups-detail-tab-member-count', String(summary.members));

@@ -2,7 +2,7 @@ import { syncAuthSession } from '../auth/auth-client.js';
 import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 import { initI18n, t } from '../i18n/i18n.js?v=20260812-redesign';
 import { toggleTheme as toggleThemePreference } from '../theme/theme-manager.js';
-import { initWorkspaceGuidance } from './workspace-guidance.js?v=20260809-4';
+import { initWorkspaceGuidance } from './workspace-guidance.js?v=20260813-redesign';
 import {
     initNotificationsPopover,
     loadWorkspaceNotifications

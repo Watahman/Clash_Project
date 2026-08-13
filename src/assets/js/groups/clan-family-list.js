@@ -1,7 +1,7 @@
 import { getGroupsOfUser } from '../Supabase/Supabase-Group.js';
 import { getCurrentUserId } from '../utils/user.js';
 import { withGlobalLoading } from '../utils/loading-state.js';
-import { createGroupCard } from '../templates/GroupTemplates.js';
+import { createGroupCard } from '../templates/GroupTemplates.js?v=20260813-redesign';
 import { loadClanFamilyFixture } from './clan-family-fixtures.js';
 import { familyCopy } from './clan-family-copy.js';
 import { t } from '../i18n/i18n.js';

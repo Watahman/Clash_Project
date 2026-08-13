@@ -2,7 +2,7 @@ import { answerGroupPoll, createGroupPoll, deleteGroupPoll, getGroupPolls, sendG
 import { checkUserId } from '../Supabase/Supabase-User.js';
 import { getCurrentUserId } from '../utils/user.js';
 import { withGlobalLoading } from '../utils/loading-state.js';
-import { bindGroupDialog, closeGroupDialog, openGroupDialog } from './groups-dialog.js';
+import { bindGroupDialog, closeGroupDialog, openGroupDialog } from './groups-dialog.js?v=20260813-redesign';
 import { isGroupAdmin } from './groups-roles.js';
 import { clonePolls, findLatestOpenCwlPoll, MAX_POLLS_PER_GROUP, normalizePolls, readPollAccountAnswer, resetPollView } from './groups-polls-state.js';
 import { OPEN_POLL_STORAGE_KEY } from '../notifications/poll-notifications.js';

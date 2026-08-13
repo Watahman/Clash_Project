@@ -2,7 +2,7 @@ import { getClanInfoRequest } from '../API/API-Clan.js';
 import { createGroup, addGroupClan, joinGroup, leaveGroup } from '../Supabase/Supabase-Group.js';
 import { getCurrentUserId } from '../utils/user.js';
 import { withGlobalLoading } from '../utils/loading-state.js';
-import { bindGroupDialog, closeGroupDialog, openGroupDialog } from './groups-dialog.js';
+import { bindGroupDialog, closeGroupDialog, openGroupDialog } from './groups-dialog.js?v=20260813-redesign';
 import { familyCopy } from './clan-family-copy.js';
 import { t } from '../i18n/i18n.js';
 

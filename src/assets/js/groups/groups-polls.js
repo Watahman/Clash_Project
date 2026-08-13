@@ -1,5 +1,5 @@
-import { bindGroupDialog, closeGroupDialog } from './groups-dialog.js';
-import { createPollActions } from './groups-polls-actions.js';
+import { bindGroupDialog, closeGroupDialog } from './groups-dialog.js?v=20260813-redesign';
+import { createPollActions } from './groups-polls-actions.js?v=20260813-redesign';
 import { createPollRenderer } from './groups-polls-render.js';
 import { createPollState } from './groups-polls-state.js';
 

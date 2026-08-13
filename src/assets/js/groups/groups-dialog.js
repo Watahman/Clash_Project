@@ -5,9 +5,11 @@ const FOCUSABLE_SELECTOR = [
 
 const dialogState = new WeakMap();
 const dialogStack = [];
+const DIALOG_Z_INDEX = 90;
 
 export function openGroupDialog(dialog, preferredFocus) {
     if (!dialog) return false;
+    portalDialog(dialog);
     const previousState = dialogState.get(dialog);
     if (previousState?.onKeydown) document.removeEventListener('keydown', previousState.onKeydown, true);
     const previousFocus = document.activeElement;
@@ -19,6 +21,7 @@ export function openGroupDialog(dialog, preferredFocus) {
     dialogStack.push(dialog);
     dialog.classList.remove('hidden');
     dialog.setAttribute('aria-hidden', 'false');
+    syncDialogLayer();
     document.addEventListener('keydown', state.onKeydown, true);
     const target = preferredFocus || dialog.querySelector(FOCUSABLE_SELECTOR);
     window.requestAnimationFrame?.(() => target?.focus());
@@ -34,8 +37,25 @@ export function closeGroupDialog(dialog, { restoreFocus = true } = {}) {
     dialogState.delete(dialog);
     const stackIndex = dialogStack.indexOf(dialog);
     if (stackIndex >= 0) dialogStack.splice(stackIndex, 1);
+    dialog.style.removeProperty('z-index');
+    syncDialogLayer();
     if (restoreFocus && state?.previousFocus?.isConnected) state.previousFocus.focus();
     return true;
+}
+
+function portalDialog(dialog) {
+    if (dialog.parentElement !== document.body) document.body.appendChild(dialog);
+}
+
+function syncDialogLayer() {
+    dialogStack.forEach((dialog, index) => {
+        dialog.style.zIndex = String(DIALOG_Z_INDEX + index * 2);
+    });
+    const hasDialog = dialogStack.length > 0;
+    document.body.classList.toggle('cf-overlay-open', hasDialog);
+    document.querySelectorAll('.workspace-sidebar, .workspace-area').forEach(region => {
+        region.inert = hasDialog;
+    });
 }
 
 export function bindGroupDialog(dialog, close) {
