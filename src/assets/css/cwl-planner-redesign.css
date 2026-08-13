@@ -11,7 +11,7 @@ body.cwl-inspector-open { overflow: hidden; }
 .workspace-planner,
 .workspace-planner * { box-sizing: border-box; }
 
-body.workspace-app .workspace-content .workspace-planner .cwl-page-header {
+body.workspace-app .workspace-content.workspace-planner .cwl-page-header {
     align-items: flex-end;
     background: var(--surface);
     border: 1px solid var(--planner-border);
