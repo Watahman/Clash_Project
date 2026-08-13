@@ -27,9 +27,16 @@
             <h1 id="profile-name">Your profile</h1>
             <p id="profile-email">Loading account…</p>
         </div>
-        <button class="cp-button cp-button--secondary" id="profile-code" type="button" data-copy-value aria-label="Copy friend code" title="Copy friend code" hidden>
+        <button class="cp-button cp-button--secondary" id="profile-code" type="button" data-copy-value data-copy-state="copy" aria-label="Copy friend code" title="Copy friend code" hidden>
             <span data-i18n="profilePage.friendCode">Friend code</span>
             <strong id="profile-code-value"></strong>
+            <svg class="profile-code-icon profile-code-icon--copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <rect x="9" y="9" width="10" height="10" rx="2"></rect>
+                <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+            </svg>
+            <svg class="profile-code-icon profile-code-icon--check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <path d="m5 12 4 4L19 6"></path>
+            </svg>
         </button>
     </header>
 

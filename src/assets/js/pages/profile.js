@@ -203,9 +203,16 @@ function bindInteractions() {
     });
     document.querySelector('#profile-account-submit').addEventListener('click', handleAccountSubmit);
     document.querySelector('#profile-friend-submit').addEventListener('click', handleFriendSubmit);
-    document.querySelector('#profile-code').addEventListener('click', async event => {
-        const code = event.currentTarget.dataset.copyValue;
-        if (code) await navigator.clipboard.writeText(code).catch(() => null);
+    document.querySelector('#profile-code').addEventListener('click', event => {
+        const button = event.currentTarget;
+        const code = button.dataset.copyValue;
+        if (!code) return;
+        if (navigator.clipboard?.writeText) void navigator.clipboard.writeText(code).catch(() => {});
+        button.dataset.copyState = 'copied';
+        clearTimeout(button.copyFeedbackTimer);
+        button.copyFeedbackTimer = setTimeout(() => {
+            button.dataset.copyState = 'copy';
+        }, 1000);
     });
     document.querySelector('#profile-logout').addEventListener('click', async () => {
         await signOut();

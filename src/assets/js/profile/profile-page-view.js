@@ -38,6 +38,7 @@ export function renderIdentity(profile) {
     const code = String(profile?.code || '').replace(/^#/, '');
     document.querySelector('#profile-code-value').textContent = code ? `#${code}` : '';
     codeButton.dataset.copyValue = code;
+    codeButton.dataset.copyState = 'copy';
     const friendCodeLabel = code ? `${t('profilePage.friendCode')}: #${code}` : t('profilePage.friendCode');
     codeButton.setAttribute('aria-label', friendCodeLabel);
     codeButton.title = friendCodeLabel;

@@ -52,16 +52,21 @@ body.workspace-app { overflow-x: clip; }
 
 #profile-code span { color: var(--text-muted); font-size: 0.7rem; }
 #profile-code strong { color: var(--text); letter-spacing: 0.08em; }
-#profile-code::after {
+#profile-code .profile-code-icon {
     position: absolute;
     top: 50%;
     right: 0.85rem;
-    content: "⧉";
+    width: 1.05rem;
+    height: 1.05rem;
     color: var(--cp-text-2);
-    font-size: 1rem;
-    line-height: 1;
+    pointer-events: none;
     transform: translateY(-50%);
+    transition: opacity 140ms var(--cp-ease-standard), transform 140ms var(--cp-ease-standard), color 140ms var(--cp-ease-standard);
 }
+#profile-code .profile-code-icon--copy { opacity: 1; transform: translateY(-50%) scale(1); }
+#profile-code .profile-code-icon--check { opacity: 0; transform: translateY(-50%) scale(0.72); }
+#profile-code[data-copy-state="copied"] .profile-code-icon--copy { opacity: 0; transform: translateY(-50%) scale(0.72); }
+#profile-code[data-copy-state="copied"] .profile-code-icon--check { color: var(--cp-success); opacity: 1; transform: translateY(-50%) scale(1); }
 #profile-code:hover { border-color: var(--cp-border-2); }
 
 .profile-tabs,
@@ -293,4 +298,5 @@ html[data-theme="light"] .profile-next-links img { filter: invert(39%) sepia(48%
 
 @media (prefers-reduced-motion: reduce) {
     .profile-panel { animation: none; }
+    #profile-code .profile-code-icon { transition: none; }
 }
