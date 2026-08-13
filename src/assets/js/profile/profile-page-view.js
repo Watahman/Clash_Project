@@ -38,6 +38,9 @@ export function renderIdentity(profile) {
     const code = String(profile?.code || '').replace(/^#/, '');
     document.querySelector('#profile-code-value').textContent = code ? `#${code}` : '';
     codeButton.dataset.copyValue = code;
+    const friendCodeLabel = code ? `${t('profilePage.friendCode')}: #${code}` : t('profilePage.friendCode');
+    codeButton.setAttribute('aria-label', friendCodeLabel);
+    codeButton.title = friendCodeLabel;
     codeButton.hidden = !code;
 }
 
@@ -64,10 +67,9 @@ export function renderAccounts(accounts = []) {
         const copy = node('span', 'profile-list-copy');
         copy.append(
             node('strong', '', account.name || t('profilePage.clashAccount')),
-            node('span', '', account.tag || ''),
-            node('small', '', t('profilePage.verified'))
+            node('span', '', account.tag || '')
         );
-        const badge = node('span', 'cp-status cp-status--success', t('profilePage.verified'));
+        const badge = node('span', 'cp-badge cp-badge--success', t('profilePage.verified'));
         item.append(image, copy, badge);
         container.appendChild(item);
     });

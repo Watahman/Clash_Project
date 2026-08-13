@@ -39,14 +39,30 @@ body.workspace-app { overflow-x: clip; }
 }
 
 #profile-code {
+    position: relative;
     display: grid;
     min-width: 9rem;
     justify-items: start;
     gap: 0.15rem;
+    min-height: 2.75rem;
+    height: auto;
+    padding: 0.55rem 2.65rem 0.55rem 0.85rem;
+    text-align: left;
 }
 
 #profile-code span { color: var(--text-muted); font-size: 0.7rem; }
 #profile-code strong { color: var(--text); letter-spacing: 0.08em; }
+#profile-code::after {
+    position: absolute;
+    top: 50%;
+    right: 0.85rem;
+    content: "⧉";
+    color: var(--cp-text-2);
+    font-size: 1rem;
+    line-height: 1;
+    transform: translateY(-50%);
+}
+#profile-code:hover { border-color: var(--cp-border-2); }
 
 .profile-tabs,
 .profile-subtabs {
@@ -83,7 +99,7 @@ body.workspace-app { overflow-x: clip; }
 .profile-page-status[data-state="error"] { border-color: var(--danger); background: var(--danger-soft); }
 
 .profile-panel {
-    animation: profile-panel-in var(--motion-base) var(--ease-standard) both;
+    animation: profile-panel-in 280ms var(--cp-ease-standard) both;
 }
 
 .profile-section-heading {
@@ -134,7 +150,7 @@ body.workspace-app { overflow-x: clip; }
     padding: var(--space-4);
     color: var(--text);
     text-decoration: none;
-    transition: border-color var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
+    transition: border-color 160ms var(--cp-ease-standard), transform 160ms var(--cp-ease-standard);
 }
 
 .profile-next-links a:hover { border-color: var(--border-strong); transform: translateY(-2px); }
@@ -168,7 +184,7 @@ body.workspace-app { overflow-x: clip; }
 .profile-list-copy span { overflow-wrap: anywhere; }
 .profile-list-copy small { color: var(--text-muted); }
 .profile-list-actions { display: flex; flex-wrap: wrap; justify-content: end; gap: 0.5rem; }
-.profile-list-empty { border-block: 1px solid var(--border); padding: var(--space-7) var(--space-4); color: var(--text-muted); text-align: center; }
+.profile-list-empty { border-block: 1px solid var(--border); padding: var(--space-6) var(--space-4); color: var(--text-muted); text-align: center; }
 
 .profile-subtabs { margin-bottom: var(--space-4); }
 
@@ -195,21 +211,38 @@ body.workspace-app { overflow-x: clip; }
 .profile-inline-form input { flex: 1 1 12rem; }
 .profile-choice-row button,
 .po-theme-option { min-height: 2.75rem; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); }
-.po-theme-option.po-theme-active { border-color: var(--accent); background: var(--accent-soft); }
+
+#profile-logout {
+    border-color: var(--cp-danger);
+    background: transparent;
+    color: var(--cp-danger);
+}
+
+#profile-logout:hover,
+#profile-logout:focus-visible,
+#profile-logout:active {
+    border-color: var(--cp-danger);
+    background: var(--cp-danger-soft);
+    color: var(--cp-danger);
+}
+
+.po-theme-options { display: inline-flex; width: max-content; max-width: 100%; gap: 2px; border: 1px solid var(--cp-border-1); border-radius: 8px; background: var(--cp-surface-2); padding: 3px; }
+.po-theme-option { position: relative; min-width: 6.5rem; height: 40px; border: 0; border-radius: 6px; background: transparent; padding: 0 14px; color: var(--cp-text-2); transition: background-color 160ms var(--cp-ease-standard), color 160ms var(--cp-ease-standard), box-shadow 160ms var(--cp-ease-standard), transform 160ms var(--cp-ease-standard); }
+.po-theme-icon { display: inline-grid; margin-right: 7px; color: var(--cp-brand-strong); font-size: 1rem; line-height: 1; }
+.po-theme-option:hover { background: var(--cp-surface-hover); color: var(--cp-text-1); }
+.po-theme-option:focus-visible { outline: 2px solid var(--cp-brand); outline-offset: 1px; }
+.po-theme-option.po-theme-active { border-color: var(--cp-brand); background: var(--cp-brand-soft); box-shadow: 0 1px 4px rgb(0 0 0 / 16%); color: var(--cp-text-1); }
 .profile-password-grid { display: grid; gap: 0.5rem; margin: 1rem 0; }
 .profile-settings-grid summary { min-height: 2.75rem; cursor: pointer; color: var(--text); font-weight: 750; }
 .profile-settings-message { position: sticky; bottom: 1rem; border: 1px solid var(--border); border-radius: var(--radius-small); background: var(--surface-raised); padding: 0.8rem 1rem; }
 .profile-settings-message[data-state="error"] { border-color: var(--danger); color: var(--danger); }
 
-.profile-dialog {
-    width: min(32rem, calc(100vw - 2rem));
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-large);
-    background: var(--surface);
-    padding: 0;
-    color: var(--text);
-    box-shadow: var(--shadow-overlay);
-}
+.profile-dialog { width: min(32rem, calc(100vw - 2rem)); border: 1px solid var(--border-strong); border-radius: 12px; background: var(--surface); padding: 0; color: var(--text); box-shadow: var(--cp-shadow-floating); }
+.language-switcher--profile { position: relative; width: min(100%, 15rem); }
+.language-switcher--profile .language-switcher-button { width: 100%; min-height: 44px; height: auto; }
+.language-switcher--profile .language-switcher-menu { right: auto; left: 0; width: min(15rem, calc(100vw - 2rem)); max-width: calc(100vw - 2rem); }
+.profile-next-links img { filter: invert(78%) sepia(32%) saturate(740%) hue-rotate(358deg) brightness(99%) contrast(90%); }
+html[data-theme="light"] .profile-next-links img { filter: invert(39%) sepia(48%) saturate(757%) hue-rotate(356deg) brightness(83%) contrast(91%); }
 
 .profile-dialog::backdrop { background: rgb(4 7 11 / 72%); backdrop-filter: blur(4px); }
 .profile-dialog form { display: grid; gap: var(--space-4); padding: var(--space-5); }
@@ -245,6 +278,14 @@ body.workspace-app { overflow-x: clip; }
     .profile-tabs { scrollbar-width: none; }
     .profile-tabs::-webkit-scrollbar { display: none; }
     .profile-tabs button { flex: 0 0 auto; }
+    .profile-choice-row .cp-button,
+    .po-theme-options,
+    .language-switcher--profile { width: 100%; }
+    .profile-choice-row .cp-button,
+    .po-theme-option { min-height: 44px; }
+    .po-theme-option { min-width: 0; flex: 1 1 0; }
+    .language-switcher--profile .language-switcher-button { min-height: 44px; }
+    .language-switcher--profile .language-switcher-menu { width: min(100%, calc(100vw - 2rem)); }
     .profile-section-heading { align-items: stretch; flex-direction: column; }
     .profile-list-item { grid-template-columns: auto minmax(0, 1fr); }
     .profile-list-actions { grid-column: 1 / -1; justify-content: start; }

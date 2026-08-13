@@ -89,6 +89,93 @@ body.workspace-app.workspace-sidebar-collapsed {
     .workspace-sidebar-collapsed .workspace-brand > span { display: none; }
 }
 
+/* Desktop shell motion. Keep the 248px/72px contract while allowing the
+   track, sidebar copy and controls to settle together instead of snapping. */
+@media (min-width: 68.75rem) {
+    body.workspace-app {
+        transition: grid-template-columns 240ms var(--cp-ease-emphasized);
+    }
+
+    .workspace-sidebar,
+    .workspace-brand { width: 100%; }
+
+    .workspace-brand > span,
+    .workspace-nav a > span,
+    .workspace-profile-copy,
+    .workspace-profile-arrow {
+        transition: opacity 180ms var(--cp-ease-standard),
+            transform 220ms var(--cp-ease-emphasized),
+            visibility 0s linear;
+    }
+
+    body.workspace-app.workspace-sidebar-collapsed .workspace-brand > span {
+        display: flex;
+        opacity: 0;
+        pointer-events: none;
+        position: absolute;
+        transform: translateX(-8px);
+        transition: opacity 180ms var(--cp-ease-standard),
+            transform 220ms var(--cp-ease-emphasized),
+            visibility 0s linear 220ms;
+        visibility: hidden;
+    }
+
+    body.workspace-app.workspace-sidebar-collapsed .workspace-nav a > span {
+        width: auto;
+        height: auto;
+        margin: 0;
+        clip: auto;
+        opacity: 0;
+        pointer-events: none;
+        position: absolute;
+        transform: translateX(-8px);
+        transition: opacity 180ms var(--cp-ease-standard),
+            transform 220ms var(--cp-ease-emphasized),
+            visibility 0s linear 220ms;
+        visibility: hidden;
+    }
+
+    body.workspace-app.workspace-sidebar-collapsed .workspace-profile-button {
+        grid-template-columns: auto 0 0;
+        justify-content: center;
+        gap: 0;
+    }
+
+    body.workspace-app.workspace-sidebar-collapsed .workspace-profile-copy {
+        display: flex;
+        opacity: 0;
+        pointer-events: none;
+        position: absolute;
+        transform: translateX(-8px);
+        transition: opacity 180ms var(--cp-ease-standard),
+            transform 220ms var(--cp-ease-emphasized),
+            visibility 0s linear 220ms;
+        visibility: hidden;
+    }
+
+    body.workspace-app.workspace-sidebar-collapsed .workspace-profile-arrow {
+        display: block;
+        opacity: 0;
+        pointer-events: none;
+        position: absolute;
+        transform: translateX(-8px);
+        transition: opacity 180ms var(--cp-ease-standard),
+            transform 220ms var(--cp-ease-emphasized),
+            visibility 0s linear 220ms;
+        visibility: hidden;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.workspace-app,
+    .workspace-brand > span,
+    .workspace-nav a > span,
+    .workspace-profile-copy,
+    .workspace-profile-arrow {
+        transition-duration: 0.001ms !important;
+    }
+}
+
 .cp-fixture-badge {
     align-items: center;
     background: var(--cp-warning-soft);

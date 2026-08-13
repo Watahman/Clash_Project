@@ -64,6 +64,7 @@ function syncThemeButtons() {
         const active = button.dataset.themeChoice === preference;
         button.classList.toggle('po-theme-active', active);
         button.setAttribute('aria-pressed', String(active));
+        button.dataset.themeActive = String(active);
     });
 }
 

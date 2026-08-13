@@ -1107,3 +1107,111 @@
     color: var(--danger, var(--red, #ff5b4a)) !important;
     box-shadow: inset 0 0 0 0.0625rem rgba(224, 129, 129, 0.06);
 }
+
+/* Profile popup controls: keep the compact surface comfortable and contained. */
+#profile-overlay #po-code-btn {
+    box-sizing: border-box;
+    min-height: 2.5rem;
+    max-width: 100%;
+    border: 0.0625rem solid var(--cp-border-focus, var(--border-focus, rgba(216, 172, 85, 0.62)));
+    border-radius: 0.5rem;
+    background: var(--cp-brand-soft, var(--accent-dim, rgba(216, 172, 85, 0.12)));
+    padding: 0.45rem 0.75rem;
+    color: var(--cp-brand-strong, var(--accent-strong, var(--accent)));
+}
+
+#profile-overlay .po-theme-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.25rem;
+    border: 0.0625rem solid var(--cp-border-2, var(--border-visible));
+    border-radius: 0.5rem;
+    background: var(--cp-surface-2, var(--surface-raised));
+    padding: 0.25rem;
+}
+
+#profile-overlay .po-theme-option {
+    min-width: 0;
+    min-height: 2.5rem;
+    border-color: transparent;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--cp-text-2, var(--text-muted, var(--text-3)));
+    transition: background-color 160ms var(--cp-ease-standard, ease-out), border-color 160ms var(--cp-ease-standard, ease-out), color 160ms var(--cp-ease-standard, ease-out);
+}
+
+#profile-overlay .po-theme-icon {
+    display: inline-grid;
+    margin-right: 0.4rem;
+    color: var(--cp-brand-strong, var(--accent-strong, var(--accent)));
+    font-size: 1rem;
+    line-height: 1;
+}
+
+#profile-overlay .po-theme-option:hover {
+    border-color: var(--cp-border-2, var(--border-visible));
+    background: var(--cp-surface-hover, var(--surface-raised));
+    color: var(--cp-text-1, var(--text, var(--text-1)));
+}
+
+#profile-overlay .po-theme-option:focus-visible {
+    outline: 0.1875rem solid var(--cp-brand, var(--border-focus));
+    outline-offset: 0.0625rem;
+}
+
+#profile-overlay .po-theme-option.po-theme-active,
+#profile-overlay .po-theme-option[aria-pressed="true"] {
+    border-color: var(--cp-border-focus, var(--border-focus));
+    background: var(--cp-brand-soft, var(--accent-dim));
+    color: var(--cp-brand-strong, var(--accent-strong, var(--accent)));
+    box-shadow: inset 0 0 0 0.0625rem var(--cp-border-focus, var(--border-focus));
+}
+
+#profile-overlay .po-language-picker {
+    position: relative;
+    min-width: 0;
+}
+
+#profile-overlay .language-switcher--profile {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+}
+
+#profile-overlay .language-switcher--profile .language-switcher-button {
+    width: 100%;
+    min-width: 0;
+    min-height: 2.5rem;
+}
+
+#profile-overlay .language-switcher--profile .language-switcher-menu {
+    top: calc(100% + 0.5rem);
+    right: auto;
+    left: 0;
+    width: min(15rem, 100%, calc(100vw - 2rem));
+    max-width: calc(100vw - 2rem);
+}
+
+#profile-overlay #po-logout-btn {
+    min-height: 2.5rem;
+    border: 0.0625rem solid var(--cp-danger, var(--danger, var(--red, #e07373)));
+    color: var(--cp-danger, var(--danger, var(--red, #e07373)));
+    background: transparent;
+}
+
+#profile-overlay #po-logout-btn:hover,
+#profile-overlay #po-logout-btn:focus-visible,
+#profile-overlay #po-logout-btn:active {
+    border-color: var(--cp-danger, var(--danger, var(--red, #e07373)));
+    background: var(--cp-danger-soft, var(--danger-soft, var(--red-dim, rgba(224, 115, 115, 0.12))));
+    color: var(--cp-danger, var(--danger, var(--red, #e07373)));
+}
+
+@media (max-width: 42rem), (pointer: coarse) {
+    #profile-overlay #po-code-btn,
+    #profile-overlay .po-theme-option,
+    #profile-overlay .language-switcher--profile .language-switcher-button,
+    #profile-overlay #po-logout-btn {
+        min-height: 2.75rem;
+    }
+}

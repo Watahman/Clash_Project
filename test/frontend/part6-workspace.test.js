@@ -54,6 +54,23 @@ describe('Part 6 profile and settings', () => {
         expect(css).toContain('.profile-placeholder > .overlay.hidden { display: none; }');
     });
 
+    it('keeps profile popup controls padded, segmented, contained and touch-friendly', () => {
+        const html = readFileSync('src/subpages/popup_htmls/profile_popup.html', 'utf8');
+        const css = readFileSync('src/assets/css/profile-overlay.css', 'utf8');
+
+        expect(html).toMatch(/id="po-code-btn"[^>]*type="button"/);
+        expect(html).toMatch(/class="po-theme-option"[^>]*data-theme-choice="dark"[^>]*aria-pressed="false"/);
+        expect(html).toMatch(/class="po-theme-option"[^>]*data-theme-choice="light"[^>]*aria-pressed="false"/);
+        expect(css).toMatch(/#profile-overlay #po-code-btn\s*\{[^}]*min-height:\s*2\.5rem;/s);
+        expect(css).toMatch(/#profile-overlay #po-code-btn\s*\{[^}]*padding:\s*0\.45rem 0\.75rem;/s);
+        expect(css).toMatch(/#profile-overlay #po-code-btn\s*\{[^}]*border-radius:\s*0\.5rem;/s);
+        expect(css).toMatch(/#profile-overlay \.po-theme-options\s*\{[^}]*display:\s*grid;[^}]*border-radius:\s*0\.5rem;/s);
+        expect(css).toMatch(/#profile-overlay \.po-theme-option\.po-theme-active,\s*#profile-overlay \.po-theme-option\[aria-pressed="true"\]/s);
+        expect(css).toMatch(/#profile-overlay \.language-switcher--profile \.language-switcher-menu\s*\{[^}]*top:\s*calc\(100% \+ 0\.5rem\);[^}]*right:\s*auto;[^}]*left:\s*0;/s);
+        expect(css).toMatch(/#profile-overlay #po-logout-btn\s*\{[^}]*min-height:\s*2\.5rem;[^}]*var\(--cp-danger/si);
+        expect(css).toMatch(/@media \(max-width: 42rem\), \(pointer: coarse\)[\s\S]*#profile-overlay #po-logout-btn[\s\S]*min-height:\s*2\.75rem;/);
+    });
+
     it('binds setting controls only once when the profile is initialized again', () => {
         document.body.innerHTML = `
             <button class="po-theme-option" data-theme-choice="dark"></button>

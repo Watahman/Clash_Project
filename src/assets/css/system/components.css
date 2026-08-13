@@ -19,9 +19,33 @@ a.cp-button {
 .cp-button--primary:hover { background: var(--cp-brand-hover); transform: translateY(-1px); }
 .cp-button--secondary { background: var(--cp-surface-2); border-color: var(--cp-border-2); color: var(--cp-text-1); }
 .cp-button--ghost { background: transparent; color: var(--cp-text-2); }
-.cp-button--danger { background: transparent; border-color: var(--cp-border-2); color: var(--cp-danger); }
+.cp-button--danger {
+    background: transparent;
+    border-color: var(--cp-danger);
+    color: var(--cp-danger);
+}
+.cp-button--danger:hover,
+.cp-button--danger:focus-visible,
+.cp-button--danger:active {
+    background: var(--cp-danger-soft);
+    border-color: var(--cp-danger);
+    color: var(--cp-danger);
+}
+.cp-button--danger:focus-visible { outline-color: var(--cp-danger); }
 .cp-button--large { font-size: .875rem; height: 48px; padding-inline: 18px; }
 .cp-icon-button { height: 40px; padding: 0; width: 40px; }
+
+html[data-theme="light"] .cp-button--primary {
+    background: #e7b957;
+    border-color: #e7b957;
+    color: #17202a;
+}
+
+html[data-theme="light"] .cp-button--primary:hover {
+    background: #dda944;
+    border-color: #dda944;
+    color: #17202a;
+}
 
 .cp-panel {
     background: var(--cp-surface-1);
