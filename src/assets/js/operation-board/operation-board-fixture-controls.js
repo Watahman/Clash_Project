@@ -11,7 +11,9 @@ export function setSourceMode(mode, root = document) {
         button.setAttribute('aria-pressed', String(selected));
     });
     root.querySelectorAll('[data-source-control]').forEach(control => {
-        control.hidden = control.dataset.sourceControl !== mode;
+        const hidden = control.dataset.sourceControl !== mode;
+        control.hidden = hidden;
+        control.setAttribute('aria-hidden', String(hidden));
     });
 }
 
