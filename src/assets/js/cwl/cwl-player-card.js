@@ -40,7 +40,7 @@ export function createPlayerCard(playerInfo, clanUuid, options = {}) {
 
         makePlayerDraggable(element);
         attachDeleteButton(element);
-        attachMoveControl(element);
+        if (clanUuid == null) attachMoveControl(element);
         const preferredStatus = normalizeRosterStatus(
             player.rosterStatus || player.roster_status || player.status
         );

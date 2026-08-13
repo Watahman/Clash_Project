@@ -60,7 +60,10 @@ function createInspectorFacts(card) {
 function createInspectorActions(card) {
     const actions = card.ownerDocument.createElement('div');
     actions.className = 'cwl-inspector-actions';
-    actions.append(createMoveControl(card), createRoleControl(card));
+    if (card.querySelector('.cwl-move-player')) {
+        actions.appendChild(createMoveControl(card));
+    }
+    actions.appendChild(createRoleControl(card));
     return actions;
 }
 
