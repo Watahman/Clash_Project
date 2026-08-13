@@ -6,23 +6,48 @@ const RESULT_CLASSES = new Set(['draw', 'loss', 'win']);
 
 export function renderWarHistory(summaryElement, listElement, history) {
     const summary = history?.summary || {};
-    summaryElement.innerHTML = `
-        ${metric(t('war.winRate'), summary.winRate == null ? '—' : `${number(summary.winRate).toFixed(0)}%`)}
-        ${metric(t('war.record'), t('war.recordFormat', {
+    summaryElement.innerHTML = [
+        metric(t('war.winRate'), summary.winRate == null ? '—' : `${number(summary.winRate).toFixed(0)}%`),
+        metric(t('war.record'), t('war.recordFormat', {
             wins: number(summary.wins),
             losses: number(summary.losses),
             draws: number(summary.draws)
-        }))}
-        ${metric(t('war.avgStars'), summary.avgStars == null ? '—' : number(summary.avgStars).toFixed(1))}
-        ${metric(t('war.avgAttackUse'), summary.avgUsage == null ? '—' : `${number(summary.avgUsage).toFixed(0)}%`)}`;
+        })),
+        metric(t('war.avgStars'), summary.avgStars == null ? '—' : number(summary.avgStars).toFixed(1)),
+        metric(t('war.avgAttackUse'), summary.avgUsage == null ? '—' : `${number(summary.avgUsage).toFixed(0)}%`)
+    ].join('');
+
     const wars = history?.wars || [];
-    listElement.innerHTML = wars.length ? wars.map(war => `
-        <article class="war-history-row is-${resultClass(war.result)}">
-            <span class="war-history-result">${escapeHtml(resultLabel(war.result))}</span>
-            <span><strong>${escapeHtml(war.opponent.name)}</strong><small>${dateLabel(war.endTime)} · ${number(war.teamSize, 0)}v${number(war.teamSize, 0)}</small></span>
-            <span><strong>${escapeHtml(t('war.historyScore', { own: number(war.own.stars), opponent: number(war.opponent.stars) }))}</strong><small>${number(war.own.destruction).toFixed(1)}% — ${number(war.opponent.destruction).toFixed(1)}%</small></span>
-            <span><strong>${number(war.attackUsage).toFixed(0)}%</strong><small>${escapeHtml(t('war.attackUsage'))}</small></span>
-        </article>`).join('') : `<p class="war-muted">${escapeHtml(t('war.noHistory'))}</p>`;
+    listElement.innerHTML = wars.length
+        ? wars.map(renderHistoryRow).join('')
+        : `<p class="war-muted">${escapeHtml(t('war.noHistory'))}</p>`;
+}
+
+function renderHistoryRow(war) {
+    return war?.isRegular !== false ? renderRegularRow(war) : renderExcludedRow(war);
+}
+
+function renderRegularRow(war) {
+    return `<article class="war-history-row is-${resultClass(war.result)}">
+        <span class="war-history-result">${escapeHtml(resultLabel(war.result))}</span>
+        <span><strong>${escapeHtml(war.opponent.name || t('war.unknown'))}</strong><small>${dateLabel(war.endTime)} · ${teamSizeLabel(war.teamSize)}</small></span>
+        <span><strong>${escapeHtml(t('war.historyScore', { own: number(war.own.stars), opponent: number(war.opponent.stars) }))}</strong><small>${number(war.own.destruction).toFixed(1)}% — ${number(war.opponent.destruction).toFixed(1)}%</small></span>
+        <span><strong>${number(war.attackUsage).toFixed(0)}%</strong><small>${escapeHtml(t('war.attackUsage'))}</small></span>
+    </article>`;
+}
+
+function renderExcludedRow(war) {
+    const cwl = war?.isCwl;
+    const prefix = cwl ? 'war.cwl' : 'war.grouped';
+    const badge = cwl ? t('war.cwlBadge') : t('war.groupedBadge');
+    const opponentName = war.opponent.name
+        || t(cwl ? 'war.cwlOpponentUnknown' : 'war.unknown');
+    return `<article class="war-history-row is-${cwl ? 'cwl' : 'grouped'}">
+        <span class="war-history-result war-history-type">${escapeHtml(badge)}</span>
+        <span><strong>${escapeHtml(opponentName)}</strong><small>${dateLabel(war.endTime)} · ${teamSizeLabel(war.teamSize)}</small></span>
+        <span class="war-history-cwl-summary"><strong>${escapeHtml(t(`${prefix}HistoryTitle`))}</strong><small>${escapeHtml(t(`${prefix}HistoryCopy`))}</small></span>
+        <span class="war-history-cwl-meta"><strong>${escapeHtml(t(`${prefix}HistoryTotal`, { own: number(war.own.stars), opponent: number(war.opponent.stars) }))}</strong><small>${escapeHtml(t('war.historyExcluded'))}</small></span>
+    </article>`;
 }
 
 function resultLabel(result) {
@@ -37,6 +62,11 @@ function resultClass(result) {
 
 function metric(label, value) {
     return `<article><small>${escapeHtml(label)}</small><strong>${value}</strong></article>`;
+}
+
+function teamSizeLabel(teamSize) {
+    const size = number(teamSize, 0);
+    return size > 0 ? `${size}v${size}` : t('war.unknown');
 }
 
 function dateLabel(value) {

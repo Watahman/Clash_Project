@@ -812,6 +812,40 @@
     color: #f27a7a;
 }
 
+.war-history-row.is-cwl,
+.war-history-row.is-grouped {
+    border-color: color-mix(in srgb, var(--war-gold) 48%, var(--war-line));
+    background: linear-gradient(105deg, rgba(212, 167, 44, .1), var(--war-surface) 42%);
+}
+
+.war-history-row.is-cwl .war-history-result,
+.war-history-row.is-grouped .war-history-result {
+    width: auto;
+    min-width: 42px;
+    padding: 0 8px;
+    background: rgba(212, 167, 44, .15);
+    color: var(--war-gold);
+    font-size: .62rem;
+    letter-spacing: .06em;
+}
+
+.war-history-cwl-summary,
+.war-history-cwl-meta {
+    display: grid;
+    gap: 3px;
+}
+
+.war-history-cwl-summary strong,
+.war-history-cwl-meta strong {
+    color: var(--war-gold);
+    font-size: .78rem;
+}
+
+.war-history-cwl-summary small,
+.war-history-cwl-meta small {
+    line-height: 1.35;
+}
+
 @media (max-width: 1100px) {
     .war-board-header {
         align-items: flex-start;

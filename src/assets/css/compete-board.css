@@ -247,6 +247,10 @@
 .war-board--webby .war-history-row { align-items: center; border-bottom: 1px solid var(--compete-border); display: grid; gap: 12px; grid-template-columns: 34px minmax(0, 1fr) minmax(140px, auto) 90px; min-height: 56px; padding: 10px 14px; }
 .war-board--webby .war-history-row:last-child { border-bottom: 0; }
 .war-board--webby .war-history-row small { color: var(--compete-muted); display: block; }
+.war-board--webby .war-history-row.is-cwl,
+.war-board--webby .war-history-row.is-grouped { background: color-mix(in srgb, var(--compete-accent) 7%, var(--compete-surface)); border-color: color-mix(in srgb, var(--compete-accent) 42%, var(--compete-border)); }
+.war-board--webby .war-history-row.is-cwl .war-history-result,
+.war-board--webby .war-history-row.is-grouped .war-history-result { color: var(--compete-accent-strong); }
 
 .operation-workspace-page button:focus-visible,
 .war-board--webby button:focus-visible,
