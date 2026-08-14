@@ -69,7 +69,6 @@ html:not([data-theme="light"]) body.minigames-page img[src$="/streak.svg"] { con
 .minigame-switch-copy em { margin-top: .35rem; overflow: hidden; color: var(--game-accent); font-size: .68rem; font-style: normal; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
 .minigame-switch-play { display: inline-block; margin-top: .45rem; color: var(--game-accent); font-size: .68rem; font-weight: 800; letter-spacing: .02em; }
 
-body[data-game-focus="true"] .minigames-hero { display: none; }
 .higher-lower-shell[hidden],
 [data-minigame-view][hidden] { display: none !important; }
 

@@ -55,8 +55,9 @@ describe('workspace Minigames navigation', () => {
         });
         expect(privatePage).toContain('/assets/js/pages/minigames-hub.js?v=20260812-redesign');
         expect(privatePage).toContain('/assets/js/pages/minigames-phase2b.js?v=20260814-entity-mode-fix');
+        expect(privatePage).toContain('/assets/js/pages/higher-lower.js?v=20260814-question-count');
         expect(privatePage).toContain('minigames-entity-guesser.css?v=20260814-practice-picker');
-        expect(privatePage).toContain('minigames.css?v=20260814-games-header-spacing');
+        expect(privatePage).toContain('minigames.css?v=20260814-games-header-visible');
         expect(gameStyles).toContain('padding-block: 3rem 3rem');
         expect(privateStyles).toContain('padding-block-start: 1.25rem');
         expect(privatePage).not.toContain('class="public-header"');

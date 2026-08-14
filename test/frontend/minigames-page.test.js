@@ -11,6 +11,7 @@ describe('ClashPanel minigames public page', () => {
     const higherLowerController = readFileSync('src/assets/js/pages/higher-lower.js', 'utf8');
     const higherLowerCopy = readFileSync('src/assets/js/minigames/higher-lower-copy.js', 'utf8');
     const higherLowerEngine = readFileSync('src/assets/js/minigames/higher-lower-engine.js', 'utf8');
+    const higherLowerRenderer = readFileSync('src/assets/js/minigames/higher-lower-renderer.js', 'utf8');
     const minigamesState = readFileSync('src/assets/js/minigames/minigames-state.js', 'utf8');
     const hubController = readFileSync('src/assets/js/pages/minigames-hub.js', 'utf8');
 
@@ -99,6 +100,11 @@ describe('ClashPanel minigames public page', () => {
         expect(higherLowerController).toContain("root.querySelectorAll('[data-hl-choice]')");
     });
 
+    it('keeps the Higher or Lower question counter free of a duplicated label', () => {
+        expect(higherLowerRenderer).toContain('elements.question.textContent = count;');
+        expect(higherLowerRenderer).not.toContain("elements.question.textContent = `${text('question')} ${count}`;");
+    });
+
     it('keeps mode changes from focusing and reopening the answer picker', () => {
         expect(entityController).toMatch(/function setMode\(mode, categoryId = state\?\.categoryId\) \{[\s\S]*?hydrate\(createState\(mode, categoryId\)\);[\s\S]*?render\(\);\s*\}/);
         expect(entityController).not.toMatch(/function setMode\([\s\S]*?elements\.input\.focus\(\);/);
@@ -135,8 +141,8 @@ describe('ClashPanel minigames public page', () => {
 
     it('versions the changed module graph so existing browsers cannot keep the broken picker', () => {
         expect(page).toContain('/assets/js/pages/minigames-phase2b.js?v=20260814-entity-mode-fix');
-        expect(page).toContain('/assets/js/pages/higher-lower.js?v=20260811-2');
-        expect(page).toContain('/assets/css/minigames.css?v=20260814-games-header-spacing');
+        expect(page).toContain('/assets/js/pages/higher-lower.js?v=20260814-question-count');
+        expect(page).toContain('/assets/css/minigames.css?v=20260814-games-header-visible');
         expect(hubController).toContain("higher-lower-engine.js?v=20260809-3");
         expect(hubController).toContain("minigames-state.js?v=20260809-3");
         expect(entityController).toContain("entity-guesser-catalog.js?v=20260809-3");
@@ -144,6 +150,7 @@ describe('ClashPanel minigames public page', () => {
         expect(entityEngine).toContain("entity-guesser-catalog.js?v=20260809-3");
         expect(higherLowerController).toContain("higher-lower-engine.js?v=20260809-3");
         expect(higherLowerEngine).toContain("entity-guesser-catalog.js?v=20260809-3");
+        expect(higherLowerController).toContain("higher-lower-renderer.js?v=20260814-question-count");
         expect(minigamesState).toContain("higher-lower-engine.js?v=20260809-3");
     });
 
@@ -159,6 +166,11 @@ describe('ClashPanel minigames public page', () => {
     it('starts the public game heading closer to the page header', () => {
         const styles = readFileSync('src/assets/css/minigames.css', 'utf8');
         expect(styles).toContain('padding-block: 3rem 3rem');
+    });
+
+    it('keeps the Games hero header visible while a game is focused', () => {
+        const styles = readFileSync('src/assets/css/minigames.css', 'utf8');
+        expect(styles).not.toContain('body[data-game-focus="true"] .minigames-hero');
     });
 
     it('keeps the answer picker usable on narrow touch screens', () => {
