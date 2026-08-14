@@ -32,18 +32,20 @@ body.public-home-v3 {
     content: "";
     pointer-events: none;
 }
-.home3-hero h1 { color: #fff; }
 .home3-hero .home3-lead { color: rgba(237,242,247,.76); }
 .home3-hero .home3-footnote { color: rgba(237,242,247,.58); }
 .home3-hero-copy { max-width: 37rem; }
-.home3-hero h1 {
+body.public-home-v3 .home3-hero h1 {
     max-width: 13ch;
     margin: .85rem 0 1.25rem;
-    color: var(--text);
-    font-family: Manrope, Inter, sans-serif;
+    color: #fff;
+    font-family: "Segoe UI", system-ui, sans-serif;
     font-size: clamp(3rem, 5.5vw, 5.5rem);
     line-height: .98;
     letter-spacing: -.065em;
+}
+:root[data-theme="light"] body.public-home-v3 .home3-hero h1 {
+    color: #fff !important;
 }
 .home3-lead { max-width: 58ch; color: var(--text-muted); font-size: clamp(1rem, 1.35vw, 1.2rem); line-height: 1.65; }
 .home3-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.8rem; }
