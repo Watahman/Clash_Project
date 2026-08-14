@@ -52,7 +52,8 @@ describe('workspace Minigames navigation', () => {
             expect(publicPage).toContain(attribute);
         });
         expect(privatePage).toContain('/assets/js/pages/minigames-hub.js?v=20260812-redesign');
-        expect(privatePage).toContain('/assets/js/pages/minigames-phase2b.js?v=20260811-2');
+        expect(privatePage).toContain('/assets/js/pages/minigames-phase2b.js?v=20260814-entity-mode-fix');
+        expect(privatePage).toContain('minigames-entity-guesser.css?v=20260814-practice-picker');
         expect(privatePage).not.toContain('class="public-header"');
     });
 });

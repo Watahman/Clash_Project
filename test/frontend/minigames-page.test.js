@@ -99,6 +99,19 @@ describe('ClashPanel minigames public page', () => {
         expect(higherLowerController).toContain("root.querySelectorAll('[data-hl-choice]')");
     });
 
+    it('keeps mode changes from focusing and reopening the answer picker', () => {
+        expect(entityController).toMatch(/function setMode\(mode, categoryId = state\?\.categoryId\) \{[\s\S]*?hydrate\(createState\(mode, categoryId\)\);[\s\S]*?render\(\);\s*\}/);
+        expect(entityController).not.toMatch(/function setMode\([\s\S]*?elements\.input\.focus\(\);/);
+    });
+
+    it('styles the Entity Guesser practice category control as a real workspace field', () => {
+        const styles = readFileSync('src/assets/css/minigames-entity-guesser.css', 'utf8');
+        expect(page).toContain('minigames-entity-guesser.css?v=20260814-practice-picker');
+        expect(styles).toContain('.game-category-picker {');
+        expect(styles).toContain('.game-category-picker select {');
+        expect(styles).toContain('.game-category-picker select:focus-visible {');
+    });
+
     it('uses a complete touch-friendly answer picker instead of a limited datalist', () => {
         expect(page).toContain('role="combobox"');
         expect(page).toContain('role="listbox"');
@@ -121,7 +134,7 @@ describe('ClashPanel minigames public page', () => {
     });
 
     it('versions the changed module graph so existing browsers cannot keep the broken picker', () => {
-        expect(page).toContain('/assets/js/pages/minigames-phase2b.js?v=20260811-2');
+        expect(page).toContain('/assets/js/pages/minigames-phase2b.js?v=20260814-entity-mode-fix');
         expect(page).toContain('/assets/js/pages/higher-lower.js?v=20260811-2');
         expect(page).toContain('/assets/css/minigames.css?v=20260814-dark-icons');
         expect(hubController).toContain("higher-lower-engine.js?v=20260809-3");

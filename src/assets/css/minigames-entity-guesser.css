@@ -6,6 +6,11 @@
 .game-sidebar-heading .eyebrow { margin-bottom: .25rem !important; color: var(--game-accent) !important; font-size: .64rem; }
 .game-sidebar-heading h2 { margin: 0; font-size: 1.16rem; line-height: 1.2; text-wrap: balance; }
 .game-sidebar-copy { margin: 1rem 0 0; color: var(--text-muted); font-size: .78rem; line-height: 1.55; }
+.game-category-picker { display: grid; gap: .45rem; margin: 1.15rem 0 1.3rem; border: 1px solid color-mix(in srgb, var(--game-accent) 42%, var(--border)); border-radius: 10px; padding: .75rem; background: var(--game-accent-soft); }
+.game-category-picker span { color: var(--game-accent); font-size: .68rem; font-weight: 800; letter-spacing: .02em; }
+.game-category-picker select { width: 100%; min-height: 2.65rem; border: 1px solid var(--border-strong); border-radius: 7px; padding: 0 .7rem; background: var(--surface); color: var(--text); font: inherit; font-size: .8rem; }
+.game-category-picker select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.game-category-picker[hidden] { display: none; }
 .game-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .75rem; margin: 1.35rem 0; }
 .game-stat { min-width: 0; border-top: 1px solid var(--border); padding: .8rem 0 .7rem; }
 .game-stat span { display: block; overflow: hidden; color: var(--text-subtle); font-size: .64rem; font-weight: 750; letter-spacing: .04em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }

@@ -246,7 +246,6 @@ function setMode(mode, categoryId = state?.categoryId) {
     });
     hydrate(createState(mode, categoryId));
     render();
-    elements.input.focus();
 }
 
 async function share() {
