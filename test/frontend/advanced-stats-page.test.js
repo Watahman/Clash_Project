@@ -85,6 +85,7 @@ describe('Advanced Stats workspace page', () => {
         const runtime = readFileSync('src/assets/js/i18n/runtime-translations.js', 'utf8');
 
         expect(html).toContain('advanced-stats-bootstrap.js?v=20260814-advanced-stats-v2');
+        expect(html).toContain('advanced-stats.css?v=20260814-advanced-stats-v2');
         expect(html).toContain('workspace-shell.js?v=20260812-redesign');
         expect(bootstrap).toContain("advanced-stats.js?v=20260814-advanced-stats-v2");
         expect(page).toContain("i18n/i18n.js?v=20260809-4");

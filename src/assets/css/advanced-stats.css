@@ -122,7 +122,7 @@
 .advanced-stats__favorites :is(span, strong, small) { min-width: 0; overflow-wrap: anywhere; }
 .advanced-stats__favorites strong { line-height: 1.35; white-space: normal; }
 .advanced-stats__favorites small { color: var(--cp-text-2); min-height: 18px; }
-.advanced-stats__two-column { align-items: start; display: grid; gap: 24px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.advanced-stats__two-column { align-items: stretch; display: grid; gap: 24px; grid-template-columns: 1fr; }
 
 .advanced-stats__trend-chart { min-height: 240px; overflow-x: auto; padding: 4px 0 0; }
 .advanced-stats__trend-svg { display: block; height: 240px; min-width: 520px; overflow: visible; width: 100%; }
@@ -143,7 +143,7 @@
     to { stroke-dasharray: 1200; stroke-dashoffset: 0; }
 }
 
-.advanced-stats__army-list { display: grid; gap: 8px; }
+.advanced-stats__army-list { display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .advanced-stats__army-card { background: var(--cp-surface-2); border-radius: 8px; display: grid; gap: 8px; padding: 12px; }
 .advanced-stats__army-card header { align-items: baseline; display: flex; gap: 8px; justify-content: space-between; }
 .advanced-stats__army-card h3 { font-size: .9rem; margin: 0; }
@@ -198,11 +198,12 @@
     .advanced-stats__tracking-bar { grid-template-columns: 1fr 1.4fr; }
     .advanced-stats__tracking-menu { grid-column: 1 / -1; justify-self: start; }
     .advanced-stats__kpis,
-    .advanced-stats__favorites { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .advanced-stats__favorites,
+    .advanced-stats__army-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 899px) {
-    .advanced-stats__hero,
-    .advanced-stats__two-column { grid-template-columns: 1fr; }
+    .advanced-stats__hero { grid-template-columns: 1fr; }
+    .advanced-stats__army-list { grid-template-columns: 1fr; }
     .advanced-stats__tracking-bar { grid-template-columns: 1fr; }
     .advanced-stats__tracking-menu { grid-column: auto; }
     .advanced-stats__setup { align-items: start; flex-wrap: wrap; }

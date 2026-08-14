@@ -39,6 +39,8 @@ describe('Progress workspace page contracts', () => {
 
         expect(advancedStats).toContain('@media (max-width: 599px)');
         expect(advancedStats).toContain('.advanced-stats__units-mobile { display: grid;');
+        expect(advancedStats).toContain('.advanced-stats__two-column { align-items: stretch; display: grid; gap: 24px; grid-template-columns: 1fr; }');
+        expect(advancedStats).toContain('.advanced-stats__army-list { display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); }');
         expect(advancedStats).toContain('.advanced-stats__trend-tooltip');
         expect(achievements).toContain('.achievement-filter-dialog:modal');
         expect(achievements).toContain('.achievement-grid { grid-template-columns: 1fr;');
