@@ -35,6 +35,8 @@ describe('workspace Minigames navigation', () => {
     it('keeps the public hub and exposes the same game surface in the private shell', () => {
         const publicPage = readFileSync('src/minigames.html', 'utf8');
         const privatePage = readFileSync('src/subpages/minigames.html', 'utf8');
+        const privateStyles = readFileSync('src/assets/css/workspace-minigames.css', 'utf8');
+        const gameStyles = readFileSync('src/assets/css/minigames.css', 'utf8');
 
         expect(publicPage).toContain('class="public-site minigames-page"');
         expect(privatePage).toContain('class="workspace-app minigames-page" data-workspace-page="minigames"');
@@ -54,6 +56,9 @@ describe('workspace Minigames navigation', () => {
         expect(privatePage).toContain('/assets/js/pages/minigames-hub.js?v=20260812-redesign');
         expect(privatePage).toContain('/assets/js/pages/minigames-phase2b.js?v=20260814-entity-mode-fix');
         expect(privatePage).toContain('minigames-entity-guesser.css?v=20260814-practice-picker');
+        expect(privatePage).toContain('minigames.css?v=20260814-games-header-spacing');
+        expect(gameStyles).toContain('padding-block: 3rem 3rem');
+        expect(privateStyles).toContain('padding-block-start: 1.25rem');
         expect(privatePage).not.toContain('class="public-header"');
     });
 });

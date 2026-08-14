@@ -136,7 +136,7 @@ describe('ClashPanel minigames public page', () => {
     it('versions the changed module graph so existing browsers cannot keep the broken picker', () => {
         expect(page).toContain('/assets/js/pages/minigames-phase2b.js?v=20260814-entity-mode-fix');
         expect(page).toContain('/assets/js/pages/higher-lower.js?v=20260811-2');
-        expect(page).toContain('/assets/css/minigames.css?v=20260814-dark-icons');
+        expect(page).toContain('/assets/css/minigames.css?v=20260814-games-header-spacing');
         expect(hubController).toContain("higher-lower-engine.js?v=20260809-3");
         expect(hubController).toContain("minigames-state.js?v=20260809-3");
         expect(entityController).toContain("entity-guesser-catalog.js?v=20260809-3");
@@ -154,6 +154,11 @@ describe('ClashPanel minigames public page', () => {
             expect(styles).toContain(`/assets/icons/games/dark/${icon}.svg`);
             expect(readFileSync(`src/assets/icons/games/dark/${icon}.svg`, 'utf8')).toContain('stroke="#c8bfff"');
         });
+    });
+
+    it('starts the public game heading closer to the page header', () => {
+        const styles = readFileSync('src/assets/css/minigames.css', 'utf8');
+        expect(styles).toContain('padding-block: 3rem 3rem');
     });
 
     it('keeps the answer picker usable on narrow touch screens', () => {

@@ -8,3 +8,9 @@ body.workspace-app.minigames-page .minigames-category-summary,
 body.workspace-app.minigames-page .minigames-policy {
     width: min(var(--game-max), 100%);
 }
+
+/* The shell already adds its own page inset; keep the game heading close to
+   the topbar without crowding the navigation context. */
+body.workspace-app.minigames-page .minigames-hero {
+    padding-block-start: 1.25rem;
+}

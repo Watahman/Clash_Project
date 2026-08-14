@@ -16,7 +16,7 @@ body.minigames-page {
 .minigames-category-summary,
 .minigames-policy { width: min(var(--game-max), calc(100% - 4rem)); margin-inline: auto; }
 
-.minigames-hero { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(19rem, .8fr); gap: 3rem; align-items: end; padding-block: 4rem 3rem; }
+.minigames-hero { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(19rem, .8fr); gap: 3rem; align-items: end; padding-block: 3rem 3rem; }
 .minigames-hero-copy,
 .minigames-hero-note { min-width: 0; }
 .minigames-hero-copy { max-width: 46rem; }
