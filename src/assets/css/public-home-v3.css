@@ -7,27 +7,33 @@ body.public-home-v3 {
 .public-home-v3 main { overflow: clip; }
 .home3-hero {
     position: relative;
+    isolation: isolate;
     display: grid;
-    grid-template-columns: minmax(0, .82fr) minmax(32rem, 1.18fr);
+    grid-template-columns: minmax(0, 37rem);
     gap: clamp(2rem, 5vw, 5rem);
     align-items: center;
-    width: var(--home-width);
+    width: 100%;
     min-height: min(47.5rem, calc(100svh - var(--marketing-header)));
     margin: 0 auto;
-    padding: clamp(4.5rem, 8vw, 7rem) 0;
+    padding: clamp(4.5rem, 8vw, 7rem) max(var(--marketing-pad), calc((100vw - 80rem) / 2));
+}
+.home3-hero-background {
+    position: absolute;
+    z-index: -2;
+    inset: 0;
+    background: url("/assets/css/pictures/hero.cf5d813794.avif") center / cover no-repeat;
 }
 .home3-hero::before {
     position: absolute;
     z-index: -1;
-    top: 6%;
-    right: -12%;
-    width: 48rem;
-    height: 38rem;
-    border-radius: 50%;
-    background: radial-gradient(circle at var(--mx, 50%) var(--my, 48%), rgba(216,172,85,.08), transparent 68%);
+    inset: 0;
+    background: linear-gradient(90deg, rgba(5,7,12,.96) 0%, rgba(5,7,12,.82) 38%, rgba(5,7,12,.34) 72%, rgba(5,7,12,.18) 100%);
     content: "";
     pointer-events: none;
 }
+.home3-hero h1 { color: #fff; }
+.home3-hero .home3-lead { color: rgba(237,242,247,.76); }
+.home3-hero .home3-footnote { color: rgba(237,242,247,.58); }
 .home3-hero-copy { max-width: 37rem; }
 .home3-hero h1 {
     max-width: 13ch;
@@ -92,7 +98,7 @@ body.public-home-v3 {
 .has-reveal [data-reveal] { opacity: 0; transform: translateY(14px); transition: opacity 500ms ease var(--reveal-delay, 0ms), transform 500ms ease var(--reveal-delay, 0ms); }
 .has-reveal [data-reveal].is-visible { opacity: 1; transform: none; }
 @media (max-width: 70rem) {
-    .home3-hero { grid-template-columns: 1fr; min-height: auto; padding-top: 5rem; }
+    .home3-hero { grid-template-columns: 1fr; min-height: 42rem; padding-top: 5rem; }
     .home3-hero-copy { max-width: 46rem; }
     .home3-product-stage { width: min(100%, 47rem); margin-inline: auto; }
     .home3-pillar-grid { grid-template-columns: repeat(3, 1fr); }
@@ -104,7 +110,7 @@ body.public-home-v3 {
 }
 @media (max-width: 45rem) {
     .home3-section { padding: 3rem 0; }
-    .home3-hero { gap: 2.5rem; padding: 3.5rem 0 4rem; }
+    .home3-hero { min-height: calc(100svh - var(--marketing-header)); gap: 2.5rem; align-items: end; padding: 5rem var(--marketing-pad) 4rem; }
     .home3-hero h1 { max-width: 11ch; font-size: clamp(2.75rem, 13vw, 4.2rem); }
     .home3-pillar-grid { grid-template-columns: 1fr; }
     .home3-pillar-grid a { display: grid; grid-template-columns: 2rem 5rem 1fr; gap: .65rem; align-items: center; border-right: 0; border-top: 1px solid var(--home-rule); padding: 1rem .25rem; }

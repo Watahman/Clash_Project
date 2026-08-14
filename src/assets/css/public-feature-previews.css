@@ -295,6 +295,36 @@ body.public-feature-v2 .home-v2-bottom-cta { width: min(80rem, calc(100% - 2.5re
 .cp-about-document .home-v2-feature-lines { max-width: 48rem; }
 .cp-about-document .home-v2-feature-lines > div { border-top: 1px solid var(--cp-border-1, var(--border)); }
 
+body.public-feature-about .cp-feature-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    width: 100%;
+    min-height: clamp(38rem, 78vh, 50rem);
+    grid-template-columns: minmax(0, 38rem);
+    padding-inline: max(1.25rem, calc((100vw - 80rem) / 2));
+}
+
+.public-feature-about .cp-feature-hero-background {
+    position: absolute;
+    z-index: -2;
+    inset: 0;
+    background: url("/assets/css/pictures/public-pages/clan-march.98e06a9863.avif") center / cover no-repeat;
+}
+
+body.public-feature-about .cp-feature-hero::after {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(5,7,12,.96) 0%, rgba(5,7,12,.82) 38%, rgba(5,7,12,.34) 72%, rgba(5,7,12,.18) 100%);
+    content: "";
+    pointer-events: none;
+}
+
+body.public-feature-about .cp-feature-hero .home-v2-hero-copy h1 { color: #fff; }
+body.public-feature-about .cp-feature-hero .home-v2-lead { color: rgba(237,242,247,.78); }
+body.public-feature-about .cp-feature-hero .hero-footnote { color: rgba(237,242,247,.6); }
+
 @media (max-width: 68rem) {
     body.public-feature-v2 .cp-feature-hero,
     .cp-detail-section,
@@ -306,6 +336,7 @@ body.public-feature-v2 .home-v2-bottom-cta { width: min(80rem, calc(100% - 2.5re
     body.public-feature-v2 .home-v2-signal-strip,
     body.public-feature-v2 .home-v2-bottom-cta { width: min(52rem, calc(100% - 2rem)); }
     .cp-detail-section { padding-block: 3.5rem; }
+    body.public-feature-about .cp-feature-hero { width: 100%; min-height: 42rem; padding-inline: max(1rem, var(--marketing-pad)); }
 }
 
 @media (max-width: 42rem) {
@@ -329,6 +360,7 @@ body.public-feature-v2 .home-v2-bottom-cta { width: min(80rem, calc(100% - 2.5re
     .cp-member-row em { grid-column: 2; grid-row: 1 / span 2; }
     body.public-feature-v2 .home-v2-signal-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     body.public-feature-v2 .home-v2-bottom-cta { display: grid; gap: 1.5rem; }
+    body.public-feature-about .cp-feature-hero { min-height: calc(100svh - var(--marketing-header)); align-items: end; padding-block: 5rem 4rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

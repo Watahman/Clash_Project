@@ -25,6 +25,7 @@
         {"@context":"https://schema.org","@graph":[{"@type":"WebSite","name":"ClashPanel","alternateName":"clashpanel.com","url":"https://clashpanel.com/"},{"@type":"SoftwareApplication","name":"ClashPanel","url":"https://clashpanel.com/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","description":"A free connected Clash of Clans toolkit for clan management, CWL planning, competition, games and progress tracking.","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}}]}
     </script>
     <link rel="icon" type="image/png" href="/assets/css/pictures/clashtools-logo.png">
+    <link rel="preload" as="image" href="/assets/css/pictures/hero.cf5d813794.avif" fetchpriority="high">
     <link rel="stylesheet" href="/assets/css/workspace-loading.css">
     <script src="/assets/js/shell/workspace-bootstrap.js"></script>
     <link rel="stylesheet" href="/assets/css/workspace-system.css">
@@ -49,6 +50,7 @@
 
 <main id="main-content">
     <section class="home3-hero" data-home-spotlight>
+        <div class="home3-hero-background" aria-hidden="true"></div>
         <div class="home3-hero-copy" data-reveal="left">
             <p class="eyebrow" data-i18n="homeV3.eyebrow">Clash of Clans tools, connected</p>
             <h1 data-i18n="homeV3.title">Everything your Clash life needs. One place.</h1>
@@ -56,10 +58,6 @@
             <div class="home3-actions"><a class="button button-primary button-large" href="/subpages/register.html" data-i18n="homeV3.start">Start free</a><a class="button button-secondary button-large" href="#features" data-i18n="homeV3.explore">Explore tools</a></div>
             <p class="home3-footnote" data-i18n="homeV3.footnote">Free to use · unofficial Clash of Clans fan project</p>
         </div>
-        <figure class="home3-product-stage home3-photo-stage" aria-label="ClashPanel strategy artwork" data-i18n-aria-label="homeV3.heroPreviewLabel" data-reveal="right">
-            <img class="home3-photo-main" src="/assets/css/pictures/home/barbarian-strategy.aeb88b9e0b.avif" alt="Clash of Clans Barbarian studying a war map" width="503" height="397">
-            <img class="home3-photo-inset" src="/assets/css/pictures/home/cwl-trophy.a21e1996fc.avif" alt="Clash of Clans Clan War League trophy" width="571" height="325">
-        </figure>
     </section>
 
     <section class="home3-section home3-pillars" id="features" aria-labelledby="pillars-title">
@@ -75,7 +73,7 @@
 
     <section class="home3-section home3-featured" aria-labelledby="featured-title">
         <div class="home3-section-head" data-reveal><p class="eyebrow" data-i18n="homeV3.featuredEyebrow">Featured live tools</p><h2 id="featured-title" data-i18n="homeV3.featuredTitle">Real workspaces, ready when you are.</h2></div>
-        <article class="home3-feature" data-reveal><div><p class="preview-kicker" data-i18n="homeV3.micro.plan">PLAN</p><h3>CWL Planner</h3><p data-i18n="homeV3.plannerCopy">Move from player pool to roster review without losing availability, roles or account context.</p><a href="/cwl-planner" data-i18n="homeV3.micro.explorePlanner">Explore CWL Planner →</a></div><figure class="home3-feature-photo"><img src="/assets/css/pictures/home/cwl-battle.cf5d813794.avif" alt="Clash of Clans troops advancing through a CWL battle" loading="lazy" decoding="async" width="2048" height="1274"></figure></article>
+        <article class="home3-feature" data-reveal><div><p class="preview-kicker" data-i18n="homeV3.micro.plan">PLAN</p><h3>CWL Planner</h3><p data-i18n="homeV3.plannerCopy">Move from player pool to roster review without losing availability, roles or account context.</p><a href="/cwl-planner" data-i18n="homeV3.micro.explorePlanner">Explore CWL Planner →</a></div><figure class="home3-feature-photo"><img src="/assets/css/pictures/home/cwl-trophy.a21e1996fc.avif" alt="Barbarian King jumping behind a Clash of Clans trophy" loading="lazy" decoding="async" width="571" height="325"></figure></article>
         <article class="home3-feature is-reversed" data-reveal><div><p class="preview-kicker" data-i18n="homeV3.micro.manage">MANAGE</p><h3>Clan Families</h3><p data-i18n="homeV3.familyCopy">Keep linked clans, member accounts, roles and polls in one shared community workspace.</p><a href="/clan-management" data-i18n="homeV3.micro.exploreManagement">Explore Clan Management →</a></div><figure class="home3-feature-photo"><img src="/assets/css/pictures/home/clan-war-camp.360aeb4621.avif" alt="Two Clash of Clans Barbarians representing connected clans" loading="lazy" decoding="async" width="1280" height="720"></figure></article>
         <article class="home3-feature" data-reveal><div><p class="preview-kicker" data-i18n="homeV3.micro.compete">COMPETE</p><h3>CWL Tracker</h3><p data-i18n="homeV3.trackerCopy">See the current war, league position, roster attention and history without mixing facts with projections.</p><a href="/cwl-tracker" data-i18n="homeV3.micro.exploreTracker">Explore CWL Tracker →</a></div><figure class="home3-feature-photo"><img src="/assets/css/pictures/home/war-battlefield.ba64592a1b.avif" alt="Clash of Clans war battlefield during an attack" loading="lazy" decoding="async" width="800" height="500"></figure></article>
     </section>
