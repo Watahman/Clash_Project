@@ -21,16 +21,18 @@ describe('Progress workspace page contracts', () => {
         expect(controller).toContain('resetRangeData({ clearTracking: true })');
     });
 
-    it('uses the central entity resolver and keeps achievement families on category assets', () => {
+    it('uses the central entity resolver and gives achievement families semantic assets', () => {
         const helper = read('src/assets/js/pages/progress-asset-view.js');
+        const assetView = read('src/assets/js/pages/achievement-asset-view.js');
         const renderer = read('src/assets/js/pages/achievements-renderer.js');
 
         expect(helper).toContain("from '../assets/entity-assets.js'");
         expect(helper).toContain('ASSET_FALLBACKS.entity');
         expect(helper).toContain('getEntityAsset(entity)');
         expect(helper).toContain('/assets/icons/achievements/');
-        expect(renderer).toContain('categoryImage(family.category');
-        expect(renderer).toContain('entityImage(family.entity');
+        expect(assetView).toContain('ENTITY_RULES');
+        expect(assetView).toContain('GLYPH_RULES');
+        expect(renderer).toContain('achievementFamilyImage(family');
     });
 
     it('keeps both progress pages usable on narrow screens without hiding their data model', () => {

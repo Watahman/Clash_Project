@@ -3,7 +3,7 @@ import {
     buildAchievementSummary,
     filterAchievementFamilies
 } from '../achievements/achievement-view-model.js';
-import { categoryImage, entityImage } from './progress-asset-view.js?v=20260811-1';
+import { achievementFamilyImage } from './achievement-asset-view.js?v=20260814-achievement-icons-1';
 
 const SOURCE_ORDER = Object.freeze([
     'live_profile', 'base_data', 'base_history', 'advanced_stats', 'war', 'cwl_history', 'raid_history',
@@ -116,7 +116,7 @@ function renderFeatured(refs, state) {
     refs.featured.append(title);
     candidates.forEach(family => {
         const item = document.createElement('span');
-        item.append(categoryImage(family.category, categoryLabel(state, family.category)), document.createTextNode(family.title));
+        item.append(achievementFamilyImage(family, categoryLabel(state, family.category)), document.createTextNode(family.title));
         item.title = `${number(family.currentTier.progress)} / ${family.currentTier.thresholdText || number(family.currentTier.target)}`;
         refs.featured.append(item);
     });
@@ -183,9 +183,7 @@ export function achievementCard(family, state) {
     card.dataset.rarity = family.currentTier?.rarity || family.highestUnlocked?.rarity || 'common';
     card.dataset.sourceAvailable = String(family.sourceAvailable);
     const heading = document.createElement('header');
-    const icon = family.entity
-        ? entityImage(family.entity, { alt: '', className: 'achievement-entity-image' })
-        : categoryImage(family.category, categoryLabel(state, family.category));
+    const icon = achievementFamilyImage(family, categoryLabel(state, family.category));
     const copy = document.createElement('div');
     const title = document.createElement('h3'); title.textContent = family.title;
     const meta = document.createElement('p'); meta.textContent = `${categoryLabel(state, family.category)} / ${sourceLabel(family.source)}`;

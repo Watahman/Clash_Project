@@ -147,7 +147,11 @@
 .achievement-card[data-rarity="mythic"] { --achievement-rarity: #b65a9d; }
 .achievement-card > header { align-items: center; display: grid; gap: 10px; grid-template-columns: auto minmax(0, 1fr) auto; }
 .achievement-entity-image,
-.progress-category-image { flex: 0 0 32px; height: 32px; object-fit: contain; width: 32px; }
+.progress-category-image,
+.achievement-family-image { flex: 0 0 32px; height: 32px; object-fit: contain; width: 32px; }
+.achievement-family-icon { align-items: center; background: color-mix(in srgb, var(--achievement-rarity) 14%, transparent); border: 1px solid color-mix(in srgb, var(--achievement-rarity) 38%, var(--cp-border-1)); border-radius: 8px; color: var(--achievement-rarity); display: inline-flex; flex: 0 0 32px; height: 32px; justify-content: center; width: 32px; }
+.achievement-family-icon svg { height: 21px; width: 21px; }
+:root:not([data-theme="light"]) .achievement-family-image:not(.achievement-entity-image) { filter: brightness(0) invert(1); }
 .achievement-card header > div { min-width: 0; }
 .achievement-card h3 { font-size: .88rem; margin: 0 0 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .achievement-card header p { color: var(--cp-text-2); font-size: .66rem; line-height: 1.3; margin: 0; }

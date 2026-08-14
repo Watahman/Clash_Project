@@ -13,7 +13,7 @@ import {
     renderAll,
     renderSources,
     renderAchievements
-} from './achievements-renderer.js?v=20260811-1';
+} from './achievements-renderer.js?v=20260814-achievement-icons-1';
 
 const PAGE_SIZE = 48;
 const ACCOUNT_STORAGE_KEY = 'clashpanel_achievements_account';

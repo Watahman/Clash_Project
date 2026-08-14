@@ -1,0 +1,135 @@
+import { entityImage } from './progress-asset-view.js?v=20260814-achievement-icons-1';
+
+const ICON_PATHS = Object.freeze({
+    trophy: '/assets/icons/war/trophy.svg', medal: '/assets/icons/war/medal.svg', target: '/assets/icons/war/target.svg',
+    swords: '/assets/icons/war/swords.svg', shield: '/assets/icons/war/shield.svg', win: '/assets/icons/war/win.svg',
+    promotion: '/assets/icons/war/promotion.svg', attack: '/assets/icons/war/attack-used.svg', missed: '/assets/icons/war/missed-attack.svg',
+    cwl: '/assets/icons/achievements/cwl.svg', war: '/assets/icons/achievements/war.svg', defense: '/assets/icons/achievements/defense.svg',
+    collection: '/assets/icons/achievements/collection.svg', social: '/assets/icons/achievements/social.svg', clan: '/assets/icons/achievements/clan-family.svg',
+    village: '/assets/icons/achievements/village.svg', progression: '/assets/icons/achievements/progression.svg', special: '/assets/icons/achievements/special.svg',
+    stats: '/assets/icons/achievements/stats.svg', star: '/assets/icons/stats/star.svg', army: '/assets/icons/stats/army.svg', tracking: '/assets/icons/stats/tracking.svg',
+    trend: '/assets/icons/stats/trend-up.svg', history: '/assets/icons/stats/history.svg', destruction: '/assets/icons/stats/destruction.svg',
+    plan: '/assets/icons/pillars/plan.svg', calendar: '/assets/icons/ui/calendar.svg', clock: '/assets/icons/ui/clock.svg', users: '/assets/icons/ui/users.svg',
+    user: '/assets/icons/ui/user.svg', link: '/assets/icons/ui/link.svg', check: '/assets/icons/ui/check.svg', export: '/assets/icons/ui/export.svg'
+});
+
+const ENTITY_RULES = Object.freeze([
+    [/PLY_TH|TOWN[_ ]HALL|TH[_ ]?\d/, ['town-hall-17', 'town-hall-14', 'town-hall-10']],
+    [/HERO|CROWN|HALL[_ ]OF[_ ]FAME|WARDROBE/, ['barbarian-king', 'archer-queen', 'grand-warden', 'royal-champion']],
+    [/PET|MENAGERIE/, ['unicorn', 'diggy', 'phoenix', 'spirit-fox']],
+    [/SPELL|ARCANE|MAGIC/, ['rage-spell', 'freeze-spell', 'lightning-spell', 'invisibility-spell']],
+    [/SIEGE|ENGINEER|WORKSHOP/, ['wall-wrecker', 'battle-blimp', 'log-launcher', 'siege-barracks']],
+    [/EQUIP|FORGE|BLACKSMITH|WEAPON/, ['heroic-torch', 'giant-gauntlet', 'eternal-tome', 'magic-mirror']],
+    [/GOLD|ECONOM/, ['gold-mine', 'gold-storage']],
+    [/ELIXIR/, ['elixir-collector', 'elixir-storage']],
+    [/DARK|HARVEST/, ['dark-elixir-drill', 'dark-elixir-storage']],
+    [/TRAP/, ['giant-bomb', 'bomb', 'seeking-air-mine', 'skeleton-trap']],
+    [/WALL/, ['wall-breaker', 'super-wall-breaker']],
+    [/LABORATORY/, ['laboratory']],
+    [/PET[_ ]HOUSE/, ['pet-house']],
+    [/DEFENSE|FORTRESS|STONEWALL|UNDER[_ ]FIRE|BASE[_ ]DEF/, ['air-defense', 'inferno-tower', 'cannon', 'hidden-tesla']],
+    [/CAPITAL|RAID|DISTRICT/, ['clan-castle', 'army-camp', 'workshop']],
+    [/TROOP|ARMY|BARRACK|OFFENSIVE|COMMAND|TRAINER/, ['root-rider', 'barbarian', 'dragon', 'pekka', 'golem']],
+    [/DECOR|SCENERY|OBSTACLE|COLLECTION|MUSEUM/, ['magic-mirror', 'stick-horse', 'action-figure', 'fire-heart']]
+]);
+
+const GLYPH_RULES = Object.freeze([
+    [/PLY_ACH_COMPLETE/, 'crown'],
+    [/PLY_ACH_PROGRESS/, 'steps'],
+    [/SEC_MASTER_OF_THREE/, 'map'],
+    [/APP_BASE_ARCHIV/, 'chest'],
+    [/DYN/, 'spark']
+]);
+
+const ICON_RULES = Object.freeze([
+    [/CWL|LEAGUE|PROMOTION|PODIUM/, ['cwl', 'promotion', 'trophy', 'medal']],
+    [/(?:^|[^A-Z])WAR(?:_|\s|$)|TRIPLE|STREAK|FINISH|CLEANUP|RAIDER|OPENING|CLUTCH|CAMPAIGN/, ['war', 'swords', 'attack', 'win', 'target', 'medal']],
+    [/DEF|SHIELD|SURVIV|BOUNCE|ONE[_ ]STAR|STONEWALL/, ['shield', 'defense', 'missed', 'destruction']],
+    [/RAID|CAPITAL/, ['attack', 'army', 'trophy', 'target']],
+    [/TR_|TROPHY|RANK|PEAK|PUSH|CLIMB|RECORD|WORLD[_ ]RANKED/, ['trophy', 'target', 'medal', 'trend']],
+    [/STAR|CONSTELLATION|ACH[_ ]STARS/, ['star', 'medal', 'special']],
+    [/SOC|CLAN|FAM|FAMILY|DONAT|MEMBER|LOYAL|SERVICE|ROSTER|POPULATION|BACKBONE/, ['users', 'clan', 'social', 'link']],
+    [/APP|PLAN|DATA|SNAPSHOT|ARCHIV|CONNECTED|STEWARD|PLANNER/, ['plan', 'tracking', 'history', 'export', 'link']],
+    [/COL|COLLECT|DECOR|SCENERY|OBSTACLE|MUSEUM/, ['collection', 'special', 'history', 'star']],
+    [/SEA|GIVE|SEASON|RESOURCE|DAILY|PRESENCE|LOOT|RUSH|HARVEST/, ['collection', 'calendar', 'stats', 'trend', 'clock']],
+    [/PLY|PROFILE|IDENTIF|ROLE|NAME|TRACK|VETERAN|MILESTONE|XP/, ['progression', 'tracking', 'user', 'history', 'calendar']],
+    [/BASE|VILLAGE|BUILDING|STRUCTURE|TIMER|UPGRAD|MOMENTUM|WORK|HELPER/, ['village', 'clock', 'calendar', 'progression', 'stats']],
+    [/SEC|LUCKY|REDEMPTION|DOUBLE[_ ]DUTY|IRON|UPHILL|LAST[_ ]WORD|QUIET|MASTER/, ['special', 'target', 'trend', 'check']],
+    [/DYN|OFFICIAL/, ['special', 'star', 'medal']]
+]);
+
+const GLYPHS = Object.freeze([
+    ['crown', 'M4 9h16l-1 10H5L4 9Zm3 0L5 4l4 3 3-5 3 5 4-3-2 5M7 22h10'],
+    ['compass', 'm12 3 3 6 6 3-6 3-3 6-3-6-6-3 6-3Zm0 6 3 3-3 3-3-3 3-3Z'],
+    ['chest', 'M4 8h16v11H4zM4 8l2-4h12l2 4M9 8v4h6V8M12 12v3'],
+    ['spark', 'm12 2 1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Zm7 14 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z'],
+    ['medal', 'M8 3h8l-1 5a6 6 0 1 1-6 0L8 3Zm4 8v7M9 21h6'],
+    ['map', 'M3 5l6-2 6 2 6-2v16l-6 2-6-2-6 2V5Zm6-2v16m6-14v16'],
+    ['flame', 'M12 22a6 6 0 0 0 6-6c0-4-3-6-4-10-2 2-3 4-3 6-1-1-2-3-2-5-3 3-4 6-4 9a6 6 0 0 0 6 6Z'],
+    ['shield', 'M12 3 20 6v5c0 5-3.2 8.5-8 10-4.8-1.5-8-5-8-10V6l8-3Zm-3 9 2 2 4-5'],
+    ['steps', 'M4 19h5v-5h5V9h6M4 5h5v5H4z'],
+    ['flag', 'M5 21V4m0 1h12l-2.5 4L17 13H5']
+]);
+
+function familyText(family) {
+    return `${family?.familyKey || ''} ${family?.title || ''} ${family?.category || ''} ${family?.description || ''}`.toUpperCase();
+}
+
+function hash(value) {
+    return [...String(value)].reduce((total, character) => ((total * 31) + character.charCodeAt(0)) >>> 0, 7);
+}
+
+function pick(values, seed) { return values[hash(seed) % values.length]; }
+
+export function resolveAchievementAsset(family) {
+    if (family?.entity) return { type: 'entity', value: family.entity };
+    const text = familyText(family);
+    const glyphRule = GLYPH_RULES.find(([pattern]) => pattern.test(text));
+    if (glyphRule) return { type: 'glyph', value: glyphRule[1] };
+    const entityRule = ENTITY_RULES.find(([pattern]) => pattern.test(text));
+    if (entityRule) return { type: 'entity', value: pick(entityRule[1], family.familyKey) };
+    const iconRule = ICON_RULES.find(([pattern]) => pattern.test(text));
+    if (iconRule) return { type: 'image', value: ICON_PATHS[pick(iconRule[1], family.familyKey)] };
+    return { type: 'glyph', value: pick(GLYPHS, family?.familyKey)[0] };
+}
+
+function staticImage(src, label, className = 'achievement-family-image') {
+    const image = document.createElement('img');
+    image.className = className;
+    image.src = src;
+    image.alt = '';
+    image.title = label;
+    image.width = 32;
+    image.height = 32;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    return image;
+}
+
+function glyphImage(name, label) {
+    const glyph = GLYPHS.find(([key]) => key === name) || GLYPHS[0];
+    const wrapper = document.createElement('span');
+    wrapper.className = 'achievement-family-icon';
+    wrapper.title = label;
+    wrapper.setAttribute('aria-hidden', 'true');
+    wrapper.dataset.glyph = glyph[0];
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '1.8');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', glyph[1]);
+    svg.append(path);
+    wrapper.append(svg);
+    return wrapper;
+}
+
+export function achievementFamilyImage(family, label = '') {
+    const asset = resolveAchievementAsset(family);
+    if (asset.type === 'entity') return entityImage(asset.value, { alt: '', className: 'achievement-family-image achievement-entity-image' });
+    if (asset.type === 'glyph') return glyphImage(asset.value, label);
+    return staticImage(asset.value, label);
+}
