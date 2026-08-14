@@ -32,12 +32,16 @@
     border: 1px solid var(--cp-border-2);
     border-radius: 12px;
     box-shadow: var(--cp-shadow-floating);
+    inset: 0;
     max-height: min(720px, calc(100vh - 48px));
     max-width: calc(100vw - 32px);
+    margin: auto;
     overflow: auto;
     padding: 24px;
+    position: fixed;
     width: 520px;
 }
+.cp-modal::backdrop { background: rgb(2 5 8 / 68%); }
 @media (max-width: 599px) {
     .cp-drawer,
     .cp-drawer--complex { width: 100%; }
