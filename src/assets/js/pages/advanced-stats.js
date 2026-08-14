@@ -20,7 +20,7 @@ import {
     renderStatistics,
     renderTracking,
     syncPeriodButtons
-} from './advanced-stats-renderer.js?v=20260811-2';
+} from './advanced-stats-renderer.js?v=20260814-advanced-stats-v2';
 import { arrayValue } from './advanced-stats-formatters.js?v=20260811-1';
 import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260809-4';
 import { accountsFromProfile, normalizeTag, selectInitialAccount } from './advanced-stats-account.js?v=20260811-2';
@@ -29,6 +29,7 @@ import { createTrackingActions } from './advanced-stats-actions.js?v=20260811-2'
 const PERIOD_DEFAULT = '30d';
 const ACCOUNT_STORAGE_KEY = 'clashpanel_advanced_stats_account';
 const PERIOD_STORAGE_KEY = 'clashpanel_advanced_stats_period';
+const FAVORITE_ARMY_LIMIT = 3;
 const BATTLE_PAGE_SIZE = 20;
 
 const realApi = {
@@ -40,7 +41,7 @@ const realApi = {
     deleteTracking: deleteAdvancedStatsData,
     getOverview: getAdvancedStatsOverview,
     getUnits: (tag, period) => getAdvancedStatsUnits(tag, period, 'ALL'),
-    getArmies: (tag, period) => getAdvancedStatsArmies(tag, period, 12),
+    getArmies: (tag, period) => getAdvancedStatsArmies(tag, period, FAVORITE_ARMY_LIMIT),
     getTrends: getAdvancedStatsTrends,
     getBattles: getAdvancedStatsBattles
 };

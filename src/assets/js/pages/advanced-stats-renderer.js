@@ -8,9 +8,9 @@ import {
     formatNumber,
     formatPercent
 } from './advanced-stats-formatters.js?v=20260811-2';
-import { renderArmies } from './advanced-stats-armies-renderer.js?v=20260811-2';
+import { renderArmies } from './advanced-stats-armies-renderer.js?v=20260814-advanced-stats-v2';
 import { renderBattles } from './advanced-stats-battles-renderer.js?v=20260811-2';
-import { renderTrends } from './advanced-stats-trends-renderer.js?v=20260811-2';
+import { renderTrends } from './advanced-stats-trends-renderer.js?v=20260814-advanced-stats-v2';
 import { renderUnits } from './advanced-stats-units-renderer.js?v=20260811-2';
 
 const STATUS_KEYS = Object.freeze({

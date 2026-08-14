@@ -79,6 +79,22 @@ describe('Advanced Stats extracted renderers', () => {
         expect(refs.armiesEmpty.textContent).toContain('complete army compositions');
     });
 
+    it('limits favorite armies to a focused top three', () => {
+        const refs = { armies: element(), armiesEmpty: element() };
+        const armies = Array.from({ length: 5 }, (_, index) => ({
+            army: { units: [{ category: 'TROOP', key: `troop-${index}`, name: `Troop ${index}`, quantity: 1 }] },
+            battleCount: 5 - index,
+            averageStars: 2,
+            averageDestruction: 80
+        }));
+
+        renderArmies(refs, { armies, unitCatalog: [], sectionStates: { armies: 'ready' } });
+
+        expect(refs.armies.children).toHaveLength(3);
+        expect(refs.armies.firstElementChild.textContent).toContain('Troop 0');
+        expect(refs.armies.lastElementChild.textContent).toContain('Troop 2');
+    });
+
     it('exposes known and unknown trend values with range semantics', () => {
         const known = createTrendValue({ date: '2026-08-10', attacks: 2, averageStars: 2.5, averageDestruction: 88 }, 0);
         const unknown = createTrendValue({ date: '2026-08-11', attacks: 1, averageStars: null, averageDestruction: null }, 1);
@@ -100,6 +116,9 @@ describe('Advanced Stats extracted renderers', () => {
                 { date: '2026-08-03', attacks: 1, averageStars: 3, averageDestruction: 90 }
             ]
         });
+        expect(trendRefs.trendChart.querySelector('.advanced-stats__trend-svg')).not.toBeNull();
+        expect(trendRefs.trendChart.querySelector('.advanced-stats__trend-line')).not.toBeNull();
+        expect(trendRefs.trendChart.querySelectorAll('.advanced-stats__trend-point')).toHaveLength(2);
         expect(trendRefs.trendChart.querySelector('.advanced-stats__trend-gap')).not.toBeNull();
         expect(trendRefs.trendChart.querySelectorAll('[role="meter"]')).toHaveLength(2);
 

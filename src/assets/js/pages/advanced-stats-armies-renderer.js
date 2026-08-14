@@ -3,6 +3,8 @@ import { displayArmyUnits, presentArmy } from './advanced-stats-army-view.js?v=2
 import { entityImage } from './progress-asset-view.js?v=20260811-2';
 import { formatDecimal, formatNumber, formatPercent } from './advanced-stats-formatters.js?v=20260811-2';
 
+const MAX_FAVORITE_ARMIES = 3;
+
 function setVisibility(element, visible) {
     if (element) element.hidden = !visible;
 }
@@ -53,7 +55,7 @@ function createArmyCard(entry, index, state) {
 
 export function renderArmies(elements, state) {
     const root = elements.armies;
-    const armies = visibleArmies(state);
+    const armies = visibleArmies(state).slice(0, MAX_FAVORITE_ARMIES);
     root.replaceChildren();
     armies.forEach((entry, index) => root.append(createArmyCard(entry, index, state)));
 

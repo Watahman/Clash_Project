@@ -122,19 +122,26 @@
 .advanced-stats__favorites :is(span, strong, small) { min-width: 0; overflow-wrap: anywhere; }
 .advanced-stats__favorites strong { line-height: 1.35; white-space: normal; }
 .advanced-stats__favorites small { color: var(--cp-text-2); min-height: 18px; }
-.advanced-stats__two-column { display: grid; gap: 24px; grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr); }
+.advanced-stats__two-column { align-items: start; display: grid; gap: 24px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
-.advanced-stats__trend-chart { align-items: end; display: flex; gap: 8px; min-height: 196px; overflow-x: auto; padding: 28px 4px 0; }
-.advanced-stats__trend-day { align-items: end; display: grid; flex: 1 0 32px; gap: 8px; grid-template-rows: 160px auto; min-width: 32px; text-align: center; }
-.advanced-stats__trend-bar { align-self: end; background: var(--cp-progress); border: 0; border-radius: 6px 6px 2px 2px; cursor: pointer; min-height: 8px; padding: 0; position: relative; width: 100%; }
-.advanced-stats__trend-bar:hover { background: var(--cp-brand-hover); }
-.advanced-stats__trend-bar[data-known="false"] { background: var(--cp-surface-3); border: 1px dashed var(--cp-border-2); }
-.advanced-stats__trend-tooltip { background: var(--cp-surface-3); border: 1px solid var(--cp-border-2); border-radius: 6px; bottom: calc(100% + 8px); color: var(--cp-text-1); display: none; font-size: .72rem; left: 50%; line-height: 1.35; padding: 6px 8px; position: absolute; transform: translateX(-50%); white-space: nowrap; z-index: 5; }
-.advanced-stats__trend-bar:hover .advanced-stats__trend-tooltip,
-.advanced-stats__trend-bar:focus-visible .advanced-stats__trend-tooltip { display: block; }
-.advanced-stats__trend-day small { color: var(--cp-text-3); font-size: .7rem; white-space: nowrap; }
-.advanced-stats__trend-gap { align-self: end; background: var(--cp-surface-3); border: 1px dashed var(--cp-border-2); height: 100px; min-width: 10px; opacity: .8; }
+.advanced-stats__trend-chart { min-height: 240px; overflow-x: auto; padding: 4px 0 0; }
+.advanced-stats__trend-svg { display: block; height: 240px; min-width: 520px; overflow: visible; width: 100%; }
+.advanced-stats__trend-grid-line { stroke: var(--cp-border-1); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.advanced-stats__trend-grid-label { fill: var(--cp-text-3); font-size: 10px; }
+.advanced-stats__trend-line { fill: none; stroke: var(--cp-progress); stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; vector-effect: non-scaling-stroke; animation: advanced-stats-trend-draw 520ms var(--cp-ease-emphasized, ease-out) both; }
+.advanced-stats__trend-point { fill: var(--cp-surface-1); stroke: var(--cp-progress); stroke-width: 3; cursor: pointer; vector-effect: non-scaling-stroke; }
+.advanced-stats__trend-point:hover,
+.advanced-stats__trend-point:focus-visible { fill: var(--cp-progress); outline: 2px solid var(--cp-progress); outline-offset: 3px; }
+.advanced-stats__trend-point[data-known="false"] { fill: var(--cp-surface-3); stroke: var(--cp-border-2); stroke-dasharray: 2 2; }
+.advanced-stats__trend-gap { opacity: .75; stroke: var(--cp-border-2); stroke-dasharray: 3 4; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.advanced-stats__trend-tooltip { font-size: .72rem; }
+.advanced-stats__trend-day-label { fill: var(--cp-text-3); font-size: 10px; }
 .advanced-stats__empty-copy { color: var(--cp-text-2); margin: 8px 0 0; }
+
+@keyframes advanced-stats-trend-draw {
+    from { stroke-dasharray: 1200; stroke-dashoffset: 1200; }
+    to { stroke-dasharray: 1200; stroke-dashoffset: 0; }
+}
 
 .advanced-stats__army-list { display: grid; gap: 8px; }
 .advanced-stats__army-card { background: var(--cp-surface-2); border-radius: 8px; display: grid; gap: 8px; padding: 12px; }
@@ -227,8 +234,7 @@
     .advanced-stats__battle { grid-template-columns: 1fr auto; }
     .advanced-stats__battle-meta { grid-column: 1 / -1; }
     .advanced-stats__tracking-actions { min-width: min(240px, calc(100vw - 48px)); }
-    .advanced-stats__trend-tooltip { left: 0; transform: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-    .advanced-stats__trend-bar { transition: none; }
+    .advanced-stats__trend-line { animation: none; }
 }
