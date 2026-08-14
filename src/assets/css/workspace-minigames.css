@@ -1,0 +1,10 @@
+/* The workspace already provides page padding; keep the public game rhythm
+   without applying a second viewport-sized inset inside the app shell. */
+body.workspace-app.minigames-page .minigames-hero,
+body.workspace-app.minigames-page .minigame-switcher,
+body.workspace-app.minigames-page .minigames-help,
+body.workspace-app.minigames-page .game-shell,
+body.workspace-app.minigames-page .minigames-category-summary,
+body.workspace-app.minigames-page .minigames-policy {
+    width: min(var(--game-max), 100%);
+}

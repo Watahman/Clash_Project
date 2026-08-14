@@ -10,6 +10,7 @@
         '/app/cwl-tracker',
         '/app/war-board',
         '/app/brackets',
+        '/app/minigames',
         '/app/clan-management'
     ];
 

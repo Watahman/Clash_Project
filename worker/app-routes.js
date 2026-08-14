@@ -7,6 +7,7 @@ export const APP_ASSETS = new Map([
     ["/app/clan-management", "/subpages/groups"],
     ["/app/war-board", "/subpages/war-operation-board"],
     ["/app/brackets", "/subpages/bracket-generator"],
+    ["/app/minigames", "/subpages/minigames"],
     ["/app/achievements", "/subpages/achievements"],
     ["/app/advanced-stats", "/subpages/advanced-stats"],
     ["/app/profile", "/subpages/profile"]
@@ -30,6 +31,7 @@ export const APP_ALIASES = new Map([
     ["/app/bracket-generator", "/app/brackets"],
     ["/app/bracket-generator.html", "/app/brackets"],
     ["/app/brackets.html", "/app/brackets"],
+    ["/app/minigames.html", "/app/minigames"],
     ["/app/achievements.html", "/app/achievements"],
     ["/app/advanced-stats.html", "/app/advanced-stats"],
     ["/app/profile.html", "/app/profile"]

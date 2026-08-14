@@ -69,6 +69,15 @@ const pageHelp = Object.freeze({
         intro: 'guidance.bracket.intro',
         items: []
     },
+    minigames: {
+        title: 'guidance.minigames.title',
+        intro: 'guidance.minigames.intro',
+        items: [
+            'guidance.minigames.itemDaily',
+            'guidance.minigames.itemPractice',
+            'guidance.minigames.itemProgress'
+        ]
+    },
     achievements: {
         title: 'guidance.achievements.title',
         intro: 'guidance.achievements.intro',

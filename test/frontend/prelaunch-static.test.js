@@ -27,6 +27,7 @@ const privatePages = [
     'src/subpages/cwl-planner.html',
     'src/subpages/dashboard.html',
     'src/subpages/groups.html',
+    'src/subpages/minigames.html',
     'src/subpages/login.html',
     'src/subpages/register.html'
 ];

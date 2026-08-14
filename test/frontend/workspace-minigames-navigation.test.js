@@ -5,8 +5,10 @@ import { workspaceLocales } from '../../src/assets/js/i18n/workspace-locales.js'
 describe('workspace Minigames navigation', () => {
     it('shows Minigames as a normal workspace link', () => {
         const registry = readFileSync('src/assets/js/shell/module-registry.js', 'utf8');
+        const dashboard = readFileSync('src/subpages/dashboard.html', 'utf8');
 
-        expect(registry).toContain("['minigames', 'nav.minigames', 'Games', 'play', '/minigames', true]");
+        expect(registry).toContain("['minigames', 'nav.minigames', 'Games', 'play', '/app/minigames', true]");
+        expect(dashboard).toContain('data-pillar="play" href="/app/minigames"');
         expect(registry).toContain("['advancedStats', 'nav.advancedStats'");
         expect(registry).toContain("['achievements', 'nav.achievements'");
     });
@@ -23,9 +25,34 @@ describe('workspace Minigames navigation', () => {
         const shell = readFileSync('src/assets/js/shell/workspace-shell-markup.js', 'utf8');
 
         expect(registry).toContain("['minigames', 'nav.minigames', 'Games', 'play'");
+        expect(registry).toContain("['minigames', 'nav.minigames', 'Games', 'play', '/app/minigames', true]");
         expect(registry).toContain("['advancedStats', 'nav.advancedStats', 'Advanced Stats', 'progress'");
         expect(registry).toContain("['achievements', 'nav.achievements', 'Achievements', 'progress'");
         expect(shell).toContain('getWorkspaceSections().map');
         expect(shell).not.toContain('MutationObserver');
+    });
+
+    it('keeps the public hub and exposes the same game surface in the private shell', () => {
+        const publicPage = readFileSync('src/minigames.html', 'utf8');
+        const privatePage = readFileSync('src/subpages/minigames.html', 'utf8');
+
+        expect(publicPage).toContain('class="public-site minigames-page"');
+        expect(privatePage).toContain('class="workspace-app minigames-page" data-workspace-page="minigames"');
+        expect(privatePage).toContain('<meta name="robots" content="noindex, nofollow">');
+        [
+            'data-minigame-select="entity"',
+            'data-minigame-select="higher-lower"',
+            'data-minigame-view="entity"',
+            'data-minigame-view="higher-lower"',
+            'data-higher-lower-game',
+            'data-guess-form',
+            'data-hl-choice="higher"'
+        ].forEach(attribute => {
+            expect(privatePage).toContain(attribute);
+            expect(publicPage).toContain(attribute);
+        });
+        expect(privatePage).toContain('/assets/js/pages/minigames-hub.js?v=20260812-redesign');
+        expect(privatePage).toContain('/assets/js/pages/minigames-phase2b.js?v=20260811-2');
+        expect(privatePage).not.toContain('class="public-header"');
     });
 });
