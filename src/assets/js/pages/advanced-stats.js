@@ -20,7 +20,7 @@ import {
     renderStatistics,
     renderTracking,
     syncPeriodButtons
-} from './advanced-stats-renderer.js?v=20260814-advanced-stats-v2';
+} from './advanced-stats-renderer.js?v=20260814-advanced-stats-v3';
 import { arrayValue } from './advanced-stats-formatters.js?v=20260811-1';
 import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260809-4';
 import { accountsFromProfile, normalizeTag, selectInitialAccount } from './advanced-stats-account.js?v=20260811-2';

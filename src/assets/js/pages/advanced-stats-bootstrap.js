@@ -3,4 +3,4 @@ import { profileHTML } from '../profile/profile_popup.js';
 
 await syncAuthSession().catch(() => null);
 profileHTML();
-await import('./advanced-stats.js?v=20260814-advanced-stats-v2');
+await import('./advanced-stats.js?v=20260814-advanced-stats-v3');

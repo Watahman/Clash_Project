@@ -20,8 +20,40 @@ function tableCell(value) {
     return cell;
 }
 
+function unitDisplayName(unit) {
+    return String(unit?.name || unit?.unitName || '').trim();
+}
+
+function numericValue(value) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : 0;
+}
+
+function mergeUnitRecord(target, unit) {
+    target.totalQuantity += Math.max(0, numericValue(unit.totalQuantity));
+    target.battlesPresent += Math.max(0, numericValue(unit.battlesPresent));
+}
+
+function mergedUnits(units, state) {
+    const grouped = new Map();
+    units.forEach(unit => {
+        const name = unitDisplayName(unit);
+        if (!isPlayerFacingUnitName(name)) return;
+        const key = name.toLocaleLowerCase();
+        const existing = grouped.get(key);
+        if (existing) mergeUnitRecord(existing, unit);
+        else grouped.set(key, { ...unit, name, totalQuantity: Math.max(0, numericValue(unit.totalQuantity)), battlesPresent: Math.max(0, numericValue(unit.battlesPresent)) });
+    });
+
+    const totalAttacks = numericValue(state.overview?.data?.summary?.attacks);
+    return [...grouped.values()].map(unit => {
+        const battlesPresent = totalAttacks > 0 ? Math.min(totalAttacks, unit.battlesPresent) : unit.battlesPresent;
+        return { ...unit, battlesPresent, usageRate: totalAttacks > 0 ? (100 * battlesPresent) / totalAttacks : unit.usageRate };
+    }).sort((left, right) => right.totalQuantity - left.totalQuantity || right.battlesPresent - left.battlesPresent || left.name.localeCompare(right.name));
+}
+
 function unitNameElement(unit) {
-    const name = unit.name || unit.unitName || t('advancedStats.unit');
+    const name = unitDisplayName(unit) || t('advancedStats.unit');
     const element = document.createElement('div');
     element.className = 'advanced-stats__unit-name';
     element.append(entityImage(name, { alt: '' }), document.createTextNode(name));
@@ -61,9 +93,7 @@ function unitMobileCard(unit, name) {
 }
 
 export function renderUnits(elements, state) {
-    const units = Array.isArray(state.units)
-        ? state.units.filter(unit => isPlayerFacingUnitName(unit?.name || unit?.unitName))
-        : [];
+    const units = mergedUnits(Array.isArray(state.units) ? state.units : [], state);
     elements.units.replaceChildren();
     elements.unitsMobile.replaceChildren();
     units.forEach(unit => {

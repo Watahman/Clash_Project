@@ -65,6 +65,29 @@ describe('Advanced Stats extracted renderers', () => {
         expect(refs.unitsEmpty.textContent).toContain('could not be loaded');
     });
 
+    it('merges duplicate unit names before rendering usage rows', () => {
+        const refs = {
+            units: element('tbody'),
+            unitsMobile: element(),
+            unitsTableWrap: element(),
+            unitsEmpty: element()
+        };
+
+        renderUnits(refs, {
+            units: [
+                { key: 'troop_4000177', name: 'Meteor Golem', totalQuantity: 44, battlesPresent: 10, usageRate: 50 },
+                { key: 'troop_177', name: 'Meteor Golem', totalQuantity: 1, battlesPresent: 1, usageRate: 5 }
+            ],
+            overview: { data: { summary: { attacks: 20 } } },
+            sectionStates: { units: 'ready' }
+        });
+
+        expect(refs.units.children).toHaveLength(1);
+        expect(refs.units.textContent).toContain('45');
+        expect(refs.units.textContent).toContain('11');
+        expect(refs.units.textContent).not.toMatch(/Meteor Golem[\s\S]*Meteor Golem/);
+    });
+
     it('omits unresolved army compositions while preserving the empty state', () => {
         const refs = { armies: element(), armiesEmpty: element() };
 
@@ -97,13 +120,14 @@ describe('Advanced Stats extracted renderers', () => {
 
     it('exposes known and unknown trend values with range semantics', () => {
         const known = createTrendValue({ date: '2026-08-10', attacks: 2, averageStars: 2.5, averageDestruction: 88 }, 0);
-        const unknown = createTrendValue({ date: '2026-08-11', attacks: 1, averageStars: null, averageDestruction: null }, 1);
+        const unknown = createTrendValue({ date: '2026-08-11', attacks: null, averageStars: null, averageDestruction: null }, 1);
 
         expect(known.getAttribute('role')).toBe('meter');
-        expect(known.getAttribute('aria-valuenow')).toBe('88');
+        expect(known.getAttribute('aria-valuenow')).toBe('2');
+        expect(known.getAttribute('aria-valuemax')).toBe('2');
         expect(known.getAttribute('aria-valuetext')).toContain('88%');
         expect(unknown.getAttribute('aria-valuenow')).toBeNull();
-        expect(unknown.getAttribute('aria-valuetext')).toContain('1 attack');
+        expect(unknown.getAttribute('aria-valuetext')).toContain('— attacks');
         expect(unknown.getAttribute('aria-valuetext')).toContain('—');
         expect(unknown.dataset.known).toBe('false');
     });
@@ -119,6 +143,8 @@ describe('Advanced Stats extracted renderers', () => {
         expect(trendRefs.trendChart.querySelector('.advanced-stats__trend-svg')).not.toBeNull();
         expect(trendRefs.trendChart.querySelector('.advanced-stats__trend-line')).not.toBeNull();
         expect(trendRefs.trendChart.querySelectorAll('.advanced-stats__trend-point')).toHaveLength(2);
+        expect(trendRefs.trendChart.querySelectorAll('.advanced-stats__trend-grid-label')).toHaveLength(3);
+        expect([...trendRefs.trendChart.querySelectorAll('.advanced-stats__trend-grid-label')].map(label => label.textContent).join(' ')).not.toContain('%');
         expect(trendRefs.trendChart.querySelector('.advanced-stats__trend-gap')).not.toBeNull();
         expect(trendRefs.trendChart.querySelectorAll('[role="meter"]')).toHaveLength(2);
 
