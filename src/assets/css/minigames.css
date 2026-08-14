@@ -26,6 +26,15 @@ body.minigames-page {
 
 .games-daily-status { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; gap: .7rem 1rem; align-items: center; margin-top: 2rem; border: 1px solid var(--border); border-radius: 12px; padding: .85rem 1rem; background: var(--surface-subtle); }
 .games-daily-status > img { color: var(--game-accent); }
+
+/* External SVG images cannot inherit the game accent through currentColor.
+   Swap to the high-contrast dark artwork while preserving the original dark
+   line art for light mode and user theme toggles. */
+html:not([data-theme="light"]) body.minigames-page img[src$="/daily.svg"] { content: url("/assets/icons/games/dark/daily.svg"); }
+html:not([data-theme="light"]) body.minigames-page img[src$="/guess.svg"] { content: url("/assets/icons/games/dark/guess.svg"); }
+html:not([data-theme="light"]) body.minigames-page img[src$="/higher-lower.svg"] { content: url("/assets/icons/games/dark/higher-lower.svg"); }
+html:not([data-theme="light"]) body.minigames-page img[src$="/streak.svg"] { content: url("/assets/icons/games/dark/streak.svg"); }
+
 .games-daily-status strong,
 .games-daily-status span,
 .games-daily-status p { display: block; }

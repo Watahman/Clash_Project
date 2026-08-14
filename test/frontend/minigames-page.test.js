@@ -123,7 +123,7 @@ describe('ClashPanel minigames public page', () => {
     it('versions the changed module graph so existing browsers cannot keep the broken picker', () => {
         expect(page).toContain('/assets/js/pages/minigames-phase2b.js?v=20260811-2');
         expect(page).toContain('/assets/js/pages/higher-lower.js?v=20260811-2');
-        expect(page).toContain('/assets/css/minigames.css?v=20260812-redesign');
+        expect(page).toContain('/assets/css/minigames.css?v=20260814-dark-icons');
         expect(hubController).toContain("higher-lower-engine.js?v=20260809-3");
         expect(hubController).toContain("minigames-state.js?v=20260809-3");
         expect(entityController).toContain("entity-guesser-catalog.js?v=20260809-3");
@@ -132,6 +132,15 @@ describe('ClashPanel minigames public page', () => {
         expect(higherLowerController).toContain("higher-lower-engine.js?v=20260809-3");
         expect(higherLowerEngine).toContain("entity-guesser-catalog.js?v=20260809-3");
         expect(minigamesState).toContain("higher-lower-engine.js?v=20260809-3");
+    });
+
+    it('provides high-contrast dark variants for every game icon used on the page', () => {
+        const styles = readFileSync('src/assets/css/minigames.css', 'utf8');
+        ['daily', 'guess', 'higher-lower', 'streak'].forEach(icon => {
+            expect(page).toContain(`/assets/icons/games/${icon}.svg`);
+            expect(styles).toContain(`/assets/icons/games/dark/${icon}.svg`);
+            expect(readFileSync(`src/assets/icons/games/dark/${icon}.svg`, 'utf8')).toContain('stroke="#c8bfff"');
+        });
     });
 
     it('keeps the answer picker usable on narrow touch screens', () => {
