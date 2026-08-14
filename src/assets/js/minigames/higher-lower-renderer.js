@@ -113,7 +113,10 @@ export function createHigherLowerRenderer({
         elements.score.textContent = String(run.score);
         elements.correct.textContent = String(run.correctCount);
         elements.combo.textContent = String(run.combo);
-        elements.metric.textContent = `${text(question.labelKey)} · ${text(question.unitKey)}`;
+        const metricLabel = text(question.labelKey);
+        elements.metric.textContent = `${metricLabel} · ${text(question.unitKey)}`;
+        elements.leftLabel.textContent = metricLabel;
+        elements.rightLabel.textContent = metricLabel;
         elements.prompt.textContent = text('choose');
         elements.leftName.textContent = question.leftName;
         elements.leftValue.textContent = question.leftDisplayValue;

@@ -27,7 +27,7 @@ import {
 } from '../fixtures/redesign-fixture-mode.js';
 import { getHigherLowerGameFixture } from '../minigames/minigames-fixtures.js?v=20260811-2';
 import { HIGHER_LOWER_COPY } from '../minigames/higher-lower-copy.js?v=20260811-1';
-import { createHigherLowerRenderer } from '../minigames/higher-lower-renderer.js?v=20260814-question-count';
+import { createHigherLowerRenderer } from '../minigames/higher-lower-renderer.js?v=20260814-metric-card-labels';
 import {
     readJson,
     readString,
@@ -53,8 +53,10 @@ const elements = {
     metric: root.querySelector('[data-hl-metric]'),
     prompt: root.querySelector('[data-hl-prompt]'),
     leftName: root.querySelector('[data-hl-left-name]'),
+    leftLabel: root.querySelector('[data-hl-left-label]'),
     leftValue: root.querySelector('[data-hl-left-value]'),
     rightName: root.querySelector('[data-hl-right-name]'),
+    rightLabel: root.querySelector('[data-hl-right-label]'),
     rightValue: root.querySelector('[data-hl-right-value]'),
     leftImage: root.querySelector('[data-hl-left-image]'),
     rightImage: root.querySelector('[data-hl-right-image]'),

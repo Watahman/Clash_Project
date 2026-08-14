@@ -89,7 +89,9 @@ describe('ClashPanel minigames public page', () => {
             'data-hl-mode="daily"',
             'data-hl-mode="practice"',
             'data-hl-filter',
+            'data-hl-left-label',
             'data-hl-left-value',
+            'data-hl-right-label',
             'data-hl-right-value',
             'data-hl-choice="higher"',
             'data-hl-choice="lower"',
@@ -103,6 +105,13 @@ describe('ClashPanel minigames public page', () => {
     it('keeps the Higher or Lower question counter free of a duplicated label', () => {
         expect(higherLowerRenderer).toContain('elements.question.textContent = count;');
         expect(higherLowerRenderer).not.toContain("elements.question.textContent = `${text('question')} ${count}`;");
+    });
+
+    it('labels both Higher or Lower cards with the active statistic', () => {
+        expect(higherLowerController).toContain("leftLabel: root.querySelector('[data-hl-left-label]')");
+        expect(higherLowerController).toContain("rightLabel: root.querySelector('[data-hl-right-label]')");
+        expect(higherLowerRenderer).toContain('elements.leftLabel.textContent = metricLabel;');
+        expect(higherLowerRenderer).toContain('elements.rightLabel.textContent = metricLabel;');
     });
 
     it('keeps mode changes from focusing and reopening the answer picker', () => {
@@ -141,7 +150,7 @@ describe('ClashPanel minigames public page', () => {
 
     it('versions the changed module graph so existing browsers cannot keep the broken picker', () => {
         expect(page).toContain('/assets/js/pages/minigames-phase2b.js?v=20260814-entity-mode-fix');
-        expect(page).toContain('/assets/js/pages/higher-lower.js?v=20260814-question-count');
+        expect(page).toContain('/assets/js/pages/higher-lower.js?v=20260814-metric-card-labels');
         expect(page).toContain('/assets/css/minigames.css?v=20260814-games-header-visible');
         expect(hubController).toContain("higher-lower-engine.js?v=20260809-3");
         expect(hubController).toContain("minigames-state.js?v=20260809-3");
@@ -150,7 +159,7 @@ describe('ClashPanel minigames public page', () => {
         expect(entityEngine).toContain("entity-guesser-catalog.js?v=20260809-3");
         expect(higherLowerController).toContain("higher-lower-engine.js?v=20260809-3");
         expect(higherLowerEngine).toContain("entity-guesser-catalog.js?v=20260809-3");
-        expect(higherLowerController).toContain("higher-lower-renderer.js?v=20260814-question-count");
+        expect(higherLowerController).toContain("higher-lower-renderer.js?v=20260814-metric-card-labels");
         expect(minigamesState).toContain("higher-lower-engine.js?v=20260809-3");
     });
 

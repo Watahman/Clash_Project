@@ -26,7 +26,7 @@
     <script type="module" src="/assets/js/pages/public-site.js?v=20260812-redesign"></script>
     <script type="module" src="/assets/js/pages/minigames-hub.js?v=20260812-redesign"></script>
     <script type="module" src="/assets/js/pages/minigames-phase2b.js?v=20260814-entity-mode-fix"></script>
-    <script type="module" src="/assets/js/pages/higher-lower.js?v=20260814-question-count"></script>
+    <script type="module" src="/assets/js/pages/higher-lower.js?v=20260814-metric-card-labels"></script>
     <link rel="stylesheet" href="/assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="/assets/css/workspace-polish.css">
     <link rel="stylesheet" href="/assets/css/public-marketing.css">
@@ -186,7 +186,7 @@
                 <div class="hl-board-header"><div><p class="game-context" data-hl-i18n="context">Verified comparable values</p><h2 id="hl-title">Higher or Lower?</h2></div><span class="hl-metric" data-hl-metric></span></div>
                 <p class="hl-prompt" data-hl-prompt></p>
 
-                <div class="hl-arena"><article class="hl-card" data-hl-card="left"><div class="hl-card-media"><img data-hl-left-image alt="" aria-hidden="true" loading="lazy" width="96" height="96"></div><span class="hl-card-label" data-hl-i18n="knownItem">Known item</span><h3 data-hl-left-name></h3><strong class="hl-card-value" data-hl-left-value></strong></article><span class="hl-versus" aria-hidden="true">VS</span><article class="hl-card is-mystery" data-hl-card="right"><div class="hl-card-media"><img data-hl-right-image alt="" aria-hidden="true" loading="lazy" width="96" height="96"></div><span class="hl-card-label" data-hl-i18n="hiddenItem">Hidden value</span><h3 data-hl-right-name></h3><strong class="hl-card-value is-hidden-value" data-hl-right-value>?</strong></article></div>
+                <div class="hl-arena"><article class="hl-card" data-hl-card="left"><div class="hl-card-media"><img data-hl-left-image alt="" aria-hidden="true" loading="lazy" width="96" height="96"></div><span class="hl-card-label" data-hl-left-label>Building size</span><h3 data-hl-left-name></h3><strong class="hl-card-value" data-hl-left-value></strong></article><span class="hl-versus" aria-hidden="true">VS</span><article class="hl-card is-mystery" data-hl-card="right"><div class="hl-card-media"><img data-hl-right-image alt="" aria-hidden="true" loading="lazy" width="96" height="96"></div><span class="hl-card-label" data-hl-right-label>Building size</span><h3 data-hl-right-name></h3><strong class="hl-card-value is-hidden-value" data-hl-right-value>?</strong></article></div>
 
                 <div class="hl-choice-row" role="group" aria-label="Choose higher or lower"><button class="hl-choice" type="button" data-hl-choice="higher" data-hl-i18n="higher">Higher</button><button class="hl-choice" type="button" data-hl-choice="lower" data-hl-i18n="lower">Lower</button></div>
                 <p class="hl-feedback" data-hl-feedback data-state="neutral" role="status" aria-live="polite"></p>
