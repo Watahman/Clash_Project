@@ -86,7 +86,7 @@ const nl = Object.freeze({
     'war.cwlOpponentUnknown': 'CWL-tegenstander niet beschikbaar',
     'war.cwlHistoryTitle': 'CWL-war data',
     'war.cwlHistoryCopy': 'Meerdere war-dagen staan in een record.',
-    'war.cwlHistoryTotal': 'CWL-totaal: {own} - {opponent} sterren',
+    'war.cwlHistoryTotal': '{own} - {opponent} sterren',
     'war.groupedBadge': 'Gegroepeerd',
     'war.groupedHistoryTitle': 'Gegroepeerde war-data',
     'war.groupedHistoryCopy': 'Dit record bevat meer dan een war.',

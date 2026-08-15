@@ -86,7 +86,7 @@ const de = Object.freeze({
     'war.cwlOpponentUnknown': 'CWL-Gegner nicht verfuegbar',
     'war.cwlHistoryTitle': 'CWL-Kriegsdaten',
     'war.cwlHistoryCopy': 'Mehrere Kriegstage in einem Eintrag gebuendelt.',
-    'war.cwlHistoryTotal': 'CWL-Gesamt: {own} - {opponent} Sterne',
+    'war.cwlHistoryTotal': '{own} - {opponent} Sterne',
     'war.groupedBadge': 'Gebundelt',
     'war.groupedHistoryTitle': 'Gebuendelte Kriegsdaten',
     'war.groupedHistoryCopy': 'Dieser Eintrag enthaelt mehrere Kriege.',
