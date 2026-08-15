@@ -20,9 +20,9 @@ import esCompletion from './locale-completions/es.js';
 import { publicStaticLocales } from './public-static-locales.js?v=20260812-redesign';
 import { publicResourceLocales } from './public-resource-locales.js';
 import { achievementLocales } from './achievement-locales.js';
-import { advancedStatsLocales } from './advanced-stats-locales.js?v=20260809-4';
-import { advancedStatsExtraLocales } from './advanced-stats-extra-locales.js?v=20260809-4';
-import { advancedStatsUiLocales } from './advanced-stats-ui-locales.js?v=20260809-4';
+import { advancedStatsLocales } from './advanced-stats-locales.js?v=20260814-advanced-stats-v4';
+import { advancedStatsExtraLocales } from './advanced-stats-extra-locales.js?v=20260814-advanced-stats-v4';
+import { advancedStatsUiLocales } from './advanced-stats-ui-locales.js?v=20260814-advanced-stats-v4';
 import { profilePageLocales } from './profile-page-locales.js';
 import { navigationV2Locales } from './navigation-v2-locales.js';
 

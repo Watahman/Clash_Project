@@ -5,11 +5,14 @@ export function createTrackingActions({
     elements,
     setBusy,
     setDataStatus,
-    refreshTrackingAndData
+    refreshTrackingAndData,
+    onStartRequested = () => {},
+    onStartFailed = () => {}
 }) {
     async function runTrackingAction(action) {
         if (!state.playerTag || state.busy) return;
 
+        if (action === 'startTracking') onStartRequested();
         setBusy(true);
         setDataStatus(t('advancedStats.loadingTracking'));
         try {
@@ -17,6 +20,7 @@ export function createTrackingActions({
             await refreshTrackingAndData({ preserveBusy: true });
         } catch (error) {
             console.error('advanced_stats_action_failed', error);
+            if (action === 'startTracking') onStartFailed(error);
             const message = error?.code === 'ADVANCED_STATS_ROLLOUT_RESTRICTED'
                 ? t('advancedStats.rolloutRestricted')
                 : t('advancedStats.actionFailed');

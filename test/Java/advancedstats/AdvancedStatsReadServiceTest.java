@@ -38,6 +38,7 @@ class AdvancedStatsReadServiceTest {
         assertEquals("30d", response.get("period").getAsString());
         assertEquals(NOW.minus(Duration.ofDays(30)), store.from);
         assertEquals(TRACKING_ID, store.trackingId);
+        assertEquals(1, store.compactOverviewCalls);
         assertEquals(7, response.getAsJsonObject("data").get("value").getAsInt());
     }
 
@@ -57,6 +58,7 @@ class AdvancedStatsReadServiceTest {
         JsonObject response = service(store).units(USER_ID, "#2PYLQ", "7d", "SUPER_TROOP");
 
         assertEquals(AdvancedStatsUnitCategory.SUPER_TROOP, store.category);
+        assertEquals(1, store.compactUnitsCalls);
         assertEquals(NOW.minus(Duration.ofDays(7)), store.from);
         assertTrue(response.get("items").isJsonArray());
 
@@ -72,9 +74,19 @@ class AdvancedStatsReadServiceTest {
 
         service(store).armies(USER_ID, "#2PYLQ", "90d", 9999);
         assertEquals(100, store.limit);
+        assertEquals(1, store.compactArmiesCalls);
 
         service(store).battles(USER_ID, "#2PYLQ", "90d", 0, null);
         assertEquals(25, store.limit);
+    }
+
+    @Test
+    void unscopedTrendsUseCompactReadContract() throws Exception {
+        FakeStore store = new FakeStore(state(AdvancedStatsTrackingStatus.ACTIVE));
+
+        service(store).trends(USER_ID, "#2PYLQ", "30d");
+
+        assertEquals(1, store.compactTrendsCalls);
     }
 
     @Test
@@ -172,6 +184,10 @@ class AdvancedStatsReadServiceTest {
         private int findCalls;
         private int overviewCalls;
         private int battleCalls;
+        private int compactOverviewCalls;
+        private int compactUnitsCalls;
+        private int compactArmiesCalls;
+        private int compactTrendsCalls;
 
         private FakeStore(AdvancedStatsModels.TrackingState state) {
             this.state = state;
@@ -195,6 +211,12 @@ class AdvancedStatsReadServiceTest {
         }
 
         @Override
+        public JsonObject compactOverview(UUID trackingId, Instant from) throws Exception {
+            compactOverviewCalls++;
+            return overview(trackingId, from);
+        }
+
+        @Override
         public JsonElement units(UUID trackingId, Instant from, AdvancedStatsUnitCategory category) {
             capture(trackingId, from);
             this.category = category;
@@ -202,10 +224,23 @@ class AdvancedStatsReadServiceTest {
         }
 
         @Override
+        public JsonElement compactUnits(UUID trackingId, Instant from, AdvancedStatsUnitCategory category)
+                throws Exception {
+            compactUnitsCalls++;
+            return units(trackingId, from, category);
+        }
+
+        @Override
         public JsonElement armies(UUID trackingId, Instant from, int limit) {
             capture(trackingId, from);
             this.limit = limit;
             return new JsonArray();
+        }
+
+        @Override
+        public JsonElement compactArmies(UUID trackingId, Instant from, int limit) throws Exception {
+            compactArmiesCalls++;
+            return armies(trackingId, from, limit);
         }
 
         @Override
@@ -229,6 +264,12 @@ class AdvancedStatsReadServiceTest {
         public JsonElement trends(UUID trackingId, Instant from) {
             capture(trackingId, from);
             return new JsonArray();
+        }
+
+        @Override
+        public JsonElement compactTrends(UUID trackingId, Instant from) throws Exception {
+            compactTrendsCalls++;
+            return trends(trackingId, from);
         }
 
         private void capture(UUID trackingId, Instant from) {

@@ -39,6 +39,7 @@ const scripts = [
   'smoke-test-advanced-stats-constraints.sql',
   'smoke-test-advanced-stats-cascades.sql',
   'smoke-test-advanced-stats-lifecycle-fence.sql',
+  'smoke-test-advanced-stats-compact.sql',
 ];
 
 for (const name of scripts) {

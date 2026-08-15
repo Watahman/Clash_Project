@@ -12,10 +12,11 @@
     <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="../assets/css/profile-overlay.css">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
-    <link rel="stylesheet" href="../assets/css/advanced-stats.css?v=20260814-advanced-stats-v3">
+    <link rel="stylesheet" href="../assets/css/advanced-stats.css?v=20260814-advanced-stats-v4">
+    <link rel="stylesheet" href="../assets/css/advanced-stats-analysis.css?v=20260814-advanced-stats-v4">
     <script src="../assets/js/Data/runtime-config.js"></script>
     <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260812-redesign"></script>
-    <script type="module" src="../assets/js/pages/advanced-stats-bootstrap.js?v=20260814-advanced-stats-v3"></script>
+    <script type="module" src="../assets/js/pages/advanced-stats-bootstrap.js?v=20260814-advanced-stats-v4"></script>
     <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
@@ -71,19 +72,50 @@
     <section id="advanced-stats-not-tracking" class="advanced-stats__setup" hidden>
         <img src="../assets/icons/stats/tracking.svg" alt="" width="40" height="40">
         <div class="advanced-stats__setup-copy">
-            <h2 data-i18n="advancedStats.notTrackingTitle">Build your tracked lifetime history</h2>
-            <p data-i18n="advancedStats.notTrackingText">Start tracking to see your attack performance, favorite armies and trends over time.</p>
-            <small data-i18n="advancedStats.startNote">Tracking starts from now. ClashPanel cannot reconstruct your complete lifetime before tracking began.</small>
+            <h2 data-i18n="advancedStats.notTrackingTitle">Start a historical analysis</h2>
+            <p data-i18n="advancedStats.notTrackingText">ClashPanel will fetch the available history for this account, then calculate your favorite armies, trends and unit usage.</p>
+            <small data-i18n="advancedStats.startNote">ClashPanel uses history available from its connected sources. It cannot reconstruct your complete lifetime when those sources have no older data.</small>
         </div>
-        <button id="advanced-stats-start" class="cp-button cp-button--primary cp-button--large" type="button" data-i18n="advancedStats.start">Start Advanced Stats Tracking</button>
+        <button id="advanced-stats-start" class="cp-button cp-button--primary cp-button--large" type="button" data-i18n="advancedStats.start">Start historical analysis</button>
     </section>
 
-    <section id="advanced-stats-initializing" class="advanced-stats__setup advanced-stats__setup--initializing" aria-busy="true" hidden>
-        <img src="../assets/icons/stats/history.svg" alt="" width="40" height="40">
-        <div>
-            <h2 data-i18n="advancedStats.initializingTitle">Preparing your history</h2>
-            <p data-i18n="advancedStats.initializingText">ClashPanel is adding your recent attacks. Your stats will appear here shortly.</p>
+    <section id="advanced-stats-initializing" class="advanced-stats__analysis" aria-busy="true" aria-labelledby="advanced-stats-analysis-title" hidden>
+        <div class="advanced-stats__analysis-heading">
+            <div class="advanced-stats__analysis-icon" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div>
+                <p class="advanced-stats__analysis-eyebrow" data-i18n="advancedStats.analysisEyebrow">Historical analysis</p>
+                <h2 id="advanced-stats-analysis-title">Preparing your history</h2>
+                <p id="advanced-stats-analysis-text">ClashPanel is fetching and calculating the available history for this account.</p>
+            </div>
+            <strong id="advanced-stats-analysis-status" class="advanced-stats__analysis-status" role="status" aria-live="polite">Working…</strong>
         </div>
+        <progress id="advanced-stats-analysis-progress" class="advanced-stats__analysis-progress" max="100" aria-label="Historical analysis progress" data-i18n-aria-label="advancedStats.analysisProgressLabel"></progress>
+        <div class="advanced-stats__analysis-counts" aria-live="polite">
+            <span><strong id="advanced-stats-analysis-processed">Pending</strong><small data-i18n="advancedStats.analysisProcessed">processed attacks</small></span>
+            <span><strong id="advanced-stats-analysis-available">Pending</strong><small data-i18n="advancedStats.analysisAvailable">available attacks</small></span>
+        </div>
+        <ol id="advanced-stats-analysis-scopes" class="advanced-stats__analysis-scopes" aria-label="History sources" data-i18n-aria-label="advancedStats.analysisScopesLabel" hidden>
+            <li data-analysis-scope="normal"><span aria-hidden="true">1</span><div><strong data-i18n="advancedStats.analysisNormalTitle">Normal history</strong><small data-i18n="advancedStats.analysisNormalText">Reading the available normal battle history.</small><p><em data-scope-status data-i18n="advancedStats.analysisQueuedTitle">Queued</em><progress data-scope-progress max="100" aria-label="Historical analysis progress" data-i18n-aria-label="advancedStats.analysisProgressLabel"></progress><small data-scope-count></small></p></div></li>
+            <li data-analysis-scope="war"><span aria-hidden="true">2</span><div><strong data-i18n="advancedStats.analysisWarTitle">War history</strong><small data-i18n="advancedStats.analysisWarText">Reading the available war attacks.</small><p><em data-scope-status data-i18n="advancedStats.analysisQueuedTitle">Queued</em><progress data-scope-progress max="100" aria-label="Historical analysis progress" data-i18n-aria-label="advancedStats.analysisProgressLabel"></progress><small data-scope-count></small></p></div></li>
+            <li data-analysis-scope="ranked"><span aria-hidden="true">3</span><div><strong data-i18n="advancedStats.analysisRankedTitle">Ranked history</strong><small data-i18n="advancedStats.analysisRankedText">Reading the available ranked battlelog.</small><p><em data-scope-status data-i18n="advancedStats.analysisQueuedTitle">Queued</em><progress data-scope-progress max="100" aria-label="Historical analysis progress" data-i18n-aria-label="advancedStats.analysisProgressLabel"></progress><small data-scope-count></small></p></div></li>
+            <li data-analysis-scope="aggregate"><span aria-hidden="true">4</span><div><strong data-i18n="advancedStats.analysisAggregationTitle">Calculating insights</strong><small data-i18n="advancedStats.analysisAggregationText">Building favorites, trends and unit counts.</small><p><em data-scope-status data-i18n="advancedStats.analysisQueuedTitle">Queued</em><progress data-scope-progress max="100" aria-label="Historical analysis progress" data-i18n-aria-label="advancedStats.analysisProgressLabel"></progress><small data-scope-count></small></p></div></li>
+        </ol>
+        <ol class="advanced-stats__analysis-steps" aria-label="Analysis phases" data-i18n-aria-label="advancedStats.analysisPhasesLabel">
+            <li data-analysis-step="QUEUED"><span aria-hidden="true">1</span><div><strong data-i18n="advancedStats.analysisQueuedTitle">Queued</strong><small data-i18n="advancedStats.analysisQueuedText">The analysis request is being prepared.</small></div></li>
+            <li data-analysis-step="FETCHING"><span aria-hidden="true">2</span><div><strong data-i18n="advancedStats.analysisFetchingTitle">Fetching history</strong><small data-i18n="advancedStats.analysisFetchingText">Reading the available battle history.</small></div></li>
+            <li data-analysis-step="PROCESSING"><span aria-hidden="true">3</span><div><strong data-i18n="advancedStats.analysisProcessingTitle">Calculating insights</strong><small data-i18n="advancedStats.analysisProcessingText">Building favorites, trends and unit counts.</small></div></li>
+            <li data-analysis-step="READY"><span aria-hidden="true">4</span><div><strong data-i18n="advancedStats.analysisReadyTitle">Ready</strong><small data-i18n="advancedStats.analysisReadyText">Your dashboard is ready with the latest available history.</small></div></li>
+        </ol>
+        <section class="advanced-stats__coverage" aria-labelledby="advanced-stats-analysis-coverage-title">
+            <div><h3 id="advanced-stats-analysis-coverage-title" data-i18n="advancedStats.coverageTitle">History coverage</h3><p data-i18n="advancedStats.coverageText">Coverage is shown only when the backend reports it.</p></div>
+            <dl>
+                <div><dt data-i18n="advancedStats.coverageNormal">Normal</dt><dd id="advanced-stats-analysis-coverage-normal">Not reported</dd><small id="advanced-stats-analysis-coverage-normal-meta" hidden></small></div>
+                <div><dt data-i18n="advancedStats.coverageWar">War</dt><dd id="advanced-stats-analysis-coverage-war">Not reported</dd><small id="advanced-stats-analysis-coverage-war-meta" hidden></small></div>
+                <div><dt data-i18n="advancedStats.coverageRanked">Ranked</dt><dd id="advanced-stats-analysis-coverage-ranked">Not reported</dd><small id="advanced-stats-analysis-coverage-ranked-meta" hidden></small></div>
+            </dl>
+        </section>
+        <p id="advanced-stats-analysis-error" class="advanced-stats__analysis-error" role="alert" hidden data-i18n="advancedStats.analysisErrorText">The historical analysis could not finish. Your saved data was not changed.</p>
+        <button id="advanced-stats-analysis-retry" class="cp-button cp-button--secondary" type="button" data-i18n="advancedStats.retry" hidden>Try again</button>
     </section>
 
     <div id="advanced-stats-content" hidden>
@@ -100,6 +132,14 @@
                 <div><dt data-i18n="advancedStats.lastUpdated">Last refreshed</dt><dd id="advanced-stats-updated-at">—</dd></div>
                 <div><dt data-i18n="advancedStats.trackedBattles">Tracked attacks</dt><dd id="advanced-stats-battles-processed">—</dd></div>
             </dl>
+            <div class="advanced-stats__coverage advanced-stats__coverage--compact" aria-labelledby="advanced-stats-dashboard-coverage-title">
+                <h3 id="advanced-stats-dashboard-coverage-title" data-i18n="advancedStats.coverageTitle">History coverage</h3>
+                <dl>
+                    <div><dt data-i18n="advancedStats.coverageNormal">Normal</dt><dd id="advanced-stats-dashboard-coverage-normal">Not reported</dd><small id="advanced-stats-dashboard-coverage-normal-meta" hidden></small></div>
+                    <div><dt data-i18n="advancedStats.coverageWar">War</dt><dd id="advanced-stats-dashboard-coverage-war">Not reported</dd><small id="advanced-stats-dashboard-coverage-war-meta" hidden></small></div>
+                    <div><dt data-i18n="advancedStats.coverageRanked">Ranked</dt><dd id="advanced-stats-dashboard-coverage-ranked">Not reported</dd><small id="advanced-stats-dashboard-coverage-ranked-meta" hidden></small></div>
+                </dl>
+            </div>
             <details class="advanced-stats__tracking-menu" id="advanced-stats-tracking-menu">
                 <summary class="cp-button cp-button--ghost" data-i18n="advancedStats.trackedLifetime">Tracked history</summary>
                 <div class="advanced-stats__tracking-actions">

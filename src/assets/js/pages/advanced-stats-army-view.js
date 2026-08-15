@@ -27,8 +27,16 @@ function normalizedCategory(value) {
     return String(value || '').trim().toUpperCase();
 }
 
+function unitKey(unit) {
+    return String(unit?.key || unit?.unitKey || unit?.unit_key || '').trim();
+}
+
+function unitName(unit) {
+    return String(unit?.name || unit?.unitName || unit?.unit_name || '').trim();
+}
+
 function unitIdentity(unit) {
-    return `${normalizedCategory(unit?.category)}:${String(unit?.key || unit?.unitKey || '').trim()}`;
+    return `${normalizedCategory(unit?.category)}:${unitKey(unit)}`;
 }
 
 export function isPlayerFacingUnitName(value) {
@@ -41,7 +49,7 @@ export function isPlayerFacingUnitName(value) {
 function unitNameLookup(unitCatalog) {
     const names = new Map();
     for (const unit of Array.isArray(unitCatalog) ? unitCatalog : []) {
-        const name = String(unit?.name || unit?.unitName || '').trim();
+        const name = unitName(unit);
         if (!isPlayerFacingUnitName(name)) continue;
         names.set(unitIdentity(unit), name);
     }
@@ -53,8 +61,8 @@ export function displayArmyUnits(army, unitCatalog) {
     return (Array.isArray(army?.units) ? army.units : [])
         .map(unit => ({
             category: normalizedCategory(unit?.category),
-            key: String(unit?.key || unit?.unitKey || '').trim(),
-            name: String(unit?.name || unit?.unitName || names.get(unitIdentity(unit)) || '').trim(),
+            key: unitKey(unit),
+            name: unitName(unit) || names.get(unitIdentity(unit)) || '',
             quantity: Math.max(0, Number(unit?.quantity || 0))
         }))
         .filter(unit => DISPLAY_CATEGORIES.has(unit.category)

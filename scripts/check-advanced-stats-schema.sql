@@ -18,7 +18,12 @@ declare
         'advanced_stats_unit_totals',
         'advanced_stats_army_totals',
         'advanced_stats_daily',
-        'advanced_stats_tracking_gaps'
+        'advanced_stats_tracking_gaps',
+        'advanced_stats_scope_state',
+        'advanced_stats_event_receipts',
+        'advanced_stats_scope_unit_daily',
+        'advanced_stats_scope_army_daily',
+        'advanced_stats_scope_daily'
     ];
     v_required_functions text[] := array[
         'public.save_achievement_import(uuid,text,bigint,text,jsonb,jsonb,jsonb)',
@@ -39,7 +44,49 @@ declare
         'public.read_advanced_stats_trends_v1(uuid,timestamptz)',
         'public.read_advanced_stats_achievement_metrics_v1(uuid)',
         'public.reconcile_advanced_stats_achievement_progress_v1(uuid,text,bigint,jsonb)',
-        'public.delete_advanced_stats_tracking_v1(uuid,text)'
+        'public.delete_advanced_stats_tracking_v1(uuid,text)',
+        'public.save_advanced_stats_compact_event_v1(uuid,text,text,text,timestamptz,timestamptz,smallint,numeric,bigint,bigint,bigint,jsonb,text,jsonb,text,timestamptz,text,text,timestamptz,text,jsonb,boolean,text)',
+        'public.update_advanced_stats_scope_poll_v1(uuid,text,text,text,timestamptz,boolean,text,timestamptz,text,text,timestamptz,text,jsonb,text,text)',
+        'public.update_advanced_stats_bootstrap_v1(uuid,text,text,text,text,smallint,bigint,bigint,text,text,timestamptz)',
+        'public.read_advanced_stats_compact_overview_v1(uuid,text,timestamptz)',
+        'public.read_advanced_stats_compact_units_v1(uuid,text,timestamptz,text)',
+        'public.read_advanced_stats_compact_armies_v1(uuid,text,timestamptz,integer)',
+        'public.read_advanced_stats_compact_trends_v1(uuid,text,timestamptz)',
+        'public.record_advanced_stats_scope_capability_v1(uuid,text,text,text,text,text,text,text,jsonb,timestamptz)',
+        'public.initialize_advanced_stats_scope_state_v1()',
+        'public.normalize_advanced_stats_ranked_season_key_v1(text,text)',
+        'public.guard_advanced_stats_scope_season_v1()',
+        'public.assign_advanced_stats_aggregate_season_v1()',
+        'public.switch_advanced_stats_ranked_season_v1(uuid,text,text,text,text,timestamptz)',
+        'public.prepare_advanced_stats_ranked_season_v1(uuid,text,text,text,timestamptz)',
+        'public.save_advanced_stats_compact_event_v2(uuid,text,text,text,timestamptz,timestamptz,smallint,numeric,bigint,bigint,bigint,jsonb,text,jsonb,text,timestamptz,text,text,timestamptz,text,jsonb,boolean,text,text)',
+        'public.update_advanced_stats_scope_poll_v2(uuid,text,text,text,timestamptz,boolean,text,timestamptz,text,text,timestamptz,text,jsonb,text,text,text)',
+        'public.read_advanced_stats_compact_overview_v2(uuid,text,timestamptz,text)',
+        'public.read_advanced_stats_compact_units_v2(uuid,text,timestamptz,text,text)',
+        'public.read_advanced_stats_compact_armies_v2(uuid,text,timestamptz,integer,text)',
+        'public.read_advanced_stats_compact_trends_v2(uuid,text,timestamptz,text)'
+    ];
+    v_invoker_functions text[] := array[
+        'public.save_advanced_stats_compact_event_v1(uuid,text,text,text,timestamptz,timestamptz,smallint,numeric,bigint,bigint,bigint,jsonb,text,jsonb,text,timestamptz,text,text,timestamptz,text,jsonb,boolean,text)',
+        'public.update_advanced_stats_scope_poll_v1(uuid,text,text,text,timestamptz,boolean,text,timestamptz,text,text,timestamptz,text,jsonb,text,text)',
+        'public.update_advanced_stats_bootstrap_v1(uuid,text,text,text,text,smallint,bigint,bigint,text,text,timestamptz)',
+        'public.read_advanced_stats_compact_overview_v1(uuid,text,timestamptz)',
+        'public.read_advanced_stats_compact_units_v1(uuid,text,timestamptz,text)',
+        'public.read_advanced_stats_compact_armies_v1(uuid,text,timestamptz,integer)',
+        'public.read_advanced_stats_compact_trends_v1(uuid,text,timestamptz)',
+        'public.record_advanced_stats_scope_capability_v1(uuid,text,text,text,text,text,text,text,jsonb,timestamptz)',
+        'public.initialize_advanced_stats_scope_state_v1()',
+        'public.normalize_advanced_stats_ranked_season_key_v1(text,text)',
+        'public.guard_advanced_stats_scope_season_v1()',
+        'public.assign_advanced_stats_aggregate_season_v1()',
+        'public.switch_advanced_stats_ranked_season_v1(uuid,text,text,text,text,timestamptz)',
+        'public.prepare_advanced_stats_ranked_season_v1(uuid,text,text,text,timestamptz)',
+        'public.save_advanced_stats_compact_event_v2(uuid,text,text,text,timestamptz,timestamptz,smallint,numeric,bigint,bigint,bigint,jsonb,text,jsonb,text,timestamptz,text,text,timestamptz,text,jsonb,boolean,text,text)',
+        'public.update_advanced_stats_scope_poll_v2(uuid,text,text,text,timestamptz,boolean,text,timestamptz,text,text,timestamptz,text,jsonb,text,text,text)',
+        'public.read_advanced_stats_compact_overview_v2(uuid,text,timestamptz,text)',
+        'public.read_advanced_stats_compact_units_v2(uuid,text,timestamptz,text,text)',
+        'public.read_advanced_stats_compact_armies_v2(uuid,text,timestamptz,integer,text)',
+        'public.read_advanced_stats_compact_trends_v2(uuid,text,timestamptz,text)'
     ];
     v_required_migrations text[] := array[
         'advanced_achievements_foundation',
@@ -51,7 +98,21 @@ declare
         'advanced_stats_exact_trends',
         'advanced_stats_achievements_integration',
         'advanced_stats_delete_cleanup',
-        'advanced_stats_lifecycle_fence_and_delete_cleanup'
+        'advanced_stats_lifecycle_fence_and_delete_cleanup',
+        'advanced_stats_compact_source_of_truth',
+        'advanced_stats_compact_backfill',
+        'advanced_stats_compact_rpc_contract',
+        'advanced_stats_compact_reads',
+        'advanced_stats_compact_bootstrap',
+        'advanced_stats_compact_capabilities',
+        'advanced_stats_ranked_season_schema',
+        'advanced_stats_ranked_season_switch',
+        'advanced_stats_ranked_season_v1_compat',
+        'advanced_stats_ranked_season_write_contract',
+        'advanced_stats_ranked_season_overview_read',
+        'advanced_stats_ranked_season_units_read',
+        'advanced_stats_ranked_season_armies_read',
+        'advanced_stats_ranked_season_trends_read'
     ];
 begin
     if has_schema_privilege('anon', 'public', 'CREATE')
@@ -115,6 +176,16 @@ begin
         end if;
     end loop;
 
+    foreach v_function in array v_invoker_functions loop
+        select p.prosecdef
+          into v_rls
+          from pg_proc p
+         where p.oid = to_regprocedure(v_function);
+        if coalesce(v_rls, false) then
+            raise exception 'Compact Advanced Stats RPC must remain SECURITY INVOKER: %', v_function;
+        end if;
+    end loop;
+
     foreach v_migration in array v_required_migrations loop
         if not exists (
             select 1
@@ -128,9 +199,9 @@ end $$;
 
 select jsonb_build_object(
     'status', 'PASS',
-    'tablesChecked', 9,
-    'functionsChecked', 19,
-    'migrationsChecked', 10,
+    'tablesChecked', 14,
+    'functionsChecked', 39,
+    'migrationsChecked', 24,
     'browserSchemaCreate', 'DENIED',
     'browserTableAccess', 'DENIED',
     'browserRpcExecute', 'DENIED',

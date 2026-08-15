@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { renderArmies } from '../../src/assets/js/pages/advanced-stats-armies-renderer.js';
 import { renderBattles } from '../../src/assets/js/pages/advanced-stats-battles-renderer.js';
 import { renderOverview } from '../../src/assets/js/pages/advanced-stats-renderer.js';
+import { renderCoverageStatus, renderHistoryAnalysis } from '../../src/assets/js/pages/advanced-stats-analysis-renderer.js';
+import { normalizeAnalysis } from '../../src/assets/js/pages/advanced-stats-analysis.js';
 import { createTrendValue, renderTrends } from '../../src/assets/js/pages/advanced-stats-trends-renderer.js';
 import { renderUnits } from '../../src/assets/js/pages/advanced-stats-units-renderer.js';
 
@@ -47,6 +49,71 @@ describe('Advanced Stats extracted renderers', () => {
         expect(refs.kpiStars.textContent).toBe('—');
         expect(refs.kpiThreeStar.textContent).toBe('—');
         expect(refs.kpiDestruction.textContent).toBe('—');
+    });
+
+    it('shows honest coverage source labels without exposing source identifiers', () => {
+        const refs = {
+            analysisCoverageNormal: element('dd'), analysisCoverageNormalMeta: element('small'),
+            analysisCoverageWar: element('dd'), analysisCoverageWarMeta: element('small'),
+            analysisCoverageRanked: element('dd'), analysisCoverageRankedMeta: element('small')
+        };
+
+        renderCoverageStatus(refs, {
+            normal: { status: 'PARTIAL', sourceLabel: 'clashking-v2', sourceId: 'internal-42' },
+            war: { status: 'UNAVAILABLE', reasonLabel: 'Not supplied' }
+        }, 'analysis');
+
+        expect(refs.analysisCoverageNormal.dataset.state).toBe('partial');
+        expect(refs.analysisCoverageNormalMeta.textContent).toContain('ClashKing');
+        expect(refs.analysisCoverageNormalMeta.textContent).not.toContain('clashking-v2');
+        expect(refs.analysisCoverageNormalMeta.textContent).not.toContain('internal-42');
+        expect(refs.analysisCoverageWar.dataset.state).toBe('unavailable');
+        expect(refs.analysisCoverageWarMeta.textContent).toContain('Not supplied');
+        expect(refs.analysisCoverageRanked.dataset.state).toBe('unknown');
+    });
+
+    it('renders compact backend scope phases and hides terminal unknown progress', () => {
+        const root = document.createElement('section');
+        root.innerHTML = `
+            <h2></h2><p></p><strong></strong><progress></progress>
+            <span data-processed></span><span data-available></span>
+            <ol data-analysis-scopes>
+                <li data-analysis-scope="normal"><em data-scope-status></em><progress data-scope-progress></progress><small data-scope-count></small></li>
+                <li data-analysis-scope="war"><em data-scope-status></em><progress data-scope-progress></progress><small data-scope-count></small></li>
+                <li data-analysis-scope="ranked"><em data-scope-status></em><progress data-scope-progress></progress><small data-scope-count></small></li>
+                <li data-analysis-scope="aggregate"><em data-scope-status></em><progress data-scope-progress></progress><small data-scope-count></small></li>
+            </ol><ol class="advanced-stats__analysis-steps"></ol>
+        `;
+        const refs = {
+            analysisLoading: root,
+            analysisTitle: root.querySelector('h2'),
+            analysisText: root.querySelector('p'),
+            analysisStatus: root.querySelector('strong'),
+            analysisProgress: root.querySelector(':scope > progress'),
+            analysisProcessed: root.querySelector('[data-processed]'),
+            analysisAvailable: root.querySelector('[data-available]')
+        };
+        const analysis = normalizeAnalysis({
+            trackingExists: true,
+            analysisPhase: 'BOOTSTRAPPING',
+            analysisProgress: 36,
+            analysisProcessed: 18,
+            analysisTotal: 50,
+            analysisScopes: [
+                { scope: 'normal', bootstrapStatus: 'RUNNING', progress: 36 },
+                { scope: 'war', bootstrapStatus: 'PARTIAL', coverage: 'PARTIAL', progress: 100 },
+                { scope: 'ranked', bootstrapStatus: 'PENDING', capabilityStatus: 'UNSUPPORTED', coverage: 'UNSUPPORTED', progress: 0 }
+            ]
+        });
+
+        renderHistoryAnalysis({ ...refs, analysisError: null, analysisRetry: null }, { analysis, analysisRequested: true });
+
+        expect(root.hidden).toBe(false);
+        expect(root.querySelector('[data-analysis-scope="normal"]').dataset.phase).toBe('PROCESSING');
+        expect(root.querySelector('[data-analysis-scope="war"]').dataset.phase).toBe('PARTIAL');
+        expect(root.querySelector('[data-analysis-scope="war"] progress').hidden).toBe(true);
+        expect(root.querySelector('[data-analysis-scope="ranked"] em').textContent).toContain('Not available');
+        expect(refs.analysisProgress.value).toBe(36);
     });
 
     it('renders a partial unit source as an explicit error state', () => {

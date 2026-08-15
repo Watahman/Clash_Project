@@ -1,6 +1,7 @@
 package Java;
 
 import Java.advancedstats.AdvancedStatsScheduledCollector;
+import Java.advancedstats.AdvancedStatsCompactScheduledCollector;
 import io.github.cdimascio.dotenv.Dotenv;
 
 import java.nio.charset.StandardCharsets;
@@ -48,6 +49,18 @@ public final class AdvancedStatsCollectorConfig {
                 Duration.ofMinutes(boundedInt("ADVANCED_STATS_UNKNOWN_BACKOFF_MINUTES", 15, 2, 240)),
                 Duration.ofMinutes(boundedInt("ADVANCED_STATS_MAX_BACKOFF_MINUTES", 240, 30, 1440)),
                 boundedInt("ADVANCED_STATS_DEGRADED_THRESHOLD", 3, 2, 20)
+        );
+    }
+
+    public AdvancedStatsCompactScheduledCollector.Settings compactSettings() {
+        AdvancedStatsScheduledCollector.Settings legacy = settings();
+        return new AdvancedStatsCompactScheduledCollector.Settings(
+                legacy.batchSize(),
+                boundedInt("ADVANCED_STATS_PAGE_SIZE", 100, 1, 500),
+                boundedInt("ADVANCED_STATS_MAX_BOOTSTRAP_PAGES", 20, 1, 1000),
+                legacy.leaseSeconds(),
+                legacy.activePollDelay(),
+                legacy.idlePollDelay()
         );
     }
 

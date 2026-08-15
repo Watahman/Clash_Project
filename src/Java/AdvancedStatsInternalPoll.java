@@ -1,13 +1,22 @@
 package Java;
 
-import Java.advancedstats.AdvancedStatsBattleIngestionService;
+import Java.advancedstats.AdvancedStatsBattleLogHistorySource;
+import Java.advancedstats.AdvancedStatsCapabilityBasedSource;
+import Java.advancedstats.AdvancedStatsCompactScheduledCollector;
 import Java.advancedstats.AdvancedStatsCollectorRepository;
+import Java.advancedstats.ClashKingV2AdvancedStatsSource;
+import Java.advancedstats.AdvancedStatsHistorySource;
+import Java.advancedstats.HistoricalPlayerDataAdvancedStatsSource;
 import Java.advancedstats.AdvancedStatsScheduledCollector;
+import Java.performance.ClashKingLegacyProvider;
+import Java.performance.HistoricalPlayerDataProvider;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
 import java.time.Clock;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Protected Cloud Scheduler trigger for one bounded Advanced Stats collection pass. */
 public final class AdvancedStatsInternalPoll {
@@ -17,6 +26,7 @@ public final class AdvancedStatsInternalPoll {
     private final API_Utils utils;
     private final AdvancedStatsCollectorConfig collectorConfig;
     private final AdvancedStatsScheduledCollector collector;
+    private final AdvancedStatsCompactScheduledCollector compactCollector;
 
     public AdvancedStatsInternalPoll(HttpServer server, Config config) {
         if (server == null) throw new IllegalArgumentException("server is required");
@@ -27,14 +37,14 @@ public final class AdvancedStatsInternalPoll {
         this.collectorConfig = new AdvancedStatsCollectorConfig();
 
         AdvancedStatsBattleLogSource source = new AdvancedStatsBattleLogSource(config);
-        AdvancedStatsBattleIngestionService ingestion = new AdvancedStatsBattleIngestionService();
-        this.collector = new AdvancedStatsScheduledCollector(
+        HistoricalPlayerDataProvider historical = new ClashKingLegacyProvider(config.getClashKingLegacyBaseUrl());
+        this.compactCollector = new AdvancedStatsCompactScheduledCollector(
                 new AdvancedStatsCollectorRepository(),
-                source::fetchFresh,
-                ingestion::ingest,
+                workerId -> compactSource(config, source, historical),
                 Clock.systemUTC(),
-                collectorConfig.settings()
+                collectorConfig.compactSettings()
         );
+        this.collector = null;
     }
 
     AdvancedStatsInternalPoll(
@@ -47,6 +57,23 @@ public final class AdvancedStatsInternalPoll {
         this.utils = utils;
         this.collectorConfig = collectorConfig;
         this.collector = collector;
+        this.compactCollector = null;
+    }
+
+    private AdvancedStatsHistorySource compactSource(
+            Config config,
+            AdvancedStatsBattleLogSource official,
+            HistoricalPlayerDataProvider legacy
+    ) {
+        List<AdvancedStatsHistorySource> sources = new ArrayList<>();
+        sources.add(new ClashKingV2AdvancedStatsSource(config));
+        if (config.isClashKingOfficialFallbackEnabled()) {
+            sources.add(new AdvancedStatsBattleLogHistorySource(official::fetchFresh));
+        }
+        if (config.isClashKingLegacyFallbackEnabled()) {
+            sources.add(new HistoricalPlayerDataAdvancedStatsSource(legacy));
+        }
+        return new AdvancedStatsCapabilityBasedSource(sources);
     }
 
     public void registerRoute() {
@@ -93,29 +120,7 @@ public final class AdvancedStatsInternalPoll {
                 return;
             }
 
-            AdvancedStatsScheduledCollector.BatchSummary summary = collector.runOnce();
-            JsonObject body = new JsonObject();
-            body.addProperty("claimed", summary.claimed());
-            body.addProperty("succeeded", summary.succeeded());
-            body.addProperty("failed", summary.failed());
-            body.addProperty("insertedBattles", summary.insertedBattles());
-            body.addProperty("duplicateBattles", summary.duplicateBattles());
-            body.addProperty("parserErrors", summary.parserErrors());
-            body.addProperty("rateLimited", summary.rateLimited());
-            body.addProperty("finalizeFailures", summary.finalizeFailures());
-            body.addProperty("healthy", summary.finalizeFailures() == 0);
-
-            System.out.printf(
-                    "advanced_stats_poll_batch claimed=%d succeeded=%d failed=%d inserted=%d duplicates=%d parserErrors=%d rateLimited=%d finalizeFailures=%d%n",
-                    summary.claimed(),
-                    summary.succeeded(),
-                    summary.failed(),
-                    summary.insertedBattles(),
-                    summary.duplicateBattles(),
-                    summary.parserErrors(),
-                    summary.rateLimited(),
-                    summary.finalizeFailures()
-            );
+            JsonObject body = compactCollector == null ? legacySummary(collector.runOnce()) : compactSummary(compactCollector.runOnce());
 
             utils.sendJsonResponse(exchange, body.toString(), 200);
         } catch (Exception failure) {
@@ -133,5 +138,39 @@ public final class AdvancedStatsInternalPoll {
                 responseFailure.printStackTrace();
             }
         }
+    }
+
+    private JsonObject legacySummary(AdvancedStatsScheduledCollector.BatchSummary summary) {
+        JsonObject body = new JsonObject();
+        body.addProperty("claimed", summary.claimed());
+        body.addProperty("succeeded", summary.succeeded());
+        body.addProperty("failed", summary.failed());
+        body.addProperty("insertedBattles", summary.insertedBattles());
+        body.addProperty("duplicateBattles", summary.duplicateBattles());
+        body.addProperty("parserErrors", summary.parserErrors());
+        body.addProperty("rateLimited", summary.rateLimited());
+        body.addProperty("finalizeFailures", summary.finalizeFailures());
+        body.addProperty("healthy", summary.finalizeFailures() == 0);
+        return body;
+    }
+
+    private JsonObject compactSummary(AdvancedStatsCompactScheduledCollector.Summary summary) {
+        JsonObject body = new JsonObject();
+        body.addProperty("claimed", summary.claimed());
+        body.addProperty("succeeded", summary.succeeded());
+        body.addProperty("failed", summary.failed());
+        body.addProperty("processed", summary.processed());
+        body.addProperty("seenObservations", summary.processed());
+        body.addProperty("insertedBattles", summary.inserted());
+        body.addProperty("duplicateBattles", summary.duplicates());
+        body.addProperty("skippedNonAttacks", summary.skipped());
+        body.addProperty("parserErrors", 0);
+        body.addProperty("rateLimited", 0);
+        body.addProperty("finalizeFailures", 0);
+        body.addProperty("partialScopes", summary.partialScopes());
+        body.addProperty("healthy", summary.failed() == 0 && summary.partialScopes() == 0);
+        body.addProperty("degraded", summary.failed() > 0 || summary.partialScopes() > 0);
+        body.addProperty("storageMode", "COMPACT_DERIVED");
+        return body;
     }
 }

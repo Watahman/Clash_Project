@@ -21,6 +21,21 @@ public final class AdvancedStatsReadService {
         JsonElement armies(UUID trackingId, Instant from, int limit) throws Exception;
         JsonObject battles(UUID trackingId, Instant from, int limit, Instant cursorAt, UUID cursorId) throws Exception;
         JsonElement trends(UUID trackingId, Instant from) throws Exception;
+
+        default JsonObject compactOverview(UUID trackingId, Instant from) throws Exception { return overview(trackingId, from); }
+        default JsonElement compactUnits(UUID trackingId, Instant from, AdvancedStatsUnitCategory category) throws Exception { return units(trackingId, from, category); }
+        default JsonElement compactArmies(UUID trackingId, Instant from, int limit) throws Exception { return armies(trackingId, from, limit); }
+        default JsonElement compactTrends(UUID trackingId, Instant from) throws Exception { return trends(trackingId, from); }
+    }
+
+    /** Scope-aware compact reads. Legacy Store implementations remain source-compatible. */
+    public interface ScopedStore extends Store {
+        JsonObject overview(UUID trackingId, AdvancedStatsScope scope, Instant from) throws Exception;
+        JsonElement units(UUID trackingId, AdvancedStatsScope scope, Instant from,
+                          AdvancedStatsUnitCategory category) throws Exception;
+        JsonElement armies(UUID trackingId, AdvancedStatsScope scope, Instant from, int limit) throws Exception;
+        JsonObject battles(UUID trackingId, AdvancedStatsScope scope, Instant from, int limit) throws Exception;
+        JsonElement trends(UUID trackingId, AdvancedStatsScope scope, Instant from) throws Exception;
     }
 
     record Cursor(Instant at, UUID id) {}
@@ -45,11 +60,18 @@ public final class AdvancedStatsReadService {
     }
 
     public JsonObject overview(UUID userId, String rawPlayerTag, String rawPeriod) throws Exception {
+        return overview(userId, rawPlayerTag, rawPeriod, null);
+    }
+
+    public JsonObject overview(UUID userId, String rawPlayerTag, String rawPeriod, String rawScope) throws Exception {
         AdvancedStatsPeriod period = AdvancedStatsPeriod.parse(rawPeriod);
+        AdvancedStatsScope scope = parseScope(rawScope);
         Context context = requireContext(userId, rawPlayerTag);
         Instant from = period.from(clock.instant());
         JsonObject response = envelope(context, period, from);
-        response.add("data", store.overview(context.tracking().id(), from));
+        if (scope == null) response.add("data", store.compactOverview(context.tracking().id(), from));
+        else response.add("data", scopedStore().overview(context.tracking().id(), scope, from));
+        if (scope != null) response.addProperty("scope", scope.apiValue());
         return response;
     }
 
@@ -59,14 +81,28 @@ public final class AdvancedStatsReadService {
             String rawPeriod,
             String rawCategory
     ) throws Exception {
+        return units(userId, rawPlayerTag, rawPeriod, rawCategory, null);
+    }
+
+    public JsonObject units(
+            UUID userId,
+            String rawPlayerTag,
+            String rawPeriod,
+            String rawCategory,
+            String rawScope
+    ) throws Exception {
         AdvancedStatsPeriod period = AdvancedStatsPeriod.parse(rawPeriod);
         AdvancedStatsUnitCategory category = parseCategory(rawCategory);
+        AdvancedStatsScope scope = parseScope(rawScope);
         Context context = requireContext(userId, rawPlayerTag);
         Instant from = period.from(clock.instant());
         JsonObject response = envelope(context, period, from);
         if (category == null) response.add("category", JsonNull.INSTANCE);
         else response.addProperty("category", category.name());
-        response.add("items", store.units(context.tracking().id(), from, category));
+        response.add("items", scope == null
+                ? store.compactUnits(context.tracking().id(), from, category)
+                : scopedStore().units(context.tracking().id(), scope, from, category));
+        if (scope != null) response.addProperty("scope", scope.apiValue());
         return response;
     }
 
@@ -76,13 +112,27 @@ public final class AdvancedStatsReadService {
             String rawPeriod,
             int requestedLimit
     ) throws Exception {
+        return armies(userId, rawPlayerTag, rawPeriod, requestedLimit, null);
+    }
+
+    public JsonObject armies(
+            UUID userId,
+            String rawPlayerTag,
+            String rawPeriod,
+            int requestedLimit,
+            String rawScope
+    ) throws Exception {
         AdvancedStatsPeriod period = AdvancedStatsPeriod.parse(rawPeriod);
         int limit = boundedLimit(requestedLimit, 20, 100);
+        AdvancedStatsScope scope = parseScope(rawScope);
         Context context = requireContext(userId, rawPlayerTag);
         Instant from = period.from(clock.instant());
         JsonObject response = envelope(context, period, from);
         response.addProperty("limit", limit);
-        response.add("items", store.armies(context.tracking().id(), from, limit));
+        response.add("items", scope == null
+                ? store.compactArmies(context.tracking().id(), from, limit)
+                : scopedStore().armies(context.tracking().id(), scope, from, limit));
+        if (scope != null) response.addProperty("scope", scope.apiValue());
         return response;
     }
 
@@ -93,19 +143,28 @@ public final class AdvancedStatsReadService {
             int requestedLimit,
             String rawCursor
     ) throws Exception {
+        return battles(userId, rawPlayerTag, rawPeriod, requestedLimit, rawCursor, null);
+    }
+
+    public JsonObject battles(
+            UUID userId,
+            String rawPlayerTag,
+            String rawPeriod,
+            int requestedLimit,
+            String rawCursor,
+            String rawScope
+    ) throws Exception {
         AdvancedStatsPeriod period = AdvancedStatsPeriod.parse(rawPeriod);
         int limit = boundedLimit(requestedLimit, 25, 100);
+        AdvancedStatsScope scope = parseScope(rawScope);
         Cursor cursor = decodeCursor(rawCursor);
         Context context = requireContext(userId, rawPlayerTag);
         Instant from = period.from(clock.instant());
 
-        JsonObject page = store.battles(
-                context.tracking().id(),
-                from,
-                limit,
-                cursor == null ? null : cursor.at(),
-                cursor == null ? null : cursor.id()
-        );
+        JsonObject page = scope == null ? store.battles(
+                context.tracking().id(), from, limit,
+                cursor == null ? null : cursor.at(), cursor == null ? null : cursor.id())
+                : scopedStore().battles(context.tracking().id(), scope, from, limit);
 
         JsonObject response = envelope(context, period, from);
         response.addProperty("limit", limit);
@@ -123,16 +182,35 @@ public final class AdvancedStatsReadService {
         } else {
             response.add("nextCursor", JsonNull.INSTANCE);
         }
+        if (page.has("unsupported") && page.get("unsupported").getAsBoolean()) {
+            response.addProperty("unsupported", true);
+            if (hasText(page, "reason")) response.addProperty("reason", page.get("reason").getAsString());
+        }
+        if (scope != null) response.addProperty("scope", scope.apiValue());
         return response;
     }
 
     public JsonObject trends(UUID userId, String rawPlayerTag, String rawPeriod) throws Exception {
+        return trends(userId, rawPlayerTag, rawPeriod, null);
+    }
+
+    public JsonObject trends(UUID userId, String rawPlayerTag, String rawPeriod, String rawScope) throws Exception {
         AdvancedStatsPeriod period = AdvancedStatsPeriod.parse(rawPeriod);
+        AdvancedStatsScope scope = parseScope(rawScope);
         Context context = requireContext(userId, rawPlayerTag);
         Instant from = period.from(clock.instant());
         JsonObject response = envelope(context, period, from);
-        response.add("points", store.trends(context.tracking().id(), from));
+        response.add("points", scope == null
+                ? store.compactTrends(context.tracking().id(), from)
+                : scopedStore().trends(context.tracking().id(), scope, from));
+        if (scope != null) response.addProperty("scope", scope.apiValue());
         return response;
+    }
+
+    private ScopedStore scopedStore() throws HttpException {
+        if (store instanceof ScopedStore scoped) return scoped;
+        throw new HttpException(501,
+                "{\"error\":\"Advanced Stats scope reads are not configured\",\"code\":\"ADVANCED_STATS_SCOPE_UNAVAILABLE\"}");
     }
 
     private Context requireContext(UUID userId, String rawPlayerTag) throws Exception {
@@ -161,6 +239,15 @@ public final class AdvancedStatsReadService {
             return AdvancedStatsUnitCategory.fromDatabase(rawCategory);
         } catch (IllegalArgumentException invalid) {
             throw new IllegalArgumentException("Ongeldige Advanced Stats unit category: " + rawCategory);
+        }
+    }
+
+    private AdvancedStatsScope parseScope(String rawScope) {
+        if (rawScope == null || rawScope.isBlank()) return null;
+        try {
+            return AdvancedStatsScope.parse(rawScope);
+        } catch (IllegalArgumentException invalid) {
+            throw new IllegalArgumentException("Ongeldige Advanced Stats scope: " + rawScope);
         }
     }
 

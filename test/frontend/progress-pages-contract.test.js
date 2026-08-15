@@ -6,19 +6,27 @@ const read = path => readFileSync(path, 'utf8');
 describe('Progress workspace page contracts', () => {
     it('covers every required Advanced Stats lifecycle and source-quality state', () => {
         const renderer = read('src/assets/js/pages/advanced-stats-renderer.js');
+        const analysis = read('src/assets/js/pages/advanced-stats.js');
+        const analysisModel = read('src/assets/js/pages/advanced-stats-analysis.js');
+        const analysisRenderer = read('src/assets/js/pages/advanced-stats-analysis-renderer.js');
+        const dataLoader = read('src/assets/js/pages/advanced-stats-data-loader.js');
         const trendRenderer = read('src/assets/js/pages/advanced-stats-trends-renderer.js');
-        const controller = read('src/assets/js/pages/advanced-stats.js');
 
         for (const status of ['INITIALIZING', 'ACTIVE', 'PAUSED', 'DEGRADED', 'STOPPED', 'ERROR']) {
-            expect(renderer).toContain(`'${status}'`);
+            expect(renderer).toContain(`${status}:`);
         }
         expect(renderer).toContain('trackingExists');
-        expect(renderer).toContain("status === 'INITIALIZING' && !hasHistory");
-        expect(renderer).toContain('aria-valuetext');
+        expect(renderer).toContain('analysisPending');
+        expect(renderer).toContain('analysis.active');
+        expect(renderer).toContain('(analysis.error && !hasHistory)');
+        expect(analysisModel).toContain('ACTIVE_PHASES');
+        expect(analysisModel).toContain("['READY', 'PARTIAL', 'UNSUPPORTED']");
+        expect(analysisModel).toContain('current.active');
+        expect(analysisRenderer).toContain('aria-valuetext');
         expect(trendRenderer).toContain('aria-valuetext');
-        expect(controller).toContain('Promise.allSettled');
-        expect(controller).toContain('data-load-error');
-        expect(controller).toContain('resetRangeData({ clearTracking: true })');
+        expect(dataLoader).toContain('Promise.allSettled');
+        expect(dataLoader).toContain('data-load-error');
+        expect(analysis).toContain('resetRangeData({ clearTracking: true })');
     });
 
     it('uses the central entity resolver and gives achievement families semantic assets', () => {

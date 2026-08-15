@@ -31,9 +31,23 @@ public class Config {
             env("CLASHKING_V2_BASE_URL"),
             "https://v2-api.clashk.ing"
     );
+    String _CLASHKING_V2_BASE_URL_ENV = env("CLASHKING_V2_BASE_URL");
     String _CLASHKING_FALLBACK_TO_LEGACY = firstNonBlank(
             env("CLASHKING_FALLBACK_TO_LEGACY"),
             "false"
+    );
+    String _CLASHKING_FALLBACK_TO_OFFICIAL = firstNonBlank(
+            env("CLASHKING_FALLBACK_TO_OFFICIAL"),
+            "false"
+    );
+    String _CLASHKING_V2_AUTH_TOKEN = firstNonBlank(
+            env("CLASHKING_V2_AUTH_TOKEN"),
+            env("CLASHKING_V2_BEARER_TOKEN"),
+            env("CLASHKING_API_TOKEN")
+    );
+    String _CLASHKING_V2_RANKED_SEASON = firstNonBlank(
+            env("CLASHKING_V2_RANKED_SEASON"),
+            env("CLASHKING_RANKED_SEASON")
     );
     String _CLASHKING_COUNTER_INTERVAL_SECONDS = firstNonBlank(
             env("CLASHKING_COUNTER_INTERVAL_SECONDS"),
@@ -286,8 +300,24 @@ public class Config {
         return _CLASHKING_V2_BASE_URL;
     }
 
+    public boolean isClashKingV2BaseUrlExplicit() {
+        return _CLASHKING_V2_BASE_URL_ENV != null && !_CLASHKING_V2_BASE_URL_ENV.isBlank();
+    }
+
     public boolean isClashKingLegacyFallbackEnabled() {
         return "true".equalsIgnoreCase(_CLASHKING_FALLBACK_TO_LEGACY);
+    }
+
+    public boolean isClashKingOfficialFallbackEnabled() {
+        return "true".equalsIgnoreCase(_CLASHKING_FALLBACK_TO_OFFICIAL);
+    }
+
+    public String getClashKingV2AuthToken() {
+        return _CLASHKING_V2_AUTH_TOKEN;
+    }
+
+    public String getClashKingV2RankedSeason() {
+        return _CLASHKING_V2_RANKED_SEASON;
     }
 
     int getClashKingCounterIntervalSeconds() {

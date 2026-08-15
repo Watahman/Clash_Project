@@ -12,6 +12,8 @@ import { renderArmies } from './advanced-stats-armies-renderer.js?v=20260814-adv
 import { renderBattles } from './advanced-stats-battles-renderer.js?v=20260811-2';
 import { renderTrends } from './advanced-stats-trends-renderer.js?v=20260814-advanced-stats-v3';
 import { renderUnits } from './advanced-stats-units-renderer.js?v=20260814-advanced-stats-v3';
+import { renderDashboardCoverage, renderHistoryAnalysis } from './advanced-stats-analysis-renderer.js?v=20260814-advanced-stats-v4';
+import { normalizeAnalysis } from './advanced-stats-analysis.js?v=20260814-advanced-stats-v4';
 
 const STATUS_KEYS = Object.freeze({
     ACTIVE: 'advancedStats.active',
@@ -54,9 +56,11 @@ export function renderTracking(elements, state) {
     const status = safeStatus(tracking);
     const exists = Boolean(tracking?.trackingExists);
     const hasHistory = Number(tracking?.battlesProcessed || 0) > 0;
+    const analysis = state.analysis || normalizeAnalysis(tracking);
+    const analysisPending = Boolean(state.analysisRequested || analysis.active || (analysis.error && !hasHistory));
     const noAccounts = !state.accounts.length;
-    const showSetup = !state.trackingError && !noAccounts && (!exists || status === 'DISABLED');
-    const showInitializing = !state.trackingError && !noAccounts && exists && status === 'INITIALIZING' && !hasHistory;
+    const showSetup = !state.trackingError && !noAccounts && !analysisPending && (!exists || status === 'DISABLED');
+    const showInitializing = !state.trackingError && !noAccounts && analysisPending;
     const showContent = !noAccounts && exists && status !== 'DISABLED' && !showInitializing;
 
     setVisibility(elements.noAccounts, noAccounts);
@@ -65,6 +69,8 @@ export function renderTracking(elements, state) {
     setVisibility(elements.notTracking, showSetup);
     setVisibility(elements.initializing, showInitializing);
     setVisibility(elements.content, showContent);
+    renderHistoryAnalysis(elements, { ...state, analysis });
+    renderDashboardCoverage(elements, { ...state, analysis });
     if (!showContent) return;
 
     elements.trackingBar.dataset.status = status;

@@ -34,17 +34,18 @@ describe('Advanced Stats workspace page', () => {
 
     it('keeps profile errors separate and preserves last-good partial data', () => {
         const source = readFileSync('src/assets/js/pages/advanced-stats.js', 'utf8');
+        const loader = readFileSync('src/assets/js/pages/advanced-stats-data-loader.js', 'utf8');
         const renderer = readFileSync('src/assets/js/pages/advanced-stats-renderer.js', 'utf8');
         expect(source).toContain('state.profileError = true');
         expect(renderer).toContain('setVisibility(elements.profileError, state.profileError === true)');
         expect(source).toContain('elements.profileRetry?.addEventListener');
-        expect(source).toContain("if (overview.status === 'fulfilled') { state.overview = overview.value;");
-        expect(source).toContain("if (units.status === 'fulfilled') {");
-        expect(source).toContain('state.unitCatalog = arrayValue(units.value?.items)');
+        expect(loader).toContain("applySectionResult(state, overview, 'overview'");
+        expect(loader).toContain("applySectionResult(state, units, 'units'");
+        expect(loader).toContain('state.unitCatalog = arrayValue(value?.items)');
         expect(source).not.toContain("state.overview = overview.status === 'fulfilled' ? overview.value : null");
         expect(source).not.toContain("setDataStatus('advancedStats.loadingData');\n    state.nextCursor = null;");
-        expect(source).toContain("data-load-error");
-        expect(source).toContain("advancedStats.partialLoadFailed");
+        expect(loader).toContain("data-load-error");
+        expect(loader).toContain("advancedStats.partialLoadFailed");
     });
 
     it('uses translatable and semantic accessibility labels', () => {
@@ -57,6 +58,7 @@ describe('Advanced Stats workspace page', () => {
         expect(unitFilter?.getAttribute('aria-labelledby')).toBe('advanced-stats-units-title');
         expect(document.querySelector('#advanced-stats-page-status')?.getAttribute('aria-live')).toBe('polite');
         expect(document.querySelector('#advanced-stats-data-status')?.getAttribute('aria-live')).toBe('polite');
+        expect(document.querySelectorAll('#advanced-stats-analysis-scopes [data-scope-progress][data-i18n-aria-label]')).toHaveLength(4);
     });
 
     it('shows meaningful army names without developer metadata', () => {
@@ -84,19 +86,19 @@ describe('Advanced Stats workspace page', () => {
         const i18n = readFileSync('src/assets/js/i18n/i18n.js', 'utf8');
         const runtime = readFileSync('src/assets/js/i18n/runtime-translations.js', 'utf8');
 
-        expect(html).toContain('advanced-stats-bootstrap.js?v=20260814-advanced-stats-v3');
-        expect(html).toContain('advanced-stats.css?v=20260814-advanced-stats-v3');
+        expect(html).toContain('advanced-stats-bootstrap.js?v=20260814-advanced-stats-v4');
+        expect(html).toContain('advanced-stats.css?v=20260814-advanced-stats-v4');
         expect(html).toContain('workspace-shell.js?v=20260812-redesign');
-        expect(bootstrap).toContain("advanced-stats.js?v=20260814-advanced-stats-v3");
+        expect(bootstrap).toContain("advanced-stats.js?v=20260814-advanced-stats-v4");
         expect(page).toContain("i18n/i18n.js?v=20260809-4");
         expect(page).toContain("advanced-stats-army-view.js?v=20260809-4");
         expect(page).toContain('applyI18n(document)');
         expect(i18n).toContain("runtime-translations.js?v=20260812-redesign");
         expect(runtime).toContain("runtime-locales/workspace-en.js?v=20260809-4");
         expect(runtime).toContain("runtime-locales/workspace-nl.js?v=20260809-4");
-        expect(runtime).toContain("advanced-stats-locales.js?v=20260809-4");
-        expect(runtime).toContain("advanced-stats-extra-locales.js?v=20260809-4");
-        expect(runtime).toContain("advanced-stats-ui-locales.js?v=20260809-4");
+        expect(runtime).toContain("advanced-stats-locales.js?v=20260814-advanced-stats-v4");
+        expect(runtime).toContain("advanced-stats-extra-locales.js?v=20260814-advanced-stats-v4");
+        expect(runtime).toContain("advanced-stats-ui-locales.js?v=20260814-advanced-stats-v4");
     });
 
     it('removes setup and sorting notes from the player-facing page', () => {
@@ -116,13 +118,14 @@ describe('Advanced Stats workspace page', () => {
 
     it('does not apply stale tracking or statistics responses to newer state', () => {
         const source = readFileSync('src/assets/js/pages/advanced-stats.js', 'utf8');
+        const loader = readFileSync('src/assets/js/pages/advanced-stats-data-loader.js', 'utf8');
         const trackingRequest = source.indexOf('const tracking = await state.api.getTracking');
         const trackingAssignment = source.indexOf('state.tracking = tracking');
 
         expect(trackingRequest).toBeGreaterThanOrEqual(0);
         expect(source).toContain('if (version !== state.requestVersion) return;');
         expect(trackingAssignment).toBeGreaterThan(trackingRequest);
-        expect(source).toContain('if (requestVersion !== state.requestVersion) {');
+        expect(loader).toContain('if (requestVersion !== state.requestVersion) return;');
     });
 
     it('is discoverable through the central workspace module registry', () => {

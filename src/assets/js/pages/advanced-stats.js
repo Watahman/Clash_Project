@@ -20,17 +20,24 @@ import {
     renderStatistics,
     renderTracking,
     syncPeriodButtons
-} from './advanced-stats-renderer.js?v=20260814-advanced-stats-v3';
-import { arrayValue } from './advanced-stats-formatters.js?v=20260811-1';
+} from './advanced-stats-renderer.js?v=20260814-advanced-stats-v4';
 import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260809-4';
 import { accountsFromProfile, normalizeTag, selectInitialAccount } from './advanced-stats-account.js?v=20260811-2';
 import { createTrackingActions } from './advanced-stats-actions.js?v=20260811-2';
+import {
+    normalizeAnalysis,
+    queuedAnalysis
+} from './advanced-stats-analysis.js?v=20260814-advanced-stats-v4';
+import {
+    loadMoreBattles as loadMoreBattlesFromApi,
+    loadStatistics as loadStatisticsFromApi
+} from './advanced-stats-data-loader.js?v=20260814-advanced-stats-v4';
+import { waitForHistoricalAnalysis } from './advanced-stats-analysis-controller.js?v=20260814-advanced-stats-v4';
 
 const PERIOD_DEFAULT = '30d';
 const ACCOUNT_STORAGE_KEY = 'clashpanel_advanced_stats_account';
 const PERIOD_STORAGE_KEY = 'clashpanel_advanced_stats_period';
 const FAVORITE_ARMY_LIMIT = 3;
-const BATTLE_PAGE_SIZE = 20;
 
 const realApi = {
     getTracking: getAdvancedStatsTracking,
@@ -53,6 +60,8 @@ const state = {
     period: readPreference(PERIOD_STORAGE_KEY) || PERIOD_DEFAULT,
     category: 'ALL',
     tracking: null,
+    analysis: null,
+    analysisRequested: false,
     overview: null,
     unitCatalog: [],
     units: [],
@@ -80,6 +89,10 @@ function cacheElements() {
         account: 'advanced-stats-account', noAccounts: 'advanced-stats-no-accounts', openProfile: 'advanced-stats-open-profile',
         profileError: 'advanced-stats-profile-error', profileRetry: 'advanced-stats-profile-retry', trackingError: 'advanced-stats-tracking-error', trackingRetry: 'advanced-stats-tracking-retry', pageStatus: 'advanced-stats-page-status',
         notTracking: 'advanced-stats-not-tracking', start: 'advanced-stats-start', initializing: 'advanced-stats-initializing', content: 'advanced-stats-content',
+        analysisLoading: 'advanced-stats-initializing', analysisTitle: 'advanced-stats-analysis-title', analysisText: 'advanced-stats-analysis-text', analysisStatus: 'advanced-stats-analysis-status',
+        analysisProgress: 'advanced-stats-analysis-progress', analysisProcessed: 'advanced-stats-analysis-processed', analysisAvailable: 'advanced-stats-analysis-available', analysisError: 'advanced-stats-analysis-error', analysisRetry: 'advanced-stats-analysis-retry',
+        analysisCoverageNormal: 'advanced-stats-analysis-coverage-normal', analysisCoverageNormalMeta: 'advanced-stats-analysis-coverage-normal-meta', analysisCoverageWar: 'advanced-stats-analysis-coverage-war', analysisCoverageWarMeta: 'advanced-stats-analysis-coverage-war-meta', analysisCoverageRanked: 'advanced-stats-analysis-coverage-ranked', analysisCoverageRankedMeta: 'advanced-stats-analysis-coverage-ranked-meta',
+        dashboardCoverageNormal: 'advanced-stats-dashboard-coverage-normal', dashboardCoverageNormalMeta: 'advanced-stats-dashboard-coverage-normal-meta', dashboardCoverageWar: 'advanced-stats-dashboard-coverage-war', dashboardCoverageWarMeta: 'advanced-stats-dashboard-coverage-war-meta', dashboardCoverageRanked: 'advanced-stats-dashboard-coverage-ranked', dashboardCoverageRankedMeta: 'advanced-stats-dashboard-coverage-ranked-meta',
         trackingBar: document.querySelector('.advanced-stats__tracking-bar'), trackingTitle: 'advanced-stats-tracking-title', playerLine: 'advanced-stats-player-line',
         startedAt: 'advanced-stats-started-at', updatedAt: 'advanced-stats-updated-at', battlesProcessed: 'advanced-stats-battles-processed',
         refresh: 'advanced-stats-refresh', pause: 'advanced-stats-pause', resume: 'advanced-stats-resume', stop: 'advanced-stats-stop', delete: 'advanced-stats-delete',
@@ -151,14 +164,38 @@ function clearStatisticsState() {
 
 function resetRangeData({ clearTracking = false } = {}) {
     clearStatisticsState();
-    if (clearTracking) { state.tracking = null; state.trackingError = false; }
+    if (clearTracking) { state.tracking = null; state.analysis = null; state.analysisRequested = false; state.trackingError = false; }
     state.requestVersion += 1;
+    renderPage();
+}
+
+function beginHistoricalAnalysis() {
+    state.analysisRequested = true;
+    state.analysis = queuedAnalysis();
+    state.trackingError = false;
+    setPageStatus(t('advancedStats.analysisLiveStatus'));
+    renderPage();
+}
+
+function failHistoricalAnalysis() {
+    state.analysis = {
+        ...queuedAnalysis(),
+        phase: 'ERROR',
+        active: false,
+        ready: false,
+        error: true
+    };
+    state.analysisRequested = true;
     renderPage();
 }
 
 async function initialize() {
     cacheElements();
-    trackingActions = createTrackingActions({ state, elements, setBusy, setDataStatus, refreshTrackingAndData });
+    trackingActions = createTrackingActions({
+        state, elements, setBusy, setDataStatus, refreshTrackingAndData,
+        onStartRequested: beginHistoricalAnalysis,
+        onStartFailed: failHistoricalAnalysis
+    });
     applyI18n(document);
     bindEvents();
     setPageStatus(t('advancedStats.loadingTracking'));
@@ -201,12 +238,20 @@ async function refreshTrackingAndData({ preserveBusy = false } = {}) {
         const tracking = await state.api.getTracking(state.playerTag);
         if (version !== state.requestVersion) return;
         state.tracking = tracking;
+        state.analysis = normalizeAnalysis(tracking);
+        state.analysisRequested = state.analysis.active
+            || (state.analysis.error && Number(tracking?.battlesProcessed || 0) === 0);
         state.trackingError = false;
         renderPage();
         setPageStatus('');
         const status = String(state.tracking?.status || 'DISABLED').toUpperCase();
         const hasHistory = Number(state.tracking?.battlesProcessed || 0) > 0;
-        if (state.tracking?.trackingExists && (status !== 'INITIALIZING' || hasHistory)) await loadStatistics({ requestVersion: version, manageBusy: false });
+        if (state.analysis.active) await waitForHistoricalAnalysis({
+            state, version, tracking, renderPage, loadStatistics, setDataStatus,
+            errorMessage: t('advancedStats.analysisLoadFailed')
+        });
+        else if (state.analysis.error && !hasHistory) setDataStatus(t('advancedStats.analysisLoadFailed'), 'error');
+        else if (state.tracking?.trackingExists && (status !== 'INITIALIZING' || hasHistory)) await loadStatistics({ requestVersion: version, manageBusy: false });
         else { clearStatisticsState(); renderPage(); }
     } catch (error) {
         if (version !== state.requestVersion) return;
@@ -214,52 +259,13 @@ async function refreshTrackingAndData({ preserveBusy = false } = {}) {
     } finally { if (!preserveBusy && version === state.requestVersion) setBusy(false); }
 }
 
-async function loadStatistics({ requestVersion = ++state.requestVersion, manageBusy = true } = {}) {
-    if (!state.playerTag) return;
-    if (manageBusy) setBusy(true);
-    setDataStatus(t('advancedStats.loadingData'));
-    const requests = await Promise.allSettled([
-        state.api.getOverview(state.playerTag, state.period), state.api.getUnits(state.playerTag, state.period), state.api.getArmies(state.playerTag, state.period),
-        state.api.getTrends(state.playerTag, state.period), state.api.getBattles(state.playerTag, state.period, { limit: BATTLE_PAGE_SIZE })
-    ]);
-    if (requestVersion !== state.requestVersion) {
-        return;
-    }
-    const [overview, units, armies, trends, battles] = requests;
-    if (overview.status === 'fulfilled') { state.overview = overview.value; state.sectionStates.overview = 'ready'; } else state.sectionStates.overview = 'error';
-    if (units.status === 'fulfilled') { state.unitCatalog = arrayValue(units.value?.items); state.units = filteredUnits(); state.sectionStates.units = 'ready'; } else state.sectionStates.units = 'error';
-    if (armies.status === 'fulfilled') { state.armies = arrayValue(armies.value?.items); state.sectionStates.armies = 'ready'; } else state.sectionStates.armies = 'error';
-    if (trends.status === 'fulfilled') { state.trends = arrayValue(trends.value?.points); state.sectionStates.trends = 'ready'; } else state.sectionStates.trends = 'error';
-    if (battles.status === 'fulfilled') { state.battles = arrayValue(battles.value?.items); state.nextCursor = battles.value?.nextCursor || null; state.hasMore = Boolean(battles.value?.hasMore && state.nextCursor); state.sectionStates.battles = 'ready'; } else state.sectionStates.battles = 'error';
-    renderPage();
-    const names = ['summary', 'units', 'armies', 'trends', 'battles'];
-    const failed = requests.map((request, index) => request.status === 'rejected' ? names[index] : null).filter(Boolean);
-    names.forEach(name => document.getElementById(`advanced-stats-${name}-section`)?.setAttribute('data-load-error', String(failed.includes(name))));
-    setDataStatus(failed.length ? t('advancedStats.partialLoadFailed', { sections: failed.map(name => t(`advancedStats.section.${name}`)).join(', ') }) : t('advancedStats.updatedNow'), failed.length ? 'warning' : 'success');
-    if (manageBusy) setBusy(false);
+function loadStatistics(options = {}) {
+    const requestVersion = options.requestVersion ?? ++state.requestVersion;
+    return loadStatisticsFromApi({ state, setBusy, setDataStatus, renderPage, ...options, requestVersion });
 }
 
-function filteredUnits() {
-    return state.unitCatalog.filter(unit => (state.category === 'ALL' || String(unit?.category || '').toUpperCase() === state.category)
-        && isPlayerFacingUnitName(unit?.name || unit?.unitName));
-}
-
-async function loadMoreBattles() {
-    if (!state.nextCursor || state.busy) return;
-    const version = state.requestVersion;
-    setBusy(true);
-    try {
-        const response = await state.api.getBattles(state.playerTag, state.period, { limit: BATTLE_PAGE_SIZE, cursor: state.nextCursor });
-        if (version !== state.requestVersion) return;
-        state.battles.push(...arrayValue(response?.items)); state.nextCursor = response?.nextCursor || null; state.hasMore = Boolean(response?.hasMore && state.nextCursor); renderPage();
-    } catch (error) {
-        if (version !== state.requestVersion) return;
-        console.error('advanced_stats_battles_more_failed', error);
-        setDataStatus(t('advancedStats.loadFailed'), 'error');
-    }
-    finally {
-        if (version === state.requestVersion) setBusy(false);
-    }
+function loadMoreBattles() {
+    return loadMoreBattlesFromApi({ state, setBusy, setDataStatus, renderPage });
 }
 
 function bindEvents() {
@@ -268,6 +274,7 @@ function bindEvents() {
     elements.profileRetry?.addEventListener('click', retryProfileLoad);
     elements.trackingRetry?.addEventListener('click', () => void refreshTrackingAndData());
     elements.start?.addEventListener('click', trackingActions.start);
+    elements.analysisRetry?.addEventListener('click', trackingActions.start);
     elements.pause?.addEventListener('click', trackingActions.pause);
     elements.resume?.addEventListener('click', trackingActions.resume);
     elements.refresh?.addEventListener('click', () => void refreshTrackingAndData());
@@ -279,7 +286,12 @@ function bindEvents() {
         if (!period || period === state.period) return;
         state.period = period; writePreference(PERIOD_STORAGE_KEY, period); resetRangeData(); void loadStatistics();
     });
-    elements.unitCategory?.addEventListener('change', () => { state.category = elements.unitCategory.value || 'ALL'; state.units = filteredUnits(); renderStatistics(elements, state); });
+    elements.unitCategory?.addEventListener('change', () => {
+        state.category = elements.unitCategory.value || 'ALL';
+        state.units = state.unitCatalog.filter(unit => (state.category === 'ALL' || String(unit?.category || '').toUpperCase() === state.category)
+            && isPlayerFacingUnitName(unit?.name || unit?.unitName));
+        renderStatistics(elements, state);
+    });
     elements.loadMore?.addEventListener('click', loadMoreBattles);
     window.addEventListener('clashtools:language-changed', renderPage);
 }

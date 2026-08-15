@@ -50,6 +50,20 @@ describe('Advanced Stats army presentation', () => {
         });
     });
 
+    it('accepts compact snake_case unit fields from army and catalog responses', () => {
+        const presentation = presentArmy({
+            units: [
+                { unit_key: 'troop:1', unit_name: 'Root Rider', category: 'TROOP', quantity: 8 },
+                { unit_key: 'troop:2', category: 'TROOP', quantity: 4 }
+            ]
+        }, [
+            { unit_key: 'troop:2', unit_name: 'Valkyrie', category: 'TROOP' }
+        ], 'Army composition');
+
+        expect(presentation.label).toBe('8× Root Rider + 4× Valkyrie');
+        expect(presentation.units).toEqual(['8× Root Rider', '4× Valkyrie']);
+    });
+
     it('hides unresolved internal unit identifiers', () => {
         const presentation = presentArmy({
             units: [
