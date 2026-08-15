@@ -64,8 +64,21 @@ public final class AdvancedStatsBattleLogHistorySource implements AdvancedStatsH
             throw new UnsupportedOperationException("battlelog source only supports normal observations");
         }
         String raw = fetcher.fetch(request.playerTag());
+
+        System.out.printf(
+                "ADVANCED_STATS_BATTLELOG_FETCH player=%s bytes=%d%n",
+                request.playerTag(),
+                raw == null ? 0 : raw.length()
+        );
+
         List<AdvancedStatsModels.BattleCandidate> candidates = parser.parse(
                 request.playerTag(), raw, request.requestedAt(), null);
+
+        System.out.printf(
+                "ADVANCED_STATS_BATTLELOG_PARSED player=%s candidates=%d%n",
+                request.playerTag(),
+                candidates.size()
+        );
         List<AttackObservation> observations = new ArrayList<>();
         for (AdvancedStatsModels.BattleCandidate candidate : candidates) {
             AttackObservation observation = toObservation(candidate);
