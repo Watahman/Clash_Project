@@ -28,8 +28,10 @@ const ENTITY_RULES = Object.freeze([
     [/LABORATORY/, ['laboratory']],
     [/PET[_ ]HOUSE/, ['pet-house']],
     [/DEFENSE|FORTRESS|STONEWALL|UNDER[_ ]FIRE|BASE[_ ]DEF/, ['air-defense', 'inferno-tower', 'cannon', 'hidden-tesla']],
-    [/CAPITAL|RAID|DISTRICT/, ['clan-castle', 'army-camp', 'workshop']],
-    [/TROOP|ARMY|BARRACK|OFFENSIVE|COMMAND|TRAINER/, ['root-rider', 'barbarian', 'dragon', 'pekka', 'golem']],
+    // Word-boundaried so generic words that merely *contain* these roots (e.g. "Raider", "Commander")
+    // don't hijack the match — see resolveAchievementAsset() for why scope also matters here.
+    [/\bCAPITAL\b|\bRAID\b|\bDISTRICT\b/, ['clan-castle', 'army-camp', 'workshop']],
+    [/TROOP|ARMY|BARRACK|OFFENSIVE|\bCOMMAND\b|TRAINER/, ['root-rider', 'barbarian', 'dragon', 'pekka', 'golem']],
     [/DECOR|SCENERY|OBSTACLE|COLLECTION|MUSEUM/, ['magic-mirror', 'stick-horse', 'action-figure', 'fire-heart']]
 ]);
 
@@ -41,12 +43,22 @@ const GLYPH_RULES = Object.freeze([
     [/DYN/, 'spark']
 ]);
 
+// Rules that only fire within a whitelisted set of families' own categories (matched against
+// the achievement's clean, curated `category` field, not free text). Used for keywords that are
+// unambiguous in some categories ("Rank"/"Record" for trophies) but get borrowed in a different
+// sense elsewhere ("Trusted Rank" clan role tenure, "Internal Mobility" — "Record players moving…").
+const TROPHY_RANK_CATEGORIES = Object.freeze([
+    'Trophies & rankings', 'Legend & ranked performance', 'Builder Base', 'Clan achievements'
+]);
+
 const ICON_RULES = Object.freeze([
-    [/CWL|LEAGUE|PROMOTION|PODIUM/, ['cwl', 'promotion', 'trophy', 'medal']],
+    // "LEAGUE" dropped as a bare trigger — it shows up in non-CWL prose too (e.g. "profile … league
+    // … visible" for the Trophy League). CWL/PROMOTION/PODIUM are unambiguous enough on their own.
+    [/CWL|PROMOTION|PODIUM/, ['cwl', 'promotion', 'trophy', 'medal']],
     [/(?:^|[^A-Z])WAR(?:_|\s|$)|TRIPLE|STREAK|FINISH|CLEANUP|RAIDER|OPENING|CLUTCH|CAMPAIGN/, ['war', 'swords', 'attack', 'win', 'target', 'medal']],
     [/DEF|SHIELD|SURVIV|BOUNCE|ONE[_ ]STAR|STONEWALL/, ['shield', 'defense', 'missed', 'destruction']],
     [/RAID|CAPITAL/, ['attack', 'army', 'trophy', 'target']],
-    [/TR_|TROPHY|RANK|PEAK|PUSH|CLIMB|RECORD|WORLD[_ ]RANKED/, ['trophy', 'target', 'medal', 'trend']],
+    [/TR_|TROPHY|RANK|PEAK|PUSH|CLIMB|RECORD|WORLD[_ ]RANKED/, ['trophy', 'target', 'medal', 'trend'], TROPHY_RANK_CATEGORIES],
     [/STAR|CONSTELLATION|ACH[_ ]STARS/, ['star', 'medal', 'special']],
     [/SOC|CLAN|FAM|FAMILY|DONAT|MEMBER|LOYAL|SERVICE|ROSTER|POPULATION|BACKBONE/, ['users', 'clan', 'social', 'link']],
     [/APP|PLAN|DATA|SNAPSHOT|ARCHIV|CONNECTED|STEWARD|PLANNER/, ['plan', 'tracking', 'history', 'export', 'link']],
@@ -57,6 +69,38 @@ const ICON_RULES = Object.freeze([
     [/SEC|LUCKY|REDEMPTION|DOUBLE[_ ]DUTY|IRON|UPHILL|LAST[_ ]WORD|QUIET|MASTER/, ['special', 'target', 'trend', 'check']],
     [/DYN|OFFICIAL/, ['special', 'star', 'medal']]
 ]);
+
+// "Secret & combination achievements" are deliberately meant to read as hidden/mystery badges
+// regardless of which game mode they happen to reference (CWL, raids, wars, …), so they skip the
+// free-text rules above entirely rather than borrowing an icon from whichever mode they mention.
+const SECRET_CATEGORY = 'Secret & combination achievements';
+const SECRET_ICONS = Object.freeze(['special', 'check', 'target', 'trend']);
+
+// Used only when nothing else matched at all — replaces the old fully-random glyph fallback with
+// something at least thematically related to the achievement's own category.
+const CATEGORY_FALLBACK_ICONS = Object.freeze({
+    'Profile & milestones': ['progression', 'user', 'tracking', 'calendar'],
+    'Offensive progression': ['army', 'progression', 'stats'],
+    'Season economy & activity': ['collection', 'calendar', 'stats', 'trend'],
+    'Trophies & rankings': ['trophy', 'target', 'medal', 'trend'],
+    'Legend & ranked performance': ['trophy', 'trend', 'target', 'medal'],
+    'Builder Base': ['village', 'trophy', 'progression', 'stats'],
+    'Regular war offense': ['war', 'swords', 'attack', 'win'],
+    'Regular war defense': ['shield', 'defense', 'missed', 'destruction'],
+    'Clan War League': ['cwl', 'promotion', 'trophy', 'medal'],
+    'Clan Capital & raids': ['attack', 'army', 'target', 'trophy'],
+    'Clan loyalty & social': ['users', 'clan', 'social', 'link'],
+    'Clan achievements': ['clan', 'trophy', 'medal', 'users'],
+    'Clan family achievements': ['clan', 'link', 'social', 'users'],
+    'ClashPanel workflow': ['plan', 'tracking', 'export', 'link'],
+    [SECRET_CATEGORY]: SECRET_ICONS,
+    'Imported Home Village base': ['village', 'stats', 'progression'],
+    'Imported upgrade activity': ['clock', 'calendar', 'progression', 'stats'],
+    'Imported Builder Base': ['village', 'clock', 'stats'],
+    Helpers: ['check', 'export', 'link', 'plan'],
+    'Cosmetics & village collections': ['collection', 'special', 'history', 'star'],
+    'Dynamic official achievements': ['special', 'star', 'medal']
+});
 
 const GLYPHS = Object.freeze([
     ['crown', 'M4 9h16l-1 10H5L4 9Zm3 0L5 4l4 3 3-5 3 5 4-3-2 5M7 22h10'],
@@ -71,6 +115,19 @@ const GLYPHS = Object.freeze([
     ['flag', 'M5 21V4m0 1h12l-2.5 4L17 13H5']
 ]);
 
+// Entity/glyph matching is scoped to familyKey + title only (no description, no category).
+// Descriptions are free prose written for readability, not for keyword-matching, and commonly
+// mention *context* ("...for the current Town Hall", "...in the same clan") that isn't the actual
+// subject of the achievement. Matching against that prose was the single biggest source of
+// mismatched icons — e.g. any hero/troop/spell/pet achievement whose description happened to
+// mention "current Town Hall" got a Town Hall building icon instead of the actual subject.
+function entityText(family) {
+    return `${family?.familyKey || ''} ${family?.title || ''}`.toUpperCase();
+}
+
+// Full free text is still used for the ICON_RULES fallback pass, where broader context is more
+// often helpful than harmful (e.g. "Loot Gold in one season" needs the description to route
+// correctly), except for the category-gated / category-overridden cases handled before it.
 function familyText(family) {
     return `${family?.familyKey || ''} ${family?.title || ''} ${family?.category || ''} ${family?.description || ''}`.toUpperCase();
 }
@@ -83,13 +140,27 @@ function pick(values, seed) { return values[hash(seed) % values.length]; }
 
 export function resolveAchievementAsset(family) {
     if (family?.entity) return { type: 'entity', value: family.entity };
-    const text = familyText(family);
-    const glyphRule = GLYPH_RULES.find(([pattern]) => pattern.test(text));
+
+    const glyphRule = GLYPH_RULES.find(([pattern]) => pattern.test((family?.familyKey || '').toUpperCase()));
     if (glyphRule) return { type: 'glyph', value: glyphRule[1] };
-    const entityRule = ENTITY_RULES.find(([pattern]) => pattern.test(text));
+
+    const entityRule = ENTITY_RULES.find(([pattern]) => pattern.test(entityText(family)));
     if (entityRule) return { type: 'entity', value: pick(entityRule[1], family.familyKey) };
-    const iconRule = ICON_RULES.find(([pattern]) => pattern.test(text));
+
+    const category = family?.category || '';
+    if (category === SECRET_CATEGORY) {
+        return { type: 'image', value: ICON_PATHS[pick(SECRET_ICONS, family.familyKey)] };
+    }
+
+    const text = familyText(family);
+    const iconRule = ICON_RULES.find(([pattern, , categoryAllowList]) => {
+        if (categoryAllowList && !categoryAllowList.includes(category)) return false;
+        return pattern.test(text);
+    });
     if (iconRule) return { type: 'image', value: ICON_PATHS[pick(iconRule[1], family.familyKey)] };
+
+    const fallbackIcons = CATEGORY_FALLBACK_ICONS[category];
+    if (fallbackIcons) return { type: 'image', value: ICON_PATHS[pick(fallbackIcons, family.familyKey)] };
     return { type: 'glyph', value: pick(GLYPHS, family?.familyKey)[0] };
 }
 
