@@ -19,10 +19,6 @@ public record AdvancedStatsSourcePresentation(String kind, String label) {
                 || value.contains("official_battlelog")) {
             return new AdvancedStatsSourcePresentation("OFFICIAL_BATTLELOG", "Official battle log");
         }
-        if (value.contains("legacy") || value.contains("historical")
-                || value.contains("legacy_war_history")) {
-            return new AdvancedStatsSourcePresentation("LEGACY_WAR_HISTORY", "Legacy war history");
-        }
         return new AdvancedStatsSourcePresentation("UNKNOWN", "Source unavailable");
     }
 

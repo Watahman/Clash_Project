@@ -40,7 +40,7 @@
     </header>
 
     <div class="bracket-layout">
-        <aside class="bracket-setup" aria-labelledby="bracket-setup-title">
+        <aside id="bracket-setup" class="bracket-setup" aria-labelledby="bracket-setup-title">
             <div class="bracket-section-heading">
                 <div>
                     <span class="bracket-step" data-i18n="bracket.setupStep">Step 1</span>
@@ -48,9 +48,6 @@
                 </div>
                 <div class="bracket-setup-heading-actions">
                     <strong id="bracket-participant-count" aria-label="Participant count">0</strong>
-                    <button id="bracket-setup-toggle" class="cp-icon-button" type="button" aria-controls="bracket-setup-content" aria-expanded="true">
-                        <span id="bracket-setup-toggle-label" data-bracket-copy="hideSetup">Hide setup</span>
-                    </button>
                 </div>
             </div>
             <div id="bracket-setup-content" class="bracket-setup-content">
@@ -94,6 +91,9 @@
                     <span class="bracket-step" data-i18n="bracket.resultStep">Step 2</span>
                     <h2 id="bracket-result-title">Clash tournament</h2>
                     <p data-i18n="bracket.resultHelp">Choose a winner for each match. The next round updates automatically.</p>
+                    <button id="bracket-return-setup" class="cp-button cp-button--ghost bracket-return-setup" type="button" aria-controls="bracket-setup" hidden>
+                        <span data-bracket-copy="editSetup">Edit setup</span>
+                    </button>
                 </div>
                 <div class="bracket-result-meta">
                     <span><small data-i18n="bracket.participantsShort">participants</small><strong id="bracket-result-count">0</strong></span>

@@ -27,7 +27,8 @@ function bindResetEvents(refs, controller) {
 }
 
 function bindNavigationEvents(refs, controller) {
-    refs.setupToggle.addEventListener('click', () => controller.toggleSetup());
+    refs.setupToggle?.addEventListener('click', () => controller.toggleSetup());
+    refs.returnSetup?.addEventListener('click', () => controller.showSetup());
     refs.roundPrev.addEventListener('click', () => controller.changeRound(-1));
     refs.roundNext.addEventListener('click', () => controller.changeRound(1));
 }

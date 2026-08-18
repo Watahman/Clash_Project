@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="description" content="Play the ClashPanel daily Entity Guesser and Higher or Lower games inside your workspace.">
     <script src="../assets/js/Data/analytics.js"></script>
-    <title>Games · ClashPanel</title>
+    <title>Minigames · ClashPanel</title>
     <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="../assets/css/workspace-loading.css">
     <script src="../assets/js/shell/workspace-bootstrap.js"></script>
@@ -35,7 +35,7 @@
 <main id="main-content" class="minigames-main">
     <section class="minigames-hero" aria-labelledby="games-hub-title">
         <div class="minigames-hero-copy">
-            <p class="eyebrow" data-hub-i18n="kicker">ClashPanel Games</p>
+            <p class="eyebrow" data-hub-i18n="kicker">ClashPanel Minigames</p>
             <h1 id="games-hub-title" data-hub-i18n="title">A different Clash challenge every day.</h1>
             <p data-hub-i18n="lead">Solve the Entity Guesser or test your stat knowledge in Higher or Lower, then switch to practice whenever you want.</p>
             <div class="games-daily-status" role="status" aria-live="polite">
@@ -101,6 +101,7 @@
                     <button type="button" role="tab" data-game-mode="practice" data-game-i18n="practice">Practice</button>
                 </div>
             </div>
+            <label class="game-category-picker" data-category-picker><span data-game-i18n="selectCategory">Practice category</span><select data-category-select aria-label="Practice category"></select></label>
             <p class="game-toolbar-note" data-mode-note></p>
         </div>
 
@@ -108,8 +109,6 @@
             <aside class="game-sidebar" aria-labelledby="entity-sidebar-title">
                 <div class="game-sidebar-heading"><span class="game-sidebar-icon"><img src="/assets/icons/games/streak.svg" alt="" aria-hidden="true" width="20" height="20"></span><div><p class="eyebrow" data-game-i18n="phase">Entity Guesser</p><h2 id="entity-sidebar-title" data-category-title>Troops &amp; Heroes</h2></div></div>
                 <p class="game-sidebar-copy" data-game-i18n="instructions">Compare each property. Arrows show whether the hidden value is higher or lower.</p>
-
-                <label class="game-category-picker" data-category-picker><span data-game-i18n="selectCategory">Practice category</span><select data-category-select aria-label="Practice category"></select></label>
 
                 <div class="game-stat-grid" aria-label="Entity Guesser stats">
                     <div class="game-stat"><span data-game-i18n="attempts">Attempts</span><strong data-attempts-value>0/6</strong></div>

@@ -11,28 +11,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ClashKingProviderNormalizationTest {
     @Test
-    void legacyNormalizesAttacksButDoesNotInventMissedParticipation() {
-        JsonObject response = JsonParser.parseString("""
-                {"items":[{
-                  "war_data":{"state":"warEnded","endTime":"20260725T120000.000Z","tag":"#WAR","type":"cwl"},
-                  "member_data":{"tag":"#P0L","townhallLevel":17},
-                  "attacks":[{
-                    "attackerTag":"#P0L","stars":3,"destructionPercentage":100,"order":4,
-                    "defender":{"tag":"#P2Y","townhallLevel":18}
-                  }]
-                }]}
-                """).getAsJsonObject();
-
-        HistoricalPlayerData data = ClashKingLegacyProvider.normalizePlayer("#P0L", response);
-
-        assertTrue(data.available());
-        assertEquals(1, data.attacks().size());
-        assertEquals(HistoricalWarType.CWL, data.attacks().getFirst().warType());
-        assertEquals(18, data.attacks().getFirst().defenderTownHall());
-        assertTrue(data.participation().isEmpty());
-    }
-
-    @Test
     void v2UsesItsOwnBatchShapeAndOnlyExplicitMissedAttackCounts() {
         JsonObject response = JsonParser.parseString("""
                 {"items":[{

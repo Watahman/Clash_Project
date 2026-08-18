@@ -15,16 +15,16 @@ import java.time.Instant;
 import java.util.Locale;
 
 /** Fetches legend rankings from ClashKing without persisting the raw upstream payload. */
-public final class ClashKingLegendHistoryProvider {
+public final class ClashKingV2LegendHistoryProvider {
     private final ClashKingHttpClient client;
     private final Cache<String, LegendHistoryNormalizer.History> cache;
 
-    public ClashKingLegendHistoryProvider(Config config) {
-        this(config.getClashKingLegacyBaseUrl());
+    public ClashKingV2LegendHistoryProvider(Config config) {
+        this(config.getClashKingBaseUrl());
     }
 
-    public ClashKingLegendHistoryProvider(String baseUrl) {
-        client = new ClashKingHttpClient(baseUrl, "ClashKing legend history");
+    public ClashKingV2LegendHistoryProvider(String baseUrl) {
+        client = new ClashKingHttpClient(baseUrl, "ClashKing V2 legend history");
         cache = Caffeine.newBuilder()
                 .maximumSize(500)
                 .expireAfterWrite(Duration.ofMinutes(10))
@@ -37,8 +37,8 @@ public final class ClashKingLegendHistoryProvider {
         LegendHistoryNormalizer.History cached = cache.getIfPresent(key);
         if (cached != null) return cached;
         JsonElement response = client.getElement(
-                "/player/" + URLEncoder.encode(key, StandardCharsets.UTF_8)
-                        + "/legend_rankings"
+                "/v2/player/" + URLEncoder.encode(key, StandardCharsets.UTF_8)
+                        + "/legend-history"
         );
         JsonArray rows = rankingRows(response);
         LegendHistoryNormalizer.History history = LegendHistoryNormalizer.normalize(

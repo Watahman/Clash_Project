@@ -22,19 +22,9 @@ function normalizedParticipants(participants) {
 
 export function validateParticipants(participants) {
     const values = normalizedParticipants(participants);
-    const seen = new Set();
-    const duplicates = new Set();
-    values.forEach(value => {
-        const key = value.toLocaleLowerCase();
-        if (seen.has(key)) duplicates.add(value);
-        seen.add(key);
-    });
-    if (duplicates.size) {
-        throw bracketError('Each participant must have a unique name.', 'duplicate-participants');
-    }
     if (values.length < BRACKET_MIN_PARTICIPANTS) {
         throw bracketError(
-            `A bracket needs at least ${BRACKET_MIN_PARTICIPANTS} unique participants.`,
+            `A bracket needs at least ${BRACKET_MIN_PARTICIPANTS} participants.`,
             'too-few-participants'
         );
     }
@@ -45,4 +35,9 @@ export function validateParticipants(participants) {
         );
     }
     return values;
+}
+
+export function participantName(bracket, participant) {
+    if (participant === null || participant === undefined) return '';
+    return bracket?.participantLabels?.[participant] || String(participant);
 }

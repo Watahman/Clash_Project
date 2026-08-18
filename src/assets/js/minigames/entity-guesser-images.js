@@ -1,3 +1,5 @@
+import { resolveMinigameAssetEntity } from './entity-asset-resolution.js';
+
 export function createEntityImageRenderer({ getEntityAsset, installImageFallback }) {
     function setImage(image, entity, alt = '') {
         if (!image || !entity) return;
@@ -5,7 +7,7 @@ export function createEntityImageRenderer({ getEntityAsset, installImageFallback
         if (image.dataset.entityId === entityId && image.getAttribute('src')) return;
         image.dataset.entityId = entityId;
         image.alt = alt;
-        void getEntityAsset(entity).then(asset => {
+        void getEntityAsset(resolveMinigameAssetEntity(entity)).then(asset => {
             if (!image.isConnected || image.dataset.entityId !== entityId) return;
             image.src = asset.image;
             installImageFallback(image);

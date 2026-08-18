@@ -38,25 +38,38 @@ final class CwlHistoryIndexNormalizer {
             String season = CwlHistoryJson.string(value, "season");
             if (!validSeason(season)) continue;
             JsonObject standing = CwlHistoryJson.object(value, "standing");
+            JsonObject league = CwlHistoryJson.object(
+                    value, "warLeague", "league"
+            );
+            JsonObject rounds = CwlHistoryJson.object(
+                    value, "rounds", "record"
+            );
             int leagueId = CwlHistoryJson.integer(
-                    value, CwlHistoryJson.integer(standing, 0, "cwlLeagueId"),
+                    value,
+                    CwlHistoryJson.integer(
+                            league,
+                            CwlHistoryJson.integer(standing, 0, "cwlLeagueId"),
+                            "id"
+                    ),
                     "cwlLeagueId", "leagueId"
             );
+            String leagueName = CwlHistoryJson.string(league, "name");
+            if (leagueName.isBlank()) leagueName = leagueName(leagueId);
             result.add(new HistoricalCwlSeasonSummary(
                     season,
                     new HistoricalCwlSeason.League(
                             leagueId > 0 ? leagueId : null,
-                            leagueName(leagueId)
+                            leagueName
                     ),
-                    positive(standing, "groupRank", "rank", "position"),
-                    CwlHistoryJson.integer(standing, 0, "wins"),
-                    CwlHistoryJson.integer(standing, 0, "losses"),
-                    CwlHistoryJson.integer(standing, 0, "ties", "draws"),
-                    CwlHistoryJson.integer(standing, 0, "stars"),
-                    decimal(standing, "destruction"),
+                    firstPositive(value, standing, "rank", "groupRank", "position"),
+                    firstInteger(value, rounds, standing, "won", "wins"),
+                    firstInteger(value, rounds, standing, "lost", "losses"),
+                    firstInteger(value, rounds, standing, "tied", "ties", "draws"),
+                    firstInteger(value, null, standing, "stars"),
+                    firstDecimal(value, standing, "destruction"),
                     CwlHistoryJson.string(value, "state", "status"),
                     source,
-                    standing == null ? "Insufficient data" : "Partial history"
+                    "Partial history"
             ));
         }
         return newestFirst(result, limit);
@@ -126,6 +139,37 @@ final class CwlHistoryIndexNormalizer {
     private static Integer positive(JsonObject value, String... keys) {
         int number = CwlHistoryJson.integer(value, 0, keys);
         return number > 0 ? number : null;
+    }
+
+    private static Integer firstPositive(
+            JsonObject primary,
+            JsonObject secondary,
+            String... keys
+    ) {
+        Integer value = positive(primary, keys);
+        return value != null ? value : positive(secondary, keys);
+    }
+
+    private static int firstInteger(
+            JsonObject primary,
+            JsonObject secondary,
+            JsonObject tertiary,
+            String... keys
+    ) {
+        int value = CwlHistoryJson.integer(primary, Integer.MIN_VALUE, keys);
+        if (value != Integer.MIN_VALUE) return value;
+        value = CwlHistoryJson.integer(secondary, Integer.MIN_VALUE, keys);
+        if (value != Integer.MIN_VALUE) return value;
+        return CwlHistoryJson.integer(tertiary, 0, keys);
+    }
+
+    private static Double firstDecimal(
+            JsonObject primary,
+            JsonObject secondary,
+            String... keys
+    ) {
+        Double value = decimal(primary, keys);
+        return value != null ? value : decimal(secondary, keys);
     }
 
     private static Double decimal(JsonObject value, String... keys) {

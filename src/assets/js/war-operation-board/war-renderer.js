@@ -123,10 +123,14 @@ export function renderRoster(element, report, filter = 'all') {
     });
     element.innerHTML = filtered.map(player => `
         <article class="war-player-card cwl-player-article" data-performance-card="true"
+            data-performance-trigger="true"
             data-player-tag="${escapeHtml(player.tag)}" data-town-hall="${escapeHtml(townHallLabel(player.townHall))}">
             <button class="war-player-main" type="button" data-performance-trigger>
                 <span class="war-player-position">${player.mapPosition}</span>
-                <span><strong class="cwl-player-name"><img class="compete-townhall" src="${getTownHallAsset(player.townHall)}" alt="${escapeHtml(t('war.townHall', { level: townHallLabel(player.townHall) }))}">${escapeHtml(player.name)}</strong><small>${escapeHtml(t('war.townHallShort'))}${escapeHtml(townHallLabel(player.townHall))} · ${escapeHtml(player.tag)}</small></span>
+                <span class="war-player-identity">
+                    <span class="war-player-townhall" aria-hidden="true"><img class="compete-townhall" src="${getTownHallAsset(player.townHall)}" alt=""></span>
+                    <span class="war-player-copy"><strong class="cwl-player-name">${escapeHtml(player.name)}</strong><small>${escapeHtml(t('war.townHallShort'))}${escapeHtml(townHallLabel(player.townHall))} · ${escapeHtml(player.tag)}</small></span>
+                </span>
             </button>
             <div class="war-player-metrics">
                 <span><small>${escapeHtml(t('war.attacks'))}</small><strong>${player.attacksUsed}/${limit}</strong></span>

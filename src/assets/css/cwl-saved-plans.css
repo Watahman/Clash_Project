@@ -49,6 +49,10 @@
     padding: 16px;
 }
 
+body.workspace-app[data-workspace-page="drafts"] .workspace-content .drafts-table-block {
+    overflow: visible;
+}
+
 .saved-plans-page .drafts-controls {
     align-items: end;
     border-bottom: 1px solid var(--saved-border);
@@ -77,6 +81,7 @@
 .saved-plans-page .draft-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
 .saved-plans-page .draft-actions .button { min-height: 38px; }
 .saved-plans-page .draft-plan-actions-menu { position: relative; }
+.saved-plans-page .draft-plan-actions-menu[open] { z-index: 30; }
 .saved-plans-page .draft-plan-actions-menu summary { align-items: center; border: 1px solid var(--saved-border); border-radius: 6px; cursor: pointer; display: flex; font-size: 1.1rem; justify-content: center; list-style: none; min-height: 38px; min-width: 38px; }
 .saved-plans-page .draft-plan-actions-menu summary::-webkit-details-marker { display: none; }
 .saved-plans-page .draft-plan-actions-menu-content { background: var(--surface-raised, #1a222d); border: 1px solid var(--saved-border); border-radius: 8px; box-shadow: var(--shadow-md, 0 12px 28px rgba(0, 0, 0, .18)); display: grid; gap: 4px; min-width: 150px; padding: 6px; position: absolute; right: 0; top: calc(100% + 5px); z-index: 20; }

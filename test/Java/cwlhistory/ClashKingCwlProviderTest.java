@@ -21,7 +21,7 @@ class ClashKingCwlProviderTest {
     private HttpServer server;
     private Map<String, Response> responses;
     private List<String> requests;
-    private ClashKingLegacyCwlProvider provider;
+    private ClashKingV2CwlProvider provider;
 
     @BeforeEach
     void startServer() throws IOException {
@@ -30,7 +30,7 @@ class ClashKingCwlProviderTest {
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext("/", this::handle);
         server.start();
-        provider = new ClashKingLegacyCwlProvider(
+        provider = new ClashKingV2CwlProvider(
                 "http://127.0.0.1:" + server.getAddress().getPort()
         );
     }
@@ -41,155 +41,54 @@ class ClashKingCwlProviderTest {
     }
 
     @Test
-    void buildsADeepSeasonIndexWithoutPrefetchingCwlDetails()
-            throws Exception {
-        respond(
-                "/clan/%23PQL/basic",
-                200,
-                """
-                {"warLeague":"Champion League III",
-                 "changes":{"clanWarLeague":{
-                  "2026-07":"Champion League II"
-                }}}
-                """
-        );
-        respond(
-                "/list/seasons?last=48",
-                200,
-                """
-                ["2026-08","2026-07","2026-06",
-                 "2026-05","2026-04","2026-03"]
-                """
-        );
+    void usesTheV2SeasonIndexAndNormalizesRecordedValues() throws Exception {
+        respond("/v2/cwl/%23PQL/seasons", 200, """
+                {"items":[
+                  {"season":"2026-06","state":"ended","rank":2,
+                   "stars":321,"destruction":98.5,
+                   "warLeague":{"id":48000017,"name":"Champion League II"},
+                   "rounds":{"won":5,"lost":1,"tied":1}},
+                  {"season":"2026-05","state":"ended","rank":4,
+                   "warLeague":{"id":48000016,"name":"Champion League III"},
+                   "rounds":{"won":3,"lost":4,"tied":0}}
+                ]}
+                """);
 
         List<HistoricalCwlSeasonSummary> seasons =
-                provider.getAvailableSeasons("#PQL", 3);
+                provider.getAvailableSeasons("#PQL", 2);
 
-        assertEquals(
-                List.of("2026-08", "2026-07", "2026-06"),
-                seasons.stream()
-                        .map(HistoricalCwlSeasonSummary::season)
-                        .toList()
-        );
-        assertEquals("Champion League II", seasons.get(1).league().name());
-        assertEquals(
-                List.of(
-                        "/clan/%23PQL/basic",
-                        "/list/seasons?last=48"
-                ),
-                requests
-        );
+        assertEquals(List.of("2026-06", "2026-05"), seasons.stream()
+                .map(HistoricalCwlSeasonSummary::season).toList());
+        assertEquals("Champion League II", seasons.getFirst().league().name());
+        assertEquals(2, seasons.getFirst().position());
+        assertEquals(5, seasons.getFirst().wins());
+        assertEquals(List.of("/v2/cwl/%23PQL/seasons"), requests);
     }
 
     @Test
-    void expandsAClashKingSeasonPageAcrossTheFortyEightMonthWindow()
-            throws Exception {
+    void usesOnlyV2GroupAndWarRoutesForSeasonDetails() throws Exception {
+        respond("/v2/cwl/%23PQL?season=2026-06", 200, season("2026-06"));
         respond(
-                "/clan/%23PQL/basic",
+                "/v2/clan/%23PQL/wars?timestamp_start=1780272000"
+                        + "&timestamp_end=1782864000&limit=20&war_type=cwl",
                 200,
-                "{\"changes\":{\"clanWarLeague\":{}}}"
-        );
-        respond(
-                "/list/seasons?last=48",
-                200,
-                """
-                ["2026-08","2026-07","2026-06","2026-05",
-                 "2026-04","2026-03","2026-02","2026-01"]
-                """
+                "{\"items\":[]}"
         );
 
-        List<HistoricalCwlSeasonSummary> seasons =
-                provider.getAvailableSeasons("#PQL", 12);
+        HistoricalCwlSeason result = provider.getSeason("#PQL", "2026-06");
 
-        assertEquals(12, seasons.size());
-        assertEquals("2026-08", seasons.getFirst().season());
-        assertEquals("2025-09", seasons.getLast().season());
-        assertEquals(
-                List.of(
-                        "/clan/%23PQL/basic",
-                        "/list/seasons?last=48"
-                ),
-                requests
-        );
+        assertEquals("2026-06", result.season());
+        assertEquals("Champion League II", result.league().name());
+        assertEquals(List.of(
+                "/v2/cwl/%23PQL?season=2026-06",
+                "/v2/clan/%23PQL/wars?timestamp_start=1780272000"
+                        + "&timestamp_end=1782864000&limit=20&war_type=cwl"
+        ), requests);
     }
 
     @Test
-    void overviewRestoresLeagueCountBackAfterDeepIndexDiscovery()
-            throws Exception {
-        respond(
-                "/clan/%23PQL/basic",
-                200,
-                """
-                {"warLeague":"Champion League III",
-                 "changes":{"clanWarLeague":{}}}
-                """
-        );
-        respond(
-                "/list/seasons?last=48",
-                200,
-                "[\"2026-06\",\"2026-05\",\"2026-03\"]"
-        );
-        respond(
-                "/cwl/%23PQL/2026-06",
-                200,
-                rankedSeason("2026-06", "ended", 3)
-        );
-        respond(
-                "/cwl/%23PQL/2026-05",
-                200,
-                rankedSeason("2026-05", "ended", 7)
-        );
-        respond(
-                "/cwl/%23PQL/2026-03",
-                200,
-                rankedSeason("2026-03", "ended", 1)
-        );
-
-        List<HistoricalCwlSeason> seasons =
-                new HistoricalCwlService(provider).getOverview("#PQL", 3);
-
-        assertEquals(
-                List.of("2026-06", "2026-05", "2026-03"),
-                seasons.stream().map(HistoricalCwlSeason::season).toList()
-        );
-        assertEquals(
-                List.of(
-                        "Champion League III",
-                        "Champion League II",
-                        "Champion League III"
-                ),
-                seasons.stream()
-                        .map(item -> item.league().name())
-                        .toList()
-        );
-        assertEquals(1, requests.stream()
-                .filter("/clan/%23PQL/basic"::equals)
-                .count());
-    }
-
-    @Test
-    void usesTheDocumentedCwlSeasonEndpointAndEncoding() throws Exception {
-        respond(
-                "/cwl/%23PQL/2026-06",
-                200,
-                season("2026-06", "ended")
-        );
-
-        provider.getSeason("#PQL", "2026-06");
-
-        assertEquals(
-                List.of("/cwl/%23PQL/2026-06"),
-                requests
-        );
-    }
-
-    @Test
-    void rejectsAClashKingResponseForADifferentSeason() {
-        respond(
-                "/cwl/%23PQL/2025-06",
-                200,
-                season("2026-06", "ended")
-        );
+    void rejectsAResponseForADifferentSeason() {
+        respond("/v2/cwl/%23PQL?season=2025-06", 200, season("2026-06"));
 
         Java.HttpException error = assertThrows(
                 Java.HttpException.class,
@@ -197,82 +96,7 @@ class ClashKingCwlProviderTest {
         );
 
         assertEquals(502, error.getStatusCode());
-    }
-
-    @Test
-    void stillReturnsSeasonCandidatesWhenBasicClanHistoryIsMissing()
-            throws Exception {
-        respond(
-                "/clan/%23PQL/basic",
-                404,
-                "{\"detail\":\"Not Found\"}"
-        );
-        respond(
-                "/list/seasons?last=48",
-                200,
-                "[\"2026-06\"]"
-        );
-
-        List<HistoricalCwlSeasonSummary> seasons =
-                provider.getAvailableSeasons("#PQL", 8);
-
-        assertEquals(8, seasons.size());
-        assertEquals("2026-06", seasons.getFirst().season());
-        assertEquals("2025-11", seasons.getLast().season());
-        assertEquals(
-                List.of(
-                        "/clan/%23PQL/basic",
-                        "/list/seasons?last=48"
-                ),
-                requests
-        );
-    }
-
-    @Test
-    void acceptsJsonNullForTheOptionalBasicClanHistory() throws Exception {
-        respond("/clan/%23PQL/basic", 200, "null");
-        respond("/list/seasons?last=48", 200, "[\"2026-06\"]");
-
-        List<HistoricalCwlSeasonSummary> seasons =
-                provider.getAvailableSeasons("#PQL", 2);
-
-        assertEquals(List.of("2026-06", "2026-05"), seasons.stream()
-                .map(HistoricalCwlSeasonSummary::season)
-                .toList());
-    }
-
-    @Test
-    void doesNotTreatInvalidBasicClanJsonAsMissingHistory() {
-        respond("/clan/%23PQL/basic", 200, "[]");
-
-        Java.HttpException error = assertThrows(
-                Java.HttpException.class,
-                () -> provider.getAvailableSeasons("#PQL", 2)
-        );
-
-        assertEquals(502, error.getStatusCode());
-    }
-
-    @Test
-    void temporarilyCachesMissingSeasonResponses() {
-        respond(
-                "/cwl/%23PQL/2026-06",
-                404,
-                "{\"detail\":\"Not Found\"}"
-        );
-
-        assertThrows(
-                Java.HttpException.class,
-                () -> provider.getSeason("#PQL", "2026-06")
-        );
-        assertThrows(
-                Java.HttpException.class,
-                () -> provider.getSeason("#PQL", "2026-06")
-        );
-
-        assertEquals(1, requests.stream()
-                .filter("/cwl/%23PQL/2026-06"::equals)
-                .count());
+        assertEquals(List.of("/v2/cwl/%23PQL?season=2025-06"), requests);
     }
 
     private void respond(String target, int status, String body) {
@@ -295,46 +119,16 @@ class ClashKingCwlProviderTest {
         exchange.close();
     }
 
-    private static String season(String season, String state) {
+    private static String season(String season) {
         return """
                {
                  "season":"%s",
-                 "state":"%s",
-                 "clans":[{"tag":"#PQL","name":"ClashPanel"}],
+                 "state":"ended",
+                 "warLeague":{"id":48000017,"name":"Champion League II"},
+                 "clans":[{"tag":"#PQL","name":"ClashPanel","members":[]}],
                  "rounds":[]
                }
-               """.formatted(season, state);
-    }
-
-    private static String rankedSeason(
-            String season,
-            String state,
-            int targetRank
-    ) {
-        StringBuilder standings = new StringBuilder();
-        for (int rank = 1; rank <= 8; rank++) {
-            if (rank > 1) standings.append(',');
-            String tag = rank == targetRank ? "#PQL" : "#CLAN" + rank;
-            standings.append("""
-                    {"rank":%d,"tag":"%s","name":"Clan %d",
-                     "stars":%d,"destruction":%d}
-                    """.formatted(
-                    rank,
-                    tag,
-                    rank,
-                    100 - rank,
-                    100 - rank
-            ));
-        }
-        return """
-               {
-                 "season":"%s",
-                 "state":"%s",
-                 "clans":[{"tag":"#PQL","name":"ClashPanel"}],
-                 "clan_rankings":[%s],
-                 "rounds":[]
-               }
-               """.formatted(season, state, standings);
+               """.formatted(season);
     }
 
     private record Response(int status, String body) {}

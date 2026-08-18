@@ -30,12 +30,10 @@ public final class ClashKingV2AdvancedStatsSource implements AdvancedStatsHistor
 
     public ClashKingV2AdvancedStatsSource(Config config) {
         if (config == null) throw new IllegalArgumentException("config is required");
-        String token = config.getClashKingV2AuthToken();
-        String baseUrl = config.getClashKingV2BaseUrl();
-        this.transport = config.isClashKingV2BaseUrlExplicit() ? configuredTransport(baseUrl, token) : null;
+        this.transport = configuredTransport(config.getClashKingBaseUrl());
         this.unavailableReason = transport == null
-                ? missingConfigurationReason(config.isClashKingV2BaseUrlExplicit(), token) : "";
-        this.rankedSeason = parseSeason(config.getClashKingV2RankedSeason());
+                ? "ClashKing API base URL is not configured" : "";
+        this.rankedSeason = parseSeason(config.getClashKingRankedSeason());
         this.declaredCapabilities = buildCapabilities();
     }
 
@@ -154,29 +152,16 @@ public final class ClashKingV2AdvancedStatsSource implements AdvancedStatsHistor
         }
     }
 
-    private static Transport configuredTransport(String baseUrl, String token) {
-        if (baseUrl == null || baseUrl.isBlank() || !tokenConfigured(token)) return null;
-        return new HttpTransport(baseUrl, token);
-    }
-
-    private static boolean tokenConfigured(String token) {
-        if (token == null || token.isBlank()) return false;
-        String normalized = token.trim();
-        if (normalized.regionMatches(true, 0, "Bearer ", 0, 7)) normalized = normalized.substring(7).trim();
-        return !normalized.isBlank();
-    }
-
-    private static String missingConfigurationReason(boolean explicitBaseUrl, String token) {
-        if (!explicitBaseUrl) return "ClashKing V2 base URL must be explicitly configured; refusing the production default";
-        if (token == null || token.isBlank()) return "ClashKing V2 Bearer token is not configured";
-        return "ClashKing V2 transport is unavailable";
+    private static Transport configuredTransport(String baseUrl) {
+        if (baseUrl == null || baseUrl.isBlank()) return null;
+        return new HttpTransport(baseUrl);
     }
 
     private static final class HttpTransport implements Transport {
         private final ClashKingHttpClient client;
 
-        private HttpTransport(String baseUrl, String token) {
-            this.client = new ClashKingHttpClient(baseUrl, "ClashKing V2", token);
+        private HttpTransport(String baseUrl) {
+            this.client = new ClashKingHttpClient(baseUrl, "ClashKing V2");
         }
 
         @Override

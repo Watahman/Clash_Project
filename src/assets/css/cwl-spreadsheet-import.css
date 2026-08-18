@@ -16,9 +16,10 @@
     place-items: center;
     min-height: 132px;
     padding: 22px;
-    border: 1px dashed var(--border-color, #3f4652);
+    border: 1px dashed var(--border-strong, var(--border-color, #3f4652));
     border-radius: 12px;
-    background: color-mix(in srgb, var(--surface-color, #171a21) 90%, transparent);
+    background: var(--surface-subtle, var(--surface-2, #171a21));
+    color: var(--text, var(--text-1, #edf2f7));
     cursor: pointer;
     text-align: center;
     transition: border-color .15s ease, background .15s ease, transform .15s ease;
@@ -36,6 +37,14 @@
 .cwl-sheet-dropzone.is-busy { cursor: progress; opacity: .72; }
 .cwl-sheet-dropzone strong { font-size: 1rem; }
 .cwl-sheet-dropzone span { color: var(--text-secondary, #9ca3af); font-size: .88rem; }
+
+:root[data-theme="light"] .cwl-sheet-dropzone {
+    border-color: var(--border-visible, rgba(25, 35, 46, .19));
+    background: var(--surface-card, #fff);
+    color: var(--text-1, #19232e);
+}
+
+:root[data-theme="light"] .cwl-sheet-dropzone span { color: var(--text-3, #64717d); }
 
 .cwl-sheet-import-status {
     margin: 12px 0 0;

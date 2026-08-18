@@ -102,6 +102,18 @@ const CATEGORY_FALLBACK_ICONS = Object.freeze({
     'Dynamic official achievements': ['special', 'star', 'medal']
 });
 
+// A few families contain words that describe their context rather than their subject. Keep these
+// explicit so a generic entity keyword cannot turn a wall, army or base milestone into a troop icon.
+const FAMILY_ICON_RULES = Object.freeze([
+    [/^PLY_WAR_STARS$/, ['star', 'medal']],
+    [/^PLY_CAP_CONTRIB$/, ['clan', 'users']],
+    [/^SEA_ATTACK_WINS$/, ['attack', 'swords', 'win']],
+    [/^OFF_(?:BALANCED_ARMY|SUPER_ACTIVE_COUNT)$/, ['army', 'stats']],
+    [/^BASE_HOME_(?:ALL_OFFENSE_INFRA|OFFENSE_INFRA)/, ['village', 'progression']],
+    [/^BASE_HOME_TH_WEAPON/, ['village', 'progression']],
+    [/^BASE_(?:HOME|BB)_.*(?:DEFENSE|TRAP|WALL)/, ['defense', 'village', 'progression']]
+]);
+
 const GLYPHS = Object.freeze([
     ['crown', 'M4 9h16l-1 10H5L4 9Zm3 0L5 4l4 3 3-5 3 5 4-3-2 5M7 22h10'],
     ['compass', 'm12 3 3 6 6 3-6 3-3 6-3-6-6-3 6-3Zm0 6 3 3-3 3-3-3 3-3Z'],
@@ -138,8 +150,17 @@ function hash(value) {
 
 function pick(values, seed) { return values[hash(seed) % values.length]; }
 
+function familyIconOverride(family) {
+    const familyKey = String(family?.familyKey || '').toUpperCase();
+    const rule = FAMILY_ICON_RULES.find(([pattern]) => pattern.test(familyKey));
+    return rule ? { type: 'image', value: ICON_PATHS[pick(rule[1], familyKey)] } : null;
+}
+
 export function resolveAchievementAsset(family) {
     if (family?.entity) return { type: 'entity', value: family.entity };
+
+    const familyOverride = familyIconOverride(family);
+    if (familyOverride) return familyOverride;
 
     const glyphRule = GLYPH_RULES.find(([pattern]) => pattern.test((family?.familyKey || '').toUpperCase()));
     if (glyphRule) return { type: 'glyph', value: glyphRule[1] };

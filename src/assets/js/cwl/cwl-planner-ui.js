@@ -5,6 +5,7 @@ export function initPlannerSurface({ root = document } = {}) {
     const inspector = initPlayerInspector({ root });
     initMobileView(root);
     initToolKeyboard(root);
+    initToolsMenu(root);
     initPlannerFixtureBoundary(root);
     return { openPlayer: inspector.open, closePlayer: inspector.close };
 }
@@ -39,6 +40,28 @@ function initToolKeyboard(root) {
             return;
         }
         if (event.key === 'Tab') trapFocus(event, panel);
+    });
+}
+
+function initToolsMenu(root) {
+    const menu = root.querySelector('[data-cwl-tools-menu]');
+    if (!menu) return;
+
+    const close = restoreFocus => {
+        if (!menu.open) return;
+        menu.removeAttribute('open');
+        if (restoreFocus) menu.querySelector('summary')?.focus();
+    };
+
+    document.addEventListener('click', event => {
+        if (!menu.contains(event.target)) close(false);
+    });
+    menu.addEventListener('click', event => {
+        if (event.target?.closest?.('.cwl-tools-menu-content button')) close(false);
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key !== 'Escape') return;
+        close(true);
     });
 }
 

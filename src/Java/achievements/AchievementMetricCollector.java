@@ -153,14 +153,14 @@ public final class AchievementMetricCollector {
                 source(sources, AchievementSources.CWL, cwlAvailable, cwlDetail);
             }
 
-            boolean raidAvailable = refresh.raidAvailable() || cachedRaid;
+            boolean raidAvailable = cachedRaid;
             source(
                     sources,
                     AchievementSources.RAID_HISTORY,
                     raidAvailable,
                     raidAvailable
-                            ? "Raid weekends loaded from normalized history; completed weekends are reused."
-                            : "Raid history could not be measured yet; cached progress is preserved."
+                            ? "Previously measured raid-weekend progress remains cached; ClashKing V2 does not add new per-player raid weekends."
+                            : "ClashKing V2 does not expose per-player raid-weekend history; no new raid-history progress can be measured."
             );
             boolean legendAvailable = refresh.legendAvailable() || cachedLegend;
             source(

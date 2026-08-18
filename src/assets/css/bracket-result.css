@@ -13,6 +13,8 @@
 }
 .bracket-result-heading { min-width: 0; }
 .bracket-result-heading > p { max-width: 620px; margin: 8px 0 0; color: var(--cp-text-2); font-size: .8125rem; line-height: 1.55; }
+.bracket-return-setup { width: max-content; margin-top: 16px; }
+.bracket-return-setup svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .bracket-result-meta { display: flex; flex: 0 0 auto; gap: 24px; }
 .bracket-result-meta > span { display: grid; align-content: start; gap: 4px; min-width: 92px; }
 .bracket-result-meta small { color: var(--cp-text-3); font-size: .6875rem; line-height: 1.35; }

@@ -33,7 +33,7 @@ const modules = Object.freeze([
     ['operation', 'nav.operation', 'CWL Tracker', 'compete', '/app/cwl-tracker', true],
     ['warOperation', 'nav.warOperation', 'War Board', 'compete', '/app/war-board', true],
     ['bracket', 'nav.bracket', 'Brackets', 'compete', '/app/brackets', true],
-    ['minigames', 'nav.minigames', 'Games', 'play', '/app/minigames', true],
+    ['minigames', 'nav.minigames', 'Minigames', 'play', '/app/minigames', true],
     ['advancedStats', 'nav.advancedStats', 'Advanced Stats', 'progress', '/app/advanced-stats', true],
     ['achievements', 'nav.achievements', 'Achievements', 'progress', '/app/achievements', true],
     ['profile', 'profile.title', 'Profile', 'home', '/app/profile', false]

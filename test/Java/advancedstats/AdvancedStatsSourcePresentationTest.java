@@ -13,8 +13,6 @@ class AdvancedStatsSourcePresentationTest {
                 AdvancedStatsSourcePresentation.fromInternalId("CLASHKING_V2").kind());
         assertEquals("OFFICIAL_BATTLELOG",
                 AdvancedStatsSourcePresentation.fromInternalId("coc-battlelog").kind());
-        assertEquals("LEGACY_WAR_HISTORY",
-                AdvancedStatsSourcePresentation.fromInternalId("legacy").kind());
         assertEquals("UNKNOWN",
                 AdvancedStatsSourcePresentation.fromInternalId("internal-worker-42").kind());
     }

@@ -45,9 +45,9 @@ Open `http://localhost:5173`. Set `DEV_API_TARGET` only when the Java API runs e
 | `_API_KEY_ALL` | yes | Primary Clash API authorization value, with or without `Bearer ` |
 | `_API_KEY_ALL2`, `_API_KEY_ALL3` | no | Additional Clash API keys; requests rotate across all configured keys and retry another key after 401, 403 or 429 |
 | `_BASE_URL_CLASH` | no | Clash API base URL |
-| `CLASHKING_API_VERSION` | no | Historical provider: `legacy` (default) or `v2` |
-| `CLASHKING_LEGACY_BASE_URL`, `CLASHKING_V2_BASE_URL` | no | ClashKing provider base URLs |
-| `CLASHKING_FALLBACK_TO_LEGACY` | no | Retry the complete V2 batch through legacy without mixing datasets |
+| `CLASHKING_BASE_URL` | no | ClashKing V2 API base URL; defaults to `https://api.clashk.ing` |
+| `CLASHKING_RANKED_SEASON` | ranked history | Unix timestamp identifying the ranked season queried through ClashKing V2 |
+| `CLASHKING_FALLBACK_TO_OFFICIAL` | no | Use the official rolling battle log when a ClashKing V2 Advanced Stats scope is unavailable |
 | `CLASHKING_COUNTER_INTERVAL_SECONDS` | no | Console report interval for real outbound ClashKing requests; defaults to `60` seconds |
 | `SERVER_PORT` or `PORT` | no | Backend port; defaults to `8080` |
 | `PUBLIC_SITE_URL` | production | Absolute public origin used to generate `robots.txt` and `sitemap.xml` during the frontend build |

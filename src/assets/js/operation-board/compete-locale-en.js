@@ -83,7 +83,7 @@ const en = Object.freeze({
     'war.avgStars': 'Avg. stars',
     'war.avgAttackUse': 'Avg. attack use',
     'war.cwlBadge': 'CWL',
-    'war.cwlOpponentUnknown': 'CWL opponent unavailable',
+    'war.cwlOpponentUnknown': 'CWL round result',
     'war.cwlHistoryTitle': 'CWL war data',
     'war.cwlHistoryCopy': 'Multiple war days grouped into one record.',
     'war.cwlHistoryTotal': '{own} - {opponent} stars',

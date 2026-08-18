@@ -6,10 +6,7 @@ import Java.advancedstats.AdvancedStatsCompactScheduledCollector;
 import Java.advancedstats.AdvancedStatsCollectorRepository;
 import Java.advancedstats.ClashKingV2AdvancedStatsSource;
 import Java.advancedstats.AdvancedStatsHistorySource;
-import Java.advancedstats.HistoricalPlayerDataAdvancedStatsSource;
 import Java.advancedstats.AdvancedStatsScheduledCollector;
-import Java.performance.ClashKingLegacyProvider;
-import Java.performance.HistoricalPlayerDataProvider;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -37,10 +34,9 @@ public final class AdvancedStatsInternalPoll {
         this.collectorConfig = new AdvancedStatsCollectorConfig();
 
         AdvancedStatsBattleLogSource source = new AdvancedStatsBattleLogSource(config);
-        HistoricalPlayerDataProvider historical = new ClashKingLegacyProvider(config.getClashKingLegacyBaseUrl());
         this.compactCollector = new AdvancedStatsCompactScheduledCollector(
                 new AdvancedStatsCollectorRepository(),
-                workerId -> compactSource(config, source, historical),
+                workerId -> compactSource(config, source),
                 Clock.systemUTC(),
                 collectorConfig.compactSettings()
         );
@@ -62,16 +58,12 @@ public final class AdvancedStatsInternalPoll {
 
     private AdvancedStatsHistorySource compactSource(
             Config config,
-            AdvancedStatsBattleLogSource official,
-            HistoricalPlayerDataProvider legacy
+            AdvancedStatsBattleLogSource official
     ) {
         List<AdvancedStatsHistorySource> sources = new ArrayList<>();
         sources.add(new ClashKingV2AdvancedStatsSource(config));
         if (config.isClashKingOfficialFallbackEnabled()) {
             sources.add(new AdvancedStatsBattleLogHistorySource(official::fetchFresh));
-        }
-        if (config.isClashKingLegacyFallbackEnabled()) {
-            sources.add(new HistoricalPlayerDataAdvancedStatsSource(legacy));
         }
         return new AdvancedStatsCapabilityBasedSource(sources);
     }

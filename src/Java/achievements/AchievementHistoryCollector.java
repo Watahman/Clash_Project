@@ -30,13 +30,10 @@ public final class AchievementHistoryCollector {
             int cwlRemaining,
             boolean cwlAvailable,
             boolean warAvailable,
-            int raidProcessed,
-            boolean raidAvailable,
             int legendProcessed,
             boolean legendAvailable,
             String cwlError,
             String warError,
-            String raidError,
             String legendError
     ) {}
 
@@ -47,8 +44,7 @@ public final class AchievementHistoryCollector {
     private final API_Utils utils;
     private final AchievementSourceCache cache = new AchievementSourceCache();
     private final HistoricalCwlService cwlService;
-    private final ClashKingRaidHistoryProvider raidProvider;
-    private final ClashKingLegendHistoryProvider legendProvider;
+    private final ClashKingV2LegendHistoryProvider legendProvider;
 
     public AchievementHistoryCollector(Config config) {
         this(
@@ -60,8 +56,7 @@ public final class AchievementHistoryCollector {
     AchievementHistoryCollector(Config config, HistoricalCwlService cwlService) {
         this.utils = new API_Utils(config);
         this.cwlService = Objects.requireNonNull(cwlService, "cwlService");
-        this.raidProvider = new ClashKingRaidHistoryProvider(config);
-        this.legendProvider = new ClashKingLegendHistoryProvider(config);
+        this.legendProvider = new ClashKingV2LegendHistoryProvider(config);
     }
 
     public RefreshResult refresh(
@@ -74,14 +69,11 @@ public final class AchievementHistoryCollector {
         int cwlRemaining = 0;
         boolean cwlAvailable = false;
         boolean warAvailable = false;
-        int raidProcessed = 0;
-        boolean raidAvailable = false;
         int legendProcessed = 0;
         boolean legendAvailable = false;
         boolean hasClan = clanTag != null && !clanTag.isBlank();
         String cwlError = hasClan ? "" : "NO_CLAN";
         String warError = hasClan ? "" : "NO_CLAN";
-        String raidError = "";
         String legendError = "";
 
         if (hasClan) {
@@ -106,19 +98,6 @@ public final class AchievementHistoryCollector {
         }
 
         try {
-            HistoryRefresh raid = refreshRaid(userId, playerTag);
-            changed |= raid.changed();
-            raidProcessed = raid.processed();
-            raidAvailable = raid.available();
-        } catch (Exception error) {
-            raidError = sourceError(error);
-            safeMarkFailure(
-                    userId, playerTag, AchievementSources.RAID_HISTORY,
-                    CLASHKING_SOURCE_KEY, raidError
-            );
-        }
-
-        try {
             HistoryRefresh legend = refreshLegend(userId, playerTag);
             changed |= legend.changed();
             legendProcessed = legend.processed();
@@ -137,13 +116,10 @@ public final class AchievementHistoryCollector {
                 cwlRemaining,
                 cwlAvailable,
                 warAvailable,
-                raidProcessed,
-                raidAvailable,
                 legendProcessed,
                 legendAvailable,
                 cwlError,
                 warError,
-                raidError,
                 legendError
         );
     }
@@ -219,58 +195,6 @@ public final class AchievementHistoryCollector {
                 processed,
                 remaining,
                 !stored.isEmpty() || processed > 0
-        );
-    }
-
-    private HistoryRefresh refreshRaid(String userId, String playerTag) throws Exception {
-        Map<String, AchievementSourceCache.RecordState> stored = cache.records(
-                userId,
-                playerTag,
-                AchievementSources.RAID_HISTORY,
-                CLASHKING_SOURCE_KEY
-        );
-        RaidHistoryNormalizer.History history = raidProvider.getHistory(playerTag);
-        List<AchievementSourceCache.PendingRecord> pending = new ArrayList<>();
-        for (RaidHistoryNormalizer.WeekendRecord record : history.records()) {
-            AchievementSourceCache.RecordState existing = stored.get(record.recordKey());
-            if (existing != null && bool(existing.metadata(), "final") && record.finalState()) continue;
-            pending.add(new AchievementSourceCache.PendingRecord(
-                    record.recordKey(),
-                    record.recordTimestamp(),
-                    record.metrics(),
-                    record.metadata()
-            ));
-        }
-        cache.upsertRecords(
-                userId,
-                playerTag,
-                AchievementSources.RAID_HISTORY,
-                CLASHKING_SOURCE_KEY,
-                pending
-        );
-
-        JsonObject cursor = new JsonObject();
-        if (history.coverage().newestTimestamp() != null) {
-            cursor.addProperty("newestTimestamp", history.coverage().newestTimestamp().toString());
-        }
-        JsonObject coverage = history.coverage().metadata();
-        long addedRecords = pending.stream()
-                .filter(record -> !stored.containsKey(record.recordKey()))
-                .count();
-        coverage.addProperty("cachedRecords", stored.size() + addedRecords);
-        cache.markChecked(
-                userId,
-                playerTag,
-                AchievementSources.RAID_HISTORY,
-                CLASHKING_SOURCE_KEY,
-                cursor,
-                coverage,
-                null
-        );
-        return new HistoryRefresh(
-                !pending.isEmpty(),
-                pending.size(),
-                !stored.isEmpty() || !history.records().isEmpty()
         );
     }
 

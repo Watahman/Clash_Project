@@ -38,14 +38,28 @@ function validateImportedParticipants(parsed) {
     return validateParticipants(parsed.participants);
 }
 
-function validateImportedDrawOrder(parsed, participants) {
+function validateImportedIdentity(parsed, participants) {
+    if (parsed.participantIds === undefined && parsed.participantLabels === undefined) return null;
+    if (!Array.isArray(parsed.participantIds)
+        || parsed.participantIds.length !== participants.length
+        || parsed.participantIds.some(id => !isParticipantString(id))
+        || new Set(parsed.participantIds).size !== parsed.participantIds.length
+        || !isRecord(parsed.participantLabels)
+        || parsed.participantIds.some((id, index) => parsed.participantLabels[id] !== participants[index])) {
+        throw bracketError('This bracket file contains invalid participant identities.', 'invalid-identities');
+    }
+    return parsed.participantIds;
+}
+
+function validateImportedDrawOrder(parsed, participants, participantIds) {
     if (parsed.drawOrder === undefined) return null;
+    const expectedValues = participantIds || participants;
     if (!Array.isArray(parsed.drawOrder)
-        || parsed.drawOrder.length !== participants.length
+        || parsed.drawOrder.length !== expectedValues.length
         || parsed.drawOrder.some(participant => !isParticipantString(participant))) {
         throw bracketError('This bracket file contains an invalid draw order.', 'invalid-draw-order');
     }
-    const expected = new Set(participants);
+    const expected = new Set(expectedValues);
     const actual = new Set(parsed.drawOrder);
     if (actual.size !== expected.size || parsed.drawOrder.some(participant => !expected.has(participant))) {
         throw bracketError('This bracket file contains an invalid draw order.', 'invalid-draw-order');
@@ -144,8 +158,9 @@ export function validateImportedBracket(parsed) {
     }
     validateImportedMetadata(parsed);
     const participants = validateImportedParticipants(parsed);
-    const drawOrder = validateImportedDrawOrder(parsed, participants);
-    const participantSet = new Set(participants);
+    const participantIds = validateImportedIdentity(parsed, participants);
+    const drawOrder = validateImportedDrawOrder(parsed, participants, participantIds);
+    const participantSet = new Set(participantIds || participants);
     const size = nextPowerOfTwo(participants.length);
     const expectedRounds = Math.log2(size);
     if (parsed.rounds.length !== expectedRounds) {

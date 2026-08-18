@@ -3,7 +3,7 @@ import { ensureThemeToggleMarkup } from './theme-toggle-markup.js';
 
 const THEME_STORAGE_KEY = 'clashtools_theme';
 const THEMES = new Set(['dark', 'light']);
-const THEME_TRANSITION_DURATION = 420;
+const THEME_TRANSITION_DURATION = 640;
 
 function getSystemTheme() {
     if (!window.matchMedia) return 'dark';
@@ -50,10 +50,12 @@ function prefersReducedMotion() {
 
 function transitionOrigin(source) {
     const rect = source?.getBoundingClientRect?.();
-    if (!rect) return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    if (!rect || rect.width <= 0 || rect.height <= 0) {
+        return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    }
     return {
-        x: rect.left + rect.width / 2,
-        y: rect.top + rect.height / 2
+        x: Math.min(window.innerWidth, Math.max(0, rect.left + rect.width / 2)),
+        y: Math.min(window.innerHeight, Math.max(0, rect.top + rect.height / 2))
     };
 }
 
@@ -65,7 +67,7 @@ function animateThemeReveal(source, transition) {
         const radius = Math.hypot(
             Math.max(x, window.innerWidth - x),
             Math.max(y, window.innerHeight - y)
-        );
+        ) + 16;
         document.documentElement.animate(
             {
                 clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`]

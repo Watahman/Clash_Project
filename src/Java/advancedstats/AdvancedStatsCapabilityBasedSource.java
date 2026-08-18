@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/** Selects a primary or legacy source per declared capability without inventing provider routes. */
+/** Selects the first declared source that can serve each capability. */
 public final class AdvancedStatsCapabilityBasedSource implements AdvancedStatsHistorySource {
     private final List<AdvancedStatsHistorySource> sources;
     private final AdvancedStatsSourceCapabilities capabilities;

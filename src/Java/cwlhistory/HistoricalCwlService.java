@@ -95,30 +95,7 @@ public final class HistoricalCwlService {
 
     private BatchAttempt loadOverviewBatch(String clanTag, int limit)
             throws Exception {
-        if (!(provider instanceof FallbackHistoricalCwlDataProvider fallback)) {
-            return loadBatch(provider, clanTag, limit);
-        }
-        BatchAttempt primaryAttempt;
-        try {
-            primaryAttempt = loadBatch(
-                    fallback.primaryProvider(),
-                    clanTag,
-                    limit
-            );
-            if (primaryAttempt.complete() && !primaryAttempt.seasons().isEmpty()) {
-                return primaryAttempt;
-            }
-        } catch (Exception primaryFailure) {
-            primaryAttempt = null;
-        }
-        try {
-            return loadBatch(fallback.fallbackProvider(), clanTag, limit);
-        } catch (Exception fallbackFailure) {
-            if (primaryAttempt != null && !primaryAttempt.seasons().isEmpty()) {
-                return primaryAttempt;
-            }
-            throw fallbackFailure;
-        }
+        return loadBatch(provider, clanTag, limit);
     }
 
     private BatchAttempt loadBatch(
@@ -126,9 +103,6 @@ public final class HistoricalCwlService {
             String clanTag,
             int limit
     ) throws Exception {
-        // The legacy season index is intentionally cheap and may contain months
-        // in which this clan did not participate. Resolve details only when the
-        // overview is explicitly opened, and stop once enough real CWLs exist.
         List<HistoricalCwlSeasonSummary> summaries =
                 source.getAvailableSeasons(clanTag, MAX_SEASON_LIMIT);
         List<HistoricalCwlSeason> seasons = new ArrayList<>();

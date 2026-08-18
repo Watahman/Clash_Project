@@ -2,6 +2,7 @@ import { t } from '../i18n/i18n.js';
 import { bracketChampion } from './bracket-engine.js';
 import { bracketText } from './bracket-copy.js';
 import { bracketIcon } from './bracket-icons.js';
+import { participantName } from './bracket-model.js';
 
 function setActiveRound(columns, activeRound) {
     columns.forEach((column, index) => {
@@ -26,7 +27,7 @@ function renderRoundTabs(navigation, bracket, activeRound, onRoundChange) {
         button.textContent = index === bracket.rounds.length - 1
             ? t('bracket.final')
             : t('bracket.round', { round: index + 1 });
-        button.addEventListener('click', () => onRoundChange(index));
+        button.addEventListener('click', () => onRoundChange(index, true));
         button.addEventListener('keydown', event => {
             if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
             event.preventDefault();
@@ -42,7 +43,7 @@ function renderRoundTabs(navigation, bracket, activeRound, onRoundChange) {
     return tabs;
 }
 
-function renderSlot(match, player, slotIndex, isOpeningRound, onWinner) {
+function renderSlot(bracket, match, player, slotIndex, isOpeningRound, onWinner) {
     if (!player) {
         const empty = document.createElement('span');
         empty.className = `bracket-slot ${isOpeningRound ? 'bracket-slot-bye' : 'bracket-slot-waiting'}`;
@@ -52,27 +53,29 @@ function renderSlot(match, player, slotIndex, isOpeningRound, onWinner) {
         return empty;
     }
     const button = document.createElement('button');
+    const name = participantName(bracket, player);
     button.type = 'button';
     button.className = 'bracket-slot bracket-slot-player';
     button.dataset.slot = String(slotIndex);
-    button.dataset.participant = player;
+    button.dataset.participant = name;
+    button.dataset.participantId = player;
     button.setAttribute('aria-pressed', String(match.winner === player));
     button.setAttribute(
         'aria-label',
         match.winner === player
-            ? bracketText('selectedWinner', { name: player })
-            : bracketText('selectWinner', { name: player })
+            ? bracketText('selectedWinner', { name })
+            : bracketText('selectWinner', { name })
     );
     button.classList.toggle('is-winner', match.winner === player);
     const label = document.createElement('span');
     label.className = 'bracket-slot-name';
-    label.textContent = player;
+    label.textContent = name;
     button.appendChild(label);
     button.addEventListener('click', () => onWinner(match, player));
     return button;
 }
 
-function renderMatch(match, roundIndex, changedMatchIds, onWinner, champion) {
+function renderMatch(bracket, match, roundIndex, changedMatchIds, onWinner, champion) {
     const card = document.createElement('article');
     card.className = 'bracket-match';
     card.dataset.matchId = match.id;
@@ -84,14 +87,15 @@ function renderMatch(match, roundIndex, changedMatchIds, onWinner, champion) {
     const slots = document.createElement('div');
     slots.className = 'bracket-match-slots';
     match.players.forEach((player, slotIndex) => {
-        slots.appendChild(renderSlot(match, player, slotIndex, roundIndex === 0, onWinner));
+        slots.appendChild(renderSlot(bracket, match, player, slotIndex, roundIndex === 0, onWinner));
     });
     card.appendChild(slots);
 
     const state = document.createElement('p');
     state.className = 'bracket-match-state';
+    const winnerName = participantName(bracket, match.winner);
     state.textContent = match.winner
-        ? bracketText('selectedWinner', { name: match.winner })
+        ? bracketText('selectedWinner', { name: winnerName })
         : match.players.filter(Boolean).length === 2
             ? bracketText('chooseMatchWinner')
             : '';
@@ -117,7 +121,7 @@ function renderRound(round, roundIndex, bracket, changedMatchIds, onWinner) {
     list.className = 'bracket-round-matches';
     const champion = bracketChampion(bracket);
     round.forEach(match => list.appendChild(
-        renderMatch(match, roundIndex, changedMatchIds, onWinner, champion)
+        renderMatch(bracket, match, roundIndex, changedMatchIds, onWinner, champion)
     ));
     column.appendChild(list);
     return column;

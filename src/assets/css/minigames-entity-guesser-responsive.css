@@ -8,6 +8,8 @@
 }
 
 @media (max-width: 42rem) {
+    .game-toolbar .game-category-picker { width: 100%; justify-content: space-between; }
+    .game-toolbar .game-category-picker select { flex: 1; min-width: 0; }
     .game-sidebar { padding: 1rem; }
     .game-stat-grid { grid-template-columns: 1fr 1fr; }
     .game-legend { grid-template-columns: 1fr 1fr; }

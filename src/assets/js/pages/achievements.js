@@ -44,8 +44,7 @@ function captureRefs() {
         resultsCount: '#achievement-results-count', loadMore: '#achievement-load-more', search: '#achievement-search', category: '#achievement-category',
         rarity: '#achievement-rarity', status: '#achievement-status', source: '#achievement-source', progressPanel: '.achievement-progress-panel', summaryLevel: '#achievement-level',
         summaryLevelProgress: '#achievement-level-progress', summaryLevelCopy: '#achievement-level-copy', summaryXp: '#achievement-total-xp', summaryUnlocked: '#achievement-unlocked',
-        summaryCompleted: '#achievement-completed', summaryImported: '#achievement-last-import', featured: '#achievement-featured', filterToggle: '#achievement-filter-toggle',
-        filterDialog: '#achievement-filter-dialog', filterClose: '#achievement-filter-close'
+        summaryCompleted: '#achievement-completed', summaryImported: '#achievement-last-import', featured: '#achievement-featured'
     };
     Object.entries(selectors).forEach(([key, selector]) => { refs[key] = document.querySelector(selector); });
 }
@@ -181,17 +180,6 @@ async function pasteFromClipboard() {
 
 function resetVisibleAndRender() { state.visibleLimit = PAGE_SIZE; renderAchievements(refs, state, PAGE_SIZE); }
 
-function setFilterDialogOpen(open) {
-    const mobile = window.matchMedia?.('(max-width: 599px)').matches;
-    if (!mobile) { refs.filterDialog.open = true; refs.filterToggle.setAttribute('aria-expanded', 'false'); return; }
-    if (open && typeof refs.filterDialog.showModal === 'function') {
-        if (refs.filterDialog.open && typeof refs.filterDialog.close === 'function') refs.filterDialog.close();
-        refs.filterDialog.showModal();
-    }
-    if (!open && refs.filterDialog.open && typeof refs.filterDialog.close === 'function') refs.filterDialog.close();
-    refs.filterToggle.setAttribute('aria-expanded', String(Boolean(open)));
-}
-
 function bindEvents() {
     refs.accountSelect.addEventListener('change', () => {
         state.selectedTag = normalizePlayerTag(refs.accountSelect.value); writeStorage(ACCOUNT_STORAGE_KEY, state.selectedTag);
@@ -210,9 +198,6 @@ function bindEvents() {
         ref.addEventListener('change', () => { state.filters[key] = ref.value; resetVisibleAndRender(); });
     }
     refs.loadMore.addEventListener('click', () => { state.visibleLimit += PAGE_SIZE; renderAchievements(refs, state, PAGE_SIZE); });
-    refs.filterToggle.addEventListener('click', () => setFilterDialogOpen(true));
-    refs.filterClose.addEventListener('click', () => setFilterDialogOpen(false));
-    refs.filterDialog.addEventListener('close', () => refs.filterToggle.setAttribute('aria-expanded', 'false'));
     refs.emptyState.querySelector('[data-empty-import]')?.addEventListener('click', () => setImportPanelOpen(true, { focus: true }));
     refs.emptyState.querySelector('[data-empty-profile]')?.addEventListener('click', () => document.querySelector('#workspace-profile-shortcut, #profile-btn')?.click());
     window.addEventListener('clashtools:language-changed', () => { applyI18n(document); renderAll(refs, state, PAGE_SIZE); updateImportPreview(); });

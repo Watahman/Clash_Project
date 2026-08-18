@@ -43,6 +43,14 @@
     background: var(--surface-hover);
 }
 
+.operation-workspace-page .op-history-timeline button[data-result="win"] {
+    box-shadow: inset 2px 0 0 color-mix(in srgb, var(--success) 62%, transparent);
+}
+
+.operation-workspace-page .op-history-timeline button[data-result="loss"] {
+    box-shadow: inset 2px 0 0 color-mix(in srgb, var(--danger) 62%, transparent);
+}
+
 .op-history-timeline button > span,
 .op-history-timeline button > em,
 .op-history-timeline button > small {
@@ -231,7 +239,7 @@
 }
 
 .op-history-reliability-list [data-tone="attention"] {
-    color: var(--warning);
+    color: var(--text-muted);
 }
 
 .op-history-record {

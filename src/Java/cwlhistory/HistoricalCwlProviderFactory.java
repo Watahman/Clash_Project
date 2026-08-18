@@ -6,8 +6,6 @@ public final class HistoricalCwlProviderFactory {
     private HistoricalCwlProviderFactory() {}
 
     public static HistoricalCwlDataProvider create(Config config) {
-        return new ClashKingLegacyCwlProvider(
-                config.getClashKingLegacyBaseUrl()
-        );
+        return new ClashKingV2CwlProvider(config.getClashKingBaseUrl());
     }
 }

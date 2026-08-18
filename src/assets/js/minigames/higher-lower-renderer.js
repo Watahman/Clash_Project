@@ -1,3 +1,5 @@
+import { resolveMinigameAssetEntity } from './entity-asset-resolution.js';
+
 export function createHigherLowerRenderer({
     root,
     elements,
@@ -41,7 +43,7 @@ export function createHigherLowerRenderer({
     function setCardImage(image, entity, token) {
         if (image.dataset.entityId === entity.id && image.getAttribute('src')) return;
         image.dataset.entityId = entity.id;
-        void getEntityAsset(entity).then(asset => {
+        void getEntityAsset(resolveMinigameAssetEntity(entity)).then(asset => {
             if (!image.isConnected || token !== assetRenderToken || image.dataset.entityId !== entity.id) return;
             image.src = asset.image;
             installImageFallback(image);

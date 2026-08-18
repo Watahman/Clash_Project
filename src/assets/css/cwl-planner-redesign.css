@@ -188,6 +188,18 @@ body.workspace-app .workspace-content .workspace-planner .cwl-page-header > div:
     z-index: 30;
 }
 
+body.workspace-app[data-workspace-page="planner"] :is(#cwl-container-add-players, #cwl-container-import-spreadsheet, #cwl-container-add-clan) .modal-header-row {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+body.workspace-app[data-workspace-page="planner"] :is(#cwl-container-add-players, #cwl-container-import-spreadsheet, #cwl-container-add-clan) .cwl-overlay-close {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+
 .workspace-planner .button-quiet {
     background: transparent;
     border: 0;

@@ -19,6 +19,7 @@ const REF_IDS = Object.freeze({
     resultCount: 'bracket-result-count',
     resultChampion: 'bracket-result-champion',
     resultChampionHelp: 'bracket-result-champion-help',
+    returnSetup: 'bracket-return-setup',
     roundNavigation: 'bracket-round-navigation',
     roundPrev: 'bracket-round-prev',
     roundNext: 'bracket-round-next',
@@ -37,6 +38,8 @@ export function collectBracketRefs(documentRef) {
         documentRef.getElementById(id)
     ]));
     refs.roundTabs = refs.roundNavigation?.querySelector('[role="tablist"]');
+    refs.layout = documentRef.querySelector('.bracket-layout');
+    refs.setup = documentRef.querySelector('.bracket-setup');
     return refs;
 }
 
@@ -74,7 +77,8 @@ export function mountActionIcons(refs) {
     [
         [refs.seed, 'seed'], [refs.shuffle, 'shuffle'], [refs.importButton, 'upload'],
         [refs.exportButton, 'download'], [refs.reset, 'reset'], [refs.roundPrev, 'chevronLeft'],
-        [refs.roundNext, 'chevronRight'], [refs.setupToggle, 'bracket']
+        [refs.roundNext, 'chevronRight'], [refs.setupToggle, 'bracket'],
+        [refs.returnSetup, 'bracket']
     ].forEach(([button, name]) => button?.prepend(bracketIcon(name)));
 }
 
@@ -88,15 +92,22 @@ export function updateSetupSummary(refs, bracket) {
     }
 }
 
-export function setSetupCollapsed(refs, collapsed) {
-    refs.setupContent.hidden = collapsed;
-    refs.setupToggle.setAttribute('aria-expanded', String(!collapsed));
-    updateSetupToggle(refs, collapsed);
+export function setSetupVisibility(refs, hidden) {
+    refs.setup.hidden = hidden;
+    refs.returnSetup.hidden = !hidden;
+    refs.layout?.classList.toggle('is-setup-complete', hidden);
+    refs.setupContent.hidden = false;
+    if (refs.setupToggle) {
+        refs.setupToggle.setAttribute('aria-expanded', 'true');
+        updateSetupToggle(refs, false);
+    }
 }
 
 export function applyBracketToForm(refs, bracket) {
     refs.name.value = bracket.name;
-    refs.participants.value = bracket.participants.join('\n');
+    refs.participants.value = bracket.participants
+        .map(participant => typeof participant === 'string' ? participant : participant.name)
+        .join('\n');
 }
 
 export function updateRoundControls(refs, bracket, activeRound) {

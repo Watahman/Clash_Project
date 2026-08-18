@@ -78,6 +78,10 @@ body.workspace-app[data-workspace-page="bracket"] .bracket-page-header p:last-ch
     gap: 24px;
 }
 
+body.workspace-app[data-workspace-page="bracket"] .bracket-layout.is-setup-complete {
+    grid-template-columns: minmax(0, 1fr);
+}
+
 .bracket-setup,
 .bracket-result {
     min-width: 0;

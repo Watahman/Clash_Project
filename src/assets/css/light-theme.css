@@ -538,10 +538,42 @@
     background-color: var(--surface) !important;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 5L10 1' stroke='%23705a32' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
-    background-position: right 0.8rem center !important;
+    background-position: right 0.65rem center !important;
     background-size: 0.7rem 0.45rem !important;
-    padding-right: 2.2rem !important;
+    padding-right: 2rem !important;
 }
+
+/* Keep workspace select arrows visible and aligned in dark mode as well. The
+   page-level select backgrounds are allowed to change, but the arrow keeps a
+   single theme-aware position and contrast treatment. */
+:root:not([data-theme="light"]) body.workspace-app select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 5L10 1' stroke='%23f3f6f9' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.65rem center !important;
+    background-size: 0.7rem 0.45rem !important;
+    padding-right: 2rem !important;
+}
+
+/* Pillar SVG files are external images, so currentColor cannot cross the
+   image boundary. In the dark workspace, lift the line art to the same quiet
+   foreground contrast used by the Dashboard cards. */
+:root:not([data-theme="light"]) body.workspace-app .dashboard-pillar-grid img[src*="/icons/pillars/"] {
+    filter: brightness(0) invert(1);
+    opacity: .88;
+}
+
+/* Clan Family's external utility icons need the same treatment in dark mode.
+   Inline SVGs continue to inherit their surrounding control color normally. */
+:root:not([data-theme="light"]) body.workspace-app[data-workspace-page="groups"] :where(.cf-search > img, #groups-join-shortcut > img, .cf-dialog-header .cf-icon-button > img) {
+    filter: brightness(0) invert(1);
+    opacity: .86;
+}
+
+/* The empty achievement illustration is inline currentColor SVG; pin it to
+   the Progress pillar token so it remains meaningful in both themes. */
+.achievement-empty-icon { color: var(--cp-progress, var(--accent)); }
 
 /* Softer gold primary actions: still prominent, but not the dark ochre block
    that overpowered the light interface. */

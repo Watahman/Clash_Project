@@ -4,6 +4,7 @@ import {
     importBracket,
     setMatchWinner
 } from './bracket-engine.js';
+import { participantName } from './bracket-model.js';
 import { t } from '../i18n/i18n.js';
 import { bracketText } from './bracket-copy.js';
 import { createBracketFixture } from './bracket-fixtures.js';
@@ -22,7 +23,7 @@ import {
     focusSelectedRound,
     participantEntries,
     renderModuleCopy,
-    setSetupCollapsed,
+    setSetupVisibility,
     setStatus,
     updateGuidanceCopy,
     updateRoundControls,
@@ -90,7 +91,7 @@ class BracketController {
             onRoundChange: this.setRound
         });
         updateRoundControls(this.refs, this.state.bracket, this.state.activeRound);
-        setSetupCollapsed(this.refs, this.state.setupCollapsed);
+        setSetupVisibility(this.refs, this.state.setupCollapsed);
     }
 
     renderResultHeading() {
@@ -104,9 +105,13 @@ class BracketController {
 
     renderResultSummary() {
         const champion = bracketChampion(this.state.bracket);
-        this.refs.resultChampion.textContent = champion || '—';
+        this.refs.resultChampion.textContent = champion
+            ? participantName(this.state.bracket, champion)
+            : '—';
         this.refs.resultChampionHelp.textContent = champion
-            ? bracketText('championComplete', { name: champion })
+            ? bracketText('championComplete', {
+                name: participantName(this.state.bracket, champion)
+            })
             : bracketText('championHelp');
     }
 
@@ -144,8 +149,12 @@ class BracketController {
     announceWinner(player) {
         const champion = bracketChampion(this.state.bracket);
         const message = champion
-            ? bracketText('championComplete', { name: champion })
-            : bracketText('selectedWinner', { name: player });
+            ? bracketText('championComplete', {
+                name: participantName(this.state.bracket, champion)
+            })
+            : bracketText('selectedWinner', {
+                name: participantName(this.state.bracket, player)
+            });
         setStatus(this.refs, message, 'success');
         announce(this.refs, message, this.windowRef.setTimeout.bind(this.windowRef));
     }
@@ -157,17 +166,33 @@ class BracketController {
             Math.min(roundIndex, this.state.bracket.rounds.length - 1)
         );
         this.render();
-        if (focus) focusSelectedRound(this.refs);
+        if (focus) {
+            focusSelectedRound(this.refs);
+            this.scrollSelectedRound();
+        }
+    }
+
+    scrollSelectedRound() {
+        const round = this.refs.board.querySelector(
+            `#bracket-round-${this.state.activeRound + 1}`
+        );
+        round?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+
+    showSetup() {
+        this.state.setupCollapsed = false;
+        this.render();
+        this.refs.participants.focus();
     }
 
     changeRound(delta) {
-        this.setRound(this.state.activeRound + delta);
+        this.setRound(this.state.activeRound + delta, true);
     }
 
     toggleSetup() {
         if (!this.state.bracket) return;
         this.state.setupCollapsed = !this.state.setupCollapsed;
-        setSetupCollapsed(this.refs, this.state.setupCollapsed);
+        setSetupVisibility(this.refs, this.state.setupCollapsed);
     }
 
     clearBracket() {

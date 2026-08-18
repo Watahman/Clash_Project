@@ -17,7 +17,7 @@ import { ENTITY_CATEGORY_LABELS } from '../minigames/entity-guesser-copy.js';
 
 const COPY = {
     en: {
-        entity: 'Entity Guesser', higherLower: 'Higher or Lower', kicker: 'ClashPanel Games',
+        entity: 'Entity Guesser', higherLower: 'Higher or Lower', kicker: 'ClashPanel Minigames',
         title: 'A different Clash challenge every day.', lead: 'Solve the Entity Guesser or test your stat knowledge in Higher or Lower, then switch to practice whenever you want.',
         today: "Today's daily", reset: 'Resets at 00:00 UTC', entityName: 'Entity Guesser', higherName: 'Higher or Lower',
         entityDescription: 'Use shared clues to identify a hidden Clash item in up to six attempts.', higherDescription: 'Read the shown metric, choose a direction, and build a combo across nine comparisons.',
@@ -28,7 +28,7 @@ const COPY = {
         ready: 'Ready to play', inProgress: 'In progress', solved: 'Solved', complete: 'Complete', playNow: 'Play now'
     },
     nl: {
-        entity: 'Entity Guesser', higherLower: 'Hoger of lager', kicker: 'ClashPanel Games',
+        entity: 'Entity Guesser', higherLower: 'Hoger of lager', kicker: 'ClashPanel Minigames',
         title: 'Elke dag een nieuwe Clash-uitdaging.', lead: 'Los de Entity Guesser op of test je kennis van statistieken in Hoger of lager. Schakel daarna wanneer je wilt naar oefenen.',
         today: 'Dagelijkse uitdaging', reset: 'Reset om 00:00 UTC', entityName: 'Entity Guesser', higherName: 'Hoger of lager',
         entityDescription: 'Gebruik gedeelde aanwijzingen om een verborgen Clash-item te vinden in maximaal zes pogingen.', higherDescription: 'Lees de getoonde waarde, kies een richting en bouw een combo in negen vergelijkingen.',
@@ -39,7 +39,7 @@ const COPY = {
         ready: 'Klaar om te spelen', inProgress: 'Bezig', solved: 'Opgelost', complete: 'Voltooid', playNow: 'Nu spelen'
     },
     de: {
-        entity: 'Entity Guesser', higherLower: 'Höher oder niedriger', kicker: 'ClashPanel Games',
+        entity: 'Entity Guesser', higherLower: 'Höher oder niedriger', kicker: 'ClashPanel Minigames',
         title: 'Jeden Tag eine neue Clash-Herausforderung.', lead: 'Löse den Entity Guesser oder teste dein Statistik-Wissen in Höher oder niedriger. Danach kannst du jederzeit üben.',
         today: 'Tägliche Aufgabe', reset: 'Reset um 00:00 UTC', entityName: 'Entity Guesser', higherName: 'Höher oder niedriger',
         entityDescription: 'Erkenne ein verborgenes Clash-Element anhand gemeinsamer Hinweise in bis zu sechs Versuchen.', higherDescription: 'Lies den angezeigten Wert, wähle eine Richtung und baue über neun Vergleiche eine Combo auf.',
@@ -50,7 +50,7 @@ const COPY = {
         ready: 'Bereit zum Spielen', inProgress: 'In Bearbeitung', solved: 'Gelöst', complete: 'Abgeschlossen', playNow: 'Jetzt spielen'
     },
     fr: {
-        entity: 'Entity Guesser', higherLower: 'Plus ou moins', kicker: 'Jeux ClashPanel',
+        entity: 'Entity Guesser', higherLower: 'Plus ou moins', kicker: 'Mini-jeux ClashPanel',
         title: 'Un nouveau défi Clash chaque jour.', lead: 'Résolvez l’Entity Guesser ou testez vos connaissances des statistiques dans Plus ou moins, puis passez à l’entraînement quand vous le souhaitez.',
         today: 'Défi du jour', reset: 'Réinitialisation à 00:00 UTC', entityName: 'Entity Guesser', higherName: 'Plus ou moins',
         entityDescription: 'Identifiez un élément Clash caché grâce à des indices communs en six essais maximum.', higherDescription: 'Lisez la valeur affichée, choisissez une direction et construisez un combo sur neuf comparaisons.',
@@ -61,7 +61,7 @@ const COPY = {
         ready: 'Prêt à jouer', inProgress: 'En cours', solved: 'Résolu', complete: 'Terminé', playNow: 'Jouer maintenant'
     },
     es: {
-        entity: 'Entity Guesser', higherLower: 'Mayor o menor', kicker: 'Juegos de ClashPanel',
+        entity: 'Entity Guesser', higherLower: 'Mayor o menor', kicker: 'Minijuegos de ClashPanel',
         title: 'Un desafío de Clash diferente cada día.', lead: 'Resuelve Entity Guesser o pon a prueba tus conocimientos de estadísticas en Mayor o menor; después cambia a práctica cuando quieras.',
         today: 'Desafío diario', reset: 'Se reinicia a las 00:00 UTC', entityName: 'Entity Guesser', higherName: 'Mayor o menor',
         entityDescription: 'Identifica un elemento oculto de Clash con pistas compartidas en un máximo de seis intentos.', higherDescription: 'Lee el valor mostrado, elige una dirección y crea un combo durante nueve comparaciones.',

@@ -909,6 +909,11 @@
     background: color-mix(in srgb, var(--wb-panel-raised) 70%, transparent);
 }
 
+.war-board--webby .war-player-card:focus-within {
+    border-color: var(--wb-line-strong);
+    background: color-mix(in srgb, var(--wb-panel-raised) 70%, transparent);
+}
+
 .war-board--webby .war-player-main {
     min-width: 0;
     gap: .75rem;
@@ -926,6 +931,19 @@
 
 .war-board--webby .war-player-main strong {
     color: var(--wb-text);
+}
+
+.war-board--webby .war-player-townhall {
+    width: 2.25rem;
+    min-height: 2.25rem;
+    border: 1px solid var(--wb-line);
+    border-radius: .6rem;
+    background: rgba(255, 255, 255, .025);
+}
+
+.war-board--webby .war-player-townhall .compete-townhall {
+    width: 1.9rem;
+    height: 1.9rem;
 }
 
 .war-board--webby .war-player-main small,

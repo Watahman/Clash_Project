@@ -4,6 +4,7 @@ import {
     BRACKET_MAX_PARTICIPANTS,
     bracketError,
     nextPowerOfTwo,
+    participantName,
     validateParticipants
 } from './bracket-model.js';
 import { validateImportedBracket } from './bracket-import-validator.js';
@@ -28,6 +29,10 @@ function createBracketId() {
     return `bracket-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+function createParticipantIds(participants) {
+    return participants.map((_, index) => `participant-${index + 1}`);
+}
+
 function createRounds(seeded) {
     const size = nextPowerOfTwo(seeded.length);
     const byeCount = size - seeded.length;
@@ -49,14 +54,20 @@ function createRounds(seeded) {
 }
 
 export function createBracket(participants, { shuffle = false, random = Math.random, name = 'Bracket' } = {}) {
-    const unique = validateParticipants(participants);
-    const seeded = shuffle ? shuffled(unique, random) : unique;
+    const names = validateParticipants(participants);
+    const participantIds = createParticipantIds(names);
+    const participantLabels = Object.fromEntries(
+        participantIds.map((id, index) => [id, names[index]])
+    );
+    const seeded = shuffle ? shuffled(participantIds, random) : participantIds;
     const rounds = createRounds(seeded);
     const bracket = {
         schemaVersion: BRACKET_SCHEMA_VERSION,
         id: createBracketId(),
         name: String(name || 'Bracket').trim() || 'Bracket',
-        participants: unique,
+        participants: names,
+        participantIds,
+        participantLabels,
         drawOrder: seeded,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -69,11 +80,13 @@ export function createBracket(participants, { shuffle = false, random = Math.ran
 export function setMatchWinner(bracket, matchId, winner) {
     const match = bracket.rounds.flat().find(item => item.id === matchId);
     if (!match) throw bracketError('That match could not be found.', 'match-not-found');
-    if (!winner || !match.players.includes(winner)) {
+    const winnerId = match.players.find(player => player === winner
+        || (participantName(bracket, player) === winner && !match.players.includes(winner)));
+    if (!winnerId) {
         throw bracketError('Choose a participant from this match.', 'invalid-winner');
     }
-    if (match.winner && match.winner !== winner) clearDownstream(bracket, match);
-    match.winner = winner;
+    if (match.winner && match.winner !== winnerId) clearDownstream(bracket, match);
+    match.winner = winnerId;
     placeWinnerInNextRound(bracket, match);
     propagateAutomaticWinners(bracket);
     bracket.updatedAt = new Date().toISOString();
