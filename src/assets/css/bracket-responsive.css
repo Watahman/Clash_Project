@@ -14,7 +14,7 @@
         padding: 16px;
     }
 
-    body.workspace-app[data-workspace-page="bracket"] .bracket-round-matches {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-board[data-representation="round-grid"] .bracket-round-matches {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
@@ -45,7 +45,7 @@
         overflow-x: clip;
     }
 
-    body.workspace-app[data-workspace-page="bracket"] .bracket-round-matches {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-board[data-representation="round-grid"] .bracket-round-matches {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -79,7 +79,7 @@
         padding: 16px;
     }
 
-    body.workspace-app[data-workspace-page="bracket"] .bracket-round-matches {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-board[data-representation="round-grid"] .bracket-round-matches {
         grid-template-columns: minmax(0, 1fr);
     }
 
@@ -148,6 +148,8 @@
     body.workspace-app[data-workspace-page="bracket"] .bracket-round.is-active,
     body.workspace-app[data-workspace-page="bracket"] .bracket-match,
     body.workspace-app[data-workspace-page="bracket"] .bracket-slot-player,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-connector,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round.is-classic-round,
     body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab,
     body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab::after {
         animation: none;

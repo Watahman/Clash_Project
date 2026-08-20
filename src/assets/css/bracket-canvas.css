@@ -1,5 +1,5 @@
-/* The editor shows one round at a time. This keeps a large tournament
-   readable without turning the workspace into a horizontally scrolling map. */
+/* Early rounds use a compact grid. The last eight return to a connected
+   bracket so the closing path remains easy to understand at a glance. */
 body.workspace-app[data-workspace-page="bracket"] .bracket-board {
     position: relative;
     display: block;
@@ -34,7 +34,7 @@ body.workspace-app[data-workspace-page="bracket"] .bracket-round-heading {
     letter-spacing: -.01em;
 }
 
-body.workspace-app[data-workspace-page="bracket"] .bracket-round-matches {
+body.workspace-app[data-workspace-page="bracket"] .bracket-board[data-representation="round-grid"] .bracket-round-matches {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     align-content: start;
@@ -158,10 +158,61 @@ body.workspace-app[data-workspace-page="bracket"] .bracket-match-state {
     white-space: nowrap;
 }
 
-/* Connectors remain in the renderer for compatibility, but are not part of
-   the compact round representation. */
 body.workspace-app[data-workspace-page="bracket"] .bracket-connectors {
-    display: none !important;
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    left: 0;
+    overflow: visible;
+    pointer-events: none;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-connector {
+    fill: none;
+    stroke: var(--bracket-line);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 170ms var(--cp-ease-standard),
+        stroke-width 170ms var(--cp-ease-standard);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-connector.is-active {
+    stroke: var(--bracket-accent);
+    stroke-width: 2;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-board[data-representation="classic"] {
+    display: flex;
+    min-height: 620px;
+    align-items: stretch;
+    gap: 48px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-color: var(--cp-border-2) transparent;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-board[data-representation="classic"] .bracket-round.is-classic-round {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex: 0 0 220px;
+    min-height: 572px;
+    flex-direction: column;
+    gap: 16px;
+    animation: bracket-round-reveal 280ms var(--cp-ease-emphasized) both;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-board[data-representation="classic"] .bracket-round-matches {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 16px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-board[data-representation="classic"] .bracket-round[data-active="true"] .bracket-round-heading {
+    color: var(--bracket-accent);
 }
 
 body.workspace-app[data-workspace-page="bracket"] .bracket-empty-state {

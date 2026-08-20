@@ -1,6 +1,7 @@
 import { t } from '../i18n/i18n.js';
 import { bracketChampion } from './bracket-engine.js';
 import { bracketText } from './bracket-copy.js';
+import { drawBracketConnectors } from './bracket-connectors.js';
 import { bracketIcon } from './bracket-icons.js';
 import { participantDisplayName } from './bracket-model.js';
 
@@ -26,15 +27,27 @@ function normalizeRound(bracket, activeRound) {
     return Math.max(0, Math.min(Number(activeRound) || 0, lastRound));
 }
 
-function setActiveRound(columns, activeRound) {
+function classicStartRound(bracket) {
+    const index = bracket.rounds.findIndex(round => round.length <= 4);
+    return index < 0 ? bracket.rounds.length - 1 : index;
+}
+
+function setRoundRepresentation(board, columns, bracket, activeRound) {
+    const classicStart = classicStartRound(bracket);
+    const classic = activeRound >= classicStart;
+    board.dataset.representation = classic ? 'classic' : 'round-grid';
+    board.dataset.classicStart = String(classicStart);
     columns.forEach((column, index) => {
         const active = index === activeRound;
+        const visible = classic ? index >= classicStart : active;
         column.dataset.active = String(active);
-        column.hidden = !active;
-        column.style.display = active ? '' : 'none';
-        column.setAttribute('aria-hidden', String(!active));
+        column.classList.toggle('is-classic-round', classic && visible);
+        column.hidden = !visible;
+        column.style.display = visible ? '' : 'none';
+        column.setAttribute('aria-hidden', String(!visible));
         column.tabIndex = active ? 0 : -1;
     });
+    return classic;
 }
 
 function renderRoundTabs(navigation, bracket, activeRound, onRoundChange) {
@@ -194,14 +207,7 @@ function renderEmpty(board) {
     board.appendChild(empty);
 }
 
-/**
- * Kept as a compatibility boundary for callers that still request a redraw.
- * The round-grid representation deliberately has no SVG connector layer.
- */
-export function drawBracketConnectors(board) {
-    board?.querySelectorAll('.bracket-connectors').forEach(element => element.remove());
-    return board;
-}
+export { drawBracketConnectors } from './bracket-connectors.js';
 
 export function renderBracketBoard({
     board,
@@ -215,6 +221,8 @@ export function renderBracketBoard({
     board.replaceChildren();
     const tabs = renderRoundTabs(navigation, bracket, activeRound, onRoundChange);
     if (!bracket) {
+        delete board.dataset.representation;
+        delete board.dataset.classicStart;
         renderEmpty(board);
         return { tabs, columns: [] };
     }
@@ -224,6 +232,7 @@ export function renderBracketBoard({
         renderRound(documentRef, round, index, bracket, changedMatchIds, onWinner)
     );
     board.append(...columns);
-    setActiveRound(columns, selectedRound);
+    const classic = setRoundRepresentation(board, columns, bracket, selectedRound);
+    if (classic) drawBracketConnectors(board, bracket);
     return { tabs, columns };
 }
