@@ -23,9 +23,6 @@ const REF_IDS = Object.freeze({
     roundNavigation: 'bracket-round-navigation',
     roundPrev: 'bracket-round-prev',
     roundNext: 'bracket-round-next',
-    setupToggle: 'bracket-setup-toggle',
-    setupToggleLabel: 'bracket-setup-toggle-label',
-    setupContent: 'bracket-setup-content',
     announcement: 'bracket-board-announcement',
     resetDialog: 'bracket-reset-dialog',
     resetConfirm: 'bracket-reset-confirm',
@@ -55,11 +52,10 @@ export function setStatus(refs, message = '', state = '') {
     refs.status.dataset.state = state;
 }
 
-export function renderModuleCopy(documentRef, refs, setupCollapsed) {
+export function renderModuleCopy(documentRef, refs) {
     documentRef.querySelectorAll('[data-bracket-copy]').forEach(element => {
         element.textContent = bracketText(element.dataset.bracketCopy);
     });
-    if (refs.setupToggle) updateSetupToggle(refs, setupCollapsed);
     if (refs.resetDialog) {
         refs.resetDialog.querySelector('h2').textContent = bracketText('resetConfirmTitle');
         refs.resetDialog.querySelector('[data-reset-copy]').textContent = bracketText('resetConfirmText');
@@ -68,18 +64,13 @@ export function renderModuleCopy(documentRef, refs, setupCollapsed) {
     }
 }
 
-function updateSetupToggle(refs, collapsed) {
-    refs.setupToggleLabel.textContent = bracketText(collapsed ? 'showSetup' : 'hideSetup');
-    refs.setupToggle.setAttribute('aria-label', refs.setupToggleLabel.textContent);
-}
-
 export function mountActionIcons(refs) {
     [
         [refs.seed, 'seed'], [refs.shuffle, 'shuffle'], [refs.importButton, 'upload'],
         [refs.exportButton, 'download'], [refs.reset, 'reset'], [refs.roundPrev, 'chevronLeft'],
-        [refs.roundNext, 'chevronRight'], [refs.setupToggle, 'bracket'],
+        [refs.roundNext, 'chevronRight'],
         [refs.returnSetup, 'bracket']
-    ].forEach(([button, name]) => button?.prepend(bracketIcon(name)));
+    ].forEach(([button, name]) => button?.prepend(bracketIcon(name, button.ownerDocument)));
 }
 
 export function updateSetupSummary(refs, bracket) {
@@ -96,11 +87,6 @@ export function setSetupVisibility(refs, hidden) {
     refs.setup.hidden = hidden;
     refs.returnSetup.hidden = !hidden;
     refs.layout?.classList.toggle('is-setup-complete', hidden);
-    refs.setupContent.hidden = false;
-    if (refs.setupToggle) {
-        refs.setupToggle.setAttribute('aria-expanded', 'true');
-        updateSetupToggle(refs, false);
-    }
 }
 
 export function applyBracketToForm(refs, bracket) {

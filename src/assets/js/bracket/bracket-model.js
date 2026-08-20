@@ -41,3 +41,12 @@ export function participantName(bracket, participant) {
     if (participant === null || participant === undefined) return '';
     return bracket?.participantLabels?.[participant] || String(participant);
 }
+
+export function participantDisplayName(bracket, participant, suffix = number => `participant ${number}`) {
+    const name = participantName(bracket, participant);
+    const ids = bracket?.participantIds || [];
+    const matching = ids.filter(id => participantName(bracket, id) === name);
+    if (matching.length < 2) return name;
+    const position = matching.indexOf(participant);
+    return position < 0 ? name : `${name} · ${suffix(position + 1)}`;
+}

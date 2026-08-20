@@ -27,14 +27,11 @@ function bindResetEvents(refs, controller) {
 }
 
 function bindNavigationEvents(refs, controller) {
-    refs.setupToggle?.addEventListener('click', () => controller.toggleSetup());
     refs.returnSetup?.addEventListener('click', () => controller.showSetup());
     refs.roundPrev.addEventListener('click', () => controller.changeRound(-1));
     refs.roundNext.addEventListener('click', () => controller.changeRound(1));
 }
 
 function bindWindowEvents(refs, controller, windowRef) {
-    refs.board.addEventListener('scroll', () => controller.redrawConnectors(), { passive: true });
-    windowRef.addEventListener('resize', () => controller.redrawConnectors(), { passive: true });
     windowRef.addEventListener('clashtools:language-changed', () => controller.languageChanged());
 }

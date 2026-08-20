@@ -11,8 +11,8 @@ const paths = Object.freeze({
     close: '<path d="m6 6 12 12M18 6 6 18"/>'
 });
 
-export function bracketIcon(name) {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+export function bracketIcon(name, documentRef = globalThis.document) {
+    const svg = documentRef.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewBox', '0 0 24 24');
     svg.setAttribute('fill', 'none');
     svg.setAttribute('aria-hidden', 'true');

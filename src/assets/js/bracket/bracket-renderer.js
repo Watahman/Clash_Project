@@ -2,31 +2,69 @@ import { t } from '../i18n/i18n.js';
 import { bracketChampion } from './bracket-engine.js';
 import { bracketText } from './bracket-copy.js';
 import { bracketIcon } from './bracket-icons.js';
-import { participantName } from './bracket-model.js';
+import { participantDisplayName } from './bracket-model.js';
+
+function ownerDocument(element) {
+    return element?.ownerDocument || globalThis.document;
+}
+
+function roundLabel(bracket, roundIndex) {
+    return roundIndex === bracket.rounds.length - 1
+        ? t('bracket.final')
+        : t('bracket.round', { round: roundIndex + 1 });
+}
+
+function roundProgress(round) {
+    return {
+        completed: round.filter(match => Boolean(match.winner)).length,
+        total: round.length
+    };
+}
+
+function normalizeRound(bracket, activeRound) {
+    const lastRound = Math.max(0, (bracket?.rounds?.length || 1) - 1);
+    return Math.max(0, Math.min(Number(activeRound) || 0, lastRound));
+}
 
 function setActiveRound(columns, activeRound) {
     columns.forEach((column, index) => {
         const active = index === activeRound;
         column.dataset.active = String(active);
-        column.setAttribute('aria-hidden', 'false');
+        column.hidden = !active;
+        column.style.display = active ? '' : 'none';
+        column.setAttribute('aria-hidden', String(!active));
+        column.tabIndex = active ? 0 : -1;
     });
 }
 
 function renderRoundTabs(navigation, bracket, activeRound, onRoundChange) {
     navigation.replaceChildren();
     if (!bracket) return [];
-    const tabs = bracket.rounds.map((round, index) => {
-        const button = document.createElement('button');
+    const selectedRound = normalizeRound(bracket, activeRound);
+    const documentRef = ownerDocument(navigation);
+    return bracket.rounds.map((round, index) => {
+        const button = documentRef.createElement('button');
+        const active = index === selectedRound;
+        const label = roundLabel(bracket, index);
+        const progress = roundProgress(round);
+        const progressText = bracketText('roundProgress', progress);
         button.type = 'button';
         button.className = 'bracket-round-tab';
         button.id = `bracket-round-tab-${index + 1}`;
         button.setAttribute('role', 'tab');
         button.setAttribute('aria-controls', `bracket-round-${index + 1}`);
-        button.setAttribute('aria-selected', String(index === activeRound));
-        button.tabIndex = index === activeRound ? 0 : -1;
-        button.textContent = index === bracket.rounds.length - 1
-            ? t('bracket.final')
-            : t('bracket.round', { round: index + 1 });
+        button.setAttribute('aria-selected', String(active));
+        button.setAttribute('aria-label', `${label}, ${progressText}`);
+        button.tabIndex = active ? 0 : -1;
+
+        const title = documentRef.createElement('span');
+        title.className = 'bracket-round-tab-label';
+        title.textContent = label;
+        const progressLabel = documentRef.createElement('span');
+        progressLabel.className = 'bracket-round-tab-progress';
+        progressLabel.textContent = progressText;
+        button.append(title, progressLabel);
+
         button.addEventListener('click', () => onRoundChange(index, true));
         button.addEventListener('keydown', event => {
             if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
@@ -40,20 +78,23 @@ function renderRoundTabs(navigation, bracket, activeRound, onRoundChange) {
         navigation.appendChild(button);
         return button;
     });
-    return tabs;
 }
 
-function renderSlot(bracket, match, player, slotIndex, isOpeningRound, onWinner) {
+function renderSlot(documentRef, bracket, match, player, slotIndex, isOpeningRound, onWinner) {
     if (!player) {
-        const empty = document.createElement('span');
+        const empty = documentRef.createElement('span');
         empty.className = `bracket-slot ${isOpeningRound ? 'bracket-slot-bye' : 'bracket-slot-waiting'}`;
         empty.textContent = isOpeningRound ? t('bracket.bye') : bracketText('waiting');
         empty.setAttribute('aria-label', empty.textContent);
         empty.dataset.slot = String(slotIndex);
         return empty;
     }
-    const button = document.createElement('button');
-    const name = participantName(bracket, player);
+    const button = documentRef.createElement('button');
+    const name = participantDisplayName(
+        bracket,
+        player,
+        number => bracketText('participantNumber', { number })
+    );
     button.type = 'button';
     button.className = 'bracket-slot bracket-slot-player';
     button.dataset.slot = String(slotIndex);
@@ -67,7 +108,7 @@ function renderSlot(bracket, match, player, slotIndex, isOpeningRound, onWinner)
             : bracketText('selectWinner', { name })
     );
     button.classList.toggle('is-winner', match.winner === player);
-    const label = document.createElement('span');
+    const label = documentRef.createElement('span');
     label.className = 'bracket-slot-name';
     label.textContent = name;
     button.appendChild(label);
@@ -75,8 +116,8 @@ function renderSlot(bracket, match, player, slotIndex, isOpeningRound, onWinner)
     return button;
 }
 
-function renderMatch(bracket, match, roundIndex, changedMatchIds, onWinner, champion) {
-    const card = document.createElement('article');
+function renderMatch(documentRef, bracket, match, roundIndex, changedMatchIds, onWinner, champion) {
+    const card = documentRef.createElement('article');
     card.className = 'bracket-match';
     card.dataset.matchId = match.id;
     card.dataset.round = String(roundIndex + 1);
@@ -84,16 +125,28 @@ function renderMatch(bracket, match, roundIndex, changedMatchIds, onWinner, cham
     if (changedMatchIds.has(match.id)) card.classList.add('is-updated');
     if (champion && match.winner === champion) card.classList.add('is-champion');
 
-    const slots = document.createElement('div');
+    const slots = documentRef.createElement('div');
     slots.className = 'bracket-match-slots';
     match.players.forEach((player, slotIndex) => {
-        slots.appendChild(renderSlot(bracket, match, player, slotIndex, roundIndex === 0, onWinner));
+        slots.appendChild(renderSlot(
+            documentRef,
+            bracket,
+            match,
+            player,
+            slotIndex,
+            roundIndex === 0,
+            onWinner
+        ));
     });
     card.appendChild(slots);
 
-    const state = document.createElement('p');
+    const state = documentRef.createElement('p');
     state.className = 'bracket-match-state';
-    const winnerName = participantName(bracket, match.winner);
+    const winnerName = participantDisplayName(
+        bracket,
+        match.winner,
+        number => bracketText('participantNumber', { number })
+    );
     state.textContent = match.winner
         ? bracketText('selectedWinner', { name: winnerName })
         : match.players.filter(Boolean).length === 2
@@ -104,97 +157,50 @@ function renderMatch(bracket, match, roundIndex, changedMatchIds, onWinner, cham
     return card;
 }
 
-function renderRound(round, roundIndex, bracket, changedMatchIds, onWinner) {
-    const column = document.createElement('section');
+function renderRound(documentRef, round, roundIndex, bracket, changedMatchIds, onWinner) {
+    const column = documentRef.createElement('section');
     column.className = 'bracket-round';
     column.id = `bracket-round-${roundIndex + 1}`;
     column.setAttribute('role', 'tabpanel');
     column.setAttribute('aria-labelledby', `bracket-round-tab-${roundIndex + 1}`);
     column.dataset.roundIndex = String(roundIndex);
-    const heading = document.createElement('h3');
+    const heading = documentRef.createElement('h3');
     heading.className = 'bracket-round-heading';
-    heading.textContent = roundIndex === bracket.rounds.length - 1
-        ? t('bracket.final')
-        : t('bracket.round', { round: roundIndex + 1 });
+    heading.textContent = roundLabel(bracket, roundIndex);
     column.appendChild(heading);
-    const list = document.createElement('div');
+    const list = documentRef.createElement('div');
     list.className = 'bracket-round-matches';
     const champion = bracketChampion(bracket);
     round.forEach(match => list.appendChild(
-        renderMatch(bracket, match, roundIndex, changedMatchIds, onWinner, champion)
+        renderMatch(documentRef, bracket, match, roundIndex, changedMatchIds, onWinner, champion)
     ));
     column.appendChild(list);
     return column;
 }
 
 function renderEmpty(board) {
-    const empty = document.createElement('div');
+    const documentRef = ownerDocument(board);
+    const empty = documentRef.createElement('div');
     empty.className = 'bracket-empty-state';
-    const icon = bracketIcon('bracket');
+    const icon = bracketIcon('bracket', documentRef);
     icon.classList.add('bracket-empty-icon');
     empty.appendChild(icon);
-    const heading = document.createElement('h3');
+    const heading = documentRef.createElement('h3');
     heading.textContent = t('bracket.title');
     empty.appendChild(heading);
-    const text = document.createElement('p');
+    const text = documentRef.createElement('p');
     text.textContent = bracketText('empty');
     empty.appendChild(text);
     board.appendChild(empty);
 }
 
-function createConnectorSvg(board) {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.classList.add('bracket-connectors');
-    svg.setAttribute('aria-hidden', 'true');
-    board.appendChild(svg);
-    return svg;
-}
-
-function connectorPath(svg, source, target, active, sourceId) {
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.classList.add('bracket-connector');
-    if (active) path.classList.add('is-active');
-    path.dataset.sourceMatch = sourceId;
-    const board = svg.parentElement;
-    const boardRect = board.getBoundingClientRect();
-    const sourceRect = source.getBoundingClientRect();
-    const targetRect = target.getBoundingClientRect();
-    const startX = sourceRect.right - boardRect.left + board.scrollLeft;
-    const startY = sourceRect.top - boardRect.top + board.scrollTop + sourceRect.height / 2;
-    const endX = targetRect.left - boardRect.left + board.scrollLeft;
-    const endY = targetRect.top - boardRect.top + board.scrollTop + targetRect.height / 2;
-    const middleX = startX + Math.max(18, (endX - startX) / 2);
-    path.setAttribute('d', `M ${startX} ${startY} H ${middleX} V ${endY} H ${endX}`);
-    svg.appendChild(path);
-}
-
-export function drawBracketConnectors(board, bracket) {
-    const svg = board.querySelector('.bracket-connectors');
-    if (!svg || !bracket) return;
-    const matchElements = new Map(
-        [...board.querySelectorAll('.bracket-match')].map(element => [element.dataset.matchId, element])
-    );
-    const width = Math.max(board.clientWidth, board.scrollWidth);
-    const height = Math.max(board.clientHeight, board.scrollHeight);
-    svg.setAttribute('width', String(width));
-    svg.setAttribute('height', String(height));
-    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-    svg.replaceChildren();
-    bracket.rounds.slice(0, -1).forEach((round, roundIndex) => {
-        round.forEach((match, matchIndex) => {
-            const source = matchElements.get(match.id);
-            const targetMatch = bracket.rounds[roundIndex + 1][Math.floor(matchIndex / 2)];
-            const target = matchElements.get(targetMatch.id);
-            if (!source || !target) return;
-            connectorPath(
-                svg,
-                source,
-                target,
-                Boolean(match.winner && targetMatch.players.includes(match.winner)),
-                match.id
-            );
-        });
-    });
+/**
+ * Kept as a compatibility boundary for callers that still request a redraw.
+ * The round-grid representation deliberately has no SVG connector layer.
+ */
+export function drawBracketConnectors(board) {
+    board?.querySelectorAll('.bracket-connectors').forEach(element => element.remove());
+    return board;
 }
 
 export function renderBracketBoard({
@@ -212,12 +218,12 @@ export function renderBracketBoard({
         renderEmpty(board);
         return { tabs, columns: [] };
     }
+    const documentRef = ownerDocument(board);
+    const selectedRound = normalizeRound(bracket, activeRound);
     const columns = bracket.rounds.map((round, index) =>
-        renderRound(round, index, bracket, changedMatchIds, onWinner)
+        renderRound(documentRef, round, index, bracket, changedMatchIds, onWinner)
     );
     board.append(...columns);
-    createConnectorSvg(board);
-    setActiveRound(columns, activeRound);
-    drawBracketConnectors(board, bracket);
+    setActiveRound(columns, selectedRound);
     return { tabs, columns };
 }

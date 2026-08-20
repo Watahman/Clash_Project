@@ -9,12 +9,13 @@
         padding: 16px;
     }
 
-    body.workspace-app[data-workspace-page="bracket"] .bracket-setup-content {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-setup-content,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-board {
         padding: 16px;
     }
 
-    body.workspace-app[data-workspace-page="bracket"] .bracket-board {
-        padding: 20px;
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-matches {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
@@ -32,7 +33,7 @@
     }
 
     body.workspace-app[data-workspace-page="bracket"] .bracket-layout {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     body.workspace-app[data-workspace-page="bracket"] .bracket-setup {
@@ -40,28 +41,20 @@
     }
 
     body.workspace-app[data-workspace-page="bracket"] .bracket-board {
-        min-height: 540px;
         overflow-x: hidden;
-        overflow-y: auto;
-    }
-
-    body.workspace-app[data-workspace-page="bracket"] .bracket-round {
-        display: none;
-        flex: 1 1 auto;
-        min-height: 492px;
-        width: 100%;
-    }
-
-    body.workspace-app[data-workspace-page="bracket"] .bracket-round[data-active="true"] {
-        display: flex;
+        overflow-x: clip;
     }
 
     body.workspace-app[data-workspace-page="bracket"] .bracket-round-matches {
-        justify-content: space-around;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    body.workspace-app[data-workspace-page="bracket"] .bracket-connectors {
-        display: none;
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-header {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta {
+        justify-content: start;
     }
 }
 
@@ -81,20 +74,13 @@
         padding: 16px;
     }
 
-    body.workspace-app[data-workspace-page="bracket"] .bracket-setup-content {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-setup-content,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-board {
         padding: 16px;
     }
 
-    body.workspace-app[data-workspace-page="bracket"] .bracket-result-header {
-        display: grid;
-    }
-
-    body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta {
-        gap: 16px;
-    }
-
-    body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta > span {
-        min-width: 0;
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-matches {
+        grid-template-columns: minmax(0, 1fr);
     }
 
     body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation {
@@ -115,13 +101,8 @@
         gap: 16px;
     }
 
-    body.workspace-app[data-workspace-page="bracket"] .bracket-board {
-        min-height: 480px;
-        padding: 16px;
-    }
-
-    body.workspace-app[data-workspace-page="bracket"] .bracket-round {
-        min-height: 432px;
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab {
+        min-height: 44px;
     }
 
     body.workspace-app[data-workspace-page="bracket"] .bracket-slot {
@@ -129,8 +110,7 @@
     }
 
     body.workspace-app[data-workspace-page="bracket"] .bracket-primary-actions .cp-button,
-    body.workspace-app[data-workspace-page="bracket"] #bracket-setup-toggle,
-    body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab {
+    body.workspace-app[data-workspace-page="bracket"] #bracket-setup-toggle {
         min-height: 44px;
     }
 
@@ -148,6 +128,11 @@
         margin-left: 0;
     }
 
+    body.workspace-app[data-workspace-page="bracket"] .bracket-return-setup {
+        width: 100%;
+        justify-content: center;
+    }
+
     body.workspace-app[data-workspace-page="bracket"] .bracket-dialog-actions {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -159,9 +144,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round[data-active="true"],
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round.is-active,
     body.workspace-app[data-workspace-page="bracket"] .bracket-match,
     body.workspace-app[data-workspace-page="bracket"] .bracket-slot-player,
-    body.workspace-app[data-workspace-page="bracket"] .bracket-connector {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab::after {
         animation: none;
         transition: none;
     }

@@ -33,7 +33,7 @@ export async function initBracketGenerator({
         fixtureFactory: createBracketFixture
     });
     bindBracketEvents({ refs, controller, windowRef });
-    renderModuleCopy(documentRef, refs, false);
+    renderModuleCopy(documentRef, refs);
     const loadedFixture = await controller.loadFixture();
     if (!loadedFixture) {
         await syncAuthSession().catch(() => null);

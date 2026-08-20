@@ -1,35 +1,214 @@
-.bracket-board { position: relative; display: flex; min-height: 620px; align-items: stretch; gap: 48px; overflow: auto; background: var(--cp-bg-elevated); padding: 24px; scrollbar-color: var(--cp-border-2) transparent; }
-.bracket-round { position: relative; z-index: 1; display: flex; flex: 0 0 220px; min-height: 572px; flex-direction: column; gap: 16px; }
-.bracket-round-heading { flex: 0 0 auto; color: var(--cp-text-2); font-family: var(--cp-font-heading); font-size: .8125rem; font-weight: 720; letter-spacing: -.01em; }
-.bracket-round-matches { display: flex; flex: 1 1 auto; flex-direction: column; justify-content: space-around; gap: 16px; }
+/* The editor shows one round at a time. This keeps a large tournament
+   readable without turning the workspace into a horizontally scrolling map. */
+body.workspace-app[data-workspace-page="bracket"] .bracket-board {
+    position: relative;
+    display: block;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-x: clip;
+    overflow-y: visible;
+    background: var(--cp-bg-elevated);
+    padding: 24px;
+}
 
-.bracket-match { position: relative; display: grid; flex: 0 0 auto; gap: 8px; min-height: 96px; border: 1px solid var(--cp-border-1); border-radius: 10px; background: var(--cp-surface-1); padding: 8px; transition: border-color 160ms var(--cp-ease-standard), background-color 160ms var(--cp-ease-standard); }
-.bracket-match:hover { border-color: var(--cp-border-2); }
-.bracket-match.is-champion { border-color: color-mix(in srgb, var(--bracket-accent) 52%, var(--cp-border-2)); background: color-mix(in srgb, var(--bracket-accent-soft) 72%, var(--cp-surface-1)); }
-.bracket-match.is-updated { animation: bracket-state-update 420ms var(--cp-ease-emphasized); }
-.bracket-match-slots { display: grid; gap: 4px; }
-.bracket-slot { display: flex; min-width: 0; min-height: 40px; align-items: center; border-radius: 6px; padding: 0 10px; font-size: .8125rem; line-height: 1.25; }
+body.workspace-app[data-workspace-page="bracket"] .bracket-round {
+    display: none;
+    width: 100%;
+    min-width: 0;
+}
 
-button.bracket-slot-player { width: 100%; justify-content: flex-start; border: 1px solid transparent; background: var(--cp-surface-2); color: var(--cp-text-1); cursor: pointer; font: 650 .8125rem/1.25 var(--cp-font-ui); text-align: left; transition: background-color 160ms var(--cp-ease-standard), border-color 160ms var(--cp-ease-standard), transform 160ms var(--cp-ease-standard); }
-button.bracket-slot-player:hover { border-color: var(--cp-border-2); background: var(--cp-surface-hover); }
-button.bracket-slot-player:active { transform: scale(.98); }
-button.bracket-slot-player.is-winner { border-color: color-mix(in srgb, var(--cp-brand) 48%, var(--cp-border-2)); background: var(--cp-brand-soft); box-shadow: inset 2px 0 0 var(--cp-brand); color: var(--cp-brand-strong); }
-.bracket-slot-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bracket-slot-bye,
-.bracket-slot-waiting { border: 1px dashed var(--cp-border-1); color: var(--cp-text-3); font-size: .75rem; }
-.bracket-slot-bye { background: color-mix(in srgb, var(--cp-surface-2) 72%, transparent); font-family: var(--cp-font-mono); font-size: .6875rem; text-transform: uppercase; }
-.bracket-match-state { min-height: 14px; margin: 0; overflow: hidden; color: var(--cp-text-3); font-size: .625rem; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+body.workspace-app[data-workspace-page="bracket"] .bracket-round[data-active="true"],
+body.workspace-app[data-workspace-page="bracket"] .bracket-round.is-active {
+    display: block;
+    animation: bracket-round-reveal 280ms var(--cp-ease-emphasized) both;
+}
 
-.bracket-connectors { position: absolute; z-index: 0; top: 0; left: 0; overflow: visible; pointer-events: none; }
-.bracket-connector { fill: none; stroke: var(--bracket-line); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: stroke 200ms var(--cp-ease-standard), stroke-width 200ms var(--cp-ease-standard); }
-.bracket-connector.is-active { stroke: var(--bracket-accent); stroke-width: 2; }
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-heading {
+    margin: 0 0 14px;
+    color: var(--cp-text-2);
+    font-family: var(--cp-font-heading);
+    font-size: .8125rem;
+    font-weight: 720;
+    letter-spacing: -.01em;
+}
 
-.bracket-empty-state { display: grid; max-width: 360px; margin: auto; justify-items: center; gap: 8px; padding: 40px 24px; text-align: center; }
-.bracket-empty-icon { width: 40px; height: 40px; margin-bottom: 8px; stroke: var(--bracket-accent); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.bracket-empty-state h3 { font-family: var(--cp-font-heading); font-size: 1.125rem; font-weight: 720; }
-.bracket-empty-state p { margin: 0; color: var(--cp-text-2); font-size: .8125rem; line-height: 1.55; }
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-matches {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-content: start;
+    gap: 16px;
+    min-width: 0;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-match {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 8px;
+    min-width: 0;
+    min-height: 124px;
+    border: 1px solid var(--cp-border-1);
+    border-radius: 10px;
+    background: var(--cp-surface-1);
+    padding: 10px;
+    transition: border-color 170ms var(--cp-ease-standard),
+        background-color 170ms var(--cp-ease-standard),
+        transform 170ms var(--cp-ease-standard),
+        box-shadow 170ms var(--cp-ease-standard);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-match:hover {
+    border-color: var(--cp-border-2);
+    background: var(--cp-surface-hover);
+    transform: translateY(-1px);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-match:focus-within {
+    border-color: color-mix(in srgb, var(--bracket-accent) 54%, var(--cp-border-2));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--bracket-accent) 18%, transparent);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-match.is-champion {
+    border-color: color-mix(in srgb, var(--bracket-accent) 58%, var(--cp-border-2));
+    background: color-mix(in srgb, var(--bracket-accent-soft) 72%, var(--cp-surface-1));
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-match.is-updated {
+    animation: bracket-state-update 420ms var(--cp-ease-emphasized);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-match-slots {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-slot {
+    display: flex;
+    min-width: 0;
+    min-height: 44px;
+    align-items: center;
+    border-radius: 6px;
+    padding: 0 10px;
+    font-size: .8125rem;
+    line-height: 1.25;
+}
+
+body.workspace-app[data-workspace-page="bracket"] button.bracket-slot-player {
+    width: 100%;
+    justify-content: flex-start;
+    border: 1px solid transparent;
+    background: var(--cp-surface-2);
+    color: var(--cp-text-1);
+    cursor: pointer;
+    font: 650 .8125rem/1.25 var(--cp-font-ui);
+    text-align: left;
+    transition: background-color 170ms var(--cp-ease-standard),
+        border-color 170ms var(--cp-ease-standard),
+        transform 170ms var(--cp-ease-standard);
+}
+
+body.workspace-app[data-workspace-page="bracket"] button.bracket-slot-player:hover {
+    border-color: var(--cp-border-2);
+    background: var(--cp-surface-hover);
+}
+
+body.workspace-app[data-workspace-page="bracket"] button.bracket-slot-player:active {
+    transform: translateY(1px);
+}
+
+body.workspace-app[data-workspace-page="bracket"] button.bracket-slot-player.is-winner {
+    border-color: color-mix(in srgb, var(--cp-brand) 52%, var(--cp-border-2));
+    background: var(--cp-brand-soft);
+    box-shadow: inset 2px 0 0 var(--cp-brand);
+    color: var(--cp-brand-strong);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-slot-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-slot-bye,
+body.workspace-app[data-workspace-page="bracket"] .bracket-slot-waiting {
+    border: 1px dashed var(--cp-border-1);
+    color: var(--cp-text-3);
+    font-size: .75rem;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-slot-bye {
+    background: color-mix(in srgb, var(--cp-surface-2) 72%, transparent);
+    font-family: var(--cp-font-mono);
+    font-size: .6875rem;
+    text-transform: uppercase;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-match-state {
+    min-height: 14px;
+    margin: 0;
+    overflow: hidden;
+    color: var(--cp-text-3);
+    font-size: .625rem;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Connectors remain in the renderer for compatibility, but are not part of
+   the compact round representation. */
+body.workspace-app[data-workspace-page="bracket"] .bracket-connectors {
+    display: none !important;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-empty-state {
+    display: grid;
+    max-width: 360px;
+    margin: auto;
+    justify-items: center;
+    gap: 8px;
+    padding: 40px 24px;
+    text-align: center;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-empty-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 8px;
+    stroke: var(--bracket-accent);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-empty-state h3 {
+    font-family: var(--cp-font-heading);
+    font-size: 1.125rem;
+    font-weight: 720;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-empty-state p {
+    margin: 0;
+    color: var(--cp-text-2);
+    font-size: .8125rem;
+    line-height: 1.55;
+}
+
+@keyframes bracket-round-reveal {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
 @keyframes bracket-state-update {
-    0% { border-color: var(--bracket-accent); background-color: var(--bracket-accent-soft); }
-    100% { border-color: var(--cp-border-1); background-color: var(--cp-surface-1); }
+    0% {
+        border-color: var(--bracket-accent);
+        background-color: var(--bracket-accent-soft);
+    }
+    100% {
+        border-color: var(--cp-border-1);
+        background-color: var(--cp-surface-1);
+    }
 }

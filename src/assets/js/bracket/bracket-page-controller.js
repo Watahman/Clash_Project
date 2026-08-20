@@ -4,7 +4,7 @@ import {
     importBracket,
     setMatchWinner
 } from './bracket-engine.js';
-import { participantName } from './bracket-model.js';
+import { participantDisplayName } from './bracket-model.js';
 import { t } from '../i18n/i18n.js';
 import { bracketText } from './bracket-copy.js';
 import { createBracketFixture } from './bracket-fixtures.js';
@@ -62,7 +62,6 @@ class BracketController {
             setStatus(this.refs, bracketText('localSave'), 'info');
         }
     }
-
     restore() {
         if (this.state.fixtureMode) return;
         try {
@@ -76,7 +75,6 @@ class BracketController {
             setStatus(this.refs, bracketText('restoreError'), 'error');
         }
     }
-
     render() {
         updateSetupSummary(this.refs, this.state.bracket);
         this.renderResultHeading();
@@ -93,7 +91,6 @@ class BracketController {
         updateRoundControls(this.refs, this.state.bracket, this.state.activeRound);
         setSetupVisibility(this.refs, this.state.setupCollapsed);
     }
-
     renderResultHeading() {
         const count = this.state.bracket?.participants.length || participantEntries(this.refs).length;
         const title = this.state.fixtureMode
@@ -102,15 +99,14 @@ class BracketController {
         this.refs.resultTitle.textContent = title;
         this.refs.resultCount.textContent = String(count);
     }
-
     renderResultSummary() {
         const champion = bracketChampion(this.state.bracket);
         this.refs.resultChampion.textContent = champion
-            ? participantName(this.state.bracket, champion)
+            ? this.displayName(champion)
             : '—';
         this.refs.resultChampionHelp.textContent = champion
             ? bracketText('championComplete', {
-                name: participantName(this.state.bracket, champion)
+                name: this.displayName(champion)
             })
             : bracketText('championHelp');
     }
@@ -131,7 +127,6 @@ class BracketController {
             setStatus(this.refs, bracketErrorCopy(error), 'error');
         }
     }
-
     chooseWinner(match, player) {
         if (!this.state.bracket) return;
         const before = snapshotMatches(this.state.bracket);
@@ -146,14 +141,21 @@ class BracketController {
         }
     }
 
+    displayName(player) {
+        return participantDisplayName(
+            this.state.bracket,
+            player,
+            number => bracketText('participantNumber', { number })
+        );
+    }
     announceWinner(player) {
         const champion = bracketChampion(this.state.bracket);
         const message = champion
             ? bracketText('championComplete', {
-                name: participantName(this.state.bracket, champion)
+                name: this.displayName(champion)
             })
             : bracketText('selectedWinner', {
-                name: participantName(this.state.bracket, player)
+                name: this.displayName(player)
             });
         setStatus(this.refs, message, 'success');
         announce(this.refs, message, this.windowRef.setTimeout.bind(this.windowRef));
@@ -171,14 +173,12 @@ class BracketController {
             this.scrollSelectedRound();
         }
     }
-
     scrollSelectedRound() {
         const round = this.refs.board.querySelector(
             `#bracket-round-${this.state.activeRound + 1}`
         );
-        round?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        round?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
     }
-
     showSetup() {
         this.state.setupCollapsed = false;
         this.render();
@@ -188,13 +188,6 @@ class BracketController {
     changeRound(delta) {
         this.setRound(this.state.activeRound + delta, true);
     }
-
-    toggleSetup() {
-        if (!this.state.bracket) return;
-        this.state.setupCollapsed = !this.state.setupCollapsed;
-        setSetupVisibility(this.refs, this.state.setupCollapsed);
-    }
-
     clearBracket() {
         this.state.bracket = null;
         this.state.activeRound = 0;
@@ -207,25 +200,20 @@ class BracketController {
         setStatus(this.refs);
         announce(this.refs, bracketText('empty'), this.windowRef.setTimeout.bind(this.windowRef));
     }
-
     openResetDialog() {
         if (!this.dialog.open()) this.clearBracket();
     }
-
     confirmReset() {
         this.dialog.close();
         this.clearBracket();
     }
-
     closeResetDialog() {
         this.dialog.close();
     }
-
     cancelReset(event) {
         event.preventDefault();
         this.closeResetDialog();
     }
-
     exportJson() {
         if (!this.state.bracket) {
             setStatus(this.refs, bracketText('empty'), 'error');
@@ -238,7 +226,6 @@ class BracketController {
         });
         setStatus(this.refs, t('bracket.export'), 'success');
     }
-
     async importJson(event) {
         const file = event.target.files?.[0];
         if (!file) return;
@@ -255,7 +242,6 @@ class BracketController {
             this.refs.importFile.value = '';
         }
     }
-
     applyImportedBracket(imported) {
         this.state.bracket = imported;
         this.state.fixtureMode = false;
@@ -266,7 +252,6 @@ class BracketController {
         this.save();
         this.render();
     }
-
     async loadFixture() {
         if (!this.fixture.isRequested()) return false;
         this.state.fixtureMode = true;
@@ -279,31 +264,26 @@ class BracketController {
         }
         return true;
     }
-
     showFixtureStatus() {
         if (!this.state.bracket) return;
         applyBracketToForm(this.refs, this.state.bracket);
         this.state.setupCollapsed = true;
         setStatus(this.refs, bracketText('fixtureLoaded'), 'info');
     }
-
     languageChanged() {
-        renderModuleCopy(this.documentRef, this.refs, this.state.setupCollapsed);
+        renderModuleCopy(this.documentRef, this.refs);
         if (this.state.fixtureMode) {
             this.refs.name.value = bracketText('fixtureName', { count: this.state.bracket?.participants.length || 0 });
         }
         this.render();
         updateGuidanceCopy(this.documentRef);
     }
-
     updateInputSummary() {
         updateSetupSummary(this.refs, this.state.bracket);
     }
-
     redrawConnectors() {
         this.connectorRenderer(this.refs.board, this.state.bracket);
     }
-
     getState() {
         return {
             bracket: this.state.bracket,
@@ -314,7 +294,6 @@ class BracketController {
         };
     }
 }
-
 export function createBracketController(options) {
     return new BracketController(options);
 }
