@@ -38,6 +38,7 @@ public class SUPABASE_Achievements {
     private final AchievementEvaluator evaluator = new AchievementEvaluator();
     private final AchievementMetricCollector metricCollector;
     private final ClanAchievementLedger clanLedger = new ClanAchievementLedger();
+    private final LinkedAccountRepository accounts = new LinkedAccountRepository();
 
     public SUPABASE_Achievements(HttpServer server, Config conf) {
         this.server = server;
@@ -393,32 +394,9 @@ public class SUPABASE_Achievements {
     }
 
     private void ensureOwnedAccount(String userId, String playerTag) throws Exception {
-        String result = SUPABASE_Client.getWithBody("users", "select=accounts&id=" + SUPABASE_Client.eq(userId) + "&limit=1");
-        JsonArray users = JsonParser.parseString(result).getAsJsonArray();
-        if (users.isEmpty()) throw new HttpException(404, "{\"error\":\"Gebruiker niet gevonden\"}");
-
-        JsonElement accounts = users.get(0).getAsJsonObject().get("accounts");
-        if (!containsPlayerTag(accounts, playerTag)) {
+        if (!accounts.owns(userId, playerTag)) {
             throw new HttpException(403, "{\"error\":\"Deze speler is niet als geverifieerd account gekoppeld\",\"code\":\"ACCOUNT_NOT_LINKED\"}");
         }
-    }
-
-    private boolean containsPlayerTag(JsonElement element, String playerTag) {
-        if (element == null || element.isJsonNull()) return false;
-        if (element.isJsonPrimitive() && element.getAsJsonPrimitive().isString()) {
-            try { return playerTag.equals(CacheKeys.requireValidTag(element.getAsString())); }
-            catch (IllegalArgumentException ignored) { return false; }
-        }
-        if (element.isJsonArray()) {
-            for (JsonElement child : element.getAsJsonArray()) if (containsPlayerTag(child, playerTag)) return true;
-            return false;
-        }
-        if (!element.isJsonObject()) return false;
-        JsonObject object = element.getAsJsonObject();
-        for (String key : List.of("tag", "playerTag", "accountTag", "clashTag")) {
-            if (object.has(key) && containsPlayerTag(object.get(key), playerTag)) return true;
-        }
-        return false;
     }
 
     private String requiredQueryParameter(Map<String, String> parameters, String name) {

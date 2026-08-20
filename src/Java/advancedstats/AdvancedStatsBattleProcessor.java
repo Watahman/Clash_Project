@@ -65,10 +65,6 @@ public final class AdvancedStatsBattleProcessor {
     private final Store store;
     private final ArmyShareCodeParser armyParser;
 
-    public AdvancedStatsBattleProcessor() {
-        this(new AdvancedStatsRepository(), new ArmyShareCodeParser());
-    }
-
     AdvancedStatsBattleProcessor(Store store, ArmyShareCodeParser armyParser) {
         this.store = Objects.requireNonNull(store, "store");
         this.armyParser = Objects.requireNonNull(armyParser, "armyParser");

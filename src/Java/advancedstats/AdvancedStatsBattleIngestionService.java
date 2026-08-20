@@ -43,14 +43,6 @@ public final class AdvancedStatsBattleIngestionService {
     private final Clock clock;
     private final AchievementReconciliation achievementReconciliation;
 
-    public AdvancedStatsBattleIngestionService() {
-        AdvancedStatsAchievementReconciler reconciler = new AdvancedStatsAchievementReconciler();
-        this.battleLogParser = new AdvancedStatsBattleLogParser();
-        this.processor = new AdvancedStatsBattleProcessor();
-        this.clock = Clock.systemUTC();
-        this.achievementReconciliation = reconciler::reconcile;
-    }
-
     AdvancedStatsBattleIngestionService(
             AdvancedStatsBattleLogParser battleLogParser,
             AdvancedStatsBattleProcessor processor,

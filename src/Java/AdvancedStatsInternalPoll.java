@@ -1,19 +1,14 @@
 package Java;
 
-import Java.advancedstats.AdvancedStatsBattleLogHistorySource;
-import Java.advancedstats.AdvancedStatsCapabilityBasedSource;
 import Java.advancedstats.AdvancedStatsCompactScheduledCollector;
 import Java.advancedstats.AdvancedStatsCollectorRepository;
 import Java.advancedstats.ClashKingV2AdvancedStatsSource;
-import Java.advancedstats.AdvancedStatsHistorySource;
 import Java.advancedstats.AdvancedStatsScheduledCollector;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
 import java.time.Clock;
-import java.util.ArrayList;
-import java.util.List;
 
 /** Protected Cloud Scheduler trigger for one bounded Advanced Stats collection pass. */
 public final class AdvancedStatsInternalPoll {
@@ -33,10 +28,9 @@ public final class AdvancedStatsInternalPoll {
         this.utils = new API_Utils(config);
         this.collectorConfig = new AdvancedStatsCollectorConfig();
 
-        AdvancedStatsBattleLogSource source = new AdvancedStatsBattleLogSource(config);
         this.compactCollector = new AdvancedStatsCompactScheduledCollector(
                 new AdvancedStatsCollectorRepository(),
-                workerId -> compactSource(config, source),
+                workerId -> new ClashKingV2AdvancedStatsSource(config),
                 Clock.systemUTC(),
                 collectorConfig.compactSettings()
         );
@@ -54,18 +48,6 @@ public final class AdvancedStatsInternalPoll {
         this.collectorConfig = collectorConfig;
         this.collector = collector;
         this.compactCollector = null;
-    }
-
-    private AdvancedStatsHistorySource compactSource(
-            Config config,
-            AdvancedStatsBattleLogSource official
-    ) {
-        List<AdvancedStatsHistorySource> sources = new ArrayList<>();
-        sources.add(new ClashKingV2AdvancedStatsSource(config));
-        if (config.isClashKingOfficialFallbackEnabled()) {
-            sources.add(new AdvancedStatsBattleLogHistorySource(official::fetchFresh));
-        }
-        return new AdvancedStatsCapabilityBasedSource(sources);
     }
 
     public void registerRoute() {

@@ -1,43 +1,24 @@
 package Java.advancedstats;
 
 import Java.HttpException;
-import Java.SUPABASE_Client;
+import Java.LinkedAccountRepository;
 import Java.cache.CacheKeys;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import java.util.UUID;
 
 /** Ensures persistent tracking is only enabled for an account already linked to the user. */
 public final class AdvancedStatsAccountOwnership implements AdvancedStatsLifecycleService.Ownership {
     private static final String[] TAG_FIELDS = {"tag", "playerTag", "accountTag", "clashTag"};
+    private final LinkedAccountRepository accounts = new LinkedAccountRepository();
 
     @Override
     public String requireLinkedAccount(UUID userId, String rawPlayerTag) throws Exception {
         if (userId == null) throw new IllegalArgumentException("userId is required");
         String playerTag = CacheKeys.requireValidTag(rawPlayerTag);
 
-        String response = SUPABASE_Client.getWithBody(
-                "users",
-                "select=accounts&id=" + SUPABASE_Client.eq(userId.toString()) + "&limit=1"
-        );
-        JsonElement parsed = JsonParser.parseString(response == null ? "[]" : response);
-        if (!parsed.isJsonArray()) {
-            throw new IllegalStateException("User account lookup must return an array");
-        }
-
-        JsonArray users = parsed.getAsJsonArray();
-        if (users.isEmpty()) {
-            throw new HttpException(
-                    403,
-                    "{\"error\":\"Gebruikersprofiel is niet beschikbaar\",\"code\":\"PROFILE_NOT_LINKED\"}"
-            );
-        }
-
-        JsonElement accounts = users.get(0).getAsJsonObject().get("accounts");
-        if (!containsLinkedAccount(accounts, playerTag)) {
+        if (!accounts.owns(userId.toString(), playerTag)) {
             throw new HttpException(
                     403,
                     "{\"error\":\"Dit Clash-account is niet gekoppeld aan je profiel\",\"code\":\"ADVANCED_STATS_ACCOUNT_NOT_LINKED\"}"

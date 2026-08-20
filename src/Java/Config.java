@@ -27,10 +27,6 @@ public class Config {
             env("CLASHKING_V2_BASE_URL"),
             "https://api.clashk.ing"
     );
-    String _CLASHKING_FALLBACK_TO_OFFICIAL = firstNonBlank(
-            env("CLASHKING_FALLBACK_TO_OFFICIAL"),
-            "false"
-    );
     String _CLASHKING_RANKED_SEASON = firstNonBlank(
             env("CLASHKING_RANKED_SEASON"),
             env("CLASHKING_V2_RANKED_SEASON")
@@ -276,10 +272,6 @@ public class Config {
 
     public String getClashKingBaseUrl() {
         return _CLASHKING_BASE_URL;
-    }
-
-    public boolean isClashKingOfficialFallbackEnabled() {
-        return "true".equalsIgnoreCase(_CLASHKING_FALLBACK_TO_OFFICIAL);
     }
 
     public String getClashKingRankedSeason() {

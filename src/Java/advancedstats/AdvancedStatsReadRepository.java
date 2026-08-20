@@ -32,9 +32,8 @@ public final class AdvancedStatsReadRepository
 
     @Override
     public JsonObject overview(UUID trackingId, Instant from) throws Exception {
-        JsonObject body = trackingBody(trackingId);
-        addInstant(body, "p_from", from);
-        return objectRpc("read_advanced_stats_overview_v1", body);
+        return AdvancedStatsPublicSourceMetadata.sanitizeOverview(
+                compactAggregator.overview(trackingId, from));
     }
 
     @Override
@@ -49,21 +48,12 @@ public final class AdvancedStatsReadRepository
 
     @Override
     public JsonObject compactOverview(UUID trackingId, Instant from) throws Exception {
-        try {
-            return AdvancedStatsPublicSourceMetadata.sanitizeOverview(
-                    compactAggregator.overview(trackingId, from));
-        } catch (Exception compactFailure) {
-            return overview(trackingId, from);
-        }
+        return overview(trackingId, from);
     }
 
     @Override
     public JsonElement units(UUID trackingId, Instant from, AdvancedStatsUnitCategory category) throws Exception {
-        JsonObject body = trackingBody(trackingId);
-        addInstant(body, "p_from", from);
-        if (category == null) body.add("p_category", JsonNull.INSTANCE);
-        else body.addProperty("p_category", category.name());
-        return elementRpc("read_advanced_stats_units_v1", body);
+        return compactAggregator.units(trackingId, from, category);
     }
 
     @Override
@@ -81,19 +71,12 @@ public final class AdvancedStatsReadRepository
     @Override
     public JsonElement compactUnits(UUID trackingId, Instant from, AdvancedStatsUnitCategory category)
             throws Exception {
-        try {
-            return compactAggregator.units(trackingId, from, category);
-        } catch (Exception compactFailure) {
-            return units(trackingId, from, category);
-        }
+        return units(trackingId, from, category);
     }
 
     @Override
     public JsonElement armies(UUID trackingId, Instant from, int limit) throws Exception {
-        JsonObject body = trackingBody(trackingId);
-        addInstant(body, "p_from", from);
-        body.addProperty("p_limit", limit);
-        return elementRpc("read_advanced_stats_armies_v1", body);
+        return compactAggregator.armies(trackingId, from, limit);
     }
 
     @Override
@@ -108,11 +91,7 @@ public final class AdvancedStatsReadRepository
 
     @Override
     public JsonElement compactArmies(UUID trackingId, Instant from, int limit) throws Exception {
-        try {
-            return compactAggregator.armies(trackingId, from, limit);
-        } catch (Exception compactFailure) {
-            return armies(trackingId, from, limit);
-        }
+        return armies(trackingId, from, limit);
     }
 
     @Override
@@ -123,17 +102,15 @@ public final class AdvancedStatsReadRepository
             Instant cursorAt,
             UUID cursorId
     ) throws Exception {
-        JsonObject body = trackingBody(trackingId);
-        addInstant(body, "p_from", from);
-        body.addProperty("p_limit", limit);
-        addInstant(body, "p_cursor_at", cursorAt);
-        if (cursorId == null) body.add("p_cursor_id", JsonNull.INSTANCE);
-        else body.addProperty("p_cursor_id", cursorId.toString());
-        return objectRpc("read_advanced_stats_battles_v1", body);
+        return unsupportedBattleHistory();
     }
 
     @Override
     public JsonObject battles(UUID trackingId, AdvancedStatsScope scope, Instant from, int limit) {
+        return unsupportedBattleHistory();
+    }
+
+    private JsonObject unsupportedBattleHistory() {
         JsonObject page = new JsonObject();
         page.add("items", new com.google.gson.JsonArray());
         page.addProperty("hasMore", false);
@@ -144,9 +121,7 @@ public final class AdvancedStatsReadRepository
 
     @Override
     public JsonElement trends(UUID trackingId, Instant from) throws Exception {
-        JsonObject body = trackingBody(trackingId);
-        addInstant(body, "p_from", from);
-        return elementRpc("read_advanced_stats_trends_v1", body);
+        return compactAggregator.trends(trackingId, from);
     }
 
     @Override
@@ -160,11 +135,7 @@ public final class AdvancedStatsReadRepository
 
     @Override
     public JsonElement compactTrends(UUID trackingId, Instant from) throws Exception {
-        try {
-            return compactAggregator.trends(trackingId, from);
-        } catch (Exception compactFailure) {
-            return trends(trackingId, from);
-        }
+        return trends(trackingId, from);
     }
 
     private JsonObject trackingBody(UUID trackingId) {
@@ -179,14 +150,6 @@ public final class AdvancedStatsReadRepository
         if (scope == null) throw new IllegalArgumentException("scope is required");
         body.addProperty("p_scope", scope.apiValue());
         return body;
-    }
-
-    private JsonObject objectRpc(String function, JsonObject body) throws Exception {
-        JsonElement value = elementRpc(function, body);
-        if (!value.isJsonObject()) {
-            throw new IllegalStateException("Advanced Stats read RPC must return an object: " + function);
-        }
-        return value.getAsJsonObject();
     }
 
     private JsonObject objectRpcWithFallback(String primary, String fallback, JsonObject body) throws Exception {

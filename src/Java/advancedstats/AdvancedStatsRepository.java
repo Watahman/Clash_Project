@@ -13,16 +13,9 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-/** Backend-only persistence boundary for Advanced Stats. */
-public final class AdvancedStatsRepository
-        implements AdvancedStatsLifecycleService.Store, AdvancedStatsBattleProcessor.Store {
+/** Backend-only persistence boundary for the Advanced Stats tracker lifecycle. */
+public final class AdvancedStatsRepository implements AdvancedStatsLifecycleService.Store {
     static final String TRACKING_TABLE = "advanced_stats_tracking";
-    static final String BATTLES_TABLE = "advanced_stats_battles";
-    static final String BATTLE_UNITS_TABLE = "advanced_stats_battle_units";
-    static final String UNIT_TOTALS_TABLE = "advanced_stats_unit_totals";
-    static final String ARMY_TOTALS_TABLE = "advanced_stats_army_totals";
-    static final String DAILY_TABLE = "advanced_stats_daily";
-    static final String GAPS_TABLE = "advanced_stats_tracking_gaps";
 
     private static final String TRACKING_SELECT = String.join(",",
             "id", "user_id", "player_tag", "player_name", "town_hall_level", "status",
@@ -113,168 +106,6 @@ public final class AdvancedStatsRepository
                 body.toString()
         ));
         return booleanValue(result, "deleted", false);
-    }
-
-    @Override
-    public AdvancedStatsModels.SaveBattleResult saveProcessedBattle(
-            UUID trackingId,
-            AdvancedStatsModels.BattleCandidate battle,
-            String rawFingerprint,
-            AdvancedStatsModels.ParsedArmy army,
-            boolean bootstrapImport,
-            int parserVersion
-    ) throws Exception {
-        if (trackingId == null) throw new IllegalArgumentException("trackingId is required");
-        if (battle == null) throw new IllegalArgumentException("battle is required");
-        if (army == null) throw new IllegalArgumentException("army is required");
-        String fingerprint = AdvancedStatsModels.requireSha256(rawFingerprint, "fingerprint");
-
-        JsonObject body = baseBattleRpcBody(trackingId, battle, fingerprint, bootstrapImport, parserVersion);
-        body.addProperty("p_army_data_available", army.armyDataAvailable());
-        body.add("p_units", unitsJson(army));
-        if (army.armyDataAvailable()) {
-            body.addProperty("p_army_hash", army.normalizedArmyHash());
-            body.add("p_normalized_army_json", JsonParser.parseString(army.normalizedArmyJson()));
-        } else {
-            body.add("p_army_hash", JsonNull.INSTANCE);
-            body.add("p_normalized_army_json", JsonNull.INSTANCE);
-        }
-
-        JsonObject result = parseObject(SUPABASE_Client.rpc("save_advanced_stats_battle_v3", body.toString()));
-        if (!booleanValue(result, "inserted", false)) {
-            return AdvancedStatsModels.SaveBattleResult.duplicate();
-        }
-        return new AdvancedStatsModels.SaveBattleResult(
-                true,
-                UUID.fromString(requiredString(result, "battleId"))
-        );
-    }
-
-    @Override
-    public AdvancedStatsModels.SaveBattleResult saveProcessedBattleWithLease(
-            UUID trackingId,
-            AdvancedStatsModels.BattleCandidate battle,
-            String rawFingerprint,
-            AdvancedStatsModels.ParsedArmy army,
-            boolean bootstrapImport,
-            int parserVersion,
-            String workerId
-    ) throws Exception {
-        if (workerId == null || workerId.isBlank()) {
-            return saveProcessedBattle(trackingId, battle, rawFingerprint, army, bootstrapImport, parserVersion);
-        }
-        String fingerprint = AdvancedStatsModels.requireSha256(rawFingerprint, "fingerprint");
-        JsonObject body = baseBattleRpcBody(trackingId, battle, fingerprint, bootstrapImport, parserVersion);
-        body.addProperty("p_worker_id", workerId.trim());
-        body.addProperty("p_army_data_available", army.armyDataAvailable());
-        body.add("p_units", unitsJson(army));
-        if (army.armyDataAvailable()) {
-            body.addProperty("p_army_hash", army.normalizedArmyHash());
-            body.add("p_normalized_army_json", JsonParser.parseString(army.normalizedArmyJson()));
-        } else {
-            body.add("p_army_hash", JsonNull.INSTANCE);
-            body.add("p_normalized_army_json", JsonNull.INSTANCE);
-        }
-        JsonObject result = parseObject(SUPABASE_Client.rpc("save_advanced_stats_battle_v4", body.toString()));
-        if (!booleanValue(result, "inserted", false)) return AdvancedStatsModels.SaveBattleResult.duplicate();
-        return new AdvancedStatsModels.SaveBattleResult(true, UUID.fromString(requiredString(result, "battleId")));
-    }
-
-    @Override
-    public boolean recordParserError(
-            UUID trackingId,
-            AdvancedStatsModels.BattleCandidate battle,
-            String rawFingerprint,
-            boolean bootstrapImport,
-            int parserVersion
-    ) throws Exception {
-        if (trackingId == null) throw new IllegalArgumentException("trackingId is required");
-        if (battle == null) throw new IllegalArgumentException("battle is required");
-        String fingerprint = AdvancedStatsModels.requireSha256(rawFingerprint, "fingerprint");
-        JsonObject body = baseBattleRpcBody(trackingId, battle, fingerprint, bootstrapImport, parserVersion);
-        JsonObject result = parseObject(SUPABASE_Client.rpc(
-                "record_advanced_stats_parser_error_v2",
-                body.toString()
-        ));
-        return booleanValue(result, "inserted", false);
-    }
-
-    @Override
-    public boolean recordParserErrorWithLease(
-            UUID trackingId,
-            AdvancedStatsModels.BattleCandidate battle,
-            String rawFingerprint,
-            boolean bootstrapImport,
-            int parserVersion,
-            String workerId
-    ) throws Exception {
-        if (workerId == null || workerId.isBlank()) {
-            return recordParserError(trackingId, battle, rawFingerprint, bootstrapImport, parserVersion);
-        }
-        String fingerprint = AdvancedStatsModels.requireSha256(rawFingerprint, "fingerprint");
-        JsonObject body = baseBattleRpcBody(trackingId, battle, fingerprint, bootstrapImport, parserVersion);
-        body.addProperty("p_worker_id", workerId.trim());
-        JsonObject result = parseObject(SUPABASE_Client.rpc(
-                "record_advanced_stats_parser_error_v3", body.toString()
-        ));
-        return booleanValue(result, "inserted", false);
-    }
-
-    public boolean battleFingerprintExists(UUID trackingId, String rawFingerprint) throws Exception {
-        if (trackingId == null) throw new IllegalArgumentException("trackingId is required");
-        String fingerprint = AdvancedStatsModels.requireSha256(rawFingerprint, "fingerprint");
-        String query = "select=id"
-                + "&tracking_id=" + SUPABASE_Client.eq(trackingId.toString())
-                + "&battle_fingerprint=" + SUPABASE_Client.eq(fingerprint)
-                + "&limit=1";
-        return !parseArray(SUPABASE_Client.getWithBody(BATTLES_TABLE, query)).isEmpty();
-    }
-
-    private JsonObject baseBattleRpcBody(
-            UUID trackingId,
-            AdvancedStatsModels.BattleCandidate battle,
-            String fingerprint,
-            boolean bootstrapImport,
-            int parserVersion
-    ) {
-        JsonObject body = new JsonObject();
-        body.addProperty("p_tracking_id", trackingId.toString());
-        body.addProperty("p_player_tag", battle.playerTag());
-        body.addProperty("p_battle_fingerprint", fingerprint);
-        addInstant(body, "p_battle_timestamp", battle.battleTimestamp());
-        addInstant(body, "p_observed_at", battle.observedAt());
-        body.addProperty("p_battle_type", battle.battleType());
-        body.addProperty("p_opponent_player_tag", battle.opponentPlayerTag());
-        body.addProperty("p_opponent_name", battle.opponentName());
-        addInteger(body, "p_opponent_town_hall", battle.opponentTownHall());
-        addInteger(body, "p_player_town_hall", battle.playerTownHall());
-        addInteger(body, "p_stars", battle.stars());
-        addDouble(body, "p_destruction_percentage", battle.destructionPercentage());
-        body.addProperty("p_army_share_code", battle.armyShareCode());
-        body.addProperty("p_loot_gold", battle.lootGold());
-        body.addProperty("p_loot_elixir", battle.lootElixir());
-        body.addProperty("p_loot_dark_elixir", battle.lootDarkElixir());
-        body.addProperty("p_available_gold", battle.availableGold());
-        body.addProperty("p_available_elixir", battle.availableElixir());
-        body.addProperty("p_available_dark_elixir", battle.availableDarkElixir());
-        body.addProperty("p_bootstrap_import", bootstrapImport);
-        body.addProperty("p_parser_version", Math.max(1, parserVersion));
-        return body;
-    }
-
-    private JsonArray unitsJson(AdvancedStatsModels.ParsedArmy army) {
-        JsonArray units = new JsonArray();
-        for (AdvancedStatsModels.UnitUsage unit : army.units()) {
-            JsonObject item = new JsonObject();
-            item.addProperty("unit_key", unit.unitKey());
-            item.addProperty("unit_name", unit.unitName());
-            item.addProperty("category", unit.category().name());
-            item.addProperty("quantity", unit.quantity());
-            if (unit.unitLevel() == null) item.add("unit_level", JsonNull.INSTANCE);
-            else item.addProperty("unit_level", unit.unitLevel());
-            units.add(item);
-        }
-        return units;
     }
 
     private AdvancedStatsModels.TrackingState requireTracking(UUID userId, String playerTag) throws Exception {
@@ -382,18 +213,4 @@ public final class AdvancedStatsRepository
         }
     }
 
-    private void addInstant(JsonObject object, String field, Instant value) {
-        if (value == null) object.add(field, JsonNull.INSTANCE);
-        else object.addProperty(field, value.toString());
-    }
-
-    private void addInteger(JsonObject object, String field, Integer value) {
-        if (value == null) object.add(field, JsonNull.INSTANCE);
-        else object.addProperty(field, value);
-    }
-
-    private void addDouble(JsonObject object, String field, Double value) {
-        if (value == null) object.add(field, JsonNull.INSTANCE);
-        else object.addProperty(field, value);
-    }
 }
