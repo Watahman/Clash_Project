@@ -11,6 +11,7 @@ import { initPlayerPerformanceClient } from "../cwl/player-performance-client.js
 import { initPlayerPerformancePopover } from "../cwl/cwl-player-performance-popover.js";
 import { initAutoPlan } from "../cwl/auto-plan/cwl-auto-plan-ui.js";
 import { initOptimizePlan } from "../cwl/optimize-plan/cwl-optimize-plan-ui.js?v=20260812-1";
+import { initCwlPlanExport } from "../cwl/export/cwl-export-ui.js";
 import { initPlannerSurface } from "../cwl/cwl-planner-ui.js";
 import {
     applyPlannerFixture,
@@ -101,6 +102,7 @@ async function init() {
     initPlayerPerformancePopover();
     initAutoPlan();
     initOptimizePlan();
+    initCwlPlanExport();
     initPlannerSurface({ root: document });
     initPlanNameSync();
     initPlannerHeaderState();

@@ -167,7 +167,7 @@ function readPlayerCard(player) {
     return snapshot;
 }
 
-function serializePlan() {
+function serializePlan({ persistCache = true } = {}) {
     const pollMeta = getActiveCwlPollMeta();
     const document = {
         schemaVersion: CWL_PLAN_SCHEMA_VERSION,
@@ -192,11 +192,35 @@ function serializePlan() {
         }
     };
     const validated = validatePlanDocument(document);
-    localStorage.setItem(
-        'clashtools_last_planner_players',
-        JSON.stringify([...validated.freePlayers, ...validated.clans.flatMap(clan => clan.players)])
-    );
+    if (persistCache) {
+        localStorage.setItem(
+            'clashtools_last_planner_players',
+            JSON.stringify([...validated.freePlayers, ...validated.clans.flatMap(clan => clan.players)])
+        );
+    }
     return validated;
+}
+
+function freezeDeep(value, seen = new WeakSet()) {
+    if (!value || typeof value !== 'object' || seen.has(value)) return value;
+    seen.add(value);
+    Object.values(value).forEach(child => freezeDeep(child, seen));
+    return Object.freeze(value);
+}
+
+function exportTimestamp(now) {
+    const date = now instanceof Date ? new Date(now.getTime()) : new Date(now ?? Date.now());
+    return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
+}
+
+export function getCurrentPlanSnapshot({ now } = {}) {
+    const info = serializePlan({ persistCache: false });
+    const name = String(planName?.value || '').trim() || t('cwl.defaultPlanName');
+    return freezeDeep({
+        name,
+        exportedAt: exportTimestamp(now),
+        ...info
+    });
 }
 
 export function savePlan(options = {}) {

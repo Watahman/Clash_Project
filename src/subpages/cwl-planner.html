@@ -23,7 +23,7 @@
     <script src="../assets/js/Data/runtime-config.js"></script>
     <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260812-redesign"></script>
     <script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-    <script type="module" src="../assets/js/pages/cwl-planner.js?v=20260813-roster"></script>
+    <script type="module" src="../assets/js/pages/cwl-planner.js?v=20260821-export-v1"></script>
     <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
@@ -31,6 +31,7 @@
     <link rel="stylesheet" href="../assets/css/cwl-planner-redesign.css?v=20260813-title-space">
     <link rel="stylesheet" href="../assets/css/cwl-planner-roster.css?v=20260813-roster3">
     <link rel="stylesheet" href="../assets/css/cwl-planner-drawers.css">
+    <link rel="stylesheet" href="../assets/css/cwl-export.css?v=20260821-export-v1">
 </head>
 <body class="workspace-app" data-workspace-page="planner">
 <header>
@@ -81,6 +82,7 @@
                     <button class="button button-quiet" id="cwl-import-spreadsheet-button" type="button" data-i18n="cwl.sheetImport">Import spreadsheet</button>
                     <button class="button button-quiet" id="cwl-auto-plan-button" type="button" data-i18n="autoPlan.open">Auto Plan</button>
                     <button class="button button-quiet" id="cwl-optimize-plan-button" type="button" data-i18n="optimizePlan.open">Optimize Plan</button>
+                    <button class="button button-quiet" id="cwl-export-plan-button" type="button" aria-haspopup="dialog" aria-controls="cwl-export-dialog" aria-expanded="false" data-i18n="cwl.exportPlan">Export plan</button>
                 </div>
             </details>
             <button class="button button-secondary" id="cwl-undo-plan-button" type="button" disabled>Undo</button>
@@ -127,6 +129,44 @@
         <p class="cwl-optimize-plan-status" id="cwl-optimize-plan-status" role="status" aria-live="polite"></p>
         <div class="cwl-optimize-plan-preview" id="cwl-optimize-plan-preview"></div>
     </section>
+
+    <dialog id="cwl-export-dialog" class="cp-modal cwl-export-dialog" aria-modal="true" aria-labelledby="cwl-export-title" aria-describedby="cwl-export-description">
+        <header class="cwl-export-dialog-header">
+            <div>
+                <p class="page-kicker" data-i18n="cwl.exportKicker">CWL Planner</p>
+                <h2 id="cwl-export-title" data-i18n="cwl.exportTitle">Export current plan</h2>
+                <p id="cwl-export-description" data-i18n="cwl.exportDescription">Review a branded preview before downloading your plan.</p>
+            </div>
+            <button class="button button-quiet" id="cwl-export-close" type="button" data-i18n="common.close">Close</button>
+        </header>
+        <div class="cwl-export-layout">
+            <fieldset class="cwl-export-controls" aria-labelledby="cwl-export-scope-label">
+                <legend id="cwl-export-scope-label" data-i18n="cwl.exportScope">Export scope</legend>
+                <label class="cwl-export-choice" for="cwl-export-scope-complete"><input id="cwl-export-scope-complete" type="radio" name="cwl-export-scope" value="complete" checked><span data-i18n="cwl.exportComplete">Complete plan</span></label>
+                <label class="cwl-export-choice" for="cwl-export-scope-clan"><input id="cwl-export-scope-clan" type="radio" name="cwl-export-scope" value="clan"><span data-i18n="cwl.exportSingleClan">Single clan</span></label>
+                <div class="cwl-export-clan-control" id="cwl-export-clan-control" hidden>
+                    <label for="cwl-export-clan-select" data-i18n="cwl.exportClan">Clan</label>
+                    <select class="cwl-export-clan-select" id="cwl-export-clan-select" disabled></select>
+                </div>
+                <fieldset class="cwl-export-fieldset cwl-export-control-group" aria-labelledby="cwl-export-details-label">
+                    <legend id="cwl-export-details-label" data-i18n="cwl.exportDetails">Visible details</legend>
+                    <label class="cwl-export-toggle"><input type="checkbox" data-cwl-export-toggle="names" name="names" checked><span data-i18n="cwl.exportPlayerNames">Player names</span></label>
+                    <label class="cwl-export-toggle"><input type="checkbox" data-cwl-export-toggle="town-hall" name="town-hall" checked><span data-i18n="cwl.exportTownHall">Town Hall levels</span></label>
+                    <label class="cwl-export-toggle"><input type="checkbox" data-cwl-export-toggle="tags" name="tags"><span data-i18n="cwl.exportPlayerTags">Player tags</span></label>
+                    <label class="cwl-export-toggle"><input type="checkbox" data-cwl-export-toggle="roles" name="roles" checked><span data-i18n="cwl.exportRosterRoles">Roster roles</span></label>
+                </fieldset>
+            </fieldset>
+            <section class="cwl-export-preview" aria-labelledby="cwl-export-preview-title">
+                <header><h3 id="cwl-export-preview-title" data-i18n="cwl.exportPreview">Preview</h3><p class="cwl-export-status" id="cwl-export-status" role="status" aria-live="polite" data-state="idle"></p></header>
+                <div class="cwl-export-preview-frame" id="cwl-export-preview-frame"></div>
+            </section>
+        </div>
+        <footer class="cwl-export-actions">
+            <button class="button button-primary cp-button cp-button--primary" id="cwl-export-download-png" type="button" data-i18n="cwl.exportDownloadPng" disabled>Download PNG</button>
+            <button class="button button-secondary cp-button cp-button--secondary" id="cwl-export-download-excel" type="button" data-i18n="cwl.exportDownloadExcel" disabled>Export Excel</button>
+            <button class="button button-quiet cp-button" id="cwl-export-cancel" type="button" data-i18n="cwl.exportCancel">Cancel</button>
+        </footer>
+    </dialog>
 
     <div class="cwl-mobile-view-tabs" role="tablist" aria-label="Planner view">
         <button type="button" role="tab" data-planner-mobile-view="players" aria-selected="true">Players</button>
