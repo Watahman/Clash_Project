@@ -16,23 +16,39 @@ export function createOperationBoardAutoRefresh({
     intervalMs = DEFAULT_INTERVAL_MS
 }) {
     let paused = storage.getItem(STORAGE_KEY) === 'true';
+    let importedDataPaused = false;
+
+    function isPaused() {
+        return paused || importedDataPaused;
+    }
 
     function sync() {
         if (!refs?.autoRefresh) return;
-        refs.autoRefresh.setAttribute('aria-pressed', String(paused));
+        refs.autoRefresh.setAttribute('aria-pressed', String(isPaused()));
         refs.autoRefresh.textContent = t(
-            paused ? 'op.resumeAutoRefresh' : 'op.pauseAutoRefresh'
+            isPaused() ? 'op.resumeAutoRefresh' : 'op.pauseAutoRefresh'
         );
     }
 
     function toggle() {
-        paused = !paused;
+        paused = !isPaused();
+        importedDataPaused = false;
         storage.setItem(STORAGE_KEY, String(paused));
         sync();
     }
 
+    function pauseForImportedData() {
+        importedDataPaused = true;
+        sync();
+    }
+
+    function resumeForLiveSource() {
+        importedDataPaused = false;
+        sync();
+    }
+
     function refreshIfEligible() {
-        if (paused || documentRef.visibilityState !== 'visible') return;
+        if (isPaused() || documentRef.visibilityState !== 'visible') return;
         if (getSyncState() === 'loading') return;
         if (!getSelectedClan() || getHistoryMode() !== 'current') return;
         refresh();
@@ -50,5 +66,12 @@ export function createOperationBoardAutoRefresh({
         }
     }
 
-    return { refreshIfEligible, start, sync, toggle };
+    return {
+        pauseForImportedData,
+        refreshIfEligible,
+        resumeForLiveSource,
+        start,
+        sync,
+        toggle
+    };
 }

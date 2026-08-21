@@ -18,7 +18,8 @@ export function createCwlOperationBoardControllers({
     renderClanSelector,
     clearReport,
     cancelReportLoad,
-    clearBoard
+    clearBoard,
+    onImported
 }) {
     const historyController = createOperationBoardHistoryPage({
         refs,
@@ -44,7 +45,8 @@ export function createCwlOperationBoardControllers({
         renderClanSelector,
         clearReport,
         setState,
-        setHelp
+        setHelp,
+        onImported
     });
     return { historyController, importController };
 }

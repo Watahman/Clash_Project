@@ -101,6 +101,7 @@ function selectClan(clanTag) {
     selectedClan = getPlanClans(selectedPlan)
         .find(clan => clan.tag === clanTag) || null;
     if (selectedClan) {
+        autoRefresh?.resumeForLiveSource();
         currentReport = null;
         historyController?.resetForClan();
         void refreshClanReport(selectedClan);
@@ -120,6 +121,7 @@ function loadStandaloneClan() {
         players: [],
         standalone: true
     };
+    autoRefresh?.resumeForLiveSource();
     planSelectToken += 1;
     currentReport = null;
     historyController?.resetForClan();
@@ -278,7 +280,8 @@ async function init() {
         renderClanSelector,
         clearReport,
         cancelReportLoad,
-        clearBoard: () => clearBoard(refs, selectedClan, false)
+        clearBoard: () => clearBoard(refs, selectedClan, false),
+        onImported: () => autoRefresh.pauseForImportedData()
     });
     historyController = controllers.historyController;
     importController = controllers.importController;
