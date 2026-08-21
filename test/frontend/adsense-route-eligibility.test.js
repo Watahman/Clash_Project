@@ -4,6 +4,8 @@ import { describe, expect, it } from 'vitest';
 const excludedFiles = [
     'src/404.html',
     'src/about.html',
+    'src/advanced-stats.html',
+    'src/achievements.html',
     'src/bracket-generator.html',
     'src/cwl-planner.html',
     'src/cwl-tracker.html',
@@ -19,6 +21,8 @@ const excludedFiles = [
     'src/subpages/register.html',
     'src/subpages/dashboard.html',
     'src/subpages/groups.html',
+    'src/subpages/advanced-stats.html',
+    'src/subpages/achievements.html',
     'src/subpages/cwl-planner.html',
     'src/subpages/cwl-planner-drafts.html',
     'src/subpages/cwl-operation-board.html',

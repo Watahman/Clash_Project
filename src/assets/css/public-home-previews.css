@@ -1,4 +1,60 @@
-.home3-product-stage { position: relative; min-width: 0; }
+.home3-product-stage {
+    --stage-bg: #0e141b;
+    --stage-surface: #121a23;
+    --stage-raised: #17212c;
+    --stage-border: rgb(243 246 249 / 12%);
+    --stage-text: #f3f6f9;
+    --stage-muted: #aab5c2;
+    position: relative;
+    min-width: 0;
+    padding: 1.25rem 1.75rem 2.25rem;
+}
+.home3-app-frame {
+    overflow: hidden;
+    border: 1px solid var(--stage-border);
+    border-radius: .9rem;
+    background: var(--stage-bg);
+    box-shadow: 0 1.8rem 4rem rgb(0 0 0 / 34%);
+    color: var(--stage-text);
+}
+.home3-app-bar {
+    display: flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--stage-border);
+    padding: 0 .9rem;
+    background: var(--stage-surface);
+}
+.home3-app-mark { display: inline-flex; align-items: center; gap: .5rem; font-size: .72rem; font-weight: 800; }
+.home3-app-mark img { width: 1.35rem; height: 1.35rem; }
+.home3-app-avatar { display: grid; width: 1.7rem; height: 1.7rem; place-items: center; border: 1px solid var(--stage-border); border-radius: 50%; color: var(--stage-muted); font-size: .55rem; }
+.home3-app-body { display: grid; grid-template-columns: 7.25rem minmax(0, 1fr); min-height: 22rem; }
+.home3-app-body > nav { display: flex; flex-direction: column; gap: .3rem; border-right: 1px solid var(--stage-border); padding: 1rem .65rem; background: var(--stage-surface); }
+.home3-app-body > nav span { border-radius: .4rem; padding: .55rem .65rem; color: var(--stage-muted); font-size: .62rem; }
+.home3-app-body > nav .is-active { background: rgb(216 172 85 / 12%); color: #f2d48f; }
+.home3-app-content { min-width: 0; padding: 1.45rem; }
+.home3-app-content h2 { max-width: 17ch; margin: .4rem 0 1.2rem; color: var(--stage-text); font-size: clamp(1.35rem, 2.2vw, 2rem); letter-spacing: -.035em; }
+.home3-action-row { display: grid; grid-template-columns: 2rem minmax(0, 1fr) auto; gap: .7rem; align-items: center; border-top: 1px solid var(--stage-border); padding: .85rem 0; }
+.home3-action-row > img { width: 1.25rem; height: 1.25rem; filter: brightness(0) invert(1); opacity: .72; }
+.home3-action-row span { display: flex; min-width: 0; flex-direction: column; gap: .15rem; }
+.home3-action-row strong { font-size: .72rem; }
+.home3-action-row small { overflow: hidden; color: var(--stage-muted); font-size: .6rem; text-overflow: ellipsis; white-space: nowrap; }
+.home3-action-row b { border: 1px solid rgb(216 172 85 / 35%); border-radius: .35rem; padding: .4rem .55rem; color: #f2d48f; font-size: .56rem; }
+.home3-module-dots { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .8rem; }
+.home3-module-dots span { border: 1px solid var(--stage-border); border-radius: 99px; padding: .35rem .55rem; color: var(--stage-muted); font-size: .55rem; }
+.home3-float { position: absolute; display: flex; align-items: center; gap: .55rem; border: 1px solid var(--stage-border); border-radius: .65rem; background: var(--stage-raised); padding: .7rem .8rem; box-shadow: 0 .9rem 2rem rgb(0 0 0 / 24%); color: var(--stage-text); }
+.home3-float small { display: block; color: var(--stage-muted); font-size: .52rem; }
+.home3-float strong { display: block; margin-top: .15rem; font-size: .62rem; }
+.home3-family-float { right: 0; bottom: .2rem; }
+.home3-family-float .preview-icon { display: grid; width: 1.7rem; height: 1.7rem; place-items: center; border-radius: .4rem; background: rgb(98 184 166 / 13%); }
+.home3-family-float img,
+.home3-achievement-float img { width: 1rem; height: 1rem; filter: brightness(0) invert(1); opacity: .8; }
+.home3-stats-float { top: 0; right: .15rem; display: grid; grid-template-columns: auto 5rem; }
+.home3-stats-float svg { width: 5rem; height: 1.6rem; }
+.home3-stats-float path { fill: none; stroke: #62a6d9; stroke-linecap: round; stroke-width: 3; }
+.home3-stats-float span { grid-column: 1 / -1; color: var(--stage-muted); font-size: .5rem; }
+.home3-achievement-float { left: 0; bottom: 0; }
 :root[data-theme="dark"] .home3-product-stage img[src*="/icons/"],
 :root[data-theme="dark"] .home3-pillar-grid img,
 :root[data-theme="dark"] .ecosystem-source img,
@@ -24,5 +80,12 @@
 @media (max-width: 45rem) {
     .game-mini,
     .progress-mini { min-height: 8rem; padding: .8rem; }
+}
+@media (max-width: 45rem) {
+    .home3-product-stage { padding: .5rem 0 1rem; }
+    .home3-app-body { grid-template-columns: 1fr; min-height: 0; }
+    .home3-app-body > nav { flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--stage-border); }
+    .home3-app-content { padding: 1rem; }
+    .home3-float { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .home3-feature-photo img { transition: none; } }

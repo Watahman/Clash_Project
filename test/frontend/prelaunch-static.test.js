@@ -7,12 +7,14 @@ const publicPages = new Map([
     ['src/cwl-planner.html', 'https://clashpanel.com/cwl-planner'],
     ['src/cwl-tracker.html', 'https://clashpanel.com/cwl-tracker'],
     ['src/clan-management.html', 'https://clashpanel.com/clan-management'],
+    ['src/advanced-stats.html', 'https://clashpanel.com/advanced-stats'],
+    ['src/achievements.html', 'https://clashpanel.com/achievements'],
     ['src/minigames.html', 'https://clashpanel.com/minigames'],
     ['src/about.html', 'https://clashpanel.com/about'],
-    ['src/subpages/privacy.html', 'https://clashpanel.com/subpages/privacy'],
-    ['src/subpages/cookies.html', 'https://clashpanel.com/subpages/cookies'],
-    ['src/subpages/terms.html', 'https://clashpanel.com/subpages/terms'],
-    ['src/subpages/contact.html', 'https://clashpanel.com/subpages/contact']
+    ['src/subpages/privacy.html', 'https://clashpanel.com/privacy'],
+    ['src/subpages/cookies.html', 'https://clashpanel.com/cookies'],
+    ['src/subpages/terms.html', 'https://clashpanel.com/terms'],
+    ['src/subpages/contact.html', 'https://clashpanel.com/contact']
 ]);
 
 const bracketPreviewPages = new Map([
@@ -28,6 +30,8 @@ const privatePages = [
     'src/subpages/dashboard.html',
     'src/subpages/groups.html',
     'src/subpages/minigames.html',
+    'src/subpages/advanced-stats.html',
+    'src/subpages/achievements.html',
     'src/subpages/login.html',
     'src/subpages/register.html'
 ];
@@ -74,9 +78,19 @@ describe('Pre-launch static contract', () => {
         expect(robots).toContain('Disallow: /subpages/popup_htmls/');
         expect(robots).toContain('https://clashpanel.com/sitemap.xml');
         expect(sitemap).not.toContain('replace-with-production-domain.invalid');
+        expect(sitemap).toContain('/advanced-stats');
+        expect(sitemap).toContain('/achievements');
         expect(sitemap).toContain('/minigames');
+        for (const name of ['privacy', 'cookies', 'terms', 'contact']) {
+            expect(sitemap).toContain(`https://clashpanel.com/${name}`);
+            expect(sitemap).not.toContain(`https://clashpanel.com/subpages/${name}`);
+        }
+        expect(sitemap).toContain(
+            '<loc>https://clashpanel.com/changelog</loc><lastmod>2026-08-14</lastmod>'
+        );
         expect(sitemap).not.toContain('/bracket-generator');
-        expect(sitemap.match(/https:\/\/clashpanel\.com/g)).toHaveLength(13);
+        expect(sitemap.match(/https:\/\/clashpanel\.com/g)).toHaveLength(15);
+        expect(sitemap.match(/<url>/g)).toHaveLength(15);
     });
 
     it('defines permanent static fallbacks for legacy legal URLs', () => {
@@ -84,10 +98,27 @@ describe('Pre-launch static contract', () => {
 
         for (const name of ['privacy', 'cookies', 'terms', 'contact']) {
             expect(redirects).toContain(
-                `/subpages/${name}.html /subpages/${name} 301`
+                `/subpages/${name} /${name} 301`
+            );
+            expect(redirects).toContain(
+                `/subpages/${name}.html /${name} 301`
             );
         }
         expect(redirects).toContain('/about.html /about 301');
+    });
+
+    it.each([
+        ['privacy', 'https://clashpanel.com/privacy'],
+        ['cookies', 'https://clashpanel.com/cookies'],
+        ['terms', 'https://clashpanel.com/terms'],
+        ['contact', 'https://clashpanel.com/contact']
+    ])('%s exposes canonical social metadata for the preferred route', (name, canonical) => {
+        const document = documentFor(`src/subpages/${name}.html`);
+
+        expect(document.querySelector('meta[name="twitter:url"]')?.content).toBe(canonical);
+        expect(JSON.parse(
+            document.querySelector('script[type="application/ld+json"]')?.textContent || '{}'
+        ).url).toBe(canonical);
     });
 
     it('defines baseline static security and preview noindex headers', () => {

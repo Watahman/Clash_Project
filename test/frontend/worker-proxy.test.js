@@ -25,14 +25,33 @@ describe('Cloudflare API proxy', () => {
             'https://backend.example/ready'
         ]);
     });
-    it('leaves non-API requests with the static asset binding', async () => {
-        const bindings = env();
-        const request = new Request('https://clashpanel.com/subpages/privacy');
+    it.each([
+        ['/privacy', '/subpages/privacy'],
+        ['/cookies', '/subpages/cookies'],
+        ['/terms', '/subpages/terms'],
+        ['/contact', '/subpages/contact']
+    ])('serves preferred legal route %s from its existing public HTML asset', async (route, assetPath) => {
+        const bindings = env({
+            ASSETS: {
+                fetch: vi.fn(async request => new Response(
+                    `asset:${new URL(request.url).pathname}`,
+                    {
+                        headers: {
+                            'Content-Type': 'text/html',
+                            'X-Robots-Tag': 'noindex, nofollow'
+                        }
+                    }
+                ))
+            }
+        });
+        const request = new Request(`https://clashpanel.com${route}`);
 
         const response = await worker.fetch(request, bindings);
 
-        expect(await response.text()).toBe('asset');
-        expect(bindings.ASSETS.fetch).toHaveBeenCalledWith(request);
+        expect(await response.text()).toBe(`asset:${assetPath}`);
+        expect(new URL(bindings.ASSETS.fetch.mock.calls[0][0].url).pathname)
+            .toBe(assetPath);
+        expect(response.headers.get('X-Robots-Tag')).toBeNull();
     });
 
     it.each([
@@ -40,10 +59,14 @@ describe('Cloudflare API proxy', () => {
         ['/subPages/cwl-operation-board', '/cwl-tracker'],
         ['/subpages/groups/', '/clan-management'],
         ['/subpages/bracket-generator.html', '/bracket-generator'],
-        ['/subpages/privacy.html', '/subpages/privacy'],
-        ['/subpages/cookies.html', '/subpages/cookies'],
-        ['/subpages/terms.html', '/subpages/terms'],
-        ['/subpages/contact.html', '/subpages/contact'],
+        ['/subpages/privacy', '/privacy'],
+        ['/subpages/privacy.html', '/privacy'],
+        ['/subpages/cookies', '/cookies'],
+        ['/subpages/cookies.html', '/cookies'],
+        ['/subpages/terms', '/terms'],
+        ['/subpages/terms.html', '/terms'],
+        ['/subpages/contact', '/contact'],
+        ['/subpages/contact.html', '/contact'],
         ['/subpages/dashboard.html', '/dashboard'],
         ['/app/dashboard', '/dashboard'],
         ['/cwl-planner.html', '/cwl-planner'],
@@ -59,6 +82,22 @@ describe('Cloudflare API proxy', () => {
         expect(response.status).toBe(301);
         expect(response.headers.get('Location'))
             .toBe(`https://clashpanel.com${destination}?ref=legacy`);
+    });
+
+    it.each([
+        ['/privacy/', '/privacy'],
+        ['/cookies/', '/cookies'],
+        ['/terms/', '/terms'],
+        ['/contact/', '/contact']
+    ])('normalizes a trailing slash on the preferred legal route: %s', async (source, destination) => {
+        const response = await worker.fetch(
+            new Request(`https://clashpanel.com${source}`),
+            env()
+        );
+
+        expect(response.status).toBe(301);
+        expect(response.headers.get('Location'))
+            .toBe(`https://clashpanel.com${destination}`);
     });
 
     it.each([

@@ -3,11 +3,19 @@ import { APP_ALIASES, APP_ASSETS } from './app-routes.js';
 const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 const PERMANENT_REDIRECT_STATUS = 301;
 const CANONICAL_HOST = "clashpanel.com";
+const PUBLIC_ASSETS = new Map([
+    ["/privacy", "/subpages/privacy"],
+    ["/cookies", "/subpages/cookies"],
+    ["/terms", "/subpages/terms"],
+    ["/contact", "/subpages/contact"]
+]);
 
 const PUBLIC_REDIRECTS = new Map([
     ["/cwl-planner.html", "/cwl-planner"],
     ["/cwl-tracker.html", "/cwl-tracker"],
     ["/clan-management.html", "/clan-management"],
+    ["/advanced-stats.html", "/advanced-stats"],
+    ["/achievements.html", "/achievements"],
     ["/bracket-generator.html", "/bracket-generator"],
     ["/guides.html", "/guides"],
     ["/methodology.html", "/methodology"],
@@ -20,10 +28,14 @@ const PUBLIC_REDIRECTS = new Map([
     ["/subpages/groups.html", "/clan-management"],
     ["/subpages/bracket-generator", "/bracket-generator"],
     ["/subpages/bracket-generator.html", "/bracket-generator"],
-    ["/subpages/privacy.html", "/subpages/privacy"],
-    ["/subpages/cookies.html", "/subpages/cookies"],
-    ["/subpages/terms.html", "/subpages/terms"],
-    ["/subpages/contact.html", "/subpages/contact"],
+    ["/subpages/privacy", "/privacy"],
+    ["/subpages/privacy.html", "/privacy"],
+    ["/subpages/cookies", "/cookies"],
+    ["/subpages/cookies.html", "/cookies"],
+    ["/subpages/terms", "/terms"],
+    ["/subpages/terms.html", "/terms"],
+    ["/subpages/contact", "/contact"],
+    ["/subpages/contact.html", "/contact"],
     ["/subpages/dashboard", "/dashboard"],
     ["/subpages/dashboard.html", "/dashboard"],
     ["/subpages/explore", "/app/explore"],
@@ -86,10 +98,16 @@ function routeRedirect(incomingUrl) {
         "/cwl-planner",
         "/cwl-tracker",
         "/clan-management",
+        "/advanced-stats",
+        "/achievements",
         "/bracket-generator",
         "/guides",
         "/methodology",
-        "/changelog"
+        "/changelog",
+        "/privacy",
+        "/cookies",
+        "/terms",
+        "/contact"
     ]) {
         if (path === publicPath && incomingUrl.pathname !== publicPath) {
             return publicPath;
@@ -113,6 +131,35 @@ async function serveAppAsset(request, env, incomingUrl) {
     const response = await env.ASSETS.fetch(assetRequest);
     const headers = new Headers(response.headers);
     headers.set("X-Robots-Tag", "noindex, nofollow");
+    return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers
+    });
+}
+
+async function servePublicAsset(request, env, incomingUrl) {
+    const path = normalizedPath(incomingUrl.pathname);
+    const assetPath = PUBLIC_ASSETS.get(path);
+    if (!assetPath) return null;
+
+    const assetUrl = new URL(incomingUrl);
+    assetUrl.pathname = assetPath;
+    const assetRequest = new Request(assetUrl.toString(), {
+        method: request.method,
+        headers: request.headers,
+        redirect: "manual"
+    });
+    const response = await env.ASSETS.fetch(assetRequest);
+    return publicRobotsResponse(response, incomingUrl);
+}
+
+function publicRobotsResponse(response, incomingUrl) {
+    if (incomingUrl.hostname !== CANONICAL_HOST || !response.headers.has("X-Robots-Tag")) {
+        return response;
+    }
+    const headers = new Headers(response.headers);
+    headers.delete("X-Robots-Tag");
     return new Response(response.body, {
         status: response.status,
         statusText: response.statusText,
@@ -233,6 +280,9 @@ export default {
             return proxyApiRequest(request, env, incomingUrl);
         }
         if (redirect) return permanentRedirect(incomingUrl, redirect);
+
+        const publicResponse = await servePublicAsset(request, env, incomingUrl);
+        if (publicResponse) return publicResponse;
 
         const appResponse = await serveAppAsset(request, env, incomingUrl);
         if (appResponse) return appResponse;

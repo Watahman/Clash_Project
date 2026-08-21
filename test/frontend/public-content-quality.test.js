@@ -4,9 +4,10 @@ import { describe, expect, it } from 'vitest';
 
 const policyFiles = ['privacy', 'cookies', 'terms', 'contact'].map(name => `src/subpages/${name}.html`);
 const demoFiles = ['src/cwl-planner.html', 'src/cwl-tracker.html', 'src/clan-management.html'];
+const progressFiles = ['src/advanced-stats.html', 'src/achievements.html'];
 
 describe('Public content quality', () => {
-    it.each([...policyFiles, ...demoFiles, 'src/index.html', 'src/about.html', 'src/guides.html', 'src/methodology.html', 'src/changelog.html'])('%s stays visible when JavaScript fails', file => {
+    it.each([...policyFiles, ...demoFiles, ...progressFiles, 'src/index.html', 'src/about.html', 'src/guides.html', 'src/methodology.html', 'src/changelog.html'])('%s stays visible when JavaScript fails', file => {
         const document = new JSDOM(readFileSync(file, 'utf8')).window.document;
         expect(document.documentElement.classList.contains('workspace-page-loading')).toBe(false);
     });

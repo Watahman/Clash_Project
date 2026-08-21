@@ -10,11 +10,7 @@ const PUBLIC_NAV_ITEMS = Object.freeze([
 ]);
 
 const TOOL_PATHS = new Set([
-    '/',
-    '/cwl-planner',
-    '/cwl-tracker',
-    '/clan-management',
-    '/bracket-generator'
+    '/'
 ]);
 
 const CAPABILITY_LABEL_KEYS = Object.freeze({
@@ -98,10 +94,10 @@ export function normalizePublicFooter(root = document) {
                 <a href="/methodology" data-i18n="public.footer.methodology">Methodology</a>
                 <a href="/about" data-i18n="public.footer.about">About</a>
                 <a href="/changelog" data-i18n="public.footer.changelog">Changelog</a>
-                <a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a>
-                <a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a>
-                <a href="/subpages/terms" data-i18n="public.terms">Terms of use</a>
-                <a href="/subpages/contact" data-i18n="public.contact">Contact</a>
+                <a href="/privacy" data-i18n="public.privacy">Privacy</a>
+                <a href="/cookies" data-i18n="public.cookies">Cookies</a>
+                <a href="/terms" data-i18n="public.terms">Terms of use</a>
+                <a href="/contact" data-i18n="public.contact">Contact</a>
                 <a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer" data-i18n="public.fanPolicy">Supercell Fan Content Policy</a>
                 <button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button>
             </nav>

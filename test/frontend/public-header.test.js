@@ -37,16 +37,16 @@ describe('public shell normalization', () => {
         const { footer } = mountShell('/guides');
         expect(footer.querySelector('[href="/guides"]')?.dataset.i18n).toBe('public.footer.guides');
         expect(footer.querySelector('[href="/methodology"]')?.dataset.i18n).toBe('public.footer.methodology');
-        expect(footer.querySelector('[href="/subpages/privacy"]')?.dataset.i18n).toBe('public.privacy');
+        expect(footer.querySelector('[href="/privacy"]')?.dataset.i18n).toBe('public.privacy');
         expect(footer.querySelector('[data-cookie-preferences]')?.dataset.i18n).toBe('public.cookiePreferences');
         expect(footer.querySelector('.public-disclaimer')?.dataset.i18n).toBe('public.disclaimer');
     });
 
-    it('marks Tools on public product pages and no item on legal pages', () => {
+    it('does not mark a section link as the current page on product or legal pages', () => {
         let { header } = mountShell('/cwl-planner');
-        expect(header.querySelector('[href="/#features"]')?.getAttribute('aria-current')).toBe('page');
+        expect(header.querySelector('[aria-current="page"]')).toBeNull();
 
-        ({ header } = mountShell('/subpages/privacy'));
+        ({ header } = mountShell('/privacy'));
         expect(header.querySelector('[aria-current="page"]')).toBeNull();
     });
 

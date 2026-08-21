@@ -30,6 +30,10 @@ function restoreHashPosition() {
 
 function changelogBadges(main) {
     const moduleKeys = {
+        'august-14': ['changelog.badgeUi', 'changelog.badgeFix'],
+        'august-12': ['changelog.badgeCwl', 'changelog.badgeStats', 'changelog.badgeUi'],
+        'august-11': ['changelog.badgeCwl', 'changelog.badgeUi'],
+        'august-6': ['changelog.badgeUi', 'changelog.badgeFix'],
         'august-4': ['public.nav.guides', 'public.nav.methodology', 'public.nav.about'],
         'august-3': ['public.nav.guides'],
         'august-2': ['nav.operation', 'nav.cwl'],
@@ -41,7 +45,7 @@ function changelogBadges(main) {
         if (!title || article.querySelector('.changelog-module-badges')) return;
         const badges = document.createElement('div');
         badges.className = 'changelog-module-badges';
-        badges.setAttribute('aria-label', 'Modules');
+        badges.setAttribute('aria-label', t('changelog.modulesLabel'));
         keys.forEach(key => {
             const badge = document.createElement('span');
             badge.textContent = t(key);
@@ -49,6 +53,32 @@ function changelogBadges(main) {
         });
         title.after(badges);
     });
+}
+
+function renderGuideLibrary() {
+    return `
+        <section class="guide-library" aria-labelledby="guide-library-title">
+            <div class="guide-library-head"><p class="resource-kicker">Guide library</p><h2 id="guide-library-title">Start with the decision in front of you.</h2><p>${t('guides.heroIntro')}</p></div>
+            <a class="guide-featured" href="#fair-roster"><div><p class="resource-kicker">Featured guide</p><h3>${t('guides.tocFair')}</h3><p>${t('guides.heroMeta')}</p></div><div class="guide-featured-preview" aria-label="Sample roster preview"><div class="guide-preview-row"><span>Core</span><strong>15 / 15</strong></div><div class="guide-preview-row"><span>Rotation</span><strong>4 days</strong></div><div class="guide-preview-row"><span>Reserve</span><strong>1 gap</strong></div></div></a>
+            <div class="guide-category-grid">
+                <a class="guide-category-card" href="#fair-roster"><span class="guide-category-label">Planning</span><strong>${t('guides.tocFair')} · ${t('guides.tocRotation')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Pool</span><i>→</i><span>Rules</span><i>→</i><span>Roster</span></span></a>
+                <a class="guide-category-card" href="#availability"><span class="guide-category-label">Availability</span><strong>${t('guides.tocAvailability')} · ${t('guides.tocMissed')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Known</span><i>→</i><span>Change</span><i>→</i><span>Cover</span></span></a>
+                <a class="guide-category-card" href="#two-sided"><span class="guide-category-label">Review</span><strong>${t('guides.tocTwoSided')} · ${t('guides.tocSeasons')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Attack</span><i>→</i><span>Defence</span><i>→</i><span>Context</span></span></a>
+                <a class="guide-category-card" href="#spreadsheet"><span class="guide-category-label">Workflow</span><strong>${t('guides.tocSpreadsheet')} · ${t('guides.tocBonus')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Sheet</span><i>→</i><span>Import</span><i>→</i><span>Review</span></span></a>
+            </div>
+        </section>`;
+}
+
+function renderAutoPlanFlow() {
+    return `<figure class="methodology-flow" aria-labelledby="auto-plan-flow-title"><figcaption id="auto-plan-flow-title">Auto Plan flow · sample process</figcaption><ol><li><span class="methodology-flow-step">1</span><strong>Inputs</strong><small>Clans, roles and availability</small></li><li><span class="methodology-flow-step">2</span><strong>Guardrails</strong><small>Locks, league and roster size</small></li><li><span class="methodology-flow-step">3</span><strong>Assignment</strong><small>Core, Rotation, then Reserve</small></li><li><span class="methodology-flow-step">4</span><strong>Review</strong><small>Warnings before applying</small></li></ol><p class="methodology-flow-note">The output is a reversible starting point. A leader still reviews the sample roster against current information.</p></figure>`;
+}
+
+function renderConfidenceFlow() {
+    return `<figure class="methodology-flow" aria-labelledby="confidence-flow-title"><figcaption id="confidence-flow-title">Confidence and fallback paths</figcaption><div class="methodology-branch-grid"><div class="methodology-branch"><strong>Known history → measured signals → confidence shown</strong><p>Performance, reliability and matchup context can contribute when the provider supplies usable history.</p></div><div class="methodology-branch" data-state="missing"><strong>Missing history → Town Hall fallback → confidence penalty</strong><p>Ordering can continue, but the fallback is not presented as measured player history.</p></div></div></figure>`;
+}
+
+function renderMissingDataFlow() {
+    return `<figure class="methodology-flow" aria-labelledby="missing-data-flow-title"><figcaption id="missing-data-flow-title">When required data is missing</figcaption><ol><li><span class="methodology-flow-step">1</span><strong>Source check</strong><small>Provider or war detail is incomplete</small></li><li><span class="methodology-flow-step">2</span><strong>Mark unknown</strong><small>No fabricated zero or result</small></li><li><span class="methodology-flow-step">3</span><strong>Leader review</strong><small>Confirm before acting on the signal</small></li><li><span class="methodology-flow-step">4</span><strong>Safe next step</strong><small>Wait, correct or use a labelled fallback</small></li></ol></figure>`;
 }
 
 function renderGuides(main) {
@@ -66,6 +96,7 @@ function renderGuides(main) {
                 <a href="/methodology">${t('public.nav.methodology')}</a>
             </nav>
         </header>
+        ${renderGuideLibrary()}
         <div class="resource-layout">
             <nav class="resource-toc" aria-label="${t('guides.tocLabel')}">
                 <strong>${t('guides.tocTitle')}</strong>
@@ -103,12 +134,20 @@ function renderChangelog(main) {
         <div class="resource-layout">
             <nav class="resource-toc" aria-label="${t('changelog.tocLabel')}">
                 <strong>${t('changelog.tocTitle')}</strong>
+                <a href="#august-14">${t('changelog.aug14')}</a>
+                <a href="#august-12">${t('changelog.aug12')}</a>
+                <a href="#august-11">${t('changelog.aug11')}</a>
+                <a href="#august-6">${t('changelog.aug6')}</a>
                 <a href="#august-4">${t('changelog.aug4')}</a>
                 <a href="#august-3">${t('changelog.aug3')}</a>
                 <a href="#august-2">${t('changelog.aug2')}</a>
                 <a href="#august-1">${t('changelog.aug1')}</a>
             </nav>
-            <div class="resource-content">
+            <div class="resource-content changelog-timeline">
+                ${t('changelog.article14Html')}
+                ${t('changelog.article12Html')}
+                ${t('changelog.article11Html')}
+                ${t('changelog.article6Html')}
                 ${t('changelog.article4Html')}
                 ${t('changelog.article3Html')}
                 ${t('changelog.article2Html')}
@@ -146,6 +185,7 @@ function renderMethodology(main) {
                     <p><strong>${t('methodology.problem')}</strong> ${t('methodology.autoProblem')}</p>
                     <h3>${t('methodology.inputsRules')}</h3>
                     <ul><li>${t('methodology.autoRule1')}</li><li>${t('methodology.autoRule2')}</li><li>${t('methodology.autoRule3')}</li><li>${t('methodology.autoRule4')}</li></ul>
+                    ${renderAutoPlanFlow()}
                     <h3>${t('methodology.outputMeaning')}</h3>
                     <p>${t('methodology.autoOutput')}</p>
                     <figure class="sample-panel"><span class="sample-label">${t('methodology.sampleNotLive')}</span><table><thead><tr><th>${t('methodology.day')}</th><th>${t('methodology.coreAvailable')}</th><th>${t('methodology.rotationUsed')}</th><th>${t('methodology.warning')}</th></tr></thead><tbody><tr><td>Sample North</td><td>15</td><td>15</td><td class="status-ok">${t('methodology.complete15')}</td></tr><tr><td>Sample South</td><td>15</td><td>14</td><td class="status-risk">${t('methodology.missingPlayer')}</td></tr></tbody></table><figcaption>${t('methodology.autoCaption')}</figcaption></figure>
@@ -161,6 +201,7 @@ function renderMethodology(main) {
                     <p class="resource-kicker">${t('methodology.performanceKicker')}</p><h2>${t('methodology.performanceTitle')}</h2>
                     <p><strong>${t('methodology.problem')}</strong> ${t('methodology.performanceProblem')}</p>
                     <p>${t('methodology.performanceSignals')}</p><p>${t('methodology.performanceUnavailable')}</p>
+                    ${renderConfidenceFlow()}
                 </article>
                 <article class="resource-article" id="attack-defense">
                     <p class="resource-kicker">${t('methodology.attackKicker')}</p><h2>${t('methodology.attackTitle')}</h2>
@@ -184,6 +225,7 @@ function renderMethodology(main) {
                 <article class="resource-article" id="limitations">
                     <p class="resource-kicker">${t('methodology.limitKicker')}</p><h2>${t('methodology.limitTitle')}</h2>
                     <ul><li>${t('methodology.limit1')}</li><li>${t('methodology.limit2')}</li><li>${t('methodology.limit3')}</li><li>${t('methodology.limit4')}</li><li>${t('methodology.limit5')}</li></ul>
+                    ${renderMissingDataFlow()}
                     <div class="resource-links"><a class="button button-secondary" href="/guides">${t('methodology.guides')}</a><a class="button button-secondary" href="/cwl-planner">${t('methodology.plannerOverview')}</a><a class="button button-secondary" href="/cwl-tracker">${t('methodology.trackerOverview')}</a></div>
                 </article>
             </div>

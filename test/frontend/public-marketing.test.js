@@ -7,6 +7,8 @@ const publicPages = [
     'src/cwl-planner.html',
     'src/cwl-tracker.html',
     'src/clan-management.html',
+    'src/advanced-stats.html',
+    'src/achievements.html',
     'src/bracket-generator.html',
     'src/about.html',
     'src/subpages/contact.html',
@@ -19,7 +21,9 @@ const applicationPages = [
     'src/subpages/dashboard.html',
     'src/subpages/cwl-planner.html',
     'src/subpages/cwl-operation-board.html',
-    'src/subpages/groups.html'
+    'src/subpages/groups.html',
+    'src/subpages/advanced-stats.html',
+    'src/subpages/achievements.html'
 ];
 
 const cinematicPages = [
@@ -32,7 +36,8 @@ const cinematicPages = [
 
 const featurePages = cinematicPages.filter(path => path !== 'src/index.html');
 
-const documentFor = path => new JSDOM(readFileSync(path, 'utf8')).window.document;
+const read = path => readFileSync(path, 'utf8');
+const documentFor = path => new JSDOM(read(path)).window.document;
 
 describe('Public marketing shell', () => {
     it.each(publicPages)('%s keeps the shared public shell', path => {
@@ -41,7 +46,7 @@ describe('Public marketing shell', () => {
         expect(document.querySelector('body.public-site')).not.toBeNull();
         expect(document.querySelector('.public-header')).not.toBeNull();
         expect(document.querySelector('.public-footer')).not.toBeNull();
-        expect(document.querySelector('script[src*="/assets/js/pages/public-site.js?v=20260812-redesign"]')).not.toBeNull();
+        expect(document.querySelector('script[src*="/assets/js/pages/public-site.js?v=20260821-public-pages"]')).not.toBeNull();
     });
 
     it('keeps the homepage product-led and follows the requested story', () => {
@@ -64,9 +69,30 @@ describe('Public marketing shell', () => {
         const stylesheets = [...document.querySelectorAll('link[rel="stylesheet"]')]
             .map(link => link.getAttribute('href'));
 
-        expect(stylesheets).toContain('/assets/css/public-home-v3.css');
-        expect(stylesheets).toContain('/assets/css/public-home-previews.css');
+        expect(stylesheets).toContain('/assets/css/public-home-v3.css?v=20260821-public-pages');
+        expect(stylesheets).toContain('/assets/css/public-home-previews.css?v=20260821-public-pages');
         expect(document.querySelector('body.public-home-v3')).not.toBeNull();
+    });
+
+    it('cache-busts the complete changed public module graph', () => {
+        const version = 'v=20260821-public-pages';
+        const entry = read('src/assets/js/pages/public-site.js');
+
+        ['i18n.js', 'theme-manager.js', 'public-header.js', 'public-resource-pages.js']
+            .forEach(file => expect(entry).toContain(`${file}?${version}`));
+        expect(read('src/assets/js/i18n/i18n.js')).toContain(`runtime-translations.js?${version}`);
+        expect(read('src/assets/js/i18n/runtime-translations.js')).toContain(`public-resource-locales.js?${version}`);
+        expect(read('src/assets/js/i18n/public-resource-locales.js')).toContain(`public-changelog-locales.js?${version}`);
+        expect(read('src/assets/js/i18n/public-resource-locales.js')).toContain(`public-feature-extra-locales.js?${version}`);
+        expect(read('src/assets/js/i18n/public-progress-locales.js')).toContain(`i18n.js?${version}`);
+    });
+
+    it('reveals hero previews on load before observing lower-page content', () => {
+        const entry = read('src/assets/js/pages/public-site.js');
+
+        expect(entry).toContain("item.closest('.home-v2-hero')");
+        expect(entry).toContain('heroItems.forEach(item => item.classList.add(\'is-visible\'))');
+        expect(entry).toContain('scrollItems.forEach(item => observer.observe(item))');
     });
 
     it.each(cinematicPages)('%s loads the approved cinematic public theme', path => {

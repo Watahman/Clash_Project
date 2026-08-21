@@ -93,7 +93,7 @@ describe('Advanced Stats workspace page', () => {
         expect(page).toContain("i18n/i18n.js?v=20260809-4");
         expect(page).toContain("advanced-stats-army-view.js?v=20260809-4");
         expect(page).toContain('applyI18n(document)');
-        expect(i18n).toContain("runtime-translations.js?v=20260812-redesign");
+        expect(i18n).toContain("runtime-translations.js?v=20260821-public-pages");
         expect(runtime).toContain("runtime-locales/workspace-en.js?v=20260809-4");
         expect(runtime).toContain("runtime-locales/workspace-nl.js?v=20260809-4");
         expect(runtime).toContain("advanced-stats-locales.js?v=20260814-advanced-stats-v4");

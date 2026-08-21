@@ -18,7 +18,7 @@ import frCompletion from './locale-completions/fr.js';
 import deCompletion from './locale-completions/de.js';
 import esCompletion from './locale-completions/es.js';
 import { publicStaticLocales } from './public-static-locales.js?v=20260812-redesign';
-import { publicResourceLocales } from './public-resource-locales.js';
+import { publicResourceLocales } from './public-resource-locales.js?v=20260821-public-pages';
 import { achievementLocales } from './achievement-locales.js';
 import { advancedStatsLocales } from './advanced-stats-locales.js?v=20260814-advanced-stats-v4';
 import { advancedStatsExtraLocales } from './advanced-stats-extra-locales.js?v=20260814-advanced-stats-v4';

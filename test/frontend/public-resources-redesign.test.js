@@ -4,18 +4,26 @@ import { describe, expect, it } from 'vitest';
 
 const read = path => readFileSync(path, 'utf8');
 const dom = path => new JSDOM(read(path)).window.document;
+const aboutMarkers = ['aboutPage.independent.f1.title', 'resource-page'];
 
 describe('public resources redesign surfaces', () => {
     it.each([
         ['src/cwl-planner.html', ['cp-preview-planner', 'planner.playerPool', 'planner.reviewTitle']],
         ['src/cwl-tracker.html', ['cp-preview-score', 'tracker.liveStep', 'tracker.standings']],
-        ['src/clan-management.html', ['cp-preview-family', 'family.network', 'family.planner']],
-        ['src/about.html', ['aboutPage.independent.f1.title', 'resource-page']]
+        ['src/clan-management.html', ['cp-preview-family', 'family.network', 'family.planner']]
     ])('%s keeps a genuine product/document preview', (path, markers) => {
         const source = read(path);
         markers.forEach(marker => expect(source).toContain(marker));
         expect(source).not.toMatch(/pictures\/(?:public-pages|home)\//);
         expect(dom(path).querySelectorAll('h1')).toHaveLength(1);
+    });
+
+    it('keeps About identity artwork while retaining its product/document preview', () => {
+        const source = read('src/about.html');
+        aboutMarkers.forEach(marker => expect(source).toContain(marker));
+        expect(source).toMatch(/pictures\/public-pages\//);
+        expect(dom('src/about.html').querySelectorAll('.home-v2-artwork img').length).toBeGreaterThan(0);
+        expect(dom('src/about.html').querySelectorAll('h1')).toHaveLength(1);
     });
 
     it('keeps the released games and bracket actions discoverable', () => {
