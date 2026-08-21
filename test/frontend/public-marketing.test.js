@@ -54,7 +54,7 @@ describe('Public marketing shell', () => {
 
         expect(document.querySelector('h1')?.textContent.replace(/\s+/g, ' ').trim())
             .toBe('Everything your Clash life needs. One place.');
-        expect(document.querySelector('.home3-product-stage')).not.toBeNull();
+        expect(document.querySelector('.home3-product-stage')).toBeNull();
         expect(document.querySelectorAll('.home3-pillar-grid > a')).toHaveLength(5);
         expect(document.querySelectorAll('.home3-feature')).toHaveLength(3);
         expect(document.querySelector('.home3-ecosystem')).not.toBeNull();
@@ -74,10 +74,18 @@ describe('Public marketing shell', () => {
         const stylesheets = [...document.querySelectorAll('link[rel="stylesheet"]')]
             .map(link => link.getAttribute('href'));
 
-        expect(stylesheets).toContain('/assets/css/public-home-v3.css?v=20260821-product-home');
-        expect(stylesheets).toContain('/assets/css/public-home-previews.css?v=20260821-product-home');
+        expect(stylesheets).toContain('/assets/css/public-home-v3.css?v=20260821-authentic-home');
+        expect(stylesheets).toContain('/assets/css/public-home-previews.css?v=20260821-authentic-home');
         expect(stylesheets).toContain('/assets/css/public-home-showcase.css?v=20260821-product-home');
         expect(document.querySelector('body.public-home-v3')).not.toBeNull();
+    });
+
+    it('keeps homepage SVG icons readable in both themes', () => {
+        const css = read('src/assets/css/public-home-previews.css');
+
+        expect(css).toContain('.public-home-v3 main img[src*="/assets/icons/"]');
+        expect(css).toContain('brightness(0) saturate(100%)');
+        expect(css).toContain('invert(1)');
     });
 
     it('cache-busts the complete changed public module graph', () => {
@@ -86,8 +94,9 @@ describe('Public marketing shell', () => {
         const entry = read('src/assets/js/pages/public-site.js');
 
         expect(entry).toContain(`i18n.js?${productVersion}`);
-        ['theme-manager.js', 'public-header.js', 'public-resource-pages.js']
+        ['theme-manager.js', 'public-header.js']
             .forEach(file => expect(entry).toContain(`${file}?${publicVersion}`));
+        expect(entry).toContain('public-resource-pages.js?v=20260821-authentic-pages');
         expect(read('src/assets/js/i18n/i18n.js')).toContain(`runtime-translations.js?${productVersion}`);
         expect(read('src/assets/js/i18n/runtime-translations.js')).toContain(`public-resource-locales.js?${productVersion}`);
         const resources = read('src/assets/js/i18n/public-resource-locales.js');
@@ -145,7 +154,7 @@ describe('Public marketing shell', () => {
         const planner = documentFor('src/cwl-planner.html');
         const localized = read('src/assets/js/i18n/public-feature-extra-locales.js');
 
-        expect(planner.querySelector('.cp-screenshot-sample img[src="/assets/previews/home/cwl-planner.webp"]')).not.toBeNull();
+        expect(planner.querySelector('.cp-screenshot-sample img[src="/assets/previews/home/cwl-planner.webp?v=20260821-authentic"]')).not.toBeNull();
         expect(planner.querySelector('.resource-page .sample-panel table')).toBeNull();
         expect(localized).not.toMatch(/Sample North|Voorbeeld Noord|Exemple Nord|Beispiel Nord|Ejemplo Norte/);
         expect(localized.match(/cp-screenshot-sample/g)).toHaveLength(5);

@@ -3,7 +3,7 @@ export default Object.freeze({
     "guides.metaDescription": "Eight practical, product-informed guides for fair CWL rosters, rotation, availability, missed attacks, bonus medals and multi-season review.",
     "guides.heroKicker": "Guide hub",
     "guides.heroTitle": "Practical decisions, not generic tips.",
-    "guides.heroIntro": "These guides use the same roster, availability and review problems that ClashPanel is designed to make visible. Every example is labelled sample data, and every recommendation includes a reason to override it.",
+    "guides.heroIntro": "These guides explain the roster, availability and review decisions ClashPanel is designed to make visible. Each workflow names its trade-offs and when a leader should override it.",
     "guides.heroMeta": "Written by ClashPanel · Published and updated 4 August 2026",
     "guides.tocLabel": "Guide list",
     "guides.tocTitle": "Eight guides",

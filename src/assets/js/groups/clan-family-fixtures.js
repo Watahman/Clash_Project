@@ -25,7 +25,7 @@ export function buildClanFamilyFixture(id) {
         owner_id: 'fixture-leader',
         created_at: '2025-04-18T12:00:00Z',
         badge: 'shield',
-        badge_url: ''
+        badge_url: '/assets/fixtures/clan-badges/northwind-main.png'
     };
     const entry = {
         membership: { group_id: group.id, role: isAdmin ? 'leader' : 'member' },
@@ -76,15 +76,17 @@ function buildClans(id) {
         return Array.from({ length: 6 }, (_, index) => ({
             clan_tag: `#NW${String(index + 1).padStart(3, '0')}CLAN`,
             clan_name: ['Northwind Main', 'Northwind Academy', 'Northwind Forge', 'Northwind Tide', 'Northwind Vale', 'Northwind Reserve'][index],
-            badge_url: '',
+            badge_url: index % 2 === 0
+                ? '/assets/fixtures/clan-badges/northwind-main.png'
+                : '/assets/fixtures/clan-badges/northwind-academy.png',
             is_primary: index === 0,
             member_count: 38 - index * 3
         }));
     }
-    if (id === 'family-member') return [{ clan_tag: '#NORTH01', clan_name: 'Northwind Main', badge_url: '', is_primary: true, member_count: 28 }];
+    if (id === 'family-member') return [{ clan_tag: '#NORTH01', clan_name: 'Northwind Main', badge_url: '/assets/fixtures/clan-badges/northwind-main.png', is_primary: true, member_count: 28 }];
     return [
-        { clan_tag: '#NORTH01', clan_name: 'Northwind Main', badge_url: '', is_primary: true, member_count: 28 },
-        { clan_tag: '#NORTH02', clan_name: 'Northwind Academy', badge_url: '', is_primary: false, member_count: 19 }
+        { clan_tag: '#NORTH01', clan_name: 'Northwind Main', badge_url: '/assets/fixtures/clan-badges/northwind-main.png', is_primary: true, member_count: 28 },
+        { clan_tag: '#NORTH02', clan_name: 'Northwind Academy', badge_url: '/assets/fixtures/clan-badges/northwind-academy.png', is_primary: false, member_count: 19 }
     ];
 }
 

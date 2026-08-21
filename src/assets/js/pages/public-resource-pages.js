@@ -59,7 +59,7 @@ function renderGuideLibrary() {
     return `
         <section class="guide-library" aria-labelledby="guide-library-title">
             <div class="guide-library-head"><p class="resource-kicker">Guide library</p><h2 id="guide-library-title">Start with the decision in front of you.</h2><p>${t('guides.heroIntro')}</p></div>
-            <a class="guide-featured" href="#fair-roster"><div><p class="resource-kicker">Featured guide</p><h3>${t('guides.tocFair')}</h3><p>${t('guides.heroMeta')}</p></div><div class="guide-featured-preview" aria-label="Sample roster preview"><div class="guide-preview-row"><span>Core</span><strong>15 / 15</strong></div><div class="guide-preview-row"><span>Rotation</span><strong>4 days</strong></div><div class="guide-preview-row"><span>Reserve</span><strong>1 gap</strong></div></div></a>
+            <a class="guide-featured" href="#fair-roster"><div><p class="resource-kicker">Featured guide</p><h3>${t('guides.tocFair')}</h3><p>${t('guides.heroMeta')}</p></div></a>
             <div class="guide-category-grid">
                 <a class="guide-category-card" href="#fair-roster"><span class="guide-category-label">Planning</span><strong>${t('guides.tocFair')} · ${t('guides.tocRotation')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Pool</span><i>→</i><span>Rules</span><i>→</i><span>Roster</span></span></a>
                 <a class="guide-category-card" href="#availability"><span class="guide-category-label">Availability</span><strong>${t('guides.tocAvailability')} · ${t('guides.tocMissed')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Known</span><i>→</i><span>Change</span><i>→</i><span>Cover</span></span></a>
@@ -70,7 +70,16 @@ function renderGuideLibrary() {
 }
 
 function renderAutoPlanFlow() {
-    return `<figure class="methodology-flow" aria-labelledby="auto-plan-flow-title"><figcaption id="auto-plan-flow-title">Auto Plan flow · sample process</figcaption><ol><li><span class="methodology-flow-step">1</span><strong>Inputs</strong><small>Clans, roles and availability</small></li><li><span class="methodology-flow-step">2</span><strong>Guardrails</strong><small>Locks, league and roster size</small></li><li><span class="methodology-flow-step">3</span><strong>Assignment</strong><small>Core, Rotation, then Reserve</small></li><li><span class="methodology-flow-step">4</span><strong>Review</strong><small>Warnings before applying</small></li></ol><p class="methodology-flow-note">The output is a reversible starting point. A leader still reviews the sample roster against current information.</p></figure>`;
+    return `<figure class="methodology-flow" aria-labelledby="auto-plan-flow-title"><figcaption id="auto-plan-flow-title">Auto Plan decision flow</figcaption><ol><li><span class="methodology-flow-step">1</span><strong>Inputs</strong><small>Clans, roles and availability</small></li><li><span class="methodology-flow-step">2</span><strong>Guardrails</strong><small>Locks, league and roster size</small></li><li><span class="methodology-flow-step">3</span><strong>Assignment</strong><small>Core, Rotation, then Reserve</small></li><li><span class="methodology-flow-step">4</span><strong>Review</strong><small>Warnings before applying</small></li></ol><p class="methodology-flow-note">The output is a reversible starting point. A leader reviews every proposed assignment against current information.</p></figure>`;
+}
+
+function removeIllustrativeGuideExamples(main) {
+    main.querySelectorAll('.sample-panel, .resource-article .resource-note').forEach(element => element.remove());
+    const markers = /\b(sample|example|voorbeeld|beispiel|ejemplo|exemple)\b/i;
+    main.querySelectorAll('.resource-article > p').forEach(paragraph => {
+        const label = paragraph.querySelector(':scope > strong')?.textContent || '';
+        if (markers.test(label)) paragraph.remove();
+    });
 }
 
 function renderConfidenceFlow() {
@@ -120,6 +129,7 @@ function renderGuides(main) {
                 ${t('guides.article8Html')}
             </div>
         </div>`;
+    removeIllustrativeGuideExamples(main);
 }
 
 function renderChangelog(main) {
@@ -188,14 +198,12 @@ function renderMethodology(main) {
                     ${renderAutoPlanFlow()}
                     <h3>${t('methodology.outputMeaning')}</h3>
                     <p>${t('methodology.autoOutput')}</p>
-                    <figure class="sample-panel"><span class="sample-label">${t('methodology.sampleNotLive')}</span><table><thead><tr><th>${t('methodology.day')}</th><th>${t('methodology.coreAvailable')}</th><th>${t('methodology.rotationUsed')}</th><th>${t('methodology.warning')}</th></tr></thead><tbody><tr><td>Sample North</td><td>15</td><td>15</td><td class="status-ok">${t('methodology.complete15')}</td></tr><tr><td>Sample South</td><td>15</td><td>14</td><td class="status-risk">${t('methodology.missingPlayer')}</td></tr></tbody></table><figcaption>${t('methodology.autoCaption')}</figcaption></figure>
                     <h3>${t('methodology.limitsOverrides')}</h3><p>${t('methodology.autoLimits')}</p>
                 </article>
                 <article class="resource-article" id="optimise">
                     <p class="resource-kicker">${t('methodology.optimiseKicker')}</p><h2>${t('methodology.optimiseTitle')}</h2>
                     <p><strong>${t('methodology.problem')}</strong> ${t('methodology.optimiseProblem')}</p>
                     <p>${t('methodology.optimiseProcess')}</p><p>${t('methodology.optimiseReview')}</p>
-                    <div class="resource-note"><strong>${t('methodology.workedSample')}</strong> ${t('methodology.optimiseSample')}</div>
                 </article>
                 <article class="resource-article" id="performance">
                     <p class="resource-kicker">${t('methodology.performanceKicker')}</p><h2>${t('methodology.performanceTitle')}</h2>
@@ -207,7 +215,6 @@ function renderMethodology(main) {
                     <p class="resource-kicker">${t('methodology.attackKicker')}</p><h2>${t('methodology.attackTitle')}</h2>
                     <p><strong>${t('methodology.problem')}</strong> ${t('methodology.attackProblem')}</p>
                     <p>${t('methodology.attackMethod')}</p><p>${t('methodology.attackLimits')}</p>
-                    <figure class="sample-panel"><span class="sample-label">${t('methodology.sampleComparison')}</span><table><thead><tr><th>${t('methodology.samplePlayer')}</th><th>${t('methodology.attackContext')}</th><th>${t('methodology.defenceContext')}</th><th>${t('methodology.leaderInterpretation')}</th></tr></thead><tbody><tr><td>Sample A</td><td>2.4 ★</td><td>1.8 ★</td><td>${t('methodology.strongWeek')}</td></tr><tr><td>Sample B</td><td>2.6 ★</td><td>—</td><td>${t('methodology.doNotAssume')}</td></tr></tbody></table><figcaption>${t('methodology.attackCaption')}</figcaption></figure>
                 </article>
                 <article class="resource-article" id="history">
                     <p class="resource-kicker">${t('methodology.historyKicker')}</p><h2>${t('methodology.historyTitle')}</h2>
@@ -220,11 +227,10 @@ function renderMethodology(main) {
                 <article class="resource-article" id="bonus">
                     <p class="resource-kicker">${t('methodology.bonusKicker')}</p><h2>${t('methodology.bonusTitle')}</h2>
                     <p><strong>${t('methodology.problem')}</strong> ${t('methodology.bonusProblem')}</p><p>${t('methodology.bonusMethod')}</p><p>${t('methodology.bonusLimits')}</p>
-                    <div class="resource-note"><strong>${t('methodology.workedSample')}</strong> ${t('methodology.bonusSample')}</div>
                 </article>
                 <article class="resource-article" id="limitations">
                     <p class="resource-kicker">${t('methodology.limitKicker')}</p><h2>${t('methodology.limitTitle')}</h2>
-                    <ul><li>${t('methodology.limit1')}</li><li>${t('methodology.limit2')}</li><li>${t('methodology.limit3')}</li><li>${t('methodology.limit4')}</li><li>${t('methodology.limit5')}</li></ul>
+                    <ul><li>${t('methodology.limit1')}</li><li>${t('methodology.limit2')}</li><li>${t('methodology.limit3')}</li><li>${t('methodology.limit5')}</li></ul>
                     ${renderMissingDataFlow()}
                     <div class="resource-links"><a class="button button-secondary" href="/guides">${t('methodology.guides')}</a><a class="button button-secondary" href="/cwl-planner">${t('methodology.plannerOverview')}</a><a class="button button-secondary" href="/cwl-tracker">${t('methodology.trackerOverview')}</a></div>
                 </article>

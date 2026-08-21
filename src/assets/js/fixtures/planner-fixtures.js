@@ -13,6 +13,21 @@ import { updateAllPlayerCounters } from '../cwl/cwl-planner-card-state.js';
 
 const DAYS = Object.freeze([1, 2, 3, 4, 5, 6, 7]);
 const ALL_DAYS = [...DAYS];
+const CLAN_BADGES = Object.freeze([
+    '/assets/fixtures/clan-badges/ember-legion.png',
+    '/assets/fixtures/clan-badges/northwind-main.png',
+    '/assets/fixtures/clan-badges/northwind-academy.png'
+]);
+const PLAYER_NAMES = Object.freeze([
+    'Aster', 'Bramble', 'Cobalt', 'Dusk', 'Ember', 'Freya', 'Griffin', 'Havoc',
+    'Iris', 'Jasper', 'Kael', 'Lyra', 'Mako', 'Nova', 'Orion', 'Pyre', 'Quinn',
+    'Ragnar', 'Sable', 'Thorne', 'Ursa', 'Vale', 'Willow', 'Xander', 'Yara',
+    'Zephyr', 'Atlas', 'Blaze', 'Cirrus', 'Drake', 'Echo', 'Flint', 'Gale',
+    'Halo', 'Indigo', 'Juno', 'Knox', 'Lumen', 'Mira', 'Nyx', 'Onyx', 'Piper',
+    'Quartz', 'Rune', 'Skye', 'Talon', 'Umber', 'Vex', 'Wren', 'Xena', 'Ymir',
+    'Zora', 'Arden', 'Briar', 'Cinder', 'Delta', 'Elio', 'Fable', 'Glimmer',
+    'Harbor', 'Ivory', 'Jet', 'Koda', 'Lotus', 'Maven'
+]);
 
 export const PLANNER_FIXTURE_IDS = Object.freeze([
     'planner-empty',
@@ -199,7 +214,16 @@ function makeScenario(id, name, clans, players, poll = undefined, tool = '') {
 }
 
 function clan(id, name, league, capacity = 15) {
-    return { id, tag: `#FX${id.toUpperCase()}`, name, league, capacity, players: [] };
+    const badgeIndex = Math.abs([...id].reduce((sum, char) => sum + char.charCodeAt(0), 0)) % CLAN_BADGES.length;
+    return {
+        id,
+        tag: `#FX${id.toUpperCase()}`,
+        name,
+        league,
+        capacity,
+        players: [],
+        badgeUrls: { small: CLAN_BADGES[badgeIndex] }
+    };
 }
 
 function makePlayers(count, availabilityFor) {
@@ -207,7 +231,7 @@ function makePlayers(count, availabilityFor) {
         const current = availabilityFor(index);
         return {
             tag: `#FXP${String(index + 1).padStart(3, '0')}`,
-            name: `Fixture Player ${String(index + 1).padStart(2, '0')}`,
+            name: PLAYER_NAMES[index % PLAYER_NAMES.length],
             townHallLevel: [17, 16, 15, 14][index % 4],
             clanName: '',
             currentClanId: null,

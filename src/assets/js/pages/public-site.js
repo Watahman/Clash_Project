@@ -4,7 +4,7 @@ import { toggleTheme as toggleThemePreference } from '../theme/theme-manager.js?
 import { normalizePublicShell } from '../shell/public-header.js?v=20260821-public-pages';
 import { ensureThemeToggleMarkup } from '../theme/theme-toggle-markup.js';
 import { initPublicPageBindings } from './public-page-bindings.js';
-import { initPublicResourcePages } from './public-resource-pages.js?v=20260821-public-pages';
+import { initPublicResourcePages } from './public-resource-pages.js?v=20260821-authentic-pages';
 
 function toggleTheme(event) {
     toggleThemePreference(event.currentTarget);

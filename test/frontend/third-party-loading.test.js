@@ -77,7 +77,7 @@ describe('Privacy-aware third-party loading', () => {
 
     it('does not preload the removed battle artwork on the product-led homepage', () => {
         const homepage = readFileSync('src/index.html', 'utf8');
-        expect(homepage).toContain('class="home3-product-stage"');
+        expect(homepage).not.toContain('class="home3-product-stage"');
         expect(homepage).not.toMatch(/rel="preload"[^>]+\/assets\/css\/pictures\/hero\./);
     });
 });

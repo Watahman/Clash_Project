@@ -34,4 +34,15 @@ describe('Public content quality', () => {
         expect(guides.querySelectorAll('.resource-article')).toHaveLength(8);
         expect(guides.body.textContent).toContain('Written by ClashPanel');
     });
+
+    it('keeps Guides and Methodology free of invented sample panels', () => {
+        const methodology = new JSDOM(readFileSync('src/methodology.html', 'utf8')).window.document;
+        const guides = new JSDOM(readFileSync('src/guides.html', 'utf8')).window.document;
+
+        expect(guides.querySelector('.guide-featured-preview')).toBeNull();
+        expect(guides.querySelector('.sample-panel')).toBeNull();
+        expect(guides.querySelector('.resource-article .resource-note')).toBeNull();
+        expect(methodology.querySelector('.sample-panel')).toBeNull();
+        expect(methodology.querySelector('.resource-article .resource-note')).toBeNull();
+    });
 });

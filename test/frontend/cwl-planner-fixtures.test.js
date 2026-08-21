@@ -64,6 +64,8 @@ describe('CWL planner redesign fixtures', () => {
         const multi = getPlannerFixtureData('planner-multi-clan');
         expect(multi.info.clans).toHaveLength(2);
         expect(multi.info.clans.every(clan => clan.players.every(player => player.plannedDays.length === 7))).toBe(true);
+        expect(multi.info.clans.every(clan => clan.badgeUrls.small.endsWith('.png'))).toBe(true);
+        expect(multi.players.some(player => player.name.startsWith('Fixture Player'))).toBe(false);
     });
 
     it('renders the normal and large fixtures through planner card and schedule paths', () => {
