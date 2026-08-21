@@ -11,7 +11,7 @@ import { initPlayerPerformanceClient } from "../cwl/player-performance-client.js
 import { initPlayerPerformancePopover } from "../cwl/cwl-player-performance-popover.js";
 import { initAutoPlan } from "../cwl/auto-plan/cwl-auto-plan-ui.js";
 import { initOptimizePlan } from "../cwl/optimize-plan/cwl-optimize-plan-ui.js?v=20260812-1";
-import { initCwlPlanExport } from "../cwl/export/cwl-export-ui.js";
+import { initCwlPlanExport } from "../cwl/export/cwl-export-ui.js?v=20260821-badge-v2";
 import { initPlannerSurface } from "../cwl/cwl-planner-ui.js";
 import {
     applyPlannerFixture,

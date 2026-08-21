@@ -172,6 +172,46 @@ describe('Cloudflare API proxy', () => {
         expect(await response.json()).toEqual({ ok: true });
     });
 
+    it('streams official clan badges through the export asset route', async () => {
+        const badgeBody = new Uint8Array([137, 80, 78, 71]);
+        const upstream = vi.fn(async () => new Response(badgeBody, {
+            headers: {
+                'Content-Type': 'image/png',
+                'Content-Length': String(badgeBody.byteLength)
+            }
+        }));
+        vi.stubGlobal('fetch', upstream);
+        const badgeUrl = 'https://api-assets.clashofclans.com/badges/200/example.png';
+
+        const response = await worker.fetch(
+            new Request(`https://clashpanel.com/api/export-assets/clan-badge?url=${encodeURIComponent(badgeUrl)}`),
+            env()
+        );
+
+        expect(upstream).toHaveBeenCalledWith(badgeUrl, expect.objectContaining({ redirect: 'manual' }));
+        expect(response.status).toBe(200);
+        expect(response.headers.get('Content-Type')).toBe('image/png');
+        expect(response.headers.get('Cache-Control')).toContain('s-maxage=604800');
+        expect(new Uint8Array(await response.arrayBuffer())).toEqual(badgeBody);
+    });
+
+    it.each([
+        'https://example.com/badges/200/example.png',
+        'https://api-assets.clashofclans.com/other/example.png',
+        'http://api-assets.clashofclans.com/badges/200/example.png'
+    ])('rejects non-official export asset URLs: %s', async badgeUrl => {
+        const upstream = vi.fn();
+        vi.stubGlobal('fetch', upstream);
+
+        const response = await worker.fetch(
+            new Request(`https://clashpanel.com/api/export-assets/clan-badge?url=${encodeURIComponent(badgeUrl)}`),
+            env()
+        );
+
+        expect(response.status).toBe(400);
+        expect(upstream).not.toHaveBeenCalled();
+    });
+
     it('normalizes an HTML 404 from the backend to a JSON API error', async () => {
         vi.stubGlobal('fetch', vi.fn(async () => new Response('<h1>Not found</h1>', {
             status: 404,

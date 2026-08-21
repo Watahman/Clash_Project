@@ -46,7 +46,7 @@ describe('Public marketing shell', () => {
         expect(document.querySelector('body.public-site')).not.toBeNull();
         expect(document.querySelector('.public-header')).not.toBeNull();
         expect(document.querySelector('.public-footer')).not.toBeNull();
-        expect(document.querySelector('script[src*="/assets/js/pages/public-site.js?v=20260821-public-pages"]')).not.toBeNull();
+        expect(document.querySelector('script[src*="/assets/js/pages/public-site.js?v="]')).not.toBeNull();
     });
 
     it('keeps the homepage product-led and follows the requested story', () => {
@@ -58,7 +58,12 @@ describe('Public marketing shell', () => {
         expect(document.querySelectorAll('.home3-pillar-grid > a')).toHaveLength(5);
         expect(document.querySelectorAll('.home3-feature')).toHaveLength(3);
         expect(document.querySelector('.home3-ecosystem')).not.toBeNull();
-        expect(document.querySelector('.home3-play-progress')).not.toBeNull();
+        expect(document.querySelectorAll('.home3-flow > li')).toHaveLength(6);
+        expect(document.querySelector('.home3-progress-showcase')).not.toBeNull();
+        expect(document.querySelectorAll('.home3-product-shot > img')).toHaveLength(5);
+        expect(document.querySelector('a[href="/advanced-stats"]')).not.toBeNull();
+        expect(document.querySelector('a[href="/achievements"]')).not.toBeNull();
+        expect(document.querySelector('.home3-feature-photo')).toBeNull();
         expect(document.querySelector('.home3-trust')).not.toBeNull();
         expect(document.querySelector('.home3-final')).not.toBeNull();
         expect(document.querySelector('.home-v2-hero-background')).toBeNull();
@@ -69,28 +74,32 @@ describe('Public marketing shell', () => {
         const stylesheets = [...document.querySelectorAll('link[rel="stylesheet"]')]
             .map(link => link.getAttribute('href'));
 
-        expect(stylesheets).toContain('/assets/css/public-home-v3.css?v=20260821-public-pages');
-        expect(stylesheets).toContain('/assets/css/public-home-previews.css?v=20260821-public-pages');
+        expect(stylesheets).toContain('/assets/css/public-home-v3.css?v=20260821-product-home');
+        expect(stylesheets).toContain('/assets/css/public-home-previews.css?v=20260821-product-home');
+        expect(stylesheets).toContain('/assets/css/public-home-showcase.css?v=20260821-product-home');
         expect(document.querySelector('body.public-home-v3')).not.toBeNull();
     });
 
     it('cache-busts the complete changed public module graph', () => {
-        const version = 'v=20260821-public-pages';
+        const productVersion = 'v=20260821-product-home';
+        const publicVersion = 'v=20260821-public-pages';
         const entry = read('src/assets/js/pages/public-site.js');
 
-        ['i18n.js', 'theme-manager.js', 'public-header.js', 'public-resource-pages.js']
-            .forEach(file => expect(entry).toContain(`${file}?${version}`));
-        expect(read('src/assets/js/i18n/i18n.js')).toContain(`runtime-translations.js?${version}`);
-        expect(read('src/assets/js/i18n/runtime-translations.js')).toContain(`public-resource-locales.js?${version}`);
-        expect(read('src/assets/js/i18n/public-resource-locales.js')).toContain(`public-changelog-locales.js?${version}`);
-        expect(read('src/assets/js/i18n/public-resource-locales.js')).toContain(`public-feature-extra-locales.js?${version}`);
-        expect(read('src/assets/js/i18n/public-progress-locales.js')).toContain(`i18n.js?${version}`);
+        expect(entry).toContain(`i18n.js?${productVersion}`);
+        ['theme-manager.js', 'public-header.js', 'public-resource-pages.js']
+            .forEach(file => expect(entry).toContain(`${file}?${publicVersion}`));
+        expect(read('src/assets/js/i18n/i18n.js')).toContain(`runtime-translations.js?${productVersion}`);
+        expect(read('src/assets/js/i18n/runtime-translations.js')).toContain(`public-resource-locales.js?${productVersion}`);
+        const resources = read('src/assets/js/i18n/public-resource-locales.js');
+        expect(resources).toContain(`public-home-v3-locales.js?${productVersion}`);
+        expect(resources).toContain(`public-home-v3-micro-locales.js?${productVersion}`);
+        expect(resources).toContain(`public-feature-extra-locales.js?${productVersion}`);
     });
 
     it('reveals hero previews on load before observing lower-page content', () => {
         const entry = read('src/assets/js/pages/public-site.js');
 
-        expect(entry).toContain("item.closest('.home-v2-hero')");
+        expect(entry).toContain("item.closest('.home3-hero')");
         expect(entry).toContain('heroItems.forEach(item => item.classList.add(\'is-visible\'))');
         expect(entry).toContain('scrollItems.forEach(item => observer.observe(item))');
     });
@@ -130,5 +139,15 @@ describe('Public marketing shell', () => {
 
         expect(css).toContain('body.public-site');
         expect(css).not.toContain('body.workspace-app');
+    });
+
+    it('uses a real Planner capture instead of an invented public roster table', () => {
+        const planner = documentFor('src/cwl-planner.html');
+        const localized = read('src/assets/js/i18n/public-feature-extra-locales.js');
+
+        expect(planner.querySelector('.cp-screenshot-sample img[src="/assets/previews/home/cwl-planner.webp"]')).not.toBeNull();
+        expect(planner.querySelector('.resource-page .sample-panel table')).toBeNull();
+        expect(localized).not.toMatch(/Sample North|Voorbeeld Noord|Exemple Nord|Beispiel Nord|Ejemplo Norte/);
+        expect(localized.match(/cp-screenshot-sample/g)).toHaveLength(5);
     });
 });

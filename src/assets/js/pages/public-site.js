@@ -1,4 +1,4 @@
-import { initI18n, t } from '../i18n/i18n.js?v=20260821-public-pages';
+import { initI18n, t } from '../i18n/i18n.js?v=20260821-product-home';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { toggleTheme as toggleThemePreference } from '../theme/theme-manager.js?v=20260821-public-pages';
 import { normalizePublicShell } from '../shell/public-header.js?v=20260821-public-pages';
@@ -100,7 +100,7 @@ function initHomepageReveal() {
     if (!items.length) return;
     document.documentElement.classList.add('has-reveal');
 
-    const heroItems = items.filter(item => item.closest('.home-v2-hero'));
+    const heroItems = items.filter(item => item.closest('.home3-hero'));
     const scrollItems = items.filter(item => !heroItems.includes(item));
     window.requestAnimationFrame(() => {
         heroItems.forEach(item => item.classList.add('is-visible'));

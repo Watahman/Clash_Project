@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../../src/assets/js/cwl/cwl-plan-io.js', () => ({
     getCurrentPlanSnapshot: mocks.getCurrentPlanSnapshot
 }));
-vi.mock('../../src/assets/js/cwl/export/cwl-export-renderer.js', () => ({
+vi.mock('../../src/assets/js/cwl/export/cwl-export-renderer.js?v=20260821-badge-v2', () => ({
     renderCwlExportTemplate: mocks.renderCwlExportTemplate,
     fitCwlExportPreview: mocks.fitCwlExportPreview,
     downloadCwlExportPng: mocks.downloadCwlExportPng

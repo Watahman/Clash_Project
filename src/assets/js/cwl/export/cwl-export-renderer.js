@@ -1,6 +1,6 @@
 import { ASSET_FALLBACKS, getTownHallAsset, installImageFallback } from '../../assets/entity-assets.js';
 import { createCwlExportViewModel, safeExportFilename } from './cwl-export-model.js';
-import { captureCwlExportElement, triggerCwlExportDownload } from './cwl-export-capture.js';
+import { captureCwlExportElement, triggerCwlExportDownload } from './cwl-export-capture.js?v=20260821-badge-v2';
 const EXPORT_WIDTH = 960;
 const EXPORT_MIN_HEIGHT = 600;
 const EXPORT_PIXEL_RATIO = 2;

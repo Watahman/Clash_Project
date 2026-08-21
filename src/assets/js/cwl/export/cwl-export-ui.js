@@ -4,7 +4,7 @@ import {
     downloadCwlExportPng,
     fitCwlExportPreview,
     renderCwlExportTemplate
-} from './cwl-export-renderer.js';
+} from './cwl-export-renderer.js?v=20260821-badge-v2';
 import { downloadCwlExportWorkbook } from './cwl-export-xlsx.js';
 
 const DEFAULT_OPTIONS = Object.freeze({

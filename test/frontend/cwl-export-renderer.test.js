@@ -30,6 +30,7 @@ import {
     fitCwlExportPreview,
     renderCwlExportTemplate
 } from '../../src/assets/js/cwl/export/cwl-export-renderer.js';
+import { imageRequestCandidates } from '../../src/assets/js/cwl/export/cwl-export-capture.js';
 
 describe('CWL export renderer', () => {
     beforeEach(() => {
@@ -108,6 +109,15 @@ describe('CWL export renderer', () => {
         expect(createUrl).toHaveBeenCalledOnce();
         expect(click).toHaveBeenCalledOnce();
         expect(document.querySelector('a[download]')).toBeNull();
+    });
+
+    it('retries official preview badges through the same-origin export route', () => {
+        const badge = 'https://api-assets.clashofclans.com/badges/200/example.png';
+
+        expect(imageRequestCandidates(badge)).toEqual([
+            badge,
+            `/api/export-assets/clan-badge?url=${encodeURIComponent(badge)}`
+        ]);
     });
 });
 

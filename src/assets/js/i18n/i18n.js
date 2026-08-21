@@ -6,7 +6,7 @@ import {
     isSupportedLanguage,
     supportedLanguages,
     translations
-} from './runtime-translations.js?v=20260821-public-pages';
+} from './runtime-translations.js?v=20260821-product-home';
 
 const STORAGE_KEY = 'clashtools_language';
 const DEFAULT_LANG = 'en';

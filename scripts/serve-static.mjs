@@ -4,7 +4,9 @@ import { createServer } from 'node:http';
 import { request as httpRequest } from 'node:http';
 import { request as httpsRequest } from 'node:https';
 import { extname, resolve, sep } from 'node:path';
+import { Readable } from 'node:stream';
 import { APP_ALIASES, APP_ASSETS } from '../worker/app-routes.js';
+import { isExportAssetPath, proxyExportAsset } from '../worker/export-assets.js';
 
 const root = resolve(process.env.STATIC_ROOT || 'src');
 const port = Number(process.env.STATIC_PORT || 5173);
@@ -41,6 +43,22 @@ function proxyApi(request, response) {
         response.end(JSON.stringify({ error: `API proxy unavailable: ${error.message}` }));
     });
     request.pipe(proxied);
+}
+
+async function proxyExportAssetLocally(request, response) {
+    try {
+        const incoming = new URL(request.url, `http://${request.headers.host || 'localhost'}`);
+        const assetResponse = await proxyExportAsset(new Request(incoming, {
+            method: request.method,
+            headers: request.headers
+        }), incoming);
+        response.writeHead(assetResponse.status, Object.fromEntries(assetResponse.headers.entries()));
+        if (!assetResponse.body || request.method === 'HEAD') response.end();
+        else Readable.fromWeb(assetResponse.body).pipe(response);
+    } catch {
+        response.writeHead(502, { 'Content-Type': 'application/json; charset=utf-8' });
+        response.end(JSON.stringify({ error: 'Clan badge proxy unavailable.' }));
+    }
 }
 
 async function serveFile(request, response) {
@@ -100,7 +118,9 @@ async function serveFile(request, response) {
 }
 
 createServer((request, response) => {
-    if (request.url === '/api' || request.url?.startsWith('/api/')) proxyApi(request, response);
+    const incoming = new URL(request.url, `http://${request.headers.host || 'localhost'}`);
+    if (isExportAssetPath(incoming.pathname)) void proxyExportAssetLocally(request, response);
+    else if (request.url === '/api' || request.url?.startsWith('/api/')) proxyApi(request, response);
     else void serveFile(request, response);
 }).listen(port, () => {
     console.log(`Static frontend available at http://localhost:${port}`);

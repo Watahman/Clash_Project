@@ -100,6 +100,10 @@
     padding: clamp(1rem, 2.5vw, 1.5rem);
 }
 .sample-panel figcaption { margin-top: .85rem; color: var(--text-subtle); font-size: .7rem; line-height: 1.55; }
+.cp-screenshot-sample { overflow: hidden; padding: 0; background: #0b1016; }
+.cp-screenshot-sample .sample-label { display: block; padding: .85rem 1rem; }
+.cp-screenshot-sample img { display: block; width: 100%; height: auto; border-block: 1px solid rgb(255 255 255 / 9%); }
+.cp-screenshot-sample figcaption { margin: 0; padding: 1rem; color: #aab5c2; }
 .sample-panel table { width: 100%; min-width: 34rem; border-collapse: collapse; }
 .sample-panel th,
 .sample-panel td { border-bottom: 1px solid var(--border); padding: .65rem .5rem; text-align: left; font-size: .73rem; }

@@ -15,6 +15,8 @@ const en = Object.freeze({
     'homeV3.micro.availabilityRoster': 'availability + roster', 'homeV3.micro.planContext': 'plan context', 'homeV3.micro.dailyChallenge': 'Daily challenge',
     'homeV3.micro.playGames': 'Play games →', 'homeV3.micro.trackedOnly': 'Tracked data only', 'homeV3.micro.statsAchievements': 'Stats & Achievements',
     'homeV3.micro.exploreProgress': 'Explore progress →', 'homeV3.micro.readMethodology': 'Read the methodology', 'homeV3.micro.reviewPrivacy': 'Review privacy',
+    'homeV3.micro.fixturePreview': 'ClashPanel interface · controlled fixture data · not live', 'homeV3.micro.accountContext': 'verified account context',
+    'homeV3.micro.exploreStats': 'Explore Advanced Stats →', 'homeV3.micro.exploreAchievements': 'Explore Achievements →',
     'homeV3.micro.yourClashPanel': 'YOUR CLASHPANEL'
 });
 
@@ -35,6 +37,8 @@ const nl = Object.freeze({
     'homeV3.micro.availabilityRoster': 'beschikbaarheid + roster', 'homeV3.micro.planContext': 'plancontext', 'homeV3.micro.dailyChallenge': 'Dagelijkse uitdaging',
     'homeV3.micro.playGames': 'Speel games →', 'homeV3.micro.trackedOnly': 'Alleen gevolgde data', 'homeV3.micro.statsAchievements': 'Stats & Achievements',
     'homeV3.micro.exploreProgress': 'Ontdek voortgang →', 'homeV3.micro.readMethodology': 'Lees de methodologie', 'homeV3.micro.reviewPrivacy': 'Bekijk privacy',
+    'homeV3.micro.fixturePreview': 'ClashPanel-interface · gecontroleerde fixturedata · niet live', 'homeV3.micro.accountContext': 'geverifieerde accountcontext',
+    'homeV3.micro.exploreStats': 'Ontdek Advanced Stats →', 'homeV3.micro.exploreAchievements': 'Ontdek Achievements →',
     'homeV3.micro.yourClashPanel': 'JOUW CLASHPANEL'
 });
 
@@ -55,6 +59,8 @@ const fr = Object.freeze({
     'homeV3.micro.availabilityRoster': 'disponibilité + effectif', 'homeV3.micro.planContext': 'contexte du plan', 'homeV3.micro.dailyChallenge': 'Défi quotidien',
     'homeV3.micro.playGames': 'Jouer →', 'homeV3.micro.trackedOnly': 'Données suivies uniquement', 'homeV3.micro.statsAchievements': 'Stats et succès',
     'homeV3.micro.exploreProgress': 'Explorer la progression →', 'homeV3.micro.readMethodology': 'Lire la méthodologie', 'homeV3.micro.reviewPrivacy': 'Consulter la confidentialité',
+    'homeV3.micro.fixturePreview': 'Interface ClashPanel · données de test contrôlées · non directes', 'homeV3.micro.accountContext': 'contexte de compte vérifié',
+    'homeV3.micro.exploreStats': 'Explorer Advanced Stats →', 'homeV3.micro.exploreAchievements': 'Explorer Achievements →',
     'homeV3.micro.yourClashPanel': 'VOTRE CLASHPANEL'
 });
 
@@ -75,6 +81,8 @@ const de = Object.freeze({
     'homeV3.micro.availabilityRoster': 'Verfügbarkeit + Kader', 'homeV3.micro.planContext': 'Plankontext', 'homeV3.micro.dailyChallenge': 'Tägliche Challenge',
     'homeV3.micro.playGames': 'Spiele spielen →', 'homeV3.micro.trackedOnly': 'Nur erfasste Daten', 'homeV3.micro.statsAchievements': 'Stats & Erfolge',
     'homeV3.micro.exploreProgress': 'Fortschritt entdecken →', 'homeV3.micro.readMethodology': 'Methodik lesen', 'homeV3.micro.reviewPrivacy': 'Datenschutz ansehen',
+    'homeV3.micro.fixturePreview': 'ClashPanel-Oberfläche · kontrollierte Fixture-Daten · nicht live', 'homeV3.micro.accountContext': 'verifizierter Kontokontext',
+    'homeV3.micro.exploreStats': 'Advanced Stats entdecken →', 'homeV3.micro.exploreAchievements': 'Achievements entdecken →',
     'homeV3.micro.yourClashPanel': 'DEIN CLASHPANEL'
 });
 
@@ -95,6 +103,8 @@ const es = Object.freeze({
     'homeV3.micro.availabilityRoster': 'disponibilidad + plantilla', 'homeV3.micro.planContext': 'contexto del plan', 'homeV3.micro.dailyChallenge': 'Reto diario',
     'homeV3.micro.playGames': 'Jugar →', 'homeV3.micro.trackedOnly': 'Solo datos registrados', 'homeV3.micro.statsAchievements': 'Stats y logros',
     'homeV3.micro.exploreProgress': 'Explorar progreso →', 'homeV3.micro.readMethodology': 'Leer la metodología', 'homeV3.micro.reviewPrivacy': 'Revisar privacidad',
+    'homeV3.micro.fixturePreview': 'Interfaz de ClashPanel · datos de prueba controlados · no en directo', 'homeV3.micro.accountContext': 'contexto de cuenta verificado',
+    'homeV3.micro.exploreStats': 'Explorar Advanced Stats →', 'homeV3.micro.exploreAchievements': 'Explorar Achievements →',
     'homeV3.micro.yourClashPanel': 'TU CLASHPANEL'
 });
 

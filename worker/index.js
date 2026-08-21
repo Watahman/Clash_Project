@@ -1,4 +1,5 @@
 import { APP_ALIASES, APP_ASSETS } from './app-routes.js';
+import { isExportAssetPath, proxyExportAsset } from './export-assets.js';
 
 const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 const PERMANENT_REDIRECT_STATUS = 301;
@@ -276,6 +277,9 @@ export default {
         const redirect = routeRedirect(incomingUrl);
         const originRedirect = canonicalOriginRedirect(incomingUrl, redirect, env);
         if (originRedirect) return originRedirect;
+        if (isExportAssetPath(incomingUrl.pathname)) {
+            return proxyExportAsset(request, incomingUrl);
+        }
         if (isApiPath(incomingUrl.pathname)) {
             return proxyApiRequest(request, env, incomingUrl);
         }

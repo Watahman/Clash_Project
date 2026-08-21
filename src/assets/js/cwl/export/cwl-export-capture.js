@@ -3,6 +3,8 @@ import { ASSET_FALLBACKS } from '../../assets/entity-assets.js';
 const DEFAULT_WIDTH = 960;
 const DEFAULT_HEIGHT = 600;
 const DEFAULT_PIXEL_RATIO = 2;
+const CLAN_BADGE_HOST = 'api-assets.clashofclans.com';
+const CLAN_BADGE_PROXY = '/api/export-assets/clan-badge';
 let stylesheetPromise;
 
 export async function captureCwlExportElement(root, options = {}) {
@@ -55,22 +57,40 @@ function loadStylesheet(cssUrl) {
 
 async function inlineImage(image) {
     const original = image.getAttribute('src') || ASSET_FALLBACKS.clan;
-    const dataUrl = await fetchImageData(original);
+    const dataUrl = await fetchImageData(original, imageRequestCandidates(original));
     if (dataUrl) image.setAttribute('src', dataUrl);
     else if (original !== ASSET_FALLBACKS.clan) image.setAttribute('src', ASSET_FALLBACKS.clan);
     image.removeAttribute('srcset');
 }
 
-async function fetchImageData(source) {
+async function fetchImageData(source, candidates) {
     if (source.startsWith('data:')) return source;
-    try {
-        const response = await fetch(new URL(source, location.href), { credentials: 'same-origin' });
-        if (!response.ok) throw new Error('Asset unavailable');
-        return blobDataUrl(await response.blob());
-    } catch {
-        if (source === ASSET_FALLBACKS.clan) return '';
-        return fetchImageData(ASSET_FALLBACKS.clan);
+    for (const candidate of candidates) {
+        try {
+            const url = new URL(candidate, location.href);
+            const response = await fetch(url, {
+                credentials: url.origin === location.origin ? 'same-origin' : 'omit'
+            });
+            if (response.ok) return blobDataUrl(await response.blob());
+        } catch {
+            // Try the same-origin badge route before falling back to the generic badge.
+        }
     }
+    if (source === ASSET_FALLBACKS.clan) return '';
+    return fetchImageData(ASSET_FALLBACKS.clan, [ASSET_FALLBACKS.clan]);
+}
+
+export function imageRequestCandidates(source) {
+    const value = String(source || '');
+    try {
+        const url = new URL(value, location.href);
+        if (url.protocol === 'https:' && url.hostname === CLAN_BADGE_HOST) {
+            return [url.toString(), `${CLAN_BADGE_PROXY}?url=${encodeURIComponent(url.toString())}`];
+        }
+    } catch {
+        // The normal fetch path reports malformed sources and uses the fallback.
+    }
+    return [value];
 }
 
 function exportSvg(markup, width, height, ratio) {
