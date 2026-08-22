@@ -14,6 +14,7 @@ describe('Operation Board Live model', () => {
                 clan: {
                     tag: '#PQL',
                     name: 'Belgian Warriors',
+                    badgeUrls: { small: 'https://example.test/own.png' },
                     stars: 31,
                     destructionPercentage: 82.4,
                     attacks: 12,
@@ -22,6 +23,7 @@ describe('Operation Board Live model', () => {
                 opponent: {
                     tag: '#AAA',
                     name: 'Northern Kings',
+                    badgeUrls: { medium: 'https://example.test/opponent.png' },
                     stars: 30,
                     destructionPercentage: 83.1,
                     attacks: 13,
@@ -34,6 +36,7 @@ describe('Operation Board Live model', () => {
             day: 4,
             state: 'live',
             own: {
+                badgeUrl: 'https://example.test/own.png',
                 stars: 31,
                 attacksUsed: 12,
                 availableAttacks: 15,
@@ -41,6 +44,7 @@ describe('Operation Board Live model', () => {
             },
             opponent: {
                 name: 'Northern Kings',
+                badgeUrl: 'https://example.test/opponent.png',
                 stars: 30,
                 remainingAttacks: 2
             }

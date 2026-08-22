@@ -32,6 +32,7 @@ export function buildLiveView(report) {
         own: {
             tag: side?.self?.tag || report.clan?.tag || '',
             name: side?.self?.name || report.clan?.name || report.clan?.tag || '-',
+            badgeUrl: clanBadgeUrl(side?.self, report.clanInfo, report.clan),
             stars: side ? own.stars : number(round?.stars, 0),
             destruction: side ? own.destruction : number(round?.destruction, 0),
             attacksUsed: side ? own.attacksUsed : number(round?.attacksUsed, 0),
@@ -49,11 +50,24 @@ export function buildLiveView(report) {
         opponent: {
             tag: side?.opponent?.tag || '',
             name: side?.opponent?.name || round?.opponent || '-',
+            badgeUrl: clanBadgeUrl(side?.opponent),
             ...opponent
         },
         startTime: war?.startTime || null,
         endTime: war?.endTime || null
     };
+}
+
+function clanBadgeUrl(...clans) {
+    for (const clan of clans) {
+        const badgeUrl = clan?.badgeUrls?.small
+            || clan?.badgeUrls?.medium
+            || clan?.badgeUrls?.large
+            || clan?.badgeUrl
+            || clan?.badge_url;
+        if (badgeUrl) return String(badgeUrl).trim();
+    }
+    return '';
 }
 
 export function getCurrentCwlDay(report) {

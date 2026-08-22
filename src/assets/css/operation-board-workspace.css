@@ -342,6 +342,19 @@
 }
 
 .op-live-side:last-child { text-align: right; }
+.op-live-clan {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: var(--space-2);
+}
+.op-live-side:last-child .op-live-clan { flex-direction: row-reverse; }
+.op-live-clan-badge {
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 2.75rem;
+    object-fit: contain;
+}
 .op-live-side h2 { font-size: 1rem; }
 .op-live-side > strong {
     color: var(--text);
@@ -1349,6 +1362,7 @@
     .op-bonus-recommended { grid-column: 2 / -1; justify-self: start; }
     .op-live-versus { grid-template-columns: 1fr; }
     .op-live-side:last-child { text-align: left; }
+    .op-live-side:last-child .op-live-clan { flex-direction: row; }
     .op-live-side:last-child dl { justify-content: flex-start; }
     .op-live-versus-mark {
         min-height: 2.5rem;
