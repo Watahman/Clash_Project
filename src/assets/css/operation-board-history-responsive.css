@@ -78,6 +78,10 @@
         grid-column: 2 / -1;
     }
 
+    .op-history-timeline .op-history-record-tone {
+        grid-column: 2 / -1;
+    }
+
     .op-history-trend-toggle {
         width: 100%;
         overflow-x: auto;

@@ -43,14 +43,6 @@
     background: var(--surface-hover);
 }
 
-.operation-workspace-page .op-history-timeline button[data-result="win"] {
-    box-shadow: inset 2px 0 0 color-mix(in srgb, var(--success) 62%, transparent);
-}
-
-.operation-workspace-page .op-history-timeline button[data-result="loss"] {
-    box-shadow: inset 2px 0 0 color-mix(in srgb, var(--danger) 62%, transparent);
-}
-
 .op-history-timeline button > span,
 .op-history-timeline button > em,
 .op-history-timeline button > small {
@@ -74,6 +66,33 @@
 
 .op-history-timeline small[data-change="same"] {
     color: var(--accent-strong);
+}
+
+.op-history-timeline .op-history-record-tone {
+    display: inline-flex;
+    width: max-content;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.24rem 0.48rem;
+    background: var(--surface-hover);
+    color: var(--text-muted);
+    font-size: 0.62rem;
+    font-weight: 750;
+}
+
+.op-history-record-tone[data-result="win"] {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.op-history-record-tone[data-result="loss"] {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+.op-history-record-tone[data-result="draw"] {
+    background: var(--warning-soft);
+    color: var(--warning);
 }
 
 .op-history-trend-heading {
@@ -235,7 +254,7 @@
 }
 
 .op-history-reliability-list [data-tone="complete"] {
-    color: var(--accent-strong);
+    color: var(--success);
 }
 
 .op-history-reliability-list [data-tone="attention"] {
