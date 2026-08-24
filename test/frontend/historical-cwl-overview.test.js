@@ -74,13 +74,25 @@ describe('Historical CWL overview', () => {
         });
     });
 
-    it('trusts the actual next season over an estimated placement outcome', () => {
+    it('trusts a verified placement over a conflicting next-season league', () => {
+        const first = season(
+            '2026-06',
+            'Master League I',
+            2.5,
+            2.0,
+            0.99,
+            1
+        );
+        first.standings = Array.from({ length: 8 }, (_, index) => ({
+            rank: index + 1,
+            tag: `#CLAN${index + 1}`
+        }));
         const overview = buildHistoricalCwlOverview([
-            season('2026-06', 'Master League I', 2.5, 2.0, 0.99, 1),
-            season('2026-07', 'Master League I', 2.4, 2.1, 0.98, 3)
+            first,
+            season('2026-07', 'Master League II', 2.4, 2.1, 0.98, 3)
         ]);
 
-        expect(overview.chronological[0].change).toBe('same');
+        expect(overview.chronological[0].change).toBe('promoted');
         expect(getLeagueChangeForSeason(
             '2026-06',
             { name: 'Master League I' },
@@ -91,13 +103,13 @@ describe('Historical CWL overview', () => {
                 },
                 {
                     season: '2026-07',
-                    league: { name: 'Master League I' }
+                    league: { name: 'Master League II' }
                 }
             ],
             { position: 1, groupSize: 8 }
         )).toEqual({
-            state: 'same',
-            nextLeague: { name: 'Master League I' }
+            state: 'promoted',
+            nextLeague: { name: 'Champion League III' }
         });
     });
 

@@ -118,7 +118,7 @@ describe('Historical CWL renderers', () => {
         expect(selectSeason).toHaveBeenCalledWith('2026-06');
     });
 
-    it('shows records as compact status chips without styling the card border', () => {
+    it('does not show unreliable winning or losing labels in the timeline', () => {
         const seasons = [
             overviewSeason('2026-04', 'Master League III', 2.1, 2.2),
             overviewSeason('2026-05', 'Master League II', 2.2, 2.2),
@@ -138,14 +138,10 @@ describe('Historical CWL renderers', () => {
             insights: []
         });
 
-        expect(Array.from(container.querySelectorAll(
-            '.op-history-timeline .op-history-record-tone'
-        )).map(status => [status.dataset.result, status.textContent.trim()]))
-            .toEqual([
-                ['loss', 'Losing record'],
-                ['draw', 'Even record'],
-                ['win', 'Winning record']
-            ]);
+        expect(container.querySelector('.op-history-record-tone')).toBeNull();
+        expect(container.textContent).not.toContain('Winning record');
+        expect(container.textContent).not.toContain('Losing record');
+        expect(container.textContent).not.toContain('Even record');
         expect(container.querySelector('.op-history-timeline button[data-result]'))
             .toBeNull();
     });
