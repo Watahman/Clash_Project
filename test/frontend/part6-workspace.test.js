@@ -53,6 +53,18 @@ describe('Part 6 profile and settings', () => {
         expect(localStorage.getItem('clashtools_language')).toBe('en');
     });
 
+    it('uses a semantic password-change form with password-manager metadata', () => {
+        const html = readFileSync('src/subpages/profile.html', 'utf8');
+        const page = new DOMParser().parseFromString(html, 'text/html');
+        const form = page.querySelector('#profile-password-form');
+
+        expect(form).not.toBeNull();
+        expect(form.querySelector('[autocomplete="username"]')?.hidden).toBe(true);
+        expect(form.querySelector('[autocomplete="current-password"]')).not.toBeNull();
+        expect(form.querySelectorAll('[autocomplete="new-password"]')).toHaveLength(2);
+        expect(form.querySelector('#po-save-password')?.getAttribute('type')).toBe('submit');
+    });
+
     it('provides every new label in all supported languages', () => {
         const keys = [
             'bracket.workspaceIntro', 'bracket.setupTitle', 'bracket.resultHelp',
