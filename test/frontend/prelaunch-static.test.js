@@ -142,8 +142,7 @@ describe('Pre-launch static contract', () => {
         const pages = [
             ...publicPages.keys(),
             ...bracketPreviewPages.keys(),
-            ...privatePages,
-            'src/subpages/popup_htmls/profile_popup.html'
+            ...privatePages
         ];
         for (const path of new Set(pages)) {
             const buttonsWithoutType = [...documentFor(path).querySelectorAll('button:not([type])')];

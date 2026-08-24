@@ -29,7 +29,10 @@ describe('dedicated profile page', () => {
 
     it('links the shared avatar controls to the dedicated profile page', () => {
         const shell = readFileSync('src/assets/js/shell/workspace-shell-markup.js', 'utf8');
+        const bootstrap = readFileSync('src/assets/js/shell/workspace-bootstrap.js', 'utf8');
         expect(shell.match(/href="\/app\/profile"/g)).toHaveLength(2);
+        expect(bootstrap).not.toContain('profile_popup');
+        expect(bootstrap).not.toContain('preloadProfileMarkup');
     });
 
     it('renders one accessible Verified status badge per linked account', () => {

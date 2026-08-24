@@ -1,11 +1,10 @@
 import { readFileSync } from 'node:fs';
-import { afterEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
     isFriendNotification,
     isFriendRequestNotification,
     pollNotificationCopy
 } from '../../src/assets/js/notifications/poll-notifications.js';
-import { hideProfileEmptyStateFor } from '../../src/assets/js/profile/profile_empty_state.js';
 
 describe('friend notifications', () => {
     const request = {
@@ -34,41 +33,6 @@ describe('friend notifications', () => {
         });
     });
 
-    it('keeps the request count as a separate element so translations cannot remove it', () => {
-        const markup = readFileSync('src/subpages/popup_htmls/profile_popup.html', 'utf8');
-        document.body.innerHTML = markup;
-
-        const button = document.querySelector('#po-friend-requests-btn');
-        expect(button.querySelector('[data-i18n="profile.requests"]')).not.toBeNull();
-        expect(button.querySelector('#po-friend-requests-count')).not.toBeNull();
-        expect(button.hasAttribute('data-i18n')).toBe(false);
-    });
-});
-
-describe('profile empty state', () => {
-    afterEach(() => {
-        document.body.replaceChildren();
-    });
-
-    it('hides the empty state immediately after the first item is added to the active tab', () => {
-        document.body.innerHTML = `
-            <button id="po-tab-bases" class="po-tab po-tab-active"></button>
-            <div class="po-panel-content"><p class="po-empty">No bases</p></div>
-        `;
-
-        expect(hideProfileEmptyStateFor('po-tab-bases')).toBe(true);
-        expect(document.querySelector('.po-empty').classList.contains('hidden')).toBe(true);
-    });
-
-    it('does not hide another tab its empty state', () => {
-        document.body.innerHTML = `
-            <button id="po-tab-bases" class="po-tab po-tab-active"></button>
-            <div class="po-panel-content"><p class="po-empty">No bases</p></div>
-        `;
-
-        expect(hideProfileEmptyStateFor('po-tab-friends')).toBe(false);
-        expect(document.querySelector('.po-empty').classList.contains('hidden')).toBe(false);
-    });
 });
 
 describe('friend notification migration', () => {

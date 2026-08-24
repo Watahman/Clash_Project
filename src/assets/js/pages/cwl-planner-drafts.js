@@ -1,5 +1,4 @@
 import { initI18n, t } from '../i18n/i18n.js';
-import { profileHTML } from '../profile/profile_popup.js';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { getCurrentUserId } from '../utils/user.js';
 import { summarizePlan } from '../cwl/cwl-plan-summary.js';
@@ -86,7 +85,6 @@ async function init() {
     initRefs();
     bindListControls();
     setListControlsEnabled(false);
-    profileHTML();
     window.addEventListener('clashtools:language-changed', render);
     userId = getCurrentUserId();
     if (!userId) {

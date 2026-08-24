@@ -22,7 +22,6 @@ import {
 } from '../operation-board/operation-board-source-controls.js';
 import { applyOperationTabState, getBoardIdentity, getDefaultOperationTab, hasUsableBoardData } from '../operation-board/operation-board-tabs.js';
 import { looksLikeClashTag, normalizeTag } from '../operation-board/operation-board-utils.js';
-import { profileHTML } from '../profile/profile_popup.js';
 import { getCurrentUserId } from '../utils/user.js';
 let refs;
 const planStore = createOperationPlanStore();
@@ -302,7 +301,6 @@ async function init() {
     if (!sourceBootstrap.usesFixture()) {
         await Promise.resolve(syncAuthSession()).catch(() => null);
     }
-    profileHTML();
     bindOperationBoardEvents(refs, {
         selectPlan,
         selectClan,

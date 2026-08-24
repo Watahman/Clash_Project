@@ -1,5 +1,4 @@
 import { initI18n, t } from '../i18n/i18n.js';
-import { profileHTML } from "../profile/profile_popup.js";
 import { syncAuthSession } from "../auth/auth-client.js";
 import { initOverlayHide, initAddPlayersOverlay, initAddClanButton, applyCwlSizeRestriction } from "../cwl/cwl-overlay.js";
 import { initPlanIO, savePlan, loadAllPlans, loadPlanListener, startNewPlan, undoLastPlanChange } from "../cwl/cwl-plan-io.js";
@@ -114,7 +113,6 @@ async function init() {
         await loadAllPlans();
     }
     loadPlanListener();
-    if (!fixture) profileHTML();
 }
 
 function preservePlannerStorage() {

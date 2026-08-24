@@ -1,5 +1,4 @@
 import { getLanguage, initI18n, t } from '../i18n/i18n.js';
-import { profileHTML } from '../profile/profile_popup.js';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { getCurrentUserId } from '../utils/user.js';
 import { checkUserId } from '../Supabase/Supabase-User.js';
@@ -251,7 +250,6 @@ async function init() {
     refs.accountLine.addEventListener('click', () => document.querySelector('#profile-btn')?.click());
     window.addEventListener('clashtools:language-changed', renderAll);
     await syncAuthSession().catch(() => null);
-    profileHTML();
     const userId = getCurrentUserId();
     state.loggedIn = Boolean(userId);
     if (!userId) {

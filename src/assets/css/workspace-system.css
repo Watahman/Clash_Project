@@ -137,7 +137,7 @@ body.workspace-app .workspace-content input:focus-visible { outline: 0.18rem sol
 
 .sr-only { position: absolute !important; width: 0.0625rem !important; height: 0.0625rem !important; overflow: hidden !important; margin: -0.0625rem !important; padding: 0 !important; border: 0 !important; clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; }
 
-.hidden, .po-hidden { display: none !important; }
+.hidden { display: none !important; }
 
 .skip-link { position: fixed; top: 0.75rem; left: 0.75rem; z-index: var(--z-toast); transform: translateY(-180%); border-radius: var(--radius-small); background: var(--accent); padding: 0.75rem 1rem; color: #18130a !important; font-weight: 750; transition: transform 180ms ease-out; }
 .skip-link:focus { transform: translateY(0); }
@@ -419,7 +419,6 @@ body.workspace-app > footer { display: none !important; }
 .workspace-avatar-top { padding: 0; }
 .workspace-sidebar button:hover,
 .workspace-topbar button:hover { box-shadow: none; }
-body.workspace-app > .profile-placeholder { position: fixed; z-index: var(--z-modal); grid-column: 1 / -1; }
 body.workspace-app > .overlay { grid-column: 1 / -1; }
 .workspace-dashboard { width: min(100%, var(--content-max-width)); min-height: calc(100vh - var(--topbar-height)); margin: 0 auto; padding: clamp(2rem, 4vw, 4rem); }
 .workspace-dashboard .page-kicker { margin: 0 0 0.75rem; color: var(--accent-strong); font-size: 0.72rem; font-weight: 750; letter-spacing: 0.1em; text-transform: uppercase; }

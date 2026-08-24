@@ -14,7 +14,6 @@ const playerApiMocks = vi.hoisted(() => ({
 vi.mock('../../src/assets/js/API/API-Clan.js', () => clanApiMocks);
 vi.mock('../../src/assets/js/API/API-Player.js', () => playerApiMocks);
 
-vi.mock('../../src/assets/js/profile/profile_popup.js', () => ({ profileHTML: vi.fn() }));
 vi.mock('../../src/assets/js/auth/auth-client.js', () => ({ syncAuthSession: vi.fn().mockResolvedValue(null) }));
 vi.mock('../../src/assets/js/utils/user.js', () => ({ getCurrentUserId: () => null }));
 vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
@@ -99,7 +98,7 @@ describe('CWL Operation Board', () => {
             <div id="op-position-chart"></div><span id="op-position-chart-state"></span>
             <span id="op-standings-state"></span><div id="op-standings-list"></div><p id="op-standings-note"></p>
             <span id="op-roster-count"></span><table><thead><tr><th>Player</th><th>TH</th><th data-op-roster-column="planning">Planning</th><th>Attacks</th><th>Stars</th><th>Avg. destruction</th><th>Missed</th></tr></thead><tbody id="op-roster-body"></tbody></table><input id="op-roster-filter"><select id="op-roster-view"></select>
-            <ol id="op-bonus-list"></ol><div class="profile-placeholder"></div>`;
+            <ol id="op-bonus-list"></ol>`;
     });
 
     it('renders imported live data with all standings rows and marks the own clan', async () => {

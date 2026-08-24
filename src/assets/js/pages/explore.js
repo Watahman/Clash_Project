@@ -1,5 +1,4 @@
 import { initI18n, t } from '../i18n/i18n.js';
-import { profileHTML } from '../profile/profile_popup.js';
 import { WORKSPACE_MODULES, WORKSPACE_SECTIONS } from '../shell/module-registry.js';
 
 const visibleIds = new Set([
@@ -65,7 +64,6 @@ function initFilters() {
 
 function init() {
     initI18n();
-    profileHTML();
     renderCards(document.querySelector('.explore-grid'));
     initI18n(document.querySelector('.explore-grid'));
     initFilters();
