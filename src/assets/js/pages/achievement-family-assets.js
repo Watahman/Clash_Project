@@ -1,0 +1,43 @@
+// Stable family-ID art for milestones whose copy contains broad words such as
+// "record", "war" or "raid". All paths point to the local asset pack.
+export const FAMILY_IMAGE_OVERRIDES = Object.freeze({
+    BB_HALL: '/assets/icons/pillars/progress.svg',
+    BB_TROPHIES: '/assets/icons/stats/trend-up.svg',
+    BB_BEST: '/assets/icons/war/trophy.svg',
+    BB_HERO_SUM: '/assets/game/builder-base/heroes/battle-machine-icon.webp',
+    BB_TROOP_MAX: '/assets/game/builder-base/troops/boxer-giant-icon.webp',
+    BB_ALL_TROOPS_MAX: '/assets/game/builder-base/troops/power-pekka-icon.webp',
+    BB_ALL_HEROES_MAX: '/assets/game/builder-base/heroes/battle-copter-icon.webp',
+    BB_GAIN_7D: '/assets/icons/stats/trend-up.svg',
+    BB_NEW_BEST: '/assets/icons/stats/trend-up.svg',
+    BB_PROGRESS_PCT: '/assets/game/builder-base/buildings/builder-barracks-level-1.webp',
+    CL_LEVEL: '/assets/fixtures/clan-badges/rival-clan.png',
+    CL_MEMBERS: '/assets/fixtures/clan-badges/rival-clan.png',
+    CL_WAR_WINS: '/assets/game/ui-icons/icon-hv-clan-war.webp',
+    CL_WIN_STREAK: '/assets/icons/war/trophy.svg',
+    CL_PERFECT_WARS: '/assets/game/ui-icons/icon-hv-attack-star.webp',
+    CL_WAR_WINRATE: '/assets/icons/war/trophy.svg',
+    CL_HARD_WINS: '/assets/game/ui-icons/icon-hv-sword.webp',
+    CL_CWL_TOP3: '/assets/game/ui-icons/icon-hv-podium.webp',
+    CL_RAID_LOOT: '/assets/game/ui-icons/icon-cc-resource-capital-gold-small.webp',
+    CL_RAID_PARTICIPATION: '/assets/icons/ui/users.svg',
+    CL_WAR_READY_ROSTER: '/assets/game/ui-icons/icon-hv-in.webp',
+    CL_CAPITAL_POINTS: '/assets/icons/stats/trend-up.svg',
+    RAID_WEEKENDS: '/assets/icons/ui/users.svg',
+    RAID_ATTACKS: '/assets/game/ui-icons/icon-hv-sword.webp',
+    RAID_LOOT: '/assets/game/ui-icons/icon-cc-resource-capital-gold-small.webp',
+    RAID_WEEKEND_LOOT: '/assets/game/ui-icons/icon-cc-resource-capital-gold-small.webp',
+    RAID_FULL_ATTACKS: '/assets/game/ui-icons/icon-hv-attacks-no-shield.webp',
+    RAID_BONUS: '/assets/icons/ui/add.svg',
+    RAID_EFFICIENCY: '/assets/game/ui-icons/icon-cc-resource-capital-gold-small.webp',
+    RAID_TOP_LOOTER: '/assets/game/ui-icons/icon-cc-resource-capital-gold-small.webp',
+    RAID_TOP_LOOTER_COUNT: '/assets/game/ui-icons/icon-hv-podium.webp',
+    RAID_FULL_STREAK: '/assets/icons/ui/users.svg',
+    RAID_100_WEEKENDS_FULL: '/assets/game/ui-icons/icon-hv-sword.webp',
+    RAID_PERFECT_WEEKEND: '/assets/game/ui-icons/icon-hv-attack-star.webp',
+    RAID_CONTRIB_AND_LOOT: '/assets/game/ui-icons/icon-cc-resource-capital-gold-small.webp',
+    // No damaged Town Hall/building render exists locally. Workshop and Clan Castle
+    // keep district and Capital Hall finishers visually distinct.
+    RAID_DISTRICT_FINISH: '/assets/game/buildings/workshop.webp',
+    RAID_CAPITAL_FINISH: '/assets/game/buildings/clan-castle.webp'
+});

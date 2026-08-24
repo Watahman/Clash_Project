@@ -1,4 +1,5 @@
 import { entityImage } from './progress-asset-view.js?v=20260814-achievement-icons-1';
+import { FAMILY_IMAGE_OVERRIDES } from './achievement-family-assets.js';
 
 const ICON_PATHS = Object.freeze({
     trophy: '/assets/icons/war/trophy.svg', medal: '/assets/icons/war/medal.svg', target: '/assets/icons/war/target.svg',
@@ -156,8 +157,17 @@ function familyIconOverride(family) {
     return rule ? { type: 'image', value: ICON_PATHS[pick(rule[1], familyKey)] } : null;
 }
 
+function familyImageOverride(family) {
+    const familyKey = String(family?.familyKey || '').toUpperCase();
+    const image = FAMILY_IMAGE_OVERRIDES[familyKey];
+    return image ? { type: 'image', value: image } : null;
+}
+
 export function resolveAchievementAsset(family) {
     if (family?.entity) return { type: 'entity', value: family.entity };
+
+    const imageOverride = familyImageOverride(family);
+    if (imageOverride) return imageOverride;
 
     const familyOverride = familyIconOverride(family);
     if (familyOverride) return familyOverride;

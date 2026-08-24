@@ -3,7 +3,7 @@ import {
     buildAchievementSummary,
     filterAchievementFamilies
 } from '../achievements/achievement-view-model.js';
-import { achievementFamilyImage } from './achievement-asset-view.js?v=20260814-achievement-icons-1';
+import { achievementFamilyImage } from './achievement-asset-view.js?v=20260823-achievement-card-assets-1';
 
 const SOURCE_ORDER = Object.freeze([
     'live_profile', 'base_data', 'base_history', 'advanced_stats', 'war', 'cwl_history', 'raid_history',

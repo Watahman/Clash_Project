@@ -5,6 +5,7 @@ import de from './achievement-locales/de.js';
 import es from './achievement-locales/es.js';
 import { achievementBattleLocales } from './achievement-battle-locales.js';
 import { achievementExpandedLocales } from './achievement-expanded-locales.js';
+import { achievementFamilyLocales } from './achievement-family-locales/index.js';
 
 const v2UiLocales = Object.freeze({
     en: {
@@ -64,6 +65,7 @@ function withExpandedCopy(language, base) {
         ...base,
         ...(achievementBattleLocales[language] || achievementBattleLocales.en),
         ...(achievementExpandedLocales[language] || achievementExpandedLocales.en),
+        ...(achievementFamilyLocales[language] || achievementFamilyLocales.en),
         ...(v2UiLocales[language] || v2UiLocales.en)
     });
 }

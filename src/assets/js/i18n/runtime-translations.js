@@ -19,7 +19,7 @@ import deCompletion from './locale-completions/de.js';
 import esCompletion from './locale-completions/es.js';
 import { publicStaticLocales } from './public-static-locales.js?v=20260812-redesign';
 import { publicResourceLocales } from './public-resource-locales.js?v=20260821-product-home';
-import { achievementLocales } from './achievement-locales.js';
+import { achievementLocales } from './achievement-locales.js?v=20260823-achievement-card-assets-1';
 import { advancedStatsLocales } from './advanced-stats-locales.js?v=20260814-advanced-stats-v4';
 import { advancedStatsExtraLocales } from './advanced-stats-extra-locales.js?v=20260814-advanced-stats-v4';
 import { advancedStatsUiLocales } from './advanced-stats-ui-locales.js?v=20260814-advanced-stats-v4';

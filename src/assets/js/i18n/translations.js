@@ -5,7 +5,7 @@ import { de } from './locales/de.js';
 import { es } from './locales/es.js';
 import { workspaceLocales } from './workspace-locales.js';
 import { publicPageLocales } from './public-pages-locales.js';
-import { achievementLocales } from './achievement-locales.js';
+import { achievementLocales } from './achievement-locales.js?v=20260823-achievement-card-assets-1';
 
 const plannerToolFallback = Object.fromEntries(
     Object.entries(en).filter(([key]) =>

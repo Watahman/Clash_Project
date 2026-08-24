@@ -1,7 +1,7 @@
 import { getAchievements, importAchievementBaseData } from '../Supabase/Supabase-Achievements.js';
 import { checkUserId } from '../Supabase/Supabase-User.js';
 import { getCurrentUserId } from '../utils/user.js';
-import { applyI18n, getLanguage, t } from '../i18n/i18n.js';
+import { applyI18n, getLanguage, t } from '../i18n/i18n.js?v=20260823-achievement-card-assets-1';
 import {
     collectLinkedAccounts,
     normalizePlayerTag,
@@ -13,7 +13,7 @@ import {
     renderAll,
     renderSources,
     renderAchievements
-} from './achievements-renderer.js?v=20260814-achievement-icons-1';
+} from './achievements-renderer.js?v=20260823-achievement-card-assets-1';
 
 const PAGE_SIZE = 48;
 const ACCOUNT_STORAGE_KEY = 'clashpanel_achievements_account';
