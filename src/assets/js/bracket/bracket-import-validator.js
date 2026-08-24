@@ -170,7 +170,7 @@ export function validateImportedBracket(parsed) {
         const round = parsed.rounds[roundIndex];
         validateImportedRound(round, roundIndex, participantSet, size / (2 ** (roundIndex + 1)));
     }
-    validateOpeningRound(parsed.rounds[0], participants, drawOrder);
+    validateOpeningRound(parsed.rounds[0], participantIds || participants, drawOrder);
     for (let roundIndex = 1; roundIndex < parsed.rounds.length; roundIndex += 1) {
         validateRoundPropagation(parsed.rounds[roundIndex], parsed.rounds[roundIndex - 1]);
     }

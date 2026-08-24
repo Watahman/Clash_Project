@@ -58,7 +58,7 @@ describe('CWL Auto Plan source adapter', () => {
         expect(locks.startedClanIds).toEqual(['alpha']);
     });
 
-    it('applies roles and daily assignments only after preview confirmation', async () => {
+    it('applies roster placement and roles only after preview confirmation', async () => {
         const { applyAutoPlanResult } = await import(
             '../../src/assets/js/cwl/auto-plan/cwl-auto-plan-source.js'
         );
@@ -70,8 +70,7 @@ describe('CWL Auto Plan source adapter', () => {
                 id: 'alpha',
                 players: [{
                     tag: '#FREE',
-                    role: 'rotation',
-                    plannedDays: [1, 2, 5, 6, 7]
+                    role: 'rotation'
                 }]
             }]
         });
@@ -80,7 +79,7 @@ describe('CWL Auto Plan source adapter', () => {
             '#cwl-clan-template_alpha [data-player-tag="#FREE"]'
         );
         expect(moved?.dataset.rosterStatus).toBe('rotation');
-        expect(moved?.dataset.plannedDays).toBe('1,2,5,6,7');
+        expect(moved?.dataset.plannedDays).toBeUndefined();
         expect(document.querySelector(
             '#cwl-available-players [data-player-tag="#ASSIGNED"]'
         )).not.toBeNull();

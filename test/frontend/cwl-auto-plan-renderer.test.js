@@ -7,7 +7,7 @@ describe('CWL Auto Plan preview', () => {
         document.body.innerHTML = '<div id="preview"></div>';
     });
 
-    it('renders readiness, role totals and all seven daily decisions', () => {
+    it('renders readiness and role totals without a fabricated daily schedule', () => {
         const result = previewResult('automatic');
         renderAutoPlanPreview({
             container: document.querySelector('#preview'),
@@ -20,8 +20,8 @@ describe('CWL Auto Plan preview', () => {
             .toContain('Alpha · Master League I');
         expect(document.querySelector('.cwl-auto-plan-readiness').textContent)
             .toContain('Good');
-        expect(document.querySelectorAll('thead th')).toHaveLength(9);
-        expect(document.querySelectorAll('tbody .is-planned')).toHaveLength(7);
+        expect(document.querySelectorAll('.cwl-auto-plan-metrics dt')).toHaveLength(5);
+        expect(document.querySelector('.cwl-auto-plan-lineups')).toBeNull();
         expect(document.querySelector('.cwl-auto-plan-changes').textContent)
             .toContain('Player One');
     });
@@ -33,7 +33,6 @@ describe('CWL Auto Plan preview', () => {
             tag: '#LOCKED',
             name: 'Locked player',
             role: 'reserve',
-            plannedDays: []
         });
         result.freePlayers = [{ tag: '#FREE', name: 'Free player' }];
 
@@ -63,7 +62,6 @@ describe('CWL Auto Plan preview', () => {
             status: 'not-used',
             reasonCode: 'not_enough_remaining_players',
             players: [],
-            lineups: [],
             warnings: []
         });
 
@@ -107,7 +105,6 @@ function previewResult(mode) {
             league: 'Master League I',
             capacity: 15,
             status: 'active',
-            lineupChanges: 0,
             warnings: [],
             readiness: {
                 status: 'good',
@@ -119,8 +116,7 @@ function previewResult(mode) {
             players: [{
                 tag: '#ONE',
                 name: 'Player One',
-                role: 'core',
-                plannedDays: [1, 2, 3, 4, 5, 6, 7]
+                role: 'core'
             }]
         }]
     };

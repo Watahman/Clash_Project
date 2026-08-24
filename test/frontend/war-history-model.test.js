@@ -89,7 +89,7 @@ describe('regular war history', () => {
         expect(card).not.toBeNull();
         expect(card.querySelector('.war-history-type').textContent).toBe('CWL');
         expect(card.textContent).toContain('CWL war data');
-        expect(card.textContent).toContain('CWL opponent unavailable');
+        expect(card.textContent).toContain('CWL round result');
         expect(card.textContent).toContain('Excluded from regular-war stats');
         expect(card.textContent).not.toContain('700%');
     });

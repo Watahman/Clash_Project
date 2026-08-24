@@ -82,13 +82,10 @@ describe('workspace guidance', () => {
         expect(document.querySelector('.workspace-help-intro')?.textContent).toContain(expectedCopy);
     });
 
-    it('derives planner progress from the real roster, poll, lineups and saved-plan state', () => {
-        localStorage.setItem('planner_id', 'plan-1');
+    it('derives planner empty states from the real free and assigned rosters', () => {
         shell('planner', `
             <header class="cwl-page-header"><div><h1>July</h1><p>Intro</p></div></header>
             <span id="cwl-total-player-amount">3</span>
-            <select id="cwl-roster-poll-select"><option value="poll-1" selected>July poll</option></select>
-            <span id="cwl-save-status" data-state="idle">Saved</span>
             <div id="cwl-available-players"><article class="cwl-player-article" data-planner-card="true"></article></div>
             <div id="cwl-all-clans"><article class="cwl-clan-article">
                 <article class="cwl-player-article" data-planner-card="true"></article>
@@ -98,12 +95,9 @@ describe('workspace guidance', () => {
 
         initWorkspaceGuidance('planner');
 
-        const workflow = document.querySelector('#cwl-guidance-workflow');
-        expect(workflow.querySelector('[data-guidance-step="roster"]').classList).toContain('is-complete');
-        expect(workflow.querySelector('[data-guidance-step="availability"]').classList).toContain('is-complete');
-        expect(workflow.querySelector('[data-guidance-step="lineups"] small').textContent)
-            .toBe('2 players assigned across 1 clans');
-        expect(workflow.querySelector('[data-guidance-step="save"]').classList).toContain('is-complete');
+        expect(document.querySelector('#cwl-guidance-workflow')).toBeNull();
+        expect(document.querySelector('#cwl-available-players .workspace-guidance-empty')).toBeNull();
+        expect(document.querySelector('#cwl-all-clans .workspace-guidance-empty')).toBeNull();
     });
 
     it('uses Clan Family statistics for the setup checklist and collapses it when complete', () => {

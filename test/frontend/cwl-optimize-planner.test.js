@@ -164,7 +164,7 @@ describe('CWL Optimize Plan', () => {
         expect(targetClan.players.filter(player => player.role !== 'reserve')).toHaveLength(30);
     });
 
-    it('promotes depth when it is needed to cover all seven CWL days', () => {
+    it('does not infer role changes from removed daily schedules', () => {
         const roster = playersForClan('alpha', 16).map((player, index) => ({
             ...player,
             currentRole: index < 15 ? 'core' : 'reserve'
@@ -182,16 +182,8 @@ describe('CWL Optimize Plan', () => {
             players: roster
         }));
 
-        expect(result.suggestions).toContainEqual(expect.objectContaining({
-            type: 'structural',
-            actions: expect.arrayContaining([
-                expect.objectContaining({
-                    type: 'role',
-                    playerTag: '#P015',
-                    role: 'rotation'
-                })
-            ])
-        }));
+        expect(result.suggestions.flatMap(item => item.actions)
+            .some(action => action.type === 'days')).toBe(false);
         expect(result.optimized.clans[0].warnings).not.toContainEqual(expect.objectContaining({
             code: 'incomplete_day'
         }));
@@ -237,7 +229,7 @@ describe('CWL Optimize Plan', () => {
         expect(result.suggestions.some(item => item.type === 'role-swap')).toBe(false);
     });
 
-    it('reduces excessive daily lineup changes with a stable schedule suggestion', () => {
+    it('ignores legacy daily schedules after schedule editing was removed', () => {
         const roster = playersForClan('alpha', 16, { equalScores: true })
             .map((player, index) => {
                 const rotation = index >= 14;
@@ -254,18 +246,10 @@ describe('CWL Optimize Plan', () => {
             clans: [clan('alpha', '#ALPHA', 'Champion League I')],
             players: roster
         }));
-        const cleanup = result.suggestions.find(item =>
-            item.type === 'schedule-cleanup'
-        );
-
-        expect(cleanup).toBeDefined();
-        expect(cleanup.reasons).toContainEqual(expect.objectContaining({
-            code: 'lineup-changes',
-            from: 6,
-            to: expect.any(Number)
-        }));
-        expect(result.optimized.metrics.lineupChanges)
-            .toBeLessThan(result.current.metrics.lineupChanges);
+        expect(result.suggestions.some(item => item.type === 'schedule-cleanup')).toBe(false);
+        expect(result.suggestions.flatMap(item => item.actions)
+            .some(action => action.type === 'days')).toBe(false);
+        expect(result.optimized.metrics.lineupChanges).toBeUndefined();
     });
 
     it('applies only the suggestions selected by the user', () => {

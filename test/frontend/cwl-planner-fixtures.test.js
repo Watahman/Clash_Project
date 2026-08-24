@@ -5,7 +5,6 @@ import {
     getRequestedPlannerFixture
 } from '../../src/assets/js/fixtures/planner-fixtures.js';
 import { clearActiveCwlPoll, getPlayerAvailability } from '../../src/assets/js/cwl/cwl-availability.js';
-import { initPlannerSchedule } from '../../src/assets/js/cwl/cwl-planner-schedule.js';
 import { normalizePlayer } from '../../src/assets/js/cwl/cwl-utils.js';
 
 describe('CWL planner redesign fixtures', () => {
@@ -47,7 +46,7 @@ describe('CWL planner redesign fixtures', () => {
             </template>`;
     });
 
-    it('catalogues real counts and seven-day data for the core planner states', () => {
+    it('catalogues real counts and roster roles for the core planner states', () => {
         expect(getPlannerFixtureData('planner-empty').info).toMatchObject({
             freePlayers: [],
             clans: []
@@ -63,20 +62,20 @@ describe('CWL planner redesign fixtures', () => {
 
         const multi = getPlannerFixtureData('planner-multi-clan');
         expect(multi.info.clans).toHaveLength(2);
-        expect(multi.info.clans.every(clan => clan.players.every(player => player.plannedDays.length === 7))).toBe(true);
+        expect(multi.info.clans.every(clan => clan.players.every(player =>
+            ['core', 'rotation', 'reserve'].includes(player.rosterStatus)
+        ))).toBe(true);
         expect(multi.info.clans.every(clan => clan.badgeUrls.small.endsWith('.png'))).toBe(true);
         expect(multi.players.some(player => player.name.startsWith('Fixture Player'))).toBe(false);
     });
 
-    it('renders the normal and large fixtures through planner card and schedule paths', () => {
+    it('renders the normal and large fixtures through the current roster cards', () => {
         const normal = applyPlannerFixture(fixture('planner-normal'), { location: localUrl() });
-        const schedule = initPlannerSchedule({ root: document });
-        schedule.refresh();
         expect(normal.info.freePlayers).toHaveLength(20);
         expect(document.querySelectorAll('#cwl-available-players .cwl-player-article')).toHaveLength(20);
         expect(normalizePlayer({ tag: '#TEST' }).clanName).toBe('');
         expect(document.querySelectorAll('.cwl-clan-article')).toHaveLength(1);
-        expect(document.querySelectorAll('.cwl-day-column')).toHaveLength(7);
+        expect(document.querySelectorAll('#cwl-available-players .cwl-player-article')).toHaveLength(20);
 
         applyPlannerFixture(fixture('planner-large'), { location: localUrl() });
         expect(document.querySelectorAll('.cwl-player-article[data-planner-card="true"]')).toHaveLength(65);
@@ -85,19 +84,15 @@ describe('CWL planner redesign fixtures', () => {
         )).toEqual([15, 15, 15]);
     });
 
-    it('renders full multi-clan days and marks capacity/availability conflicts', () => {
+    it('renders full multi-clan rosters and marks capacity and availability conflicts', () => {
         applyPlannerFixture(fixture('planner-multi-clan'), { location: localUrl() });
-        const schedule = initPlannerSchedule({ root: document });
-        schedule.refresh();
         expect([...document.querySelectorAll('.cwl-clan-article')].every(clan =>
-            clan.querySelectorAll('[data-day="1"] .cwl-day-player').length === 15
+            clan.querySelectorAll('.cwl-clan-player-list .cwl-player-article').length === 15
         )).toBe(true);
 
         applyPlannerFixture(fixture('planner-conflicts'), { location: localUrl() });
-        schedule.refresh();
         expect(document.querySelectorAll('.cwl-clan-article[data-capacity-conflict="true"]')).toHaveLength(2);
         expect(document.querySelectorAll('.cwl-player-article[data-availability="no"]')).not.toHaveLength(0);
-        expect(document.querySelectorAll('.cwl-day-player[data-availability-conflict="true"]')).not.toHaveLength(0);
     });
 
     it('injects confirmed, unavailable, and unknown poll availability without storage writes', () => {

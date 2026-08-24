@@ -3,6 +3,7 @@ import { JSDOM } from 'jsdom';
 import { describe, expect, it } from 'vitest';
 import { bracketChampion, createBracket } from '../../src/assets/js/bracket/bracket-engine.js';
 import { createBracketFixture } from '../../src/assets/js/bracket/bracket-fixtures.js';
+import { participantName } from '../../src/assets/js/bracket/bracket-model.js';
 import {
     drawBracketConnectors,
     renderBracketBoard
@@ -103,7 +104,7 @@ describe('bracket boundary fixtures', () => {
 
     it('has a deterministic completed champion fixture', () => {
         const bracket = createBracketFixture('bracket-complete');
-        expect(bracketChampion(bracket)).toBe('Northwind');
+        expect(participantName(bracket, bracketChampion(bracket))).toBe('Northwind');
         expect(bracket.updatedAt).toBe('2026-01-01T00:00:00.000Z');
     });
 });

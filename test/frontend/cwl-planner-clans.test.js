@@ -128,7 +128,7 @@ describe('CWL planner clan rows', () => {
         expect(player.querySelector('.cwl-player-control-group > .cwl-move-player')).not.toBeNull();
     });
 
-    it("keeps the move selector aligned with the player's current clan", async () => {
+    it('shows move controls only while a player is in the free roster', async () => {
         const { createClanCard, createPlayerCard } = await import(
             '../../src/assets/js/templates/CWLTemplates.js'
         );
@@ -143,9 +143,8 @@ describe('CWL planner clan rows', () => {
         clanList.appendChild(player);
         syncPlayerRosterStatus(player);
 
-        expect(player.querySelector('.cwl-move-player')?.value)
-            .toBe('cwl-clan-template_north');
-        expect(player.querySelectorAll('.cwl-player-control-group > select')).toHaveLength(2);
+        expect(player.querySelector('.cwl-move-player')).toBeNull();
+        expect(player.querySelectorAll('.cwl-player-control-group > select')).toHaveLength(1);
 
         document.querySelector('#cwl-available-players').appendChild(player);
         syncPlayerRosterStatus(player);
