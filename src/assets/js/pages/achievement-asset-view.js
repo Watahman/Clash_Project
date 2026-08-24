@@ -197,7 +197,10 @@ export function resolveAchievementAsset(family) {
 
 function staticImage(src, label, className = 'achievement-family-image') {
     const image = document.createElement('img');
-    image.className = className;
+    const assetClass = /\.svg(?:$|\?)/i.test(src)
+        ? 'achievement-vector-image'
+        : 'achievement-raster-image';
+    image.className = `${className} ${assetClass}`;
     image.src = src;
     image.alt = '';
     image.title = label;
