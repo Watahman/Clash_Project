@@ -3,7 +3,6 @@ import {
     classifyClanRoles
 } from './cwl-auto-plan-assignment.js';
 import { calculateClanReadiness } from './cwl-auto-plan-readiness.js';
-import { buildDailySchedule } from './cwl-auto-plan-schedule.js';
 import { selectActiveClans } from './cwl-auto-plan-selection.js';
 
 export function buildAutoPlan(input) {
@@ -32,12 +31,7 @@ export function buildAutoPlan(input) {
             assignment.buckets.get(clan.id) || [],
             locks.roles
         );
-        const schedule = buildDailySchedule(
-            clan,
-            classified.players,
-            clampRounds(input?.rounds)
-        );
-        const readiness = calculateClanReadiness(clan, classified.players, schedule);
+        const readiness = calculateClanReadiness(clan, classified.players);
         const warnings = [
             ...(classified.players.filter(entry => entry.role !== 'reserve').length < clan.capacity
                 ? [{
@@ -45,8 +39,7 @@ export function buildAutoPlan(input) {
                     active: classified.players.filter(entry => entry.role !== 'reserve').length,
                     required: clan.capacity,
                     message: `Only ${classified.players.filter(entry => entry.role !== 'reserve').length} of ${clan.capacity} required active players are available.`
-                }] : []),
-            ...schedule.warnings
+                }] : [])
         ];
         return {
             ...clan,
@@ -56,11 +49,8 @@ export function buildAutoPlan(input) {
                 ...entry.player,
                 role: entry.role,
                 hardLocked: entry.hardLocked,
-                score: entry.score,
-                plannedDays: schedule.plannedDays[entry.player.tag] || []
+                score: entry.score
             })).sort(compareResultPlayers),
-            lineups: schedule.lineups,
-            lineupChanges: schedule.changes,
             readiness,
             warnings
         };
@@ -69,7 +59,6 @@ export function buildAutoPlan(input) {
     const activeCount = selection.activeClans.length;
     return {
         mode: input?.mode === 'guided' ? 'guided' : 'automatic',
-        rounds: clampRounds(input?.rounds),
         clans: results,
         activeCount,
         totalClanCount: clans.length,
@@ -91,8 +80,6 @@ function unusedClanResult(clan, activeCount) {
             : 'not_enough_complete_roster',
         rotationPositions: 0,
         players: [],
-        lineups: [],
-        lineupChanges: 0,
         readiness: null,
         warnings: []
     };

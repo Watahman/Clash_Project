@@ -1,0 +1,31 @@
+{
+  "generatedSvgCounts": {
+    "ui": 42,
+    "pillars": 5,
+    "achievements": 11,
+    "stats": 9,
+    "war": 13,
+    "games": 9,
+    "placeholders": 3
+  },
+  "rasterCollection": {
+    "status": "collected-and-locally-validated",
+    "source": "clash-of-clans-data@0.16.0",
+    "entityCount": 195,
+    "webpCount": 274,
+    "categories": [
+      "town-halls",
+      "troops",
+      "super-troops",
+      "spells",
+      "siege-machines",
+      "heroes",
+      "pets",
+      "equipment",
+      "buildings",
+      "defenses",
+      "traps",
+      "leagues"
+    ]
+  }
+}

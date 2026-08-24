@@ -5,7 +5,7 @@
     }
 
     .op-history-side + .op-history-side {
-        border-top: 1px solid var(--border-strong);
+        border-top: 2px solid var(--history-side-accent);
         border-left: 0;
     }
 
@@ -75,6 +75,10 @@
     }
 
     .op-history-timeline button > small {
+        grid-column: 2 / -1;
+    }
+
+    .op-history-timeline .op-history-record-tone {
         grid-column: 2 / -1;
     }
 

@@ -3,7 +3,9 @@ package Java.performance;
 import java.util.List;
 import java.util.Map;
 
-public final class FallbackHistoricalPlayerDataProvider implements HistoricalPlayerDataProvider {
+/** Uses a secondary history source only when the configured primary fails. */
+public final class FallbackHistoricalPlayerDataProvider
+        implements HistoricalPlayerDataProvider {
     private final HistoricalPlayerDataProvider primary;
     private final HistoricalPlayerDataProvider fallback;
 
@@ -16,7 +18,8 @@ public final class FallbackHistoricalPlayerDataProvider implements HistoricalPla
     }
 
     @Override
-    public Map<String, HistoricalPlayerData> getPlayerWarHistory(List<String> playerTags) throws Exception {
+    public Map<String, HistoricalPlayerData> getPlayerWarHistory(List<String> playerTags)
+            throws Exception {
         try {
             return primary.getPlayerWarHistory(playerTags);
         } catch (Exception primaryFailure) {

@@ -1,12 +1,9 @@
 package Java;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class Config {
@@ -18,22 +15,44 @@ public class Config {
     String _API_KEY_ALL = env("_API_KEY_ALL");
     String _API_KEY_ALL2 = env("_API_KEY_ALL2");
     String _API_KEY_ALL3 = env("_API_KEY_ALL3");
-    private final AtomicInteger clashApiKeyCursor = new AtomicInteger();
+    String _CLASH_API_KEY_POOL = env("CLASH_API_KEY_POOL");
+    String _CLASH_API_RATE_LIMIT_COOLDOWN_SECONDS = firstNonBlank(
+            env("CLASH_API_RATE_LIMIT_COOLDOWN_SECONDS"),
+            "60"
+    );
+    String _CLASH_API_MAX_COOLDOWN_SECONDS = firstNonBlank(
+            env("CLASH_API_MAX_COOLDOWN_SECONDS"),
+            "300"
+    );
+    private volatile ClashApiKeyPool clashApiKeyPool;
 
     String _BASE_URL_SUPABASE = firstNonBlank(env("_BASE_URL_SUPABASE"), env("SUPABASE_URL"));
     String _BASE_URL_CLASH = firstNonBlank(env("_BASE_URL_CLASH"), "https://cocproxy.royaleapi.dev/v1");
-    String _CLASHKING_API_VERSION = firstNonBlank(env("CLASHKING_API_VERSION"), "legacy");
+    String _CLASHKING_API_VERSION = firstNonBlank(
+            env("CLASHKING_API_VERSION"),
+            "legacy"
+    );
     String _CLASHKING_LEGACY_BASE_URL = firstNonBlank(
             env("CLASHKING_LEGACY_BASE_URL"),
+            env("CLASHKING_BASE_URL"),
             "https://api.clashk.ing"
     );
     String _CLASHKING_V2_BASE_URL = firstNonBlank(
             env("CLASHKING_V2_BASE_URL"),
-            "https://v2-api.clashk.ing"
+            env("CLASHKING_BASE_URL"),
+            "https://api.clashk.ing"
     );
     String _CLASHKING_FALLBACK_TO_LEGACY = firstNonBlank(
             env("CLASHKING_FALLBACK_TO_LEGACY"),
             "false"
+    );
+    String _CLASHKING_RANKED_SEASON = firstNonBlank(
+            env("CLASHKING_RANKED_SEASON"),
+            env("CLASHKING_V2_RANKED_SEASON")
+    );
+    String _CLASHKING_COUNTER_INTERVAL_SECONDS = firstNonBlank(
+            env("CLASHKING_COUNTER_INTERVAL_SECONDS"),
+            "60"
     );
     String _CACHE_ENABLED = firstNonBlank(env("CACHE_ENABLED"), "true");
     String _CACHE_MODE = firstNonBlank(env("CACHE_MODE"), "layered");
@@ -111,6 +130,18 @@ public class Config {
     String _EXT_CWL_HISTORY_SEASONS = "/CWLHistorySeasons";
     String _EXT_CWL_HISTORY_OVERVIEW = "/CWLHistoryOverview";
 
+    String _EXT_ADVANCED_STATS_TRACKING_START = "/AdvancedStatsTrackingStart";
+    String _EXT_ADVANCED_STATS_TRACKING_GET = "/AdvancedStatsTrackingGet";
+    String _EXT_ADVANCED_STATS_TRACKING_PAUSE = "/AdvancedStatsTrackingPause";
+    String _EXT_ADVANCED_STATS_TRACKING_RESUME = "/AdvancedStatsTrackingResume";
+    String _EXT_ADVANCED_STATS_TRACKING_STOP = "/AdvancedStatsTrackingStop";
+    String _EXT_ADVANCED_STATS_DATA_DELETE = "/AdvancedStatsDataDelete";
+    String _EXT_ADVANCED_STATS_OVERVIEW = "/AdvancedStatsOverview";
+    String _EXT_ADVANCED_STATS_UNITS = "/AdvancedStatsUnits";
+    String _EXT_ADVANCED_STATS_ARMIES = "/AdvancedStatsArmies";
+    String _EXT_ADVANCED_STATS_BATTLES = "/AdvancedStatsBattles";
+    String _EXT_ADVANCED_STATS_TRENDS = "/AdvancedStatsTrends";
+
     String _EXT_LEAGUE_LEAGUETIERS_INFO = "/LeagueTierInfo";
     String _EXT_LEAGUE_CAPITAL_LEAGUES = "/LeagueCapitalLeagues";
     String _EXT_LEAGUE_LEAGUETIERS = "/LeagueTiers";
@@ -181,9 +212,6 @@ public class Config {
     String _EXT_SUPA_GROUP_POLL_DELETE = "/SupabaseGroupPollDelete";
     String _EXT_SUPA_NOTIFICATIONS_GET = "/SupabaseNotificationsGet";
     String _EXT_SUPA_NOTIFICATION_READ = "/SupabaseNotificationRead";
-    String _EXT_SUPA_WAR_ASSIGNMENTS_GET = "/SupabaseWarAssignmentsGet";
-    String _EXT_SUPA_WAR_ASSIGNMENT_SAVE = "/SupabaseWarAssignmentSave";
-    String _EXT_SUPA_WAR_ASSIGNMENT_DELETE = "/SupabaseWarAssignmentDelete";
 
     static String firstNonBlank(String... values) {
         if (values == null) return "";
@@ -214,51 +242,52 @@ public class Config {
         return _API_KEY_SUPABASE;
     }
 
-    String getClashApiKey() {
-        List<String> keys = normalizedClashApiKeys();
-        if (keys.isEmpty()) {
-            throw new IllegalStateException(
-                    "Ontbrekende Clash API key env var, bv. _API_KEY_ALL"
-            );
+    ClashApiKeyPool getClashApiKeyPool() {
+        ClashApiKeyPool current = clashApiKeyPool;
+        if (current != null) return current;
+        synchronized (this) {
+            if (clashApiKeyPool == null) {
+                clashApiKeyPool = ClashApiKeyPool.fromConfiguration(
+                        _CLASH_API_KEY_POOL,
+                        List.of(
+                                firstNonBlank(_API_KEY_ALL),
+                                firstNonBlank(_API_KEY_ALL2),
+                                firstNonBlank(_API_KEY_ALL3)
+                        )
+                );
+            }
+            return clashApiKeyPool;
         }
-        return keys.getFirst();
     }
 
-    List<String> getClashApiKeysForRequest() {
-        List<String> keys = normalizedClashApiKeys();
-        if (keys.isEmpty()) {
-            throw new IllegalStateException(
-                    "Ontbrekende Clash API key env var, bv. _API_KEY_ALL"
-            );
-        }
-
-        int start = Math.floorMod(clashApiKeyCursor.getAndIncrement(), keys.size());
-        List<String> rotated = new ArrayList<>(keys.size());
-        for (int offset = 0; offset < keys.size(); offset++) {
-            rotated.add(keys.get((start + offset) % keys.size()));
-        }
-        return List.copyOf(rotated);
+    void validateClashApiKeyConfiguration() {
+        getClashApiKeyPool();
     }
 
-    private List<String> normalizedClashApiKeys() {
-        Set<String> uniqueKeys = new LinkedHashSet<>();
-        addNormalizedClashApiKey(uniqueKeys, _API_KEY_ALL);
-        addNormalizedClashApiKey(uniqueKeys, _API_KEY_ALL2);
-        addNormalizedClashApiKey(uniqueKeys, _API_KEY_ALL3);
-        return List.copyOf(uniqueKeys);
+    long getClashApiRateLimitCooldownMillis() {
+        return boundedLong(
+                _CLASH_API_RATE_LIMIT_COOLDOWN_SECONDS,
+                60L,
+                1L,
+                900L
+        ) * 1_000L;
     }
 
-    private void addNormalizedClashApiKey(Set<String> keys, String value) {
-        if (value == null || value.isBlank()) return;
-        String key = value.trim();
-        if (key.regionMatches(true, 0, "Bearer ", 0, 7)) {
-            key = key.substring(7).trim();
-        }
-        if (!key.isBlank()) keys.add("Bearer " + key);
+    long getClashApiMaximumCooldownMillis() {
+        return boundedLong(
+                _CLASH_API_MAX_COOLDOWN_SECONDS,
+                300L,
+                1L,
+                3_600L
+        ) * 1_000L;
     }
 
     String getClashBaseUrl() {
         return _BASE_URL_CLASH;
+    }
+
+    public String getClashKingBaseUrl() {
+        return _CLASHKING_V2_BASE_URL;
     }
 
     public String getClashKingApiVersion() {
@@ -275,6 +304,14 @@ public class Config {
 
     public boolean isClashKingLegacyFallbackEnabled() {
         return "true".equalsIgnoreCase(_CLASHKING_FALLBACK_TO_LEGACY);
+    }
+
+    public String getClashKingRankedSeason() {
+        return _CLASHKING_RANKED_SEASON;
+    }
+
+    int getClashKingCounterIntervalSeconds() {
+        return boundedInt(_CLASHKING_COUNTER_INTERVAL_SECONDS, 60, 5, 3600);
     }
 
     boolean isAuthCookieSecure() {
@@ -413,6 +450,14 @@ public class Config {
         }
     }
 
+    private long boundedLong(String value, long fallback, long minimum, long maximum) {
+        try {
+            return Math.max(minimum, Math.min(Long.parseLong(value), maximum));
+        } catch (NumberFormatException invalidValue) {
+            return fallback;
+        }
+    }
+
     boolean isOriginAllowed(String origin) {
         if (origin == null || origin.isBlank()) return true;
         for (String allowed : _ALLOWED_ORIGINS.split(",")) {
@@ -426,7 +471,7 @@ public class Config {
         if (_BASE_URL_SUPABASE == null || _BASE_URL_SUPABASE.isBlank()) missing.add("SUPABASE_URL");
         if (_API_KEY_SUPABASE == null || _API_KEY_SUPABASE.isBlank()) missing.add("SUPABASE_PUBLISHABLE_KEY");
         if (_API_KEY_SECR_SUPABASE == null || _API_KEY_SECR_SUPABASE.isBlank()) missing.add("SUPABASE_SERVICE_ROLE_KEY");
-        if (normalizedClashApiKeys().isEmpty()) missing.add("CLASH_API_KEY");
+        if (getClashApiKeyPool().size() == 0) missing.add("CLASH_API_KEY_POOL");
         if (trustsProxyHeaders() && !hasApiProxySecret()) missing.add("API_PROXY_SECRET");
         return List.copyOf(missing);
     }

@@ -1,4 +1,4 @@
-import '../theme/theme-manager.js';
+import '../theme/theme-manager.js?v=20260821-public-pages';
 import {
     ensureLanguage,
     getTranslationValue,
@@ -6,7 +6,7 @@ import {
     isSupportedLanguage,
     supportedLanguages,
     translations
-} from './runtime-translations.js';
+} from './runtime-translations.js?v=20260823-achievement-card-assets-1';
 
 const STORAGE_KEY = 'clashtools_language';
 const DEFAULT_LANG = 'en';

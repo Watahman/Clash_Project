@@ -68,6 +68,33 @@
     color: var(--accent-strong);
 }
 
+.op-history-timeline .op-history-record-tone {
+    display: inline-flex;
+    width: max-content;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.24rem 0.48rem;
+    background: var(--surface-hover);
+    color: var(--text-muted);
+    font-size: 0.62rem;
+    font-weight: 750;
+}
+
+.op-history-record-tone[data-result="win"] {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.op-history-record-tone[data-result="loss"] {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+.op-history-record-tone[data-result="draw"] {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
 .op-history-trend-heading {
     align-items: center;
 }
@@ -227,11 +254,11 @@
 }
 
 .op-history-reliability-list [data-tone="complete"] {
-    color: var(--accent-strong);
+    color: var(--success);
 }
 
 .op-history-reliability-list [data-tone="attention"] {
-    color: var(--warning);
+    color: var(--text-muted);
 }
 
 .op-history-record {

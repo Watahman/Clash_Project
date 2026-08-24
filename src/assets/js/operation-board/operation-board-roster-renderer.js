@@ -1,15 +1,14 @@
-import { t } from '../i18n/i18n.js';
+import { competeT as t } from './compete-locales.js';
 import {
-    escapeHtml,
     lower,
     number
 } from './operation-board-utils.js';
 import {
-    badge,
     option,
     stateText
 } from './operation-board-render-utils.js';
 import { matchesRosterView } from './operation-board-roster-filter.js';
+import { renderPlayerRow } from './operation-board-roster-row-renderer.js';
 
 export function isStandaloneMode(report, selectedClan = null) {
     return Boolean(
@@ -28,10 +27,10 @@ export function syncRosterMode(refs, report, selectedClan = null) {
             '[data-op-roster-column-label]'
         );
         if (label) {
-            label.textContent = historical ? 'Participation' : t('op.planning');
+            label.textContent = historical ? t('cwl.participation') : t('op.planning');
         } else {
             refs.rosterPlanningHeader.textContent = historical
-                ? 'Participation'
+                ? t('cwl.participation')
                 : t('op.planning');
         }
     }
@@ -43,7 +42,7 @@ export function syncRosterMode(refs, report, selectedClan = null) {
             '[data-op-roster-defense-label]'
         );
         if (label) {
-            label.textContent = historical ? 'Average defense' : t('op.missed');
+            label.textContent = historical ? t('cwl.averageDefense') : t('op.missed');
         }
         defenseHeader.dataset.opRosterSort = historical ? 'defense' : 'missed';
         const table = defenseHeader.closest('table');
@@ -128,7 +127,9 @@ export function renderRoster(refs, report, selectedClan = null) {
         return;
     }
     roster.forEach(({ player, display }) => {
-        refs.rosterBody.appendChild(renderPlayerRow(player, display, report));
+        refs.rosterBody.appendChild(
+            renderPlayerRow(player, display, report, isStandaloneMode(report))
+        );
     });
 }
 
@@ -164,64 +165,6 @@ function getPlayerDayDisplay(player, day) {
             missed: 0,
             avgDefense: null
         };
-}
-
-function renderPlayerRow(player, display, report) {
-    const row = document.createElement('tr');
-    row.className = `op-player-row op-status-${player.status}`;
-    row.dataset.performanceCard = 'true';
-    row.dataset.playerTag = player.tag;
-    row.dataset.townHall = player.townHall || '';
-    const standalone = isStandaloneMode(report);
-    const planningCell = report.mode === 'historical'
-        ? historicalParticipation(player, report.rounds?.length || 0)
-        : standalone ? '' : `<td>${badge(
-            player.planned ? t('op.planned') : t('op.notPlanned'),
-            player.planned ? 'ok' : 'warn'
-        )}</td>`;
-    row.innerHTML = `
-        <td><button type="button" class="op-player-info cwl-player-info"
-                data-performance-trigger aria-expanded="false"
-                aria-label="${escapeHtml(t('performance.openForPlayer', {
-                    player: player.name
-                }))}">
-            <strong class="cwl-player-name">${escapeHtml(player.name)}</strong>
-            <span>${escapeHtml(player.tag)}</span>
-        </button></td>
-        <td>TH${player.townHall || '-'}</td>
-        ${planningCell}
-        <td>${attackFraction(display.attacksUsed, display.availableAttacks)}</td>
-        <td>${number(display.stars, 0)}★</td>
-        <td>${number(display.destruction, 0).toFixed(1)}%</td>
-        <td>${report.mode === 'historical'
-            ? defenseValue(display.avgDefense)
-            : display.missed == null ? '—' : number(display.missed, 0)}</td>`;
-    return row;
-}
-
-function attackFraction(used, available) {
-    const availableValue = available == null ? '—' : number(available, 0);
-    return `${number(used, 0)}/${availableValue}`;
-}
-
-function defenseValue(input) {
-    const parsed = finite(input);
-    return parsed == null ? '—' : `${parsed.toFixed(1)}%`;
-}
-
-function historicalParticipation(player, totalRounds) {
-    const rounds = number(player.roundsPlayed, 0);
-    const status = rounds === 0
-        ? ['not-fielded', 'Not fielded']
-        : player.missed == null
-            ? ['unknown', 'Attack usage unknown']
-            : number(player.missed, 0) > 0
-                ? ['attention', 'Missed attacks']
-                : ['complete', 'Complete'];
-    return `<td><span class="op-history-participation" data-state="${status[0]}">
-        <strong>${rounds}/${number(totalRounds, 0)}</strong>
-        <small>${status[1]}</small>
-    </span></td>`;
 }
 
 function syncRosterSortHeaders(refs, report, selectedClan) {

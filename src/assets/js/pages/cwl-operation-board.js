@@ -2,15 +2,16 @@ import { syncAuthSession } from '../auth/auth-client.js';
 import { initPlayerPerformancePopover } from '../cwl/cwl-player-performance-popover.js';
 import { initI18n, t } from '../i18n/i18n.js';
 import { exportOperationReport } from '../operation-board/operation-board-import-export.js';
-import { createOperationBoardImportController } from '../operation-board/operation-board-import-controller.js';
+import { createCwlOperationBoardBootstrap } from '../operation-board/cwl-operation-board-bootstrap.js';
+import { createCwlOperationBoardControllers } from '../operation-board/cwl-operation-board-controllers.js';
+import { createCwlOperationBoardReportLoader } from '../operation-board/cwl-operation-board-report-loader.js';
 import { renderBoardContext } from '../operation-board/operation-board-context-renderer.js';
 import { bindOperationBoardEvents } from '../operation-board/operation-board-page-events.js';
-import { enrichWithHistoricalPerformance } from '../operation-board/operation-board-performance.js';
-import { createOperationBoardHistoryPage } from '../operation-board/operation-board-history-page.js';
 import { initOperationBoardRefs } from '../operation-board/operation-board-page-refs.js';
+import { createOperationBoardAutoRefresh } from '../operation-board/operation-board-auto-refresh.js';
 import { createOperationPlanStore } from '../operation-board/operation-board-plan-store.js';
+import { initCompeteI18n } from '../operation-board/compete-locales.js';
 import { getPlanClans, normalizePlan } from '../operation-board/operation-board-plan-model.js';
-import { buildReport } from '../operation-board/operation-board-report-model.js';
 import {
     clearBoard, refreshBoardLabels, renderBoard, renderFilteredRoster,
     renderPhase, renderSyncState, setHelp
@@ -19,7 +20,6 @@ import {
     renderClanLoading, renderClanOptions, renderPlanError, renderPlanLoading,
     renderPlanOptions, renderPlanRequired, renderStandaloneMode
 } from '../operation-board/operation-board-source-controls.js';
-import { loadOperationSource, NoActiveCwlError } from '../operation-board/operation-board-source.js';
 import { applyOperationTabState, getBoardIdentity, getDefaultOperationTab, hasUsableBoardData } from '../operation-board/operation-board-tabs.js';
 import { looksLikeClashTag, normalizeTag } from '../operation-board/operation-board-utils.js';
 import { profileHTML } from '../profile/profile_popup.js';
@@ -32,34 +32,14 @@ let latestReport = null;
 let currentReport = null;
 let syncState = 'idle';
 let lastSyncAt = null;
-let requestToken = 0;
 let planSelectToken = 0;
-let reportController;
 let activeTab = null;
 let activeBoardKey = '';
 let historyController;
 let importController;
-const AUTO_REFRESH_INTERVAL_MS = 60_000;
-const AUTO_REFRESH_STORAGE_KEY = 'clashtools_op_auto_refresh_paused';
-let autoRefreshPaused = localStorage.getItem(AUTO_REFRESH_STORAGE_KEY) === 'true';
-
-function syncAutoRefreshControl() {
-    if (!refs?.autoRefresh) return;
-    refs.autoRefresh.setAttribute('aria-pressed', String(autoRefreshPaused));
-    refs.autoRefresh.textContent = t(autoRefreshPaused ? 'op.resumeAutoRefresh' : 'op.pauseAutoRefresh');
-}
-
-function toggleAutoRefresh() {
-    autoRefreshPaused = !autoRefreshPaused;
-    localStorage.setItem(AUTO_REFRESH_STORAGE_KEY, String(autoRefreshPaused));
-    syncAutoRefreshControl();
-}
-
-function refreshLiveDataIfEligible() {
-    if (autoRefreshPaused || document.visibilityState !== 'visible' || syncState === 'loading') return;
-    if (!selectedClan || historyController?.getMode() !== 'current') return;
-    void refreshClanReport(selectedClan);
-}
+let sourceBootstrap;
+let autoRefresh;
+let reportLoader;
 
 function setState(state, isError = false) {
     syncState = isError ? 'error' : state;
@@ -104,6 +84,7 @@ async function selectPlan(planId) {
     const full = await planStore.resolve(planId);
     if (token !== planSelectToken) return;
     selectedPlan = normalizePlan(full);
+    sourceBootstrap?.setMode('plan');
     renderClanSelector(selectedPlan, token);
 }
 
@@ -120,6 +101,7 @@ function selectClan(clanTag) {
     selectedClan = getPlanClans(selectedPlan)
         .find(clan => clan.tag === clanTag) || null;
     if (selectedClan) {
+        autoRefresh?.resumeForLiveSource();
         currentReport = null;
         historyController?.resetForClan();
         void refreshClanReport(selectedClan);
@@ -139,83 +121,66 @@ function loadStandaloneClan() {
         players: [],
         standalone: true
     };
+    autoRefresh?.resumeForLiveSource();
     planSelectToken += 1;
     currentReport = null;
     historyController?.resetForClan();
     renderStandaloneMode(refs);
+    sourceBootstrap?.setMode('direct');
     void refreshClanReport(selectedClan);
 }
 
-async function refreshClanReport(clan) {
-    const token = ++requestToken;
-    reportController?.abort();
-    reportController = new AbortController();
-    const { signal } = reportController;
-    setState('loading');
-    setHelp(refs, t('op.loadingLive'));
-    clearReport(false);
-    try {
-        const raw = await loadOperationSource({
-            clan,
-            plan: selectedPlan,
-            signal
-        });
-        if (token !== requestToken || signal.aborted) return;
-        selectedClan = raw.clan;
-        currentReport = { ...buildReport(raw), predictionState: 'loading' };
-        latestReport = currentReport;
-        renderLatestReport();
-        setState('ready');
-        void historyController?.syncForCurrentReport(currentReport);
-        void enrichPredictions(latestReport, token, signal);
-    } catch (error) {
-        if (error?.name === 'AbortError' || token !== requestToken) return;
-        if (error instanceof NoActiveCwlError || error?.code === 'NO_ACTIVE_CWL') {
-            await openHistoryOverview();
-            return;
-        }
-        console.error(error);
-        setState('error', true);
-        setHelp(refs, t('op.loadError'), true);
+function changeSourceMode(mode) {
+    resetSourceState();
+    if (mode === 'plan') {
+        preparePlanSource();
+        return;
     }
+    prepareDirectSource();
 }
 
-async function enrichPredictions(report, token, signal) {
-    try {
-        const enriched = await enrichWithHistoricalPerformance(report);
-        if (token !== requestToken || signal.aborted) return;
-        if (currentReport === report) currentReport = enriched;
-        if (latestReport !== report) return;
-        latestReport = enriched;
-        renderLatestReport();
-    } catch (error) {
-        if (token !== requestToken || signal.aborted) return;
-        console.error(error);
-        if (currentReport === report) {
-            currentReport = { ...report, predictionState: 'unavailable' };
-        }
-        if (latestReport === report) {
-            latestReport = currentReport;
-            renderLatestReport();
-        }
-    }
-}
-
-async function openHistoryOverview() {
-    clearReport(false);
+function resetSourceState() {
+    cancelReportLoad();
+    selectedPlan = null;
+    selectedClan = null;
     currentReport = null;
-    renderPhase(refs, 'unknown');
+    latestReport = null;
+    planSelectToken += 1;
+    activeTab = null;
+    activeBoardKey = '';
+    historyController?.resetForClan();
+    clearReport();
     setState('idle');
-    setHelp(refs, 'Loading CWL history…');
-    await historyController?.syncForCurrentReport(
-        null,
-        { defaultToOverview: true }
+}
+
+function preparePlanSource() {
+    refs.standaloneInput.value = '';
+    refs.planSelect.value = '';
+    renderPlanRequired(refs);
+    setHelp(refs, t('op.help'));
+    if (!hasLoadedPlans()) void loadPlans();
+    refs.planSelect.focus();
+}
+
+function prepareDirectSource() {
+    renderStandaloneMode(refs);
+    refs.standaloneInput.value = '';
+    setHelp(refs, t('op.standaloneHelp'));
+    refs.standaloneInput.focus();
+}
+
+function hasLoadedPlans() {
+    return Array.from(refs.planSelect.options || []).some(
+        option => option.value && !option.disabled
     );
 }
 
+function refreshClanReport(clan) {
+    return reportLoader?.refreshClanReport(clan);
+}
+
 function cancelReportLoad() {
-    requestToken += 1;
-    reportController?.abort();
+    return reportLoader?.cancelReportLoad();
 }
 
 function clearReport(resetPhase = true) {
@@ -256,7 +221,7 @@ function selectBoardTab(tab, focus = false) {
 }
 
 function refreshLabels() {
-    syncAutoRefreshControl();
+    autoRefresh?.sync();
     if (historyController?.refreshLabels()) return;
     refreshBoardLabels(
         refs,
@@ -274,37 +239,69 @@ export function applyImportedJson(data) {
 
 async function init() {
     refs = initOperationBoardRefs();
+    sourceBootstrap = createCwlOperationBoardBootstrap({
+        refs,
+        renderClanSelector,
+        refreshClanReport,
+        loadPlans,
+        setSelectedPlan: plan => { selectedPlan = plan; },
+        setSelectedClan: clan => { selectedClan = clan; },
+        setHelp: (message, error = false) => setHelp(refs, message, error),
+        onSourceModeChange: changeSourceMode
+    });
+    await sourceBootstrap.loadFixture();
+    autoRefresh = createOperationBoardAutoRefresh({
+        refs,
+        getSelectedClan: () => selectedClan,
+        getHistoryMode: () => historyController?.getMode(),
+        getSyncState: () => syncState,
+        getLastSyncAt: () => lastSyncAt,
+        refresh: () => void refreshClanReport(selectedClan)
+    });
     initI18n();
+    initCompeteI18n(document, refreshLabels);
     initPlayerPerformancePopover({
         getCurrentContext: tag => historyController?.getPlayerContext(tag)
     });
-    historyController = createOperationBoardHistoryPage({
+    const controllers = createCwlOperationBoardControllers({
         refs,
+        planStore,
         getClan: () => selectedClan,
         getCurrentReport: () => currentReport,
         getLatestReport: () => latestReport,
         setLatestReport: report => { latestReport = report; },
-        renderLatestReport,
+        setSelectedPlan: plan => { selectedPlan = plan; },
+        setSelectedClan: clan => { selectedClan = clan; },
+        setCurrentReport: report => { currentReport = report; },
         setActiveTab: tab => { activeTab = tab; },
         setState,
         setHelp: (message, error = false) => setHelp(refs, message, error),
-        clearBoard: () => clearBoard(refs, selectedClan, false)
-    });
-    importController = createOperationBoardImportController({
-        refs,
-        planStore,
-        setSelectedPlan: plan => { selectedPlan = plan; },
-        setSelectedClan: clan => { selectedClan = clan; },
-        setLatestReport: report => { latestReport = report; },
-        setCurrentReport: report => { currentReport = report; },
-        cancelReportLoad,
         renderLatestReport,
         renderClanSelector,
         clearReport,
-        setState,
-        setHelp: (message, error = false) => setHelp(refs, message, error)
+        cancelReportLoad,
+        clearBoard: () => clearBoard(refs, selectedClan, false),
+        onImported: () => autoRefresh.pauseForImportedData()
     });
-    await Promise.resolve(syncAuthSession()).catch(() => null);
+    historyController = controllers.historyController;
+    importController = controllers.importController;
+    reportLoader = createCwlOperationBoardReportLoader({
+        getSelectedPlan: () => selectedPlan,
+        getHistoryController: () => historyController,
+        setSelectedClan: clan => { selectedClan = clan; },
+        setCurrentReport: report => { currentReport = report; },
+        getCurrentReport: () => currentReport,
+        setLatestReport: report => { latestReport = report; },
+        getLatestReport: () => latestReport,
+        setState,
+        setHelp: (message, error = false) => setHelp(refs, message, error),
+        clearReport,
+        renderLatestReport,
+        renderPhase: phase => renderPhase(refs, phase)
+    });
+    if (!sourceBootstrap.usesFixture()) {
+        await Promise.resolve(syncAuthSession()).catch(() => null);
+    }
     profileHTML();
     bindOperationBoardEvents(refs, {
         selectPlan,
@@ -319,7 +316,7 @@ async function init() {
                 void historyController.refresh();
             }
         },
-        toggleAutoRefresh,
+        toggleAutoRefresh: () => autoRefresh.toggle(),
         filterRoster: () =>
             renderFilteredRoster(refs, latestReport, selectedClan),
         exportReport: () => exportOperationReport(latestReport),
@@ -328,17 +325,14 @@ async function init() {
         selectTab: selectBoardTab,
         refreshLabels
     });
+    sourceBootstrap.bindSourceMode();
     clearReport(false);
     refreshLabels();
-    await loadPlans();
+    await sourceBootstrap.loadInitialSource();
     renderPhase(refs, 'unknown');
     setState('idle');
-    syncAutoRefreshControl();
-    window.setInterval(refreshLiveDataIfEligible, AUTO_REFRESH_INTERVAL_MS);
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState !== 'visible' || !lastSyncAt) return;
-        if (Date.now() - lastSyncAt.getTime() >= AUTO_REFRESH_INTERVAL_MS) refreshLiveDataIfEligible();
-    });
+    autoRefresh.sync();
+    autoRefresh.start();
 }
 
 const initialPageLoad = init();

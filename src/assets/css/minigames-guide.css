@@ -1,0 +1,58 @@
+/* Shared guide disclosure. */
+.minigames-help {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+}
+
+.minigames-help summary {
+    min-height: 3.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .75rem 1rem;
+    cursor: pointer;
+    list-style: none;
+}
+
+.minigames-help summary::-webkit-details-marker { display: none; }
+.minigames-help summary:hover { background: var(--surface-subtle); }
+.minigames-help summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+.minigames-help summary span:first-child { display: grid; gap: .2rem; }
+.minigames-help summary strong { font: 800 .9rem/1.2 Manrope, sans-serif; }
+.minigames-help summary small { color: var(--text-muted); font-size: .74rem; }
+
+.minigames-help-toggle {
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    flex: 0 0 2rem;
+    place-items: center;
+    border: 1px solid var(--border-strong);
+    border-radius: 50%;
+    color: var(--game-accent);
+    transition: transform 200ms var(--cp-ease-emphasized, ease-out);
+}
+
+.minigames-help-toggle svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.minigames-help[open] .minigames-help-toggle { transform: rotate(180deg); }
+.minigames-help-content { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; padding: 0 1rem 1rem; }
+.minigames-help-content article { min-width: 0; border-top: 1px solid var(--border); padding-top: 1rem; }
+.minigames-help-content .eyebrow { margin-bottom: .35rem !important; color: var(--game-accent) !important; font-size: .68rem; }
+.minigames-help-content h2 { margin-bottom: .3rem; font-size: 1rem; }
+.minigames-help-content article p:last-child { margin: 0; color: var(--text-muted); font-size: .8rem; line-height: 1.6; }
+.minigames-help-note { grid-column: 1 / -1; margin: .1rem 0 0; border-top: 1px solid var(--border); padding-top: .9rem; color: var(--text-muted); font-size: .76rem; line-height: 1.55; }
+.minigames-help-note strong { color: var(--text); }
+
+@media (max-width: 42rem) {
+    .minigames-help-content { grid-template-columns: 1fr; }
+    .minigames-help-note { grid-column: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .minigames-help-toggle { transition: none; }
+}

@@ -5,10 +5,10 @@
     <meta name="robots" content="noindex">
     <script src="../assets/js/Data/analytics.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Follow live CWL wars, standings, rosters and attacks in ClashPanel.">
+    <meta name="description" data-compete-content="cwl.documentDescription" content="Follow live CWL wars, standings, rosters and attacks in ClashPanel.">
     <link rel="stylesheet" href="../assets/css/workspace-loading.css">
     <script src="../assets/js/shell/workspace-bootstrap.js"></script>
-    <title>CWL Operation Board · ClashPanel</title>
+    <title data-compete-i18n="cwl.documentTitle">CWL Operation Board · ClashPanel</title>
     <link rel="stylesheet" href="../assets/css/Main-css.css">
     <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="../assets/css/profile-overlay.css">
@@ -19,11 +19,13 @@
     <link rel="stylesheet" href="../assets/css/operation-board-history-responsive.css">
     <link rel="stylesheet" href="../assets/css/cwl-player-performance-popover.css">
     <script src="../assets/js/Data/runtime-config.js"></script>
-    <script type="module" src="../assets/js/shell/workspace-shell.js"></script>
+    <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260812-redesign"></script>
     <script type="module" src="../assets/js/pages/cwl-operation-board.js"></script>
-    <link rel="stylesheet" href="../assets/css/light-theme.css">
+    <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
+    <link rel="stylesheet" href="../assets/css/workspace-v2.css?v=20260812-redesign">
+    <link rel="stylesheet" href="../assets/css/compete-board.css">
 </head>
 <body class="workspace-app" data-workspace-page="operation">
 <header>
@@ -31,42 +33,50 @@
     <nav class="center"><a href="./cwl-planner.html" data-i18n="nav.cwl">CWL planner</a><a href="./cwl-operation-board.html" aria-current="page" data-i18n="nav.operation">Operation board</a><a href="./groups.html" data-i18n="nav.groups">Clan Family</a></nav>
     <div class="right"><button type="button" data-language-control data-i18n="header.language">Language</button><button id="profile-btn" type="button"><img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt=""><span data-i18n="header.user">User</span></button></div>
 </header>
-<main class="operation-main operation-live-main operation-workspace-page" id="main-content">
+<main class="operation-main operation-live-main operation-workspace-page compete-module" id="main-content">
     <header class="op-page-header">
         <div>
             <p class="op-page-kicker" data-i18n="op.kicker">Live CWL tracker</p>
-            <div class="op-title-row"><h1 data-i18n="op.title">CWL Operation Board</h1><span id="op-cwl-phase" class="op-phase-badge" data-state="unknown">-</span></div>
+            <div class="op-title-row"><h1 data-compete-i18n="cwl.title">CWL Operation Board</h1><span id="op-cwl-phase" class="op-phase-badge" data-state="unknown">-</span></div>
             <p data-i18n="op.subtitle">Track 7 war days, attacks, stars, destruction, rotation and bonus medals.</p>
-        </div>
-        <div class="operation-actions">
-            <button id="op-import-json" class="button button-secondary" type="button" data-i18n="op.import">Import JSON</button>
-            <input id="op-import-file" class="hidden" type="file" accept="application/json,.json" aria-label="Choose Operation Board JSON file">
-            <button id="op-export" class="button button-secondary" type="button" data-i18n="op.export">Export JSON</button>
-            <button id="op-refresh" class="button button-primary" type="button" data-i18n="op.refresh">Refresh live data</button>
-            <button id="op-auto-refresh" class="button button-secondary" type="button" aria-pressed="false">Pause auto refresh</button>
         </div>
     </header>
 
-    <section class="op-context-toolbar" aria-label="Setup" data-i18n-aria-label="op.setup">
-        <label><span data-i18n="op.selectPlan">Planning</span><select id="op-plan-select"></select></label>
-        <label><span data-i18n="op.selectClan">Clan</span><select id="op-clan-select" disabled></select></label>
-        <label class="op-season-control"><span>Season</span><select id="op-season-select" disabled><option value="current">Current CWL</option></select></label>
-        <label class="op-standalone-control"><span data-i18n="op.standaloneClan">Single clan</span><span class="op-inline-control"><input id="op-standalone-clan-tag" type="text" data-i18n-placeholder="op.standalonePlaceholder" placeholder="Clan tag: #ABC123"><button id="op-standalone-load" type="button" class="button button-secondary" data-i18n="op.loadClan">Load clan</button></span></label>
+    <div class="operation-actions op-context-actions">
+        <button id="op-import-json" class="button button-secondary" type="button" data-i18n="op.import">Import JSON</button>
+        <input id="op-import-file" class="hidden" type="file" accept="application/json,.json" data-compete-aria-label="cwl.chooseJsonFile" aria-label="Choose Operation Board JSON file">
+        <button id="op-export" class="button button-secondary" type="button" data-i18n="op.export">Export JSON</button>
+        <button id="op-refresh" class="button button-primary" type="button" data-i18n="op.refresh">Refresh live data</button>
+        <button id="op-auto-refresh" class="button button-secondary" type="button" aria-pressed="false" data-i18n="op.pauseAutoRefresh">Pause auto refresh</button>
+    </div>
+
+    <section class="op-context-toolbar compete-contextbar" aria-label="Setup" data-i18n-aria-label="op.setup">
+        <div class="compete-source-control">
+            <span data-compete-i18n="cwl.source">CWL source</span>
+            <div class="compete-source-switch" role="group" data-compete-aria-label="cwl.source" aria-label="CWL source">
+                <button type="button" data-op-source-mode="plan" aria-pressed="true" data-compete-i18n="cwl.sourcePlan">Planning</button>
+                <button type="button" data-op-source-mode="direct" aria-pressed="false" data-compete-i18n="cwl.sourceDirect">Single clan</button>
+            </div>
+        </div>
+        <label data-source-control="plan"><span data-compete-i18n="cwl.sourcePlan">Planning</span><select id="op-plan-select"></select></label>
+        <label data-source-control="plan"><span data-i18n="op.selectClan">Clan</span><select id="op-clan-select" disabled></select></label>
+        <label class="op-standalone-control" data-source-control="direct" hidden><span data-compete-i18n="cwl.sourceDirect">Single clan</span><span class="op-inline-control"><input id="op-standalone-clan-tag" type="text" data-i18n-placeholder="op.standalonePlaceholder" placeholder="Clan tag: #ABC123"><button id="op-standalone-load" type="button" class="button button-secondary" data-i18n="op.loadClan">Load clan</button></span></label>
+        <label class="op-season-control"><span data-compete-i18n="cwl.season">Season</span><select id="op-season-select" disabled><option value="current" data-compete-i18n="cwl.currentSeason">Current CWL</option></select></label>
         <span class="op-toolbar-spacer"></span>
         <span id="op-live-state" class="op-sync-state" role="status" aria-live="polite" data-state="idle" data-i18n="op.syncIdle">Not synchronized yet</span>
     </section>
-    <p class="operation-help" id="op-help" data-i18n="op.help">Select a planning first, then a clan. The board loads live data when possible.</p>
+    <p class="operation-help" id="op-help" data-i18n="op.help" aria-live="polite">Select a planning first, then a clan. The board loads live data when possible.</p>
     <p class="op-board-context" id="op-board-context" hidden></p>
 
     <nav class="op-board-tabs" id="op-board-tabs" role="tablist" aria-label="Operation Board views" data-i18n-aria-label="op.tabsLabel" hidden>
-        <button id="op-tab-summary" type="button" role="tab" data-op-tab="summary" aria-controls="op-panel-summary" aria-selected="false" hidden>Summary</button>
-        <button id="op-tab-live" type="button" role="tab" data-op-tab="live" aria-controls="op-panel-live" aria-selected="false" data-i18n="op.tabLive">Live</button>
-        <button id="op-tab-league" type="button" role="tab" data-op-tab="league" aria-controls="op-panel-league" aria-selected="false" data-i18n="op.tabLeague">League</button>
-        <button id="op-tab-roster" type="button" role="tab" data-op-tab="roster" aria-controls="op-panel-roster" aria-selected="false" data-i18n="op.tabRoster">Roster</button>
-        <button id="op-tab-bonuses" type="button" role="tab" data-op-tab="bonuses" aria-controls="op-panel-bonuses" aria-selected="false" data-i18n="op.tabBonuses">Bonuses</button>
+        <button id="op-tab-summary" type="button" role="tab" data-op-tab="summary" aria-controls="op-panel-summary" aria-selected="false" hidden data-compete-i18n="cwl.summary">Summary</button>
+        <button id="op-tab-live" type="button" role="tab" data-op-tab="live" aria-controls="op-panel-live" aria-selected="false" data-compete-i18n="cwl.tabLive">Live</button>
+        <button id="op-tab-league" type="button" role="tab" data-op-tab="league" aria-controls="op-panel-league" aria-selected="false" data-compete-i18n="cwl.tabLeague">League</button>
+        <button id="op-tab-roster" type="button" role="tab" data-op-tab="roster" aria-controls="op-panel-roster" aria-selected="false" data-compete-i18n="cwl.tabRoster">Roster</button>
+        <button id="op-tab-bonuses" type="button" role="tab" data-op-tab="bonuses" aria-controls="op-panel-bonuses" aria-selected="false" data-compete-i18n="cwl.tabBonuses">Bonuses</button>
     </nav>
 
-    <section class="op-history-overview" id="op-history-overview" aria-label="CWL history overview" hidden></section>
+    <section class="op-history-overview" id="op-history-overview" data-compete-aria-label="cwl.historyOverview" aria-label="CWL history overview" hidden></section>
 
     <section class="op-tab-panel" id="op-panel-summary" role="tabpanel" aria-labelledby="op-tab-summary" tabindex="0" hidden>
         <div id="op-history-summary"></div>
@@ -85,19 +95,19 @@
         </section>
         <div class="op-history-grid">
             <section class="op-flat-section op-stars-chart-panel" aria-labelledby="op-stars-chart-title">
-                <div class="op-section-heading"><div><p data-i18n="op.warDayHistory">CWL progress</p><h2 id="op-stars-chart-title" data-i18n="op.starsPerDay">Stars per war day</h2></div><span id="op-stars-chart-state" role="status" aria-live="polite">0/7 days</span></div>
+                <div class="op-section-heading"><div><p data-i18n="op.warDayHistory">CWL progress</p><h2 id="op-stars-chart-title" data-i18n="op.starsPerDay">Stars per war day</h2></div><span id="op-stars-chart-state" role="status" aria-live="polite" data-compete-i18n="cwl.chartDaysInitial">0/7 days</span></div>
                 <p class="op-stars-chart-note" id="op-stars-chart-note" data-i18n="op.starsChartHelp">Live and completed days use real CWL data. The dotted line compares Town Hall, army progress, recent form and opponent strength.</p>
                 <div class="op-stars-chart" id="op-stars-chart" role="group"></div>
             </section>
             <section class="op-flat-section op-position-chart-panel" aria-labelledby="op-position-chart-title">
-                <div class="op-section-heading"><div><p data-i18n="op.warDayHistory">CWL progress</p><h2 id="op-position-chart-title" data-i18n="op.positionPerDay">Position per war day</h2></div><span id="op-position-chart-state" role="status" aria-live="polite">0/7 days</span></div>
+                <div class="op-section-heading"><div><p data-i18n="op.warDayHistory">CWL progress</p><h2 id="op-position-chart-title" data-i18n="op.positionPerDay">Position per war day</h2></div><span id="op-position-chart-state" role="status" aria-live="polite" data-compete-i18n="cwl.chartDaysInitial">0/7 days</span></div>
                 <p class="op-stars-chart-note" id="op-position-chart-note" data-i18n="op.positionChartHelp">Completed league days receive a position. The dotted line predicts future positions from recent performance.</p>
                 <div class="op-stars-chart op-ranking-chart" id="op-position-chart" role="group"></div>
             </section>
         </div>
         <div class="op-league-layout">
             <section class="op-flat-section op-rounds-panel" aria-labelledby="op-rounds-title">
-                <div class="op-section-heading"><div><p data-i18n="op.rounds">War days</p><h2 id="op-rounds-title" data-i18n="op.dayOverview">Day overview</h2></div><span><span id="op-round-state">-</span> · <span id="op-round-count">7 rounds</span></span></div>
+                <div class="op-section-heading"><div><p data-compete-i18n="cwl.warDays">War days</p><h2 id="op-rounds-title" data-i18n="op.dayOverview">Day overview</h2></div><span><span id="op-round-state">-</span> · <span id="op-round-count" data-compete-i18n="cwl.roundsInitial">7 rounds</span></span></div>
                 <div class="op-rounds-list" id="op-rounds-list"></div>
             </section>
             <section class="op-flat-section op-standings-panel" aria-labelledby="op-standings-title"><div class="op-section-heading"><div><p data-i18n="op.standings">CWL standings</p><h2 id="op-standings-title" data-i18n="op.fullStandings">Full standings</h2></div><span id="op-standings-state">-</span></div><div class="op-standings-list" id="op-standings-list"></div><p class="op-standings-note" id="op-standings-note"></p></section>
@@ -106,11 +116,11 @@
 
     <section class="op-tab-panel" id="op-panel-roster" role="tabpanel" aria-labelledby="op-tab-roster" tabindex="0" hidden>
         <section class="op-flat-section op-roster-panel" aria-labelledby="op-roster-title">
-            <div class="op-section-heading op-roster-heading"><div><p data-i18n="op.roster">Roster</p><h2 id="op-roster-title" data-i18n="op.playerOverview">Player overview</h2></div><span id="op-roster-count">0 players</span></div>
-            <div class="op-roster-filter-row"><input id="op-roster-filter" type="search" data-i18n-placeholder="op.filterPlaceholder" placeholder="Search player or tag" aria-label="Search roster"><select id="op-roster-view" aria-label="Filter roster status"><option value="all" data-i18n="op.viewAll">All</option><option value="planned" data-i18n="op.viewPlanned">Planned</option><option value="unplanned" data-i18n="op.viewUnplanned">Not planned</option><option value="missed" data-i18n="op.viewMissed">Missed attacks</option></select></div>
+            <div class="op-section-heading op-roster-heading"><div><p data-compete-i18n="cwl.roster">Roster</p><h2 id="op-roster-title" data-i18n="op.playerOverview">Player overview</h2></div><span id="op-roster-count" data-compete-i18n="cwl.playersInitial">0 players</span></div>
+            <div class="op-roster-filter-row"><input id="op-roster-filter" type="search" data-i18n-placeholder="op.filterPlaceholder" placeholder="Search player or tag" data-compete-aria-label="cwl.searchRoster" aria-label="Search roster"><select id="op-roster-view" data-compete-aria-label="cwl.filterRosterStatus" aria-label="Filter roster status"><option value="all" data-i18n="op.viewAll">All</option><option value="planned" data-i18n="op.viewPlanned">Planned</option><option value="unplanned" data-i18n="op.viewUnplanned">Not planned</option><option value="missed" data-i18n="op.viewMissed">Missed attacks</option></select></div>
             <div class="op-table-wrap"><table class="op-table op-live-table"><thead><tr>
                 <th data-op-roster-sort="player" aria-sort="none"><button type="button" class="op-table-sort"><span data-i18n="op.player">Player</span><span class="op-sort-indicator" aria-hidden="true">↕</span></button></th>
-                <th data-op-roster-sort="townHall" aria-sort="none"><button type="button" class="op-table-sort"><span>TH</span><span class="op-sort-indicator" aria-hidden="true">↕</span></button></th>
+                <th data-op-roster-sort="townHall" aria-sort="none"><button type="button" class="op-table-sort"><span data-compete-i18n="cwl.townHallShort">TH</span><span class="op-sort-indicator" aria-hidden="true">↕</span></button></th>
                 <th data-op-roster-column="planning" data-op-roster-sort="participation" aria-sort="none"><button type="button" class="op-table-sort"><span data-op-roster-column-label data-i18n="op.planning">Planning</span><span class="op-sort-indicator" aria-hidden="true">↕</span></button></th>
                 <th data-op-roster-sort="attacks" aria-sort="none"><button type="button" class="op-table-sort"><span data-i18n="op.attacks">Attacks</span><span class="op-sort-indicator" aria-hidden="true">↕</span></button></th>
                 <th data-op-roster-sort="stars" aria-sort="none"><button type="button" class="op-table-sort"><span data-i18n="op.stars">Stars</span><span class="op-sort-indicator" aria-hidden="true">↕</span></button></th>
@@ -128,7 +138,7 @@
             </div>
             <div class="op-bonus-toolbar">
                 <span data-i18n="op.bonusStrategy">Strategy</span>
-                <div class="op-bonus-strategies" role="group" aria-label="Bonus strategy" data-i18n-aria-label="op.bonusStrategy">
+                <div class="op-bonus-strategies" role="group" data-compete-aria-label="cwl.bonusStrategy" aria-label="Bonus strategy">
                     <button type="button" data-bonus-strategy="fair" aria-pressed="true" data-i18n="op.bonusFair">Fair</button>
                     <button type="button" data-bonus-strategy="performance" aria-pressed="false" data-i18n="op.bonusPerformance">Performance</button>
                     <button type="button" data-bonus-strategy="contribution" aria-pressed="false" data-i18n="op.bonusContribution">Contribution</button>

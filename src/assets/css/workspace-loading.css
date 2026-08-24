@@ -1,9 +1,6 @@
 /*
- * Short visual loading gate.
- *
- * Only stylesheets, fonts and initially visible images can delay the reveal.
- * API calls, cache refreshes, background requests and later DOM updates never
- * keep a workspace page hidden.
+ * Short visual loading gate. The workspace shell stays visible while the
+ * content area settles, so navigation does not present as a full-site reload.
  */
 html.workspace-page-loading {
     min-height: 100%;
@@ -14,7 +11,10 @@ html.workspace-page-loading[data-theme="light"] {
     background: #eef2f6;
 }
 
-html.workspace-page-loading body {
+/* Keep the shell and page chrome available while the page content settles.
+   Hiding the entire body made every navigation feel like a full-site reload. */
+html.workspace-page-loading body.workspace-app > main,
+html.workspace-page-loading body.workspace-app .workspace-content {
     visibility: hidden !important;
     pointer-events: none !important;
 }
@@ -40,17 +40,23 @@ html.workspace-navigation-waiting[data-theme="light"]::before {
     border-top-color: #b87916;
 }
 
-html.workspace-navigation-waiting::after {
+html.workspace-navigation-waiting body.workspace-app .workspace-content::after {
     content: "";
     position: fixed;
     z-index: 2147483646;
-    inset: 0;
+    inset: var(--topbar-height, 64px) 0 0 var(--workspace-sidebar-current-width, 248px);
     background: rgb(4 9 15 / 0.12);
     cursor: wait;
 }
 
-html.workspace-navigation-waiting[data-theme="light"]::after {
+html.workspace-navigation-waiting[data-theme="light"] body.workspace-app .workspace-content::after {
     background: rgb(238 242 246 / 0.22);
+}
+
+@media (max-width: 899px) {
+    html.workspace-navigation-waiting body.workspace-app .workspace-content::after {
+        inset: var(--topbar-height, 64px) 0 0;
+    }
 }
 
 @keyframes workspace-loading-spin {

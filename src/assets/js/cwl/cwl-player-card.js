@@ -11,14 +11,16 @@ import { t } from '../i18n/i18n.js';
 import {
     attachDeleteButton,
     attachMoveControl,
-    syncPlayerPlannedDays,
     syncPlayerRosterStatus
 } from './cwl-player-controls.js';
 import { makePlayerDraggable } from './cwl-player-drag.js';
 import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js';
+import { getTownHallAsset, installImageFallback } from '../assets/entity-assets.js';
+import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 
-export function createPlayerCard(playerInfo, clanUuid) {
+export function createPlayerCard(playerInfo, clanUuid, options = {}) {
     const players = uniquePlayers(playerInfo);
+    const persist = options.persist !== false && !isRedesignFixtureRequested();
     let plannerChanged = false;
     let skipped = 0;
     let added = 0;
@@ -38,7 +40,7 @@ export function createPlayerCard(playerInfo, clanUuid) {
 
         makePlayerDraggable(element);
         attachDeleteButton(element);
-        attachMoveControl(element);
+        if (clanUuid == null) attachMoveControl(element);
         const preferredStatus = normalizeRosterStatus(
             player.rosterStatus || player.roster_status || player.status
         );
@@ -46,22 +48,18 @@ export function createPlayerCard(playerInfo, clanUuid) {
             preferredStatus,
             autoReserve: !preferredStatus
         });
-        syncPlayerPlannedDays(
-            element,
-            player.plannedDays || player.planned_days || player.days || []
-        );
         applyAvailabilityToCard(element);
         plannerChanged = true;
     });
 
     if (plannerChanged) {
         updateAllPlayerCounters();
-        rememberPlannerPlayers();
+        if (persist) rememberPlannerPlayers();
         window.dispatchEvent(new CustomEvent(
             'clashtools:cwl-player-added',
             { detail: { added, skipped } }
         ));
-        savePlan();
+        if (persist) savePlan();
     }
     if (skipped > 0) {
         window.dispatchEvent(new CustomEvent(
@@ -108,13 +106,9 @@ function buildPlayerElement(player, targetInfo) {
     const element = template.querySelector('.cwl-player-article');
     const normalized = normalizePlayer(player);
     const townHallImage = element.querySelector('.cwl-player-townhall-foto');
-    townHallImage.src =
-        `../assets/css/pictures/townhalls/Town_Hall${normalized.townHallLevel}.png`;
-    townHallImage.addEventListener('error', () => {
-        if (!townHallImage.src.endsWith('/Town_Hall1.png')) {
-            townHallImage.src = '../assets/css/pictures/townhalls/Town_Hall1.png';
-        }
-    }, { once: true });
+    townHallImage.src = getTownHallAsset(normalized.townHallLevel);
+    townHallImage.alt = `${t('cwl.sortTownhall')} ${normalized.townHallLevel}`;
+    installImageFallback(townHallImage);
 
     const tagElement = element.querySelector('.cwl-player-hashtag');
     const nameElement = element.querySelector('.cwl-player-name');
@@ -134,10 +128,15 @@ function buildPlayerElement(player, targetInfo) {
         'aria-label',
         t('performance.openForPlayer', { player: normalized.name })
     );
+    infoElement.setAttribute('aria-controls', 'cwl-player-inspector');
+    element.setAttribute('aria-controls', 'cwl-player-inspector');
 
     element.dataset.playerTag = normalized.tag;
     element.dataset.townHall = String(normalized.townHallLevel);
-    element.dataset.source = targetInfo.source;
+        element.dataset.source = normalized.source || normalized.origin || targetInfo.source;
+    if (normalized.legacySchedule?.length) {
+        element.dataset.legacySchedule = normalized.legacySchedule.join(',');
+    }
     element._cwlPlayer = normalized;
     targetInfo.classes.forEach(className => element.classList.add(className));
     if (targetInfo.groupId) element.dataset.clanuuid = targetInfo.groupId;

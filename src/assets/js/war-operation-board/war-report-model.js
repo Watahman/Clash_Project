@@ -1,9 +1,10 @@
 import { normalizeWarState } from '../cwl/cwl-war-state.js';
+import { competeT as t } from '../operation-board/compete-locales.js';
 import { getWarSide, normalizeTag, number } from '../operation-board/operation-board-utils.js';
 
 export class ActiveCwlWarError extends Error {
     constructor() {
-        super('This clan is currently in a CWL war. Open the CWL operation board instead.');
+        super(t('war.activeCwlStatus'));
         this.code = 'ACTIVE_CWL_WAR';
     }
 }
@@ -28,14 +29,20 @@ export function buildWarBoardReport(rawWar, clanTag, historicalPerformance = {})
     return {
         kind: 'regular-war',
         clan: {
-            tag: normalizeTag(normalizedSide.self.tag),
-            name: normalizedSide.self.name || selectedTag,
-            badgeUrl: normalizedSide.self.badgeUrls?.small || normalizedSide.self.badgeUrls?.medium || ''
+        tag: normalizeTag(normalizedSide.self.tag),
+        name: normalizedSide.self.name || selectedTag,
+            badgeUrl: normalizedSide.self.badgeUrls?.small
+                || normalizedSide.self.badgeUrls?.medium
+                || normalizedSide.self.badgeUrl
+                || ''
         },
         opponent: {
             tag: normalizeTag(normalizedSide.opponent.tag),
             name: normalizedSide.opponent.name || normalizeTag(normalizedSide.opponent.tag),
-            badgeUrl: normalizedSide.opponent.badgeUrls?.small || normalizedSide.opponent.badgeUrls?.medium || ''
+            badgeUrl: normalizedSide.opponent.badgeUrls?.small
+                || normalizedSide.opponent.badgeUrls?.medium
+                || normalizedSide.opponent.badgeUrl
+                || ''
         },
         state: normalizeWarState(normalizedWar),
         warKey: buildWarKey(normalizedWar, selectedTag),
@@ -56,7 +63,7 @@ export function currentWarPlayerContext(report, playerTag) {
     const attackLimit = Math.max(1, number(war?.attacksPerMember, 2));
     const totalStars = attacks.reduce((sum, attack) => sum + number(attack.stars), 0);
     return {
-        heading: 'Current Clan War',
+        heading: t('war.currentClanWar'),
         stars: totalStars,
         avgStars: attacks.length ? totalStars / attacks.length : null,
         avgDestruction: attacks.length

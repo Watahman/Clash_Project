@@ -29,10 +29,15 @@ export function applyAvailabilityToAllPlayerCards() {
 
 export function applyAvailabilityToCard(card) {
     if (!card) return;
+    card.querySelector('.cwl-availability-indicator')?.remove();
+    if (!activePoll) {
+        card.removeAttribute('data-availability');
+        card.removeAttribute('title');
+        return;
+    }
     const status = getAvailabilityStatus(getCardTag(card));
     card.dataset.availability = status.state;
     card.title = status.tooltip;
-    card.querySelector('.cwl-availability-indicator')?.remove();
     const indicator = document.createElement('span');
     indicator.className = `cwl-availability-indicator cwl-availability-${status.state}`;
     indicator.textContent = status.label;

@@ -1,0 +1,320 @@
+body.cwl-inspector-open { overflow: hidden; }
+
+.workspace-planner {
+    --planner-border: var(--border);
+    --planner-muted: var(--text-muted);
+    max-width: 100%;
+    min-width: 0;
+    padding: 0 0 32px;
+}
+
+.workspace-planner,
+.workspace-planner * { box-sizing: border-box; }
+
+body.workspace-app .workspace-content.workspace-planner .cwl-page-header {
+    align-items: flex-end;
+    background: var(--surface);
+    border: 1px solid var(--planner-border);
+    border-bottom: 0;
+    border-radius: var(--radius-medium) var(--radius-medium) 0 0;
+    display: flex;
+    height: auto;
+    justify-content: space-between;
+    margin: 0;
+    padding: 28px 32px 20px !important;
+    position: static;
+}
+
+.workspace-planner .cwl-page-header > #cwl-save-status {
+    margin: 0 0 2px 24px;
+}
+
+.workspace-planner .cwl-page-header > div:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+}
+
+.workspace-planner .cwl-page-kicker,
+.workspace-planner .cwl-board-heading p,
+.workspace-planner .cwl-panel-heading p {
+    color: var(--planner-muted);
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    margin: 0 0 3px;
+    text-transform: uppercase;
+}
+
+body.workspace-app .workspace-content .workspace-planner .cwl-page-header .cwl-page-kicker { margin-bottom: 12px !important; }
+
+.workspace-planner .cwl-page-title-row {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+    justify-content: flex-start;
+}
+
+body.workspace-app .workspace-content .workspace-planner .cwl-page-header h1 {
+    font-size: 1rem !important;
+    letter-spacing: 0;
+    line-height: 1.3;
+    margin: 0;
+}
+
+body.workspace-app .workspace-content .workspace-planner .cwl-page-header > div:first-child > p:last-of-type {
+    color: var(--planner-muted);
+    font-size: .86rem;
+    line-height: 1.5;
+    margin: 6px 0 0 !important;
+    max-width: 46rem;
+}
+
+.workspace-planner .cwl-page-header .workspace-page-help-trigger {
+    margin: 8px 0 0;
+}
+
+.workspace-planner .cwl-context-toolbar {
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--planner-border);
+    border-radius: 0 0 var(--radius-medium) var(--radius-medium);
+    display: flex;
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 12px;
+    padding: 6px 18px 14px;
+    position: relative;
+    z-index: 10;
+}
+
+.workspace-planner .cwl-plan-fields,
+.workspace-planner .cwl-toolbar-actions {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+}
+
+.workspace-planner .cwl-plan-fields {
+    flex: 0 1 310px;
+    min-width: 0;
+}
+
+.workspace-planner .cwl-plan-fields label {
+    color: var(--planner-muted);
+    display: grid;
+    flex: 1 1 130px;
+    font-size: .68rem;
+    font-weight: 700;
+    gap: 4px;
+    min-width: 120px;
+}
+
+.workspace-planner .cwl-plan-fields label > span {
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    position: absolute;
+    width: 1px;
+}
+
+.workspace-planner .cwl-plan-name-field { flex-grow: 1 !important; }
+
+.workspace-planner .cwl-context-toolbar select,
+.workspace-planner .cwl-context-toolbar input,
+.workspace-planner .cwl-roster-tools input,
+.workspace-planner .cwl-roster-tools select {
+    background: var(--surface-subtle);
+    border: 1px solid var(--planner-border);
+    border-radius: var(--radius-small);
+    color: var(--text);
+    min-height: 38px;
+    min-width: 0;
+    padding: 7px 10px;
+    width: 100%;
+}
+
+.workspace-planner .cwl-toolbar-actions {
+    flex: 0 1 auto;
+    flex-wrap: nowrap;
+    gap: 6px;
+    margin-left: auto;
+    min-width: 0;
+    justify-content: flex-end;
+}
+
+.workspace-planner .cwl-context-toolbar > .cwl-toolbar-actions > * { flex: 0 0 auto; }
+
+.workspace-planner .cwl-context-toolbar .button,
+.workspace-planner .cwl-tools-menu summary {
+    min-height: 36px;
+    padding: 6px 10px;
+    white-space: nowrap;
+}
+
+.workspace-planner .cwl-save-status {
+    color: var(--planner-muted);
+    flex: 0 0 auto;
+    font-size: .78rem;
+    min-width: 0;
+    text-align: right;
+}
+
+.workspace-planner .cwl-save-status[data-state="error"],
+.workspace-planner .cwl-save-status[data-state="conflict"] { color: var(--danger); }
+
+.workspace-planner .cwl-plan-state {
+    border: 0;
+    padding: 0;
+}
+
+.workspace-planner .cwl-tools-menu { position: relative; }
+.workspace-planner .cwl-tools-menu summary { cursor: pointer; list-style: none; }
+.workspace-planner .cwl-tools-menu summary::-webkit-details-marker { display: none; }
+
+.workspace-planner .cwl-tools-menu-content {
+    background: var(--surface-raised);
+    border: 1px solid var(--planner-border);
+    border-radius: var(--radius-small);
+    box-shadow: var(--shadow-md);
+    display: grid;
+    gap: 3px;
+    min-width: 190px;
+    padding: 6px;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 30;
+}
+
+body.workspace-app[data-workspace-page="planner"] :is(#cwl-container-add-players, #cwl-container-import-spreadsheet, #cwl-container-add-clan) .modal-header-row {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+body.workspace-app[data-workspace-page="planner"] :is(#cwl-container-add-players, #cwl-container-import-spreadsheet, #cwl-container-add-clan) .cwl-overlay-close {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+
+.workspace-planner .button-quiet {
+    background: transparent;
+    border: 0;
+    color: var(--text);
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.workspace-planner .button-quiet:hover,
+.workspace-planner .button-quiet:focus-visible { background: var(--surface-hover); }
+.workspace-planner .cwl-plan-limit-feedback { flex-basis: 100%; margin: 0; }
+
+.workspace-planner .cwl-auto-plan-panel,
+.workspace-planner .cwl-optimize-plan-panel { margin: 0 0 12px; }
+
+.workspace-planner .cwl-planner-layout {
+    background: var(--surface);
+    border: 1px solid var(--planner-border);
+    border-radius: var(--radius-medium);
+    display: grid;
+    grid-template-columns: minmax(22rem, 38%) minmax(0, 1fr);
+    min-height: 34rem;
+    min-width: 0;
+    overflow: clip;
+}
+
+.workspace-planner .cwl-roster-panel,
+.workspace-planner .cwl-board {
+    background: var(--surface);
+    border: 0;
+    border-radius: 0;
+    min-width: 0;
+    padding: 0;
+}
+
+.workspace-planner .cwl-roster-panel { border-right: 1px solid var(--planner-border); }
+.workspace-planner .cwl-panel-heading,
+.workspace-planner .cwl-board-heading {
+    align-items: center;
+    border-bottom: 1px solid var(--planner-border);
+    display: flex;
+    justify-content: space-between;
+    min-height: 62px;
+    padding: 12px 16px;
+}
+
+.workspace-planner .cwl-panel-heading h2,
+.workspace-planner .cwl-board-heading h2 { font-size: 1rem; margin: 0; }
+.workspace-planner #cwl-total-player-amount { color: var(--text); font-weight: 700; }
+.workspace-planner .cwl-roster-tools { display: grid; gap: 8px; padding: 12px 14px; }
+.workspace-planner .cwl-roster-search { display: grid; gap: 4px; }
+.workspace-planner .cwl-roster-search > span { font-size: 0; }
+.workspace-planner .cwl-roster-select-row { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; }
+.workspace-planner .cwl-roster-select-row label { color: var(--planner-muted); display: grid; font-size: .68rem; font-weight: 700; gap: 4px; min-width: 0; }
+.workspace-planner .cwl-roster-filter-status { color: var(--planner-muted); font-size: .72rem; margin: 0; min-height: 1em; }
+.workspace-planner .cwl-mobile-view-tabs { display: none; }
+
+@media (max-width: 1180px) {
+    .workspace-planner .cwl-context-toolbar { align-items: stretch; }
+    .workspace-planner .cwl-plan-fields { flex-basis: 100%; }
+    .workspace-planner .cwl-toolbar-actions { flex: 1 1 auto; justify-content: flex-end; }
+    .workspace-planner .cwl-planner-layout { grid-template-columns: minmax(20rem, 38%) minmax(0, 1fr); }
+}
+
+@media (min-width: 1181px) {
+    .workspace-planner .cwl-toolbar-actions {
+        flex: 1;
+        justify-content: flex-end;
+    }
+    .workspace-planner #cwl-undo-plan-button { border-left-color: var(--border-strong); margin-left: 8px; }
+}
+
+@media (max-width: 900px) {
+    body.workspace-app .workspace-content .workspace-planner .cwl-page-header { margin-bottom: 0; }
+    .workspace-planner .cwl-page-header > div:first-child > p:last-of-type { max-width: 34rem; }
+    .workspace-planner .cwl-page-header > #cwl-save-status { align-self: flex-end; margin: 8px 0 0; }
+    .workspace-planner .cwl-mobile-view-tabs {
+        background: var(--surface-subtle);
+        border: 1px solid var(--planner-border);
+        border-bottom: 0;
+        border-radius: var(--radius-medium) var(--radius-medium) 0 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        padding: 4px;
+    }
+    .workspace-planner .cwl-mobile-view-tabs button {
+        background: transparent;
+        border: 0;
+        border-radius: var(--radius-small);
+        color: var(--planner-muted);
+        min-height: 44px;
+    }
+    .workspace-planner .cwl-mobile-view-tabs button.is-active {
+        background: var(--surface-raised);
+        color: var(--text);
+        box-shadow: var(--shadow-sm);
+    }
+    .workspace-planner .cwl-planner-layout { border-radius: 0 0 var(--radius-medium) var(--radius-medium); display: block; }
+    .workspace-planner .cwl-roster-panel { border-right: 0; }
+    .workspace-planner .cwl-planner-layout[data-mobile-view="players"] .cwl-board,
+    .workspace-planner .cwl-planner-layout[data-mobile-view="clans"] .cwl-roster-panel { display: none; }
+}
+
+@media (max-width: 620px) {
+    body.workspace-app .workspace-content .workspace-planner .cwl-page-header { padding: 20px 18px 16px !important; }
+    .workspace-planner .cwl-context-toolbar .button,
+    .workspace-planner .cwl-tools-menu summary { min-height: 40px; }
+    .workspace-planner .cwl-plan-fields { display: grid; grid-template-columns: 1fr; }
+    .workspace-planner .cwl-toolbar-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+    .workspace-planner .cwl-toolbar-actions .button,
+    .workspace-planner .cwl-toolbar-actions .cwl-tools-menu,
+    .workspace-planner .cwl-tools-menu summary { width: 100%; }
+    .workspace-planner .cwl-roster-select-row { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .workspace-planner * { scroll-behavior: auto !important; }
+}

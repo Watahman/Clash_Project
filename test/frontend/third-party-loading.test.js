@@ -4,6 +4,8 @@ import { describe, expect, it } from 'vitest';
 const htmlFiles = [
     'src/index.html',
     'src/about.html',
+    'src/advanced-stats.html',
+    'src/achievements.html',
     'src/cwl-planner.html',
     'src/cwl-tracker.html',
     'src/clan-management.html',
@@ -17,6 +19,8 @@ const htmlFiles = [
     'src/subpages/register.html',
     'src/subpages/dashboard.html',
     'src/subpages/groups.html',
+    'src/subpages/advanced-stats.html',
+    'src/subpages/achievements.html',
     'src/subpages/cwl-planner.html',
     'src/subpages/cwl-planner-drafts.html',
     'src/subpages/cwl-operation-board.html',
@@ -71,10 +75,9 @@ describe('Privacy-aware third-party loading', () => {
         expect(bootstrap).toContain('display=optional');
     });
 
-    it('preloads the homepage LCP artwork with high priority', () => {
+    it('does not preload the removed battle artwork on the product-led homepage', () => {
         const homepage = readFileSync('src/index.html', 'utf8');
-        expect(homepage).toMatch(
-            /<link rel="preload" as="image" href="\/assets\/css\/pictures\/hero\.[a-f0-9]{10}\.avif" fetchpriority="high">/
-        );
+        expect(homepage).not.toContain('class="home3-product-stage"');
+        expect(homepage).not.toMatch(/rel="preload"[^>]+\/assets\/css\/pictures\/hero\./);
     });
 });

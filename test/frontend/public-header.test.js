@@ -26,7 +26,7 @@ describe('public shell normalization', () => {
         const navLabels = Array.from(header.querySelectorAll('.public-nav a'))
             .map(link => link.textContent.trim());
 
-        expect(navLabels).toEqual(['Tools', 'Guides', 'Methodology', 'About', 'Changelog']);
+        expect(navLabels).toEqual(['Tools', 'Games', 'Guides', 'Methodology', 'About', 'Changelog']);
         expect(header.querySelectorAll('.public-nav [data-i18n]').length).toBe(5);
         expect(header.querySelector('[href="/subpages/login.html"]')?.textContent.trim()).toBe('Log in');
         expect(header.querySelector('[href="/subpages/register.html"]')?.textContent.trim()).toBe('Start for free');
@@ -37,16 +37,16 @@ describe('public shell normalization', () => {
         const { footer } = mountShell('/guides');
         expect(footer.querySelector('[href="/guides"]')?.dataset.i18n).toBe('public.footer.guides');
         expect(footer.querySelector('[href="/methodology"]')?.dataset.i18n).toBe('public.footer.methodology');
-        expect(footer.querySelector('[href="/subpages/privacy"]')?.dataset.i18n).toBe('public.privacy');
+        expect(footer.querySelector('[href="/privacy"]')?.dataset.i18n).toBe('public.privacy');
         expect(footer.querySelector('[data-cookie-preferences]')?.dataset.i18n).toBe('public.cookiePreferences');
         expect(footer.querySelector('.public-disclaimer')?.dataset.i18n).toBe('public.disclaimer');
     });
 
-    it('marks Tools on public product pages and no item on legal pages', () => {
+    it('does not mark a section link as the current page on product or legal pages', () => {
         let { header } = mountShell('/cwl-planner');
-        expect(header.querySelector('[href="/#features"]')?.getAttribute('aria-current')).toBe('page');
+        expect(header.querySelector('[aria-current="page"]')).toBeNull();
 
-        ({ header } = mountShell('/subpages/privacy'));
+        ({ header } = mountShell('/privacy'));
         expect(header.querySelector('[aria-current="page"]')).toBeNull();
     });
 

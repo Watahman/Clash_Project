@@ -25,7 +25,7 @@ describe('CWL Optimize Plan controller', () => {
     });
 
     it('does not mutate the plan until an accepted suggestion is applied', async () => {
-        const { initOptimizePlan } = await import(
+        const { getOptimizePlanPreview, initOptimizePlan } = await import(
             '../../src/assets/js/cwl/optimize-plan/cwl-optimize-plan-ui.js'
         );
         initOptimizePlan();
@@ -34,6 +34,10 @@ describe('CWL Optimize Plan controller', () => {
         await vi.waitFor(() =>
             expect(document.querySelector('.cwl-optimize-suggestion')).not.toBeNull()
         );
+        const suggestions = [...document.querySelectorAll('.cwl-optimize-suggestion')];
+        expect(suggestions).toHaveLength(getOptimizePlanPreview().suggestions.length);
+        expect(new Set(suggestions.map(item => item.dataset.suggestionId)).size)
+            .toBe(suggestions.length);
         expect(mocks.applyAutoPlanResult).not.toHaveBeenCalled();
 
         document.querySelector('[data-optimize-action="accept"]').click();

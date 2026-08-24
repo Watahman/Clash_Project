@@ -89,7 +89,7 @@ describe('CWL Auto Planner', () => {
         expect(result.warnings).toHaveLength(0);
     });
 
-    it('keeps reserves limited and never schedules them by default', () => {
+    it('keeps reserves limited without inventing a daily schedule', () => {
         const result = buildAutoPlan({
             players: players(18, { equalScores: true }),
             clans: [clan('alpha', '#ALPHA', 'Champion League I')]
@@ -97,13 +97,12 @@ describe('CWL Auto Planner', () => {
         const planned = result.clans[0];
         const reserves = planned.players.filter(player => player.role === 'reserve');
 
-        expect(planned.lineups).toHaveLength(7);
-        expect(planned.lineups.every(lineup => lineup.playerTags.length === 15)).toBe(true);
         expect(planned.players.filter(player => player.role !== 'reserve')).toHaveLength(15);
         expect(reserves).toHaveLength(2);
-        expect(reserves.every(player => player.plannedDays.length === 0)).toBe(true);
+        expect(planned.lineups).toBeUndefined();
+        expect(reserves.every(player => player.plannedDays === undefined)).toBe(true);
         expect(result.freePlayers).toHaveLength(1);
-        expect(planned.lineupChanges).toBe(0);
+        expect(planned.lineupChanges).toBeUndefined();
     });
 
     it('replans around a guided hard role lock', () => {
@@ -138,7 +137,7 @@ describe('CWL Auto Planner', () => {
         const planned = result.clans[0];
 
         expect(planned.players.filter(player => player.role !== 'reserve')).toHaveLength(15);
-        expect(planned.lineups.every(lineup => lineup.playerTags.length === 15)).toBe(true);
+        expect(planned.lineups).toBeUndefined();
         expect(planned.warnings.some(warning => warning.code === 'reserve_used')).toBe(false);
     });
 

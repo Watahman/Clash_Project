@@ -1,5 +1,9 @@
 package Java;
 
+import Java.achievements.AchievementCatalog;
+import Java.cwlhistory.HistoricalCwlProviderFactory;
+import Java.cwlhistory.HistoricalCwlService;
+import Java.performance.ClashKingRequestCounter;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
@@ -16,11 +20,13 @@ public class Main {
         SUPABASE_GroupActivity supaGroupActivity;
         SUPABASE_GroupPolls supaGroupPolls;
         SUPABASE_Notifications supaNotifications;
-        SUPABASE_WarAssignments supaWarAssignments;
         SUPABASE_Friend supaFriend;
         SUPABASE_CWLPlanner supaCWLPlanner;
         SUPABASE_User supaUser;
         SUPABASE_Auth supaAuth;
+        SUPABASE_Achievements supaAchievements;
+        SUPABASE_AdvancedStats supaAdvancedStats;
+        AdvancedStatsInternalPoll advancedStatsInternalPoll;
         PublicIntake publicIntake;
         API_Player apiPlayer;
         API_PlayerPerformance apiPlayerPerformance;
@@ -33,6 +39,9 @@ public class Main {
         Config conf;
         HttpServer server;
         conf = new Config(); // config initialiseren
+        conf.validateClashApiKeyConfiguration();
+        ClashKingRequestCounter.configure(conf.getClashKingCounterIntervalSeconds());
+        AchievementCatalog.definitions(); // Fail startup before readiness if the embedded v2 catalog is invalid.
         server = HttpServer.create(new InetSocketAddress(conf.getServerPort()), 0);
         int workerCount = Math.max(4, Math.min(32, Runtime.getRuntime().availableProcessors() * 2));
         ExecutorService executor = Executors.newFixedThreadPool(workerCount);
@@ -45,9 +54,22 @@ public class Main {
         apiLocations = new API_Locations(server, conf);
         apiPlayer = new API_Player(server, conf);
         apiPlayerPerformance = new API_PlayerPerformance(server, conf);
-        apiCwlHistory = new API_CWLHistory(server, conf);
+        HistoricalCwlService cwlHistoryService = new HistoricalCwlService(
+                HistoricalCwlProviderFactory.create(conf)
+        );
+        HistoricalCwlService achievementCwlHistoryService = new HistoricalCwlService(
+                HistoricalCwlProviderFactory.createV2(conf)
+        );
+        apiCwlHistory = new API_CWLHistory(server, conf, cwlHistoryService);
         supaUser = new SUPABASE_User(server, conf);
         supaAuth = new SUPABASE_Auth(server, conf);
+        supaAchievements = new SUPABASE_Achievements(
+                server,
+                conf,
+                achievementCwlHistoryService
+        );
+        supaAdvancedStats = new SUPABASE_AdvancedStats(server, conf);
+        advancedStatsInternalPoll = new AdvancedStatsInternalPoll(server, conf);
         publicIntake = new PublicIntake(server, conf);
         supaCWLPlanner = new SUPABASE_CWLPlanner(server, conf);
         supaFriend = new SUPABASE_Friend(server, conf);
@@ -55,7 +77,6 @@ public class Main {
         supaGroupActivity = new SUPABASE_GroupActivity(server, conf);
         supaGroupPolls = new SUPABASE_GroupPolls(server, conf);
         supaNotifications = new SUPABASE_Notifications(server, conf);
-        supaWarAssignments = new SUPABASE_WarAssignments(server, conf);
 
         apiClan.getClanCurrentWarLeagueGroup();
         apiClan.searchClans();
@@ -101,6 +122,9 @@ public class Main {
         apiLabels.getLabelsClans();
 
         supaAuth.registerRoutes();
+        supaAchievements.registerRoutes();
+        supaAdvancedStats.registerRoutes();
+        advancedStatsInternalPoll.registerRoute();
         publicIntake.registerRoutes();
 
         supaUser.getUserInfo();
@@ -144,9 +168,6 @@ public class Main {
         supaGroupPolls.deleteGroupPoll();
         supaNotifications.getNotifications();
         supaNotifications.markNotificationRead();
-        supaWarAssignments.getAssignments();
-        supaWarAssignments.saveAssignment();
-        supaWarAssignments.deleteAssignment();
 
         server.createContext("/health", exchange -> {
             byte[] response = "{\"status\":\"ok\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8);

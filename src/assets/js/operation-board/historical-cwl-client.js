@@ -1,6 +1,7 @@
 import * as config from '../Data/config.js';
 import { requestJson } from '../utils/request-json.js';
 import { normalizeTag } from './operation-board-utils.js';
+import { loadCwlFixture } from './operation-board-fixtures.js';
 
 const seasonIndexCache = new Map();
 const seasonDetailCache = new Map();
@@ -11,6 +12,9 @@ export async function loadHistoricalCwlSeasons(
     { limit = 48, signal, forceRefresh = false } = {}
 ) {
     const tag = normalizeTag(clanTag);
+    const fixture = await loadCwlFixture({ signal });
+    const fixtureSeasons = fixture?.data?.history?.seasons;
+    if (Array.isArray(fixtureSeasons)) return fixtureSeasons.slice(0, limit);
     const key = `${tag}:${limit}`;
     if (!forceRefresh && seasonIndexCache.has(key)) {
         return seasonIndexCache.get(key);
@@ -30,6 +34,12 @@ export async function loadHistoricalCwlSeason(
     { signal, forceRefresh = false } = {}
 ) {
     const tag = normalizeTag(clanTag);
+    const fixture = await loadCwlFixture({ signal });
+    const fixtureHistory = fixture?.data?.history;
+    const fixtureDetail = fixtureHistory?.details?.[season]
+        || fixtureHistory?.overview?.find(item => item?.season === season)
+        || fixtureHistory?.seasons?.find(item => item?.season === season);
+    if (fixtureDetail) return fixtureDetail;
     const key = `${tag}:${season}`;
     if (!forceRefresh && seasonDetailCache.has(key)) {
         return seasonDetailCache.get(key);
@@ -48,6 +58,9 @@ export async function loadHistoricalCwlOverview(
     { limit = 12, signal, forceRefresh = false } = {}
 ) {
     const tag = normalizeTag(clanTag);
+    const fixture = await loadCwlFixture({ signal });
+    const fixtureOverview = fixture?.data?.history?.overview;
+    if (Array.isArray(fixtureOverview)) return fixtureOverview.slice(0, limit);
     const key = `${tag}:${limit}`;
     if (!forceRefresh && overviewCache.has(key)) {
         return overviewCache.get(key);

@@ -9,6 +9,8 @@ import {
     updateAllPlayerCounters,
     updateClanCapacityCounter
 } from './cwl-planner-card-state.js';
+import { ASSET_FALLBACKS, installImageFallback } from '../assets/entity-assets.js';
+import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 
 export function applyClanLeagueRestriction(article, leagueName, options = {}) {
     const select = article?.querySelector('.cwl-clan-capacity');
@@ -34,7 +36,8 @@ export function applyClanLeagueRestriction(article, leagueName, options = {}) {
     return changed;
 }
 
-export function createClanCard(clanInfo, playerAmount, uuid = '') {
+export function createClanCard(clanInfo, playerAmount, uuid = '', options = {}) {
+    const persist = options.persist !== false && !isRedesignFixtureRequested();
     const clanTag = normalizeTag(clanInfo?.tag);
     const clanName = clanInfo?.name || clanTag || t('cwl.clan');
     const leagueName = clanInfo?.warLeague?.name || '';
@@ -44,9 +47,9 @@ export function createClanCard(clanInfo, playerAmount, uuid = '') {
     const clanUuid = uuid || crypto.randomUUID();
 
     const logo = template.querySelector('.cwl-clan-logo');
-    logo.src = clanInfo?.badgeUrls?.small
-        || '../assets/css/pictures/default-clan-banner.png';
+    logo.src = clanInfo?.badgeUrls?.small || ASSET_FALLBACKS.clan;
     logo.alt = clanName;
+    installImageFallback(logo, ASSET_FALLBACKS.clan);
     template.querySelector('.cwl-clan-name').textContent = clanName;
     template.querySelector('.cwl-clan-tag').textContent = clanTag;
     template.querySelector('.cwl-clan-league').textContent =
@@ -76,10 +79,10 @@ export function createClanCard(clanInfo, playerAmount, uuid = '') {
     attachDeleteClan(template.querySelector('.cwl-delete-clan'));
 
     document.querySelector('#cwl-all-clans').appendChild(template);
-    if (clanInfo?.name && clanTag) localStorage.setItem(`clanId_${clanInfo.name}`, clanTag);
+    if (persist && clanInfo?.name && clanTag) localStorage.setItem(`clanId_${clanInfo.name}`, clanTag);
     makeClanDraggable(document.querySelector('#cwl-all-clans').lastElementChild);
     updateAllPlayerCounters();
-    savePlan();
+    if (persist) savePlan();
 }
 
 function attachDeleteClan(button) {

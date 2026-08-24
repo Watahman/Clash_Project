@@ -1,5 +1,5 @@
 import { parseClashTime } from '../cwl/cwl-war-state.js';
-import { t } from '../i18n/i18n.js';
+import { competeT as t } from './compete-locales.js';
 import { buildLiveView } from './operation-board-live-model.js';
 import {
     buildProjectedOutcome
@@ -11,6 +11,10 @@ import {
     resultText,
     stateText
 } from './operation-board-render-utils.js';
+import {
+    installLiveBadgeFallbacks,
+    liveSideMarkup
+} from './operation-board-live-side-renderer.js';
 import { buildWinCondition } from './operation-board-win-condition.js';
 import {
     escapeHtml,
@@ -37,9 +41,9 @@ export function renderLiveTab(refs, report) {
                 <span>${escapeHtml(timeLabel(live))}</span>
             </header>
             <div class="op-live-versus">
-                ${sideMarkup(live.own)}
+                ${liveSideMarkup(live.own)}
                 <span class="op-live-versus-mark">${escapeHtml(t('op.versus'))}</span>
-                ${sideMarkup(live.opponent)}
+                ${liveSideMarkup(live.opponent)}
             </div>
             ${live.state === 'completed' ? finalResultMarkup(live) : ''}
         </section>
@@ -48,24 +52,11 @@ export function renderLiveTab(refs, report) {
             ${projectionMarkup(projection)}
         </div>
         ${recommendationsMarkup(recommendations, live.state)}`;
+    installLiveBadgeFallbacks(refs.liveContent);
 }
 
 export function clearLiveTab(refs) {
     refs.liveContent.replaceChildren();
-}
-
-function sideMarkup(side) {
-    const hasData = side.stars != null;
-    return `
-        <article class="op-live-side">
-            <h2>${escapeHtml(side.name || '—')}</h2>
-            <strong>${hasData ? number(side.stars, 0) : '—'}<small>★</small></strong>
-            <dl>
-                <div><dt>${escapeHtml(t('op.destruction'))}</dt><dd>${hasData ? `${number(side.destruction, 0).toFixed(1)}%` : '—'}</dd></div>
-                <div><dt>${escapeHtml(t('op.attacks'))}</dt><dd>${number(side.attacksUsed, 0)} / ${number(side.availableAttacks, 0)}</dd></div>
-                <div><dt>${escapeHtml(t('op.remainingAttacks'))}</dt><dd>${number(side.remainingAttacks, 0)}</dd></div>
-            </dl>
-        </article>`;
 }
 
 function finalResultMarkup(live) {
@@ -109,7 +100,7 @@ function winConditionMarkup(condition, live) {
                 <dl class="op-live-facts">
                     <div><dt>${escapeHtml(t('op.ownAttacksLeft'))}</dt><dd>${condition.ownRemaining}</dd></div>
                     <div><dt>${escapeHtml(t('op.enemyAttacksLeft'))}</dt><dd>${condition.opponentRemaining}</dd></div>
-                    <div><dt>${escapeHtml(t('op.maxStarImprovement'))}</dt><dd>+${number(condition.maxStarImprovement, 0)}★</dd></div>
+                    <div><dt>${escapeHtml(t('op.maxStarImprovement'))}</dt><dd>+${number(condition.maxStarImprovement, 0)} ${escapeHtml(t('cwl.starsUnit'))}</dd></div>
                 </dl>
             </div>
         </section>`;
@@ -126,7 +117,7 @@ function projectionMarkup(projection) {
                 </span>
             </div>
             <div class="op-projection-score">
-                <strong>${number(projection.own.stars, 0).toFixed(1)}<small>★</small></strong>
+                <strong>${number(projection.own.stars, 0).toFixed(1)}<small> ${escapeHtml(t('cwl.starsUnit'))}</small></strong>
                 <span>${number(projection.own.destruction, 0).toFixed(1)}%</span>
                 <small>${escapeHtml(t('op.projectedOpponent', {
                     stars: number(projection.opponent.stars, 0).toFixed(1),

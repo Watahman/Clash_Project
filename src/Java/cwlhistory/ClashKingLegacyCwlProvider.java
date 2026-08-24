@@ -17,11 +17,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
+/** Adapter for the released ClashKing legacy CWL history endpoints. */
 public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvider {
     private static final int SEASON_DISCOVERY_WINDOW = 48;
+    private static final Duration MISSING_SEASON_TTL = Duration.ofMinutes(5);
 
     private final ClashKingHttpClient client;
     private final Cache<String, HistoricalCwlSeason> prefetchedSeasons;
+    private final Cache<String, Boolean> missingSeasons;
     private final Cache<String, HistoryContext> historyContexts;
 
     public ClashKingLegacyCwlProvider(String baseUrl) {
@@ -29,6 +32,10 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
         prefetchedSeasons = Caffeine.newBuilder()
                 .maximumSize(500)
                 .expireAfterWrite(Duration.ofMinutes(30))
+                .build();
+        missingSeasons = Caffeine.newBuilder()
+                .maximumSize(2_000)
+                .expireAfterWrite(MISSING_SEASON_TTL)
                 .build();
         historyContexts = Caffeine.newBuilder()
                 .maximumSize(500)
@@ -51,10 +58,7 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
                         HistoricalCwlService.MAX_SEASON_LIMIT,
                         limit
                 )))
-                .map(season -> indexSummary(
-                        season,
-                        context.recordedLeagues()
-                ))
+                .map(season -> indexSummary(season, context.recordedLeagues()))
                 .toList();
     }
 
@@ -87,13 +91,21 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
     @Override
     public HistoricalCwlSeason getSeason(String clanTag, String season)
             throws Exception {
-        HistoricalCwlSeason cached = prefetchedSeasons.getIfPresent(
-                cacheKey(clanTag, season)
-        );
+        String key = cacheKey(clanTag, season);
+        HistoricalCwlSeason cached = prefetchedSeasons.getIfPresent(key);
         if (cached != null) return cached;
-        HistoricalCwlSeason result = fetchSeason(clanTag, season);
-        prefetchedSeasons.put(cacheKey(clanTag, season), result);
-        return result;
+        if (missingSeasons.getIfPresent(key) != null) {
+            throw missingSeason(clanTag, season);
+        }
+        try {
+            HistoricalCwlSeason result = fetchSeason(clanTag, season);
+            prefetchedSeasons.put(key, result);
+            missingSeasons.invalidate(key);
+            return result;
+        } catch (HttpException failure) {
+            if (isUpstreamNotFound(failure)) missingSeasons.put(key, true);
+            throw failure;
+        }
     }
 
     private HistoricalCwlSeason fetchSeason(String clanTag, String season)
@@ -126,9 +138,10 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
 
         JsonObject basic;
         try {
-            basic = client.get(
+            basic = client.getNullableObject(
                     "/clan/" + encoded(clanTag) + "/basic"
             );
+            if (basic == null) basic = new JsonObject();
         } catch (HttpException notFound) {
             if (notFound.getStatusCode() == 404) basic = new JsonObject();
             else throw notFound;
@@ -157,10 +170,7 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
         );
         if (name.isBlank()) name = CwlHistoryJson.string(value, "name");
         if (name.isBlank()) name = CwlHistoryIndexNormalizer.leagueName(id);
-        return new HistoricalCwlSeason.League(
-                id > 0 ? id : null,
-                name
-        );
+        return new HistoricalCwlSeason.League(id > 0 ? id : null, name);
     }
 
     private static String encoded(String value) {
@@ -220,6 +230,22 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
 
     private static String cacheKey(String clanTag, String season) {
         return Objects.toString(clanTag, "") + ":" + season;
+    }
+
+    private static boolean isUpstreamNotFound(HttpException failure) {
+        return failure.getStatusCode() == 404
+                && !failure.isSafeToExpose()
+                && !failure.getUpstream().isBlank();
+    }
+
+    private static HttpException missingSeason(String clanTag, String season) {
+        return HttpException.upstream(
+                404,
+                "{\"error\":\"CWL season not found\",\"clanTag\":\""
+                        + Objects.toString(clanTag, "")
+                        + "\",\"season\":\"" + Objects.toString(season, "") + "\"}",
+                "ClashKing API"
+        );
     }
 
     private record HistoryContext(

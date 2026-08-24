@@ -1,0 +1,198 @@
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-header {
+    position: static;
+    display: grid;
+    height: auto;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 20px;
+    min-height: 0;
+    border-bottom: 1px solid var(--cp-border-1);
+    padding: 20px;
+    background: var(--cp-surface-1);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-heading {
+    min-width: 0;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-heading > p {
+    max-width: 620px;
+    margin: 8px 0 0;
+    color: var(--cp-text-2);
+    font-size: .8125rem;
+    line-height: 1.55;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-return-setup {
+    width: max-content;
+    min-height: 40px;
+    margin-top: 16px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-return-setup svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 16px 24px;
+    min-width: 0;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta > span {
+    display: grid;
+    align-content: start;
+    gap: 4px;
+    min-width: 92px;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta small {
+    color: var(--cp-text-3);
+    font-size: .6875rem;
+    line-height: 1.35;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta strong {
+    overflow: hidden;
+    color: var(--cp-text-1);
+    font-family: var(--cp-font-heading);
+    font-size: 1rem;
+    font-weight: 720;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta .bracket-champion-meta strong {
+    color: var(--bracket-accent);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-champion-meta small:last-child {
+    max-width: 180px;
+    color: var(--cp-text-3);
+    font-size: .625rem;
+    line-height: 1.4;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation {
+    display: grid;
+    gap: 10px;
+    border-bottom: 1px solid var(--cp-border-1);
+    padding: 14px 20px 0;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation-label {
+    color: var(--cp-text-3);
+    font-size: .6875rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation-controls {
+    display: flex;
+    align-items: end;
+    gap: 12px;
+    min-width: 0;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation-controls > .cp-button {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    padding: 0;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation-controls svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-tabs {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: stretch;
+    min-width: 0;
+    gap: 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+    min-height: 44px;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    background: transparent;
+    padding: 0 0 10px;
+    color: var(--cp-text-3);
+    cursor: pointer;
+    font: 700 .75rem/1 var(--cp-font-ui);
+    transition: color 170ms var(--cp-ease-standard);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: transparent;
+    content: "";
+    transition: background-color 170ms var(--cp-ease-standard);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab:hover,
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab[aria-selected="true"] {
+    color: var(--cp-text-1);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab[aria-selected="true"]::after {
+    background: var(--bracket-accent);
+}
+
+/* These hooks support progress metadata added by the renderer while keeping
+   the tab itself an open row, rather than a collection of pill buttons. */
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab :is(small, .bracket-round-tab-meta, .bracket-round-tab-progress, [data-round-meta], [data-round-progress]) {
+    color: var(--cp-text-3);
+    font-size: .6875rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab[aria-selected="true"] :is(small, .bracket-round-tab-meta, .bracket-round-tab-progress, [data-round-meta], [data-round-progress]) {
+    color: var(--bracket-accent);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-reset-dialog {
+    color: var(--cp-text-1);
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-reset-dialog > p {
+    margin: 8px 0 24px;
+    color: var(--cp-text-2);
+    font-size: .875rem;
+}
+
+body.workspace-app[data-workspace-page="bracket"] .bracket-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}

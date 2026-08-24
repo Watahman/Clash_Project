@@ -4,51 +4,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="../assets/js/Data/analytics.js"></script>
-    <meta name="description" content="The ClashPanel bracket generator is currently unavailable.">
-    <meta name="robots" content="noindex">
-    <script>window.location.replace('/dashboard');</script>
+    <meta name="description" content="Create a local seeded or shuffled ClashPanel knockout bracket and advance winners through every round.">
+    <meta name="robots" content="noindex, follow">
     <link rel="stylesheet" href="../assets/css/workspace-loading.css">
     <script src="../assets/js/shell/workspace-bootstrap.js"></script>
-    <title>Bracket Generator (Coming soon) · ClashPanel</title>
+    <title>Brackets · ClashPanel</title>
     <link rel="stylesheet" href="../assets/css/Main-css.css">
     <link rel="stylesheet" href="../assets/css/profile-overlay.css">
     <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
-    <link rel="stylesheet" href="../assets/css/bracket.css">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
-    <link rel="stylesheet" href="../assets/css/bracket-workspace-v1.css">
     <script src="../assets/js/Data/runtime-config.js"></script>
-    <script type="module" src="../assets/js/shell/workspace-shell.js"></script>
+    <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260812-redesign"></script>
     <script type="module" src="../assets/js/pages/bracket-generator.js"></script>
-    <link rel="stylesheet" href="../assets/css/light-theme.css">
+    <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
+    <link rel="stylesheet" href="../assets/css/workspace-v2.css?v=20260812-redesign">
+    <link rel="stylesheet" href="../assets/css/bracket.css">
+    <link rel="stylesheet" href="../assets/css/bracket-result.css">
+    <link rel="stylesheet" href="../assets/css/bracket-canvas.css">
+    <link rel="stylesheet" href="../assets/css/bracket-responsive.css">
 </head>
 <body class="workspace-app" data-workspace-page="bracket">
-<header>
-    <div class="left"><a href="../index.html"><img src="../assets/css/pictures/clashtools-logo.png" alt="Tools for Clash logo"></a></div>
-    <nav class="center"><a href="./cwl-planner.html">CWL planner</a><a href="./cwl-operation-board.html" data-i18n="nav.operation">Operation board</a><a aria-disabled="true" tabindex="-1">Bracket generator (Coming soon)</a><a href="./groups.html" data-i18n="nav.groups">Clan Family</a></nav>
-    <div class="right"><button type="button" data-language-control data-i18n="header.language">Language</button><button id="profile-btn" type="button"><img class="profile-svg-header" src="../assets/css/pictures/profile.svg" alt=""><span data-i18n="header.user">User</span></button></div>
-</header>
-
 <main class="bracket-workspace-page">
-    <header class="bracket-page-header"><div><p class="bracket-page-kicker" data-i18n="bracket.eyebrow">Tournament</p><h1><span data-i18n="bracket.title">Bracket generator</span> <span class="workspace-coming-soon-badge" data-i18n="common.comingSoon">(Coming soon)</span></h1><p data-i18n="bracket.workspaceIntro">Create a seeded or shuffled knockout bracket and choose each match winner.</p></div></header>
+    <header class="bracket-page-header">
+        <div>
+            <p class="bracket-page-kicker" data-i18n="bracket.eyebrow">Tournament</p>
+            <h1 data-i18n="bracket.title">Bracket generator</h1>
+            <p data-i18n="bracket.workspaceIntro">Create a seeded or shuffled knockout bracket and choose each match winner.</p>
+        </div>
+        <div class="bracket-header-note">
+            <span class="cp-badge bracket-module-badge" data-bracket-copy="localOnly">Local workspace tool · no cloud sharing</span>
+            <span class="bracket-header-rule" aria-hidden="true"></span>
+        </div>
+    </header>
+
     <div class="bracket-layout">
-        <section class="bracket-setup" aria-labelledby="bracket-setup-title">
-            <div class="bracket-section-heading"><div><span data-i18n="bracket.setupStep">Step 1</span><h2 id="bracket-setup-title" data-i18n="bracket.setupTitle">Set up tournament</h2></div><strong id="bracket-participant-count">0</strong></div>
-            <div class="bracket-fields">
-                <label for="bracket-name"><span data-i18n="bracket.name">Name</span><input id="bracket-name" type="text" maxlength="60" value="Clash tournament"></label>
-                <label for="bracket-participants"><span data-i18n="bracket.participants">Participants</span><small data-i18n="bracket.onePerLine">One participant per line</small><textarea id="bracket-participants" rows="12" data-i18n-placeholder="bracket.participantsPlaceholder" placeholder="One participant per line"></textarea></label>
+        <aside id="bracket-setup" class="bracket-setup" aria-labelledby="bracket-setup-title">
+            <div class="bracket-section-heading">
+                <div>
+                    <span class="bracket-step" data-i18n="bracket.setupStep">Step 1</span>
+                    <h2 id="bracket-setup-title" data-i18n="bracket.setupTitle">Set up tournament</h2>
+                </div>
+                <div class="bracket-setup-heading-actions">
+                    <strong id="bracket-participant-count" aria-label="Participant count">0</strong>
+                </div>
             </div>
-            <div class="bracket-primary-actions"><button id="bracket-generate-seeded" type="button" class="button button-primary" data-i18n="bracket.seeded">Generate in order</button><button id="bracket-generate-shuffled" type="button" class="button button-secondary" data-i18n="bracket.shuffle">Shuffle bracket</button></div>
-            <div class="bracket-file-actions"><button id="bracket-import" type="button" data-i18n="bracket.import">Import JSON</button><button id="bracket-export" type="button" data-i18n="bracket.export">Export JSON</button><button id="bracket-reset" type="button" data-i18n="bracket.reset">Clear bracket</button><input id="bracket-import-file" class="hidden" type="file" accept="application/json" aria-label="Choose bracket JSON file"></div>
-            <p id="bracket-status" class="bracket-status" role="status" aria-live="polite"></p>
-        </section>
+            <div id="bracket-setup-content" class="bracket-setup-content">
+                <div class="bracket-fields">
+                    <label class="cp-field" for="bracket-name">
+                        <span data-i18n="bracket.name">Name</span>
+                        <input class="cp-input" id="bracket-name" type="text" maxlength="60" value="Clash tournament" autocomplete="off">
+                    </label>
+                    <label class="cp-field" for="bracket-participants">
+                        <span data-i18n="bracket.participants">Participants</span>
+                        <textarea class="cp-textarea" id="bracket-participants" rows="10" aria-describedby="bracket-field-help bracket-participant-count-text" data-i18n-placeholder="bracket.participantsPlaceholder" placeholder="One participant per line"></textarea>
+                    </label>
+                    <p id="bracket-field-help" class="bracket-field-help" data-bracket-copy="setupHelp">Use 4–128 participants. Keep one name per line. Duplicate names are allowed.</p>
+                    <p id="bracket-participant-count-text" class="bracket-count-note" aria-live="polite">0 of 128 participants</p>
+                </div>
+                <div class="bracket-primary-actions">
+                    <button id="bracket-generate-seeded" class="cp-button cp-button--primary" type="button">
+                        <span data-i18n="bracket.seeded">Generate in order</span>
+                    </button>
+                    <button id="bracket-generate-shuffled" class="cp-button cp-button--secondary" type="button">
+                        <span data-i18n="bracket.shuffle">Shuffle bracket</span>
+                    </button>
+                </div>
+                <div class="bracket-action-help">
+                    <span data-bracket-copy="seedHelp">Use the participant order as supplied.</span>
+                    <span data-bracket-copy="shuffleHelp">Randomize the opening matchups.</span>
+                </div>
+                <div class="bracket-file-actions">
+                    <button id="bracket-import" class="cp-button cp-button--ghost" type="button"><span data-i18n="bracket.import">Import JSON</span></button>
+                    <button id="bracket-export" class="cp-button cp-button--ghost" type="button"><span data-i18n="bracket.export">Export JSON</span></button>
+                    <button id="bracket-reset" class="cp-button cp-button--danger" type="button"><span data-i18n="bracket.reset">Clear bracket</span></button>
+                    <input id="bracket-import-file" class="hidden" type="file" accept="application/json" aria-label="Choose bracket JSON file">
+                </div>
+                <p id="bracket-status" class="bracket-status" role="status" aria-live="polite" aria-atomic="true"></p>
+            </div>
+        </aside>
+
         <section class="bracket-result" aria-labelledby="bracket-result-title">
-            <header class="bracket-result-header"><div><span data-i18n="bracket.resultStep">Step 2</span><h2 id="bracket-result-title">Clash tournament</h2><p data-i18n="bracket.resultHelp">Choose a winner for each match. The next round updates automatically.</p></div><div class="bracket-result-meta"><span><small data-i18n="bracket.participantsShort">participants</small><strong id="bracket-result-count">0</strong></span><span><small data-i18n="bracket.championLabel">Champion</small><strong id="bracket-result-champion">—</strong></span></div></header>
-            <section id="bracket-board" class="bracket-board" aria-live="polite"></section>
+            <header class="bracket-result-header">
+                <div class="bracket-result-heading">
+                    <span class="bracket-step" data-i18n="bracket.resultStep">Step 2</span>
+                    <h2 id="bracket-result-title">Clash tournament</h2>
+                    <p data-i18n="bracket.resultHelp">Choose a winner for each match. The next round updates automatically.</p>
+                    <button id="bracket-return-setup" class="cp-button cp-button--ghost bracket-return-setup" type="button" aria-controls="bracket-setup" hidden>
+                        <span data-bracket-copy="editSetup">Edit setup</span>
+                    </button>
+                </div>
+                <div class="bracket-result-meta">
+                    <span><small data-i18n="bracket.participantsShort">participants</small><strong id="bracket-result-count">0</strong></span>
+                    <span class="bracket-champion-meta"><small data-i18n="bracket.championLabel">Champion</small><strong id="bracket-result-champion">—</strong><small id="bracket-result-champion-help" data-bracket-copy="championHelp">The final winner is shown here when the bracket is complete.</small></span>
+                </div>
+            </header>
+            <div id="bracket-round-navigation" class="bracket-round-navigation" hidden>
+                <div class="bracket-round-navigation-label" data-bracket-copy="roundNavigation">Bracket round navigation</div>
+                <div class="bracket-round-navigation-controls">
+                    <button id="bracket-round-prev" class="cp-button cp-button--ghost" type="button" aria-label="Previous round"></button>
+                    <div class="bracket-round-tabs" role="tablist" aria-label="Bracket rounds"></div>
+                    <button id="bracket-round-next" class="cp-button cp-button--ghost" type="button" aria-label="Next round"></button>
+                </div>
+            </div>
+            <section id="bracket-board" class="bracket-board" tabindex="0" aria-label="Bracket board"></section>
+            <p id="bracket-board-announcement" class="sr-only" role="status" aria-live="polite"></p>
         </section>
     </div>
 </main>
+
+<dialog id="bracket-reset-dialog" class="cp-modal bracket-reset-dialog" aria-labelledby="bracket-reset-title">
+    <h2 id="bracket-reset-title">Clear this bracket?</h2>
+    <p data-reset-copy>This removes the current bracket and its local saved copy.</p>
+    <div class="bracket-dialog-actions">
+        <button id="bracket-reset-cancel" class="cp-button cp-button--secondary" type="button">Cancel</button>
+        <button id="bracket-reset-confirm" class="cp-button cp-button--danger" type="button">Clear bracket</button>
+    </div>
+</dialog>
 <div class="profile-placeholder"></div>
 </body>
 </html>

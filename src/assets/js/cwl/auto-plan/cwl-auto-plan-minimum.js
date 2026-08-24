@@ -35,9 +35,7 @@ export function fillRequiredLineups(clans, buckets, available, roleLocks = {}) {
 }
 
 export function hasRequiredCoverage(clan, entries = [], roleLocks = {}) {
-    if (activeEntryCount(entries, roleLocks) < clan.capacity) return false;
-    return Array.from({ length: 7 }, (_, index) => index + 1)
-        .every(day => availableActiveCount(entries, day, roleLocks) >= clan.capacity);
+    return activeEntryCount(entries, roleLocks) >= clan.capacity;
 }
 
 export function activeEntryCount(entries = [], roleLocks = {}) {
@@ -47,13 +45,11 @@ export function activeEntryCount(entries = [], roleLocks = {}) {
 }
 
 function takeBestCoveragePlayer(available, clan, entries, roleLocks) {
-    const deficitDays = Array.from({ length: 7 }, (_, index) => index + 1)
-        .filter(day => availableActiveCount(entries, day, roleLocks) < clan.capacity);
     const ranked = available.map(player => ({
         player,
         score: scorePlayerForClan(player, clan),
         stability: stabilityScore(player, clan),
-        coverageGain: deficitDays.filter(day => isAvailable(player, day)).length
+        coverageGain: activeEntryCount(entries, roleLocks) < clan.capacity ? 1 : 0
     })).sort((left, right) =>
         right.coverageGain - left.coverageGain
         || (right.score.fit + right.stability) - (left.score.fit + left.stability)
@@ -70,19 +66,6 @@ function stabilityScore(player, clan) {
         ? 2.5
         : player.currentRole === 'rotation' ? 1 : 0;
     return clanBonus + roleBonus;
-}
-
-function availableActiveCount(entries, day, roleLocks) {
-    return entries.filter(entry =>
-        entry.kind !== 'reserve'
-        && roleLocks[entry.player.tag] !== 'reserve'
-        && isAvailable(entry.player, day)
-    ).length;
-}
-
-function isAvailable(player, day) {
-    const days = player.availability?.availableDays;
-    return !Array.isArray(days) || days.includes(day);
 }
 
 function removePlayer(players, tag) {

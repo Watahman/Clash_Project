@@ -18,6 +18,7 @@ public class SUPABASE_Group {
     private final HttpServer server;
     private final Config conf;
     private final API_Utils utils;
+    private final LinkedAccountRepository accounts = new LinkedAccountRepository();
 
     public SUPABASE_Group(HttpServer server, Config conf){
         this.server = server;
@@ -63,7 +64,11 @@ public class SUPABASE_Group {
             String id       = utils.requireString(json, "groupId");
             requireGroupMember(id, userId);
             syncGroupBadgeToPrimaryClan(id);
-            String result   = SUPABASE_Client.getWithBody("groups", "id=" + SUPABASE_Client.eq(id));
+            String result = SUPABASE_Client.getWithBody(
+                    "groups",
+                    "select=id,name,owner_id,created_at,code,badge,badge_url,updated_at"
+                            + "&id=" + SUPABASE_Client.eq(id)
+            );
 
             JsonArray resultArray = JsonParser.parseString(result).getAsJsonArray();
             if (resultArray.isEmpty()) {
@@ -71,7 +76,8 @@ public class SUPABASE_Group {
                 return;
             }
 
-            utils.sendJsonResponse(ex, result, 200);
+            resultArray.get(0).getAsJsonObject().add("polls", new JsonArray());
+            utils.sendJsonResponse(ex, resultArray.toString(), 200);
         }));
     }
 
@@ -345,8 +351,9 @@ public class SUPABASE_Group {
         if (userIds.isEmpty()) return members;
         JsonArray profiles = JsonParser.parseString(SUPABASE_Client.getWithBody(
                 "users",
-                "select=id,name,code,accounts&id=" + SUPABASE_Client.in(userIds)
+                "select=id,name,code&id=" + SUPABASE_Client.in(userIds)
         )).getAsJsonArray();
+        accounts.attachToProfiles(profiles);
         Map<String, JsonObject> byId = new HashMap<>();
         for (JsonElement element : profiles) {
             JsonObject profile = element.getAsJsonObject();

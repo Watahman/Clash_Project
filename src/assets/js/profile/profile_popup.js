@@ -158,7 +158,7 @@ function profileInit() {
 
     bindBackdropClick(profile, closeProfile);
     closeProfileBtn.onclick = () => { closeProfile(); };
-    userCode.onclick = () => { copyWithFeedback(poCode.textContent, poIcoCopy, poIcoCheck); };
+    userCode.onclick = () => { copyWithFeedback(poCode.textContent, poIcoCopy, poIcoCheck, 1000); };
     profileTabs.forEach(tab => { tab.onclick = () => { poTab(tab, tabRefs); }; });
     friendListClose.onclick = () => {
         friendListRequestId += 1;

@@ -34,13 +34,14 @@
     <script src="/assets/js/shell/workspace-bootstrap.js"></script>
     <link rel="stylesheet" href="/assets/css/workspace-system.css">
     <script src="/assets/js/Data/runtime-config.js"></script>
-    <script type="module" src="/assets/js/pages/public-site.js" fetchpriority="low"></script>
-    <link rel="stylesheet" href="/assets/css/light-theme.css">
+    <script type="module" src="/assets/js/pages/public-site.js?v=20260821-public-pages" fetchpriority="low"></script>
+    <link rel="stylesheet" href="/assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="/assets/css/workspace-polish.css">
     <link rel="stylesheet" href="/assets/css/public-marketing.css">
     <link rel="stylesheet" href="/assets/css/public-home-v2.css">
-    <link rel="stylesheet" href="/assets/css/public-feature-v2.css">
-    <link rel="stylesheet" href="/assets/css/public-resources.css">
+    <link rel="stylesheet" href="/assets/css/public-feature-v2.css?v=20260814-photo2">
+    <link rel="stylesheet" href="/assets/css/public-resources.css?v=20260821-public-pages">
+    <link rel="stylesheet" href="/assets/css/public-v2.css?v=20260812-redesign">
 </head>
 <body class="public-site public-home-v2 public-feature-v2 public-feature-about">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
@@ -56,11 +57,8 @@
     <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" data-i18n-aria-label="public.openMenu" aria-label="Open menu"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
 </header>
 <main id="main-content">
-    <section class="home-v2-hero feature-v2-hero" id="product">
-        <div class="feature-v2-hero-media" aria-hidden="true">
-            <!-- IMAGE TIP: Strategic Clash of Clans scene: war map, leader planning, or calm pre-battle image rather than a chaotic attack. Replace only the src below. -->
-            <img src="/assets/css/pictures/home/barbarian-strategy.aeb88b9e0b.avif" alt="" width="503" height="397">
-        </div>
+    <section class="home-v2-hero feature-v2-hero cp-feature-hero" id="product">
+        <div class="cp-feature-hero-background" aria-hidden="true"></div>
         <div class="home-v2-hero-copy">
             <p class="eyebrow" data-i18n="aboutPage.kicker">About ClashPanel</p>
             <h1 data-i18n="aboutPage.h1">Built for clan leaders.</h1>
@@ -76,14 +74,9 @@
             <p class="eyebrow" data-i18n="aboutPage.workflow.kicker">Why it exists</p>
             <h2 data-i18n="aboutPage.workflow.title">Less copying. More context.</h2>
             <p data-i18n="aboutPage.workflow.intro">CWL work gets messy when rosters, availability, attacks and clan relationships live in different places. ClashPanel is built to keep those parts connected.</p>
-            <figure class="home-v2-workflow-art" data-reveal="image">
-                <!-- IMAGE TIP: A broad clan-war scene that can represent the full cycle from planning to live war and review. Replace only the src below. -->
-                <img src="/assets/css/pictures/public-pages/clan-march.98e06a9863.avif" alt="Clash of Clans troops moving together toward a shared objective" loading="lazy" decoding="async" width="735" height="414">
-                <figcaption data-i18n="aboutPage.workflow.caption">Planning, live war and review should feel like one workflow.</figcaption>
-            </figure>
         </div>
         <ol class="home-v2-workflow-list">
-            <li data-reveal style="--reveal-delay:60ms"><span>01</span><div><h3 data-i18n="aboutPage.workflow.step1.title">Plan the roster</h3><p data-i18n="aboutPage.workflow.step1.desc">Bring players, clans, roles and day-by-day availability into one CWL planning flow.</p></div></li>
+            <li data-reveal style="--reveal-delay:60ms"><span>01</span><div><h3 data-i18n="aboutPage.workflow.step1.title">Plan the roster</h3><p data-i18n="aboutPage.workflow.step1.desc">Bring players, clans, roles and availability into one complete CWL roster plan.</p></div></li>
             <li data-reveal style="--reveal-delay:130ms"><span>02</span><div><h3 data-i18n="aboutPage.workflow.step2.title">Follow league week</h3><p data-i18n="aboutPage.workflow.step2.desc">Track current wars, standings, participation and the decisions that still matter.</p></div></li>
             <li data-reveal style="--reveal-delay:200ms"><span>03</span><div><h3 data-i18n="aboutPage.workflow.step3.title">Keep the history</h3><p data-i18n="aboutPage.workflow.step3.desc">Reuse clan context and review historical CWL seasons and player performance when the data is available.</p></div></li>
         </ol>
@@ -95,12 +88,7 @@
             <p data-i18n="aboutPage.problem.copy">Each ClashPanel tool should solve a real task on its own. The bigger advantage comes from reusing the same roster, availability and clan relationships instead of entering them again.</p>
             <div class="home-v2-feature-lines"><div><strong data-i18n="aboutPage.problem.f1.title">CWL Planner</strong><span data-i18n="aboutPage.problem.f1.desc">Build multi-clan roster plans with player roles, availability and optimization before league week starts.</span></div><div><strong data-i18n="aboutPage.problem.f2.title">CWL Tracker</strong><span data-i18n="aboutPage.problem.f2.desc">Follow live wars, standings, participation, bonus context and previous seasons.</span></div><div><strong data-i18n="aboutPage.problem.f3.title">Clan Families</strong><span data-i18n="aboutPage.problem.f3.desc">Keep members, linked accounts, clans and availability connected around the same workflow.</span></div></div>
         </div>
-        <div class="home-v2-artwork home-v2-artwork-planner" data-reveal="right">
-            <!-- IMAGE TIP: Main: strategy/planning image. Inset: battle image to show the jump from planning to execution. Replace only the two src values below. -->
-            <img class="home-v2-artwork-main" src="/assets/css/pictures/public-pages/townhall-blueprints.8832d64e9a.avif" alt="Clash of Clans Town Hall blueprints representing planning and connected tools" loading="lazy" decoding="async" width="736" height="458">
-            <span class="home-v2-artwork-label" data-i18n="aboutPage.problem.artLabel">One connected workflow</span>
-            <img class="home-v2-artwork-inset" src="/assets/css/pictures/public-pages/battle-charge.a426f5172d.avif" alt="Clash of Clans battle scene representing execution after planning" loading="lazy" decoding="async" width="738" height="414">
-        </div>
+        <div class="home-v2-artwork home-v2-artwork-planner" data-reveal="right"><img class="home-v2-artwork-main" src="/assets/css/pictures/public-pages/townhall-blueprints.8832d64e9a.avif" alt="Clash of Clans Town Hall blueprints representing planning and connected tools" loading="lazy" decoding="async" width="736" height="458"><span class="home-v2-artwork-label" data-i18n="aboutPage.problem.artLabel">One connected workflow</span></div>
     </article><article class="home-v2-product-section home-v2-product-operation">
         <div class="home-v2-product-copy" data-reveal="right">
             <p class="eyebrow" data-i18n="aboutPage.independent.kicker">Independent project</p>
@@ -108,12 +96,7 @@
             <p data-i18n="aboutPage.independent.copy">ClashPanel is an independent community project and not a Supercell product. Game names and related assets belong to their respective owners and are used subject to the applicable fan-content rules.</p>
             <div class="home-v2-feature-lines"><div><strong data-i18n="aboutPage.independent.f1.title">No official affiliation</strong><span data-i18n="aboutPage.independent.f1.desc">ClashPanel is not endorsed, sponsored or operated by Supercell.</span></div><div><strong data-i18n="aboutPage.independent.f2.title">Built around real workflows</strong><span data-i18n="aboutPage.independent.f2.desc">Features are shaped around practical planning and clan-management problems rather than a generic dashboard.</span></div><div><strong data-i18n="aboutPage.independent.f3.title">Free starting point</strong><span data-i18n="aboutPage.independent.f3.desc">The core public positioning stays simple: try the tools first and decide whether they fit your clan workflow.</span></div></div>
         </div>
-        <div class="home-v2-artwork home-v2-artwork-operation" data-reveal="left">
-            <!-- IMAGE TIP: Main: community/clan image. Inset: neutral Clash of Clans competitive image; avoid anything that suggests official Supercell ownership. Replace only the two src values below. -->
-            <img class="home-v2-artwork-main" src="/assets/css/pictures/public-pages/clan-campfire.0d358ff2d8.avif" alt="Clash of Clans troops gathered around a campfire as a community" loading="lazy" decoding="async" width="736" height="736">
-            <span class="home-v2-artwork-label" data-i18n="aboutPage.independent.artLabel">Built for the community</span>
-            <img class="home-v2-artwork-inset" src="/assets/css/pictures/public-pages/pekka-barbarians.6446bf60da.avif" alt="Clash of Clans troops together in a fan-made community scene" loading="lazy" decoding="async" width="565" height="353">
-        </div>
+        <div class="home-v2-artwork home-v2-artwork-operation" data-reveal="left"><img class="home-v2-artwork-main" src="/assets/css/pictures/public-pages/clan-campfire.0d358ff2d8.avif" alt="Clash of Clans troops gathered around a campfire as a community" loading="lazy" decoding="async" width="736" height="736"><span class="home-v2-artwork-label" data-i18n="aboutPage.independent.artLabel">Built for the community</span></div>
     </article></section>
     <section class="resource-page" aria-labelledby="trust-title">
         <article class="resource-article">
@@ -124,9 +107,10 @@
             <p>Report a calculation concern, stale description, accessibility problem or factual error through the public contact form or by email. Include the affected page and enough non-private detail to reproduce the issue. Published documentation and the changelog are updated when a confirmed correction changes what users should expect.</p>
             <h3>External data limits</h3>
             <p>Player, clan, war and historical information can depend on the official Clash of Clans API and selected history providers. Data can be delayed, incomplete or unavailable. ClashPanel does not treat a missing value as proof of zero activity and does not guarantee planner or prediction outcomes.</p>
-            <div class="resource-links"><a class="button button-secondary" href="/methodology">Read the methodology</a><a class="button button-secondary" href="/changelog">View the changelog</a><a class="button button-secondary" href="/subpages/contact">Report a correction</a></div>
+            <div class="resource-links"><a class="button button-secondary" href="/methodology">Read the methodology</a><a class="button button-secondary" href="/changelog">View the changelog</a><a class="button button-secondary" href="/contact">Report a correction</a></div>
         </article>
     </section>
+    <section class="about-evolution resource-page" aria-labelledby="evolution-title"><header><p class="resource-kicker">Project evolution</p><h2 id="evolution-title">A product shaped in public.</h2><p>This is a repository-based timeline of the public product surface, not a founder story. ClashPanel remains an independently maintained, fan-made project.</p></header><ol class="about-timeline"><li><time datetime="2026-07-29">29 July 2026</time><h3>Public site foundation</h3><p>The repository records the first public ClashPanel redesign together with canonical public routes and crawl controls.</p></li><li><time datetime="2026-08-04">4 August 2026</time><h3>Public-value baseline</h3><p>Public content work added the methodology, practical guides and sample-output resources alongside conservative advertising and initial-HTML policy controls.</p></li><li><time datetime="2026-08-06">6 August 2026</time><h3>Resource translation pass</h3><p>Guide and changelog pages began rendering from fixed locale keys, keeping the public resource content aligned across supported languages.</p></li><li><time datetime="2026-08-12">12 August 2026</time><h3>Responsive public surfaces</h3><p>Shared public resource and feature surfaces received responsive refinements so the same product story remains usable on smaller screens.</p></li><li><time datetime="2026-08-14">14 August 2026</time><h3>Homepage UI refinements</h3><p>Repository history records follow-up homepage UI corrections across the public product entry points.</p></li></ol></section>
     <section class="home-v2-bottom-cta" data-reveal>
         <div><p class="eyebrow" data-i18n="aboutPage.cta.kicker">Ready to try it?</p><h2 data-i18n="aboutPage.cta.title">Put your next CWL in one place.</h2><p data-i18n="aboutPage.cta.desc">Start with the Planner, then add tracking or Clan Families when the workflow needs them.</p></div>
         <a class="button button-primary button-large" href="/subpages/register.html" data-i18n="aboutPage.cta.button">Start for free</a>
@@ -137,10 +121,10 @@
         <a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
         <nav aria-label="Footer navigation" data-i18n-aria-label="public.footerNav">
             <a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about" data-i18n="public.about">About</a><a href="/changelog">Changelog</a>
-            <a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a>
-            <a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a>
-            <a href="/subpages/terms" data-i18n="public.terms">Terms of use</a>
-            <a href="/subpages/contact" data-i18n="public.contact">Contact</a>
+            <a href="/privacy" data-i18n="public.privacy">Privacy</a>
+            <a href="/cookies" data-i18n="public.cookies">Cookies</a>
+            <a href="/terms" data-i18n="public.terms">Terms of use</a>
+            <a href="/contact" data-i18n="public.contact">Contact</a>
             <a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer" data-i18n="public.fanPolicy">Supercell Fan Content Policy</a>
             <button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button>
         </nav>

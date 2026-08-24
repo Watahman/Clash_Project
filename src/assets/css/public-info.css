@@ -234,3 +234,43 @@
     .about-flow article { min-height: 0; padding: 1.2rem 0; }
     .about-flow article strong { margin-top: .8rem; }
 }
+
+/* Legal documents stay documents: readable type, a compact optional TOC,
+   and a measured text column that does not stretch across the viewport. */
+.policy-page {
+    width: min(70rem, calc(100% - 2.5rem));
+    padding-block: clamp(3.5rem, 7vw, 6rem) clamp(5rem, 9vw, 8rem);
+}
+.policy-document { grid-template-columns: minmax(0, 13.75rem) minmax(0, 47.5rem); justify-content: start; column-gap: 3rem; }
+.policy-document > header { max-width: 47.5rem; margin-bottom: clamp(3rem, 6vw, 5rem); }
+.policy-document > header h1 { max-width: 16ch; font-size: clamp(2.7rem, 5vw, 4.4rem); letter-spacing: -.035em; line-height: 1.02; }
+.policy-document > header h1 { overflow-wrap: anywhere; }
+.policy-document > header p:first-of-type { max-width: 47.5rem; font-size: 1.0625rem; line-height: 1.75; }
+.policy-toc { max-width: 13.75rem; }
+.policy-toc a { min-height: 2.5rem; display: flex; align-items: center; font-size: .75rem; }
+.policy-document > section { max-width: 47.5rem; padding-block: 2.5rem; }
+.policy-document > section h2 { font-size: 1.45rem; letter-spacing: -.025em; }
+.policy-document > section p,
+.policy-document > section li { color: var(--text-muted); font-size: 1.0625rem; line-height: 1.75; }
+.policy-document > section ul { gap: .65rem; line-height: 1.75; }
+.policy-document > section li { padding-left: 1.15rem; }
+.policy-actions { max-width: 47.5rem; }
+.policy-actions .button { min-height: 2.75rem; }
+
+@media (max-width: 58rem) {
+    .policy-page { width: min(47.5rem, calc(100% - 2rem)); }
+    .policy-document { grid-template-columns: 1fr; }
+    .policy-document > header,
+    .policy-document > section,
+    .policy-toc { width: 100%; max-width: 100%; min-width: 0; }
+    .policy-toc { overflow-x: auto; }
+    .policy-document > section,
+    .policy-actions { max-width: 47.5rem; }
+}
+
+@media (max-width: 38rem) {
+    .policy-page { width: calc(100% - 2rem); padding-top: 2.75rem; }
+    .policy-document > header h1 { font-size: clamp(2.45rem, 12vw, 3.35rem); }
+    .policy-document > section p,
+    .policy-document > section li { font-size: 1.0625rem; }
+}

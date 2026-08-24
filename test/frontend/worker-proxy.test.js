@@ -25,14 +25,33 @@ describe('Cloudflare API proxy', () => {
             'https://backend.example/ready'
         ]);
     });
-    it('leaves non-API requests with the static asset binding', async () => {
-        const bindings = env();
-        const request = new Request('https://clashpanel.com/subpages/privacy');
+    it.each([
+        ['/privacy', '/subpages/privacy'],
+        ['/cookies', '/subpages/cookies'],
+        ['/terms', '/subpages/terms'],
+        ['/contact', '/subpages/contact']
+    ])('serves preferred legal route %s from its existing public HTML asset', async (route, assetPath) => {
+        const bindings = env({
+            ASSETS: {
+                fetch: vi.fn(async request => new Response(
+                    `asset:${new URL(request.url).pathname}`,
+                    {
+                        headers: {
+                            'Content-Type': 'text/html',
+                            'X-Robots-Tag': 'noindex, nofollow'
+                        }
+                    }
+                ))
+            }
+        });
+        const request = new Request(`https://clashpanel.com${route}`);
 
         const response = await worker.fetch(request, bindings);
 
-        expect(await response.text()).toBe('asset');
-        expect(bindings.ASSETS.fetch).toHaveBeenCalledWith(request);
+        expect(await response.text()).toBe(`asset:${assetPath}`);
+        expect(new URL(bindings.ASSETS.fetch.mock.calls[0][0].url).pathname)
+            .toBe(assetPath);
+        expect(response.headers.get('X-Robots-Tag')).toBeNull();
     });
 
     it.each([
@@ -40,10 +59,14 @@ describe('Cloudflare API proxy', () => {
         ['/subPages/cwl-operation-board', '/cwl-tracker'],
         ['/subpages/groups/', '/clan-management'],
         ['/subpages/bracket-generator.html', '/bracket-generator'],
-        ['/subpages/privacy.html', '/subpages/privacy'],
-        ['/subpages/cookies.html', '/subpages/cookies'],
-        ['/subpages/terms.html', '/subpages/terms'],
-        ['/subpages/contact.html', '/subpages/contact'],
+        ['/subpages/privacy', '/privacy'],
+        ['/subpages/privacy.html', '/privacy'],
+        ['/subpages/cookies', '/cookies'],
+        ['/subpages/cookies.html', '/cookies'],
+        ['/subpages/terms', '/terms'],
+        ['/subpages/terms.html', '/terms'],
+        ['/subpages/contact', '/contact'],
+        ['/subpages/contact.html', '/contact'],
         ['/subpages/dashboard.html', '/dashboard'],
         ['/app/dashboard', '/dashboard'],
         ['/cwl-planner.html', '/cwl-planner'],
@@ -59,6 +82,22 @@ describe('Cloudflare API proxy', () => {
         expect(response.status).toBe(301);
         expect(response.headers.get('Location'))
             .toBe(`https://clashpanel.com${destination}?ref=legacy`);
+    });
+
+    it.each([
+        ['/privacy/', '/privacy'],
+        ['/cookies/', '/cookies'],
+        ['/terms/', '/terms'],
+        ['/contact/', '/contact']
+    ])('normalizes a trailing slash on the preferred legal route: %s', async (source, destination) => {
+        const response = await worker.fetch(
+            new Request(`https://clashpanel.com${source}`),
+            env()
+        );
+
+        expect(response.status).toBe(301);
+        expect(response.headers.get('Location'))
+            .toBe(`https://clashpanel.com${destination}`);
     });
 
     it.each([
@@ -131,6 +170,46 @@ describe('Cloudflare API proxy', () => {
 
         expect(response.status).toBe(200);
         expect(await response.json()).toEqual({ ok: true });
+    });
+
+    it('streams official clan badges through the export asset route', async () => {
+        const badgeBody = new Uint8Array([137, 80, 78, 71]);
+        const upstream = vi.fn(async () => new Response(badgeBody, {
+            headers: {
+                'Content-Type': 'image/png',
+                'Content-Length': String(badgeBody.byteLength)
+            }
+        }));
+        vi.stubGlobal('fetch', upstream);
+        const badgeUrl = 'https://api-assets.clashofclans.com/badges/200/example.png';
+
+        const response = await worker.fetch(
+            new Request(`https://clashpanel.com/api/export-assets/clan-badge?url=${encodeURIComponent(badgeUrl)}`),
+            env()
+        );
+
+        expect(upstream).toHaveBeenCalledWith(badgeUrl, expect.objectContaining({ redirect: 'manual' }));
+        expect(response.status).toBe(200);
+        expect(response.headers.get('Content-Type')).toBe('image/png');
+        expect(response.headers.get('Cache-Control')).toContain('s-maxage=604800');
+        expect(new Uint8Array(await response.arrayBuffer())).toEqual(badgeBody);
+    });
+
+    it.each([
+        'https://example.com/badges/200/example.png',
+        'https://api-assets.clashofclans.com/other/example.png',
+        'http://api-assets.clashofclans.com/badges/200/example.png'
+    ])('rejects non-official export asset URLs: %s', async badgeUrl => {
+        const upstream = vi.fn();
+        vi.stubGlobal('fetch', upstream);
+
+        const response = await worker.fetch(
+            new Request(`https://clashpanel.com/api/export-assets/clan-badge?url=${encodeURIComponent(badgeUrl)}`),
+            env()
+        );
+
+        expect(response.status).toBe(400);
+        expect(upstream).not.toHaveBeenCalled();
     });
 
     it('normalizes an HTML 404 from the backend to a JSON API error', async () => {

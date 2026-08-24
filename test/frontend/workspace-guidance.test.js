@@ -53,13 +53,39 @@ describe('workspace guidance', () => {
         expect(document.querySelector('.workspace-help-list')?.textContent).toContain('Add and verify');
     });
 
-    it('derives planner progress from the real roster, poll, lineups and saved-plan state', () => {
-        localStorage.setItem('planner_id', 'plan-1');
+    it('keeps the dashboard guide aligned with Games, Achievements and Advanced Stats', () => {
+        shell('dashboard', '<header class="workspace-page-header"><h1>Dashboard</h1><p>Intro</p></header>');
+
+        initWorkspaceGuidance('dashboard');
+        initI18n(document.body);
+        document.querySelector('.workspace-page-help-trigger').click();
+
+        const copy = document.querySelector('.workspace-help-list')?.textContent || '';
+        expect(document.querySelectorAll('.workspace-help-list li')).toHaveLength(6);
+        expect(copy).toContain('Games');
+        expect(copy).toContain('Achievements');
+        expect(copy).toContain('Advanced Stats');
+    });
+
+    it.each([
+        ['achievements', '<header class="achievement-hero"><div class="achievement-hero-copy"><h1>Achievements</h1><p>Intro</p></div></header>', 'Understand your achievement progress', 'independent data'],
+        ['advancedStats', '<header class="advanced-stats__hero"><div><h1>Advanced Stats</h1><p>Intro</p></div></header>', 'Build and review tracked attack history', 'eligible linked account']
+    ])('provides accurate page help for %s', (page, content, title, expectedCopy) => {
+        shell(page, content);
+
+        initWorkspaceGuidance(page);
+        initI18n(document.body);
+        document.querySelector('.workspace-page-help-trigger').click();
+
+        expect(document.querySelector('#workspace-help-title')?.textContent).toBe(title);
+        expect(document.querySelectorAll('.workspace-help-list li')).toHaveLength(4);
+        expect(document.querySelector('.workspace-help-intro')?.textContent).toContain(expectedCopy);
+    });
+
+    it('derives planner empty states from the real free and assigned rosters', () => {
         shell('planner', `
             <header class="cwl-page-header"><div><h1>July</h1><p>Intro</p></div></header>
             <span id="cwl-total-player-amount">3</span>
-            <select id="cwl-roster-poll-select"><option value="poll-1" selected>July poll</option></select>
-            <span id="cwl-save-status" data-state="idle">Saved</span>
             <div id="cwl-available-players"><article class="cwl-player-article" data-planner-card="true"></article></div>
             <div id="cwl-all-clans"><article class="cwl-clan-article">
                 <article class="cwl-player-article" data-planner-card="true"></article>
@@ -69,12 +95,9 @@ describe('workspace guidance', () => {
 
         initWorkspaceGuidance('planner');
 
-        const workflow = document.querySelector('#cwl-guidance-workflow');
-        expect(workflow.querySelector('[data-guidance-step="roster"]').classList).toContain('is-complete');
-        expect(workflow.querySelector('[data-guidance-step="availability"]').classList).toContain('is-complete');
-        expect(workflow.querySelector('[data-guidance-step="lineups"] small').textContent)
-            .toBe('2 players assigned across 1 clans');
-        expect(workflow.querySelector('[data-guidance-step="save"]').classList).toContain('is-complete');
+        expect(document.querySelector('#cwl-guidance-workflow')).toBeNull();
+        expect(document.querySelector('#cwl-available-players .workspace-guidance-empty')).toBeNull();
+        expect(document.querySelector('#cwl-all-clans .workspace-guidance-empty')).toBeNull();
     });
 
     it('uses Clan Family statistics for the setup checklist and collapses it when complete', () => {
@@ -118,5 +141,13 @@ describe('workspace guidance', () => {
         expect(isolatedHeader).toContain('background: transparent');
         expect(isolatedHeader).toContain('backdrop-filter: none');
         expect(isolatedHeader).toContain('box-shadow: none');
+    });
+
+    it('does not query an empty selector for unknown workspace pages', () => {
+        shell('unknown-page', '<main><h1>Unknown page</h1></main>');
+
+        expect(() => initWorkspaceGuidance('unknown-page')).not.toThrow();
+        expect(document.querySelector('#workspace-help-button')).toBeTruthy();
+        expect(document.querySelector('.workspace-page-help-trigger')).toBeNull();
     });
 });

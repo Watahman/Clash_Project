@@ -1,0 +1,13 @@
+/* Achievement-specific source and waiting-state refinements. The base page owns layout. */
+.achievement-card[data-source-available="false"] {
+    background: var(--cp-surface-2);
+    border-style: dashed;
+}
+.achievement-card[data-source-available="false"] .achievement-card-description,
+.achievement-card[data-source-available="false"] .achievement-status-label { color: var(--cp-text-3); }
+.achievement-card[data-state="unknown"] .achievement-rarity-badge { border-color: var(--cp-border-2); color: var(--cp-text-2); }
+.achievement-card[data-state="unknown"] .achievement-progress-track[data-known="false"] { opacity: 1; }
+.achievement-card-meta { align-items: center; display: flex; flex-wrap: wrap; gap: 4px 8px; }
+.achievement-card-source { color: var(--cp-text-3); }
+.achievement-card-source[data-available="true"] { color: var(--cp-success); }
+.achievement-card-source::before { background: currentColor; border-radius: 50%; content: ''; display: inline-block; height: 5px; margin-inline-end: 4px; width: 5px; }

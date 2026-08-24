@@ -61,7 +61,7 @@ describe('CWL plan schema', () => {
         expect(document.clans[0].players.map(player => player.rosterStatus)).toEqual(['rotation', '']);
     });
 
-    it('persists normalized daily lineup assignments', () => {
+    it('keeps normalized legacy schedules available for migration', () => {
         const document = normalizePlanDocument({
             clans: [{
                 tag: '#CLAN',
@@ -73,6 +73,6 @@ describe('CWL plan schema', () => {
             }]
         });
 
-        expect(document.clans[0].players[0].plannedDays).toEqual([1, 3, 7]);
+        expect(document.clans[0].players[0].legacySchedule).toEqual([1, 3, 7]);
     });
 });

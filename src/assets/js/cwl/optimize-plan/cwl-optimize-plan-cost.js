@@ -10,20 +10,9 @@ export function calculateChangeCost(actions, clanById) {
         if (action.type === 'role') {
             return total + (action.fromRole === 'core' ? 5 : 2) + rank;
         }
-        if (action.type === 'days') {
-            const changedDays = symmetricDifference(action.fromDays, action.days);
-            return total + changedDays * (0.35 + rank * 0.12);
-        }
         return total;
     }, 0);
     return round(base + Math.max(0, changedPlayers - 2) * 2, 2);
-}
-
-function symmetricDifference(left = [], right = []) {
-    const leftSet = new Set(left);
-    const rightSet = new Set(right);
-    return [...leftSet].filter(value => !rightSet.has(value)).length
-        + [...rightSet].filter(value => !leftSet.has(value)).length;
 }
 
 function round(value, places) {

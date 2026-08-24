@@ -1,4 +1,4 @@
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260809-4';
 
 const HINTS_KEY = 'clashtools_guidance_dismissed';
 const INTENT_KEY = 'clashtools_first_intent';
@@ -10,7 +10,10 @@ const pageHelp = Object.freeze({
         items: [
             'guidance.dashboard.itemPlan',
             'guidance.dashboard.itemRun',
-            'guidance.dashboard.itemFamily'
+            'guidance.dashboard.itemFamily',
+            'guidance.dashboard.itemGames',
+            'guidance.dashboard.itemAchievements',
+            'guidance.dashboard.itemAdvancedStats'
         ]
     },
     planner: {
@@ -52,7 +55,6 @@ const pageHelp = Object.freeze({
         items: [
             'guidance.war.itemLoad',
             'guidance.war.itemLive',
-            'guidance.war.itemMap',
             'guidance.war.itemRoster',
             'guidance.war.itemHistory'
         ]
@@ -66,6 +68,35 @@ const pageHelp = Object.freeze({
         title: 'guidance.bracket.title',
         intro: 'guidance.bracket.intro',
         items: []
+    },
+    minigames: {
+        title: 'guidance.minigames.title',
+        intro: 'guidance.minigames.intro',
+        items: [
+            'guidance.minigames.itemDaily',
+            'guidance.minigames.itemPractice',
+            'guidance.minigames.itemProgress'
+        ]
+    },
+    achievements: {
+        title: 'guidance.achievements.title',
+        intro: 'guidance.achievements.intro',
+        items: [
+            'guidance.achievements.itemAccount',
+            'guidance.achievements.itemSources',
+            'guidance.achievements.itemSnapshot',
+            'guidance.achievements.itemExplore'
+        ]
+    },
+    advancedStats: {
+        title: 'guidance.advancedStats.title',
+        intro: 'guidance.advancedStats.intro',
+        items: [
+            'guidance.advancedStats.itemAccount',
+            'guidance.advancedStats.itemTracking',
+            'guidance.advancedStats.itemHistory',
+            'guidance.advancedStats.itemControls'
+        ]
     }
 });
 
@@ -85,7 +116,6 @@ const tabDescriptions = Object.freeze({
     },
     warOperation: {
         '[data-war-panel="live"]': 'guidance.tabs.warLive',
-        '[data-war-panel="map"]': 'guidance.tabs.warMap',
         '[data-war-panel="roster"]': 'guidance.tabs.warRoster',
         '[data-war-panel="history"]': 'guidance.tabs.warHistory'
     }
@@ -241,9 +271,12 @@ function pageHeader(page) {
         operation: '.op-page-header > div:first-child',
         groups: '.groups-page-header > div:first-child',
         warOperation: '.war-board-header > div:first-child',
-        drafts: '.drafts-header > div:first-child'
+        drafts: '.drafts-header > div:first-child',
+        achievements: '.achievement-hero-copy',
+        advancedStats: '.advanced-stats__hero > div:first-child'
     };
-    return document.querySelector(selectors[page] || '');
+    const selector = selectors[page];
+    return selector ? document.querySelector(selector) : null;
 }
 
 function mountPageHelp(page, drawer) {
@@ -367,105 +400,6 @@ function mountPlannerEmptyStates() {
     render();
 }
 
-function mountPlannerWorkflow() {
-    const header = document.querySelector('.cwl-page-header');
-    if (!header || document.querySelector('#cwl-guidance-workflow')) return;
-    const section = document.createElement('section');
-    section.id = 'cwl-guidance-workflow';
-    section.className = 'workspace-guidance-workflow';
-    section.setAttribute('aria-labelledby', 'cwl-guidance-workflow-title');
-    const heading = document.createElement('div');
-    heading.className = 'workspace-guidance-workflow-heading';
-    heading.innerHTML = '<div><p class="page-kicker"></p><h2 id="cwl-guidance-workflow-title"></h2></div><p></p>';
-    const steps = document.createElement('ol');
-    steps.append(
-        statusStep('roster', 'guidance.planner.stepRoster'),
-        statusStep('availability', 'guidance.planner.stepAvailability'),
-        statusStep('lineups', 'guidance.planner.stepLineups'),
-        statusStep('review', 'guidance.planner.stepReview'),
-        statusStep('save', 'guidance.planner.stepSave')
-    );
-    section.append(heading, steps);
-    header.after(section);
-
-    const render = () => {
-        heading.querySelector('.page-kicker').textContent = t('guidance.planner.workflowKicker');
-        heading.querySelector('h2').textContent = t('guidance.planner.workflowTitle');
-        heading.querySelector(':scope > p').textContent = t('guidance.planner.workflowHelp');
-        steps.querySelectorAll('[data-label-key]').forEach(label => {
-            label.textContent = t(label.dataset.labelKey);
-        });
-        const { players, clans, assigned } = plannerNumbers();
-        const poll = document.querySelector('#cwl-roster-poll-select');
-        const pollSelected = Boolean(poll?.value);
-        const save = document.querySelector('#cwl-save-status');
-        const saveState = save?.dataset.state || 'idle';
-        const persisted = Boolean(localStorage.getItem('planner_id'));
-        setStep(section, 'roster', {
-            complete: players > 0,
-            current: players === 0,
-            text: players ? t('guidance.planner.playersCount', { count: players }) : t('guidance.planner.notStarted')
-        });
-        setStep(section, 'availability', {
-            complete: pollSelected,
-            current: players > 0 && !pollSelected,
-            text: pollSelected
-                ? t('guidance.planner.pollLinked')
-                : t('guidance.planner.pollOptional')
-        });
-        setStep(section, 'lineups', {
-            complete: clans > 0 && assigned > 0,
-            current: players > 0 && (clans === 0 || assigned === 0),
-            text: clans
-                ? t('guidance.planner.lineupCount', { assigned, clans })
-                : t('guidance.planner.noClans')
-        });
-        setStep(section, 'review', {
-            current: assigned > 0,
-            text: t('guidance.planner.reviewOptional')
-        });
-        setStep(section, 'save', {
-            complete: persisted && !['error', 'conflict'].includes(saveState),
-            current: assigned > 0 && !persisted,
-            text: saveState === 'saving'
-                ? t('cwl.saving')
-                : ['error', 'conflict'].includes(saveState)
-                    ? save.textContent
-                    : persisted ? t('cwl.saved') : t('guidance.planner.notSaved')
-        });
-    };
-
-    const observer = new MutationObserver(render);
-    ['#cwl-total-player-amount', '#cwl-all-clans', '#cwl-save-status', '#cwl-roster-poll-select']
-        .forEach(selector => {
-            const node = document.querySelector(selector);
-            if (node) observer.observe(node, { childList: true, subtree: true, attributes: true });
-        });
-    document.querySelector('#cwl-roster-poll-select')?.addEventListener('change', render);
-    ['clashtools:cwl-plan-loaded', 'clashtools:cwl-player-added', 'clashtools:cwl-player-removed']
-        .forEach(name => window.addEventListener(name, render));
-    window.addEventListener('clashtools:language-changed', render);
-    render();
-
-    if (!readDismissedHints().has('planner-tools')) {
-        const hint = document.createElement('aside');
-        hint.className = 'workspace-first-use-hint';
-        hint.innerHTML = '<div><strong></strong><p></p></div><button type="button"></button>';
-        const renderHint = () => {
-            hint.querySelector('strong').textContent = t('guidance.planner.hintTitle');
-            hint.querySelector('p').textContent = t('guidance.planner.hintText');
-            hint.querySelector('button').textContent = t('guidance.hint.dismiss');
-        };
-        hint.querySelector('button').addEventListener('click', () => {
-            dismissHint('planner-tools');
-            hint.remove();
-        });
-        section.after(hint);
-        window.addEventListener('clashtools:language-changed', renderHint);
-        renderHint();
-    }
-}
-
 function parseStat(selector) {
     const value = document.querySelector(selector)?.textContent || '';
     const match = value.match(/\d+/);
@@ -478,7 +412,7 @@ function mountGroupChecklist() {
     const details = document.createElement('details');
     details.id = 'groups-setup-checklist';
     details.className = 'workspace-setup-checklist';
-    details.open = true;
+    details.open = false;
     details.innerHTML = `
         <summary><span><strong></strong><small></small></span><span aria-hidden="true">⌄</span></summary>
         <ol>
@@ -583,7 +517,6 @@ export function initWorkspaceGuidance(page = document.body.dataset.workspacePage
     mountPageHelp(page, drawer);
     mountTabDescriptions(page);
     if (page === 'planner') {
-        mountPlannerWorkflow();
         mountPlannerEmptyStates();
     }
     if (page === 'groups') mountGroupChecklist();

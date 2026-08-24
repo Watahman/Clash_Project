@@ -4,9 +4,10 @@ import { describe, expect, it } from 'vitest';
 
 const policyFiles = ['privacy', 'cookies', 'terms', 'contact'].map(name => `src/subpages/${name}.html`);
 const demoFiles = ['src/cwl-planner.html', 'src/cwl-tracker.html', 'src/clan-management.html'];
+const progressFiles = ['src/advanced-stats.html', 'src/achievements.html'];
 
 describe('Public content quality', () => {
-    it.each([...policyFiles, ...demoFiles, 'src/index.html', 'src/about.html', 'src/guides.html', 'src/methodology.html', 'src/changelog.html'])('%s stays visible when JavaScript fails', file => {
+    it.each([...policyFiles, ...demoFiles, ...progressFiles, 'src/index.html', 'src/about.html', 'src/guides.html', 'src/methodology.html', 'src/changelog.html'])('%s stays visible when JavaScript fails', file => {
         const document = new JSDOM(readFileSync(file, 'utf8')).window.document;
         expect(document.documentElement.classList.contains('workspace-page-loading')).toBe(false);
     });
@@ -32,5 +33,16 @@ describe('Public content quality', () => {
         expect(methodology.querySelectorAll('.resource-article')).toHaveLength(8);
         expect(guides.querySelectorAll('.resource-article')).toHaveLength(8);
         expect(guides.body.textContent).toContain('Written by ClashPanel');
+    });
+
+    it('keeps Guides and Methodology free of invented sample panels', () => {
+        const methodology = new JSDOM(readFileSync('src/methodology.html', 'utf8')).window.document;
+        const guides = new JSDOM(readFileSync('src/guides.html', 'utf8')).window.document;
+
+        expect(guides.querySelector('.guide-featured-preview')).toBeNull();
+        expect(guides.querySelector('.sample-panel')).toBeNull();
+        expect(guides.querySelector('.resource-article .resource-note')).toBeNull();
+        expect(methodology.querySelector('.sample-panel')).toBeNull();
+        expect(methodology.querySelector('.resource-article .resource-note')).toBeNull();
     });
 });

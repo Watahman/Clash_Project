@@ -14,6 +14,7 @@ public class SUPABASE_User {
     private final HttpServer server;
     private final Config conf;
     private final API_Utils utils;
+    private final LinkedAccountRepository accounts = new LinkedAccountRepository();
 
     public SUPABASE_User(HttpServer server, Config conf){
         this.server = server;
@@ -25,8 +26,11 @@ public class SUPABASE_User {
         server.createContext(conf._EXT_SUPA_USER_BASES, exchange -> utils.handlePost(exchange, ex -> {
             utils.parseBody(ex);
             String id = utils.requireAuthenticatedUser(ex);
-            String result = SUPABASE_Client.getWithBody("users", "select=accounts&id=" + SUPABASE_Client.eq(id));
-            utils.sendJsonResponse(ex, result, 200);
+            JsonObject row = new JsonObject();
+            row.add("accounts", accounts.listForUser(id));
+            JsonArray result = new JsonArray();
+            result.add(row);
+            utils.sendJsonResponse(ex, result.toString(), 200);
         }));
     }
 
@@ -40,14 +44,15 @@ public class SUPABASE_User {
             }
             String result = SUPABASE_Client.getWithBody(
                     "users",
-                    "select=id,name,code,accounts,created_at&id=" + SUPABASE_Client.eq(actorId)
+                    "select=id,name,code,created_at&id=" + SUPABASE_Client.eq(actorId)
             );
             JsonArray users = JsonParser.parseString(result).getAsJsonArray();
             if (users.isEmpty()) {
                 utils.sendJsonResponse(ex, "{\"error\":\"Gebruiker niet gevonden\"}", 404);
                 return;
             }
-            utils.sendJsonResponse(ex, result, 200);
+            accounts.attachToProfiles(users);
+            utils.sendJsonResponse(ex, users.toString(), 200);
         }));
     }
 
@@ -56,7 +61,9 @@ public class SUPABASE_User {
             utils.parseBody(ex);
             String id = utils.requireAuthenticatedUser(ex);
 
-            JsonArray userArray = JsonParser.parseString(SUPABASE_Client.getWithBody("users", "select=id,name,email,created_at,code,accounts&id=" + SUPABASE_Client.eq(id))).getAsJsonArray();
+            JsonArray userArray = JsonParser.parseString(SUPABASE_Client.getWithBody(
+                    "users", "select=id,name,email,created_at,code&id=" + SUPABASE_Client.eq(id)
+            )).getAsJsonArray();
             if (userArray.isEmpty()) {
                 utils.sendJsonResponse(ex, "{\"error\":\"Gebruiker niet gevonden\"}", 404);
                 return;
@@ -69,8 +76,7 @@ public class SUPABASE_User {
             userJson.addProperty("email",      userObj.get("email").getAsString());
             userJson.addProperty("created_at", userObj.get("created_at").getAsString());
             userJson.addProperty("code",       userObj.get("code").getAsString());
-            JsonElement accounts = userObj.get("accounts");
-            userJson.add("accounts", (accounts != null && !accounts.isJsonNull()) ? accounts.getAsJsonArray() : new JsonArray());
+            userJson.add("accounts", accounts.listForUser(id));
 
             utils.sendJsonResponse(ex, userJson.toString(), 200);
         }));

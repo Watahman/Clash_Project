@@ -1,0 +1,10 @@
+.gcloudignore
+.git
+.gitignore
+
+#!include:.gitignore
+
+# Local Codex workflow material is not part of the deployable application.
+.codex_workflow_hidden_resource/
+AGENTS.md
+agent_docs/

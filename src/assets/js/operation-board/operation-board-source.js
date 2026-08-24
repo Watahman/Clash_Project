@@ -19,10 +19,12 @@ import {
     normalizeLeaguePhase,
     normalizeTag
 } from './operation-board-utils.js';
+import { competeT as t } from './compete-locales.js';
+import { loadCwlFixture } from './operation-board-fixtures.js';
 
 export class NoActiveCwlError extends Error {
     constructor() {
-        super('No active CWL is available');
+        super(t('cwl.noActive'));
         this.name = 'NoActiveCwlError';
         this.code = 'NO_ACTIVE_CWL';
     }
@@ -48,6 +50,8 @@ export async function fetchClanName(clanTag) {
 }
 
 export async function loadOperationSource({ clan, plan = null, signal }) {
+    const fixture = await loadCwlFixture({ signal });
+    if (fixture) return loadFixtureSource(fixture, clan, plan);
     const [clanInfoResult, membersResult, leagueGroupResult] = await Promise.allSettled([
         getClanInfoRequest(clan.tag, { signal }),
         getClanMembersRequest(clan.tag, { signal }),
@@ -91,6 +95,37 @@ export async function loadOperationSource({ clan, plan = null, signal }) {
         leagueWars,
         wars: leagueWars.filter(war => getWarSide(war, enrichedClan.tag)),
         phase: normalizeLeaguePhase(leagueGroup.state)
+    };
+}
+
+function loadFixtureSource(fixture, requestedClan, requestedPlan) {
+    const source = fixture.data?.source;
+    if (!source) throw new Error(t('cwl.sourceUnavailable'));
+    if (source.noActive) throw new NoActiveCwlError();
+    const fixtureClan = source.clan || requestedClan;
+    const clan = {
+        ...requestedClan,
+        ...fixtureClan,
+        tag: normalizeTag(fixtureClan?.tag || requestedClan?.tag),
+        name: cleanDisplayName(fixtureClan?.name || requestedClan?.name)
+            || normalizeTag(fixtureClan?.tag || requestedClan?.tag),
+        players: Array.isArray(fixtureClan?.players) ? fixtureClan.players : []
+    };
+    return {
+        ...source,
+        fixture: true,
+        plan: source.plan || requestedPlan || null,
+        clan,
+        members: Array.isArray(source.members) ? source.members : [],
+        leagueGroup: source.leagueGroup || null,
+        leagueWars: Array.isArray(source.leagueWars) ? source.leagueWars : [],
+        wars: Array.isArray(source.wars) && source.wars.length
+            ? source.wars
+            : (source.leagueWars || []).filter(war =>
+                getWarSide(war, clan.tag)
+            ),
+        phase: source.phase || normalizeLeaguePhase(source.leagueGroup?.state),
+        predictionState: source.predictionState || 'unavailable'
     };
 }
 

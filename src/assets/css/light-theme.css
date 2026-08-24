@@ -9,7 +9,7 @@
     --surface-hover: #e8edf1;
     --text: #19232e;
     --text-muted: #5f6d7a;
-    --text-subtle: #7f8b97;
+    --text-subtle: #64717d;
     --border: rgba(25, 35, 46, 0.11);
     --border-strong: rgba(25, 35, 46, 0.19);
     --accent: #e1ad45;
@@ -53,8 +53,8 @@
     --blue-dim: rgba(39, 111, 159, 0.10);
     --text-1: #19232e;
     --text-2: #465563;
-    --text-3: #6b7885;
-    --text-4: #929ca6;
+    --text-3: #64717d;
+    --text-4: #64717d;
     --text-on-dark: #f5f7fa;
     --text-muted-on-dark: #b9c2cc;
     --input-bg: #ffffff;
@@ -313,95 +313,6 @@
     background: var(--surface-subtle);
 }
 
-/* ---------- Groups ---------- */
-:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] main#groups-main {
-    background: var(--bg) !important;
-}
-
-:root[data-theme="light"] .groups-workspace {
-    border: 0.0625rem solid var(--border-strong);
-    background: var(--surface);
-    box-shadow: var(--card-shadow);
-}
-
-:root[data-theme="light"] .group-index,
-:root[data-theme="light"] .group-detail,
-:root[data-theme="light"] .group-inspector,
-:root[data-theme="light"] #groups-detail {
-    background: var(--surface) !important;
-}
-
-:root[data-theme="light"] .group-index {
-    border-right-color: var(--border-strong);
-}
-
-:root[data-theme="light"] .group-inspector {
-    border-left-color: var(--border-strong);
-}
-
-:root[data-theme="light"] .group-index-heading,
-:root[data-theme="light"] .group-detail-header,
-:root[data-theme="light"] .groups-section-heading,
-:root[data-theme="light"] .groups-detail-tabs,
-:root[data-theme="light"] .group-inspector > header {
-    background: var(--surface-subtle);
-    border-color: var(--border);
-}
-
-:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] .groups-item.group-index-row:hover {
-    background: var(--surface-hover);
-}
-
-:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] .groups-item.group-index-row.active {
-    background: linear-gradient(90deg, var(--accent-soft), rgba(183, 123, 32, 0.025));
-}
-
-:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] .groups-role-badge,
-:root[data-theme="light"] #groups-sidebar .groups-role-badge {
-    color: var(--text-muted) !important;
-    background: var(--surface-raised) !important;
-    border-color: var(--border-strong) !important;
-}
-
-:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] .groups-role-badge.leader,
-:root[data-theme="light"] #groups-sidebar .groups-role-badge.leader {
-    color: var(--accent-strong) !important;
-    background: var(--accent-soft) !important;
-    border-color: rgba(183, 123, 32, 0.30) !important;
-}
-
-:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] .groups-role-badge.co-leader,
-:root[data-theme="light"] #groups-sidebar .groups-role-badge.co-leader {
-    color: var(--success) !important;
-    background: var(--success-soft) !important;
-    border-color: rgba(36, 122, 80, 0.28) !important;
-}
-
-:root[data-theme="light"] .groups-member-item,
-:root[data-theme="light"] .groups-admin-card,
-:root[data-theme="light"] .groups-linked-clan,
-:root[data-theme="light"] .groups-unlinked-account,
-:root[data-theme="light"] .groups-admin-member,
-:root[data-theme="light"] .groups-poll-account-card,
-:root[data-theme="light"] .groups-poll-result-user,
-:root[data-theme="light"] .groups-poll-summary,
-:root[data-theme="light"] .groups-poll-day-summary,
-:root[data-theme="light"] .groups-admin-panel {
-    border-color: var(--border-strong);
-    background: var(--surface);
-    box-shadow: 0 0.35rem 1rem rgba(35, 48, 61, 0.06);
-}
-
-:root[data-theme="light"] .groups-create-option.groups-create-option-active,
-:root[data-theme="light"] .groups-code-pill {
-    color: var(--purple) !important;
-}
-
-:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] .groups-item-logo,
-:root[data-theme="light"] body.workspace-app[data-workspace-page="groups"] .groups-detail-logo {
-    color: #287c74;
-}
-
 /* ---------- Bracket and drafts ---------- */
 :root[data-theme="light"] body.workspace-app[data-workspace-page="bracket"] .bracket-setup,
 :root[data-theme="light"] .bracket-result,
@@ -542,7 +453,7 @@
 }
 
 :root[data-theme="light"] body.workspace-app .workspace-nav p {
-    color: #778592;
+    color: #5d6a76;
 }
 
 :root[data-theme="light"] body.workspace-app .workspace-nav a {
@@ -592,7 +503,7 @@
 
 :root[data-theme="light"] body.workspace-app .workspace-profile-copy small,
 :root[data-theme="light"] body.workspace-app .workspace-profile-arrow {
-    color: #6e7c89;
+    color: #64717d;
 }
 
 :root[data-theme="light"] body.workspace-app .workspace-avatar {
@@ -627,10 +538,42 @@
     background-color: var(--surface) !important;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 5L10 1' stroke='%23705a32' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
-    background-position: right 0.8rem center !important;
+    background-position: right 0.65rem center !important;
     background-size: 0.7rem 0.45rem !important;
-    padding-right: 2.2rem !important;
+    padding-right: 2rem !important;
 }
+
+/* Keep workspace select arrows visible and aligned in dark mode as well. The
+   page-level select backgrounds are allowed to change, but the arrow keeps a
+   single theme-aware position and contrast treatment. */
+:root:not([data-theme="light"]) body.workspace-app select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 5L10 1' stroke='%23f3f6f9' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.65rem center !important;
+    background-size: 0.7rem 0.45rem !important;
+    padding-right: 2rem !important;
+}
+
+/* Pillar SVG files are external images, so currentColor cannot cross the
+   image boundary. In the dark workspace, lift the line art to the same quiet
+   foreground contrast used by the Dashboard cards. */
+:root:not([data-theme="light"]) body.workspace-app .dashboard-pillar-grid img[src*="/icons/pillars/"] {
+    filter: brightness(0) invert(1);
+    opacity: .88;
+}
+
+/* Clan Family's external utility icons need the same treatment in dark mode.
+   Inline SVGs continue to inherit their surrounding control color normally. */
+:root:not([data-theme="light"]) body.workspace-app[data-workspace-page="groups"] :where(.cf-search > img, #groups-join-shortcut > img, .cf-dialog-header .cf-icon-button > img) {
+    filter: brightness(0) invert(1);
+    opacity: .86;
+}
+
+/* The empty achievement illustration is inline currentColor SVG; pin it to
+   the Progress pillar token so it remains meaningful in both themes. */
+.achievement-empty-icon { color: var(--cp-progress, var(--accent)); }
 
 /* Softer gold primary actions: still prominent, but not the dark ochre block
    that overpowered the light interface. */

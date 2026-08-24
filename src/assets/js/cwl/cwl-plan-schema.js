@@ -9,14 +9,11 @@ export function normalizeRosterStatus(value, fallback = '') {
     return CWL_ROSTER_STATUSES.includes(status) ? status : fallback;
 }
 
-export function normalizePlannedDays(value) {
-    const days = Array.isArray(value)
-        ? value
-        : String(value || '').split(',');
-    return [...new Set(days
-        .map(Number)
-        .filter(day => Number.isInteger(day) && day >= 1 && day <= 7)
-    )].sort((left, right) => left - right);
+function normalizeLegacySchedule(value) {
+    const days = Array.isArray(value) ? value : String(value || '').split(',');
+    return [...new Set(days.map(Number).filter(day => (
+        Number.isInteger(day) && day >= 1 && day <= 7
+    )))].sort((left, right) => left - right);
 }
 
 export function normalizePlayerSnapshot(player, fallbackClanName = '', fallbackRosterStatus = '') {
@@ -27,14 +24,13 @@ export function normalizePlayerSnapshot(player, fallbackClanName = '', fallbackR
             name: tag,
             townHallLevel: 1,
             clanName: fallbackClanName,
-            rosterStatus: normalizeRosterStatus('', fallbackRosterStatus),
-            plannedDays: []
+            rosterStatus: normalizeRosterStatus('', fallbackRosterStatus)
         } : null;
     }
     if (!player || typeof player !== 'object') return null;
     const tag = normalizeTag(player.tag || player.playerTag || player.accountTag || player.clashTag);
     if (!tag) return null;
-    return {
+    const snapshot = {
         tag,
         name: String(player.name || player.playerName || tag).trim(),
         townHallLevel: Math.max(1, Number(player.townHallLevel || player.townHall || player.th || 1)),
@@ -43,11 +39,13 @@ export function normalizePlayerSnapshot(player, fallbackClanName = '', fallbackR
         rosterStatus: normalizeRosterStatus(
             player.rosterStatus || player.roster_status || player.status,
             fallbackRosterStatus
-        ),
-        plannedDays: normalizePlannedDays(
-            player.plannedDays || player.planned_days || player.days
         )
     };
+    const legacySchedule = normalizeLegacySchedule(
+        player.plannedDays || player.planned_days || player.days
+    );
+    if (legacySchedule.length) snapshot.legacySchedule = legacySchedule;
+    return snapshot;
 }
 
 function uniquePlayerSnapshots(players, fallbackClanName = '', fallbackRosterStatus = '') {

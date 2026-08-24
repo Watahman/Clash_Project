@@ -1,11 +1,19 @@
-export const BRACKET_SCHEMA_VERSION = 1;
-export const BRACKET_MAX_PARTICIPANTS = 128;
+import {
+    BRACKET_SCHEMA_VERSION,
+    BRACKET_MIN_PARTICIPANTS,
+    BRACKET_MAX_PARTICIPANTS,
+    bracketError,
+    nextPowerOfTwo,
+    participantName,
+    validateParticipants
+} from './bracket-model.js';
+import { validateImportedBracket } from './bracket-import-validator.js';
 
-function nextPowerOfTwo(value) {
-    let power = 1;
-    while (power < value) power *= 2;
-    return power;
-}
+export {
+    BRACKET_SCHEMA_VERSION,
+    BRACKET_MIN_PARTICIPANTS,
+    BRACKET_MAX_PARTICIPANTS
+};
 
 function shuffled(values, random = Math.random) {
     const result = [...values];
@@ -16,24 +24,21 @@ function shuffled(values, random = Math.random) {
     return result;
 }
 
-export function createBracket(participants, { shuffle = false, random = Math.random, name = 'Bracket' } = {}) {
-    const unique = [...new Set(
-        (Array.isArray(participants) ? participants : [])
-            .map(participant => String(participant || '').trim())
-            .filter(Boolean)
-    )];
-    if (unique.length < 2) throw new Error('Voeg minstens twee deelnemers toe.');
-    if (unique.length > BRACKET_MAX_PARTICIPANTS) {
-        throw new Error(`Een bracket kan maximaal ${BRACKET_MAX_PARTICIPANTS} deelnemers bevatten.`);
-    }
-    const seeded = shuffle ? shuffled(unique, random) : unique;
+function createBracketId() {
+    if (typeof globalThis.crypto?.randomUUID === 'function') return globalThis.crypto.randomUUID();
+    return `bracket-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function createParticipantIds(participants) {
+    return participants.map((_, index) => `participant-${index + 1}`);
+}
+
+function createRounds(seeded) {
     const size = nextPowerOfTwo(seeded.length);
     const byeCount = size - seeded.length;
-    const slots = [];
-    seeded.forEach((participant, index) => {
-        slots.push(participant);
-        if (index < byeCount) slots.push(null);
-    });
+    const slots = seeded.flatMap((participant, index) => (
+        index < byeCount ? [participant, null] : [participant]
+    ));
     const rounds = [];
     let matches = size / 2;
     for (let round = 0; matches >= 1; round += 1, matches /= 2) {
@@ -45,11 +50,25 @@ export function createBracket(participants, { shuffle = false, random = Math.ran
             winner: null
         })));
     }
+    return rounds;
+}
+
+export function createBracket(participants, { shuffle = false, random = Math.random, name = 'Bracket' } = {}) {
+    const names = validateParticipants(participants);
+    const participantIds = createParticipantIds(names);
+    const participantLabels = Object.fromEntries(
+        participantIds.map((id, index) => [id, names[index]])
+    );
+    const seeded = shuffle ? shuffled(participantIds, random) : participantIds;
+    const rounds = createRounds(seeded);
     const bracket = {
         schemaVersion: BRACKET_SCHEMA_VERSION,
-        id: crypto.randomUUID(),
+        id: createBracketId(),
         name: String(name || 'Bracket').trim() || 'Bracket',
-        participants: unique,
+        participants: names,
+        participantIds,
+        participantLabels,
+        drawOrder: seeded,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         rounds
@@ -60,10 +79,14 @@ export function createBracket(participants, { shuffle = false, random = Math.ran
 
 export function setMatchWinner(bracket, matchId, winner) {
     const match = bracket.rounds.flat().find(item => item.id === matchId);
-    if (!match) throw new Error('Match niet gevonden.');
-    if (!match.players.includes(winner)) throw new Error('Winnaar speelt niet in deze match.');
-    if (match.winner && match.winner !== winner) clearDownstream(bracket, match);
-    match.winner = winner;
+    if (!match) throw bracketError('That match could not be found.', 'match-not-found');
+    const winnerId = match.players.find(player => player === winner
+        || (participantName(bracket, player) === winner && !match.players.includes(winner)));
+    if (!winnerId) {
+        throw bracketError('Choose a participant from this match.', 'invalid-winner');
+    }
+    if (match.winner && match.winner !== winnerId) clearDownstream(bracket, match);
+    match.winner = winnerId;
     placeWinnerInNextRound(bracket, match);
     propagateAutomaticWinners(bracket);
     bracket.updatedAt = new Date().toISOString();
@@ -104,24 +127,16 @@ function propagateAutomaticWinners(bracket) {
 }
 
 export function importBracket(value) {
-    const parsed = typeof value === 'string' ? JSON.parse(value) : value;
-    if (!parsed || parsed.schemaVersion !== BRACKET_SCHEMA_VERSION || !Array.isArray(parsed.rounds)) {
-        throw new Error('Invalid or unsupported bracket file.');
+    let parsed;
+    try {
+        parsed = typeof value === 'string' ? JSON.parse(value) : value;
+    } catch {
+        throw bracketError('This bracket file is not valid JSON.', 'invalid-json');
     }
-    if (!Array.isArray(parsed.participants)
-            || parsed.participants.length < 2
-            || parsed.participants.length > BRACKET_MAX_PARTICIPANTS) {
-        throw new Error('Invalid number of participants.');
-    }
-    parsed.rounds.forEach(round => {
-        if (!Array.isArray(round)) throw new Error('Invalid bracket structure.');
-        round.forEach(match => {
-            if (!match?.id || !Array.isArray(match.players) || match.players.length !== 2) {
-                throw new Error('Invalid match structure.');
-            }
-        });
-    });
-    return structuredClone(parsed);
+    validateImportedBracket(parsed);
+    return typeof structuredClone === 'function'
+        ? structuredClone(parsed)
+        : JSON.parse(JSON.stringify(parsed));
 }
 
 export function bracketChampion(bracket) {

@@ -69,6 +69,7 @@
 }
 
 .cwl-player-hashtag {
+    display: none;
     color: var(--accent);
     font-family: var(--font-mono);
 }

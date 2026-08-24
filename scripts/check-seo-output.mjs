@@ -77,7 +77,7 @@ for (const file of initialHtmlPolicyFiles) {
 
 const adImports = publicDocuments.filter(item => item.source.includes('/assets/js/Data/ads.js'));
 assert(adImports.length === 1 && adImports[0].route.path === '/', 'AdSense loader must only be imported by the homepage candidate');
-for (const file of ['subpages/dashboard.html', 'subpages/cwl-planner.html', 'subpages/cwl-planner-drafts.html', 'subpages/cwl-operation-board.html', 'subpages/bracket-generator.html']) {
+for (const file of ['subpages/dashboard.html', 'subpages/cwl-planner.html', 'subpages/cwl-planner-drafts.html', 'subpages/cwl-operation-board.html', 'subpages/bracket-generator.html', 'subpages/minigames.html']) {
     const source = await readFile(resolve('dist', file), 'utf8');
     assert(!source.includes('Data/ads.js'), `${file}: excluded application route imports AdSense`);
 }

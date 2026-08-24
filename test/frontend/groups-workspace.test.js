@@ -1,27 +1,28 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { groupMemberSummary, memberAccounts } from '../../src/assets/js/templates/GroupTemplates.js';
-import { canKickGroupMember, isGroupAdmin } from '../../src/assets/js/groups/groups-roles.js';
-import { activateGroupTab, bindGroupTabs } from '../../src/assets/js/groups/groups-tabs.js';
+import { canKickGroupMember, canManageGroupMembers, canManageGroupRoles, isGroupAdmin } from '../../src/assets/js/groups/groups-roles.js';
+import { activateGroupTab, bindGroupTabs, normalizeGroupTab } from '../../src/assets/js/groups/groups-tabs.js';
 import { renderBadge } from '../../src/assets/js/groups/groups-badges.js';
 import { createMemberRoleAdmin } from '../../src/assets/js/groups/groups-admin-members.js';
 import { initGroupIndexSlider } from '../../src/assets/js/groups/groups-index-slider.js';
 
-describe('Groups V1 workspace', () => {
-    it('keeps the approved four real tabs and removes dead or broken controls', () => {
+describe('Clan Family workspace', () => {
+    it('keeps the approved five-section information architecture and owned controls', () => {
         const html = readFileSync('src/subpages/groups.html', 'utf8');
         const tabs = [...html.matchAll(/data-group-tab="([^"]+)"/g)].map(match => match[1]);
 
-        expect(tabs).toEqual(['members', 'availability', 'polls', 'clans']);
+        expect(tabs).toEqual(['overview', 'members', 'clans', 'polls', 'settings']);
         expect(html).not.toContain('data-admin-tab="future"');
         expect(html).not.toContain('groups-invite-btn');
-        expect(html).toContain('id="groups-inspector-roles"');
         expect(html).toContain('id="groups-poll-reminder-btn"');
-        expect(html).toContain('id="groups-detail-tab-availability-count"');
         expect(html).toContain('id="groups-admin-scan-unlinked"');
         expect(html).toContain('id="groups-index-toggle"');
         expect(html).toContain('data-i18n="groups.clansSharedHelp"');
-        expect(html).toContain('groups-inline-form groups-admin-only hidden');
+        expect(html).toContain('data-family-copy="readiness"');
+        expect(html).toContain('id="groups-member-drawer"');
+        expect(html).toContain('groups-admin-only hidden" data-role-visible="leader,co_leader"');
+        expect(html).not.toContain('data-group-tab="availability"');
         expect(html).not.toContain('groups-badge-picker');
         expect(html).not.toContain('groups-badge-options');
     });
@@ -58,7 +59,7 @@ describe('Groups V1 workspace', () => {
 
         renderBadge(badge, 'shield', '');
         expect(badge.dataset.badge).toBe('default');
-        expect(badge.querySelector('img')?.src).toContain('default-clan-banner.png');
+        expect(badge.querySelector('img')?.src).toContain('/assets/placeholders/clan-badge.svg');
 
         renderBadge(badge, 'shield', 'https://example.com/clan-badge.png');
         expect(badge.dataset.badge).toBe('official');
@@ -91,6 +92,9 @@ describe('Groups V1 workspace', () => {
         expect(canKickGroupMember('co_leader', 'co_leader')).toBe(false);
         expect(canKickGroupMember('co_leader', 'leader')).toBe(false);
         expect(canKickGroupMember('member', 'member')).toBe(false);
+        expect(canManageGroupMembers('co_leader', 'member')).toBe(true);
+        expect(canManageGroupRoles('leader', 'co_leader')).toBe(true);
+        expect(canManageGroupRoles('co_leader', 'member')).toBe(false);
     });
 
     it('never exposes internal member UUIDs as display names or codes', () => {
@@ -127,15 +131,72 @@ describe('Groups V1 workspace', () => {
         expect(document.querySelector('.groups-admin-member')?.textContent).not.toContain(uuid);
     });
 
+    it('normalizes legacy availability links into Polls', () => {
+        expect(normalizeGroupTab('availability')).toBe('polls');
+        expect(normalizeGroupTab('settings')).toBe('settings');
+        expect(normalizeGroupTab('future')).toBe('overview');
+    });
+
+    it('keeps the responsive and reduced-motion contracts in the module stylesheet', () => {
+        const css = readFileSync('src/assets/css/pages/clan-family.css', 'utf8');
+        const content = readFileSync('src/assets/css/pages/clan-family-content.css', 'utf8');
+        const overlays = readFileSync('src/assets/css/pages/clan-family-overlays.css', 'utf8');
+
+        expect(content).toContain('@media (max-width: 720px)');
+        expect(content).toContain('min-height: 70px');
+        expect(content).toContain('.groups-member-item');
+        expect(content).toContain('.cf-poll-matrix-row');
+        expect(content).toContain('.cf-settings-section');
+        expect(content).toContain('@media (prefers-reduced-motion: reduce)');
+        expect(css).not.toContain('.cf-poll-matrix-row');
+        expect(overlays).toContain('min-height: 44px');
+        expect(overlays).toContain('@media (max-width: 600px)');
+    });
+
+    it('keeps extracted controllers and stylesheets below the follow-up review ceiling', () => {
+        const sources = [
+            'src/assets/js/pages/groups.js',
+            'src/assets/js/groups/groups-polls.js',
+            'src/assets/js/groups/groups-polls-actions.js',
+            'src/assets/js/groups/groups-polls-render.js',
+            'src/assets/js/groups/groups-polls-state.js',
+            'src/assets/js/groups/clan-family-actions.js',
+            'src/assets/js/groups/clan-family-list.js',
+            'src/assets/css/pages/clan-family.css',
+            'src/assets/css/pages/clan-family-content.css'
+        ];
+        sources.forEach(path => expect(readFileSync(path, 'utf8').split(/\r?\n/).length).toBeLessThanOrEqual(300));
+
+        const html = readFileSync('src/subpages/groups.html', 'utf8');
+        expect(html.indexOf('pages/clan-family.css')).toBeLessThan(html.indexOf('pages/clan-family-content.css'));
+        expect(html.indexOf('pages/clan-family-content.css')).toBeLessThan(html.indexOf('pages/clan-family-overlays.css'));
+    });
+
+    it('keeps UI permission hints advisory while writes stay on authoritative seams', () => {
+        const lifecycle = readFileSync('src/assets/js/groups/clan-family-actions.js', 'utf8');
+        const pollActions = readFileSync('src/assets/js/groups/groups-polls-actions.js', 'utf8');
+        const pollBackend = readFileSync('src/Java/SUPABASE_GroupPolls.java', 'utf8');
+
+        expect(lifecycle).toContain('api.createGroup');
+        expect(lifecycle).toContain('api.joinGroup');
+        expect(lifecycle).toContain('api.leaveGroup');
+        expect(pollActions).toContain('isGroupAdmin');
+        expect(pollActions).toContain('createGroupPoll');
+        expect(pollActions).toContain('state.entry?.fixture');
+        expect(pollBackend).toContain('access.requireAdmin(groupId, actorId)');
+    });
+
     it('binds tab navigation once and switches panels without loading data', () => {
         document.body.innerHTML = `<nav class="groups-detail-tabs">
+            <button data-group-tab="overview"><span>Overview</span></button>
             <button data-group-tab="members"><span>Leden</span></button>
-            <button data-group-tab="availability"><span>Beschikbaarheid</span></button>
-            <button data-group-tab="polls"><span>Polls</span></button>
             <button data-group-tab="clans"><span>Clans</span></button>
+            <button data-group-tab="polls"><span>Polls</span></button>
+            <button data-group-tab="settings"><span>Settings</span></button>
         </nav>
-        <div data-group-panel="members"></div><div data-group-panel="availability"></div>
-        <div data-group-panel="polls"></div><div data-group-panel="clans"></div>`;
+        <div data-group-panel="overview"></div><div data-group-panel="members"></div>
+        <div data-group-panel="clans"></div><div data-group-panel="polls"></div>
+        <div data-group-panel="settings"></div>`;
         let switches = 0;
         const onSelect = tab => { switches += 1; activateGroupTab(document, tab); };
 
@@ -145,8 +206,8 @@ describe('Groups V1 workspace', () => {
 
         expect(switches).toBe(1);
         expect(document.querySelector('.groups-detail-tabs .is-active').dataset.groupTab).toBe('polls');
-        expect(document.querySelector('.groups-tab-panel.is-visible')).toBeNull();
         expect(document.querySelector('[data-group-panel="polls"]').classList.contains('is-visible')).toBe(true);
+        expect(document.querySelector('[data-group-panel="overview"]').hidden).toBe(true);
     });
 });
 

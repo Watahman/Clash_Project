@@ -2,6 +2,7 @@ package Java.cwlhistory;
 
 import java.util.List;
 
+/** Uses a secondary CWL source only when the configured primary fails. */
 public final class FallbackHistoricalCwlDataProvider
         implements HistoricalCwlDataProvider {
     private final HistoricalCwlDataProvider primary;
@@ -18,7 +19,7 @@ public final class FallbackHistoricalCwlDataProvider
     @Override
     public List<HistoricalCwlSeasonSummary> getAvailableSeasons(
             String clanTag,
-        int limit
+            int limit
     ) throws Exception {
         try {
             List<HistoricalCwlSeasonSummary> result =
@@ -42,9 +43,21 @@ public final class FallbackHistoricalCwlDataProvider
     }
 
     @Override
+    public List<HistoricalCwlSeason> enrichOverview(
+            String clanTag,
+            List<HistoricalCwlSeason> seasons
+    ) throws Exception {
+        if (seasons != null && seasons.stream()
+                .allMatch(season -> fallback.providerName().equals(season.source()))) {
+            return fallback.enrichOverview(clanTag, seasons);
+        }
+        return primary.enrichOverview(clanTag, seasons);
+    }
+
+    @Override
     public String providerName() {
-        return primary.providerName() + "-with-"
-                + fallback.providerName() + "-fallback";
+        return primary.providerName() + "-with-" + fallback.providerName()
+                + "-fallback";
     }
 
     HistoricalCwlDataProvider primaryProvider() {

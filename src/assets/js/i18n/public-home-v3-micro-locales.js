@@ -1,0 +1,111 @@
+const en = Object.freeze({
+    'homeV3.micro.overview': 'Overview', 'homeV3.micro.plan': 'Plan', 'homeV3.micro.compete': 'Compete', 'homeV3.micro.progress': 'Progress',
+    'homeV3.micro.nextAction': 'YOUR NEXT ACTION', 'homeV3.micro.buildRoster': 'Build and review a roster', 'homeV3.micro.open': 'Open',
+    'homeV3.micro.manageAvailability': 'Manage members and availability', 'homeV3.micro.games': 'Games', 'homeV3.micro.accountsConnected': 'Accounts connected',
+    'homeV3.micro.trackedSnapshots': 'Tracked snapshots', 'homeV3.micro.progressUpdated': 'Progress updated', 'homeV3.micro.manage': 'Manage', 'homeV3.micro.play': 'Play',
+    'homeV3.micro.explorePlanner': 'Explore CWL Planner →', 'homeV3.micro.playerPool': 'Player pool', 'homeV3.micro.review': 'Review',
+    'homeV3.micro.availablePlayers': 'Available players', 'homeV3.micro.roster': 'Roster', 'homeV3.micro.reviewPlan': 'Review plan',
+    'homeV3.micro.exploreManagement': 'Explore Clan Management →', 'homeV3.micro.connectedClans': 'Connected Clans',
+    'homeV3.micro.memberAccounts': 'Member accounts', 'homeV3.micro.linked': 'Linked', 'homeV3.micro.availability': 'CWL availability',
+    'homeV3.micro.collecting': 'Collecting', 'homeV3.micro.plannerHandoff': 'Planner handoff', 'homeV3.micro.ready': 'Ready',
+    'homeV3.micro.exploreTracker': 'Explore CWL Tracker →', 'homeV3.micro.live': 'Live', 'homeV3.micro.league': 'League', 'homeV3.micro.history': 'History',
+    'homeV3.micro.yourClan': 'Your clan', 'homeV3.micro.warDay': 'War day', 'homeV3.micro.opponent': 'Opponent', 'homeV3.micro.liveState': 'Live state',
+    'homeV3.micro.officialScore': 'Official score', 'homeV3.micro.projectionSeparate': 'Projection labeled separately',
+    'homeV3.micro.playerAccounts': 'Player accounts', 'homeV3.micro.trackedHistory': 'tracked history', 'homeV3.micro.derivedProgress': 'derived progress',
+    'homeV3.micro.availabilityRoster': 'availability + roster', 'homeV3.micro.planContext': 'plan context', 'homeV3.micro.dailyChallenge': 'Daily challenge',
+    'homeV3.micro.playGames': 'Play games →', 'homeV3.micro.trackedOnly': 'Tracked data only', 'homeV3.micro.statsAchievements': 'Stats & Achievements',
+    'homeV3.micro.exploreProgress': 'Explore progress →', 'homeV3.micro.readMethodology': 'Read the methodology', 'homeV3.micro.reviewPrivacy': 'Review privacy',
+    'homeV3.micro.fixturePreview': 'ClashPanel interface · controlled fixture data · not live', 'homeV3.micro.accountContext': 'verified account context',
+    'homeV3.micro.exploreStats': 'Explore Advanced Stats →', 'homeV3.micro.exploreAchievements': 'Explore Achievements →',
+    'homeV3.micro.yourClashPanel': 'YOUR CLASHPANEL'
+});
+
+const nl = Object.freeze({
+    'homeV3.micro.overview': 'Overzicht', 'homeV3.micro.plan': 'Plannen', 'homeV3.micro.compete': 'Wedstrijd', 'homeV3.micro.progress': 'Voortgang',
+    'homeV3.micro.nextAction': 'JE VOLGENDE ACTIE', 'homeV3.micro.buildRoster': 'Bouw en beoordeel een roster', 'homeV3.micro.open': 'Openen',
+    'homeV3.micro.manageAvailability': 'Beheer leden en beschikbaarheid', 'homeV3.micro.games': 'Games', 'homeV3.micro.accountsConnected': 'Accounts verbonden',
+    'homeV3.micro.trackedSnapshots': 'Gevolgde snapshots', 'homeV3.micro.progressUpdated': 'Voortgang bijgewerkt', 'homeV3.micro.manage': 'Beheren', 'homeV3.micro.play': 'Spelen',
+    'homeV3.micro.explorePlanner': 'Ontdek CWL Planner →', 'homeV3.micro.playerPool': 'Spelerspool', 'homeV3.micro.review': 'Beoordelen',
+    'homeV3.micro.availablePlayers': 'Beschikbare spelers', 'homeV3.micro.roster': 'Roster', 'homeV3.micro.reviewPlan': 'Plan beoordelen',
+    'homeV3.micro.exploreManagement': 'Ontdek clanbeheer →', 'homeV3.micro.connectedClans': 'Verbonden clans',
+    'homeV3.micro.memberAccounts': 'Ledenaccounts', 'homeV3.micro.linked': 'Verbonden', 'homeV3.micro.availability': 'CWL-beschikbaarheid',
+    'homeV3.micro.collecting': 'Wordt verzameld', 'homeV3.micro.plannerHandoff': 'Overdracht naar Planner', 'homeV3.micro.ready': 'Klaar',
+    'homeV3.micro.exploreTracker': 'Ontdek CWL Tracker →', 'homeV3.micro.live': 'Live', 'homeV3.micro.league': 'League', 'homeV3.micro.history': 'Historiek',
+    'homeV3.micro.yourClan': 'Jouw clan', 'homeV3.micro.warDay': 'Wardag', 'homeV3.micro.opponent': 'Tegenstander', 'homeV3.micro.liveState': 'Live status',
+    'homeV3.micro.officialScore': 'Officiële score', 'homeV3.micro.projectionSeparate': 'Projectie apart gelabeld',
+    'homeV3.micro.playerAccounts': 'Spelersaccounts', 'homeV3.micro.trackedHistory': 'gevolgde historiek', 'homeV3.micro.derivedProgress': 'afgeleide voortgang',
+    'homeV3.micro.availabilityRoster': 'beschikbaarheid + roster', 'homeV3.micro.planContext': 'plancontext', 'homeV3.micro.dailyChallenge': 'Dagelijkse uitdaging',
+    'homeV3.micro.playGames': 'Speel games →', 'homeV3.micro.trackedOnly': 'Alleen gevolgde data', 'homeV3.micro.statsAchievements': 'Stats & Achievements',
+    'homeV3.micro.exploreProgress': 'Ontdek voortgang →', 'homeV3.micro.readMethodology': 'Lees de methodologie', 'homeV3.micro.reviewPrivacy': 'Bekijk privacy',
+    'homeV3.micro.fixturePreview': 'ClashPanel-interface · gecontroleerde fixturedata · niet live', 'homeV3.micro.accountContext': 'geverifieerde accountcontext',
+    'homeV3.micro.exploreStats': 'Ontdek Advanced Stats →', 'homeV3.micro.exploreAchievements': 'Ontdek Achievements →',
+    'homeV3.micro.yourClashPanel': 'JOUW CLASHPANEL'
+});
+
+const fr = Object.freeze({
+    'homeV3.micro.overview': 'Aperçu', 'homeV3.micro.plan': 'Planifier', 'homeV3.micro.compete': 'Compétition', 'homeV3.micro.progress': 'Progression',
+    'homeV3.micro.nextAction': 'VOTRE PROCHAINE ACTION', 'homeV3.micro.buildRoster': 'Créer et vérifier un effectif', 'homeV3.micro.open': 'Ouvrir',
+    'homeV3.micro.manageAvailability': 'Gérer les membres et disponibilités', 'homeV3.micro.games': 'Jeux', 'homeV3.micro.accountsConnected': 'Comptes connectés',
+    'homeV3.micro.trackedSnapshots': 'Instantanés suivis', 'homeV3.micro.progressUpdated': 'Progression actualisée', 'homeV3.micro.manage': 'Gérer', 'homeV3.micro.play': 'Jouer',
+    'homeV3.micro.explorePlanner': 'Explorer CWL Planner →', 'homeV3.micro.playerPool': 'Groupe de joueurs', 'homeV3.micro.review': 'Vérifier',
+    'homeV3.micro.availablePlayers': 'Joueurs disponibles', 'homeV3.micro.roster': 'Effectif', 'homeV3.micro.reviewPlan': 'Vérifier le plan',
+    'homeV3.micro.exploreManagement': 'Explorer la gestion de clans →', 'homeV3.micro.connectedClans': 'Clans connectés',
+    'homeV3.micro.memberAccounts': 'Comptes membres', 'homeV3.micro.linked': 'Liés', 'homeV3.micro.availability': 'Disponibilité CWL',
+    'homeV3.micro.collecting': 'Collecte en cours', 'homeV3.micro.plannerHandoff': 'Transfert vers Planner', 'homeV3.micro.ready': 'Prêt',
+    'homeV3.micro.exploreTracker': 'Explorer CWL Tracker →', 'homeV3.micro.live': 'Direct', 'homeV3.micro.league': 'Ligue', 'homeV3.micro.history': 'Historique',
+    'homeV3.micro.yourClan': 'Votre clan', 'homeV3.micro.warDay': 'Jour de guerre', 'homeV3.micro.opponent': 'Adversaire', 'homeV3.micro.liveState': 'État en direct',
+    'homeV3.micro.officialScore': 'Score officiel', 'homeV3.micro.projectionSeparate': 'Projection indiquée séparément',
+    'homeV3.micro.playerAccounts': 'Comptes joueurs', 'homeV3.micro.trackedHistory': 'historique suivi', 'homeV3.micro.derivedProgress': 'progression dérivée',
+    'homeV3.micro.availabilityRoster': 'disponibilité + effectif', 'homeV3.micro.planContext': 'contexte du plan', 'homeV3.micro.dailyChallenge': 'Défi quotidien',
+    'homeV3.micro.playGames': 'Jouer →', 'homeV3.micro.trackedOnly': 'Données suivies uniquement', 'homeV3.micro.statsAchievements': 'Stats et succès',
+    'homeV3.micro.exploreProgress': 'Explorer la progression →', 'homeV3.micro.readMethodology': 'Lire la méthodologie', 'homeV3.micro.reviewPrivacy': 'Consulter la confidentialité',
+    'homeV3.micro.fixturePreview': 'Interface ClashPanel · données de test contrôlées · non directes', 'homeV3.micro.accountContext': 'contexte de compte vérifié',
+    'homeV3.micro.exploreStats': 'Explorer Advanced Stats →', 'homeV3.micro.exploreAchievements': 'Explorer Achievements →',
+    'homeV3.micro.yourClashPanel': 'VOTRE CLASHPANEL'
+});
+
+const de = Object.freeze({
+    'homeV3.micro.overview': 'Übersicht', 'homeV3.micro.plan': 'Planen', 'homeV3.micro.compete': 'Wettkampf', 'homeV3.micro.progress': 'Fortschritt',
+    'homeV3.micro.nextAction': 'DEINE NÄCHSTE AKTION', 'homeV3.micro.buildRoster': 'Kader erstellen und prüfen', 'homeV3.micro.open': 'Öffnen',
+    'homeV3.micro.manageAvailability': 'Mitglieder und Verfügbarkeit verwalten', 'homeV3.micro.games': 'Spiele', 'homeV3.micro.accountsConnected': 'Konten verbunden',
+    'homeV3.micro.trackedSnapshots': 'Erfasste Snapshots', 'homeV3.micro.progressUpdated': 'Fortschritt aktualisiert', 'homeV3.micro.manage': 'Verwalten', 'homeV3.micro.play': 'Spielen',
+    'homeV3.micro.explorePlanner': 'CWL Planner entdecken →', 'homeV3.micro.playerPool': 'Spielerpool', 'homeV3.micro.review': 'Prüfen',
+    'homeV3.micro.availablePlayers': 'Verfügbare Spieler', 'homeV3.micro.roster': 'Kader', 'homeV3.micro.reviewPlan': 'Plan prüfen',
+    'homeV3.micro.exploreManagement': 'Clanverwaltung entdecken →', 'homeV3.micro.connectedClans': 'Verbundene Clans',
+    'homeV3.micro.memberAccounts': 'Mitgliedskonten', 'homeV3.micro.linked': 'Verknüpft', 'homeV3.micro.availability': 'CWL-Verfügbarkeit',
+    'homeV3.micro.collecting': 'Wird gesammelt', 'homeV3.micro.plannerHandoff': 'Übergabe an Planner', 'homeV3.micro.ready': 'Bereit',
+    'homeV3.micro.exploreTracker': 'CWL Tracker entdecken →', 'homeV3.micro.live': 'Live', 'homeV3.micro.league': 'Liga', 'homeV3.micro.history': 'Verlauf',
+    'homeV3.micro.yourClan': 'Dein Clan', 'homeV3.micro.warDay': 'Kriegstag', 'homeV3.micro.opponent': 'Gegner', 'homeV3.micro.liveState': 'Live-Status',
+    'homeV3.micro.officialScore': 'Offizieller Punktestand', 'homeV3.micro.projectionSeparate': 'Prognose separat gekennzeichnet',
+    'homeV3.micro.playerAccounts': 'Spielerkonten', 'homeV3.micro.trackedHistory': 'erfasster Verlauf', 'homeV3.micro.derivedProgress': 'abgeleiteter Fortschritt',
+    'homeV3.micro.availabilityRoster': 'Verfügbarkeit + Kader', 'homeV3.micro.planContext': 'Plankontext', 'homeV3.micro.dailyChallenge': 'Tägliche Challenge',
+    'homeV3.micro.playGames': 'Spiele spielen →', 'homeV3.micro.trackedOnly': 'Nur erfasste Daten', 'homeV3.micro.statsAchievements': 'Stats & Erfolge',
+    'homeV3.micro.exploreProgress': 'Fortschritt entdecken →', 'homeV3.micro.readMethodology': 'Methodik lesen', 'homeV3.micro.reviewPrivacy': 'Datenschutz ansehen',
+    'homeV3.micro.fixturePreview': 'ClashPanel-Oberfläche · kontrollierte Fixture-Daten · nicht live', 'homeV3.micro.accountContext': 'verifizierter Kontokontext',
+    'homeV3.micro.exploreStats': 'Advanced Stats entdecken →', 'homeV3.micro.exploreAchievements': 'Achievements entdecken →',
+    'homeV3.micro.yourClashPanel': 'DEIN CLASHPANEL'
+});
+
+const es = Object.freeze({
+    'homeV3.micro.overview': 'Resumen', 'homeV3.micro.plan': 'Planificar', 'homeV3.micro.compete': 'Competir', 'homeV3.micro.progress': 'Progreso',
+    'homeV3.micro.nextAction': 'TU PRÓXIMA ACCIÓN', 'homeV3.micro.buildRoster': 'Crear y revisar una plantilla', 'homeV3.micro.open': 'Abrir',
+    'homeV3.micro.manageAvailability': 'Gestionar miembros y disponibilidad', 'homeV3.micro.games': 'Juegos', 'homeV3.micro.accountsConnected': 'Cuentas conectadas',
+    'homeV3.micro.trackedSnapshots': 'Instantáneas registradas', 'homeV3.micro.progressUpdated': 'Progreso actualizado', 'homeV3.micro.manage': 'Gestionar', 'homeV3.micro.play': 'Jugar',
+    'homeV3.micro.explorePlanner': 'Explorar CWL Planner →', 'homeV3.micro.playerPool': 'Grupo de jugadores', 'homeV3.micro.review': 'Revisar',
+    'homeV3.micro.availablePlayers': 'Jugadores disponibles', 'homeV3.micro.roster': 'Plantilla', 'homeV3.micro.reviewPlan': 'Revisar plan',
+    'homeV3.micro.exploreManagement': 'Explorar gestión de clanes →', 'homeV3.micro.connectedClans': 'Clanes conectados',
+    'homeV3.micro.memberAccounts': 'Cuentas de miembros', 'homeV3.micro.linked': 'Vinculadas', 'homeV3.micro.availability': 'Disponibilidad CWL',
+    'homeV3.micro.collecting': 'Recopilando', 'homeV3.micro.plannerHandoff': 'Envío a Planner', 'homeV3.micro.ready': 'Listo',
+    'homeV3.micro.exploreTracker': 'Explorar CWL Tracker →', 'homeV3.micro.live': 'En directo', 'homeV3.micro.league': 'Liga', 'homeV3.micro.history': 'Historial',
+    'homeV3.micro.yourClan': 'Tu clan', 'homeV3.micro.warDay': 'Día de guerra', 'homeV3.micro.opponent': 'Rival', 'homeV3.micro.liveState': 'Estado en directo',
+    'homeV3.micro.officialScore': 'Puntuación oficial', 'homeV3.micro.projectionSeparate': 'Proyección indicada por separado',
+    'homeV3.micro.playerAccounts': 'Cuentas de jugadores', 'homeV3.micro.trackedHistory': 'historial registrado', 'homeV3.micro.derivedProgress': 'progreso derivado',
+    'homeV3.micro.availabilityRoster': 'disponibilidad + plantilla', 'homeV3.micro.planContext': 'contexto del plan', 'homeV3.micro.dailyChallenge': 'Reto diario',
+    'homeV3.micro.playGames': 'Jugar →', 'homeV3.micro.trackedOnly': 'Solo datos registrados', 'homeV3.micro.statsAchievements': 'Stats y logros',
+    'homeV3.micro.exploreProgress': 'Explorar progreso →', 'homeV3.micro.readMethodology': 'Leer la metodología', 'homeV3.micro.reviewPrivacy': 'Revisar privacidad',
+    'homeV3.micro.fixturePreview': 'Interfaz de ClashPanel · datos de prueba controlados · no en directo', 'homeV3.micro.accountContext': 'contexto de cuenta verificado',
+    'homeV3.micro.exploreStats': 'Explorar Advanced Stats →', 'homeV3.micro.exploreAchievements': 'Explorar Achievements →',
+    'homeV3.micro.yourClashPanel': 'TU CLASHPANEL'
+});
+
+export const publicHomeV3MicroLocales = Object.freeze({ en, nl, fr, de, es });

@@ -17,7 +17,8 @@ export function createOperationBoardImportController({
     renderClanSelector,
     clearReport,
     setState,
-    setHelp
+    setHelp,
+    onImported
 }) {
     async function importJsonFile(file) {
         if (!file) return;
@@ -35,6 +36,7 @@ export function createOperationBoardImportController({
     function applyImportedJson(data) {
         const report = normalizeImportedReport(data);
         if (report) {
+            onImported?.();
             cancelReportLoad();
             setLatestReport(report);
             setCurrentReport(report);
@@ -46,6 +48,7 @@ export function createOperationBoardImportController({
         }
         const importedPlan = normalizePlan(data.plan || data);
         if (!importedPlan?.info) throw new Error('Unsupported JSON format');
+        onImported?.();
         const id = importedPlan.id || 'imported-json-plan';
         const plan = { ...importedPlan, id };
         planStore.add(plan);

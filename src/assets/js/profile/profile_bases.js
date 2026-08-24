@@ -5,8 +5,32 @@ import { getCurrentUserId } from "../utils/user.js";
 import { t } from "../i18n/i18n.js";
 import { hideProfileEmptyStateFor } from "./profile_empty_state.js";
 
+const CLASH_TAG_PATTERN = /^#[0289PYLQGRJCUV]{3,15}$/;
+
+function extractTagCandidate(value) {
+    let raw = String(value || '').trim();
+    if (!raw) return '';
+
+    try {
+        if (/^https?:\/\//i.test(raw)) {
+            const url = new URL(raw);
+            raw = url.searchParams.get('tag') || raw;
+        }
+    } catch {
+        // Fall through and let normal validation reject malformed input.
+    }
+
+    try {
+        raw = decodeURIComponent(raw);
+    } catch {
+        // Keep the original value when percent-decoding is not valid.
+    }
+
+    return raw.trim().toUpperCase().replace(/O/g, '0').replace(/\s+/g, '');
+}
+
 function normalizeTag(value) {
-    const tag = String(value || '').trim().toUpperCase();
+    const tag = extractTagCandidate(value);
     if (!tag) return '';
     return tag.startsWith('#') ? tag : `#${tag}`;
 }
@@ -36,6 +60,7 @@ export function handleAddBase(inputBaseTag, inputBaseToken) {
     const playerId = normalizeTag(inputBaseTag.value);
     const playerToken = inputBaseToken.value.trim();
     if (!playerId || !playerToken) return Promise.reject(new Error(t('profile.accountMissingFields')));
+    if (!CLASH_TAG_PATTERN.test(playerId)) return Promise.reject(new Error(t('profile.accountVerifyFailed')));
     if (profileHasBase(playerId)) return Promise.reject(new Error(t('profile.accountAlreadyExists')));
 
     return getPlayerWithBattleData(playerId)

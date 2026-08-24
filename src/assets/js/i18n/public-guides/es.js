@@ -3,7 +3,7 @@ export default Object.freeze({
     "guides.metaDescription": "Ocho guías prácticas sobre plantillas CWL justas, rotación, disponibilidad, ataques perdidos, medallas de bonificación y análisis de varias temporadas.",
     "guides.heroKicker": "Centro de guías",
     "guides.heroTitle": "Decisiones prácticas, no consejos genéricos.",
-    "guides.heroIntro": "Estas guías usan los mismos problemas de plantilla, disponibilidad y revisión que ClashPanel pretende hacer visibles. Cada ejemplo se identifica como dato de muestra y cada recomendación incluye un motivo para sustituirla cuando sea necesario.",
+    "guides.heroIntro": "Estas guías explican las decisiones de plantilla, disponibilidad y revisión que ClashPanel pretende hacer visibles. Cada flujo describe sus concesiones y cuándo un líder debería apartarse de él.",
     "guides.heroMeta": "Escrito por ClashPanel · Publicado y actualizado el 4 de agosto de 2026",
     "guides.tocLabel": "Lista de guías",
     "guides.tocTitle": "Ocho guías",

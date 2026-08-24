@@ -64,6 +64,7 @@ function syncThemeButtons() {
         const active = button.dataset.themeChoice === preference;
         button.classList.toggle('po-theme-active', active);
         button.setAttribute('aria-pressed', String(active));
+        button.dataset.themeActive = String(active);
     });
 }
 
@@ -105,7 +106,8 @@ async function saveName() {
             name
         };
 
-        q('#po-username').textContent = name;
+        const profileName = q('#po-username');
+        if (profileName) profileName.textContent = name;
 
         onProfileUpdated?.(currentProfile);
 

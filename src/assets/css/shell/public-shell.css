@@ -1,0 +1,34 @@
+.public-header,
+.site-header {
+    background: color-mix(in srgb, var(--cp-bg) 86%, transparent);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--cp-border-1);
+    min-height: 72px;
+}
+.public-header-inner,
+.site-header-inner {
+    margin-inline: auto;
+    max-width: 1280px;
+    padding-inline: clamp(24px, 4vw, 32px);
+}
+
+.public-footer,
+.site-footer {
+    background: var(--cp-bg-elevated);
+    border-top: 1px solid var(--cp-border-1);
+    color: var(--cp-text-2);
+}
+
+.public-section { padding-block: 96px; }
+.public-container { margin-inline: auto; max-width: 1280px; padding-inline: 32px; }
+.public-reading-copy { max-width: 620px; }
+
+@media (max-width: 899px) {
+    .public-section { padding-block: 64px; }
+    .public-container { padding-inline: 24px; }
+}
+
+@media (max-width: 599px) {
+    .public-section { padding-block: 48px; }
+    .public-container { padding-inline: 16px; }
+}

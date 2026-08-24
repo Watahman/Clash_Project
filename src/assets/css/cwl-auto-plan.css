@@ -146,7 +146,12 @@
 }
 
 .cwl-auto-plan-clan-heading {
+    position: static;
+    inset: auto;
     display: flex;
+    width: auto;
+    height: auto;
+    min-height: 0;
     align-items: start;
     justify-content: space-between;
     gap: var(--space-3);

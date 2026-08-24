@@ -1,5 +1,6 @@
 package Java.cwlhistory;
 
+import Java.HttpException;
 import Java.performance.ClashKingHttpClient;
 import com.google.gson.JsonObject;
 
@@ -22,7 +23,7 @@ public final class ClashKingV2CwlProvider implements HistoricalCwlDataProvider {
             int limit
     ) throws Exception {
         JsonObject response = client.get(
-                "/v2/cwl/" + encoded(clanTag) + "/ranking-history"
+                "/v2/cwl/" + encoded(clanTag) + "/seasons"
         );
         return CwlHistoryIndexNormalizer.normalizeV2(
                 response, limit, providerName()
@@ -37,8 +38,17 @@ public final class ClashKingV2CwlProvider implements HistoricalCwlDataProvider {
         long end = month.plusMonths(1).atDay(1).atStartOfDay()
                 .toEpochSecond(ZoneOffset.UTC);
         JsonObject group = client.get(
-                "/cwl/" + encoded(clanTag) + "/" + encoded(season)
+                "/v2/cwl/" + encoded(clanTag)
+                        + "?season=" + encoded(season)
         );
+        String responseSeason = CwlHistoryJson.string(group, "season");
+        if (!responseSeason.isBlank() && !season.equals(responseSeason)) {
+            throw HttpException.upstream(
+                    502,
+                    "{\"error\":\"ClashKing returned a different CWL season\"}",
+                    "ClashKing V2"
+            );
+        }
         JsonObject wars = client.get(
                 "/v2/clan/" + encoded(clanTag)
                         + "/wars?timestamp_start=" + start

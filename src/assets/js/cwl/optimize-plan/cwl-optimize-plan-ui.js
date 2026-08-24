@@ -7,7 +7,7 @@ import {
     buildAcceptedOptimization,
     buildOptimizePlan
 } from './cwl-optimize-planner.js';
-import { renderOptimizePlanPreview } from './cwl-optimize-plan-renderer.js';
+import { renderOptimizePlanPreview } from './cwl-optimize-plan-renderer.js?v=20260812-1';
 
 let refs;
 let currentResult;
@@ -48,6 +48,7 @@ async function generatePreview() {
         detail: { tool: 'optimize' }
     }));
     refs.panel.classList.remove('hidden');
+    refs.panel.focus({ preventScroll: true });
     refs.panel.scrollIntoView({
         behavior: reducedMotion() ? 'auto' : 'smooth',
         block: 'start'
@@ -141,6 +142,9 @@ function setStatus(message, state) {
 }
 
 function closePreview() {
+    const restoreFocus = refs?.panel && (
+        document.activeElement === refs.panel || refs.panel.contains(document.activeElement)
+    );
     generationId += 1;
     currentResult = null;
     acceptedIds = new Set();
@@ -149,6 +153,7 @@ function closePreview() {
     refs?.panel?.classList.add('hidden');
     if (refs?.applyAccepted) refs.applyAccepted.disabled = true;
     if (refs?.applyAll) refs.applyAll.disabled = true;
+    if (restoreFocus) refs.open?.focus({ preventScroll: true });
 }
 
 function reducedMotion() {

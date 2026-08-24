@@ -1,4 +1,6 @@
-export const DEFAULT_GROUP_BADGE_URL = new URL('../../css/pictures/default-clan-banner.png', import.meta.url).href;
+import { ASSET_FALLBACKS, installImageFallback } from '../assets/entity-assets.js';
+
+export const DEFAULT_GROUP_BADGE_URL = ASSET_FALLBACKS.clan;
 
 export const GROUP_BADGES = ['shield', 'swords', 'crown', 'war_star', 'tower', 'flame', 'banner', 'helmet'];
 
@@ -30,6 +32,9 @@ export function renderBadge(element, badge, badgeUrl = '') {
     image.src = officialBadgeUrl || DEFAULT_GROUP_BADGE_URL;
     image.alt = '';
     image.loading = officialBadgeUrl ? 'lazy' : 'eager';
+    image.width = 48;
+    image.height = 48;
+    installImageFallback(image, DEFAULT_GROUP_BADGE_URL);
     element.appendChild(image);
     element.dataset.badge = officialBadgeUrl ? 'official' : 'default';
 }

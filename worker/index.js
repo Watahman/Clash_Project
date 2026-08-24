@@ -1,11 +1,22 @@
+import { APP_ALIASES, APP_ASSETS } from './app-routes.js';
+import { isExportAssetPath, proxyExportAsset } from './export-assets.js';
+
 const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 const PERMANENT_REDIRECT_STATUS = 301;
 const CANONICAL_HOST = "clashpanel.com";
+const PUBLIC_ASSETS = new Map([
+    ["/privacy", "/subpages/privacy"],
+    ["/cookies", "/subpages/cookies"],
+    ["/terms", "/subpages/terms"],
+    ["/contact", "/subpages/contact"]
+]);
 
 const PUBLIC_REDIRECTS = new Map([
     ["/cwl-planner.html", "/cwl-planner"],
     ["/cwl-tracker.html", "/cwl-tracker"],
     ["/clan-management.html", "/clan-management"],
+    ["/advanced-stats.html", "/advanced-stats"],
+    ["/achievements.html", "/achievements"],
     ["/bracket-generator.html", "/bracket-generator"],
     ["/guides.html", "/guides"],
     ["/methodology.html", "/methodology"],
@@ -18,38 +29,24 @@ const PUBLIC_REDIRECTS = new Map([
     ["/subpages/groups.html", "/clan-management"],
     ["/subpages/bracket-generator", "/bracket-generator"],
     ["/subpages/bracket-generator.html", "/bracket-generator"],
-    ["/subpages/privacy.html", "/subpages/privacy"],
-    ["/subpages/cookies.html", "/subpages/cookies"],
-    ["/subpages/terms.html", "/subpages/terms"],
-    ["/subpages/contact.html", "/subpages/contact"],
+    ["/subpages/privacy", "/privacy"],
+    ["/subpages/privacy.html", "/privacy"],
+    ["/subpages/cookies", "/cookies"],
+    ["/subpages/cookies.html", "/cookies"],
+    ["/subpages/terms", "/terms"],
+    ["/subpages/terms.html", "/terms"],
+    ["/subpages/contact", "/contact"],
+    ["/subpages/contact.html", "/contact"],
     ["/subpages/dashboard", "/dashboard"],
     ["/subpages/dashboard.html", "/dashboard"],
+    ["/subpages/explore", "/app/explore"],
+    ["/subpages/explore.html", "/app/explore"],
     ["/subpages/cwl-planner-drafts", "/app/cwl-planner-drafts"],
-    ["/subpages/cwl-planner-drafts.html", "/app/cwl-planner-drafts"]
-]);
-
-const APP_ASSETS = new Map([
-    ["/dashboard", "/subpages/dashboard"],
-    ["/app/cwl-planner", "/subpages/cwl-planner"],
-    ["/app/cwl-planner-drafts", "/subpages/cwl-planner-drafts"],
-    ["/app/cwl-tracker", "/subpages/cwl-operation-board"],
-    ["/app/clan-management", "/subpages/groups"],
-    ["/app/war-operation-board", "/subpages/war-operation-board"]
-]);
-
-const APP_ALIASES = new Map([
-    ["/dashboard.html", "/dashboard"],
-    ["/app/dashboard", "/dashboard"],
-    ["/app/dashboard.html", "/dashboard"],
-    ["/app/cwl-planner.html", "/app/cwl-planner"],
-    ["/app/cwl-planner-drafts.html", "/app/cwl-planner-drafts"],
-    ["/app/cwl-operation-board", "/app/cwl-tracker"],
-    ["/app/cwl-operation-board.html", "/app/cwl-tracker"],
-    ["/app/cwl-tracker.html", "/app/cwl-tracker"],
-    ["/app/groups", "/app/clan-management"],
-    ["/app/groups.html", "/app/clan-management"],
-    ["/app/clan-management.html", "/app/clan-management"],
-    ["/app/war-operation-board.html", "/app/war-operation-board"]
+    ["/subpages/cwl-planner-drafts.html", "/app/cwl-planner-drafts"],
+    ["/subpages/achievements", "/app/achievements"],
+    ["/subpages/achievements.html", "/app/achievements"],
+    ["/subpages/advanced-stats", "/app/advanced-stats"],
+    ["/subpages/advanced-stats.html", "/app/advanced-stats"]
 ]);
 
 function jsonError(status, code, error) {
@@ -67,6 +64,11 @@ function isApiPath(pathname) {
     return pathname === "/api" || pathname.startsWith("/api/");
 }
 
+function isAdvancedStatsApiPath(pathname) {
+    const path = String(pathname || "").toLowerCase();
+    return path.startsWith("/api/advancedstats") || path === "/api/internaladvancedstatspoll";
+}
+
 function normalizedPath(pathname) {
     const normalized = pathname.replace(/\/+$/, "") || "/";
     return normalized.toLowerCase();
@@ -78,7 +80,8 @@ function permanentRedirect(requestUrl, destination) {
     return Response.redirect(redirectUrl.toString(), PERMANENT_REDIRECT_STATUS);
 }
 
-function canonicalOriginRedirect(incomingUrl, canonicalPath = null) {
+function canonicalOriginRedirect(incomingUrl, canonicalPath = null, env = {}) {
+    if (String(env.DISABLE_CANONICAL_REDIRECT || "").toLowerCase() === "true") return null;
     if (incomingUrl.protocol === "https:" && incomingUrl.hostname === CANONICAL_HOST) return null;
     const canonicalUrl = new URL(incomingUrl);
     canonicalUrl.protocol = "https:";
@@ -96,10 +99,16 @@ function routeRedirect(incomingUrl) {
         "/cwl-planner",
         "/cwl-tracker",
         "/clan-management",
+        "/advanced-stats",
+        "/achievements",
         "/bracket-generator",
         "/guides",
         "/methodology",
-        "/changelog"
+        "/changelog",
+        "/privacy",
+        "/cookies",
+        "/terms",
+        "/contact"
     ]) {
         if (path === publicPath && incomingUrl.pathname !== publicPath) {
             return publicPath;
@@ -130,6 +139,48 @@ async function serveAppAsset(request, env, incomingUrl) {
     });
 }
 
+async function servePublicAsset(request, env, incomingUrl) {
+    const path = normalizedPath(incomingUrl.pathname);
+    const assetPath = PUBLIC_ASSETS.get(path);
+    if (!assetPath) return null;
+
+    const assetUrl = new URL(incomingUrl);
+    assetUrl.pathname = assetPath;
+    const assetRequest = new Request(assetUrl.toString(), {
+        method: request.method,
+        headers: request.headers,
+        redirect: "manual"
+    });
+    const response = await env.ASSETS.fetch(assetRequest);
+    return publicRobotsResponse(response, incomingUrl);
+}
+
+function publicRobotsResponse(response, incomingUrl) {
+    if (incomingUrl.hostname !== CANONICAL_HOST || !response.headers.has("X-Robots-Tag")) {
+        return response;
+    }
+    const headers = new Headers(response.headers);
+    headers.delete("X-Robots-Tag");
+    return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers
+    });
+}
+
+function applyUpstreamOriginOverride(headers, env) {
+    const rawOverride = String(env.UPSTREAM_ORIGIN_OVERRIDE || "").trim();
+    if (!rawOverride) return;
+    try {
+        const overrideUrl = new URL(rawOverride);
+        if (!["http:", "https:"].includes(overrideUrl.protocol)) return;
+        headers.set("Origin", overrideUrl.origin);
+        headers.set("Referer", `${overrideUrl.origin}/`);
+    } catch {
+        // Invalid preview-only override is ignored; production behavior remains unchanged.
+    }
+}
+
 function createBackendHeaders(request, incomingUrl, env) {
     const headers = new Headers(request.headers);
     headers.delete("host");
@@ -139,6 +190,7 @@ function createBackendHeaders(request, incomingUrl, env) {
     headers.delete("x-clashpanel-proxy-secret");
     headers.set("X-Forwarded-Host", incomingUrl.host);
     headers.set("X-Forwarded-Proto", incomingUrl.protocol.replace(":", ""));
+    applyUpstreamOriginOverride(headers, env);
 
     const connectingIp = request.headers.get("CF-Connecting-IP");
     if (connectingIp) headers.set("X-Forwarded-For", connectingIp);
@@ -147,6 +199,17 @@ function createBackendHeaders(request, incomingUrl, env) {
     }
 
     return headers;
+}
+
+function privateApiResponse(response) {
+    const headers = new Headers(response.headers);
+    headers.set("Cache-Control", "no-store");
+    headers.set("Pragma", "no-cache");
+    return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers
+    });
 }
 
 async function proxyApiRequest(request, env, incomingUrl) {
@@ -191,6 +254,9 @@ async function proxyApiRequest(request, env, incomingUrl) {
         return jsonError(upstreamResponse.status, code, message);
     }
 
+    if (isAdvancedStatsApiPath(incomingUrl.pathname)) {
+        return privateApiResponse(upstreamResponse);
+    }
     return upstreamResponse;
 }
 
@@ -209,12 +275,18 @@ export default {
     async fetch(request, env) {
         const incomingUrl = new URL(request.url);
         const redirect = routeRedirect(incomingUrl);
-        const originRedirect = canonicalOriginRedirect(incomingUrl, redirect);
+        const originRedirect = canonicalOriginRedirect(incomingUrl, redirect, env);
         if (originRedirect) return originRedirect;
+        if (isExportAssetPath(incomingUrl.pathname)) {
+            return proxyExportAsset(request, incomingUrl);
+        }
         if (isApiPath(incomingUrl.pathname)) {
             return proxyApiRequest(request, env, incomingUrl);
         }
         if (redirect) return permanentRedirect(incomingUrl, redirect);
+
+        const publicResponse = await servePublicAsset(request, env, incomingUrl);
+        if (publicResponse) return publicResponse;
 
         const appResponse = await serveAppAsset(request, env, incomingUrl);
         if (appResponse) return appResponse;

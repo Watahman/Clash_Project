@@ -1,13 +1,24 @@
 import { buildLiveView } from '../operation-board/operation-board-live-model.js';
 import { buildWinCondition } from '../operation-board/operation-board-win-condition.js';
 import { buildProjectedOutcome } from '../operation-board/operation-board-live-projection.js';
-import { buildImportantAttacks } from '../operation-board/operation-board-live-recommendations.js';
 import { escapeHtml, number } from '../operation-board/operation-board-utils.js';
-import { parseClashTime } from '../cwl/cwl-war-state.js';
-import { buildWarContributions, attacksByOrder } from './war-contribution.js';
+import { normalizeWarState, parseClashTime } from '../cwl/cwl-war-state.js';
+import { competeT as t } from '../operation-board/compete-locales.js';
+import {
+    ASSET_FALLBACKS,
+    getTownHallAsset,
+    installImageFallback
+} from '../assets/entity-assets.js';
+import { buildWarContributions } from './war-contribution.js';
 import { buildWarMap } from './war-map-model.js';
-import { assignmentState } from './war-assignments.js';
 import { buildMathematicalWarStatus } from './war-outcome-model.js';
+import { renderStats as renderStatsSection } from './war-stats-renderer.js';
+
+const WAR_STATE_CLASSES = new Set(['completed', 'live', 'preparation']);
+const BASE_STATE_CLASSES = new Set(['cleared', 'damaged', 'untouched']);
+const MATH_STATE_CLASSES = new Set(['lost', 'open', 'won']);
+
+export { renderStatsSection as renderStats };
 
 export function renderScoreStrip(element, report) {
     const live = buildLiveView(report);
@@ -18,78 +29,86 @@ export function renderScoreStrip(element, report) {
         element.innerHTML = '';
         return;
     }
+    const liveState = classToken(live.state, WAR_STATE_CLASSES, 'unknown');
+    const mathStatus = classToken(
+        mathematical?.status,
+        MATH_STATE_CLASSES,
+        'open'
+    );
     element.innerHTML = `
         <div class="war-score-side war-score-own">
             ${badge(report.clan)}
-            <span><strong>${escapeHtml(live.own.name)}</strong><small>${live.own.attacksUsed}/${live.own.availableAttacks} attacks</small></span>
+            <span><strong>${escapeHtml(live.own.name)}</strong><small>${live.own.attacksUsed}/${live.own.availableAttacks} ${escapeHtml(t('war.attacks'))}</small></span>
         </div>
         <div class="war-score-main">
             <span>${stars(live.own.stars)} <b>—</b> ${stars(live.opponent.stars)}</span>
             <small>${percent(live.own.destruction)} — ${percent(live.opponent.destruction)}</small>
         </div>
         <div class="war-score-side war-score-opponent">
-            <span><strong>${escapeHtml(live.opponent.name)}</strong><small>${live.opponent.attacksUsed}/${live.opponent.availableAttacks} attacks</small></span>
+            <span><strong>${escapeHtml(live.opponent.name)}</strong><small>${live.opponent.attacksUsed}/${live.opponent.availableAttacks} ${escapeHtml(t('war.attacks'))}</small></span>
             ${badge(report.opponent)}
         </div>
         <div class="war-score-meta">
-            <span class="war-state-pill is-${escapeHtml(live.state)}">${stateLabel(live.state)}</span>
-            <span>${timeLabel(live)}</span>
-            <span>Max: ${condition?.maxFinalStars ?? live.own.stars}★</span>
-            <span class="war-math-status is-${mathematical?.status || 'open'}">${mathLabel(mathematical?.status)}</span>
-            <span>${projection?.winProbability == null ? 'Projection building' : `${projection.winProbability}% projected win`}</span>
+            <span class="war-state-pill is-${liveState}">${stateLabel(live.state)}</span>
+            <span>${timeLabel(live, report.wars?.[0]?.fixtureReferenceTime)}</span>
+            <span>${escapeHtml(t('war.maxStars', {
+                stars: number(condition?.maxFinalStars ?? live.own.stars)
+            }))}</span>
+            <span class="war-math-status is-${mathStatus}">${mathLabel(mathematical?.status)}</span>
+            <span>${escapeHtml(projection?.winProbability == null
+                ? t('war.projectionBuilding')
+                : t('war.projectedWin', { probability: projection.winProbability }))}</span>
         </div>`;
+    installAssetFallbacks(element);
 }
 
-export function renderWarMap(element, report, sideName, selectedPosition, assignments) {
+export function renderWarMap(element, report, sideName, selectedPosition) {
     const bases = buildWarMap(report, sideName);
-    element.innerHTML = bases.map((base, index) => {
-        const assignmentCount = sideName === 'enemy'
-            ? assignments.filter(item => Number(item.targetPosition) === base.mapPosition).length
-            : 0;
-        return `<button class="war-base is-${base.state} ${base.mapPosition === selectedPosition ? 'is-selected' : ''}"
-            type="button" data-base-position="${base.mapPosition}" style="--base-index:${index}">
-            <span class="war-base-position">${base.mapPosition}</span>
-            <span class="war-base-emblem"><b>TH${base.townHall}</b><i>${base.stars}★</i></span>
-            <span class="war-base-copy"><strong>${escapeHtml(base.name)}</strong><small>${percent(base.destruction)} · ${base.opponentAttacks} hit${base.opponentAttacks === 1 ? '' : 's'}</small></span>
-            ${assignmentCount ? `<span class="war-base-assigned">${assignmentCount} assigned</span>` : ''}
-        </button>`;
-    }).join('');
+    element.dataset.warMapSide = sideName;
+    element.innerHTML = bases.map((base, index) =>
+        renderBaseCard(base, index, selectedPosition)
+    ).join('');
+    installAssetFallbacks(element);
 }
 
-export function renderBaseDetail(element, report, sideName, position, assignments) {
+function renderBaseCard(base, index, selectedPosition) {
+    const baseState = classToken(base.state, BASE_STATE_CLASSES, 'untouched');
+    const townHall = townHallLabel(base.townHall);
+    return `<button class="war-base is-${baseState} ${base.mapPosition === selectedPosition ? 'is-selected' : ''}"
+        type="button" data-base-position="${base.mapPosition}" style="--base-index:${index}">
+        <span class="war-base-position">${base.mapPosition}</span>
+        <span class="war-base-emblem"><img class="compete-townhall" src="${getTownHallAsset(base.townHall)}" alt="${escapeHtml(t('war.townHall', { level: townHall }))}"><i>${stars(base.stars)}</i></span>
+        <span class="war-base-copy"><strong>${escapeHtml(base.name)}</strong><small>${percent(base.destruction)} · ${base.opponentAttacks} ${escapeHtml(t(base.opponentAttacks === 1 ? 'war.hit' : 'war.hits'))}</small></span>
+    </button>`;
+}
+
+export function renderBaseDetail(element, report, sideName, position) {
     const bases = buildWarMap(report, sideName);
     const base = bases.find(item => item.mapPosition === position) || bases[0];
     if (!base) {
-        element.innerHTML = '<div class="war-detail-empty">Select a base to inspect it.</div>';
+        element.innerHTML = `<div class="war-detail-empty">${escapeHtml(t('war.selectBase'))}</div>`;
         return;
     }
-    const recommendations = sideName === 'enemy'
-        ? buildImportantAttacks(report, 6).filter(item => item.target.mapPosition === base.mapPosition)
-        : [];
-    const assigned = assignments.filter(item =>
-        Number(item.targetPosition) === base.mapPosition
-        || ['hold', 'free'].includes(item.type)
-    );
-    const roster = report.roster || [];
-    element.innerHTML = `
-        <header>
-            <div><p>Base ${base.mapPosition}</p><h2>${escapeHtml(base.name)}</h2><span>${escapeHtml(base.tag)}</span></div>
-            <span class="war-detail-th">TH${base.townHall}</span>
-        </header>
-        <div class="war-detail-score"><strong>${stars(base.stars)}</strong><span>${percent(base.destruction)} best destruction</span></div>
-        <section><h3>Attack history</h3>${base.attacks.length ? base.attacks.map(attack => `
-            <div class="war-detail-row"><span>${escapeHtml(attack.attackerName)} · TH${attack.attackerTownHall}</span><strong>${stars(attack.stars)} · ${percent(attack.destructionPercentage)}</strong></div>`).join('') : '<p class="war-muted">No attacks on this base yet.</p>'}</section>
-        ${sideName === 'enemy' ? `<section><h3>Assignments</h3>
-            <div class="war-assignment-list">${assigned.length ? assigned.map(item => `
-                <div class="war-assignment-item"><span>${escapeHtml(roster.find(player => player.tag === item.playerTag)?.name || item.playerTag)} · attack ${item.attackSlot} · ${assignmentLabel(item, base.mapPosition)}</span><em class="is-${assignmentState(item, report)}">${assignmentState(item, report)}</em><button type="button" data-remove-assignment="${item.id}" aria-label="Remove assignment">×</button></div>`).join('') : '<p class="war-muted">Nobody assigned yet.</p>'}</div>
-            <form class="war-assignment-form" data-assignment-position="${base.mapPosition}">
-                <select name="playerTag" required><option value="">Assign attacker…</option>${roster.map(player => `<option value="${player.tag}">${escapeHtml(player.name)}</option>`).join('')}</select>
-                <select name="attackSlot"><option value="1">Attack 1</option><option value="2">Attack 2</option></select>
-                <select name="type"><option value="base">Base ${base.mapPosition}</option><option value="cleanup">Cleanup ${base.mapPosition}</option><option value="hold">Hold</option><option value="free">Free attack</option></select>
-                <button type="submit">Assign</button>
-            </form></section>` : ''}
-        ${recommendations.length ? `<section><h3>Recommended matchup</h3>${recommendations.slice(0, 2).map(item => `
-            <div class="war-recommendation"><strong>${escapeHtml(item.attacker.name)}</strong><span>${item.expectedStars.toFixed(1)}★ expected · +${item.expectedNetStars.toFixed(1)} net</span><small>${reasonLabel(item.reason)} · ${item.confidence} confidence</small></div>`).join('')}</section>` : ''}`;
+    element.innerHTML = renderBaseDetailHtml(base, sideName);
+    installAssetFallbacks(element);
+}
+
+function renderBaseDetailHtml(base, sideName) {
+    const townHall = townHallLabel(base.townHall);
+    const historyKey = sideName === 'own' ? 'war.defenseHistory' : 'war.attackHistory';
+    const history = base.attacks.length
+        ? base.attacks.map(renderAttackRow).join('')
+        : `<p class="war-muted">${escapeHtml(t('war.noAttacks'))}</p>`;
+    return `<header>
+        <div><p>${escapeHtml(t('war.base', { position: base.mapPosition }))}</p><h2>${escapeHtml(base.name)}</h2><span>${escapeHtml(base.tag)}</span></div>
+        <span class="war-detail-th"><img class="compete-townhall" src="${getTownHallAsset(base.townHall)}" alt="${escapeHtml(t('war.townHall', { level: townHall }))}"> ${escapeHtml(t('war.townHallShort'))}${escapeHtml(townHall)}</span>
+    </header>
+    <div class="war-detail-score"><strong>${stars(base.stars)}</strong><span>${percent(base.destruction)} ${escapeHtml(t('war.bestDestruction'))}</span></div>
+    <section><h3>${escapeHtml(t(historyKey))}</h3>${history}</section>`;
+}
+
+function renderAttackRow(attack) {
+    return `<div class="war-detail-row"><span>${escapeHtml(attack.attackerName)} · ${escapeHtml(t('war.townHallShort'))}${attack.attackerTownHall}</span><strong>${stars(attack.stars)} · ${percent(attack.destructionPercentage)}</strong></div>`;
 }
 
 export function renderRoster(element, report, filter = 'all') {
@@ -103,62 +122,36 @@ export function renderRoster(element, report, filter = 'all') {
         return true;
     });
     element.innerHTML = filtered.map(player => `
-        <article class="war-player-card cwl-player-article" data-performance-card="true" data-planner-card="true"
-            data-player-tag="${player.tag}" data-town-hall="${player.townHall}">
+        <article class="war-player-card cwl-player-article" data-performance-card="true"
+            data-performance-trigger="true"
+            data-player-tag="${escapeHtml(player.tag)}" data-town-hall="${escapeHtml(townHallLabel(player.townHall))}">
             <button class="war-player-main" type="button" data-performance-trigger>
                 <span class="war-player-position">${player.mapPosition}</span>
-                <span><strong class="cwl-player-name">${escapeHtml(player.name)}</strong><small>TH${player.townHall} · ${escapeHtml(player.tag)}</small></span>
+                <span class="war-player-identity">
+                    <span class="war-player-townhall" aria-hidden="true"><img class="compete-townhall" src="${getTownHallAsset(player.townHall)}" alt=""></span>
+                    <span class="war-player-copy"><strong class="cwl-player-name">${escapeHtml(player.name)}</strong><small>${escapeHtml(t('war.townHallShort'))}${escapeHtml(townHallLabel(player.townHall))} · ${escapeHtml(player.tag)}</small></span>
+                </span>
             </button>
             <div class="war-player-metrics">
-                <span><small>Attacks</small><strong>${player.attacksUsed}/${limit}</strong></span>
-                <span><small>Stars</small><strong>${player.stars}★</strong></span>
-                <span><small>Net stars</small><strong>+${player.netStars}</strong></span>
-                <span><small>Avg. destruction</small><strong>${player.avgDestruction == null ? '—' : percent(player.avgDestruction)}</strong></span>
+                <span><small>${escapeHtml(t('war.attacks'))}</small><strong>${player.attacksUsed}/${limit}</strong></span>
+                <span><small>${escapeHtml(t('war.starsLabel'))}</small><strong>${stars(player.stars)}</strong></span>
+                <span><small>${escapeHtml(t('war.netStarsLabel'))}</small><strong>+${player.netStars}</strong></span>
+                <span><small>${escapeHtml(t('war.avgDestruction'))}</small><strong>${player.avgDestruction == null ? '—' : percent(player.avgDestruction)}</strong></span>
             </div>
-            <span class="war-player-status is-${attention(player) ? 'attention' : player.attacksUsed >= limit ? 'done' : player.attacksUsed ? 'active' : 'ready'}">${attention(player) ? 'Needs attention' : player.attacksUsed >= limit ? 'Done' : player.attacksUsed ? 'In progress' : 'Ready'}</span>
-        </article>`).join('') || '<p class="war-muted">No players match this filter.</p>';
-}
-
-export function renderStats(element, report) {
-    const live = buildLiveView(report);
-    const attacks = attacksByOrder(report);
-    const recommendations = buildImportantAttacks(report, 3);
-    const use = live?.own.availableAttacks
-        ? live.own.attacksUsed / live.own.availableAttacks * 100
-        : 0;
-    const points = cumulativePoints(attacks);
-    element.innerHTML = `
-        <article class="war-stat-card"><p>Attack usage</p><strong>${Math.round(use)}%</strong><div class="war-progress"><i style="width:${use}%"></i></div><small>${live?.own.attacksUsed || 0} of ${live?.own.availableAttacks || 0} attacks used</small></article>
-        <article class="war-stat-card war-chart-card"><p>Stars by attack order</p>${sparkline(points)}<small>${attacks.length ? `${attacks.length} recorded attacks` : 'Waiting for the first attack'}</small></article>
-        <article class="war-stat-card"><p>Important next attacks</p>${recommendations.length ? recommendations.map(item => `<div class="war-mini-row"><span>${escapeHtml(item.attacker.name)} → #${item.target.mapPosition}</span><strong>+${item.expectedNetStars.toFixed(1)}★</strong></div>`).join('') : '<small>No recommendation needed right now.</small>'}</article>`;
-}
-
-function cumulativePoints(attacks) {
-    let total = 0;
-    return attacks.map((attack, index) => {
-        total += number(attack.netStars);
-        return [index, total];
-    });
-}
-
-function sparkline(points) {
-    if (!points.length) return '<div class="war-chart-empty"></div>';
-    const maxX = Math.max(1, points.length - 1);
-    const maxY = Math.max(1, ...points.map(point => point[1]));
-    const path = points.map(([x, y], index) =>
-        `${index ? 'L' : 'M'} ${(x / maxX * 240).toFixed(1)} ${(64 - y / maxY * 52).toFixed(1)}`
-    ).join(' ');
-    return `<svg class="war-sparkline" viewBox="0 0 240 72" role="img" aria-label="Cumulative net stars by attack order"><path d="${path}"/></svg>`;
+            <span class="war-player-status is-${attention(player) ? 'attention' : player.attacksUsed >= limit ? 'done' : player.attacksUsed ? 'active' : 'ready'}">${statusLabel(report, player, limit, attention(player))}</span>
+        </article>`).join('') || `<p class="war-muted">${escapeHtml(t('war.noPlayersMatch'))}</p>`;
+    installAssetFallbacks(element);
 }
 
 function badge(clan) {
-    return clan?.badgeUrl
-        ? `<img src="${escapeHtml(clan.badgeUrl)}" alt="">`
-        : '<span class="war-score-fallback">⚔</span>';
+    const badgeUrl = safeBadgeUrl(clan?.badgeUrl);
+    return badgeUrl
+        ? `<img src="${escapeHtml(badgeUrl)}" alt="${escapeHtml(t('war.clanBadge', { clan: clan.name || t('war.clanLabel') }))}" loading="lazy">`
+        : `<img src="${ASSET_FALLBACKS.clan}" alt="${escapeHtml(t('war.clanBadgeUnavailable'))}">`;
 }
 
 function stars(value) {
-    return `${number(value)}★`;
+    return t('war.stars', { count: number(value) });
 }
 
 function percent(value) {
@@ -166,40 +159,76 @@ function percent(value) {
 }
 
 function stateLabel(state) {
-    return ({ live: 'Live', preparation: 'Preparation', completed: 'Ended' })[state] || 'Unavailable';
+    const key = ({
+        live: 'war.stateLive',
+        preparation: 'war.statePreparation',
+        completed: 'war.stateEnded'
+    })[state] || 'war.stateUnavailable';
+    return t(key);
 }
 
-function timeLabel(live) {
+function timeLabel(live, referenceTime = '') {
     const date = live.state === 'preparation' ? live.startTime : live.endTime;
-    if (!date) return 'Time unavailable';
-    const remaining = (parseClashTime(date)?.getTime() || 0) - Date.now();
-    if (remaining <= 0) return live.state === 'completed' ? 'War ended' : 'Updating…';
+    if (!date) return t('war.timeUnavailable');
+    const fixtureNow = parseClashTime(referenceTime)?.getTime();
+    const remaining = (parseClashTime(date)?.getTime() || 0) - (fixtureNow || Date.now());
+    if (remaining <= 0) return live.state === 'completed' ? t('war.warEnded') : t('war.updating');
     const hours = Math.floor(remaining / 3_600_000);
     const minutes = Math.floor(remaining % 3_600_000 / 60_000);
-    return `${hours}h ${minutes}m remaining`;
-}
-
-function reasonLabel(reason) {
-    return ({ highImpact: 'Highest net-star value', goodMatchup: 'Favorable matchup', bestAvailable: 'Best available matchup' })[reason] || 'Recommended';
+    const duration = hours
+        ? t('war.durationHoursMinutes', { hours, minutes })
+        : t('war.durationMinutes', { minutes });
+    return t('war.timeRemaining', { duration });
 }
 
 function mathLabel(status) {
-    return status === 'won'
-        ? 'Mathematically won'
-        : status === 'lost' ? 'Mathematically lost' : 'Outcome still open';
+    return t(status === 'won'
+        ? 'war.mathWon'
+        : status === 'lost' ? 'war.mathLost' : 'war.mathOpen');
 }
 
-function assignmentLabel(assignment, position) {
-    if (assignment.type === 'hold') return 'hold';
-    if (assignment.type === 'free') return 'free';
-    return assignment.type === 'cleanup'
-        ? `cleanup #${position}`
-        : `base #${position}`;
+function classToken(value, allowed, fallback) {
+    return allowed.has(String(value)) ? String(value) : fallback;
+}
+
+function townHallLabel(value) {
+    const parsed = number(value, 0);
+    return parsed >= 1 && parsed <= 18 ? String(parsed) : t('war.unknown');
+}
+
+function safeBadgeUrl(value) {
+    const raw = String(value || '').trim();
+    if (raw.startsWith('/') && !raw.startsWith('//')) return raw;
+    try {
+        const url = new URL(raw);
+        return ['http:', 'https:'].includes(url.protocol) ? raw : '';
+    } catch {
+        return '';
+    }
+}
+
+function installAssetFallbacks(element) {
+    element.querySelectorAll('img.compete-townhall').forEach(image =>
+        installImageFallback(image, ASSET_FALLBACKS.entity)
+    );
+    element.querySelectorAll('.war-score-side img').forEach(image =>
+        installImageFallback(image, ASSET_FALLBACKS.clan)
+    );
+}
+
+function statusLabel(report, player, limit, attention) {
+    const ended = normalizeWarState(report?.wars?.[0]) === 'completed';
+    if (ended && player.attacksUsed < limit) return t('war.missedAttacks');
+    if (attention) return t('war.statusNeedsAttention');
+    if (player.attacksUsed >= limit) return t('war.statusDone');
+    return player.attacksUsed ? t('war.statusInProgress') : t('war.statusReady');
 }
 
 function needsAttention(report, player, limit) {
     const war = report?.wars?.[0];
-    if (String(war?.state || '').toLowerCase() !== 'inwar') return false;
+    const state = normalizeWarState(war);
+    if (state === 'completed') return player.attacksUsed < limit;
+    if (state !== 'live') return false;
     const end = String(war?.endTime || '').match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/);
     if (!end) return false;
     const endTime = Date.UTC(

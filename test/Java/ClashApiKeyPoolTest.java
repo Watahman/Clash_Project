@@ -1,93 +1,129 @@
 package Java;
 
-import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.Test;
 
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ClashApiKeyPoolTest {
     @Test
-    void rotatesConfiguredKeysAndNormalizesBearerPrefix() {
-        Config config = configWithKeys("first", "bearer second", "Bearer third");
+    void parsesOneToTenJsonKeysAndNormalizesBearerPrefix() {
+        List<String> parsed = ClashApiKeyPool.parseConfiguredKeys(
+                "[\"first\",\"bearer second\",\"Bearer third\"]",
+                List.of("ignored-legacy")
+        );
+        List<String> ten = ClashApiKeyPool.parseConfiguredKeys(
+                "[\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"10\"]",
+                List.of()
+        );
 
-        assertEquals(List.of("Bearer first", "Bearer second", "Bearer third"), config.getClashApiKeysForRequest());
-        assertEquals(List.of("Bearer second", "Bearer third", "Bearer first"), config.getClashApiKeysForRequest());
-        assertEquals(List.of("Bearer third", "Bearer first", "Bearer second"), config.getClashApiKeysForRequest());
+        assertEquals(List.of("first", "second", "third"), parsed);
+        assertEquals(10, ten.size());
     }
 
     @Test
-    void removesDuplicateAndBlankKeys() {
-        Config config = configWithKeys("same", "Bearer same", " ");
-
-        assertEquals(List.of("Bearer same"), config.getClashApiKeysForRequest());
+    void removesDuplicatesAndKeepsLegacyCompatibilityWhenPoolIsAbsent() {
+        assertEquals(
+                List.of("same", "other"),
+                ClashApiKeyPool.parseConfiguredKeys(
+                        "[\"same\",\"Bearer same\",\"other\"]",
+                        List.of("ignored")
+                )
+        );
+        assertEquals(
+                List.of("first", "second"),
+                ClashApiKeyPool.parseConfiguredKeys(
+                        "",
+                        List.of("first", "Bearer second", "first", "")
+                )
+        );
     }
 
     @Test
-    void retriesAnotherKeyAfterRateLimit() throws Exception {
-        List<String> receivedKeys = new ArrayList<>();
-        AtomicInteger attempts = new AtomicInteger();
-        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext("/players", exchange -> {
-            receivedKeys.add(exchange.getRequestHeaders().getFirst("Authorization"));
-            int status = attempts.getAndIncrement() == 0 ? 429 : 200;
-            byte[] body = (status == 200 ? "{\"ok\":true}" : "{\"reason\":\"rateLimit\"}")
-                    .getBytes(StandardCharsets.UTF_8);
-            exchange.sendResponseHeaders(status, body.length);
-            exchange.getResponseBody().write(body);
-            exchange.close();
-        });
-        server.start();
+    void rejectsMalformedOrOversizedConfigurationWithoutEchoingSecrets() {
+        IllegalStateException malformed = assertThrows(
+                IllegalStateException.class,
+                () -> ClashApiKeyPool.parseConfiguredKeys(
+                        "[\"do-not-echo\",}", List.of()
+                )
+        );
+        assertFalse(malformed.getMessage().contains("do-not-echo"));
+        assertThrows(
+                IllegalStateException.class,
+                () -> ClashApiKeyPool.parseConfiguredKeys(
+                        "[\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"10\",\"11\"]",
+                        List.of()
+                )
+        );
+        assertThrows(
+                IllegalStateException.class,
+                () -> ClashApiKeyPool.parseConfiguredKeys("[\"has whitespace\"]", List.of())
+        );
+    }
 
-        try {
-            API_Utils utils = new API_Utils(configWithKeys("first", "second", "third"));
-            String response = utils.getClashApiResponse(
-                    "http://127.0.0.1:" + server.getAddress().getPort() + "/players"
-            );
+    @Test
+    void rotatesKeysAndSharesCooldownState() throws Exception {
+        AtomicLong clock = new AtomicLong(1_000L);
+        ClashApiKeyPool pool = new ClashApiKeyPool(
+                List.of("first", "second"), clock::get
+        );
+        ClashApiKeyPool.Lease first = pool.acquire(Set.of());
+        pool.markRateLimited(first, 5_000L);
 
-            assertEquals("{\"ok\":true}", response);
-            assertEquals(List.of("Bearer first", "Bearer second"), receivedKeys);
-        } finally {
-            server.stop(0);
+        assertEquals("Bearer first", first.authorizationValue());
+        assertEquals("Bearer second", pool.acquire(Set.of()).authorizationValue());
+        assertEquals(1, pool.usableCount());
+
+        clock.addAndGet(5_001L);
+        assertEquals(2, pool.usableCount());
+    }
+
+    @Test
+    void invalidKeysStayDisabledAndEmptyPoolsFailPredictably() throws Exception {
+        ClashApiKeyPool pool = new ClashApiKeyPool(List.of("only"), () -> 1_000L);
+        ClashApiKeyPool.Lease lease = pool.acquire(Set.of());
+        pool.markInvalid(lease);
+
+        assertEquals(0, pool.usableCount());
+        assertThrows(
+                ClashApiKeyPool.UnavailableException.class,
+                () -> pool.acquire(Set.of())
+        );
+        assertThrows(
+                ClashApiKeyPool.UnavailableException.class,
+                () -> new ClashApiKeyPool(List.of(), () -> 1_000L).acquire(Set.of())
+        );
+    }
+
+    @Test
+    void concurrentSelectionRemainsSafeAndUsesEveryKey() throws Exception {
+        ClashApiKeyPool pool = new ClashApiKeyPool(
+                List.of("first", "second", "third"),
+                System::currentTimeMillis
+        );
+        Set<String> selected = ConcurrentHashMap.newKeySet();
+        try (var executor = Executors.newFixedThreadPool(12)) {
+            for (int index = 0; index < 240; index++) {
+                executor.submit(() -> selected.add(
+                        pool.acquire(Set.of()).authorizationValue()
+                ));
+            }
+            executor.shutdown();
+            assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
         }
-    }
 
-    @Test
-    void doesNotRetryUnrelatedServerErrors() throws Exception {
-        AtomicInteger attempts = new AtomicInteger();
-        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext("/players", exchange -> {
-            attempts.incrementAndGet();
-            byte[] body = "{\"reason\":\"maintenance\"}".getBytes(StandardCharsets.UTF_8);
-            exchange.sendResponseHeaders(500, body.length);
-            exchange.getResponseBody().write(body);
-            exchange.close();
-        });
-        server.start();
-
-        try {
-            API_Utils utils = new API_Utils(configWithKeys("first", "second", "third"));
-            assertThrows(HttpException.class, () -> utils.getClashApiResponse(
-                    "http://127.0.0.1:" + server.getAddress().getPort() + "/players"
-            ));
-            assertEquals(1, attempts.get());
-        } finally {
-            server.stop(0);
-        }
-    }
-
-    private Config configWithKeys(String first, String second, String third) {
-        Config config = new Config();
-        config._API_KEY_ALL = first;
-        config._API_KEY_ALL2 = second;
-        config._API_KEY_ALL3 = third;
-        config._CACHE_ENABLED = "false";
-        return config;
+        assertEquals(
+                Set.of("Bearer first", "Bearer second", "Bearer third"),
+                selected
+        );
     }
 }

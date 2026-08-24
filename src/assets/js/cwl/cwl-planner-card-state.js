@@ -1,8 +1,10 @@
 import { getCardTag } from './cwl-utils.js';
-import { normalizePlannedDays, normalizeRosterStatus } from './cwl-plan-schema.js';
+import { normalizeRosterStatus } from './cwl-plan-schema.js';
 import { t } from '../i18n/i18n.js';
+import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 
 export function rememberPlannerPlayers() {
+    if (isRedesignFixtureRequested()) return;
     const players = Array.from(
         document.querySelectorAll('.cwl-player-article[data-planner-card="true"]')
     ).map(player => ({
@@ -10,8 +12,7 @@ export function rememberPlannerPlayers() {
         clanName: player.querySelector('.cwl-player-clan')?.textContent || '',
         tag: getCardTag(player),
         townHall: Number(player.dataset.townHall || 1),
-        rosterStatus: normalizeRosterStatus(player.dataset.rosterStatus),
-        plannedDays: normalizePlannedDays(player.dataset.plannedDays)
+        rosterStatus: normalizeRosterStatus(player.dataset.rosterStatus)
     })).filter(player => player.tag);
     localStorage.setItem('clashtools_last_planner_players', JSON.stringify(players));
 }
@@ -29,6 +30,7 @@ export function updateClanCapacityCounter(article) {
         normalizeRosterStatus(player.dataset.rosterStatus, 'core') === 'reserve'
     )).length;
     const active = players.length - reserves;
+    const capacityConflict = active > capacity;
 
     counter.textContent = reserves > 0
         ? `${active}/${capacity} · ${t(reserves === 1 ? 'cwl.reserveCountOne' : 'cwl.reserveCountMany', { count: reserves })}`
@@ -42,6 +44,8 @@ export function updateClanCapacityCounter(article) {
     counter.dataset.totalPlayers = String(players.length);
     counter.dataset.activePlayers = String(active);
     counter.dataset.reservePlayers = String(reserves);
+    counter.dataset.capacityConflict = String(capacityConflict);
+    article.dataset.capacityConflict = String(capacityConflict);
     article.dataset.clanCapacity = String(capacity);
 }
 

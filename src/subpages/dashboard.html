@@ -5,7 +5,7 @@
     <meta name="robots" content="noindex">
     <script src="../assets/js/Data/analytics.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Open your recent CWL plans, Clan Families and linked Clash of Clans accounts.">
+    <meta name="description" content="Review your ClashPanel activity, tools and anything that needs attention.">
     <link rel="stylesheet" href="../assets/css/workspace-loading.css">
     <script src="../assets/js/shell/workspace-bootstrap.js"></script>
     <title>Dashboard · ClashPanel</title>
@@ -13,39 +13,37 @@
     <link rel="stylesheet" href="../assets/css/profile-overlay.css">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
     <script src="../assets/js/Data/runtime-config.js"></script>
-    <script type="module" src="../assets/js/shell/workspace-shell.js"></script>
+    <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260812-redesign"></script>
     <script type="module" src="../assets/js/pages/dashboard.js"></script>
-    <link rel="stylesheet" href="../assets/css/light-theme.css">
+    <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
+    <link rel="stylesheet" href="../assets/css/workspace-v2.css?v=20260812-redesign">
+    <link rel="stylesheet" href="../assets/css/pages/dashboard.css">
 </head>
 <body class="workspace-app" data-workspace-page="dashboard">
 <main class="workspace-dashboard workspace-dashboard-overview" id="main-content">
     <header class="workspace-page-header">
         <p class="page-kicker" data-i18n="nav.dashboard">Dashboard</p>
         <h1 id="dashboard-welcome" data-i18n="dashboard.welcome">Welcome back.</h1>
-        <p data-i18n="guidance.dashboard.hero">Choose an outcome, or continue with something you already started.</p>
+        <p data-i18n="dashboard.v2Intro">Your ClashPanel activity, tools and anything that needs attention.</p>
     </header>
 
-    <section class="workspace-dashboard-actions" aria-labelledby="dashboard-actions-title">
-        <div class="workspace-dashboard-actions-heading">
-            <p class="page-kicker" data-i18n="guidance.dashboard.chooseKicker">Start here</p>
-            <h2 id="dashboard-actions-title" data-i18n="guidance.dashboard.chooseTitle">What do you want to do?</h2>
-        </div>
-        <nav aria-label="Core tools" data-i18n-aria-label="dashboard.coreFunctions">
-            <a href="/app/cwl-planner">
-                <span><strong data-i18n="guidance.dashboard.planTitle">Plan a CWL</strong><small data-i18n="guidance.dashboard.planText">Build multi-clan rosters, use availability and create seven-day lineups.</small></span>
-                <b data-i18n="guidance.dashboard.planAction">Open Planner →</b>
-            </a>
-            <a href="/app/cwl-tracker">
-                <span><strong data-i18n="guidance.dashboard.runTitle">Track a CWL</strong><small data-i18n="guidance.dashboard.runText">Follow live wars, league standings, roster performance, bonuses and CWL history.</small></span>
-                <b data-i18n="guidance.dashboard.runAction">Open CWL Operation Board →</b>
-            </a>
-            <a href="/app/clan-management">
-                <span><strong data-i18n="guidance.dashboard.familyTitle">Manage a Clan Family</strong><small data-i18n="guidance.dashboard.familyText">Add members, link clans and start polls to collect your members’ CWL availability.</small></span>
-                <b data-i18n="guidance.dashboard.familyAction">Open Clan Family →</b>
-            </a>
-        </nav>
+    <section class="dashboard-priority-grid" aria-label="Dashboard priorities" data-i18n-aria-label="dashboard.v2Priorities">
+        <article class="dashboard-contextual cp-panel" aria-labelledby="dashboard-next-title">
+            <p class="page-kicker" data-i18n="dashboard.v2Next">Next best action</p>
+            <div>
+                <h2 id="dashboard-next-title" data-i18n="dashboard.v2StartTitle">Create your first CWL plan</h2>
+                <p id="dashboard-next-copy" data-i18n="dashboard.v2StartCopy">Bring players, availability and seven lineups into one plan.</p>
+            </div>
+            <a id="dashboard-next-action" class="cp-button cp-button--primary" href="/app/cwl-planner" data-i18n="dashboard.v2StartAction">Start planning</a>
+        </article>
+
+        <article class="dashboard-attention cp-panel" aria-labelledby="dashboard-attention-title">
+            <p class="page-kicker" data-i18n="dashboard.v2Attention">Needs attention</p>
+            <h2 id="dashboard-attention-title" class="sr-only" data-i18n="dashboard.v2Attention">Needs attention</h2>
+            <p id="dashboard-attention-copy" data-i18n="dashboard.v2Nothing">Nothing needs your attention right now.</p>
+        </article>
     </section>
 
     <section class="workspace-dashboard-continue" aria-labelledby="dashboard-continue-title">
@@ -53,33 +51,48 @@
             <p class="page-kicker" data-i18n="guidance.dashboard.continueKicker">Your work</p>
             <h2 id="dashboard-continue-title" data-i18n="guidance.dashboard.continueTitle">Continue where you left off</h2>
         </div>
-        <div class="workspace-dashboard-split">
-        <section class="workspace-section-block" aria-labelledby="recent-plans-title">
-            <div class="workspace-section-heading">
-                <div><p class="page-kicker" data-i18n="dashboard.recent">Recent</p><h2 id="recent-plans-title" data-i18n="nav.savedPlans">Saved plans</h2></div>
-                <a href="/app/cwl-planner-drafts" data-i18n="dashboard.allPlans">All plans →</a>
-            </div>
-            <p id="dashboard-plan-status" class="workspace-inline-status" role="status" aria-live="polite" data-i18n="dashboard.loadingPlans">Loading plans…</p>
-            <div class="workspace-table-wrap">
-                <table class="workspace-data-table workspace-recent-plans">
-                    <thead><tr><th data-i18n="plans.name">Plan</th><th data-i18n="plans.clans">Clans</th><th data-i18n="plans.freeRoster">Free roster</th><th data-i18n="plans.updated">Updated</th><th><span class="sr-only" data-i18n="plans.actions">Actions</span></th></tr></thead>
-                    <tbody id="dashboard-plan-list"></tbody>
-                </table>
-            </div>
-        </section>
+        <div class="workspace-dashboard-split dashboard-continue-grid">
+            <section class="workspace-section-block" aria-labelledby="recent-plans-title">
+                <div class="workspace-section-heading">
+                    <div><p class="page-kicker" data-i18n="dashboard.recent">Recent</p><h2 id="recent-plans-title" data-i18n="nav.savedPlans">Saved plans</h2></div>
+                    <a href="/app/cwl-planner-drafts" data-i18n="dashboard.allPlans">All plans →</a>
+                </div>
+                <p id="dashboard-plan-status" class="workspace-inline-status" role="status" aria-live="polite" data-i18n="dashboard.loadingPlans">Loading plans…</p>
+                <div class="workspace-table-wrap">
+                    <table class="workspace-data-table workspace-recent-plans">
+                        <thead><tr><th data-i18n="plans.name">Plan</th><th data-i18n="plans.clans">Clans</th><th data-i18n="plans.freeRoster">Free roster</th><th data-i18n="plans.updated">Updated</th><th><span class="sr-only" data-i18n="plans.actions">Actions</span></th></tr></thead>
+                        <tbody id="dashboard-plan-list"></tbody>
+                    </table>
+                </div>
+            </section>
 
-        <aside class="workspace-section-block workspace-groups-summary" aria-labelledby="recent-groups-title">
-            <div class="workspace-section-heading">
-                <div><p class="page-kicker" data-i18n="dashboard.recent">Recent</p><h2 id="recent-groups-title" data-i18n="nav.groups">Clan Family</h2></div>
-                <a href="/app/clan-management" data-i18n="dashboard.manageGroups">Manage →</a>
-            </div>
-            <p id="dashboard-group-status" class="workspace-inline-status" role="status" aria-live="polite" data-i18n="dashboard.loadingGroups">Loading Clan Families…</p>
-            <div id="dashboard-group-list"></div>
-            <button id="dashboard-account-line" class="workspace-account-line" type="button" hidden>
-                <span><strong id="dashboard-account-count">0</strong><small data-i18n="dashboard.linkedAccounts">linked accounts</small></span>
-                <span data-i18n="dashboard.openProfile">Open profile →</span>
-            </button>
-        </aside>
+            <aside class="workspace-section-block workspace-groups-summary" aria-labelledby="recent-groups-title">
+                <div class="workspace-section-heading">
+                    <div><p class="page-kicker" data-i18n="dashboard.recent">Recent</p><h2 id="recent-groups-title" data-i18n="nav.groups">Clan Family</h2></div>
+                    <a href="/app/clan-management" data-i18n="dashboard.manageGroups">Manage →</a>
+                </div>
+                <p id="dashboard-group-status" class="workspace-inline-status" role="status" aria-live="polite" data-i18n="dashboard.loadingGroups">Loading Clan Families…</p>
+                <div id="dashboard-group-list"></div>
+                <button id="dashboard-account-line" class="workspace-account-line" type="button" hidden>
+                    <span><strong id="dashboard-account-count">0</strong><small data-i18n="dashboard.linkedAccounts">linked accounts</small></span>
+                    <span data-i18n="dashboard.openProfile">Open profile →</span>
+                </button>
+            </aside>
+        </div>
+    </section>
+
+    <section class="dashboard-explore" aria-labelledby="dashboard-explore-title">
+        <div class="workspace-dashboard-actions-heading">
+            <p class="page-kicker" data-i18n="dashboard.v2ExploreKicker">Explore</p>
+            <h2 id="dashboard-explore-title" data-i18n="dashboard.v2ExploreTitle">Tools for every part of clan life</h2>
+            <a href="/app/explore" data-i18n="dashboard.v2ExploreAll">View all tools →</a>
+        </div>
+        <div class="dashboard-pillar-grid">
+            <a class="cp-module-card" data-pillar="manage" href="/app/clan-management"><img src="/assets/icons/pillars/manage.svg" alt=""><span class="page-kicker" data-i18n="shell.manage">Manage</span><h3 data-i18n="nav.groups">Clan Family</h3><p data-i18n="explore.groups.description">Keep members, linked accounts, clans and availability together.</p><strong data-i18n="explore.open">Open →</strong></a>
+            <a class="cp-module-card" data-pillar="plan" href="/app/cwl-planner"><img src="/assets/icons/pillars/plan.svg" alt=""><span class="page-kicker" data-i18n="shell.plan">Plan</span><h3 data-i18n="nav.cwl">CWL Planner</h3><p data-i18n="explore.planner.description">Build multi-clan rosters and seven-day CWL lineups.</p><strong data-i18n="explore.open">Open →</strong></a>
+            <a class="cp-module-card" data-pillar="compete" href="/app/cwl-tracker"><img src="/assets/icons/pillars/compete.svg" alt=""><span class="page-kicker" data-i18n="shell.compete">Compete</span><h3 data-i18n="nav.operation">CWL Tracker</h3><p data-i18n="explore.operation.description">Follow CWL rounds, standings, performance, bonuses and history.</p><strong data-i18n="explore.open">Open →</strong></a>
+            <a class="cp-module-card" data-pillar="play" href="/app/minigames"><img src="/assets/icons/pillars/play.svg" alt=""><span class="page-kicker" data-i18n="shell.play">Play</span><h3 data-i18n="nav.minigames">Games</h3><p data-i18n="explore.minigames.description">Take on daily and practice Clash knowledge challenges.</p><strong data-i18n="explore.open">Open →</strong></a>
+            <div class="cp-module-card cp-module-card--coming-soon" data-pillar="progress" aria-disabled="true"><img src="/assets/icons/pillars/progress.svg" alt=""><span class="page-kicker" data-i18n="shell.progression">Progress</span><h3><span data-i18n="nav.advancedStats">Advanced Stats</span> <span class="workspace-coming-soon-badge" data-i18n="common.comingSoon">(Coming soon)</span></h3><p data-i18n="explore.advancedStats.description">Understand tracked attacks, armies and long-term trends.</p><strong data-i18n="common.comingSoon">Coming soon</strong></div>
         </div>
     </section>
 </main>

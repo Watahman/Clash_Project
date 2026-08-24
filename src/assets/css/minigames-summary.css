@@ -1,0 +1,17 @@
+/* Catalog summary and fan-content notice. */
+.minigames-category-summary { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 2.5rem; align-items: end; margin-bottom: 4rem; border-top: 1px solid var(--border); padding-block: 2rem; }
+.minigames-category-summary h2 { max-width: 20ch; margin: 0 0 .6rem; font-size: clamp(1.35rem, 2.8vw, 2.15rem); text-wrap: balance; }
+.minigames-category-summary p:not(.eyebrow) { margin: 0; color: var(--text-muted); line-height: 1.55; }
+.minigames-category-summary ul { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .55rem; margin: 0; padding: 0; list-style: none; }
+.minigames-category-summary li { min-height: 5.8rem; display: flex; flex-direction: column; justify-content: end; border-top: 1px solid var(--border); padding: .75rem .2rem; }
+.minigames-category-summary strong { color: var(--game-accent); font: 850 1.65rem/1 Manrope, sans-serif; }
+.minigames-category-summary span { margin-top: .35rem; color: var(--text-muted); font-size: .7rem; line-height: 1.35; }
+.minigames-policy { margin-bottom: 4rem; border-top: 1px solid var(--border); padding-top: 1rem; color: var(--text-muted); font-size: .72rem; line-height: 1.65; }
+
+@media (max-width: 70rem) {
+    .minigames-category-summary { grid-template-columns: 1fr; gap: 1.5rem; align-items: start; }
+}
+
+@media (max-width: 42rem) {
+    .minigames-category-summary ul { grid-template-columns: 1fr 1fr; }
+}

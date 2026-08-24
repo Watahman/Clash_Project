@@ -1,6 +1,6 @@
 import { savePlan } from './cwl-plan-io.js';
 import { escapeCssIdentifier } from './cwl-utils.js';
-import { normalizePlannedDays, normalizeRosterStatus } from './cwl-plan-schema.js';
+import { normalizeRosterStatus } from './cwl-plan-schema.js';
 import { t } from '../i18n/i18n.js';
 import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js';
 
@@ -36,11 +36,15 @@ function nonReservePlayerCount(clan, excludedPlayer = null) {
     )).length;
 }
 
-function statusOption(value, labelKey) {
+function statusOption(value) {
     const option = document.createElement('option');
     option.value = value;
-    option.textContent = t(labelKey);
+    option.textContent = value;
     return option;
+}
+
+function isFreeRosterPlayer(element) {
+    return Boolean(element?.closest('#cwl-available-players'));
 }
 
 function attachRosterStatusControl(element) {
@@ -55,9 +59,9 @@ function attachRosterStatusControl(element) {
     select.setAttribute('aria-label', t('cwl.rosterStatus'));
     select.title = t('cwl.rosterStatus');
     select.append(
-        statusOption('core', 'cwl.rosterCore'),
-        statusOption('rotation', 'cwl.rosterRotation'),
-        statusOption('reserve', 'cwl.rosterReserve')
+        statusOption('core'),
+        statusOption('rotation'),
+        statusOption('reserve')
     );
     select.addEventListener('pointerdown', event => event.stopPropagation());
     select.addEventListener('mousedown', event => event.stopPropagation());
@@ -104,19 +108,6 @@ export function syncPlayerRosterStatus(element, options = {}) {
     return status;
 }
 
-export function syncPlayerPlannedDays(element, plannedDays = []) {
-    const days = normalizePlannedDays(plannedDays);
-    const clan = element.closest('.cwl-clan-article');
-    element.querySelector('.cwl-planned-days')?.remove();
-    if (!clan || !days.length) {
-        delete element.dataset.plannedDays;
-        return [];
-    }
-
-    element.dataset.plannedDays = days.join(',');
-    return days;
-}
-
 export function attachDeleteButton(element) {
     if (element.querySelector('.cwl-delete-player')) return;
     const button = document.createElement('button');
@@ -141,64 +132,79 @@ export function attachDeleteButton(element) {
     element.appendChild(button);
 }
 
-export function attachMoveControl(element) {
-    const existing = element.querySelector('.cwl-move-player');
-    if (existing) {
-        ensurePlayerControlGroup(element).appendChild(existing);
-        return;
-    }
-    const select = document.createElement('select');
-    select.className = 'cwl-move-player';
-    select.setAttribute('aria-label', t('cwl.movePlayer'));
-    select.title = t('cwl.movePlayer');
+function refreshMoveOptions(element, select) {
+    const currentContainer = element.parentElement;
+    select.replaceChildren();
+    const free = document.createElement('option');
+    free.value = 'free';
+    free.textContent = t('cwl.moveToAvailable');
+    select.appendChild(free);
+    document.querySelectorAll('.cwl-clan-article').forEach(clan => {
+        const option = document.createElement('option');
+        option.value = clan.id;
+        option.textContent = clan.dataset.clanName
+            || clan.querySelector('.cwl-clan-name')?.textContent
+            || t('cwl.clan');
+        select.appendChild(option);
+    });
+    select.value = currentContainer?.closest('.cwl-clan-article')?.id || 'free';
+}
 
-    const refreshOptions = () => {
-        const currentContainer = element.parentElement;
-        select.replaceChildren();
-        const free = document.createElement('option');
-        free.value = 'free';
-        free.textContent = t('cwl.moveToAvailable');
-        select.appendChild(free);
-        document.querySelectorAll('.cwl-clan-article').forEach(clan => {
-            const option = document.createElement('option');
-            option.value = clan.id;
-            option.textContent = clan.dataset.clanName
-                || clan.querySelector('.cwl-clan-name')?.textContent
-                || t('cwl.clan');
-            select.appendChild(option);
-        });
-        select.value = currentContainer?.closest('.cwl-clan-article')?.id || 'free';
-    };
-    moveControlRefreshers.set(element, refreshOptions);
+function movePlayer(element, select) {
+    const target = select.value === 'free'
+        ? document.querySelector('#cwl-available-players')
+        : document.querySelector(
+            `#${escapeCssIdentifier(select.value)} .cwl-clan-player-list`
+        );
+    const previousContainer = element.parentElement;
+    if (!target || target === previousContainer) return;
+    const previousStatus = normalizeRosterStatus(element.dataset.rosterStatus);
+    target.appendChild(element);
+    syncPlayerRosterStatus(element, {
+        preferredStatus: previousStatus,
+        autoReserve: target.matches('.cwl-clan-player-list')
+    });
+    updateAllPlayerCounters();
+    rememberPlannerPlayers();
+    window.dispatchEvent(new CustomEvent('clashtools:cwl-player-added'));
+    savePlan();
+}
 
+function bindMoveControl(element, select, refreshOptions) {
     select.addEventListener('focus', refreshOptions);
     select.addEventListener('pointerdown', event => event.stopPropagation());
     select.addEventListener('mousedown', event => event.stopPropagation());
-    select.addEventListener('change', () => {
-        const target = select.value === 'free'
-            ? document.querySelector('#cwl-available-players')
-            : document.querySelector(
-                `#${escapeCssIdentifier(select.value)} .cwl-clan-player-list`
-            );
-        const previousContainer = element.parentElement;
-        if (!target || target === previousContainer) return;
-        const previousStatus = normalizeRosterStatus(element.dataset.rosterStatus);
-        target.appendChild(element);
-        syncPlayerRosterStatus(element, {
-            preferredStatus: previousStatus,
-            autoReserve: target.matches('.cwl-clan-player-list')
-        });
-        syncPlayerPlannedDays(element, []);
-        updateAllPlayerCounters();
-        rememberPlannerPlayers();
-        window.dispatchEvent(new CustomEvent('clashtools:cwl-player-added'));
-        savePlan();
-    });
+    select.addEventListener('change', () => movePlayer(element, select));
+}
+
+export function attachMoveControl(element) {
+    const existing = element.querySelector('.cwl-move-player');
+    if (!isFreeRosterPlayer(element)) {
+        existing?.remove();
+        moveControlRefreshers.delete(element);
+        return;
+    }
+    const select = existing || document.createElement('select');
+    const isNew = !existing;
+    if (isNew) select.className = 'cwl-move-player';
+    select.setAttribute('aria-label', t('cwl.movePlayer'));
+    select.title = t('cwl.movePlayer');
+
+    const refreshOptions = () => refreshMoveOptions(element, select);
+    moveControlRefreshers.set(element, refreshOptions);
+
+    if (isNew) bindMoveControl(element, select, refreshOptions);
     refreshOptions();
     ensurePlayerControlGroup(element).appendChild(select);
 }
 
 export function syncPlayerMoveControl(element) {
+    if (!isFreeRosterPlayer(element)) {
+        element.querySelector('.cwl-move-player')?.remove();
+        moveControlRefreshers.delete(element);
+        return '';
+    }
+    if (!moveControlRefreshers.has(element)) attachMoveControl(element);
     const refresh = moveControlRefreshers.get(element);
     if (!refresh) return '';
     refresh();

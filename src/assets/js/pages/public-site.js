@@ -1,13 +1,13 @@
-import { initI18n, t } from '../i18n/i18n.js';
+import { initI18n, t } from '../i18n/i18n.js?v=20260821-product-home';
 import { syncAuthSession } from '../auth/auth-client.js';
-import { getThemePreference, setThemePreference } from '../theme/theme-manager.js';
-import { normalizePublicShell } from '../shell/public-header.js';
+import { toggleTheme as toggleThemePreference } from '../theme/theme-manager.js?v=20260821-public-pages';
+import { normalizePublicShell } from '../shell/public-header.js?v=20260821-public-pages';
+import { ensureThemeToggleMarkup } from '../theme/theme-toggle-markup.js';
 import { initPublicPageBindings } from './public-page-bindings.js';
-import { initPublicResourcePages } from './public-resource-pages.js';
+import { initPublicResourcePages } from './public-resource-pages.js?v=20260821-authentic-pages';
 
-function toggleTheme() {
-    const next = getThemePreference() === 'light' ? 'dark' : 'light';
-    setThemePreference(next);
+function toggleTheme(event) {
+    toggleThemePreference(event.currentTarget);
     updateThemeButtons();
 }
 
@@ -21,10 +21,12 @@ function updateThemeButtons() {
 }
 
 function initThemeButtons() {
+    ensureThemeToggleMarkup();
     document.querySelectorAll('[data-theme-toggle]').forEach(button => {
         button.addEventListener('click', toggleTheme);
     });
     updateThemeButtons();
+    window.addEventListener('clashtools:theme-changed', updateThemeButtons);
 }
 
 function initPublicMenu() {
@@ -98,8 +100,14 @@ function initHomepageReveal() {
     if (!items.length) return;
     document.documentElement.classList.add('has-reveal');
 
+    const heroItems = items.filter(item => item.closest('.home3-hero'));
+    const scrollItems = items.filter(item => !heroItems.includes(item));
+    window.requestAnimationFrame(() => {
+        heroItems.forEach(item => item.classList.add('is-visible'));
+    });
+
     if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        items.forEach(item => item.classList.add('is-visible'));
+        scrollItems.forEach(item => item.classList.add('is-visible'));
         return;
     }
 
@@ -111,7 +119,7 @@ function initHomepageReveal() {
         });
     }, { threshold: 0.12, rootMargin: '0px 0px -7% 0px' });
 
-    items.forEach(item => observer.observe(item));
+    scrollItems.forEach(item => observer.observe(item));
 }
 
 function initHomepageSpotlight() {

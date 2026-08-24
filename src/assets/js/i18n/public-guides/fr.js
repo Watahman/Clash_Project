@@ -3,7 +3,7 @@ export default Object.freeze({
     "guides.metaDescription": "Huit guides pratiques sur les effectifs CWL équitables, la rotation, les disponibilités, les attaques manquées, les médailles bonus et l’analyse sur plusieurs saisons.",
     "guides.heroKicker": "Centre de guides",
     "guides.heroTitle": "Des décisions pratiques, pas des conseils génériques.",
-    "guides.heroIntro": "Ces guides utilisent les mêmes problèmes d’effectif, de disponibilité et d’évaluation que ClashPanel rend visibles. Chaque exemple est identifié comme donnée d’exemple et chaque recommandation précise quand il peut être raisonnable de la remplacer.",
+    "guides.heroIntro": "Ces guides expliquent les décisions d’effectif, de disponibilité et d’évaluation que ClashPanel rend visibles. Chaque méthode précise ses compromis et quand un responsable doit s’en écarter.",
     "guides.heroMeta": "Rédigé par ClashPanel · Publié et mis à jour le 4 août 2026",
     "guides.tocLabel": "Liste des guides",
     "guides.tocTitle": "Huit guides",

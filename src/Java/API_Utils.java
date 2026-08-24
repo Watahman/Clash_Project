@@ -12,13 +12,9 @@ import Java.cache.CacheStore;
 import Java.cache.InMemoryCacheStore;
 import Java.cache.PersistentCacheStore;
 
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,11 +35,17 @@ public class API_Utils {
     });
     private final Config conf;
     private final AuthService authService;
+    private final ClashApiClient clashApiClient;
 
     public API_Utils(Config conf) {
         this.conf = conf;
         ensureCacheStores(conf);
         this.authService = new AuthService(conf);
+        this.clashApiClient = new ClashApiClient(
+                conf.getClashApiKeyPool(),
+                conf.getClashApiRateLimitCooldownMillis(),
+                conf.getClashApiMaximumCooldownMillis()
+        );
     }
 
     private static void ensureCacheStores(Config conf) {
@@ -82,64 +84,11 @@ public class API_Utils {
     }
 
     public String getClashApiResponse(String urlStr) throws Exception {
-        return executeClashApiRequest("GET", urlStr, null);
+        return clashApiClient.get(urlStr);
     }
 
     public String postClashApiResponse(String urlStr, String jsonBody) throws Exception {
-        return executeClashApiRequest("POST", urlStr, jsonBody);
-    }
-
-    private String executeClashApiRequest(String method, String urlStr, String jsonBody) throws Exception {
-        List<String> keys = conf.getClashApiKeysForRequest();
-        HttpException lastKeyError = null;
-
-        for (int index = 0; index < keys.size(); index++) {
-            HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
-            try {
-                conn.setRequestMethod(method);
-                conn.setRequestProperty("Authorization", keys.get(index));
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setConnectTimeout(8_000);
-                conn.setReadTimeout(15_000);
-
-                if (jsonBody != null) {
-                    conn.setRequestProperty("Content-Type", "application/json");
-                    conn.setDoOutput(true);
-                    try (OutputStream os = conn.getOutputStream()) {
-                        os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
-                    }
-                }
-
-                int statusCode = conn.getResponseCode();
-                String responseBody = readResponseBody(conn, statusCode);
-                if (statusCode >= 200 && statusCode < 300) return responseBody;
-
-                HttpException error = HttpException.upstream(statusCode, responseBody, "Clash API");
-                if (isKeySpecificFailure(statusCode) && index + 1 < keys.size()) {
-                    lastKeyError = error;
-                    continue;
-                }
-                throw error;
-            } finally {
-                conn.disconnect();
-            }
-        }
-
-        throw lastKeyError == null
-                ? new IllegalStateException("Geen Clash API key beschikbaar")
-                : lastKeyError;
-    }
-
-    private boolean isKeySpecificFailure(int statusCode) {
-        return statusCode == 401 || statusCode == 403 || statusCode == 429;
-    }
-
-    private String readResponseBody(HttpURLConnection conn, int statusCode) throws Exception {
-        InputStream stream = (statusCode >= 200 && statusCode < 300) ? conn.getInputStream() : conn.getErrorStream();
-        if (stream == null) return "{\"error\":\"HTTP " + statusCode + "\"}";
-        try (stream) {
-            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-        }
+        return clashApiClient.post(urlStr, jsonBody);
     }
 
     public void sendJsonResponse(HttpExchange exchange, String json, int statusCode) throws Exception {

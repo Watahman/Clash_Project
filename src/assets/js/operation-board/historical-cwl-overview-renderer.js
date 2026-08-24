@@ -107,11 +107,15 @@ function timelineItem(item) {
         : item.change === 'relegated'
             ? '↓ Relegated'
             : item.change === 'same' ? 'No league change' : 'Change unknown';
+    const tone = recordTone(item.summary.record);
     return `<button type="button" data-history-season="${item.data.season}">
         <span>${escapeHtml(shortSeason(item.data.season))}</span>
         <strong>${escapeHtml(item.summary.league?.name || 'League unavailable')}</strong>
         <em>${item.summary.position ? `#${item.summary.position}` : '—'}</em>
         <small data-change="${item.change}">${escapeHtml(change)}</small>
+        <span class="op-history-record-tone" data-result="${tone}">
+            ${escapeHtml(recordToneLabel(tone))}
+        </span>
     </button>`;
 }
 
@@ -175,6 +179,20 @@ function recordMarkup(record = {}) {
         <b data-result="loss">${record.losses || 0}L</b>
         <b data-result="draw">${record.draws || 0}D</b>
     </span>`;
+}
+
+function recordTone(record = {}) {
+    const wins = Number(record.wins) || 0;
+    const losses = Number(record.losses) || 0;
+    if (wins > losses) return 'win';
+    if (losses > wins) return 'loss';
+    return 'draw';
+}
+
+function recordToneLabel(tone) {
+    if (tone === 'win') return 'Winning record';
+    if (tone === 'loss') return 'Losing record';
+    return 'Even record';
 }
 
 function bindSeasonButtons(container, selectSeason) {

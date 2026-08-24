@@ -24,8 +24,7 @@
     --war-red: #c63434;
 }
 
-:root[data-theme="light"] .war-tag-form button,
-:root[data-theme="light"] .war-assignment-form button {
+:root[data-theme="light"] .war-tag-form button {
     color: #79530a;
 }
 
@@ -92,9 +91,7 @@
 .war-tag-form input,
 .war-tag-form button,
 .war-refresh-button,
-.war-roster-toolbar select,
-.war-assignment-form select,
-.war-assignment-form button {
+.war-roster-toolbar select {
     min-height: 40px;
     border: 1px solid var(--war-line);
     border-radius: 8px;
@@ -119,8 +116,7 @@
     text-transform: uppercase;
 }
 
-.war-tag-form button,
-.war-assignment-form button {
+.war-tag-form button {
     border-left: 0;
     border-radius: 0 8px 8px 0;
     padding: 0 14px;
@@ -331,7 +327,6 @@
 
 .war-primary-panel,
 .war-detail-panel,
-.war-map-page,
 .war-stat-card,
 .war-player-card,
 .war-history-row,
@@ -340,10 +335,9 @@
     background: var(--war-surface);
 }
 
-.war-primary-panel,
-.war-map-page {
-    border-radius: 12px;
+.war-primary-panel {
     overflow: hidden;
+    border-radius: 12px;
 }
 
 .war-panel-heading,
@@ -392,10 +386,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px 62px;
     padding: 24px 28px;
-    background:
-        linear-gradient(90deg, transparent calc(50% - 2px), rgba(212, 167, 44, .12) calc(50% - 2px), rgba(212, 167, 44, .12) calc(50% + 2px), transparent calc(50% + 2px)),
-        radial-gradient(circle at 50% 20%, rgba(212, 167, 44, .06), transparent 30%),
-        var(--war-canvas);
+    background: var(--war-canvas);
 }
 
 .war-map::after {
@@ -428,13 +419,8 @@
     transition: border-color .15s ease, background .15s ease, transform .15s ease;
 }
 
-.war-base:nth-child(even) {
-    grid-column: 2;
-}
-
-.war-base:nth-child(odd) {
-    grid-column: 1;
-}
+.war-base:nth-child(even) { grid-column: 2; }
+.war-base:nth-child(odd) { grid-column: 1; }
 
 .war-base:hover,
 .war-base:focus-visible,
@@ -443,9 +429,7 @@
     background: color-mix(in srgb, var(--war-gold) 5%, var(--war-surface));
 }
 
-.war-base:hover {
-    transform: translateY(-1px);
-}
+.war-base:hover { transform: translateY(-1px); }
 
 .war-base-position {
     display: grid;
@@ -468,11 +452,6 @@
     border: 1px solid rgba(212, 167, 44, .28);
     border-radius: 11px 11px 16px 16px;
     background: linear-gradient(145deg, #24272e, #121419);
-}
-
-.war-base-emblem b {
-    font-size: .66rem;
-    color: #e5c771;
 }
 
 .war-base-emblem i {
@@ -505,24 +484,9 @@
     font-size: .67rem;
 }
 
-.war-base-assigned {
-    grid-column: 3;
-    color: var(--war-gold);
-    font-size: .64rem;
-    font-weight: 750;
-}
-
-.war-base.is-cleared {
-    opacity: .66;
-}
-
-.war-base.is-cleared .war-base-emblem {
-    border-color: rgba(34, 197, 94, .35);
-}
-
-.war-base.is-damaged .war-base-emblem {
-    border-color: rgba(245, 158, 11, .38);
-}
+.war-base.is-cleared { opacity: .66; }
+.war-base.is-cleared .war-base-emblem { border-color: rgba(34, 197, 94, .35); }
+.war-base.is-damaged .war-base-emblem { border-color: rgba(245, 158, 11, .38); }
 
 .war-detail-panel {
     position: sticky;
@@ -543,9 +507,7 @@
 
 .war-detail-panel header p,
 .war-detail-panel header h2,
-.war-detail-panel header span {
-    margin: 0;
-}
+.war-detail-panel header span { margin: 0; }
 
 .war-detail-panel header p,
 .war-detail-panel header span {
@@ -577,15 +539,8 @@
     background: rgba(212, 167, 44, .035);
 }
 
-.war-detail-score strong {
-    color: #f4c94f;
-    font-size: 1.25rem;
-}
-
-.war-detail-score span {
-    color: var(--war-muted);
-    font-size: .75rem;
-}
+.war-detail-score strong { color: #f4c94f; font-size: 1.25rem; }
+.war-detail-score span { color: var(--war-muted); font-size: .75rem; }
 
 .war-detail-panel section {
     padding: 16px 18px;
@@ -600,9 +555,7 @@
     text-transform: uppercase;
 }
 
-.war-detail-row,
-.war-mini-row,
-.war-assignment-item {
+.war-detail-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -611,88 +564,20 @@
     font-size: .74rem;
 }
 
-.war-detail-row + .war-detail-row,
-.war-mini-row + .war-mini-row {
-    border-top: 1px solid rgba(42, 48, 56, .7);
-}
+.war-detail-row + .war-detail-row { border-top: 1px solid rgba(42, 48, 56, .7); }
+.war-detail-row span { color: var(--war-muted); }
 
-.war-detail-row span {
-    color: var(--war-muted);
-}
-
-.war-assignment-item em {
-    margin-left: auto;
-    color: var(--war-amber);
-    font-size: .65rem;
-    font-style: normal;
-    text-transform: capitalize;
-}
-
-.war-assignment-item em.is-completed {
-    color: var(--war-green);
-}
-
-.war-assignment-item em.is-changed {
-    color: var(--war-red);
-}
-
-.war-assignment-item button {
-    border: 0;
-    background: none;
-    color: var(--war-muted);
-    font-size: 1rem;
-}
-
-.war-assignment-form {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    margin-top: 9px;
-}
-
-.war-assignment-form select {
-    min-width: 0;
-    padding: 0 8px;
-    border-radius: 7px;
-}
-
-.war-assignment-form select[name="playerTag"] {
-    grid-column: 1 / -1;
-}
-
-.war-assignment-form select + select {
-    width: 100%;
-    border-left: 1px solid var(--war-line);
-    border-radius: 7px;
-}
-
-.war-assignment-form select[name="type"] {
-    width: 100%;
-}
-
-.war-assignment-form button {
-    grid-column: 1 / -1;
-    border: 1px solid rgba(212, 167, 44, .25);
-    border-radius: 7px;
-}
-
-.war-recommendation {
-    display: grid;
-    gap: 3px;
-    padding: 10px;
-    border: 1px solid rgba(212, 167, 44, .22);
-    border-radius: 8px;
-    background: rgba(212, 167, 44, .04);
+.war-mini-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 0;
     font-size: .74rem;
 }
 
-.war-recommendation + .war-recommendation {
-    margin-top: 7px;
-}
-
-.war-recommendation span,
-.war-recommendation small {
-    color: var(--war-muted);
+.war-mini-row + .war-mini-row {
+    border-top: 1px solid rgba(42, 48, 56, .7);
 }
 
 .war-stats-grid {
@@ -759,14 +644,6 @@
     border-bottom: 1px dashed var(--war-line);
 }
 
-.war-map-page {
-    margin-bottom: 20px;
-}
-
-.war-map-expanded {
-    grid-template-columns: repeat(2, minmax(250px, 1fr));
-}
-
 .war-roster-toolbar {
     margin-bottom: 12px;
     border: 1px solid var(--war-line);
@@ -793,6 +670,11 @@
     border-radius: 10px;
 }
 
+.war-player-card:focus-within {
+    border-color: color-mix(in srgb, var(--war-gold) 52%, var(--war-line));
+    background: color-mix(in srgb, var(--war-gold) 6%, var(--war-surface));
+}
+
 .war-player-main {
     display: flex;
     align-items: center;
@@ -805,6 +687,33 @@
 
 .war-player-main > span:last-child {
     display: grid;
+}
+
+.war-player-identity {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.war-player-townhall {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    min-height: 32px;
+}
+
+.war-player-townhall .compete-townhall {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.war-player-copy {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
 }
 
 .war-player-main small {
@@ -935,6 +844,40 @@
     color: #f27a7a;
 }
 
+.war-history-row.is-cwl,
+.war-history-row.is-grouped {
+    border-color: color-mix(in srgb, var(--war-gold) 48%, var(--war-line));
+    background: linear-gradient(105deg, rgba(212, 167, 44, .1), var(--war-surface) 42%);
+}
+
+.war-history-row.is-cwl .war-history-result,
+.war-history-row.is-grouped .war-history-result {
+    width: auto;
+    min-width: 42px;
+    padding: 0 8px;
+    background: rgba(212, 167, 44, .15);
+    color: var(--war-gold);
+    font-size: .62rem;
+    letter-spacing: .06em;
+}
+
+.war-history-cwl-summary,
+.war-history-cwl-meta {
+    display: grid;
+    gap: 3px;
+}
+
+.war-history-cwl-summary strong,
+.war-history-cwl-meta strong {
+    color: var(--war-gold);
+    font-size: .78rem;
+}
+
+.war-history-cwl-summary small,
+.war-history-cwl-meta small {
+    line-height: 1.35;
+}
+
 @media (max-width: 1100px) {
     .war-board-header {
         align-items: flex-start;
@@ -1038,12 +981,10 @@
         flex-direction: column;
     }
 
-    .war-map,
-    .war-map-expanded {
+    .war-map {
         grid-template-columns: 1fr;
         gap: 7px;
         padding: 14px;
-        background: var(--war-canvas);
     }
 
     .war-map::after {
@@ -1087,7 +1028,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .war-base,
     .war-board-content {
         transition: none;
     }

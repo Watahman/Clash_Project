@@ -1,0 +1,30 @@
+/* Shared game shell and action controls. */
+.game-shell { margin-bottom: 4rem; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.game-toolbar { display: flex; min-height: 4.25rem; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--border); padding: .75rem 1rem; background: var(--surface-subtle); }
+.game-toolbar-leading { display: flex; align-items: center; gap: .7rem; }
+.game-toolbar-icon { width: 2rem; height: 2rem; display: grid; place-items: center; color: var(--game-accent); }
+.game-toolbar-icon img { width: 1.25rem; height: 1.25rem; }
+.game-mode-tabs { display: inline-flex; gap: .15rem; padding: .2rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.game-mode-tabs button { min-height: 2.75rem; border-radius: 6px; padding: 0 .85rem; background: transparent; color: var(--text-muted); font-weight: 750; }
+.game-mode-tabs button:hover { color: var(--text); }
+.game-mode-tabs button.is-active { background: var(--game-accent-soft); color: var(--text); }
+.game-toolbar-note { max-width: 42rem; margin: 0; color: var(--text-muted); font-size: .75rem; line-height: 1.45; text-align: right; }
+
+.game-action { min-height: 2.9rem; border: 1px solid var(--accent); border-radius: 8px; padding: 0 1rem; background: var(--accent); color: #17130b; font-weight: 850; transition: background-color 160ms var(--cp-ease-standard, ease), border-color 160ms var(--cp-ease-standard, ease), transform 120ms var(--cp-ease-standard, ease); }
+.game-action:hover:not(:disabled) { border-color: var(--accent-strong); background: var(--accent-strong); transform: translateY(-1px); }
+.game-action:active:not(:disabled) { transform: translateY(0) scale(.98); }
+.game-action:disabled { cursor: not-allowed; opacity: .48; }
+.game-action.secondary { border-color: var(--border-strong); background: var(--surface); color: var(--text); }
+.game-action.secondary:hover:not(:disabled) { border-color: var(--accent); background: var(--surface-raised); }
+
+@media (max-width: 42rem) {
+    .game-toolbar { align-items: stretch; flex-direction: column; }
+    .game-toolbar-leading { align-items: stretch; }
+    .game-toolbar-note { max-width: none; text-align: left; }
+    .game-mode-tabs { flex: 1; }
+    .game-mode-tabs button { flex: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .game-action { transition: none; }
+}

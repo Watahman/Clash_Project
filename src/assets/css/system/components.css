@@ -1,0 +1,113 @@
+.cp-button,
+button.cp-button,
+a.cp-button {
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    font: 700 .8125rem/1 var(--cp-font-ui);
+    gap: 8px;
+    height: 40px;
+    justify-content: center;
+    padding: 0 14px;
+    text-decoration: none;
+    transition: background-color 160ms var(--cp-ease-standard), border-color 160ms var(--cp-ease-standard), color 160ms var(--cp-ease-standard), transform 160ms var(--cp-ease-standard);
+}
+
+.cp-button--primary { background: var(--cp-brand); color: #11161d; }
+.cp-button--primary:hover { background: var(--cp-brand-hover); transform: translateY(-1px); }
+.cp-button--secondary { background: var(--cp-surface-2); border-color: var(--cp-border-2); color: var(--cp-text-1); }
+.cp-button--ghost { background: transparent; color: var(--cp-text-2); }
+.cp-button--danger {
+    background: transparent;
+    border-color: var(--cp-danger);
+    color: var(--cp-danger);
+}
+.cp-button--danger:hover,
+.cp-button--danger:focus-visible,
+.cp-button--danger:active {
+    background: var(--cp-danger-soft);
+    border-color: var(--cp-danger);
+    color: var(--cp-danger);
+}
+.cp-button--danger:focus-visible { outline-color: var(--cp-danger); }
+.cp-button--large { font-size: .875rem; height: 48px; padding-inline: 18px; }
+.cp-icon-button { height: 40px; padding: 0; width: 40px; }
+
+html[data-theme="light"] .cp-button--primary {
+    background: #e7b957;
+    border-color: #e7b957;
+    color: #17202a;
+}
+
+html[data-theme="light"] .cp-button--primary:hover {
+    background: #dda944;
+    border-color: #dda944;
+    color: #17202a;
+}
+
+.cp-panel {
+    background: var(--cp-surface-1);
+    border: 1px solid var(--cp-border-1);
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.cp-module-card {
+    --cp-module-accent: var(--cp-brand);
+    background: var(--cp-surface-1);
+    border: 1px solid var(--cp-border-1);
+    border-radius: 12px;
+    color: var(--cp-text-1);
+    display: flex;
+    flex-direction: column;
+    min-height: 190px;
+    padding: 24px;
+    position: relative;
+    text-decoration: none;
+    transition: border-color 160ms var(--cp-ease-standard), transform 160ms var(--cp-ease-standard);
+}
+
+.cp-module-card:hover { border-color: var(--cp-border-2); transform: translateY(-2px); }
+.cp-module-card--coming-soon { cursor: not-allowed; opacity: .72; }
+.cp-module-card--coming-soon:hover { border-color: var(--cp-border-1); transform: none; }
+.cp-module-card--coming-soon .workspace-coming-soon-badge { margin-inline-start: .25rem; }
+.cp-module-card::before { background: var(--cp-module-accent); border-radius: 999px; content: ""; height: 2px; left: 24px; position: absolute; top: 0; width: 36px; }
+.cp-module-card[data-pillar="manage"] { --cp-module-accent: var(--cp-manage); }
+.cp-module-card[data-pillar="plan"] { --cp-module-accent: var(--cp-plan); }
+.cp-module-card[data-pillar="compete"] { --cp-module-accent: var(--cp-compete); }
+.cp-module-card[data-pillar="play"] { --cp-module-accent: var(--cp-play); }
+.cp-module-card[data-pillar="progress"] { --cp-module-accent: var(--cp-progress); }
+
+.cp-badge {
+    align-items: center;
+    background: var(--cp-surface-3);
+    border-radius: 999px;
+    color: var(--cp-text-2);
+    display: inline-flex;
+    font-size: .6875rem;
+    font-weight: 700;
+    height: 24px;
+    padding: 0 8px;
+}
+
+.cp-badge--success { background: var(--cp-success-soft); color: var(--cp-success); }
+.cp-badge--warning { background: var(--cp-warning-soft); color: var(--cp-warning); }
+.cp-badge--danger { background: var(--cp-danger-soft); color: var(--cp-danger); }
+.cp-badge--info { background: var(--cp-info-soft); color: var(--cp-info); }
+
+.cp-empty-state {
+    margin-inline: auto;
+    max-width: 480px;
+    padding: 40px 24px;
+    text-align: center;
+}
+
+.cp-empty-state h2 { font-size: 1.125rem; margin-bottom: 8px; }
+.cp-empty-state p { color: var(--cp-text-2); margin: 0 0 24px; }
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--cp-brand);
+    outline-offset: 2px;
+}

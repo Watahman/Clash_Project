@@ -152,8 +152,21 @@ body.workspace-app .workspace-content input:focus-visible { outline: 0.18rem sol
 .button-full { width: 100%; }
 .link-button { background: none; padding: 0; color: var(--text-muted); }
 .link-button:hover { color: var(--text); }
-.theme-button { display: grid; width: 2.45rem; height: 2.45rem; flex: 0 0 auto; place-items: center; border: 0.0625rem solid var(--border) !important; border-radius: var(--radius-small); background: transparent; padding: 0; color: var(--text-muted); }
+.theme-button { position: relative; display: grid; width: 2.45rem; height: 2.45rem; flex: 0 0 auto; place-items: center; overflow: hidden; border: 0.0625rem solid var(--border) !important; border-radius: var(--radius-small); background: transparent; padding: 0; color: var(--text-muted); transition: background 180ms ease-out, border-color 180ms ease-out, color 180ms ease-out, transform 180ms ease-out; }
 .theme-button:hover { background: var(--surface-raised); color: var(--text); }
+.theme-button:active { transform: scale(0.96); }
+.theme-button-icons { position: relative; display: grid; width: 1.15rem; height: 1.15rem; place-items: center; }
+.theme-icon { grid-area: 1 / 1; width: 100%; height: 100%; overflow: visible; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; transition: opacity 180ms ease-out, transform 360ms cubic-bezier(0.22, 1, 0.36, 1); }
+.theme-icon-sun { opacity: 1; transform: rotate(0deg) scale(1); }
+.theme-icon-moon { opacity: 0; transform: rotate(90deg) scale(0.45); }
+:root[data-theme="light"] .theme-icon-sun { opacity: 0; transform: rotate(-90deg) scale(0.45); }
+:root[data-theme="light"] .theme-icon-moon { opacity: 1; transform: rotate(0deg) scale(1); }
+
+@supports (view-transition-name: root) {
+    :root { view-transition-name: root; }
+    ::view-transition-old(root),
+    ::view-transition-new(root) { animation: none; }
+}
 .language-select { width: auto; min-width: 4.5rem; height: 2.45rem; border: 0.0625rem solid var(--border); border-radius: var(--radius-small); background: var(--surface-raised); padding: 0.35rem 1.8rem 0.35rem 0.6rem; color: var(--text-muted); font-size: 0.75rem; }
 
 .language-switcher { position: relative; flex: 0 0 auto; }
@@ -357,7 +370,7 @@ body.workspace-app > footer { display: none !important; }
 .workspace-sidebar-toggle:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--border-strong)) !important; background: var(--surface-raised); color: var(--accent-strong); transform: translateY(-50%) scale(1.05); }
 .workspace-sidebar-toggle:active { transform: translateY(-50%) scale(0.96); }
 .workspace-sidebar-toggle svg { width: 0.9rem; height: 0.9rem; stroke: currentColor; transition: transform 220ms ease-out; }
-.workspace-nav { display: flex; flex: 1; min-height: 0; align-items: stretch; flex-direction: column; gap: 0; overflow-y: auto; padding: 1rem 0.75rem; }
+.workspace-nav { display: flex; flex: 1; min-height: 0; align-items: stretch; flex-direction: column; gap: 0; overflow-y: auto; overflow-x: hidden; padding: 1rem 0.75rem; }
 .workspace-nav p { flex: 0 0 auto; margin: 1.2rem 0.65rem 0.45rem; color: #77838f; font-size: 0.61rem; font-weight: 750; letter-spacing: 0.12em; line-height: 1; text-transform: uppercase; }
 .workspace-nav a { display: flex; width: 100%; min-height: 2.65rem; flex: 0 0 auto; align-items: center; gap: 0.75rem; margin: 0; border-radius: 0.4rem; padding: 0.6rem 0.75rem; color: #98a4af; text-align: left; font-size: 0.82rem; line-height: 1.2; }
 .workspace-nav a svg { width: 1rem; height: 1rem; flex: 0 0 auto; color: #77838f; stroke: currentColor; }
@@ -639,6 +652,13 @@ body.workspace-app > .overlay { grid-column: 1 / -1; }
 
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+    .theme-button,
+    .theme-icon { transition: none !important; }
+    @supports (view-transition-name: root) {
+        ::view-transition-group(root),
+        ::view-transition-old(root),
+        ::view-transition-new(root) { animation: none !important; }
+    }
 }
 
 /* Availability labels for disabled tournament tools. */

@@ -11,10 +11,10 @@ import { escapeCssIdentifier, getCardTag, normalizeTag } from './cwl-utils.js';
 import {
     CWL_PLAN_SCHEMA_VERSION,
     normalizePlanDocument,
-    normalizePlannedDays,
     normalizeRosterStatus,
     validatePlanDocument
 } from './cwl-plan-schema.js';
+import { getTownHallAsset, installImageFallback } from '../assets/entity-assets.js';
 
 const PLAN_CACHE_KEY = 'clashtools_planner_cache';
 const PLAN_RECOVERY_KEY = 'clashtools_planner_recovery_v1';
@@ -159,12 +159,15 @@ function readPlayerCard(player) {
     };
     const rosterStatus = normalizeRosterStatus(player.dataset.rosterStatus);
     if (rosterStatus) snapshot.rosterStatus = rosterStatus;
-    const plannedDays = normalizePlannedDays(player.dataset.plannedDays);
-    if (plannedDays.length) snapshot.plannedDays = plannedDays;
+    const legacySchedule = String(player.dataset.legacySchedule || '')
+        .split(',')
+        .map(Number)
+        .filter(day => Number.isInteger(day) && day >= 1 && day <= 7);
+    if (legacySchedule.length) snapshot.plannedDays = legacySchedule;
     return snapshot;
 }
 
-function serializePlan() {
+function serializePlan({ persistCache = true } = {}) {
     const pollMeta = getActiveCwlPollMeta();
     const document = {
         schemaVersion: CWL_PLAN_SCHEMA_VERSION,
@@ -189,11 +192,35 @@ function serializePlan() {
         }
     };
     const validated = validatePlanDocument(document);
-    localStorage.setItem(
-        'clashtools_last_planner_players',
-        JSON.stringify([...validated.freePlayers, ...validated.clans.flatMap(clan => clan.players)])
-    );
+    if (persistCache) {
+        localStorage.setItem(
+            'clashtools_last_planner_players',
+            JSON.stringify([...validated.freePlayers, ...validated.clans.flatMap(clan => clan.players)])
+        );
+    }
     return validated;
+}
+
+function freezeDeep(value, seen = new WeakSet()) {
+    if (!value || typeof value !== 'object' || seen.has(value)) return value;
+    seen.add(value);
+    Object.values(value).forEach(child => freezeDeep(child, seen));
+    return Object.freeze(value);
+}
+
+function exportTimestamp(now) {
+    const date = now instanceof Date ? new Date(now.getTime()) : new Date(now ?? Date.now());
+    return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
+}
+
+export function getCurrentPlanSnapshot({ now } = {}) {
+    const info = serializePlan({ persistCache: false });
+    const name = String(planName?.value || '').trim() || t('cwl.defaultPlanName');
+    return freezeDeep({
+        name,
+        exportedAt: exportTimestamp(now),
+        ...info
+    });
 }
 
 export function savePlan(options = {}) {
@@ -595,7 +622,8 @@ async function enrichPlayer(tag, token, signal) {
 
             const image = card.querySelector('.cwl-player-townhall-foto');
             if (image) {
-                image.src = `../assets/css/pictures/townhalls/Town_Hall${townHallLevel}.png`;
+                image.src = getTownHallAsset(townHallLevel);
+                installImageFallback(image);
             }
         });
     } catch (error) {

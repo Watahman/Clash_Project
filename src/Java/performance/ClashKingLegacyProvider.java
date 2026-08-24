@@ -16,6 +16,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/** Adapter for the released ClashKing legacy player-war history endpoint. */
 public final class ClashKingLegacyProvider implements HistoricalPlayerDataProvider {
     private static final int HISTORY_DAYS = 180;
     private final ClashKingHttpClient client;
@@ -98,7 +99,9 @@ public final class ClashKingLegacyProvider implements HistoricalPlayerDataProvid
                 int defenderTownHall = HistoricalJson.integer(
                         defender, 0, "townhallLevel", "townHallLevel"
                 );
-                attacks.add(toAttack(tag, type, endTime, attackerTownHall, defenderTownHall, warId, attack));
+                attacks.add(toAttack(
+                        tag, type, endTime, attackerTownHall, defenderTownHall, warId, attack
+                ));
             }
         }
 

@@ -12,10 +12,12 @@
     <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
     <script src="../assets/js/Data/runtime-config.js"></script>
-    <script type="module" src="../assets/js/pages/public-site.js"></script>
+    <script type="module" src="../assets/js/pages/public-site.js?v=20260821-public-pages"></script>
     <script type="module" src="../assets/js/pages/login.js"></script>
-    <link rel="stylesheet" href="../assets/css/light-theme.css">
+    <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
+    <link rel="stylesheet" href="/assets/css/public-v2.css?v=20260812-redesign">
+    <link rel="stylesheet" href="/assets/css/pages/auth.css">
 </head>
 <body class="auth-page">
 <a class="skip-link" href="#auth-form" data-i18n="a11y.skipForm">Skip to form</a>
@@ -24,16 +26,22 @@
     <div class="auth-header-actions">
         <button type="button" data-language-control data-i18n="header.language">Language</button>
         <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme"><span aria-hidden="true">◐</span></button>
-        <a class="link-button" href="../index.html" data-i18n="auth.backHome">← Back to home</a>
+        <a class="link-button auth-home-link" href="../index.html" data-i18n-aria-label="auth.backHome" aria-label="Back to home">
+            <svg class="auth-home-link-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M19 12H5m6 6-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            <span class="auth-home-link-label" data-i18n="auth.backHome">Back to home</span>
+        </a>
     </div>
 </header>
 <main class="auth-layout">
     <section class="auth-context" aria-labelledby="auth-context-title">
         <p class="eyebrow" data-i18n="auth.welcomeBack">Welcome back</p>
-        <h1 id="auth-context-title" data-i18n="auth.plansReady">Your plans are ready.</h1>
-        <p data-i18n="auth.loginContext">Log in to continue in Planner, Operation Board and Clan Families.</p>
-        <div class="auth-proof"><span aria-hidden="true">✓</span><p><strong data-i18n="auth.noNewWorkflow">No new workflow to learn</strong><small data-i18n="auth.dashboardDirect">Go straight to your personal dashboard.</small></p></div>
-        <div class="auth-proof"><span aria-hidden="true">✓</span><p><strong data-i18n="auth.saveVisible">Save status stays visible</strong><small data-i18n="auth.saveVisibleDesc">Always know which plan is loaded and saved.</small></p></div>
+        <h1 id="auth-context-title" data-i18n="auth.plansReady">Your ClashPanel workspace is ready.</h1>
+        <p data-i18n="auth.loginContext">Continue with your clans, plans, stats, achievements and games.</p>
+        <div class="auth-proof"><span aria-hidden="true">01</span><p><strong data-i18n="auth.connectedTools">One connected workspace</strong><small data-i18n="auth.connectedToolsDesc">Planning, clan tools, progress and games share one account.</small></p></div>
+        <div class="auth-proof"><span aria-hidden="true">02</span><p><strong data-i18n="auth.accountsStay">Linked accounts stay with you</strong><small data-i18n="auth.accountsStayDesc">Your verified Clash accounts remain available across tools.</small></p></div>
+        <div class="auth-proof"><span aria-hidden="true">03</span><p><strong data-i18n="auth.continueWork">Continue where you left off</strong><small data-i18n="auth.continueWorkDesc">Return to recent plans and active clan work.</small></p></div>
     </section>
     <section class="auth-form-wrap">
         <form class="auth-form" id="auth-form">

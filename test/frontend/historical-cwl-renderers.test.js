@@ -118,6 +118,38 @@ describe('Historical CWL renderers', () => {
         expect(selectSeason).toHaveBeenCalledWith('2026-06');
     });
 
+    it('shows records as compact status chips without styling the card border', () => {
+        const seasons = [
+            overviewSeason('2026-04', 'Master League III', 2.1, 2.2),
+            overviewSeason('2026-05', 'Master League II', 2.2, 2.2),
+            overviewSeason('2026-06', 'Master League I', 2.3, 2.1)
+        ];
+        seasons[0].summary.record = { wins: 2, losses: 4, draws: 1 };
+        seasons[1].summary.record = { wins: 3, losses: 3, draws: 1 };
+
+        const container = document.createElement('section');
+        renderHistoricalOverview(container, {
+            chronological: seasons,
+            seasons: [...seasons].reverse(),
+            count: 3,
+            promotions: 0,
+            relegations: 0,
+            averageFinish: 2,
+            insights: []
+        });
+
+        expect(Array.from(container.querySelectorAll(
+            '.op-history-timeline .op-history-record-tone'
+        )).map(status => [status.dataset.result, status.textContent.trim()]))
+            .toEqual([
+                ['loss', 'Losing record'],
+                ['draw', 'Even record'],
+                ['win', 'Winning record']
+            ]);
+        expect(container.querySelector('.op-history-timeline button[data-result]'))
+            .toBeNull();
+    });
+
     it('shows historical participation instead of planning state', () => {
         document.body.innerHTML = `
             <table><thead><tr>

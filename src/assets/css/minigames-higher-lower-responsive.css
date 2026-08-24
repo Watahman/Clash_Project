@@ -1,0 +1,82 @@
+/* Higher or Lower responsive and reduced-motion behavior. */
+@media (max-width: 70rem) {
+    .hl-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .hl-sidebar {
+        order: 2;
+        border-right: 0;
+        border-top: 1px solid var(--border);
+    }
+
+    .hl-board {
+        order: 1;
+    }
+}
+
+@media (max-width: 42rem) {
+    .hl-filter {
+        min-width: 0;
+    }
+
+    .hl-board-header {
+        display: grid;
+    }
+
+    .hl-metric {
+        justify-self: start;
+    }
+
+    .hl-arena {
+        grid-template-columns: 1fr;
+        gap: .6rem;
+    }
+
+    .hl-card {
+        width: 100%;
+        min-height: 13.5rem;
+    }
+
+    .hl-card-media {
+        width: 5.2rem;
+        height: 5.2rem;
+    }
+
+    .hl-card-media img {
+        width: 4.6rem;
+        height: 4.6rem;
+    }
+
+    .hl-versus {
+        width: 2.4rem;
+        height: 2.4rem;
+        justify-self: center;
+        margin: -.15rem 0;
+    }
+
+    .hl-choice-row {
+        grid-template-columns: 1fr;
+    }
+
+    .hl-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .hl-actions .game-action {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hl-card,
+    .hl-choice,
+    .hl-feedback {
+        transition: none;
+    }
+
+    .hl-result.is-visible {
+        animation: none;
+    }
+}

@@ -1,5 +1,8 @@
+import { THEME_TOGGLE_MARKUP } from '../theme/theme-toggle-markup.js';
+
 const PUBLIC_NAV_ITEMS = Object.freeze([
     { id: 'tools', href: '/#features', key: 'public.nav.tools', label: 'Tools' },
+    { id: 'games', href: '/minigames', key: null, label: 'Games' },
     { id: 'guides', href: '/guides', key: 'public.nav.guides', label: 'Guides' },
     { id: 'methodology', href: '/methodology', key: 'public.nav.methodology', label: 'Methodology' },
     { id: 'about', href: '/about', key: 'public.nav.about', label: 'About' },
@@ -7,11 +10,7 @@ const PUBLIC_NAV_ITEMS = Object.freeze([
 ]);
 
 const TOOL_PATHS = new Set([
-    '/',
-    '/cwl-planner',
-    '/cwl-tracker',
-    '/clan-management',
-    '/bracket-generator'
+    '/'
 ]);
 
 const CAPABILITY_LABEL_KEYS = Object.freeze({
@@ -32,6 +31,7 @@ function normalizedPath(pathname = window.location.pathname) {
 function currentPublicSection(pathname) {
     const normalized = normalizedPath(pathname);
 
+    if (normalized === '/minigames') return 'games';
     if (TOOL_PATHS.has(normalized)) return 'tools';
     if (normalized === '/guides') return 'guides';
     if (normalized === '/methodology') return 'methodology';
@@ -43,7 +43,8 @@ function currentPublicSection(pathname) {
 function navMarkup(activeSection) {
     return PUBLIC_NAV_ITEMS.map(item => {
         const current = item.id === activeSection ? ' aria-current="page"' : '';
-        return `<a href="${item.href}" data-i18n="${item.key}"${current}>${item.label}</a>`;
+        const translation = item.key ? ` data-i18n="${item.key}"` : '';
+        return `<a href="${item.href}"${translation}${current}>${item.label}</a>`;
     }).join('');
 }
 
@@ -64,9 +65,7 @@ export function normalizePublicHeader(root = document) {
         </nav>
         <div class="public-actions">
             <button type="button" data-language-control data-i18n="header.language">Language</button>
-            <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme">
-                <span aria-hidden="true">◐</span>
-            </button>
+            <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme">${THEME_TOGGLE_MARKUP}</button>
             <a class="link-button" href="/subpages/login.html" data-i18n="auth.login">Log in</a>
             <a class="button button-primary" href="/subpages/register.html" data-i18n="public.startFree">Start for free</a>
         </div>
@@ -95,10 +94,10 @@ export function normalizePublicFooter(root = document) {
                 <a href="/methodology" data-i18n="public.footer.methodology">Methodology</a>
                 <a href="/about" data-i18n="public.footer.about">About</a>
                 <a href="/changelog" data-i18n="public.footer.changelog">Changelog</a>
-                <a href="/subpages/privacy" data-i18n="public.privacy">Privacy</a>
-                <a href="/subpages/cookies" data-i18n="public.cookies">Cookies</a>
-                <a href="/subpages/terms" data-i18n="public.terms">Terms of use</a>
-                <a href="/subpages/contact" data-i18n="public.contact">Contact</a>
+                <a href="/privacy" data-i18n="public.privacy">Privacy</a>
+                <a href="/cookies" data-i18n="public.cookies">Cookies</a>
+                <a href="/terms" data-i18n="public.terms">Terms of use</a>
+                <a href="/contact" data-i18n="public.contact">Contact</a>
                 <a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer" data-i18n="public.fanPolicy">Supercell Fan Content Policy</a>
                 <button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button>
             </nav>

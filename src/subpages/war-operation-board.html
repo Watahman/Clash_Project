@@ -5,74 +5,77 @@
     <meta name="robots" content="noindex">
     <script src="../assets/js/Data/analytics.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Track a regular Clash of Clans war live, inspect every base and coordinate attacks.">
+    <meta name="description" data-compete-content="war.documentDescription" content="Track a regular Clash of Clans war live, inspect every base and coordinate attacks.">
     <link rel="stylesheet" href="../assets/css/workspace-loading.css">
     <script src="../assets/js/shell/workspace-bootstrap.js"></script>
-    <title>Clan War Operation Board · ClashPanel</title>
+    <title data-compete-i18n="war.documentTitle">Clan War Operation Board · ClashPanel</title>
     <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="../assets/css/profile-overlay.css">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
     <link rel="stylesheet" href="../assets/css/cwl-player-performance-popover.css">
     <link rel="stylesheet" href="../assets/css/war-operation-board.css?v=20260729-2">
-    <link rel="stylesheet" href="../assets/css/light-theme.css">
+    <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
+    <link rel="stylesheet" href="../assets/css/workspace-v2.css?v=20260812-redesign">
+    <link rel="stylesheet" href="../assets/css/war-operation-board-webby.css?v=20260807-1">
+    <link rel="stylesheet" href="../assets/css/compete-board.css">
+    <link rel="stylesheet" href="../assets/css/war-board-selection.css">
     <script src="../assets/js/Data/runtime-config.js"></script>
-    <script type="module" src="../assets/js/shell/workspace-shell.js"></script>
+    <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260812-redesign"></script>
     <script type="module" src="../assets/js/pages/war-operation-board.js?v=20260729-3"></script>
 </head>
 <body class="workspace-app" data-workspace-page="warOperation">
-<main class="war-board" id="main-content">
+<main class="war-board war-board--webby compete-module" id="main-content">
     <header class="war-board-header">
         <div>
-            <p class="page-kicker">Regular Clan War</p>
-            <h1>Clan War Operation Board</h1>
-            <p>Live score, base state and attack decisions for one regular war.</p>
+            <p class="page-kicker" data-compete-i18n="war.heroKicker">Regular Clan War</p>
+            <h1 data-compete-i18n="war.heroTitle">Clan War Operation Board</h1>
+            <p data-compete-i18n="war.heroLead">Live score, base state and attack decisions for one regular war.</p>
         </div>
-        <div class="war-board-controls">
+        <div class="war-board-controls compete-contextbar">
             <label class="war-clan-control">
-                <span>Clan</span>
-                <select id="war-clan-select" aria-label="Select a clan">
-                    <option value="">Select a linked clan</option>
+                <span data-compete-i18n="war.clanLabel">Clan</span>
+                <select id="war-clan-select" data-compete-aria-label="war.selectClan" aria-label="Select a clan">
+                    <option value="" data-compete-i18n="war.selectLinkedClan">Select a linked clan</option>
                 </select>
             </label>
             <form id="war-tag-form" class="war-tag-form">
-                <label class="sr-only" for="war-tag-input">Clan tag</label>
-                <input id="war-tag-input" placeholder="#CLANTAG" maxlength="16" autocomplete="off">
-                <button type="submit">Open</button>
+                <label class="sr-only" for="war-tag-input" data-compete-i18n="war.clanTag">Clan tag</label>
+                <input id="war-tag-input" data-compete-placeholder="war.clanTag" placeholder="Clan tag" maxlength="16" autocomplete="off">
+                <button type="submit" data-compete-i18n="war.open">Open</button>
             </form>
             <button class="war-refresh-button" id="war-refresh" type="button" disabled>
-                <span aria-hidden="true">↻</span> Refresh
+                <span aria-hidden="true">↻</span> <span data-compete-i18n="war.refresh">Refresh</span>
             </button>
         </div>
     </header>
 
-    <section class="war-empty-state" id="war-empty-state">
-        <span class="war-empty-mark" aria-hidden="true">⚔</span>
+    <section class="war-empty-state" id="war-empty-state" aria-live="polite">
+        <span class="war-empty-mark" aria-hidden="true"></span>
         <div>
-            <h2>Select a clan to open its current regular war</h2>
-            <p>Linked Clan Family clans appear above. You can also enter any public clan tag.</p>
+            <h2 data-war-empty-title data-compete-i18n="war.empty.selectTitle">Select a clan to open its current regular war</h2>
+            <p data-war-empty-copy data-compete-i18n="war.empty.selectCopy">Linked Clan Family clans appear above. You can also enter any public clan tag.</p>
         </div>
     </section>
 
     <section class="war-board-content" id="war-board-content" hidden>
         <div class="war-score-strip" id="war-score-strip" aria-live="polite"></div>
-        <nav class="war-tabs" aria-label="War board views">
-            <button type="button" data-war-tab="live" aria-selected="true">Live</button>
-            <button type="button" data-war-tab="map" aria-selected="false">War Map</button>
-            <button type="button" data-war-tab="roster" aria-selected="false">Roster</button>
-            <button type="button" data-war-tab="history" aria-selected="false">History</button>
+        <nav class="war-tabs" role="tablist" data-compete-aria-label="war.tabsLabel" aria-label="War board views">
+            <button id="war-tab-live" type="button" role="tab" data-war-tab="live" aria-controls="war-panel-live" aria-selected="true" tabindex="0" data-compete-i18n="war.tabLive">Live</button>
+            <button id="war-tab-roster" type="button" role="tab" data-war-tab="roster" aria-controls="war-panel-roster" aria-selected="false" tabindex="-1" data-compete-i18n="war.tabRoster">Roster</button>
+            <button id="war-tab-history" type="button" role="tab" data-war-tab="history" aria-controls="war-panel-history" aria-selected="false" tabindex="-1" data-compete-i18n="war.tabHistory">History</button>
         </nav>
 
         <div class="war-status-line" id="war-status-line" role="status" aria-live="polite"></div>
 
-        <section class="war-tab-panel" data-war-panel="live">
+        <section class="war-tab-panel" id="war-panel-live" role="tabpanel" data-war-panel="live" aria-labelledby="war-tab-live">
             <div class="war-live-grid">
                 <article class="war-primary-panel">
                     <header class="war-panel-heading">
-                        <div><p class="page-kicker">Battlefield</p><h2>Base map</h2></div>
-                        <div class="war-side-switch" role="group" aria-label="Map side">
-                            <button type="button" data-map-side="enemy" aria-pressed="true">Enemy bases</button>
-                            <button type="button" data-map-side="own" aria-pressed="false">Our bases</button>
+                        <div><p class="page-kicker" data-compete-i18n="war.battlefield">Battlefield</p><h2 data-compete-i18n="war.baseMap">Base map</h2></div>
+                        <div class="war-side-switch" role="group" data-compete-aria-label="war.mapSide" aria-label="Map side">
+                            <button type="button" data-map-side="own" aria-pressed="true" data-compete-i18n="war.ourBases">Our bases</button>
+                            <button type="button" data-map-side="enemy" aria-pressed="false" data-compete-i18n="war.enemyBases">Enemy bases</button>
                         </div>
                     </header>
                     <div class="war-map" id="war-live-map"></div>
@@ -82,35 +85,25 @@
             <section class="war-stats-grid" id="war-stats-grid"></section>
         </section>
 
-        <section class="war-tab-panel" data-war-panel="map" hidden>
-            <div class="war-map-page">
-                <header class="war-panel-heading">
-                    <div><p class="page-kicker">Full field</p><h2>War Map</h2></div>
-                    <p>Hover or select a base for player and attack details.</p>
-                </header>
-                <div class="war-map war-map-expanded" id="war-full-map"></div>
-            </div>
-        </section>
-
-        <section class="war-tab-panel" data-war-panel="roster" hidden>
+        <section class="war-tab-panel" id="war-panel-roster" role="tabpanel" data-war-panel="roster" aria-labelledby="war-tab-roster" hidden>
             <div class="war-roster-toolbar">
-                <div><p class="page-kicker">Our lineup</p><h2>Roster</h2></div>
-                <label>Filter
-                    <select id="war-roster-filter">
-                        <option value="all">All players</option>
-                        <option value="available">Attack available</option>
-                        <option value="completed">Attacks completed</option>
-                        <option value="attention">Needs attention</option>
+                <div><p class="page-kicker" data-compete-i18n="war.ourLineup">Our lineup</p><h2 data-compete-i18n="war.tabRoster">Roster</h2></div>
+                <label><span data-compete-i18n="war.filter">Filter</span>
+                    <select id="war-roster-filter" data-compete-aria-label="war.filter" aria-label="Filter">
+                        <option value="all" data-compete-i18n="war.allPlayers">All players</option>
+                        <option value="available" data-compete-i18n="war.attackAvailable">Attack available</option>
+                        <option value="completed" data-compete-i18n="war.attacksCompleted">Attacks completed</option>
+                        <option value="attention" data-compete-i18n="war.needsAttention">Needs attention</option>
                     </select>
                 </label>
             </div>
             <div class="war-roster" id="war-roster"></div>
         </section>
 
-        <section class="war-tab-panel" data-war-panel="history" hidden>
+        <section class="war-tab-panel" id="war-panel-history" role="tabpanel" data-war-panel="history" aria-labelledby="war-tab-history" hidden>
             <header class="war-panel-heading">
-                <div><p class="page-kicker">Official war log</p><h2>Recent wars</h2></div>
-                <p>Results and trends from the latest available regular wars.</p>
+                <div><p class="page-kicker" data-compete-i18n="war.officialLog">Official war log</p><h2 data-compete-i18n="war.recentWars">Recent wars</h2></div>
+                <p data-compete-i18n="war.historyLead">Results and trends from the latest available regular wars.</p>
             </header>
             <div class="war-history-summary" id="war-history-summary"></div>
             <div class="war-history-list" id="war-history-list"></div>

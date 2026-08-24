@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en" data-theme="dark" class="workspace-page-loading">
+<head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Explore the live tools in the ClashPanel workspace.">
+    <link rel="stylesheet" href="../assets/css/workspace-loading.css">
+    <script src="../assets/js/shell/workspace-bootstrap.js"></script>
+    <title>Explore · ClashPanel</title>
+    <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
+    <link rel="stylesheet" href="../assets/css/profile-overlay.css">
+    <link rel="stylesheet" href="../assets/css/workspace-system.css">
+    <script src="../assets/js/Data/runtime-config.js"></script>
+    <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260812-redesign"></script>
+    <script type="module" src="../assets/js/pages/explore.js"></script>
+    <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
+    <link rel="stylesheet" href="../assets/css/workspace-v2.css?v=20260812-redesign">
+    <link rel="stylesheet" href="../assets/css/pages/explore.css">
+</head>
+<body class="workspace-app" data-workspace-page="explore">
+<main class="workspace-explore" id="main-content">
+    <header class="workspace-page-header">
+        <p class="page-kicker" data-i18n="nav.explore">Explore</p>
+        <h1 data-i18n="explore.title">Find the right tool</h1>
+        <p data-i18n="explore.intro">Browse every live ClashPanel module by what you want to accomplish.</p>
+    </header>
+
+    <div class="explore-filters cp-tabs" role="tablist" aria-label="Filter tools" data-i18n-aria-label="explore.filterLabel">
+        <button class="cp-tab" type="button" role="tab" aria-selected="true" data-explore-filter="all" data-i18n="explore.all">All</button>
+        <button class="cp-tab" type="button" role="tab" aria-selected="false" data-explore-filter="manage" data-i18n="shell.manage">Manage</button>
+        <button class="cp-tab" type="button" role="tab" aria-selected="false" data-explore-filter="plan" data-i18n="shell.plan">Plan</button>
+        <button class="cp-tab" type="button" role="tab" aria-selected="false" data-explore-filter="compete" data-i18n="shell.compete">Compete</button>
+        <button class="cp-tab" type="button" role="tab" aria-selected="false" data-explore-filter="play" data-i18n="shell.play">Play</button>
+        <button class="cp-tab" type="button" role="tab" aria-selected="false" data-explore-filter="progress" data-i18n="shell.progression">Progress</button>
+    </div>
+
+    <section class="explore-grid" aria-live="polite" aria-label="Live tools" data-i18n-aria-label="explore.liveTools"></section>
+</main>
+<div class="profile-placeholder"></div>
+</body>
+</html>

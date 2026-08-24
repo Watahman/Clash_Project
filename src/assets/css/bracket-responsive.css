@@ -1,0 +1,158 @@
+@media (max-width: 1199px) {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-layout {
+        grid-template-columns: minmax(260px, 280px) minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-section-heading,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-header {
+        padding: 16px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-setup-content,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-board {
+        padding: 16px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-board[data-representation="round-grid"] .bracket-round-matches {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 899px) {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-page-header {
+        align-items: start;
+        flex-direction: column;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-header-note {
+        display: flex;
+        align-items: center;
+        justify-items: start;
+        gap: 8px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-setup {
+        position: static;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-board {
+        overflow-x: hidden;
+        overflow-x: clip;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-board[data-representation="round-grid"] .bracket-round-matches {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-header {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-meta {
+        justify-content: start;
+    }
+}
+
+@media (max-width: 599px) {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-page-header h1 {
+        font-size: 24px !important;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-page-header {
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-section-heading,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-result-header {
+        gap: 12px;
+        padding: 16px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-setup-content,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-board {
+        padding: 16px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-board[data-representation="round-grid"] .bracket-round-matches {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation {
+        padding: 12px 16px 0;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation-controls {
+        gap: 8px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-navigation-controls > .cp-button {
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-tabs {
+        gap: 16px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab {
+        min-height: 44px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-slot {
+        min-height: 44px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-primary-actions .cp-button,
+    body.workspace-app[data-workspace-page="bracket"] #bracket-setup-toggle {
+        min-height: 44px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] #bracket-setup-toggle {
+        width: 44px;
+        min-width: 44px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-file-actions .cp-button {
+        flex: 1 1 calc(50% - 4px);
+        min-height: 44px;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-file-actions .cp-button--danger {
+        margin-left: 0;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-return-setup {
+        width: 100%;
+        justify-content: center;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-dialog-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    body.workspace-app[data-workspace-page="bracket"] .bracket-dialog-actions .cp-button {
+        min-height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round[data-active="true"],
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round.is-active,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-match,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-slot-player,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-connector,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round.is-classic-round,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab,
+    body.workspace-app[data-workspace-page="bracket"] .bracket-round-tab::after {
+        animation: none;
+        transition: none;
+    }
+}

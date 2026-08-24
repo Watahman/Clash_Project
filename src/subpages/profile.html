@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en" data-theme="dark" class="workspace-page-loading">
+<head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Manage your ClashPanel profile, linked Clash accounts, friends and settings.">
+    <link rel="stylesheet" href="../assets/css/workspace-loading.css">
+    <script src="../assets/js/shell/workspace-bootstrap.js"></script>
+    <title>Profile · ClashPanel</title>
+    <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
+    <link rel="stylesheet" href="../assets/css/workspace-system.css">
+    <script src="../assets/js/Data/runtime-config.js"></script>
+    <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260812-redesign"></script>
+    <script type="module" src="../assets/js/pages/profile.js"></script>
+    <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
+    <link rel="stylesheet" href="../assets/css/workspace-polish.css">
+    <link rel="stylesheet" href="../assets/css/workspace-v2.css?v=20260812-redesign">
+    <link rel="stylesheet" href="../assets/css/pages/profile.css">
+</head>
+<body class="workspace-app" data-workspace-page="profile">
+<main class="profile-page" id="main-content">
+    <header class="profile-identity">
+        <span class="profile-identity-avatar" id="profile-avatar" aria-hidden="true">CT</span>
+        <div class="profile-identity-copy">
+            <p class="page-kicker" data-i18n="profile.title">Profile</p>
+            <h1 id="profile-name">Your profile</h1>
+            <p id="profile-email">Loading account…</p>
+        </div>
+        <button class="cp-button cp-button--secondary" id="profile-code" type="button" data-copy-value data-copy-state="copy" aria-label="Copy friend code" title="Copy friend code" hidden>
+            <span data-i18n="profilePage.friendCode">Friend code</span>
+            <strong id="profile-code-value"></strong>
+            <svg class="profile-code-icon profile-code-icon--copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <rect x="9" y="9" width="10" height="10" rx="2"></rect>
+                <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+            </svg>
+            <svg class="profile-code-icon profile-code-icon--check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <path d="m5 12 4 4L19 6"></path>
+            </svg>
+        </button>
+    </header>
+
+    <nav class="profile-tabs" aria-label="Profile sections" data-i18n-aria-label="profilePage.sections">
+        <button type="button" data-profile-tab="overview" aria-selected="true" data-i18n="profilePage.overview">Overview</button>
+        <button type="button" data-profile-tab="accounts" aria-selected="false" data-i18n="profile.accounts">Accounts</button>
+        <button type="button" data-profile-tab="friends" aria-selected="false" data-i18n="profile.friends">Friends</button>
+        <button type="button" data-profile-tab="settings" aria-selected="false" data-i18n="profile.settings">Settings</button>
+    </nav>
+
+    <p class="profile-page-status" id="profile-status" role="status" aria-live="polite" data-state="loading" data-i18n="profile.loading">Loading profile…</p>
+
+    <section class="profile-panel" data-profile-panel="overview" aria-labelledby="profile-overview-title">
+        <div class="profile-section-heading">
+            <div><p class="page-kicker" data-i18n="profilePage.atGlance">At a glance</p><h2 id="profile-overview-title" data-i18n="profilePage.overviewTitle">Your ClashPanel identity</h2></div>
+        </div>
+        <div class="profile-facts">
+            <article><span data-i18n="profilePage.memberSince">Member since</span><strong id="profile-member-since">—</strong></article>
+            <article><span data-i18n="profile.accounts">Accounts</span><strong id="profile-account-count">0</strong></article>
+            <article><span data-i18n="profile.friends">Friends</span><strong id="profile-friend-count">0</strong></article>
+            <article><span data-i18n="nav.groups">Clan Families</span><strong id="profile-family-count">0</strong></article>
+        </div>
+        <div class="profile-next-links">
+            <a class="profile-next-link--coming-soon" aria-disabled="true" tabindex="-1"><img src="/assets/icons/pillars/progress.svg" alt=""><span><strong><span data-i18n="nav.advancedStats">Advanced Stats</span> <small class="workspace-coming-soon-badge" data-i18n="common.comingSoon">(Coming soon)</small></strong><small data-i18n="profilePage.statsHelp">Review tracked progress for a linked account.</small></span><b data-i18n="common.comingSoon">Coming soon</b></a>
+            <a class="profile-next-link--coming-soon" aria-disabled="true" tabindex="-1"><img src="/assets/icons/war/trophy.svg" alt=""><span><strong><span data-i18n="nav.achievements">Achievements</span> <small class="workspace-coming-soon-badge" data-i18n="common.comingSoon">(Coming soon)</small></strong><small data-i18n="profilePage.achievementsHelp">See milestones across your ClashPanel activity.</small></span><b data-i18n="common.comingSoon">Coming soon</b></a>
+        </div>
+    </section>
+
+    <section class="profile-panel" data-profile-panel="accounts" aria-labelledby="profile-accounts-title" hidden>
+        <div class="profile-section-heading">
+            <div><p class="page-kicker" data-i18n="profilePage.linkedClash">Linked Clash accounts</p><h2 id="profile-accounts-title" data-i18n="profile.accounts">Accounts</h2><p data-i18n="profilePage.accountsHelp">Verified accounts can be reused across planning, Clan Families, stats and achievements.</p></div>
+            <button class="cp-button cp-button--primary" type="button" data-open-dialog="account-dialog" data-i18n="profilePage.addAccount">Add account</button>
+        </div>
+        <div class="profile-list" id="profile-account-list"></div>
+    </section>
+
+    <section class="profile-panel" data-profile-panel="friends" aria-labelledby="profile-friends-title" hidden>
+        <div class="profile-section-heading">
+            <div><p class="page-kicker" data-i18n="profilePage.connections">Connections</p><h2 id="profile-friends-title" data-i18n="profile.friends">Friends</h2></div>
+            <button class="cp-button cp-button--primary" type="button" data-open-dialog="friend-dialog" data-i18n="profile.addFriend">Add friend</button>
+        </div>
+        <div class="profile-subtabs" role="tablist" aria-label="Friend lists">
+            <button type="button" data-friend-tab="friends" aria-selected="true" data-i18n="profile.friends">Friends</button>
+            <button type="button" data-friend-tab="requests" aria-selected="false" data-i18n="profile.requests">Requests</button>
+            <button type="button" data-friend-tab="sent" aria-selected="false" data-i18n="profile.pending">Sent</button>
+        </div>
+        <div class="profile-list" id="profile-friend-list"></div>
+    </section>
+
+    <section class="profile-panel profile-settings" data-profile-panel="settings" aria-labelledby="profile-settings-title" hidden>
+        <div class="profile-section-heading"><div><p class="page-kicker" data-i18n="profilePage.preferences">Preferences & security</p><h2 id="profile-settings-title" data-i18n="profile.settings">Settings</h2></div></div>
+        <div class="profile-settings-grid">
+            <section><h3 data-i18n="settings.appearance">Appearance</h3><p data-i18n="settings.appearanceHelp">Choose how ClashPanel looks.</p><div class="profile-choice-row po-theme-options" role="group" aria-label="Appearance" data-i18n-aria-label="settings.appearance"><button type="button" class="po-theme-option" data-theme-choice="dark" aria-pressed="false"><span class="po-theme-icon" aria-hidden="true">☾</span><span data-i18n="settings.darkMode">Dark</span></button><button type="button" class="po-theme-option" data-theme-choice="light" aria-pressed="false"><span class="po-theme-icon" aria-hidden="true">☀</span><span data-i18n="settings.lightMode">Light</span></button></div></section>
+            <section><h3 data-i18n="settings.language">Language</h3><p data-i18n="settings.languageHelp">Choose the language for the entire workspace.</p><button class="cp-button cp-button--secondary" id="po-settings-language-button" type="button" data-profile-language-control data-i18n="settings.language">Language</button></section>
+            <section><h3 data-i18n="settings.account">Account</h3><p id="po-settings-email">—</p><label for="po-settings-name" data-i18n="settings.displayName">Name</label><div class="profile-inline-form"><input id="po-settings-name" type="text" autocomplete="name" maxlength="32"><button id="po-save-name" class="cp-button cp-button--primary" type="button" data-i18n="settings.save">Save</button></div></section>
+            <section><h3 data-i18n="settings.changePassword">Change password</h3><p data-i18n="settings.passwordRules">Min. 8 characters with uppercase, lowercase, number and symbol.</p><div class="profile-password-grid"><input id="po-current-password" type="password" autocomplete="current-password" data-i18n-placeholder="settings.currentPassword" placeholder="Current password"><input id="po-new-password" type="password" autocomplete="new-password" data-i18n-placeholder="settings.newPassword" placeholder="New password"><input id="po-confirm-password" type="password" autocomplete="new-password" data-i18n-placeholder="settings.confirmPassword" placeholder="Confirm password"></div><button id="po-save-password" class="cp-button cp-button--secondary" type="button" data-i18n="settings.changePassword">Change password</button></section>
+            <section><h3 data-i18n="settings.session">Session</h3><p data-i18n="settings.sessionHelp">Manage this browser.</p><div class="profile-choice-row"><button id="po-refresh-profile" class="cp-button cp-button--secondary" type="button" data-i18n="settings.refreshProfile">Refresh profile</button><button id="profile-logout" class="cp-button cp-button--danger" type="button" data-i18n="profile.logout">Log out</button></div></section>
+            <details><summary data-i18n="profilePage.advanced">Advanced troubleshooting</summary><p data-i18n="profilePage.cacheHelp">Clear locally cached workspace data if information remains out of date after refresh.</p><button id="po-clear-cache" class="cp-button cp-button--secondary" type="button" data-i18n="settings.clearCache">Clear cache</button></details>
+        </div>
+        <p id="po-settings-message" class="profile-settings-message hidden" aria-live="polite"></p>
+    </section>
+</main>
+
+<dialog class="profile-dialog" id="account-dialog"><form method="dialog"><header><div><p class="page-kicker" data-i18n="profilePage.verifyAccount">Verify account</p><h2 data-i18n="profilePage.addAccount">Add account</h2></div><button value="cancel" aria-label="Close" data-i18n-aria-label="common.close">×</button></header><p data-i18n="profilePage.accountTokenHelp">Enter the player tag and API token from the in-game settings. The token verifies ownership; ClashPanel never asks for your Supercell ID password.</p><label><span data-i18n="profilePage.playerTag">Player tag</span><input id="profile-account-tag" autocomplete="off" placeholder="#2PP" required></label><label><span data-i18n="profilePage.apiToken">API token</span><input id="profile-account-token" autocomplete="off" required></label><p class="profile-dialog-status" id="profile-account-status" role="status" aria-live="polite"></p><footer><button class="cp-button cp-button--secondary" value="cancel" data-i18n="profilePage.cancel">Cancel</button><button class="cp-button cp-button--primary" id="profile-account-submit" value="default" type="button" data-i18n="profilePage.verifyAndLink">Verify & link</button></footer></form></dialog>
+<dialog class="profile-dialog" id="friend-dialog"><form method="dialog"><header><div><p class="page-kicker" data-i18n="profilePage.connectionRequest">Connection request</p><h2 data-i18n="profile.addFriend">Add friend</h2></div><button value="cancel" aria-label="Close" data-i18n-aria-label="common.close">×</button></header><p data-i18n="profilePage.friendHelp">Use the friend code shown on another ClashPanel profile.</p><label><span data-i18n="profilePage.friendCode">Friend code</span><input id="profile-friend-code" autocomplete="off" required></label><p class="profile-dialog-status" id="profile-friend-status" role="status" aria-live="polite"></p><footer><button class="cp-button cp-button--secondary" value="cancel" data-i18n="profilePage.cancel">Cancel</button><button class="cp-button cp-button--primary" id="profile-friend-submit" value="default" type="button" data-i18n="profilePage.sendRequest">Send request</button></footer></form></dialog>
+</body>
+</html>

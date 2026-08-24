@@ -22,16 +22,12 @@ export function generateOptimizationSuggestions(input) {
     ));
     const working = normalized.players.map(player => ({
         ...player,
-        currentRole: effectiveRoles.get(player.tag) || player.currentRole,
-        plannedDays: [...player.plannedDays]
+        currentRole: effectiveRoles.get(player.tag) || player.currentRole
     }));
     const suggestions = [];
     let sequence = 0;
     const add = suggestion => {
-        const candidate = working.map(player => ({
-            ...player,
-            plannedDays: [...player.plannedDays]
-        }));
+        const candidate = working.map(player => ({ ...player }));
         applyActions(candidate, suggestion.actions);
         if (!preservesRequiredClanCoverage(normalized, working, candidate)) return false;
         sequence += 1;
@@ -204,15 +200,9 @@ function applyActions(players, actions) {
         if (!player) return;
         if (action.type === 'move') player.currentClanId = action.toClanId;
         if (action.type === 'role') player.currentRole = action.role;
-        if (action.type === 'days') {
-            player.plannedDays = [...action.days];
-            player.hasPlannedDays = true;
-        }
         if (action.type === 'free') {
             player.currentClanId = null;
             player.currentRole = '';
-            player.plannedDays = [];
-            player.hasPlannedDays = false;
         }
     });
 }
@@ -239,6 +229,5 @@ function rankedForCoverage(players, clan, assigned, roleLocks) {
 }
 
 function isEligible(player) {
-    return player.availability?.state !== 'no'
-        && (player.availability?.availableDays?.length ?? 7) > 0;
+    return player.availability?.state !== 'no';
 }

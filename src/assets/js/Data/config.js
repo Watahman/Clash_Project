@@ -29,6 +29,18 @@ export const _EXT_CWL_HISTORY = "/CWLHistory";
 export const _EXT_CWL_HISTORY_SEASONS = "/CWLHistorySeasons";
 export const _EXT_CWL_HISTORY_OVERVIEW = "/CWLHistoryOverview";
 
+export const _EXT_ADVANCED_STATS_TRACKING_START = "/AdvancedStatsTrackingStart";
+export const _EXT_ADVANCED_STATS_TRACKING_GET = "/AdvancedStatsTrackingGet";
+export const _EXT_ADVANCED_STATS_TRACKING_PAUSE = "/AdvancedStatsTrackingPause";
+export const _EXT_ADVANCED_STATS_TRACKING_RESUME = "/AdvancedStatsTrackingResume";
+export const _EXT_ADVANCED_STATS_TRACKING_STOP = "/AdvancedStatsTrackingStop";
+export const _EXT_ADVANCED_STATS_DATA_DELETE = "/AdvancedStatsDataDelete";
+export const _EXT_ADVANCED_STATS_OVERVIEW = "/AdvancedStatsOverview";
+export const _EXT_ADVANCED_STATS_UNITS = "/AdvancedStatsUnits";
+export const _EXT_ADVANCED_STATS_ARMIES = "/AdvancedStatsArmies";
+export const _EXT_ADVANCED_STATS_BATTLES = "/AdvancedStatsBattles";
+export const _EXT_ADVANCED_STATS_TRENDS = "/AdvancedStatsTrends";
+
 export const _EXT_LEAGUE_LEAGUETIERS_INFO = "/LeagueTierInfo"
 export const _EXT_LEAGUE_CAPITAL_LEAGUES = "/LeagueCapitalLeagues"
 export const _EXT_LEAGUE_LEAGUETIERS = "/LeagueTiers"
@@ -99,6 +111,3 @@ export const _EXT_SUPA_GROUP_POLL_REMIND = "/SupabaseGroupPollRemind";
 export const _EXT_SUPA_GROUP_POLL_DELETE = "/SupabaseGroupPollDelete";
 export const _EXT_SUPA_NOTIFICATIONS_GET = "/SupabaseNotificationsGet";
 export const _EXT_SUPA_NOTIFICATION_READ = "/SupabaseNotificationRead";
-export const _EXT_SUPA_WAR_ASSIGNMENTS_GET = "/SupabaseWarAssignmentsGet";
-export const _EXT_SUPA_WAR_ASSIGNMENT_SAVE = "/SupabaseWarAssignmentSave";
-export const _EXT_SUPA_WAR_ASSIGNMENT_DELETE = "/SupabaseWarAssignmentDelete";

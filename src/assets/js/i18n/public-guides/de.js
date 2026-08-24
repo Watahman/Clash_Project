@@ -3,7 +3,7 @@ export default Object.freeze({
     "guides.metaDescription": "Acht praktische Anleitungen zu fairen CWL-Kadern, Rotation, Verfügbarkeit, verpassten Angriffen, Bonusmedaillen und Auswertungen über mehrere Saisons.",
     "guides.heroKicker": "Anleitungen",
     "guides.heroTitle": "Praktische Entscheidungen statt allgemeiner Tipps.",
-    "guides.heroIntro": "Diese Anleitungen behandeln dieselben Kader-, Verfügbarkeits- und Auswertungsprobleme, die ClashPanel sichtbar macht. Jedes Beispiel ist als Beispieldaten gekennzeichnet und jede Empfehlung nennt Gründe für eine bewusste Abweichung.",
+    "guides.heroIntro": "Diese Anleitungen erklären die Kader-, Verfügbarkeits- und Auswertungsentscheidungen, die ClashPanel sichtbar macht. Jeder Ablauf nennt seine Abwägungen und wann die Clanleitung davon abweichen sollte.",
     "guides.heroMeta": "Von ClashPanel verfasst · Veröffentlicht und aktualisiert am 4. August 2026",
     "guides.tocLabel": "Liste der Anleitungen",
     "guides.tocTitle": "Acht Anleitungen",

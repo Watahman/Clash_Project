@@ -1,0 +1,289 @@
+/* Higher or Lower component structure. */
+.hl-filter {
+    display: grid;
+    min-width: min(13rem, 100%);
+    gap: .3rem;
+    color: var(--text-muted);
+    font-size: .68rem;
+    font-weight: 750;
+}
+
+.hl-filter select {
+    min-height: 2.5rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 0 .7rem;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: .78rem;
+}
+
+.hl-layout {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+}
+
+.hl-sidebar {
+    min-width: 0;
+    border-right: 1px solid var(--border);
+    padding: 1.35rem;
+    background: var(--surface-subtle);
+}
+
+.hl-board {
+    min-width: 0;
+    padding: clamp(1rem, 3vw, 2rem);
+}
+
+.hl-board-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.hl-board-header h2 {
+    margin: .2rem 0 0;
+    font-size: clamp(1.45rem, 2.8vw, 2.25rem);
+    text-wrap: balance;
+}
+
+.hl-metric {
+    display: inline-flex;
+    min-height: 2.2rem;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: .35rem .7rem;
+    background: var(--surface-subtle);
+    color: var(--game-accent);
+    font-size: .7rem;
+    font-weight: 800;
+    text-align: center;
+}
+
+.hl-prompt {
+    margin: 0 0 1rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.hl-arena {
+    display: grid;
+    grid-template-columns: minmax(0, 360px) auto minmax(0, 360px);
+    gap: clamp(.7rem, 2vw, 1.25rem);
+    justify-content: center;
+    align-items: stretch;
+}
+
+.hl-card {
+    width: min(100%, 360px);
+    min-height: 19rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    background: var(--surface-subtle);
+    text-align: center;
+    transition: border-color 180ms var(--cp-ease-standard, ease), background-color 180ms var(--cp-ease-standard, ease);
+}
+
+.hl-card.is-mystery {
+    border-color: color-mix(in srgb, var(--game-accent) 48%, var(--border));
+}
+
+.hl-card-media {
+    width: 7rem;
+    height: 7rem;
+    display: grid;
+    place-items: center;
+    margin-bottom: .2rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+}
+
+.hl-card-media img {
+    width: 6.25rem;
+    height: 6.25rem;
+    object-fit: contain;
+}
+
+.hl-card-label {
+    color: var(--text-muted);
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.hl-card h3 {
+    max-width: 18ch;
+    margin: 0;
+    font-size: clamp(1.15rem, 2.2vw, 1.65rem);
+    text-wrap: balance;
+}
+
+.hl-card-value {
+    min-height: 2.8rem;
+    display: grid;
+    place-items: center;
+    color: var(--game-accent);
+    font: 900 clamp(1.45rem, 3.2vw, 2.4rem)/1 Manrope, sans-serif;
+    font-variant-numeric: tabular-nums;
+}
+
+.hl-card-value.is-hidden-value {
+    width: 3rem;
+    border: 1px dashed var(--border-strong);
+    border-radius: 50%;
+    background: var(--surface);
+}
+
+.hl-versus {
+    align-self: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--text-muted);
+    font: 900 .68rem/1 Manrope, sans-serif;
+}
+
+.hl-choice-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .7rem;
+    max-width: 736px;
+    margin: 1rem auto 0;
+}
+
+.hl-choice {
+    min-height: 2.9rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: 800 .88rem/1 Manrope, sans-serif;
+    cursor: pointer;
+    transition: background-color 160ms var(--cp-ease-standard, ease), border-color 160ms var(--cp-ease-standard, ease), color 160ms var(--cp-ease-standard, ease), transform 120ms var(--cp-ease-standard, ease);
+}
+
+.hl-choice:hover:not(:disabled) {
+    border-color: var(--game-accent);
+    background: var(--game-accent-soft);
+    transform: translateY(-1px);
+}
+
+.hl-choice:active:not(:disabled) {
+    transform: translateY(0) scale(.98);
+}
+
+.hl-choice:disabled {
+    cursor: default;
+    opacity: .72;
+}
+
+.hl-choice.is-correct-choice {
+    border-color: var(--success);
+    background: var(--success-soft);
+    color: var(--success);
+    opacity: 1;
+}
+
+.hl-choice.is-wrong-choice {
+    border-color: var(--danger);
+    background: var(--danger-soft);
+    color: var(--danger);
+    opacity: 1;
+}
+
+.hl-feedback {
+    min-height: 2.9rem;
+    max-width: 736px;
+    display: grid;
+    place-items: center;
+    margin: 1rem auto 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: .75rem 1rem;
+    color: var(--text-muted);
+    font-size: .8rem;
+    line-height: 1.45;
+    text-align: center;
+    transition: background-color 160ms var(--cp-ease-standard, ease), border-color 160ms var(--cp-ease-standard, ease), color 160ms var(--cp-ease-standard, ease);
+}
+
+.hl-feedback[data-state="correct"] {
+    border-color: color-mix(in srgb, var(--success) 48%, var(--border));
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.hl-feedback[data-state="wrong"] {
+    border-color: color-mix(in srgb, var(--danger) 48%, var(--border));
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+.hl-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .6rem;
+    margin-top: .8rem;
+}
+
+.hl-actions .game-action {
+    width: auto;
+}
+
+.hl-result {
+    max-width: 736px;
+    margin: 1rem auto 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    background: var(--surface-subtle);
+    text-align: center;
+}
+
+.hl-result[hidden] {
+    display: none;
+}
+
+.hl-result.is-visible {
+    animation: hl-result-in 260ms var(--cp-ease-emphasized, ease-out) both;
+}
+
+.hl-result h3,
+.hl-result p {
+    margin: 0;
+}
+
+.hl-result p {
+    margin-top: .35rem;
+    color: var(--text-muted);
+    font-size: .8rem;
+}
+
+@keyframes hl-result-in {
+    from {
+        opacity: .35;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
