@@ -32,6 +32,15 @@ describe('Advanced Stats workspace page', () => {
         expect([...document.querySelectorAll('button:not([type])')]).toHaveLength(0);
     });
 
+    it('keeps the unreleased workspace behind the Coming Soon route guard', () => {
+        const source = readFileSync('src/subpages/advanced-stats.html', 'utf8');
+        const document = documentFor('src/subpages/advanced-stats.html');
+
+        expect(source).toContain("window.location.replace('/dashboard')");
+        expect(document.title).toContain('Coming soon');
+        expect(document.querySelector('.workspace-coming-soon-badge')).not.toBeNull();
+    });
+
     it('keeps profile errors separate and preserves last-good partial data', () => {
         const source = readFileSync('src/assets/js/pages/advanced-stats.js', 'utf8');
         const loader = readFileSync('src/assets/js/pages/advanced-stats-data-loader.js', 'utf8');
@@ -93,7 +102,7 @@ describe('Advanced Stats workspace page', () => {
         expect(page).toContain("i18n/i18n.js?v=20260809-4");
         expect(page).toContain("advanced-stats-army-view.js?v=20260809-4");
         expect(page).toContain('applyI18n(document)');
-        expect(i18n).toContain("runtime-translations.js?v=20260821-public-pages");
+        expect(i18n).toContain("runtime-translations.js?v=20260823-achievement-card-assets-1");
         expect(runtime).toContain("runtime-locales/workspace-en.js?v=20260809-4");
         expect(runtime).toContain("runtime-locales/workspace-nl.js?v=20260809-4");
         expect(runtime).toContain("advanced-stats-locales.js?v=20260814-advanced-stats-v4");

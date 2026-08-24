@@ -19,12 +19,14 @@ const privateScriptPattern = /(?:supabase|\/api\/|auth-client|\/auth\/)/i;
 const playerIdentityPattern = /\b(?:playerTag|clanTag|playerName|clanName)\b|#[0289PYLQGRJCUV]{6,}/i;
 
 describe('Public progress page contracts', () => {
-    it.each([...progressPages])('%s is indexable with one canonical H1', (path, canonical) => {
+    it.each([...progressPages])('%s is a noindex preview with one canonical H1', (path, canonical) => {
         const document = documentFor(path);
 
-        expect(document.querySelector('meta[name="robots"]')?.content).toMatch(/^index,\s*follow$/i);
+        expect(document.querySelector('meta[name="robots"]')?.content).toMatch(/^noindex,\s*follow$/i);
         expect(document.querySelector('link[rel="canonical"]')?.href).toBe(canonical);
         expect(document.querySelectorAll('h1')).toHaveLength(1);
+        expect(document.querySelector('.workspace-coming-soon-badge')).not.toBeNull();
+        expect(document.body.textContent).toMatch(/coming\s+soon/i);
     });
 
     it.each([...progressPages])('%s labels controlled values as non-live public content', path => {
@@ -47,6 +49,14 @@ describe('Public progress page contracts', () => {
         ]));
         expect(read(path)).not.toContain('Data/ads.js');
         expect(read(path)).not.toMatch(/pagead2\.googlesyndication\.com|googletagmanager\.com\/gtag/i);
+    });
+
+    it('does not leave a profile shortcut into unreleased progress workspaces', () => {
+        const document = documentFor('src/subpages/profile.html');
+
+        expect(document.querySelector('a[href="/app/advanced-stats"]')).toBeNull();
+        expect(document.querySelector('a[href="/app/achievements"]')).toBeNull();
+        expect(document.querySelectorAll('.profile-next-link--coming-soon[aria-disabled="true"]')).toHaveLength(2);
     });
 
     it.each([...progressPages])('%s does not expose player tags or names in its public fixture', path => {

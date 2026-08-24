@@ -61,8 +61,11 @@ describe('Public marketing shell', () => {
         expect(document.querySelectorAll('.home3-flow > li')).toHaveLength(6);
         expect(document.querySelector('.home3-progress-showcase')).not.toBeNull();
         expect(document.querySelectorAll('.home3-product-shot > img')).toHaveLength(5);
-        expect(document.querySelector('a[href="/advanced-stats"]')).not.toBeNull();
-        expect(document.querySelector('a[href="/achievements"]')).not.toBeNull();
+        expect(document.querySelector('a[href="/advanced-stats"]')).toBeNull();
+        expect(document.querySelector('a[href="/achievements"]')).toBeNull();
+        expect(document.querySelector('.home3-pillar--coming-soon[aria-disabled="true"]')).not.toBeNull();
+        expect(document.querySelectorAll('.home3-progress-card--coming-soon')).toHaveLength(2);
+        expect(document.querySelectorAll('.home3-progress-card--coming-soon .workspace-coming-soon-badge')).toHaveLength(2);
         expect(document.querySelector('.home3-feature-photo')).toBeNull();
         expect(document.querySelector('.home3-trust')).not.toBeNull();
         expect(document.querySelector('.home3-final')).not.toBeNull();
@@ -90,6 +93,7 @@ describe('Public marketing shell', () => {
 
     it('cache-busts the complete changed public module graph', () => {
         const productVersion = 'v=20260821-product-home';
+        const translationsVersion = 'v=20260823-achievement-card-assets-1';
         const publicVersion = 'v=20260821-public-pages';
         const entry = read('src/assets/js/pages/public-site.js');
 
@@ -97,7 +101,7 @@ describe('Public marketing shell', () => {
         ['theme-manager.js', 'public-header.js']
             .forEach(file => expect(entry).toContain(`${file}?${publicVersion}`));
         expect(entry).toContain('public-resource-pages.js?v=20260821-authentic-pages');
-        expect(read('src/assets/js/i18n/i18n.js')).toContain(`runtime-translations.js?${productVersion}`);
+        expect(read('src/assets/js/i18n/i18n.js')).toContain(`runtime-translations.js?${translationsVersion}`);
         expect(read('src/assets/js/i18n/runtime-translations.js')).toContain(`public-resource-locales.js?${productVersion}`);
         const resources = read('src/assets/js/i18n/public-resource-locales.js');
         expect(resources).toContain(`public-home-v3-locales.js?${productVersion}`);

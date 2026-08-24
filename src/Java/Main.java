@@ -56,13 +56,16 @@ public class Main {
         HistoricalCwlService cwlHistoryService = new HistoricalCwlService(
                 HistoricalCwlProviderFactory.create(conf)
         );
+        HistoricalCwlService achievementCwlHistoryService = new HistoricalCwlService(
+                HistoricalCwlProviderFactory.createV2(conf)
+        );
         apiCwlHistory = new API_CWLHistory(server, conf, cwlHistoryService);
         supaUser = new SUPABASE_User(server, conf);
         supaAuth = new SUPABASE_Auth(server, conf);
         supaAchievements = new SUPABASE_Achievements(
                 server,
                 conf,
-                cwlHistoryService
+                achievementCwlHistoryService
         );
         supaAdvancedStats = new SUPABASE_AdvancedStats(server, conf);
         advancedStatsInternalPoll = new AdvancedStatsInternalPoll(server, conf);

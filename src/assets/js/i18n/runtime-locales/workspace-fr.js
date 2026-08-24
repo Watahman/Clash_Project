@@ -153,7 +153,7 @@ export default Object.freeze({
     "theme.toggle": "Changer de thème",
     "theme.useDark": "Utiliser le thème sombre",
     "theme.useLight": "Utiliser le thème clair",
-    "auth.backHome": "← Retour à l’accueil",
+    "auth.backHome": "Retour à l’accueil",
     "auth.welcomeBack": "Bon retour",
     "auth.plansReady": "Vos plans sont prêts.",
     "auth.loginContext": "Connectez-vous pour continuer dans Planner, Operation Board et Clan Families.",

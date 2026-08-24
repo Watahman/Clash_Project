@@ -66,6 +66,11 @@ body.public-home-v3 .home3-hero h1 {
 .home3-pillar-grid a { min-width: 0; padding: 1.55rem 1.25rem; border-right: 1px solid var(--home-rule); color: inherit; transition: background 180ms ease, transform 180ms ease; }
 .home3-pillar-grid a:last-child { border-right: 0; }
 .home3-pillar-grid a:hover { background: var(--home-soft); transform: translateY(-2px); }
+.home3-pillar-grid a.home3-pillar--coming-soon { cursor: not-allowed; opacity: .66; }
+.home3-pillar-grid a.home3-pillar--coming-soon:hover { background: transparent; transform: none; }
+.home3-pillar-grid a.home3-pillar--coming-soon .workspace-coming-soon-badge { margin-inline-start: .18rem; vertical-align: middle; }
+.home3-pillar-grid a.home3-pillar--coming-soon strong { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; }
+.home3-pillar-grid a.home3-pillar--coming-soon strong small { font-size: .58rem; }
 .home3-pillar-grid img { width: 1.5rem; height: 1.5rem; margin-bottom: 2rem; filter: var(--icon-filter, none); }
 .home3-pillar-grid strong { display: block; margin-bottom: .5rem; font-size: 1rem; }
 .home3-pillar-grid span { display: block; color: var(--text-muted); font-size: .82rem; line-height: 1.55; }

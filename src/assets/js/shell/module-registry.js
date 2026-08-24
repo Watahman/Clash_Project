@@ -34,10 +34,10 @@ const modules = Object.freeze([
     ['warOperation', 'nav.warOperation', 'War Board', 'compete', '/app/war-board', true],
     ['bracket', 'nav.bracket', 'Brackets', 'compete', '/app/brackets', true],
     ['minigames', 'nav.minigames', 'Minigames', 'play', '/app/minigames', true],
-    ['advancedStats', 'nav.advancedStats', 'Advanced Stats', 'progress', '/app/advanced-stats', true],
-    ['achievements', 'nav.achievements', 'Achievements', 'progress', '/app/achievements', true],
+    ['advancedStats', 'nav.advancedStats', 'Advanced Stats', 'progress', '/app/advanced-stats', true, true],
+    ['achievements', 'nav.achievements', 'Achievements', 'progress', '/app/achievements', true, true],
     ['profile', 'profile.title', 'Profile', 'home', '/app/profile', false]
-].map(([id, key, fallback, section, href, available]) => Object.freeze({
+].map(([id, key, fallback, section, href, available, comingSoon = false]) => Object.freeze({
     id,
     key,
     fallback,
@@ -45,6 +45,7 @@ const modules = Object.freeze([
     section,
     href,
     available,
+    comingSoon,
     access: 'private'
 })));
 

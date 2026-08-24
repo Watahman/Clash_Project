@@ -21,13 +21,23 @@ const EXPLORE_ART = Object.freeze({
 function cardMarkup(module) {
     const descriptionKey = `explore.${module.id}.description`;
     const section = WORKSPACE_SECTIONS.find(candidate => candidate.id === module.section);
-    return `<a class="cp-module-card explore-card explore-card--${module.id}" data-pillar="${module.section}" data-explore-card="${module.section}" href="${module.href}">
+    const tag = module.comingSoon ? 'div' : 'a';
+    const state = module.comingSoon
+        ? 'aria-disabled="true"'
+        : `href="${module.href}"`;
+    const title = module.comingSoon
+        ? `<h2><span data-i18n="${module.key}">${module.fallback}</span> <span class="workspace-coming-soon-badge" data-i18n="common.comingSoon">(Coming soon)</span></h2>`
+        : `<h2 data-i18n="${module.key}">${module.fallback}</h2>`;
+    const action = module.comingSoon
+        ? '<strong class="explore-card-status" data-i18n="common.comingSoon">Coming soon</strong>'
+        : '<strong data-i18n="explore.open">Open →</strong>';
+    return `<${tag} class="cp-module-card explore-card explore-card--${module.id}${module.comingSoon ? ' explore-card--coming-soon' : ''}" data-pillar="${module.section}" data-explore-card="${module.section}" ${state}>
         <span class="explore-card-heading">${module.icon}<span class="page-kicker" data-i18n="${section.key}">${section.fallback}</span></span>
-        <h2 data-i18n="${module.key}">${module.fallback}</h2>
+        ${title}
         <p data-i18n="${descriptionKey}">${t(descriptionKey)}</p>
-        <strong data-i18n="explore.open">Open →</strong>
+        ${action}
         <span class="explore-card-art" aria-hidden="true">${EXPLORE_ART[module.id]}</span>
-    </a>`;
+    </${tag}>`;
 }
 
 function renderCards(container) {

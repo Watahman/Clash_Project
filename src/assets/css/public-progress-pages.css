@@ -4,6 +4,7 @@ body.public-progress-page main { max-width: var(--pp-max); margin-inline: auto; 
 .pp-hero-copy { max-width: 39rem; }
 .pp-hero h1 { max-width: 12ch; margin-bottom: 1.1rem !important; font-size: clamp(2.8rem, 5vw, 5rem); line-height: .98; }
 .pp-lead { max-width: 41rem; font-size: clamp(1rem, 1.3vw, 1.16rem); }
+.pp-coming-soon-button { cursor: not-allowed; opacity: .68; }
 .hero-footnote { margin-top: 1rem; color: var(--text-subtle) !important; font-size: .76rem; }
 .pp-dashboard-preview { min-width: 0; margin: 0; overflow: hidden; border: .0625rem solid var(--border-strong); border-radius: .8rem; background: var(--surface); box-shadow: var(--shadow-raised); transform: perspective(70rem) rotateY(-1.5deg) rotateX(1deg); }
 .pp-preview-bar { display: flex; min-height: 3rem; align-items: center; gap: .75rem; border-bottom: .0625rem solid var(--border); background: var(--surface-raised); padding: .7rem .9rem; }

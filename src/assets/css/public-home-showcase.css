@@ -119,12 +119,16 @@
 .home3-progress-showcase .home3-section-head { max-width: 54rem; }
 .home3-progress-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
 .home3-progress-grid article { overflow: hidden; border: 1px solid var(--home-rule); border-radius: .9rem; background: var(--bg); }
+.home3-progress-grid article.home3-progress-card--coming-soon { opacity: .78; }
+.home3-progress-grid article.home3-progress-card--coming-soon:hover .home3-product-shot > img { transform: none; }
 .home3-progress-grid .home3-product-shot { border: 0; border-bottom: 1px solid var(--home-rule); border-radius: 0; box-shadow: none; }
 .home3-progress-copy { padding: clamp(1.35rem, 3vw, 2rem); }
 .home3-progress-copy h3 { margin: .4rem 0 .6rem; font-family: Manrope, Inter, sans-serif; font-size: clamp(1.6rem, 2.5vw, 2.25rem); letter-spacing: -.035em; }
+.home3-progress-copy h3 .workspace-coming-soon-badge { margin-inline-start: .2rem; vertical-align: middle; }
 .home3-progress-copy > p:not(.preview-kicker) { color: var(--text-muted); line-height: 1.65; }
 .home3-progress-copy > a,
 .home3-games-strip a { display: inline-flex; min-height: 2.75rem; align-items: center; margin-top: .7rem; color: var(--accent); font-weight: 750; }
+.home3-progress-coming-soon { display: inline-flex; min-height: 2.75rem; align-items: center; margin-top: .7rem; color: var(--text-muted); font-size: .78rem; font-weight: 750; letter-spacing: .02em; }
 
 .home3-games-strip {
     display: grid;

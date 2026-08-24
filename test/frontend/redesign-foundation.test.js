@@ -55,6 +55,7 @@ describe('redesign shared foundation', () => {
         const shell = readFileSync('src/assets/js/shell/workspace-shell-markup.js', 'utf8');
         expect(dashboard.indexOf('workspace-v2.css')).toBeGreaterThan(dashboard.indexOf('workspace-polish-batch2.css'));
         expect(shell).toContain("from './module-registry.js'");
-        expect(shell).not.toContain('comingSoonNavItem');
+        expect(shell).toContain('workspace-nav-coming-soon');
+        expect(shell).toContain('module.comingSoon');
     });
 });

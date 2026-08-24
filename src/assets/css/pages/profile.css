@@ -159,6 +159,9 @@ body.workspace-app { overflow-x: clip; }
 }
 
 .profile-next-links a:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+.profile-next-links a.profile-next-link--coming-soon { cursor: not-allowed; opacity: .68; }
+.profile-next-links a.profile-next-link--coming-soon:hover { border-color: var(--border); transform: none; }
+.profile-next-link--coming-soon .workspace-coming-soon-badge { margin-inline-start: .15rem; color: var(--accent-strong); vertical-align: middle; }
 .profile-next-links img { width: 2.75rem; height: 2.75rem; object-fit: contain; }
 .profile-next-links span { display: grid; gap: 0.25rem; }
 .profile-next-links small { color: var(--text-muted); }

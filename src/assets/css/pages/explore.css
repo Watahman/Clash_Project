@@ -42,6 +42,10 @@
 .explore-card-art svg { display: block; width: 100%; height: 100%; overflow: visible; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .explore-card:hover .explore-card-art,
 .explore-card:focus-visible .explore-card-art { opacity: .24; transform: translate3d(0, 0, 0); }
+.explore-card--coming-soon { cursor: not-allowed; }
+.explore-card--coming-soon:hover { border-color: var(--cp-border-1); transform: none; }
+.explore-card--coming-soon:hover .explore-card-art { opacity: .12; transform: none; }
+.explore-card--coming-soon .explore-card-status { color: var(--cp-text-2); }
 .explore-card--groups .explore-card-art { top: 19%; bottom: auto; width: 57%; }
 .explore-card--planner .explore-card-art { width: 57%; height: 78%; }
 .explore-card--operation .explore-card-art { top: 21%; bottom: auto; width: 58%; height: 75%; }

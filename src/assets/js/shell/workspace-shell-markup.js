@@ -8,6 +8,9 @@ const shellIcons = Object.freeze({
 });
 
 function navLink(module) {
+    if (module.comingSoon) {
+        return `<a class="workspace-nav-coming-soon" data-workspace-nav="${module.id}" data-workspace-section="${module.section}" aria-disabled="true" tabindex="-1">${module.icon}<span class="workspace-nav-item-copy"><span data-i18n="${module.key}">${module.fallback}</span><small class="workspace-coming-soon-badge" data-i18n="common.comingSoon">(Coming soon)</small></span></a>`;
+    }
     return `<a href="${module.href}" data-workspace-nav="${module.id}" data-workspace-section="${module.section}">${module.icon}<span data-i18n="${module.key}">${module.fallback}</span></a>`;
 }
 function navigationMarkup() {
