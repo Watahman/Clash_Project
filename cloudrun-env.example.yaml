@@ -32,7 +32,7 @@ ADVANCED_STATS_DEGRADED_THRESHOLD: "3"
 
 # Secrets are intentionally NOT stored here.
 # Configure these through Cloud Run / Secret Manager:
-# _API_KEY_ALL
+# CLASH_API_KEY_POOL -> one JSON-array secret containing 1 to 10 keys
 # _API_KEY_SUPABASE
 # SUPABASE_SERVICE_ROLE_KEY
 # API_PROXY_SECRET

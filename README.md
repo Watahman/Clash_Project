@@ -42,8 +42,10 @@ Open `http://localhost:5173`. Set `DEV_API_TARGET` only when the Java API runs e
 | `_BASE_URL_SUPABASE` or `SUPABASE_URL` | yes | Supabase project URL |
 | `_API_KEY_SUPABASE` | yes | Supabase publishable/anon key used for server-side token validation |
 | `_API_KEY_SECR_SUPABASE` or `SUPABASE_SERVICE_ROLE_KEY` | yes | Server-only service-role key |
-| `_API_KEY_ALL` | yes | Primary Clash API authorization value, with or without `Bearer ` |
-| `_API_KEY_ALL2`, `_API_KEY_ALL3` | no | Additional Clash API keys; requests rotate across all configured keys and retry another key after 401, 403 or 429 |
+| `CLASH_API_KEY_POOL` | yes | Server-only JSON array with 1 to 10 Clash API keys. Cloud Run should inject one Secret Manager value into this variable. |
+| `_API_KEY_ALL`, `_API_KEY_ALL2`, `_API_KEY_ALL3` | legacy | Temporary compatibility when `CLASH_API_KEY_POOL` is absent; do not use for new deployments. |
+| `CLASH_API_RATE_LIMIT_COOLDOWN_SECONDS` | no | Fallback cooldown for a key after HTTP 429 when no valid `Retry-After` is supplied; defaults to 60 seconds. |
+| `CLASH_API_MAX_COOLDOWN_SECONDS` | no | Upper bound for a server-requested key cooldown; defaults to 300 seconds. |
 | `_BASE_URL_CLASH` | no | Clash API base URL |
 | `CLASHKING_BASE_URL` | no | ClashKing V2 API base URL; defaults to `https://api.clashk.ing` |
 | `CLASHKING_RANKED_SEASON` | ranked history | Unix timestamp identifying the ranked season queried through ClashKing V2 |
@@ -86,4 +88,4 @@ mvn package
 
 Build the frontend with `PUBLIC_SITE_URL=https://your-domain.example npm run build`, serve `dist/` over HTTPS and reverse-proxy `/api` to the Java service. Run the packaged Java JAR with JDK 21. Configure an exact production origin allowlist, set the same strong `API_PROXY_SECRET` as a Cloudflare Worker secret and a Cloud Run secret, keep all service credentials in the hosting secret store, apply migrations before new application code, configure the host to serve `404.html` for missing pages, and monitor `429`, `401`, `403`, upstream Clash errors and cache health.
 
-Before release, complete [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md). The CI workflow builds both sides, runs tests, validates migration ordering and performs a history-aware secret scan.
+Store the complete Clash key pool as a JSON array in one Secret Manager secret, for example `["key-one","key-two"]`; never place the real value in a repository file or deployment command. Before release, complete [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md). The CI workflow builds both sides, runs tests, validates migration ordering and performs a history-aware secret scan.

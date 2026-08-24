@@ -39,6 +39,7 @@ public class Main {
         Config conf;
         HttpServer server;
         conf = new Config(); // config initialiseren
+        conf.validateClashApiKeyConfiguration();
         ClashKingRequestCounter.configure(conf.getClashKingCounterIntervalSeconds());
         AchievementCatalog.definitions(); // Fail startup before readiness if the embedded v2 catalog is invalid.
         server = HttpServer.create(new InetSocketAddress(conf.getServerPort()), 0);
