@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class API_Clan {
+    private static final String NO_ACTIVE_CWL = "{\"state\":\"notInWar\",\"rounds\":[],\"noActive\":true}";
     private final HttpServer server;
     private final Config conf;
     private final API_Utils utils;
@@ -24,7 +25,12 @@ public class API_Clan {
     public void getClanCurrentWarLeagueGroup() {
         server.createContext(conf._EXT_CLAN_CURRENTWAR_LEAGUEGROUP, exchange -> utils.handlePost(exchange, ex -> {
             String clanTag = CacheKeys.requireValidTag(utils.requireString(utils.parseBody(ex), "clanTag"));
-            utils.clashGetCached(ex, "/clans/" + URLEncoder.encode(clanTag, "UTF-8") + "/currentwar/leaguegroup", CachePolicy.CLAN_LEAGUE_GROUP);
+            utils.clashGetCachedOrNotFoundDefault(
+                    ex,
+                    "/clans/" + URLEncoder.encode(clanTag, "UTF-8") + "/currentwar/leaguegroup",
+                    CachePolicy.CLAN_LEAGUE_GROUP,
+                    NO_ACTIVE_CWL
+            );
         }));
     }
 
