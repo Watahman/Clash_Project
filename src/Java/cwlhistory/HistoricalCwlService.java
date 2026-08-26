@@ -73,6 +73,13 @@ public final class HistoricalCwlService {
         return result;
     }
 
+    public void clearCaches() {
+        seasonCache.invalidateAll();
+        detailCache.invalidateAll();
+        overviewCache.invalidateAll();
+        provider.clearCaches();
+    }
+
     public List<HistoricalCwlSeason> getOverview(
             String requestedClanTag,
             int requestedLimit

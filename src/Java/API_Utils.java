@@ -462,7 +462,7 @@ public class API_Utils {
         return Math.min(maximum, Math.max(minimum, ttlMs * 8));
     }
 
-    private boolean requestsFreshData(HttpExchange exchange) {
+    static boolean requestsFreshData(HttpExchange exchange) {
         String cacheControl = exchange.getRequestHeaders().getFirst("Cache-Control");
         if (cacheControl != null) {
             for (String directive : cacheControl.split(",")) {

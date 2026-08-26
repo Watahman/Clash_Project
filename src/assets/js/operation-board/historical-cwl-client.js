@@ -22,7 +22,7 @@ export async function loadHistoricalCwlSeasons(
     const response = await get(config._EXT_CWL_HISTORY_SEASONS, {
         clanTag: tag,
         limit
-    }, signal);
+    }, signal, forceRefresh);
     const seasons = Array.isArray(response?.seasons) ? response.seasons : [];
     seasonIndexCache.set(key, seasons);
     return seasons;
@@ -47,7 +47,7 @@ export async function loadHistoricalCwlSeason(
     const response = await get(config._EXT_CWL_HISTORY, {
         clanTag: tag,
         season
-    }, signal);
+    }, signal, forceRefresh);
     const detail = response?.season || null;
     if (detail) seasonDetailCache.set(key, detail);
     return detail;
@@ -68,7 +68,7 @@ export async function loadHistoricalCwlOverview(
     const response = await get(config._EXT_CWL_HISTORY_OVERVIEW, {
         clanTag: tag,
         limit
-    }, signal);
+    }, signal, forceRefresh);
     const seasons = Array.isArray(response?.seasons) ? response.seasons : [];
     overviewCache.set(key, seasons);
     seasons.forEach(detail => {
@@ -85,12 +85,13 @@ export function clearHistoricalCwlSessionCache() {
     overviewCache.clear();
 }
 
-async function get(path, params, signal) {
+async function get(path, params, signal, forceRefresh = false) {
     const query = new URLSearchParams(params);
     return requestJson(
         `${config._BASE_URL}${path}?${query}`,
         {
             method: 'GET',
+            headers: forceRefresh ? { 'Cache-Control': 'no-cache' } : undefined,
             signal,
             loading: 'background',
             timeoutMs: 45_000

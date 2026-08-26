@@ -41,6 +41,38 @@ class HistoricalCwlServiceTest {
     }
 
     @Test
+    void clearCachesForcesTheProviderToReloadSeasonDetails() throws Exception {
+        AtomicInteger calls = new AtomicInteger();
+        HistoricalCwlDataProvider provider = new HistoricalCwlDataProvider() {
+            @Override
+            public List<HistoricalCwlSeasonSummary> getAvailableSeasons(
+                    String clanTag,
+                    int limit
+            ) {
+                return List.of();
+            }
+
+            @Override
+            public HistoricalCwlSeason getSeason(String clanTag, String season) {
+                calls.incrementAndGet();
+                return emptySeason(clanTag, season);
+            }
+
+            @Override
+            public String providerName() {
+                return "test";
+            }
+        };
+        HistoricalCwlService service = new HistoricalCwlService(provider);
+
+        service.getSeason("#PQL", "2026-06");
+        service.clearCaches();
+        service.getSeason("#PQL", "2026-06");
+
+        assertEquals(2, calls.get());
+    }
+
+    @Test
     void decodesAnAlreadyEncodedClanTagBeforeCallingTheProvider()
             throws Exception {
         AtomicReference<String> receivedTag = new AtomicReference<>();

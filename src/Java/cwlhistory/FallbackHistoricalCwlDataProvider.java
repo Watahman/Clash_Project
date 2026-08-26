@@ -60,6 +60,12 @@ public final class FallbackHistoricalCwlDataProvider
                 + "-fallback";
     }
 
+    @Override
+    public void clearCaches() {
+        primary.clearCaches();
+        fallback.clearCaches();
+    }
+
     HistoricalCwlDataProvider primaryProvider() {
         return primary;
     }

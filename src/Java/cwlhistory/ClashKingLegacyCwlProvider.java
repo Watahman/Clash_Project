@@ -131,6 +131,13 @@ public final class ClashKingLegacyCwlProvider implements HistoricalCwlDataProvid
         return "api";
     }
 
+    @Override
+    public void clearCaches() {
+        prefetchedSeasons.invalidateAll();
+        missingSeasons.invalidateAll();
+        historyContexts.invalidateAll();
+    }
+
     private HistoryContext historyContext(String clanTag) throws Exception {
         String key = Objects.toString(clanTag, "");
         HistoryContext cached = historyContexts.getIfPresent(key);
