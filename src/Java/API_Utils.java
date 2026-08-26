@@ -320,6 +320,10 @@ public class API_Utils {
         }
 
         String key = CacheKeys.clashGet(path);
+        if (requestsFreshData(exchange)) {
+            sendRefreshedOrDefault(exchange, key, path, ttlMs, notFoundJson);
+            return;
+        }
         CacheEntry cached = L1_CACHE.get(key);
         String cacheLayer = "l1";
         if (cached == null && "layered".equalsIgnoreCase(conf.getCacheMode())) {
@@ -409,7 +413,7 @@ public class API_Utils {
                         if (isNegativeCacheable(sourceError.getStatusCode())) {
                             CacheEntry entry = CacheEntry.create(
                                     sourceError.getResponseBody(),
-                                    negativeTtl(sourceError.getStatusCode()),
+                                    negativeTtl(),
                                     2 * 60 * 1000L,
                                     sourceError.getStatusCode()
                             );
@@ -458,12 +462,27 @@ public class API_Utils {
         return Math.min(maximum, Math.max(minimum, ttlMs * 8));
     }
 
-    private boolean isNegativeCacheable(int status) {
-        return status == 403 || status == 404 || status == 429;
+    private boolean requestsFreshData(HttpExchange exchange) {
+        String cacheControl = exchange.getRequestHeaders().getFirst("Cache-Control");
+        if (cacheControl != null) {
+            for (String directive : cacheControl.split(",")) {
+                String normalized = directive.trim();
+                if (normalized.equalsIgnoreCase("no-cache")
+                        || normalized.equalsIgnoreCase("no-store")
+                        || normalized.equalsIgnoreCase("max-age=0")) return true;
+            }
+        }
+        return "no-cache".equalsIgnoreCase(
+                exchange.getRequestHeaders().getFirst("Pragma")
+        );
     }
 
-    private long negativeTtl(int status) {
-        return status == 429 ? 10_000L : 30_000L;
+    static boolean isNegativeCacheable(int status) {
+        return status == 404;
+    }
+
+    private long negativeTtl() {
+        return 30_000L;
     }
 
     public void clashPost(HttpExchange exchange, String path, String body) throws Exception {

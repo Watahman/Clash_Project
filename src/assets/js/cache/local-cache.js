@@ -1,4 +1,4 @@
-import { CACHE_VERSION } from './cache-policy.js';
+import { CACHE_VERSION } from './cache-policy.js?v=20260826-live-refresh';
 export { normalizeTag } from './cache-keys.js';
 
 const DATABASE_NAME = 'clashtools-cache';
@@ -236,7 +236,7 @@ export async function getCachedThenRefresh(key, fetchFn, options = {}) {
     try {
         return await refresh();
     } catch (error) {
-        if (isFallbackUsable) return cached.data;
+        if (!forceRefresh && isFallbackUsable) return cached.data;
         throw error;
     }
 }

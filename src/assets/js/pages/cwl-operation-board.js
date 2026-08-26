@@ -4,7 +4,7 @@ import { initI18n, t } from '../i18n/i18n.js';
 import { exportOperationReport } from '../operation-board/operation-board-import-export.js';
 import { createCwlOperationBoardBootstrap } from '../operation-board/cwl-operation-board-bootstrap.js';
 import { createCwlOperationBoardControllers } from '../operation-board/cwl-operation-board-controllers.js';
-import { createCwlOperationBoardReportLoader } from '../operation-board/cwl-operation-board-report-loader.js';
+import { createCwlOperationBoardReportLoader } from '../operation-board/cwl-operation-board-report-loader.js?v=20260826-live-refresh';
 import { renderBoardContext } from '../operation-board/operation-board-context-renderer.js';
 import { bindOperationBoardEvents } from '../operation-board/operation-board-page-events.js';
 import { initOperationBoardRefs } from '../operation-board/operation-board-page-refs.js';
@@ -174,8 +174,8 @@ function hasLoadedPlans() {
     );
 }
 
-function refreshClanReport(clan) {
-    return reportLoader?.refreshClanReport(clan);
+function refreshClanReport(clan, forceRefresh = false) {
+    return reportLoader?.refreshClanReport(clan, forceRefresh);
 }
 
 function cancelReportLoad() {
@@ -309,7 +309,7 @@ async function init() {
         refresh: () => {
             if (!selectedClan) return;
             if (historyController.getMode() === 'current') {
-                void refreshClanReport(selectedClan);
+                void refreshClanReport(selectedClan, true);
             } else {
                 void historyController.refresh();
             }

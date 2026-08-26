@@ -12,6 +12,7 @@ const playerApiMocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../../src/assets/js/API/API-Clan.js', () => clanApiMocks);
+vi.mock('../../src/assets/js/API/API-Clan.js?v=20260826-live-refresh', () => clanApiMocks);
 vi.mock('../../src/assets/js/API/API-Player.js', () => playerApiMocks);
 
 vi.mock('../../src/assets/js/auth/auth-client.js', () => ({ syncAuthSession: vi.fn().mockResolvedValue(null) }));

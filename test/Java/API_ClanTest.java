@@ -13,6 +13,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,10 +46,48 @@ class API_ClanTest {
                 .orElse("").startsWith("l1-"));
     }
 
+    @Test
+    void explicitLiveRefreshBypassesCachedLeagueGroup() throws Exception {
+        AtomicInteger upstreamCalls = new AtomicInteger();
+        AtomicBoolean active = new AtomicBoolean(false);
+        startChangingClashServer(upstreamCalls, active);
+        Config config = testConfig();
+        startAppServer(config);
+
+        assertNoActiveCwl(requestLeagueGroup(config, "#PQL20", false));
+        active.set(true);
+        assertNoActiveCwl(requestLeagueGroup(config, "#PQL20", false));
+        HttpResponse<String> refreshed = requestLeagueGroup(config, "#PQL20", true);
+
+        assertEquals(2, upstreamCalls.get());
+        assertEquals(200, refreshed.statusCode());
+        assertEquals(
+                "inWar",
+                JsonParser.parseString(refreshed.body()).getAsJsonObject()
+                        .get("state").getAsString()
+        );
+    }
+
     private void startClashServer(AtomicInteger calls) throws IOException {
         clashServer = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         clashServer.createContext("/clans/", exchange -> {
             calls.incrementAndGet();
+            respond(exchange, 404, "{\"reason\":\"notFound\"}");
+        });
+        clashServer.start();
+    }
+
+    private void startChangingClashServer(
+            AtomicInteger calls,
+            AtomicBoolean active
+    ) throws IOException {
+        clashServer = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        clashServer.createContext("/clans/", exchange -> {
+            calls.incrementAndGet();
+            if (active.get()) {
+                respond(exchange, 200, "{\"state\":\"inWar\",\"rounds\":[{\"warTags\":[\"#WAR\"]}]}");
+                return;
+            }
             respond(exchange, 404, "{\"reason\":\"notFound\"}");
         });
         clashServer.start();
@@ -73,14 +112,24 @@ class API_ClanTest {
     }
 
     private HttpResponse<String> requestLeagueGroup(Config config) throws Exception {
-        HttpRequest request = HttpRequest.newBuilder()
+        return requestLeagueGroup(config, "#PQL2", false);
+    }
+
+    private HttpResponse<String> requestLeagueGroup(
+            Config config,
+            String clanTag,
+            boolean forceRefresh
+    ) throws Exception {
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(URI.create("http://127.0.0.1:" + appServer.getAddress().getPort()
                         + config._EXT_CLAN_CURRENTWAR_LEAGUEGROUP))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString("{\"clanTag\":\"#PQL2\"}"))
-                .build();
+                .POST(HttpRequest.BodyPublishers.ofString(
+                        "{\"clanTag\":\"" + clanTag + "\"}"
+                ));
+        if (forceRefresh) builder.header("Cache-Control", "no-cache");
         return HttpClient.newHttpClient().send(
-                request,
+                builder.build(),
                 HttpResponse.BodyHandlers.ofString()
         );
     }

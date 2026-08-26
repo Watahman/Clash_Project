@@ -3,7 +3,7 @@ import {
     getClanInfoRequest,
     getClanMembersRequest,
     getClanWarLeagueWarRequest
-} from '../API/API-Clan.js';
+} from '../API/API-Clan.js?v=20260826-live-refresh';
 import { getPlayerInfoRequest } from '../API/API-Player.js';
 import {
     getAllPlansFromDatabase,
@@ -49,13 +49,19 @@ export async function fetchClanName(clanTag) {
     return cleanDisplayName(clan?.name) || normalizeTag(clanTag);
 }
 
-export async function loadOperationSource({ clan, plan = null, signal }) {
+export async function loadOperationSource({
+    clan,
+    plan = null,
+    signal,
+    forceRefresh = false
+}) {
     const fixture = await loadCwlFixture({ signal });
     if (fixture) return loadFixtureSource(fixture, clan, plan);
+    const requestOptions = { signal, forceRefresh };
     const [clanInfoResult, membersResult, leagueGroupResult] = await Promise.allSettled([
-        getClanInfoRequest(clan.tag, { signal }),
-        getClanMembersRequest(clan.tag, { signal }),
-        getClanCurrentWarLeagueGroupRequest(clan.tag, { signal })
+        getClanInfoRequest(clan.tag, requestOptions),
+        getClanMembersRequest(clan.tag, requestOptions),
+        getClanCurrentWarLeagueGroupRequest(clan.tag, requestOptions)
     ]);
 
     if (isNoActiveCwlResult(leagueGroupResult)) throw new NoActiveCwlError();
@@ -85,7 +91,7 @@ export async function loadOperationSource({ clan, plan = null, signal }) {
     };
     const enrichedClan = await enrichPlannedPlayers(clanBase, members, signal);
     const leagueGroup = leagueGroupResult.value;
-    const leagueWars = await fetchLeagueWars(leagueGroup, signal);
+    const leagueWars = await fetchLeagueWars(leagueGroup, signal, forceRefresh);
     return {
         plan,
         clan: enrichedClan,
@@ -164,7 +170,7 @@ async function enrichPlannedPlayers(clan, members = [], signal) {
     return { ...clan, players: enriched };
 }
 
-async function fetchLeagueWars(leagueGroup, signal) {
+async function fetchLeagueWars(leagueGroup, signal, forceRefresh = false) {
     const warTags = (leagueGroup.rounds || [])
         .flatMap((round, roundIndex) =>
             (round.warTags || []).map(warTag => ({
@@ -175,7 +181,10 @@ async function fetchLeagueWars(leagueGroup, signal) {
         .filter(item => normalizeTag(item.warTag));
     const results = await Promise.allSettled(
         warTags.map(item =>
-            getClanWarLeagueWarRequest(item.warTag, { signal }).then(war => ({
+            getClanWarLeagueWarRequest(item.warTag, {
+                signal,
+                forceRefresh
+            }).then(war => ({
                 ...war,
                 _round: item.round,
                 _warTag: item.warTag
