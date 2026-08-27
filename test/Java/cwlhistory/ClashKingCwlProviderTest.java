@@ -66,26 +66,17 @@ class ClashKingCwlProviderTest {
     }
 
     @Test
-    void usesOnlyV2GroupAndWarRoutesForSeasonDetails() throws Exception {
+    void usesTheCompleteV2GroupForSeasonDetails() throws Exception {
         respond("/v2/cwl/%23PQL/group?season=2026-06", 200, season("2026-06"));
-        respond(
-                "/v2/clan/%23PQL/wars?type=cwl"
-                        + "&time%5Bafter%5D=2026-06-01T00%3A00%3A00Z"
-                        + "&time%5Bbefore%5D=2026-07-01T00%3A00%3A00Z&limit=20",
-                200,
-                "{\"items\":[]}"
-        );
 
         HistoricalCwlSeason result = provider.getSeason("#PQL", "2026-06");
 
         assertEquals("2026-06", result.season());
         assertEquals("Champion League II", result.league().name());
-        assertEquals(List.of(
-                "/v2/cwl/%23PQL/group?season=2026-06",
-                "/v2/clan/%23PQL/wars?type=cwl"
-                        + "&time%5Bafter%5D=2026-06-01T00%3A00%3A00Z"
-                        + "&time%5Bbefore%5D=2026-07-01T00%3A00%3A00Z&limit=20"
-        ), requests);
+        assertEquals(
+                List.of("/v2/cwl/%23PQL/group?season=2026-06"),
+                requests
+        );
     }
 
     @Test

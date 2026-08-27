@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
 
 public final class HistoricalCwlService {
     public static final int DEFAULT_SEASON_LIMIT = 12;
-    public static final int MAX_SEASON_LIMIT = 48;
+    public static final int MAX_SEASON_LIMIT = 24;
 
     private final HistoricalCwlDataProvider provider;
     private final Cache<String, List<HistoricalCwlSeasonSummary>> seasonCache;

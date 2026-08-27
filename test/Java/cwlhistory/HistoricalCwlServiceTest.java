@@ -71,6 +71,35 @@ class HistoricalCwlServiceTest {
         assertEquals("#PQL", receivedTag.get());
     }
 
+    @Test
+    void capsRequestedHistoryAtTwoYears() throws Exception {
+        AtomicInteger receivedLimit = new AtomicInteger();
+        HistoricalCwlDataProvider provider = new HistoricalCwlDataProvider() {
+            @Override
+            public List<HistoricalCwlSeasonSummary> getAvailableSeasons(
+                    String clanTag,
+                    int limit
+            ) {
+                receivedLimit.set(limit);
+                return List.of();
+            }
+
+            @Override
+            public HistoricalCwlSeason getSeason(String clanTag, String season) {
+                return emptySeason(clanTag, season);
+            }
+
+            @Override
+            public String providerName() {
+                return "test";
+            }
+        };
+
+        new HistoricalCwlService(provider).getAvailableSeasons("#PQL", 48);
+
+        assertEquals(24, receivedLimit.get());
+    }
+
     private static HistoricalCwlSeason emptySeason(String clanTag, String season) {
         return emptySeason(clanTag, season, "test");
     }

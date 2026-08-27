@@ -59,7 +59,7 @@ export function createOperationBoardHistoryController({
         try {
             seasonIndex = await loadHistoricalCwlSeasons(
                 clan.tag,
-                { limit: 48, signal: controller.signal }
+                { limit: 24, signal: controller.signal }
             );
             if (token !== requestToken) return;
             renderOptions(Boolean(report));

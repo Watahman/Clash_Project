@@ -9,7 +9,7 @@ const overviewCache = new Map();
 
 export async function loadHistoricalCwlSeasons(
     clanTag,
-    { limit = 48, signal, forceRefresh = false } = {}
+    { limit = 24, signal, forceRefresh = false } = {}
 ) {
     const tag = normalizeTag(clanTag);
     const fixture = await loadCwlFixture({ signal });
