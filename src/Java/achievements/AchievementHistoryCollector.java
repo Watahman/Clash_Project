@@ -49,7 +49,7 @@ public final class AchievementHistoryCollector {
     public AchievementHistoryCollector(Config config) {
         this(
                 config,
-                new HistoricalCwlService(HistoricalCwlProviderFactory.createV2(config))
+                new HistoricalCwlService(HistoricalCwlProviderFactory.create(config))
         );
     }
 

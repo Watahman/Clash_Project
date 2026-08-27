@@ -19,12 +19,33 @@ class ClashKingV2AdvancedStatsSourceTest {
     private static final Instant NOW = Instant.parse("2026-08-14T20:00:00Z");
 
     @Test
+    void routeBuildersMatchTheDocumentedV2Contract() {
+        assertEquals(
+                "/v2/player/%23P0Y8LQ/battlelog/history?limit=100&days=365",
+                ClashKingV2AdvancedStatsSource.normalPath("#P0Y8LQ", 100, 365)
+        );
+        assertEquals(
+                "/v2/player/%23P0Y8LQ/ranked/1754000000/battlelog?limit=100",
+                ClashKingV2AdvancedStatsSource.rankedPath("#P0Y8LQ", 1_754_000_000L, 100)
+        );
+        assertEquals(
+                "/v2/player/%23P0Y8LQ/war/attacks"
+                        + "?time%5Bafter%5D=2026-06-01T00%3A00%3A00Z"
+                        + "&time%5Bbefore%5D=2026-07-01T00%3A00%3A00Z&limit=100",
+                ClashKingV2AdvancedStatsSource.warPath(
+                        "#P0Y8LQ", 1_780_272_000L, 1_782_864_000L, 100
+                )
+        );
+    }
+
+    @Test
     void normalRouteMapsRowsAndUsesLocalWatermark() throws Exception {
         FakeTransport transport = new FakeTransport();
         transport.normal = json("{\"items\":["
                 + "{\"battle_id\":\"b1\",\"timestamp\":\"2026-08-14T19:00:00Z\","
                 + "\"attack\":true,\"stars\":3,\"destruction_percentage\":100,"
-                + "\"loot\":{\"gold\":1200},\"army_items\":[\"barbarian\"],\"army_counts\":[5]},"
+                + "\"gold\":1200,\"player_townhall\":17,\"opponent_townhall\":18,"
+                + "\"army_items\":[\"barbarian\"],\"army_counts\":{\"barbarian\":5}},"
                 + "{\"battle_id\":\"d1\",\"timestamp\":\"2026-08-14T19:30:00Z\",\"attack\":false}]}");
         ClashKingV2AdvancedStatsSource source = new ClashKingV2AdvancedStatsSource(transport, 1L);
 
@@ -33,6 +54,8 @@ class ClashKingV2AdvancedStatsSourceTest {
         assertEquals(Coverage.PARTIAL, page.coverage());
         assertEquals(2, page.observations().size());
         assertEquals(1200, page.observations().get(0).goldLooted());
+        assertEquals(17, page.observations().get(0).playerTownHall());
+        assertEquals(18, page.observations().get(0).opponentTownHall());
         assertEquals(1, page.observations().get(0).units().size());
         assertTrue(page.nextCheckpoint().present());
     }

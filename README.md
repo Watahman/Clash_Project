@@ -47,7 +47,7 @@ Open `http://localhost:5173`. Set `DEV_API_TARGET` only when the Java API runs e
 | `CLASH_API_RATE_LIMIT_COOLDOWN_SECONDS` | no | Fallback cooldown for a key after HTTP 429 when no valid `Retry-After` is supplied; defaults to 60 seconds. |
 | `CLASH_API_MAX_COOLDOWN_SECONDS` | no | Upper bound for a server-requested key cooldown; defaults to 300 seconds. |
 | `_BASE_URL_CLASH` | no | Clash API base URL |
-| `CLASHKING_BASE_URL` | no | ClashKing V2 API base URL; defaults to `https://api.clashk.ing` |
+| `CLASHKING_BASE_URL` | no | ClashKing V2 API base URL; defaults to `https://v2.api.clashk.ing` |
 | `CLASHKING_RANKED_SEASON` | ranked history | Unix timestamp identifying the ranked season queried through ClashKing V2 |
 | `CLASHKING_FALLBACK_TO_OFFICIAL` | no | Use the official rolling battle log when a ClashKing V2 Advanced Stats scope is unavailable |
 | `CLASHKING_COUNTER_INTERVAL_SECONDS` | no | Console report interval for real outbound ClashKing requests; defaults to `60` seconds |
