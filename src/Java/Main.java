@@ -58,7 +58,7 @@ public class Main {
                 HistoricalCwlProviderFactory.create(conf)
         );
         HistoricalCwlService achievementCwlHistoryService = new HistoricalCwlService(
-                HistoricalCwlProviderFactory.createV2(conf)
+                HistoricalCwlProviderFactory.create(conf)
         );
         apiCwlHistory = new API_CWLHistory(server, conf, cwlHistoryService);
         supaUser = new SUPABASE_User(server, conf);

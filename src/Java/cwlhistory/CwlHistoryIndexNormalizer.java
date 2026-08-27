@@ -7,7 +7,6 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 final class CwlHistoryIndexNormalizer {
     private static final List<String> LEAGUES = List.of(
@@ -73,45 +72,6 @@ final class CwlHistoryIndexNormalizer {
             ));
         }
         return newestFirst(result, limit);
-    }
-
-    static List<HistoricalCwlSeasonSummary> normalizeLegacy(
-            JsonObject response,
-            int limit,
-            String source
-    ) {
-        JsonObject root = unwrap(response);
-        JsonObject changes = CwlHistoryJson.object(root, "changes");
-        JsonObject leagues = CwlHistoryJson.object(
-                changes, "clanWarLeague", "clan_war_league", "warLeague"
-        );
-        if (leagues == null) {
-            leagues = CwlHistoryJson.object(root, "clanWarLeague", "cwl");
-        }
-        if (leagues == null) return List.of();
-        List<HistoricalCwlSeasonSummary> result = new ArrayList<>();
-        for (Map.Entry<String, JsonElement> entry : leagues.entrySet()) {
-            if (!validSeason(entry.getKey())) continue;
-            JsonObject value = entry.getValue().isJsonObject()
-                    ? entry.getValue().getAsJsonObject()
-                    : null;
-            String league = value == null
-                    ? entry.getValue().getAsString()
-                    : CwlHistoryJson.string(value, "league", "name", "warLeague");
-            result.add(new HistoricalCwlSeasonSummary(
-                    entry.getKey(),
-                    new HistoricalCwlSeason.League(null, league),
-                    null, 0, 0, 0, 0, null, "completed", source,
-                    "Partial history"
-            ));
-        }
-        return newestFirst(result, limit);
-    }
-
-    private static JsonObject unwrap(JsonObject response) {
-        if (response == null) return new JsonObject();
-        JsonObject data = CwlHistoryJson.object(response, "data");
-        return data == null ? response : data;
     }
 
     private static List<HistoricalCwlSeasonSummary> newestFirst(

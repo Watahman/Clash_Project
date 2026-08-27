@@ -28,27 +28,12 @@ public class Config {
 
     String _BASE_URL_SUPABASE = firstNonBlank(env("_BASE_URL_SUPABASE"), env("SUPABASE_URL"));
     String _BASE_URL_CLASH = firstNonBlank(env("_BASE_URL_CLASH"), "https://cocproxy.royaleapi.dev/v1");
-    String _CLASHKING_API_VERSION = firstNonBlank(
-            env("CLASHKING_API_VERSION"),
-            "legacy"
-    );
-    String _CLASHKING_LEGACY_BASE_URL = firstNonBlank(
-            env("CLASHKING_LEGACY_BASE_URL"),
+    String _CLASHKING_BASE_URL = firstNonBlank(
             env("CLASHKING_BASE_URL"),
-            "https://api.clashk.ing"
-    );
-    String _CLASHKING_V2_BASE_URL = firstNonBlank(
-            env("CLASHKING_V2_BASE_URL"),
-            env("CLASHKING_BASE_URL"),
-            "https://api.clashk.ing"
-    );
-    String _CLASHKING_FALLBACK_TO_LEGACY = firstNonBlank(
-            env("CLASHKING_FALLBACK_TO_LEGACY"),
-            "false"
+            "https://v2.api.clashk.ing"
     );
     String _CLASHKING_RANKED_SEASON = firstNonBlank(
-            env("CLASHKING_RANKED_SEASON"),
-            env("CLASHKING_V2_RANKED_SEASON")
+            env("CLASHKING_RANKED_SEASON")
     );
     String _CLASHKING_COUNTER_INTERVAL_SECONDS = firstNonBlank(
             env("CLASHKING_COUNTER_INTERVAL_SECONDS"),
@@ -287,23 +272,7 @@ public class Config {
     }
 
     public String getClashKingBaseUrl() {
-        return _CLASHKING_V2_BASE_URL;
-    }
-
-    public String getClashKingApiVersion() {
-        return "v2".equalsIgnoreCase(_CLASHKING_API_VERSION) ? "v2" : "legacy";
-    }
-
-    public String getClashKingLegacyBaseUrl() {
-        return _CLASHKING_LEGACY_BASE_URL;
-    }
-
-    public String getClashKingV2BaseUrl() {
-        return _CLASHKING_V2_BASE_URL;
-    }
-
-    public boolean isClashKingLegacyFallbackEnabled() {
-        return "true".equalsIgnoreCase(_CLASHKING_FALLBACK_TO_LEGACY);
+        return _CLASHKING_BASE_URL;
     }
 
     public String getClashKingRankedSeason() {

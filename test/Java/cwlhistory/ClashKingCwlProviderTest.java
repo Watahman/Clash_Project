@@ -42,7 +42,7 @@ class ClashKingCwlProviderTest {
 
     @Test
     void usesTheV2SeasonIndexAndNormalizesRecordedValues() throws Exception {
-        respond("/v2/cwl/%23PQL/seasons", 200, """
+        respond("/v2/cwl/%23PQL/seasons?limit=2", 200, """
                 {"items":[
                   {"season":"2026-06","state":"ended","rank":2,
                    "stars":321,"destruction":98.5,
@@ -62,15 +62,16 @@ class ClashKingCwlProviderTest {
         assertEquals("Champion League II", seasons.getFirst().league().name());
         assertEquals(2, seasons.getFirst().position());
         assertEquals(5, seasons.getFirst().wins());
-        assertEquals(List.of("/v2/cwl/%23PQL/seasons"), requests);
+        assertEquals(List.of("/v2/cwl/%23PQL/seasons?limit=2"), requests);
     }
 
     @Test
     void usesOnlyV2GroupAndWarRoutesForSeasonDetails() throws Exception {
-        respond("/v2/cwl/%23PQL?season=2026-06", 200, season("2026-06"));
+        respond("/v2/cwl/%23PQL/group?season=2026-06", 200, season("2026-06"));
         respond(
-                "/v2/clan/%23PQL/wars?timestamp_start=1780272000"
-                        + "&timestamp_end=1782864000&limit=20&war_type=cwl",
+                "/v2/clan/%23PQL/wars?type=cwl"
+                        + "&time%5Bafter%5D=2026-06-01T00%3A00%3A00Z"
+                        + "&time%5Bbefore%5D=2026-07-01T00%3A00%3A00Z&limit=20",
                 200,
                 "{\"items\":[]}"
         );
@@ -80,15 +81,16 @@ class ClashKingCwlProviderTest {
         assertEquals("2026-06", result.season());
         assertEquals("Champion League II", result.league().name());
         assertEquals(List.of(
-                "/v2/cwl/%23PQL?season=2026-06",
-                "/v2/clan/%23PQL/wars?timestamp_start=1780272000"
-                        + "&timestamp_end=1782864000&limit=20&war_type=cwl"
+                "/v2/cwl/%23PQL/group?season=2026-06",
+                "/v2/clan/%23PQL/wars?type=cwl"
+                        + "&time%5Bafter%5D=2026-06-01T00%3A00%3A00Z"
+                        + "&time%5Bbefore%5D=2026-07-01T00%3A00%3A00Z&limit=20"
         ), requests);
     }
 
     @Test
     void rejectsAResponseForADifferentSeason() {
-        respond("/v2/cwl/%23PQL?season=2025-06", 200, season("2026-06"));
+        respond("/v2/cwl/%23PQL/group?season=2025-06", 200, season("2026-06"));
 
         Java.HttpException error = assertThrows(
                 Java.HttpException.class,
@@ -96,7 +98,7 @@ class ClashKingCwlProviderTest {
         );
 
         assertEquals(502, error.getStatusCode());
-        assertEquals(List.of("/v2/cwl/%23PQL?season=2025-06"), requests);
+        assertEquals(List.of("/v2/cwl/%23PQL/group?season=2025-06"), requests);
     }
 
     private void respond(String target, int status, String body) {

@@ -4,8 +4,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class CwlHistoryNormalizerTest {
@@ -15,17 +13,14 @@ class CwlHistoryNormalizerTest {
                 {
                   "season":"2026-06",
                   "state":"ended",
+                  "warLeague":{"id":48000014,"name":"Master League II"},
                   "clans":[{
                     "tag":"#PQL","name":"ClashPanel",
-                    "warLeague":{"id":48000014,"name":"Master League II"},
                     "members":[{"tag":"#P0L","name":"Alex","townHallLevel":17}]
-                  }],
-                  "clan_rankings":[
-                    {"tag":"#PQL","name":"ClashPanel","stars":35,"destruction":95,
-                     "rounds":{"won":1,"lost":0,"tied":0}},
-                    {"tag":"#P2Y","name":"Opponent","stars":31,"destruction":91,
-                     "rounds":{"won":0,"lost":1,"tied":0}}
-                  ]
+                  },{
+                    "tag":"#ENEMY","name":"Opponent",
+                    "members":[{"tag":"#P2Y","name":"Luna","townHallLevel":17}]
+                  }]
                 }
                 """).getAsJsonObject();
         JsonObject wars = JsonParser.parseString("""
@@ -60,26 +55,6 @@ class CwlHistoryNormalizerTest {
         assertEquals(2, season.wars().getFirst().opponent()
                 .members().getFirst().attacks().getFirst().stars());
         assertEquals("Complete", season.dataQuality());
-    }
-
-    @Test
-    void legacySeasonIndexUsesLeagueChangesWithoutInventingPlacements() {
-        JsonObject response = JsonParser.parseString("""
-                {"changes":{"clanWarLeague":{
-                  "2026-05":{"league":"Master League II"},
-                  "2026-06":{"league":"Master League I"}
-                }}}
-                """).getAsJsonObject();
-
-        List<HistoricalCwlSeasonSummary> seasons =
-                CwlHistoryIndexNormalizer.normalizeLegacy(
-                        response, 12, "legacy"
-                );
-
-        assertEquals(List.of("2026-06", "2026-05"),
-                seasons.stream().map(HistoricalCwlSeasonSummary::season).toList());
-        assertNull(seasons.getFirst().position());
-        assertEquals("Partial history", seasons.getFirst().dataQuality());
     }
 
     @Test
@@ -134,5 +109,39 @@ class CwlHistoryNormalizerTest {
         assertEquals(2, season.standings().size());
         assertEquals(13, season.standings().getFirst().stars());
         assertEquals(1, season.record().wins());
+    }
+
+    @Test
+    void v2StandingsPreferTheCompleteGroupOverSelectedClanWars() {
+        JsonObject group = JsonParser.parseString("""
+                {"clans":[
+                  {"tag":"#A","name":"Alpha"},{"tag":"#B","name":"Beta"},
+                  {"tag":"#C","name":"Gamma"}
+                ],"rounds":[{"warTags":[
+                  {"tag":"#W1","state":"warEnded",
+                   "clan":{"tag":"#A","stars":3,"destructionPercentage":100},
+                   "opponent":{"tag":"#B","stars":2,"destructionPercentage":90}},
+                  {"tag":"#W2","state":"warEnded",
+                   "clan":{"tag":"#B","stars":3,"destructionPercentage":95},
+                   "opponent":{"tag":"#C","stars":1,"destructionPercentage":80}}
+                ]}]}
+                """).getAsJsonObject();
+        JsonObject selectedClanWars = JsonParser.parseString("""
+                {"items":[{"tag":"#W1","state":"warEnded",
+                  "clan":{"tag":"#A","stars":3},
+                  "opponent":{"tag":"#B","stars":2}}]}
+                """).getAsJsonObject();
+
+        var standings = CwlHistoryStandingsNormalizer.normalize(
+                group, selectedClanWars
+        );
+        HistoricalCwlSeason.Standing beta = standings.stream()
+                .filter(row -> "#B".equals(row.tag()))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals(1, beta.wins());
+        assertEquals(1, beta.losses());
+        assertEquals(3, standings.size());
     }
 }

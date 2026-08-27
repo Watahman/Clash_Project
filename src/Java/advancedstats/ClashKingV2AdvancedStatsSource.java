@@ -15,6 +15,8 @@ import java.util.List;
 
 /** Capability-based adapter for the documented V2 normal, ranked, and war GET routes. */
 public final class ClashKingV2AdvancedStatsSource implements AdvancedStatsHistorySource {
+    private static final int MAX_BOOTSTRAP_DAYS = 365;
+
     public interface Transport {
         JsonObject normal(String playerTag, int limit, int days) throws Exception;
 
@@ -135,10 +137,11 @@ public final class ClashKingV2AdvancedStatsSource implements AdvancedStatsHistor
     }
 
     private long startSeconds(HistoryRequest request) {
+        Instant earliest = request.requestedAt().minus(MAX_BOOTSTRAP_DAYS, ChronoUnit.DAYS);
         Instant start = request.checkpoint() == null || request.checkpoint().watermark() == null
-                ? Instant.EPOCH
+                ? earliest
                 : request.checkpoint().watermark().minus(1, ChronoUnit.DAYS);
-        if (start.isBefore(Instant.EPOCH)) start = Instant.EPOCH;
+        if (start.isBefore(earliest)) start = earliest;
         return start.getEpochSecond();
     }
 
@@ -157,6 +160,27 @@ public final class ClashKingV2AdvancedStatsSource implements AdvancedStatsHistor
         return new HttpTransport(baseUrl);
     }
 
+    static String normalPath(String playerTag, int limit, int days) {
+        return "/v2/player/" + encoded(playerTag)
+                + "/battlelog/history?limit=" + limit + "&days=" + days;
+    }
+
+    static String rankedPath(String playerTag, long season, int limit) {
+        return "/v2/player/" + encoded(playerTag) + "/ranked/" + season
+                + "/battlelog?limit=" + limit;
+    }
+
+    static String warPath(String playerTag, long start, long end, int limit) {
+        return "/v2/player/" + encoded(playerTag) + "/war/attacks"
+                + "?time%5Bafter%5D=" + encoded(Instant.ofEpochSecond(start).toString())
+                + "&time%5Bbefore%5D=" + encoded(Instant.ofEpochSecond(end).toString())
+                + "&limit=" + limit;
+    }
+
+    private static String encoded(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
     private static final class HttpTransport implements Transport {
         private final ClashKingHttpClient client;
 
@@ -166,23 +190,17 @@ public final class ClashKingV2AdvancedStatsSource implements AdvancedStatsHistor
 
         @Override
         public JsonObject normal(String playerTag, int limit, int days) throws Exception {
-            return client.get("/v2/player/" + tag(playerTag) + "/battlelog/history?limit=" + limit + "&days=" + days);
+            return client.get(normalPath(playerTag, limit, days));
         }
 
         @Override
         public JsonObject ranked(String playerTag, long seasonSeconds, int limit) throws Exception {
-            return client.get("/v2/player/" + tag(playerTag) + "/ranked/" + seasonSeconds
-                    + "/battlelog?limit=" + limit);
+            return client.get(rankedPath(playerTag, seasonSeconds, limit));
         }
 
         @Override
         public JsonObject war(String playerTag, long startSeconds, long endSeconds, int limit) throws Exception {
-            return client.get("/v2/player/" + tag(playerTag) + "/war/attacks?timestamp_start=" + startSeconds
-                    + "&timestamp_end=" + endSeconds + "&limit=" + limit);
-        }
-
-        private static String tag(String value) {
-            return URLEncoder.encode(value, StandardCharsets.UTF_8);
+            return client.get(warPath(playerTag, startSeconds, endSeconds, limit));
         }
     }
 }

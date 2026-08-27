@@ -70,8 +70,8 @@ final class ClashKingV2AdvancedStatsParser {
         return new AttackObservation(prefix + ":" + id, request.scope(), occurredAt, attack,
                 text(row, "battle_type", "battleType", "type"),
                 text(row, "opponent_tag", "opponentTag", "defenderTag"),
-                positive(integer(row, "player_town_hall", "playerTownHall", "attackerTownHall")),
-                positive(integer(row, "opponent_town_hall", "opponentTownHall", "defenderTownHall")),
+                positive(integer(row, "player_townhall", "player_town_hall", "playerTownHall", "attackerTownHall")),
+                positive(integer(row, "opponent_townhall", "opponent_town_hall", "opponentTownHall", "defenderTownHall")),
                 integer(row, "stars"), decimal(row, "destruction_percentage", "destructionPercentage", "destruction"),
                 units(row), loot(row, "gold", "gold_looted", "goldLooted"),
                 loot(row, "elixir", "elixir_looted", "elixirLooted"),
@@ -142,6 +142,7 @@ final class ClashKingV2AdvancedStatsParser {
         if (!items.isJsonArray()) return List.of();
         JsonArray itemArray = items.getAsJsonArray();
         JsonArray countArray = counts != null && counts.isJsonArray() ? counts.getAsJsonArray() : null;
+        JsonObject countObject = counts != null && counts.isJsonObject() ? counts.getAsJsonObject() : null;
         for (int index = 0; index < itemArray.size(); index++) {
             JsonElement item = itemArray.get(index);
             String key = item.isJsonObject() ? text(item.getAsJsonObject(), "id", "key", "unit_key", "name")
@@ -149,7 +150,9 @@ final class ClashKingV2AdvancedStatsParser {
             int quantity = item.isJsonObject()
                     ? number(item.getAsJsonObject().get("count"),
                     number(item.getAsJsonObject().get("quantity"), 0))
-                    : countArray == null || index >= countArray.size() ? 0 : number(countArray.get(index), 0);
+                    : countObject != null ? number(countObject.get(key), 0)
+                    : countArray == null || index >= countArray.size() ? 0
+                    : number(countArray.get(index), 0);
             if (!key.isBlank() && quantity > 0) result.add(unit(key, key, quantity));
         }
         return List.copyOf(result);
