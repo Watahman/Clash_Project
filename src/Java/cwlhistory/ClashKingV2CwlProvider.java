@@ -6,9 +6,7 @@ import com.google.gson.JsonObject;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.time.YearMonth;
-import java.time.ZoneOffset;
 import java.util.List;
 
 public final class ClashKingV2CwlProvider implements HistoricalCwlDataProvider {
@@ -34,10 +32,7 @@ public final class ClashKingV2CwlProvider implements HistoricalCwlDataProvider {
     @Override
     public HistoricalCwlSeason getSeason(String clanTag, String season)
             throws Exception {
-        YearMonth month = YearMonth.parse(season);
-        Instant start = month.atDay(1).atStartOfDay().toInstant(ZoneOffset.UTC);
-        Instant end = month.plusMonths(1).atDay(1).atStartOfDay()
-                .toInstant(ZoneOffset.UTC);
+        YearMonth.parse(season);
         JsonObject group = client.get(groupPath(clanTag, season));
         String responseSeason = CwlHistoryJson.string(group, "season");
         if (!responseSeason.isBlank() && !season.equals(responseSeason)) {
@@ -47,9 +42,8 @@ public final class ClashKingV2CwlProvider implements HistoricalCwlDataProvider {
                     "ClashKing V2"
             );
         }
-        JsonObject wars = client.get(warsPath(clanTag, start, end));
         return CwlHistoryNormalizer.normalizeSeason(
-                clanTag, season, group, wars, providerName()
+                clanTag, season, group, group, providerName()
         );
     }
 
@@ -61,14 +55,6 @@ public final class ClashKingV2CwlProvider implements HistoricalCwlDataProvider {
     private static String groupPath(String clanTag, String season) {
         return "/v2/cwl/" + encoded(clanTag)
                 + "/group?season=" + encoded(season);
-    }
-
-    private static String warsPath(String clanTag, Instant start, Instant end) {
-        return "/v2/clan/" + encoded(clanTag) + "/wars"
-                + "?type=cwl"
-                + "&time%5Bafter%5D=" + encoded(start.toString())
-                + "&time%5Bbefore%5D=" + encoded(end.toString())
-                + "&limit=20";
     }
 
     private static String encoded(String value) {
