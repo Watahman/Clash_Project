@@ -6,14 +6,26 @@ const client = vi.hoisted(() => ({
     loadHistoricalCwlOverview: vi.fn()
 }));
 
+const clanApi = vi.hoisted(() => ({
+    getClanInfoRequest: vi.fn()
+}));
+
 vi.mock(
     '../../src/assets/js/operation-board/historical-cwl-client.js?v=20260826-cwl-cache-reset',
     () => client
 );
 
+vi.mock(
+    '../../src/assets/js/API/API-Clan.js?v=20260826-live-refresh',
+    () => clanApi
+);
+
 describe('Operation Board history controller', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        clanApi.getClanInfoRequest.mockResolvedValue({
+            warLeague: { id: 48000014, name: 'Master League II' }
+        });
         document.body.innerHTML = '<select id="op-season-select"></select>';
         client.loadHistoricalCwlSeasons.mockResolvedValue([
             {
@@ -98,6 +110,10 @@ describe('Operation Board history controller', () => {
         await controller.selectSeason('overview');
 
         expect(client.loadHistoricalCwlOverview).toHaveBeenCalledTimes(1);
+        expect(client.loadHistoricalCwlOverview).toHaveBeenCalledWith(
+            '#PQL',
+            expect.objectContaining({ limit: 24 })
+        );
         expect(onOverview).toHaveBeenCalledTimes(1);
     });
 

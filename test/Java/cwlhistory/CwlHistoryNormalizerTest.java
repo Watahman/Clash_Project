@@ -4,9 +4,30 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class CwlHistoryNormalizerTest {
+    @Test
+    void v2SeasonIndexDeduplicatesDatedMonthAliases() {
+        JsonObject response = JsonParser.parseString("""
+                {"items":[
+                  {"season":"2026-08-01","rank":2},
+                  {"season":"2026-06-16","rank":5},
+                  {"season":"2026-06","rank":6}
+                ]}
+                """).getAsJsonObject();
+
+        var seasons = CwlHistoryIndexNormalizer.normalizeV2(
+                response, 24, "v2"
+        );
+
+        assertEquals(List.of("2026-08", "2026-06"), seasons.stream()
+                .map(HistoricalCwlSeasonSummary::season).toList());
+        assertEquals(6, seasons.get(1).position());
+    }
+
     @Test
     void v2NormalizesGroupWarsRosterAndReliableDefense() {
         JsonObject group = JsonParser.parseString("""

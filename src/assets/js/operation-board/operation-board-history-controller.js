@@ -7,6 +7,8 @@ import {
     buildHistoricalCwlOverview,
     getLeagueChangeForSeason
 } from './historical-cwl-overview-model.js';
+import { reconstructHistoricalLeagues } from './historical-cwl-league-reconstructor.js?v=20260827-cwl-league-history';
+import { getClanInfoRequest } from '../API/API-Clan.js?v=20260826-live-refresh';
 import {
     buildHistoricalSeasonModel,
     formatSeason
@@ -27,6 +29,7 @@ export function createOperationBoardHistoryController({
     let seasonIndex = [];
     let selectedSeason = 'current';
     let currentSeason = '';
+    let currentLeague = null;
     let requestToken = 0;
     let controller;
 
@@ -37,6 +40,7 @@ export function createOperationBoardHistoryController({
         seasonIndex = [];
         selectedSeason = 'current';
         currentSeason = '';
+        currentLeague = null;
         if (!refs.seasonSelect) return;
         refs.seasonSelect.disabled = true;
         refs.seasonSelect.replaceChildren(
@@ -57,9 +61,17 @@ export function createOperationBoardHistoryController({
         refs.seasonSelect.disabled = true;
         refs.seasonSelect.setAttribute('aria-busy', 'true');
         try {
-            seasonIndex = await loadHistoricalCwlSeasons(
-                clan.tag,
-                { limit: 24, signal: controller.signal }
+            const [loadedSeasons, officialLeague] = await Promise.all([
+                loadHistoricalCwlSeasons(
+                    clan.tag,
+                    { limit: 24, signal: controller.signal }
+                ),
+                loadCurrentLeague(report, clan.tag, controller.signal)
+            ]);
+            currentLeague = officialLeague;
+            seasonIndex = reconstructHistoricalLeagues(
+                loadedSeasons,
+                currentLeague
             );
             if (token !== requestToken) return;
             renderOptions(Boolean(report));
@@ -105,15 +117,19 @@ export function createOperationBoardHistoryController({
         onLoading(targetMode);
         try {
             if (targetMode === 'overview') {
-                const seasons = await loadHistoricalCwlOverview(
+                const loadedSeasons = await loadHistoricalCwlOverview(
                     clan.tag,
                     {
-                        limit: 12,
+                        limit: 24,
                         signal: controller.signal,
                         forceRefresh
                     }
                 );
                 if (token !== requestToken) return;
+                const seasons = reconstructHistoricalLeagues(
+                    loadedSeasons,
+                    currentLeague
+                );
                 mode = 'overview';
                 onOverview(buildHistoricalCwlOverview(seasons));
                 return;
@@ -197,6 +213,18 @@ export function createOperationBoardHistoryController({
         getSelectedSeason: () => selectedSeason,
         getSeasonIndex: () => [...seasonIndex]
     };
+}
+
+async function loadCurrentLeague(report, clanTag, signal) {
+    const known = report?.clanInfo?.warLeague;
+    if (known?.name) return known;
+    try {
+        const clan = await getClanInfoRequest(clanTag, { signal });
+        return clan?.warLeague?.name ? clan.warLeague : null;
+    } catch (error) {
+        if (error?.name === 'AbortError') throw error;
+        return null;
+    }
 }
 
 function option(value, label, disabled = false) {

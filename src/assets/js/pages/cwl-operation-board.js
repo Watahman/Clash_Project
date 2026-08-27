@@ -3,7 +3,7 @@ import { initPlayerPerformancePopover } from '../cwl/cwl-player-performance-popo
 import { initI18n, t } from '../i18n/i18n.js';
 import { exportOperationReport } from '../operation-board/operation-board-import-export.js';
 import { createCwlOperationBoardBootstrap } from '../operation-board/cwl-operation-board-bootstrap.js';
-import { createCwlOperationBoardControllers } from '../operation-board/cwl-operation-board-controllers.js';
+import { createCwlOperationBoardControllers } from '../operation-board/cwl-operation-board-controllers.js?v=20260827-cwl-league-history';
 import { createCwlOperationBoardReportLoader } from '../operation-board/cwl-operation-board-report-loader.js?v=20260826-live-refresh';
 import { renderBoardContext } from '../operation-board/operation-board-context-renderer.js';
 import { bindOperationBoardEvents } from '../operation-board/operation-board-page-events.js';

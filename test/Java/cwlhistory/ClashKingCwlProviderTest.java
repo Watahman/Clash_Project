@@ -92,6 +92,30 @@ class ClashKingCwlProviderTest {
         assertEquals(List.of("/v2/cwl/%23PQL/group?season=2025-06"), requests);
     }
 
+    @Test
+    void mapsDatedV2SeasonKeysToCalendarMonths() throws Exception {
+        respond("/v2/cwl/%23PQL/seasons?limit=24", 200, """
+                {"items":[{"season":"2026-08-01","rank":2}]}
+                """);
+        respond(
+                "/v2/cwl/%23PQL/group?season=2026-08-01",
+                200,
+                season("2026-08-01")
+        );
+
+        List<HistoricalCwlSeasonSummary> seasons =
+                provider.getAvailableSeasons("#PQL", 24);
+        HistoricalCwlSeason detail = provider.getSeason("#PQL", "2026-08");
+
+        assertEquals(List.of("2026-08"), seasons.stream()
+                .map(HistoricalCwlSeasonSummary::season).toList());
+        assertEquals("2026-08", detail.season());
+        assertEquals(List.of(
+                "/v2/cwl/%23PQL/seasons?limit=24",
+                "/v2/cwl/%23PQL/group?season=2026-08-01"
+        ), requests);
+    }
+
     private void respond(String target, int status, String body) {
         responses.put(target, new Response(status, body));
     }
