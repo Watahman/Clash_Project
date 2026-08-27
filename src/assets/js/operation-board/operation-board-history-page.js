@@ -1,5 +1,5 @@
 import { getCurrentCwlPlayerContext } from './operation-board-player-context.js';
-import { createOperationBoardHistoryController } from './operation-board-history-controller.js';
+import { createOperationBoardHistoryController } from './operation-board-history-controller.js?v=20260827-cwl-league-history';
 import { getHistoricalCwlPlayerContext } from './historical-cwl-season-model.js';
 import { renderHistoryOverview } from './operation-board-renderer.js';
 

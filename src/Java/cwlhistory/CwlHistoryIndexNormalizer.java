@@ -6,7 +6,9 @@ import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 final class CwlHistoryIndexNormalizer {
     private static final List<String> LEAGUES = List.of(
@@ -30,12 +32,13 @@ final class CwlHistoryIndexNormalizer {
     ) {
         JsonArray items = CwlHistoryJson.array(response, "items", "seasons");
         if (items == null) return List.of();
-        List<HistoricalCwlSeasonSummary> result = new ArrayList<>();
+        Map<String, HistoricalCwlSeasonSummary> result = new LinkedHashMap<>();
         for (JsonElement item : items) {
             if (!item.isJsonObject()) continue;
             JsonObject value = item.getAsJsonObject();
-            String season = CwlHistoryJson.string(value, "season");
-            if (!validSeason(season)) continue;
+            String rawSeason = CwlHistoryJson.string(value, "season");
+            String season = normalizedSeason(rawSeason);
+            if (season.isBlank()) continue;
             JsonObject standing = CwlHistoryJson.object(value, "standing");
             JsonObject league = CwlHistoryJson.object(
                     value, "warLeague", "league"
@@ -54,7 +57,7 @@ final class CwlHistoryIndexNormalizer {
             );
             String leagueName = CwlHistoryJson.string(league, "name");
             if (leagueName.isBlank()) leagueName = leagueName(leagueId);
-            result.add(new HistoricalCwlSeasonSummary(
+            HistoricalCwlSeasonSummary summary = new HistoricalCwlSeasonSummary(
                     season,
                     new HistoricalCwlSeason.League(
                             leagueId > 0 ? leagueId : null,
@@ -69,9 +72,12 @@ final class CwlHistoryIndexNormalizer {
                     CwlHistoryJson.string(value, "state", "status"),
                     source,
                     "Partial history"
-            ));
+            );
+            if (rawSeason.equals(season) || !result.containsKey(season)) {
+                result.put(season, summary);
+            }
         }
-        return newestFirst(result, limit);
+        return newestFirst(new ArrayList<>(result.values()), limit);
     }
 
     private static List<HistoricalCwlSeasonSummary> newestFirst(
@@ -91,9 +97,14 @@ final class CwlHistoryIndexNormalizer {
         return index >= 0 && index < LEAGUES.size() ? LEAGUES.get(index) : "";
     }
 
-    private static boolean validSeason(String season) {
-        return season != null
-                && season.matches("^20\\d{2}-(0[1-9]|1[0-2])$");
+    static String normalizedSeason(String season) {
+        if (season == null) return "";
+        String value = season.trim();
+        if (value.matches("^20\\d{2}-(0[1-9]|1[0-2])$")) return value;
+        if (value.matches("^20\\d{2}-(0[1-9]|1[0-2])-\\d{2}$")) {
+            return value.substring(0, 7);
+        }
+        return "";
     }
 
     private static Integer positive(JsonObject value, String... keys) {
