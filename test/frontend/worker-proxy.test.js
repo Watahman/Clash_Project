@@ -71,6 +71,8 @@ describe('Cloudflare API proxy', () => {
         ['/app/dashboard', '/dashboard'],
         ['/cwl-planner.html', '/cwl-planner'],
         ['/guides.html', '/guides'],
+        ['/guides/fair-cwl-roster.html', '/guides/fair-cwl-roster'],
+        ['/guides/cwl-season-history.html', '/guides/cwl-season-history'],
         ['/methodology.html', '/methodology'],
         ['/changelog.html', '/changelog']
     ])('permanently redirects %s to its public canonical route', async (source, destination) => {
@@ -98,6 +100,17 @@ describe('Cloudflare API proxy', () => {
         expect(response.status).toBe(301);
         expect(response.headers.get('Location'))
             .toBe(`https://clashpanel.com${destination}`);
+    });
+
+    it('normalizes a trailing slash on a guide detail route', async () => {
+        const response = await worker.fetch(
+            new Request('https://clashpanel.com/guides/fair-cwl-roster/?from=hub'),
+            env()
+        );
+
+        expect(response.status).toBe(301);
+        expect(response.headers.get('Location'))
+            .toBe('https://clashpanel.com/guides/fair-cwl-roster?from=hub');
     });
 
     it.each([

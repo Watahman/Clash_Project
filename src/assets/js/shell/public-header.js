@@ -33,7 +33,7 @@ function currentPublicSection(pathname) {
 
     if (normalized === '/minigames') return 'games';
     if (TOOL_PATHS.has(normalized)) return 'tools';
-    if (normalized === '/guides') return 'guides';
+    if (normalized === '/guides' || normalized.startsWith('/guides/')) return 'guides';
     if (normalized === '/methodology') return 'methodology';
     if (normalized === '/about') return 'about';
     if (normalized === '/changelog') return 'changelog';

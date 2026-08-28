@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://clashpanel.com/</loc><lastmod>2026-08-12</lastmod></url>
-  <url><loc>https://clashpanel.com/about</loc><lastmod>2026-08-12</lastmod></url>
-  <url><loc>https://clashpanel.com/cwl-planner</loc><lastmod>2026-08-12</lastmod></url>
-  <url><loc>https://clashpanel.com/cwl-tracker</loc><lastmod>2026-08-12</lastmod></url>
-  <url><loc>https://clashpanel.com/clan-management</loc><lastmod>2026-08-12</lastmod></url>
-  <url><loc>https://clashpanel.com/guides</loc><lastmod>2026-08-12</lastmod></url>
-  <url><loc>https://clashpanel.com/minigames</loc><lastmod>2026-08-12</lastmod></url>
+  <url><loc>https://clashpanel.com/</loc><lastmod>2026-08-28</lastmod></url>
+  <url><loc>https://clashpanel.com/about</loc><lastmod>2026-08-21</lastmod></url>
+  <url><loc>https://clashpanel.com/cwl-planner</loc><lastmod>2026-08-24</lastmod></url>
+  <url><loc>https://clashpanel.com/cwl-tracker</loc><lastmod>2026-08-28</lastmod></url>
+  <url><loc>https://clashpanel.com/clan-management</loc><lastmod>2026-08-28</lastmod></url>
+  <url><loc>https://clashpanel.com/minigames</loc><lastmod>2026-08-28</lastmod></url>
+  <url><loc>https://clashpanel.com/guides</loc><lastmod>2026-08-28</lastmod></url>
+  <url><loc>https://clashpanel.com/guides/fair-cwl-roster</loc><lastmod>2026-08-28</lastmod></url>
+  <url><loc>https://clashpanel.com/guides/cwl-rotation</loc><lastmod>2026-08-28</lastmod></url>
+  <url><loc>https://clashpanel.com/guides/cwl-availability</loc><lastmod>2026-08-28</lastmod></url>
+  <url><loc>https://clashpanel.com/guides/cwl-attack-defense</loc><lastmod>2026-08-28</lastmod></url>
+  <url><loc>https://clashpanel.com/guides/missed-attacks</loc><lastmod>2026-08-28</lastmod></url>
+  <url><loc>https://clashpanel.com/guides/cwl-bonus-medals</loc><lastmod>2026-08-28</lastmod></url>
+  <url><loc>https://clashpanel.com/guides/cwl-season-history</loc><lastmod>2026-08-28</lastmod></url>
+  <url><loc>https://clashpanel.com/guides/spreadsheet-vs-cwl-planner</loc><lastmod>2026-08-28</lastmod></url>
   <url><loc>https://clashpanel.com/methodology</loc><lastmod>2026-08-12</lastmod></url>
   <url><loc>https://clashpanel.com/changelog</loc><lastmod>2026-08-14</lastmod></url>
-  <url><loc>https://clashpanel.com/privacy</loc><lastmod>2026-08-12</lastmod></url>
-  <url><loc>https://clashpanel.com/cookies</loc><lastmod>2026-08-12</lastmod></url>
-  <url><loc>https://clashpanel.com/terms</loc><lastmod>2026-08-12</lastmod></url>
-  <url><loc>https://clashpanel.com/contact</loc><lastmod>2026-08-12</lastmod></url>
+  <url><loc>https://clashpanel.com/privacy</loc><lastmod>2026-08-27</lastmod></url>
+  <url><loc>https://clashpanel.com/cookies</loc><lastmod>2026-08-27</lastmod></url>
+  <url><loc>https://clashpanel.com/terms</loc><lastmod>2026-08-27</lastmod></url>
+  <url><loc>https://clashpanel.com/contact</loc><lastmod>2026-08-27</lastmod></url>
+  <url><loc>https://clashpanel.com/bracket-generator</loc><lastmod>2026-08-28</lastmod></url>
 </urlset>

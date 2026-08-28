@@ -51,7 +51,7 @@ export default Object.freeze({
     "planner.cta.desc": "Start met één clan, een Clan Family of een bestaande spreadsheet en houd roster, rollen en beschikbaarheid op één plaats.",
     "planner.cta.button": "Open CWL Planner",
     "tracker.kicker": "Clash of Clans CWL Tracker",
-    "tracker.h1": "Zie de volledige CWL.",
+    "tracker.h1": "Volg CWL-wars, statistieken en historiek.",
     "tracker.lead": "Volg live CWL-wars, aanvallen, gemiste aanvallen, league standings, spelersprestaties en vorige Clan War League-seizoenen in één overzicht.",
     "tracker.primary": "Open CWL Tracker",
     "tracker.secondary": "Plan een CWL-roster",

@@ -1,4 +1,5 @@
 import { t } from '../i18n/i18n.js';
+import { renderGuideDetailPage, rewriteGuideArticleLinks } from './guide-detail-renderer.js';
 
 function normalizedPath() {
     return String(window.location.pathname || '/')
@@ -59,12 +60,16 @@ function renderGuideLibrary() {
     return `
         <section class="guide-library" aria-labelledby="guide-library-title">
             <div class="guide-library-head"><p class="resource-kicker">Guide library</p><h2 id="guide-library-title">Start with the decision in front of you.</h2><p>${t('guides.heroIntro')}</p></div>
-            <a class="guide-featured" href="#fair-roster"><div><p class="resource-kicker">Featured guide</p><h3>${t('guides.tocFair')}</h3><p>${t('guides.heroMeta')}</p></div></a>
+            <a class="guide-featured" href="/guides/fair-cwl-roster"><div><p class="resource-kicker">Featured guide</p><h3>${t('guides.tocFair')}</h3><p>${t('guides.heroMeta')}</p></div></a>
             <div class="guide-category-grid">
-                <a class="guide-category-card" href="#fair-roster"><span class="guide-category-label">Planning</span><strong>${t('guides.tocFair')} · ${t('guides.tocRotation')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Pool</span><i>→</i><span>Rules</span><i>→</i><span>Roster</span></span></a>
-                <a class="guide-category-card" href="#availability"><span class="guide-category-label">Availability</span><strong>${t('guides.tocAvailability')} · ${t('guides.tocMissed')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Known</span><i>→</i><span>Change</span><i>→</i><span>Cover</span></span></a>
-                <a class="guide-category-card" href="#two-sided"><span class="guide-category-label">Review</span><strong>${t('guides.tocTwoSided')} · ${t('guides.tocSeasons')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Attack</span><i>→</i><span>Defence</span><i>→</i><span>Context</span></span></a>
-                <a class="guide-category-card" href="#spreadsheet"><span class="guide-category-label">Workflow</span><strong>${t('guides.tocSpreadsheet')} · ${t('guides.tocBonus')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Sheet</span><i>→</i><span>Import</span><i>→</i><span>Review</span></span></a>
+                <a class="guide-category-card" href="/guides/fair-cwl-roster"><span class="guide-category-label">Planning</span><strong>${t('guides.tocFair')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Pool</span><i>→</i><span>Rules</span><i>→</i><span>Roster</span></span></a>
+                <a class="guide-category-card" href="/guides/cwl-rotation"><span class="guide-category-label">Planning</span><strong>${t('guides.tocRotation')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Core</span><i>→</i><span>Rotate</span><i>→</i><span>Review</span></span></a>
+                <a class="guide-category-card" href="/guides/cwl-availability"><span class="guide-category-label">Availability</span><strong>${t('guides.tocAvailability')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Known</span><i>→</i><span>Change</span><i>→</i><span>Cover</span></span></a>
+                <a class="guide-category-card" href="/guides/missed-attacks"><span class="guide-category-label">Availability</span><strong>${t('guides.tocMissed')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Check</span><i>→</i><span>Context</span><i>→</i><span>Act</span></span></a>
+                <a class="guide-category-card" href="/guides/cwl-attack-defense"><span class="guide-category-label">Review</span><strong>${t('guides.tocTwoSided')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Attack</span><i>→</i><span>Defence</span><i>→</i><span>Context</span></span></a>
+                <a class="guide-category-card" href="/guides/cwl-season-history"><span class="guide-category-label">Review</span><strong>${t('guides.tocSeasons')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Seasons</span><i>→</i><span>Compare</span><i>→</i><span>Context</span></span></a>
+                <a class="guide-category-card" href="/guides/cwl-bonus-medals"><span class="guide-category-label">Workflow</span><strong>${t('guides.tocBonus')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Rules</span><i>→</i><span>Signals</span><i>→</i><span>Explain</span></span></a>
+                <a class="guide-category-card" href="/guides/spreadsheet-vs-cwl-planner"><span class="guide-category-label">Workflow</span><strong>${t('guides.tocSpreadsheet')}</strong><span class="guide-mini-flow" aria-hidden="true"><span>Sheet</span><i>→</i><span>Import</span><i>→</i><span>Review</span></span></a>
             </div>
         </section>`;
 }
@@ -109,14 +114,14 @@ function renderGuides(main) {
         <div class="resource-layout">
             <nav class="resource-toc" aria-label="${t('guides.tocLabel')}">
                 <strong>${t('guides.tocTitle')}</strong>
-                <a href="#fair-roster">${t('guides.tocFair')}</a>
-                <a href="#rotation">${t('guides.tocRotation')}</a>
-                <a href="#availability">${t('guides.tocAvailability')}</a>
-                <a href="#two-sided">${t('guides.tocTwoSided')}</a>
-                <a href="#missed-guide">${t('guides.tocMissed')}</a>
-                <a href="#bonus-guide">${t('guides.tocBonus')}</a>
-                <a href="#seasons">${t('guides.tocSeasons')}</a>
-                <a href="#spreadsheet">${t('guides.tocSpreadsheet')}</a>
+                <a href="/guides/fair-cwl-roster#fair-roster">${t('guides.tocFair')}</a>
+                <a href="/guides/cwl-rotation#rotation">${t('guides.tocRotation')}</a>
+                <a href="/guides/cwl-availability#availability">${t('guides.tocAvailability')}</a>
+                <a href="/guides/cwl-attack-defense#two-sided">${t('guides.tocTwoSided')}</a>
+                <a href="/guides/missed-attacks#missed-guide">${t('guides.tocMissed')}</a>
+                <a href="/guides/cwl-bonus-medals#bonus-guide">${t('guides.tocBonus')}</a>
+                <a href="/guides/cwl-season-history#seasons">${t('guides.tocSeasons')}</a>
+                <a href="/guides/spreadsheet-vs-cwl-planner#spreadsheet">${t('guides.tocSpreadsheet')}</a>
             </nav>
             <div class="resource-content">
                 ${t('guides.article1Html')}
@@ -129,6 +134,7 @@ function renderGuides(main) {
                 ${t('guides.article8Html')}
             </div>
         </div>`;
+    rewriteGuideArticleLinks(main);
     removeIllustrativeGuideExamples(main);
 }
 
@@ -242,7 +248,13 @@ function renderCurrentResourcePage() {
     const main = document.querySelector('main.resource-page');
     if (!main) return;
 
-    switch (normalizedPath()) {
+    const path = normalizedPath();
+    if (renderGuideDetailPage(main, path)) {
+        restoreHashPosition();
+        return;
+    }
+
+    switch (path) {
         case '/guides':
             renderGuides(main);
             break;

@@ -38,6 +38,13 @@ $cards = @(
         Title = 'Run a clear knockout tournament'
         Subtitle = 'Seeded or shuffled brackets with automatic progression'
         Accent = '#C792EA'
+    },
+    @{
+        File = 'minigames.png'
+        Kicker = 'CLASHPANEL MINIGAMES'
+        Title = 'Play daily Clash challenges'
+        Subtitle = 'Entity Guesser and Higher or Lower for troops, buildings and more'
+        Accent = '#C792EA'
     }
 )
 

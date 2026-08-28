@@ -49,7 +49,7 @@ export default Object.freeze({
     "planner.cta.desc": "Start with one clan, a Clan Family or an existing spreadsheet and keep the roster, roles and availability in one place.",
     "planner.cta.button": "Open CWL Planner",
     "tracker.kicker": "Clash of Clans CWL Tracker",
-    "tracker.h1": "See the whole CWL.",
+    "tracker.h1": "Track CWL wars, stats and history.",
     "tracker.lead": "Track live CWL wars, attacks, missed hits, league standings, player performance and previous Clan War League seasons in one view.",
     "tracker.primary": "Open CWL Tracker",
     "tracker.secondary": "Plan a CWL roster",

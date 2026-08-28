@@ -87,7 +87,7 @@ describe('bracket public release surface', () => {
         expect(document.querySelector('link[rel="canonical"]')?.getAttribute('href'))
             .toBe('https://clashpanel.com/bracket-generator');
         expect(document.querySelector('meta[name="robots"]')?.getAttribute('content'))
-            .toMatch(/noindex/i);
+            .toMatch(/\bindex\b/i);
         expect(document.querySelectorAll('h1')).toHaveLength(1);
         expect(document.querySelector('a[href="/app/brackets"]')).not.toBeNull();
         expect(document.querySelector('.bracket-public-preview')).not.toBeNull();

@@ -1,22 +1,30 @@
 export const PUBLIC_SITE_ORIGIN = 'https://clashpanel.com';
 
 export const publicRoutes = Object.freeze([
-    { path: '/', file: 'index.html', indexable: true, lastmod: '2026-08-12' },
-    { path: '/about', file: 'about.html', indexable: true, lastmod: '2026-08-12' },
-    { path: '/cwl-planner', file: 'cwl-planner.html', indexable: true, lastmod: '2026-08-12' },
-    { path: '/cwl-tracker', file: 'cwl-tracker.html', indexable: true, lastmod: '2026-08-12' },
-    { path: '/clan-management', file: 'clan-management.html', indexable: true, lastmod: '2026-08-12' },
+    { path: '/', file: 'index.html', indexable: true, lastmod: '2026-08-28' },
+    { path: '/about', file: 'about.html', indexable: true, lastmod: '2026-08-21' },
+    { path: '/cwl-planner', file: 'cwl-planner.html', indexable: true, lastmod: '2026-08-24' },
+    { path: '/cwl-tracker', file: 'cwl-tracker.html', indexable: true, lastmod: '2026-08-28' },
+    { path: '/clan-management', file: 'clan-management.html', indexable: true, lastmod: '2026-08-28' },
     { path: '/advanced-stats', file: 'advanced-stats.html', indexable: false, lastmod: '2026-08-24' },
     { path: '/achievements', file: 'achievements.html', indexable: false, lastmod: '2026-08-24' },
-    { path: '/minigames', file: 'minigames.html', indexable: true, lastmod: '2026-08-12' },
-    { path: '/guides', file: 'guides.html', indexable: true, lastmod: '2026-08-12' },
+    { path: '/minigames', file: 'minigames.html', indexable: true, lastmod: '2026-08-28' },
+    { path: '/guides', file: 'guides.html', indexable: true, lastmod: '2026-08-28' },
+    { path: '/guides/fair-cwl-roster', file: 'guides/fair-cwl-roster.html', indexable: true, lastmod: '2026-08-28' },
+    { path: '/guides/cwl-rotation', file: 'guides/cwl-rotation.html', indexable: true, lastmod: '2026-08-28' },
+    { path: '/guides/cwl-availability', file: 'guides/cwl-availability.html', indexable: true, lastmod: '2026-08-28' },
+    { path: '/guides/cwl-attack-defense', file: 'guides/cwl-attack-defense.html', indexable: true, lastmod: '2026-08-28' },
+    { path: '/guides/missed-attacks', file: 'guides/missed-attacks.html', indexable: true, lastmod: '2026-08-28' },
+    { path: '/guides/cwl-bonus-medals', file: 'guides/cwl-bonus-medals.html', indexable: true, lastmod: '2026-08-28' },
+    { path: '/guides/cwl-season-history', file: 'guides/cwl-season-history.html', indexable: true, lastmod: '2026-08-28' },
+    { path: '/guides/spreadsheet-vs-cwl-planner', file: 'guides/spreadsheet-vs-cwl-planner.html', indexable: true, lastmod: '2026-08-28' },
     { path: '/methodology', file: 'methodology.html', indexable: true, lastmod: '2026-08-12' },
     { path: '/changelog', file: 'changelog.html', indexable: true, lastmod: '2026-08-14' },
-    { path: '/privacy', file: 'subpages/privacy.html', indexable: true, lastmod: '2026-08-12' },
-    { path: '/cookies', file: 'subpages/cookies.html', indexable: true, lastmod: '2026-08-12' },
-    { path: '/terms', file: 'subpages/terms.html', indexable: true, lastmod: '2026-08-12' },
-    { path: '/contact', file: 'subpages/contact.html', indexable: true, lastmod: '2026-08-12' },
-    { path: '/bracket-generator', file: 'bracket-generator.html', indexable: false }
+    { path: '/privacy', file: 'subpages/privacy.html', indexable: true, lastmod: '2026-08-27' },
+    { path: '/cookies', file: 'subpages/cookies.html', indexable: true, lastmod: '2026-08-27' },
+    { path: '/terms', file: 'subpages/terms.html', indexable: true, lastmod: '2026-08-27' },
+    { path: '/contact', file: 'subpages/contact.html', indexable: true, lastmod: '2026-08-27' },
+    { path: '/bracket-generator', file: 'bracket-generator.html', indexable: true, lastmod: '2026-08-28' }
 ]);
 
 export function canonicalUrl(route, origin = PUBLIC_SITE_ORIGIN) {
