@@ -8,7 +8,6 @@ import Java.advancedstats.AdvancedStatsHistoryModels.HistoryRequest;
 import Java.advancedstats.AdvancedStatsHistoryModels.Provenance;
 import Java.advancedstats.AdvancedStatsHistoryModels.UnitObservation;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;

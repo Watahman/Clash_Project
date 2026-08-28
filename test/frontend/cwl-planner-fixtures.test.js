@@ -4,7 +4,7 @@ import {
     getPlannerFixtureData,
     getRequestedPlannerFixture
 } from '../../src/assets/js/fixtures/planner-fixtures.js';
-import { clearActiveCwlPoll, getPlayerAvailability } from '../../src/assets/js/cwl/cwl-availability.js';
+import { getPlayerAvailability } from '../../src/assets/js/cwl/cwl-availability.js';
 import { normalizePlayer } from '../../src/assets/js/cwl/cwl-utils.js';
 
 describe('CWL planner redesign fixtures', () => {

@@ -13,7 +13,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
 
 const ROOT = process.cwd();
 const SRC = path.join(ROOT, 'src');
