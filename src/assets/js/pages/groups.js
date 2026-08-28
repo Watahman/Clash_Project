@@ -1,4 +1,4 @@
-import { initI18n, t } from '../i18n/i18n.js';
+import { initI18n } from '../i18n/i18n.js';
 import { getCurrentUserId } from '../utils/user.js';
 import { initGroupPolls } from '../groups/groups-polls.js?v=20260813-redesign';
 import { createClanAdmin } from '../groups/groups-admin-clans.js';

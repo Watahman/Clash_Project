@@ -421,11 +421,4 @@ public class SUPABASE_Group {
         return primaryBadgeUrl;
     }
 
-    private String normalizeGroupBadge(String value) {
-        String badge = value == null ? "shield" : value.trim().toLowerCase();
-        return switch (badge) {
-            case "swords", "crown", "war_star", "tower", "flame", "banner", "helmet" -> badge;
-            default -> "shield";
-        };
-    }
 }

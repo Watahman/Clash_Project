@@ -11,13 +11,11 @@ import Java.advancedstats.AdvancedStatsHistoryModels.Provenance;
 import Java.advancedstats.AdvancedStatsHistoryModels.UnitObservation;
 import Java.cache.CacheKeys;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 /** Supabase RPC adapter for compact scope state and derived Advanced Stats aggregates. */
