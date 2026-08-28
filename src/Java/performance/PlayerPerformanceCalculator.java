@@ -31,16 +31,16 @@ public final class PlayerPerformanceCalculator {
                 .filter(attack -> !attack.warEndTime().isAfter(now.plus(1, ChronoUnit.DAYS)))
                 .sorted(Comparator.comparing(HistoricalAttack::warEndTime).reversed())
                 .toList();
-        List<HistoricalAttack> cwl = valid.stream()
+        Instant cutoff = now.minus(BASELINE_DAYS, ChronoUnit.DAYS);
+        List<HistoricalAttack> recent = valid.stream()
+                .filter(attack -> !attack.warEndTime().isBefore(cutoff))
+                .toList();
+        List<HistoricalAttack> cwl = recent.stream()
                 .filter(attack -> attack.warType() == HistoricalWarType.CWL)
                 .toList();
         boolean useCwl = cwl.size() >= MIN_CWL_ATTACKS;
         String scope = useCwl ? "CWL" : "All wars";
-        List<HistoricalAttack> selected = useCwl ? cwl : valid;
-        Instant cutoff = now.minus(BASELINE_DAYS, ChronoUnit.DAYS);
-        List<HistoricalAttack> baseline = selected.stream()
-                .filter(attack -> !attack.warEndTime().isBefore(cutoff))
-                .toList();
+        List<HistoricalAttack> baseline = useCwl ? cwl : recent;
 
         if (!data.available() || baseline.isEmpty()) {
             return emptyResult(data, scope, data.available() ? "not_enough_data" : "unavailable");

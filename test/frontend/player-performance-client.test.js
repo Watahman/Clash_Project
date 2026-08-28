@@ -41,27 +41,16 @@ describe('player performance batch client', () => {
         expect(requestMocks.requestJson).toHaveBeenCalledTimes(1);
     });
 
-    it('starts loading rendered planner players as soon as the client initializes', async () => {
-        requestMocks.requestJson.mockResolvedValue({
-            results: {
-                '#P0L': { playerTag: '#P0L', status: 'ready', performance: 101 },
-                '#P2Y': { playerTag: '#P2Y', status: 'ready', performance: 98 }
-            }
-        });
+    it('keeps planner initialization lazy until performance is requested', async () => {
         const client = await import('../../src/assets/js/cwl/player-performance-client.js');
 
         client.initPlayerPerformanceClient();
 
-        await vi.waitFor(() => expect(requestMocks.requestJson).toHaveBeenCalledTimes(1));
-        expect(requestMocks.requestJson.mock.calls[0][1].body).toEqual({
-            playerTags: ['#P0L', '#P2Y']
-        });
-        await vi.waitFor(() =>
-            expect(client.getPlayerPerformance('#P2Y')?.performance).toBe(98)
-        );
+        await Promise.resolve();
+        expect(requestMocks.requestJson).not.toHaveBeenCalled();
     });
 
-    it('starts the complete visible-player batch immediately after a plan loads', async () => {
+    it('loads the complete roster only for an explicit Auto Plan request', async () => {
         requestMocks.requestJson.mockResolvedValue({
             results: {
                 '#P0L': { playerTag: '#P0L', status: 'ready', performance: 101 },
@@ -80,11 +69,57 @@ describe('player performance batch client', () => {
 
         window.dispatchEvent(new CustomEvent('clashtools:cwl-plan-loaded'));
 
+        await Promise.resolve();
+        expect(requestMocks.requestJson).not.toHaveBeenCalled();
+
+        await client.loadPlayerPerformanceBatch(['#P0L', '#P2Y']);
         await vi.waitFor(() => expect(requestMocks.requestJson).toHaveBeenCalledTimes(1));
         expect(requestMocks.requestJson.mock.calls[0][1].body.playerTags).toEqual([
             '#P0L',
             '#P2Y'
         ]);
+    });
+
+    it('sends large explicit batches sequentially in bounded chunks', async () => {
+        const tags = Array.from({ length: 45 }, (_, index) => `#P${index.toString(36)}L`);
+        let activeRequests = 0;
+        let maximumActiveRequests = 0;
+        requestMocks.requestJson.mockImplementation(async (_url, options) => {
+            activeRequests += 1;
+            maximumActiveRequests = Math.max(maximumActiveRequests, activeRequests);
+            const results = Object.fromEntries(options.body.playerTags.map(tag => [
+                tag,
+                { playerTag: tag, status: 'ready', performance: 90 }
+            ]));
+            activeRequests -= 1;
+            return { results };
+        });
+
+        const client = await import('../../src/assets/js/cwl/player-performance-client.js');
+        await client.loadPlayerPerformanceBatch(tags);
+
+        expect(requestMocks.requestJson).toHaveBeenCalledTimes(3);
+        expect(requestMocks.requestJson.mock.calls.map(call => call[1].body.playerTags.length))
+            .toEqual([20, 20, 5]);
+        expect(maximumActiveRequests).toBe(1);
+    });
+
+    it('keeps successful chunks when a later chunk fails', async () => {
+        const tags = Array.from({ length: 21 }, (_, index) => `#P${index.toString(36)}L`);
+        requestMocks.requestJson
+            .mockResolvedValueOnce({
+                results: Object.fromEntries(tags.slice(0, 20).map(tag => [
+                    tag,
+                    { playerTag: tag, status: 'ready', performance: 90 }
+                ]))
+            })
+            .mockRejectedValueOnce(Object.assign(new Error('offline'), { code: 'NETWORK_ERROR' }));
+
+        const client = await import('../../src/assets/js/cwl/player-performance-client.js');
+        const result = await client.loadPlayerPerformanceBatch(tags);
+
+        expect(result[tags[0]].status).toBe('ready');
+        expect(result[tags[20].toUpperCase()]).toMatchObject({ status: 'unavailable' });
     });
 
     it('stores neutral unavailable results when the batch fails', async () => {

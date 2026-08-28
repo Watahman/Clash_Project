@@ -14,6 +14,7 @@ import java.util.Set;
 
 public final class PlayerPerformanceService {
     public static final int MAX_BATCH_SIZE = 100;
+    static final int PROVIDER_BATCH_SIZE = 20;
 
     private final HistoricalPlayerDataProvider provider;
     private final PlayerPerformanceCalculator calculator;
@@ -54,20 +55,40 @@ public final class PlayerPerformanceService {
             else result.put(tag, cached);
         }
 
-        if (!missing.isEmpty()) {
-            Map<String, HistoricalPlayerData> historical = provider.getPlayerWarHistory(missing);
-            for (String tag : missing) {
-                HistoricalPlayerData data = historical.getOrDefault(
-                        tag, HistoricalPlayerData.unavailable(tag, provider.providerName())
-                );
-                PlayerPerformanceResult calculated = calculator.calculate(data);
-                cache.put(tag, calculated);
-                result.put(tag, calculated);
-            }
-        }
+        loadMissing(missing, result);
 
         Map<String, PlayerPerformanceResult> ordered = new LinkedHashMap<>();
         unique.forEach(tag -> ordered.put(tag, result.get(tag)));
         return ordered;
+    }
+
+    private void loadMissing(
+            List<String> missing,
+            Map<String, PlayerPerformanceResult> result
+    ) {
+        for (int start = 0; start < missing.size(); start += PROVIDER_BATCH_SIZE) {
+            int end = Math.min(start + PROVIDER_BATCH_SIZE, missing.size());
+            loadProviderBatch(missing.subList(start, end), result);
+        }
+    }
+
+    private void loadProviderBatch(
+            List<String> tags,
+            Map<String, PlayerPerformanceResult> result
+    ) {
+        Map<String, HistoricalPlayerData> historical;
+        try {
+            historical = provider.getPlayerWarHistory(tags);
+        } catch (Exception ignored) {
+            historical = Map.of();
+        }
+        for (String tag : tags) {
+            HistoricalPlayerData data = historical.getOrDefault(
+                    tag, HistoricalPlayerData.unavailable(tag, provider.providerName())
+            );
+            PlayerPerformanceResult calculated = calculator.calculate(data);
+            cache.put(tag, calculated);
+            result.put(tag, calculated);
+        }
     }
 }

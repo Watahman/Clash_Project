@@ -15,7 +15,7 @@ class LegendHistoryNormalizerTest {
     private static final Instant FETCHED_AT = Instant.parse("2026-08-09T12:00:00Z");
 
     @Test
-    void acceptsOnlyMatchingDistinctExactSeasonRankings() {
+    void acceptsMatchingDistinctSeasonRankingsAndNormalizesV2Dates() {
         LegendHistoryNormalizer.History history = LegendHistoryNormalizer.normalize(
                 JsonParser.parseString("""
                 [
@@ -25,15 +25,19 @@ class LegendHistoryNormalizerTest {
                   {"tag":"#OTHER","name":"Other","trophies":6000,"rank":1,"season":"2025-08"},
                   {"tag":"#PQL","name":"Player","trophies":5000,"rank":0,"season":"2025-07"},
                   {"tag":"#PQL","name":"Player","trophies":4900,"rank":-4,"season":"2025-06"},
-                  {"tag":"#PQL","name":"Player","trophies":4960,"rank":1092636,"season":"2025-01"}
+                  {"tag":"#PQL","name":"Player","trophies":4960,"rank":1092636,"season":"2025-01"},
+                  {"tag":"#PQL","name":"Player","trophies":4960,"rank":1092636,"season":"2025-13-01"}
                 ]""").getAsJsonArray(),
                 "pql",
                 FETCHED_AT
         );
 
-        assertEquals(List.of("2025-09", "2025-01"), history.records().stream()
+        assertEquals(List.of("2025-10", "2025-09", "2025-01"), history.records().stream()
                 .map(LegendHistoryNormalizer.SeasonRecord::season).toList());
-        LegendHistoryNormalizer.SeasonRecord september = history.records().getFirst();
+        LegendHistoryNormalizer.SeasonRecord september = history.records().stream()
+                .filter(record -> record.season().equals("2025-09"))
+                .findFirst()
+                .orElseThrow();
         assertEquals(Map.of(
                 "legend_ranked_seasons", 1L,
                 "legend_best_season_trophies", 5643L,
@@ -42,21 +46,49 @@ class LegendHistoryNormalizerTest {
         ), september.metrics());
         assertEquals(Instant.parse("2025-09-30T23:59:59Z"), september.recordTimestamp());
         assertTrue(september.finalState());
-        assertEquals(7, history.coverage().sourceRecords());
-        assertEquals(2, history.coverage().measurableRecords());
+        assertEquals(8, history.coverage().sourceRecords());
+        assertEquals(3, history.coverage().measurableRecords());
         assertEquals(1, history.coverage().invalidSeasonRecords());
         assertEquals(2, history.coverage().invalidRankRecords());
         assertEquals(1, history.coverage().mismatchedPlayerRecords());
         assertEquals(1, history.coverage().duplicateRecords());
         assertTrue(september.metadata().get("final").getAsBoolean());
-        assertEquals(2, history.coverage().metadata().get("measurableRecords").getAsInt());
+        assertEquals(3, history.coverage().metadata().get("measurableRecords").getAsInt());
+    }
+
+    @Test
+    void deduplicatesMonthAndDateAliasesWithBetterRankingAndTrophyValues() {
+        LegendHistoryNormalizer.History history = LegendHistoryNormalizer.normalize(
+                JsonParser.parseString("""
+                [
+                  {"tag":"#PQL","name":"Date","trophies":5000,"rank":200,"season":"2025-10-06"},
+                  {"tag":"#PQL","name":"Month","trophies":5500,"rank":300,"season":"2025-10"},
+                  {"tag":"#PQL","name":"Invalid","trophies":6000,"rank":1,"season":"2025-09-31"},
+                  {"tag":"#PQL","name":"Player","trophies":4900,"rank":400,"season":"2025-08-01"}
+                ]""").getAsJsonArray(),
+                "#PQL",
+                FETCHED_AT
+        );
+
+        assertEquals(List.of("2025-10", "2025-08"), history.records().stream()
+                .map(LegendHistoryNormalizer.SeasonRecord::season).toList());
+        assertEquals(Map.of(
+                "legend_ranked_seasons", 1L,
+                "legend_best_season_trophies", 5500L,
+                "legend_best_season_rank", 200L,
+                "ranking_best_global_rank", 200L
+        ), history.records().getFirst().metrics());
+        assertEquals(4, history.coverage().sourceRecords());
+        assertEquals(2, history.coverage().measurableRecords());
+        assertEquals(1, history.coverage().invalidSeasonRecords());
+        assertEquals(1, history.coverage().duplicateRecords());
     }
 
     @Test
     void currentSeasonNeverBecomesMeasurableProgress() {
         LegendHistoryNormalizer.History history = LegendHistoryNormalizer.normalize(
                 JsonParser.parseString("""
-                [{"tag":"#PQL","name":"Player","trophies":5001,"rank":9000,"season":"2026-08"}]
+                [{"tag":"#PQL","name":"Player","trophies":5001,"rank":9000,"season":"2026-08-01"}]
                 """).getAsJsonArray(),
                 "#PQL",
                 FETCHED_AT

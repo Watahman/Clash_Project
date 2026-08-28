@@ -20,8 +20,8 @@ import java.util.concurrent.Executors;
 
 /** Reads historical player performance exclusively from documented V2 routes. */
 public final class ClashKingV2Provider implements HistoricalPlayerDataProvider {
-    private static final int CWL_HISTORY_YEARS = 4;
-    private static final int REGULAR_HISTORY_DAYS = 180;
+    // Covers the 90-day scoring baseline plus 90 days of season-boundary headroom.
+    static final int HISTORY_DAYS = 180;
     private static final int MAX_RESULTS = 500;
     private final ClashKingHttpClient client;
     private final ExecutorService fetchPool = Executors.newFixedThreadPool(8, runnable -> {
@@ -47,26 +47,33 @@ public final class ClashKingV2Provider implements HistoricalPlayerDataProvider {
     }
 
     private HistoricalPlayerData fetchOne(String tag) {
-        try {
-            List<HistoricalAttack> attacks = new ArrayList<>();
-            List<HistoricalParticipation> participation = new ArrayList<>();
-            fetchType(tag, "cwl", HistoricalWarType.CWL, attacks, participation);
-            fetchType(tag, "random", HistoricalWarType.REGULAR, attacks, participation);
-            return new HistoricalPlayerData(tag, attacks, participation, providerName(), true);
-        } catch (Exception upstreamFailure) {
-            return HistoricalPlayerData.unavailable(tag, providerName());
-        }
+        List<HistoricalAttack> attacks = new ArrayList<>();
+        List<HistoricalParticipation> participation = new ArrayList<>();
+        boolean cwlAvailable = tryFetchType(
+                tag, "cwl", HistoricalWarType.CWL, attacks, participation
+        );
+        boolean regularAvailable = tryFetchType(
+                tag, "random", HistoricalWarType.REGULAR, attacks, participation
+        );
+        return new HistoricalPlayerData(
+                tag, attacks, participation, providerName(), cwlAvailable || regularAvailable
+        );
     }
 
-    private void fetchType(
+    private boolean tryFetchType(
             String tag,
             String apiType,
             HistoricalWarType warType,
             List<HistoricalAttack> attacks,
             List<HistoricalParticipation> participation
-    ) throws Exception {
-        JsonObject response = client.get(warStatsPath(tag, apiType));
-        normalizePlayer(tag, warType, response, attacks, participation);
+    ) {
+        try {
+            JsonObject response = client.get(warStatsPath(tag, apiType));
+            normalizePlayer(tag, warType, response, attacks, participation);
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 
     private static String warStatsPath(String tag, String type) {
@@ -81,12 +88,13 @@ public final class ClashKingV2Provider implements HistoricalPlayerDataProvider {
     }
 
     private static Instant historyStart(String type) {
-        if ("cwl".equals(type)) {
-            return ZonedDateTime.now(ZoneOffset.UTC)
-                    .minusYears(CWL_HISTORY_YEARS)
-                    .toInstant();
-        }
-        return Instant.now().minus(REGULAR_HISTORY_DAYS, ChronoUnit.DAYS);
+        return historyStart(type, Instant.now());
+    }
+
+    static Instant historyStart(String type, Instant now) {
+        return ZonedDateTime.ofInstant(now, ZoneOffset.UTC)
+                .minus(HISTORY_DAYS, ChronoUnit.DAYS)
+                .toInstant();
     }
 
     static HistoricalPlayerData normalizePlayer(

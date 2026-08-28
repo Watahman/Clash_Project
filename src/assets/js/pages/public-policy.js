@@ -2,14 +2,14 @@ import { getLanguage, initI18n } from '../i18n/i18n.js';
 import { _BASE_URL } from '../Data/config.js';
 
 const SUPPORT_EMAIL = 'support.clashpanel@gmail.com';
-const LAST_UPDATED_EN = '25 July 2026';
-const LAST_UPDATED_NL = '25 juli 2026';
+const LAST_UPDATED_EN = '27 August 2026';
+const LAST_UPDATED_NL = '27 augustus 2026';
 
 const content = {
     privacy: {
         en: {
             title: 'Privacy policy',
-            description: 'How ClashPanel processes account, planner, Clan Family, advertising and technical data.',
+            description: 'How ClashPanel processes account, linked Clash, Advanced Stats tracking, planner, Clan Family, advertising and technical data.',
             summary: 'This policy explains what personal data ClashPanel processes, why it is used, who may receive it and what choices and rights you have.',
             sections: [
                 ['Who is responsible', [
@@ -19,24 +19,28 @@ const content = {
                 ['Data we may process', [
                     'Account and authentication data, including your email address, display name, internal user identifiers and information required to maintain an authenticated session.',
                     'Clash of Clans data you provide or link, such as player tags and clan tags, together with public game information returned for those tags by the official Clash of Clans API.',
+                    'If you choose to start Advanced Stats for a linked account, ClashPanel may store long-term battle-log observations and derived statistics for that account. These can include battle time or first-observed time, opponent public tag/name, Town Hall information, stars, destruction, looted or available resources when supplied upstream, recorded army composition and unit identifiers, aggregate usage/performance statistics, tracking status and known-gap metadata. Historical battle-log, war-attack and ranked battle-log records may be supplied by ClashKing V2, an external historical service, depending on the enabled scope and upstream availability.',
                     'Content and settings you create in ClashPanel, such as CWL plans, Clan Families, memberships, polls, reminders, planner drafts and related configuration.',
                     'Device and technical information generated when you use the service, such as IP address, browser or device information, request metadata, security events and diagnostic logs produced by hosting or infrastructure providers.',
                     'Cookie, local-storage and similar-technology data used for authentication, preferences, caching, consent choices and, where advertising is enabled, ad delivery and measurement.'
                 ]],
                 ['How we obtain data', [
                     'We receive information directly from you when you create an account, sign in, link a player, create content or contact support.',
-                    'Public player and clan information is obtained from the official Clash of Clans API after a relevant tag is submitted through ClashPanel.',
+                    'Current public player and clan information can be obtained from the official Clash of Clans API after a relevant tag is submitted through ClashPanel.',
+                    'Advanced Stats collection starts only after you choose to enable it for a linked account. While tracking is active, ClashPanel may request historical battle-log, war-attack and ranked battle-log data for that linked player from ClashKing V2. That external service may return records it has retained from earlier observations; coverage, fields and freshness can therefore be partial, delayed or unavailable. ClashPanel stores selected observations and derived statistics returned by the configured source.',
                     'Technical information may be collected automatically by your browser, ClashPanel infrastructure and service providers when you access the website.'
                 ]],
                 ['Why we use data and legal bases', [
                     'We process account, planner and Clan Family data to provide the functions you request, maintain your account and deliver the ClashPanel service.',
+                    'When you enable Advanced Stats, its tracking data is processed to provide the requested long-term attack history, statistics, trends and Advanced Achievements that rely on those tracked statistics. ClashPanel does not start this personal tracking automatically for every player you search.',
                     'We may process limited technical and security data where necessary for legitimate interests such as protecting accounts, preventing abuse, troubleshooting failures and maintaining service reliability, while considering the rights and interests of users.',
                     'Where consent is legally required, consent is used for optional advertising cookies, local storage or related advertising purposes. You may withdraw consent through the available consent controls without affecting processing that occurred before withdrawal.',
                     'We may also process information where necessary to comply with applicable legal obligations or to establish, exercise or defend legal claims.'
                 ]],
                 ['Service providers and data sharing', [
                     'ClashPanel does not sell personal data. Information is shared only when needed to provide the service, comply with law, protect the service or when you direct us to do so.',
-                    'Infrastructure and application providers may include Supabase for authentication and application data, Google Cloud for backend hosting, Cloudflare for website delivery and security, Google for sign-in or fonts, and Supercell services for Clash of Clans API data.',
+                    'Infrastructure and application providers may include Supabase for authentication and application data, Google Cloud for backend hosting, Cloudflare for website delivery and security, Google for sign-in or fonts, Supercell services for current Clash of Clans API data and ClashKing V2 for historical Advanced Stats requests.',
+                    'When historical Advanced Stats is requested, the linked player tag and requested history scope may be sent to ClashKing V2. That external provider may retain or return historical records under its own service terms; ClashPanel does not control the provider\'s retention, availability or completeness.',
                     'ClashPanel uses or may use Google AdSense on selected pages. Google and its advertising partners may receive information such as IP address, page URL, browser or device information, cookies, local-storage identifiers and ad interaction data when advertising services are used.'
                 ]],
                 ['Google advertising', [
@@ -50,6 +54,7 @@ const content = {
                 ]],
                 ['Retention', [
                     'Account and application data is kept for as long as needed to provide the service or until it is deleted, subject to security, backup, dispute-resolution and legal requirements.',
+                    'For Advanced Stats, pausing or stopping tracking prevents future scheduled collection while preserving the tracked history already stored. Using the Advanced Stats delete action removes the tracker and its stored Advanced Stats history from ClashPanel and also resets achievement progress that is derived exclusively from Advanced Stats tracking; unrelated achievement progress is preserved. This action does not delete records already held by an external provider such as ClashKing V2. Deleting the owning ClashPanel account also cascades its stored Advanced Stats application data. Backup or legal-retention copies, where applicable, may follow separate provider or legal retention periods.',
                     'Technical logs, cached data and authentication information may have shorter retention periods determined by operational needs and the relevant service provider. Data that is no longer needed should be deleted or anonymised where reasonably possible.'
                 ]],
                 ['Your privacy rights', [
@@ -72,7 +77,7 @@ const content = {
         },
         nl: {
             title: 'Privacybeleid',
-            description: 'Hoe ClashPanel account-, planner-, Clan Family-, advertentie- en technische gegevens verwerkt.',
+            description: 'Hoe ClashPanel account-, gekoppelde Clash-, Advanced Stats-, planner-, Clan Family-, advertentie- en technische gegevens verwerkt.',
             summary: 'Dit beleid legt uit welke persoonsgegevens ClashPanel verwerkt, waarom dat gebeurt, met wie gegevens kunnen worden gedeeld en welke keuzes en rechten je hebt.',
             sections: [
                 ['Wie verantwoordelijk is', [
@@ -82,24 +87,28 @@ const content = {
                 ['Gegevens die we kunnen verwerken', [
                     'Account- en authenticatiegegevens, waaronder je e-mailadres, weergavenaam, interne gebruikersidentificatoren en informatie die nodig is om een aangemelde sessie te onderhouden.',
                     'Clash of Clans-gegevens die je opgeeft of koppelt, zoals speler- en clantags, samen met openbare spelinformatie die voor die tags via de officiële Clash of Clans API wordt opgehaald.',
+                    'Als je Advanced Stats voor een gekoppeld account activeert, kan ClashPanel langdurige battlelogwaarnemingen en afgeleide statistieken voor dat account bewaren. Dit kan onder meer de tijd van de aanval of eerste waarneming, openbare tag/naam van de tegenstander, informatie over het stadhuis, sterren, vernietiging, geplunderde of beschikbare grondstoffen wanneer die upstream worden aangeleverd, geregistreerde legersamenstelling en unit-ID’s, geaggregeerde gebruiks- en prestatiestatistieken, trackingstatus en bekende-gatmetadata omvatten. Historische battlelog-, war-aanvals- en ranked-battleloggegevens kunnen afhankelijk van de gekozen scope en beschikbaarheid van de upstream bron door ClashKing V2, een externe historische dienst, worden aangeleverd.',
                     'Inhoud en instellingen die je in ClashPanel maakt, zoals CWL-plannen, Clan Families, lidmaatschappen, polls, reminders, planner-drafts en bijhorende configuratie.',
                     'Apparaat- en technische gegevens die bij gebruik van de dienst ontstaan, zoals IP-adres, browser- of apparaatinformatie, requestmetadata, beveiligingsgebeurtenissen en diagnostische logs van hosting- of infrastructuurproviders.',
                     'Cookie-, local-storage- en vergelijkbare gegevens voor authenticatie, voorkeuren, caching, toestemmingskeuzes en, waar advertenties actief zijn, advertentieweergave en -meting.'
                 ]],
                 ['Hoe we gegevens verkrijgen', [
                     'We ontvangen gegevens rechtstreeks van jou wanneer je een account maakt, inlogt, een speler koppelt, inhoud maakt of support contacteert.',
-                    'Openbare speler- en claninfo wordt via de officiële Clash of Clans API opgehaald nadat een relevante tag via ClashPanel is ingediend.',
+                    'Actuele openbare speler- en claninfo kan via de officiële Clash of Clans API worden opgehaald nadat een relevante tag via ClashPanel is ingediend.',
+                    'Advanced Stats wordt alleen verzameld nadat je dit voor een gekoppeld account activeert. Zolang tracking actief is, kan ClashPanel historische battlelog-, war-aanvals- en ranked-battleloggegevens voor die gekoppelde speler opvragen bij ClashKing V2. Die externe dienst kan gegevens teruggeven die hij uit eerdere waarnemingen heeft bewaard; dekking, velden en actualiteit kunnen daarom gedeeltelijk, vertraagd of niet beschikbaar zijn. ClashPanel bewaart geselecteerde waarnemingen en afgeleide statistieken die door de geconfigureerde bron worden teruggegeven.',
                     'Technische informatie kan automatisch worden verwerkt door je browser, de ClashPanel-infrastructuur en dienstverleners wanneer je de website gebruikt.'
                 ]],
                 ['Waarom we gegevens gebruiken en rechtsgronden', [
                     'We verwerken account-, planner- en Clan Family-gegevens om de functies te leveren die je vraagt, je account te beheren en de ClashPanel-dienst uit te voeren.',
+                    'Wanneer je Advanced Stats activeert, verwerken we de trackinggegevens om de gevraagde langdurige aanvalsgeschiedenis, statistieken, trends en Advanced Achievements te leveren die op die tracking gebaseerd zijn. ClashPanel start deze persoonlijke tracking niet automatisch voor elke speler die je opzoekt.',
                     'Beperkte technische en beveiligingsgegevens kunnen worden verwerkt op basis van gerechtvaardigde belangen, bijvoorbeeld om accounts te beschermen, misbruik te voorkomen, fouten te onderzoeken en de betrouwbaarheid van de dienst te behouden, met aandacht voor de rechten en belangen van gebruikers.',
                     'Waar toestemming wettelijk vereist is, gebruiken we toestemming voor optionele advertentiecookies, lokale opslag of bijhorende advertentiedoeleinden. Je kunt toestemming via de beschikbare toestemmingsinstellingen intrekken zonder dat dit eerdere rechtmatige verwerking ongeldig maakt.',
                     'Gegevens kunnen ook worden verwerkt wanneer dit nodig is om aan wettelijke verplichtingen te voldoen of om rechtsvorderingen vast te stellen, uit te oefenen of te verdedigen.'
                 ]],
                 ['Dienstverleners en delen van gegevens', [
                     'ClashPanel verkoopt geen persoonsgegevens. Gegevens worden alleen gedeeld wanneer dit nodig is om de dienst te leveren, aan de wet te voldoen, de dienst te beschermen of wanneer jij daar opdracht toe geeft.',
-                    'Infrastructuur- en applicatieproviders kunnen onder meer Supabase omvatten voor authenticatie en applicatiegegevens, Google Cloud voor backendhosting, Cloudflare voor levering en beveiliging van de website, Google voor login of lettertypes en Supercell-diensten voor Clash of Clans API-gegevens.',
+                    'Infrastructuur- en applicatieproviders kunnen onder meer Supabase omvatten voor authenticatie en applicatiegegevens, Google Cloud voor backendhosting, Cloudflare voor levering en beveiliging van de website, Google voor login of lettertypes, Supercell-diensten voor actuele Clash of Clans API-gegevens en ClashKing V2 voor historische Advanced Stats-verzoeken.',
+                    'Wanneer historische Advanced Stats wordt opgevraagd, kunnen de gekoppelde spelerstag en de gevraagde historische scope naar ClashKing V2 worden gestuurd. Die externe provider kan historische gegevens bewaren of teruggeven volgens de eigen dienstvoorwaarden; ClashPanel beheert de bewaartermijnen, beschikbaarheid of volledigheid bij die provider niet.',
                     'ClashPanel gebruikt of kan Google AdSense gebruiken op geselecteerde pagina’s. Google en advertentiepartners kunnen bij advertentiediensten gegevens ontvangen zoals IP-adres, pagina-URL, browser- of apparaatinformatie, cookies, lokale identificatoren en informatie over interacties met advertenties.'
                 ]],
                 ['Google-advertenties', [
@@ -113,6 +122,7 @@ const content = {
                 ]],
                 ['Bewaartermijnen', [
                     'Account- en applicatiegegevens worden bewaard zolang dat nodig is om de dienst te leveren of totdat ze worden verwijderd, rekening houdend met beveiliging, back-ups, geschillen en wettelijke verplichtingen.',
+                    'Voor Advanced Stats voorkomt pauzeren of stoppen van tracking toekomstige geplande verzameling en blijft de reeds opgeslagen trackinggeschiedenis bewaard. De verwijderactie van Advanced Stats verwijdert de tracker en de opgeslagen Advanced Stats-geschiedenis uit ClashPanel en reset ook achievementvoortgang die uitsluitend uit Advanced Stats-tracking komt; niet-gerelateerde achievementvoortgang blijft behouden. Deze actie verwijdert geen gegevens die al bij een externe provider zoals ClashKing V2 aanwezig zijn. Bij het verwijderen van het eigenaarsaccount worden de opgeslagen Advanced Stats-applicatiegegevens eveneens verwijderd. Back-ups of kopieën die om wettelijke redenen moeten worden bewaard, kunnen andere bewaartermijnen volgen.',
                     'Technische logs, cachedata en authenticatiegegevens kunnen kortere bewaartermijnen hebben op basis van operationele noodzaak en instellingen van de betrokken provider. Gegevens die niet langer nodig zijn, worden waar redelijk mogelijk verwijderd of geanonimiseerd.'
                 ]],
                 ['Je privacyrechten', [
@@ -240,7 +250,9 @@ const content = {
                     'You grant ClashPanel only the permission reasonably necessary to store, process, copy and display submitted content for operating, securing and improving the functions you choose to use.'
                 ]],
                 ['Game and third-party data', [
-                    'Player, clan, war and related game information can depend on data returned by external services, including the official Clash of Clans API. External data may be delayed, incomplete, unavailable or changed by its provider.',
+                    'Current public player and clan information can come from the official Clash of Clans API, while historical battle-log, war-attack and ranked battle-log information used by Advanced Stats may come from ClashKing V2. External data may be delayed, incomplete, unavailable or changed by its provider, and ClashKing V2 records may reflect data retained from earlier observations rather than a complete live record.',
+                    'Advanced Stats is an opt-in tracked-history feature for linked accounts. It starts from available data when tracking is enabled and does not promise to reconstruct a player\'s complete history from before tracking began. Where the upstream battle log omits an exact durable battle timestamp or identifier, ClashPanel may use first-observed time and stable battle content to represent and deduplicate the available observation. Known interruptions are represented as possible gaps rather than being described as complete data.',
+                    'Pausing or stopping Advanced Stats prevents future scheduled collection while preserving existing tracked history. The destructive Advanced Stats delete action removes the saved tracker/history from ClashPanel and resets achievement progress that is derived exclusively from Advanced Stats tracking; unrelated achievement progress is not removed by that feature-level delete. It does not delete records already retained by an external provider.',
                     'Planner suggestions, predictions, status information or imported data should be reviewed before relying on them for clan decisions.'
                 ]],
                 ['Advertising and external services', [
@@ -294,7 +306,9 @@ const content = {
                     'Je geeft ClashPanel alleen de toestemming die redelijkerwijs nodig is om ingediende inhoud op te slaan, te verwerken, te kopiëren en te tonen voor het uitvoeren, beveiligen en verbeteren van de functies die je gebruikt.'
                 ]],
                 ['Gamegegevens en externe data', [
-                    'Speler-, clan-, war- en andere gamegegevens kunnen afhangen van externe diensten, waaronder de officiële Clash of Clans API. Externe data kan vertraagd, onvolledig, tijdelijk niet beschikbaar of door de provider gewijzigd zijn.',
+                    'Actuele openbare speler- en claninformatie kan uit de officiële Clash of Clans API komen, terwijl historische battlelog-, war-aanvals- en ranked-battleloginformatie voor Advanced Stats uit ClashKing V2 kan komen. Externe data kan vertraagd, onvolledig, tijdelijk niet beschikbaar of door de provider gewijzigd zijn; ClashKing V2-gegevens kunnen bovendien eerder bewaarde waarnemingen weerspiegelen in plaats van een volledige live registratie.',
+                    'Advanced Stats is een opt-infunctie voor bijgehouden historie van gekoppelde accounts. De functie start met beschikbare gegevens zodra tracking wordt ingeschakeld en belooft niet de volledige geschiedenis van vóór de start van tracking te reconstrueren. Als de upstream battlelog geen duurzaam tijdstip of ID bevat, kan ClashPanel de tijd van eerste waarneming en stabiele battleloginhoud gebruiken om de beschikbare waarneming weer te geven en dubbele registraties te voorkomen. Bekende onderbrekingen worden als mogelijke gaten weergegeven en niet als volledige data voorgesteld.',
+                    'Pauzeren of stoppen van Advanced Stats voorkomt toekomstige geplande verzameling en bewaart de bestaande trackinggeschiedenis. De verwijderactie van Advanced Stats verwijdert de opgeslagen tracker/geschiedenis uit ClashPanel en reset achievementvoortgang die uitsluitend uit Advanced Stats-tracking komt; niet-gerelateerde achievementvoortgang wordt door deze verwijderactie niet verwijderd. Gegevens die al bij een externe provider zijn bewaard, worden hiermee niet verwijderd.',
                     'Controleer plannersuggesties, voorspellingen, statusinformatie en geïmporteerde data voordat je er belangrijke clanbeslissingen op baseert.'
                 ]],
                 ['Advertenties en externe diensten', [
