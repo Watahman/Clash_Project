@@ -1,4 +1,4 @@
-export const CACHE_VERSION = 2;
+export const CACHE_VERSION = 3;
 
 export const CACHE_TTL = Object.freeze({
     USER_INFO: 5 * 60 * 1000,

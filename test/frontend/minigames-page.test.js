@@ -16,7 +16,7 @@ describe('ClashPanel minigames public page', () => {
     const hubController = readFileSync('src/assets/js/pages/minigames-hub.js', 'utf8');
 
     it('loads the game hub, Entity Guesser and Higher or Lower controllers', () => {
-        expect(page).toContain('/assets/js/pages/minigames-hub.js?v=20260812-redesign');
+        expect(page).toContain('/assets/js/pages/minigames-hub.js?v=20260828-seo-links');
         expect(page).toContain('/assets/js/pages/minigames-phase2b.js');
         expect(page).toContain('/assets/js/pages/higher-lower.js');
         expect(page).toContain('/assets/css/minigames-entity-guesser.css');
@@ -48,6 +48,12 @@ describe('ClashPanel minigames public page', () => {
         expect(page).toContain('<meta name="twitter:card" content="summary_large_image">');
         expect(page).toContain('<meta name="twitter:image" content="https://clashpanel.com/assets/social/minigames.png">');
         expect(page).toContain('<meta name="twitter:image:alt"');
+    });
+
+    it('links the games hub directly to the public bracket generator', () => {
+        expect(page).toContain('href="/bracket-generator"');
+        expect(page).toContain('data-hub-i18n="bracketLink"');
+        expect(hubController).toContain("bracketLink: 'Build a tournament bracket →'");
     });
 
     it('presents the complete catalog as four broad newcomer-friendly categories', () => {

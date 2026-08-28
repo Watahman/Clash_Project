@@ -9,7 +9,7 @@ import {
 } from '../Supabase/Supabase-Friend.js';
 import { checkUserId } from '../Supabase/Supabase-User.js';
 import { getCurrentUserId } from '../utils/user.js';
-import { initProfileSettings, syncProfileSettings } from '../profile/profile_settings.js';
+import { initProfileSettings, syncProfileSettings } from '../profile/profile_settings.js?v=20260824-password-form';
 import {
     resolveFriendRequest,
     sendFriendRequest,

@@ -36,7 +36,6 @@ vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
         return Object.entries(values).reduce((result, [name, replacement]) => result.replaceAll(`{${name}}`, replacement), value);
     }
 }));
-vi.mock('../../src/assets/js/profile/profile_popup.js', () => ({ profileHTML: vi.fn() }));
 vi.mock('../../src/assets/js/auth/auth-client.js', () => ({ syncAuthSession: mocks.syncAuthSession }));
 vi.mock('../../src/assets/js/utils/user.js', () => ({ getCurrentUserId: () => 'user-1' }));
 vi.mock('../../src/assets/js/Supabase/Supabase-Plan.js', () => ({
@@ -62,8 +61,7 @@ describe('saved plan actions', () => {
             <p id="drafts-status"></p>
             <input id="drafts-search"><select id="drafts-sort"><option value="updated-desc">Recent</option><option value="updated-asc">Oudst</option><option value="name-asc">Naam A-Z</option><option value="name-desc">Naam Z-A</option></select>
             <p id="drafts-filter-status"></p>
-            <table><tbody id="draft-cwl-container"></tbody></table>
-            <div class="profile-placeholder"></div>`;
+            <table><tbody id="draft-cwl-container"></tbody></table>`;
     });
 
     it('selects a plan when opening and removes it after confirmation', async () => {

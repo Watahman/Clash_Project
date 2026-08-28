@@ -5,6 +5,7 @@ import {
     scorePlayerForClan
 } from './cwl-auto-plan-scoring.js';
 import { fillRequiredLineups } from './cwl-auto-plan-minimum.js';
+import { normalizePlayerPriority } from '../cwl-plan-schema.js';
 
 export function assignPlayersGlobally({
     players,
@@ -164,7 +165,8 @@ function weakestActive(entries) {
 }
 
 function isEligible(player) {
-    return player.availability?.state !== 'no';
+    return player.availability?.state !== 'no'
+        && normalizePlayerPriority(player.playerPriority) !== 'exclude';
 }
 
 function byTag(left, right) {

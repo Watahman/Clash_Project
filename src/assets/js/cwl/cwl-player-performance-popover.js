@@ -4,6 +4,7 @@ import {
     schedulePlayerPerformanceBatch
 } from './player-performance-client.js';
 import { renderCurrentCwlSection } from './cwl-player-performance-current.js';
+import { getPlayerFitContext } from './cwl-player-fit-context.js';
 
 const OPEN_DELAY_MS = 300;
 const CLOSE_DELAY_MS = 140;
@@ -38,10 +39,10 @@ export function initPlayerPerformancePopover({ getCurrentContext } = {}) {
     window.addEventListener('clashtools:cwl-player-drag-start', closePopover);
     window.addEventListener('clashtools:player-performance-updated', event => {
         if (activeCard && event.detail?.tags?.includes(activeCard.dataset.playerTag)) {
-            renderActiveCard();
+            rerenderActivePopover();
         }
     });
-    window.addEventListener('clashtools:language-changed', renderActiveCard);
+    window.addEventListener('clashtools:language-changed', rerenderActivePopover);
     return popover;
 }
 
@@ -135,6 +136,11 @@ function renderActiveCard() {
     renderPerformance(performance);
 }
 
+function rerenderActivePopover() {
+    renderActiveCard();
+    reposition();
+}
+
 function renderLoading() {
     popover.replaceChildren(
         headerForActiveCard(),
@@ -147,6 +153,8 @@ function renderLoading() {
 
 function renderPerformance(data) {
     const header = headerForActiveCard();
+    const overview = performanceOverview(data);
+    const plannerContext = plannerContextSection(data);
     if (data.status !== 'ready') {
         const empty = element('div', 'cwl-performance-empty');
         empty.append(
@@ -158,22 +166,11 @@ function renderPerformance(data) {
             ))
         );
         popover.replaceChildren(
-            header, ...currentCwlNodes(), empty, confidenceFooter(data)
+            header, overview, ...(plannerContext ? [plannerContext] : []),
+            ...currentCwlNodes(), empty
         );
         return;
     }
-
-    const top = element('div', 'cwl-performance-score');
-    top.append(
-        element('span', 'cwl-performance-label', t('performance.warPerformance')),
-        element('strong', '', number(boundedPerformance(data.performance), 0)),
-        element('em', '', data.scope === 'CWL' ? t('performance.cwl') : t('performance.allWars'))
-    );
-    const form = element('div', 'cwl-performance-form');
-    form.append(
-        element('span', '', t('performance.form')),
-        element('strong', `is-${data.form?.trend || 'unknown'}`, formText(data.form))
-    );
 
     const stats = metrics([
         [t('performance.avgStars'), stars(data.avgStars)],
@@ -188,9 +185,54 @@ function renderPerformance(data) {
         [t('performance.downHit'), String(data.downHitCount)]
     ]));
     popover.replaceChildren(
-        header, ...currentCwlNodes(), top, form, stats,
-        matchups, confidenceFooter(data)
+        header, overview, ...(plannerContext ? [plannerContext] : []),
+        ...currentCwlNodes(), stats, matchups
     );
+}
+
+function performanceOverview(data) {
+    const overview = element('section', 'cwl-performance-overview');
+    const score = element('div', 'cwl-performance-score');
+    score.append(
+        element('span', 'cwl-performance-label', t('performance.warPerformance')),
+        element('strong', '', number(boundedPerformance(data.performance), 0)),
+        element('span', 'cwl-performance-scale', '/100'),
+        element('em', '', data.scope === 'CWL' ? t('performance.cwl') : t('performance.allWars'))
+    );
+    const reliability = data.reliability == null
+        ? t('performance.insufficientParticipation')
+        : percent(data.reliability);
+    const coverage = t('performance.coverage', {
+        attacks: data.coverage?.attacks ?? data.attackCount ?? 0,
+        days: data.coverage?.days ?? 0
+    });
+    const form = element('div', 'cwl-performance-form');
+    form.append(
+        element('span', '', t('performance.form')),
+        element('strong', `is-${data.form?.trend || 'unknown'}`, formText(data.form))
+    );
+    overview.append(score, form, metrics([
+        [t('performance.reliability'), reliability],
+        [t('performance.confidenceLabel'), t(`performance.confidence${data.confidence || 'Low'}`)],
+        [t('performance.attackCoverage'), coverage]
+    ]));
+    return overview;
+}
+
+function plannerContextSection(data) {
+    const context = getPlayerFitContext(activeCard, data);
+    if (!context) return null;
+    const wrapper = section(t('performance.plannerContext'), metrics(
+        context.fits.map(item => [item.clanName, number(item.fit, 1)])
+    ));
+    wrapper.classList.add('cwl-performance-planner-context');
+    wrapper.insertBefore(element(
+        'p', 'cwl-performance-context-label',
+        t(context.mode === 'assigned'
+            ? 'performance.currentClanFit'
+            : 'performance.bestClanFits')
+    ), wrapper.querySelector('dl'));
+    return wrapper;
 }
 
 function renderHistoricalCwl(context) {
@@ -219,19 +261,6 @@ function headerForActiveCard() {
         element('span', '', tag)
     );
     return header;
-}
-
-function confidenceFooter(data) {
-    const footer = element('footer', 'cwl-performance-data');
-    const attacks = data.coverage?.attacks ?? data.attackCount ?? 0;
-    const days = data.coverage?.days ?? 0;
-    footer.append(
-        element('span', '', t('performance.coverage', { attacks, days })),
-        element('strong', '', t('performance.confidence', {
-            level: t(`performance.confidence${data.confidence || 'Low'}`)
-        }))
-    );
-    return footer;
 }
 
 function metrics(rows) {

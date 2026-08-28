@@ -240,7 +240,6 @@
                     void preloadWorkspaceVisuals(url);
                 }
             });
-            void preloadProfileMarkup();
         };
 
         if ('requestIdleCallback' in window) {
@@ -253,13 +252,6 @@
     function workspacePageUrls() {
         return PAGE_PATHS.map(path =>
             new URL(path, window.location.origin)
-        );
-    }
-
-    function profileMarkupUrl() {
-        return new URL(
-            "/subpages/popup_htmls/profile_popup.html",
-            window.location.origin
         );
     }
 
@@ -325,34 +317,6 @@
             if (url.origin === window.location.origin) urls.add(url.href);
         });
         return Array.from(urls, value => new URL(value));
-    }
-
-    async function preloadProfileMarkup() {
-        const url = profileMarkupUrl();
-        const response = await originalFetch(url.href, {
-            credentials: 'same-origin',
-            cache: 'force-cache'
-        }).catch(() => null);
-        if (!response?.ok) return false;
-
-        const source = await response.text();
-        const profileDocument = new DOMParser().parseFromString(source, 'text/html');
-        const pictureBase = new URL('../../assets/css/pictures/', url);
-        const images = new Set();
-
-        profileDocument.querySelectorAll('img[src], img[data-profile-src]').forEach(image => {
-            const directSource = image.getAttribute('src');
-            const profileSource = image.getAttribute('data-profile-src');
-            const asset = directSource
-                ? new URL(directSource, url)
-                : profileSource
-                    ? new URL(profileSource, pictureBase)
-                    : null;
-            if (asset?.origin === window.location.origin) images.add(asset.href);
-        });
-
-        await Promise.allSettled(Array.from(images, value => prefetchBinaryAsset(new URL(value))));
-        return true;
     }
 
     function prefetchCssAsset(url) {

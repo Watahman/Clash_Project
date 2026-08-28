@@ -1,7 +1,7 @@
 import { competeT as t } from './compete-locales.js';
 import { enrichWithHistoricalPerformance } from './operation-board-performance.js';
 import { buildReport } from './operation-board-report-model.js';
-import { loadOperationSource, NoActiveCwlError } from './operation-board-source.js';
+import { loadOperationSource, NoActiveCwlError } from './operation-board-source.js?v=20260826-live-refresh';
 
 export function createCwlOperationBoardReportLoader({
     getSelectedPlan,
@@ -23,7 +23,7 @@ export function createCwlOperationBoardReportLoader({
     let requestToken = 0;
     let reportController;
 
-    async function refreshClanReport(clan) {
+    async function refreshClanReport(clan, forceRefresh = false) {
         const token = ++requestToken;
         reportController?.abort();
         reportController = new AbortController();
@@ -35,7 +35,8 @@ export function createCwlOperationBoardReportLoader({
             const raw = await loadSource({
                 clan,
                 plan: getSelectedPlan(),
-                signal
+                signal,
+                forceRefresh
             });
             if (!isCurrent(token, signal)) return;
             const report = createReport(raw);

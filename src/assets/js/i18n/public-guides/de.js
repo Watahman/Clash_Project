@@ -4,7 +4,7 @@ export default Object.freeze({
     "guides.heroKicker": "Anleitungen",
     "guides.heroTitle": "Praktische Entscheidungen statt allgemeiner Tipps.",
     "guides.heroIntro": "Diese Anleitungen erklären die Kader-, Verfügbarkeits- und Auswertungsentscheidungen, die ClashPanel sichtbar macht. Jeder Ablauf nennt seine Abwägungen und wann die Clanleitung davon abweichen sollte.",
-    "guides.heroMeta": "Von ClashPanel verfasst · Veröffentlicht und aktualisiert am 4. August 2026",
+    "guides.heroMeta": "Von ClashPanel verfasst · Veröffentlicht am 4. August · Hub aktualisiert am 28. August 2026",
     "guides.tocLabel": "Liste der Anleitungen",
     "guides.tocTitle": "Acht Anleitungen",
     "guides.tocFair": "Fairer Kader",

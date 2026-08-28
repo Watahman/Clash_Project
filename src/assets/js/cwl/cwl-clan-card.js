@@ -4,6 +4,7 @@ import { normalizeTag } from './cwl-utils.js';
 import { allowsThirtyPlayerCwl, normalizeCwlCapacity } from './cwl-league-rules.js';
 import { t } from '../i18n/i18n.js';
 import { syncPlayerRosterStatus } from './cwl-player-controls.js';
+import { normalizeClanPriority } from './cwl-plan-schema.js';
 import {
     rememberPlannerPlayers,
     updateAllPlayerCounters,
@@ -70,11 +71,17 @@ export function createClanCard(clanInfo, playerAmount, uuid = '', options = {}) 
         savePlan();
     });
 
+    const priority = normalizeClanPriority(
+        clanInfo?.clanPriority || clanInfo?.clan_priority || clanInfo?.priority
+    );
+    initClanPriorityControl(article, priority);
+
     article.id = `cwl-clan-template_${clanUuid}`;
     article.dataset.clanTag = clanTag;
     article.dataset.clanName = clanName;
     article.dataset.clanLeague = leagueName;
     article.dataset.clanCapacity = String(capacity);
+    article.dataset.clanPriority = priority;
     applyClanLeagueRestriction(article, leagueName, { persist: false });
     attachDeleteClan(template.querySelector('.cwl-delete-clan'));
 
@@ -83,6 +90,36 @@ export function createClanCard(clanInfo, playerAmount, uuid = '', options = {}) 
     makeClanDraggable(document.querySelector('#cwl-all-clans').lastElementChild);
     updateAllPlayerCounters();
     if (persist) savePlan();
+}
+
+function initClanPriorityControl(article, priority) {
+    const label = article.querySelector('.cwl-clan-priority');
+    const select = label?.querySelector('select');
+    if (!select) return;
+    const labelText = label.querySelector('span');
+    if (labelText) labelText.textContent = t('planner.clanPriority');
+    translateClanPriorityOptions(select);
+    select.setAttribute('aria-label', t('planner.clanPriority'));
+    select.addEventListener('pointerdown', event => event.stopPropagation());
+    select.addEventListener('mousedown', event => event.stopPropagation());
+    select.value = priority;
+    select.addEventListener('change', () => {
+        article.dataset.clanPriority = normalizeClanPriority(select.value);
+        savePlan();
+    });
+}
+
+function translateClanPriorityOptions(select) {
+    const keys = {
+        auto: 'planner.clanPriorityAuto',
+        primary: 'planner.clanPriorityPrimary',
+        secondary: 'planner.clanPrioritySecondary',
+        development: 'planner.clanPriorityDevelopment'
+    };
+    Array.from(select.options).forEach(option => {
+        const key = keys[option.value];
+        if (key) option.textContent = t(key);
+    });
 }
 
 function attachDeleteClan(button) {

@@ -73,4 +73,15 @@ describe('IndexedDB stale-while-revalidate cache', () => {
             { ttlMs: 1_000, staleMs: 500, maxFallbackAgeMs: 1_500 }
         )).rejects.toThrow('offline');
     });
+
+    it('does not hide a failed forced refresh behind cached data', async () => {
+        const key = `test:forced:${crypto.randomUUID()}`;
+        await setCached(key, { value: 'cached' }, 10_000, 5_000);
+
+        await expect(getCachedThenRefresh(
+            key,
+            () => Promise.reject(new Error('live source unavailable')),
+            { ttlMs: 10_000, staleMs: 5_000, forceRefresh: true }
+        )).rejects.toThrow('live source unavailable');
+    });
 });

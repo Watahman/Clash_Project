@@ -1,9 +1,10 @@
 import { initI18n, t } from '../i18n/i18n.js';
-import { profileHTML } from "../profile/profile_popup.js";
 import { syncAuthSession } from "../auth/auth-client.js";
 import { initOverlayHide, initAddPlayersOverlay, initAddClanButton, applyCwlSizeRestriction } from "../cwl/cwl-overlay.js";
 import { initPlanIO, savePlan, loadAllPlans, loadPlanListener, startNewPlan, undoLastPlanChange } from "../cwl/cwl-plan-io.js";
-import { initFreeRosterFilter } from "../cwl/cwl-roster-filter.js";
+import { initFreeRosterFilter } from "../cwl/cwl-roster-filter.js?v=20260828-cwl-planner-v2";
+import { initClanVisibilityFilter } from "../cwl/cwl-clan-visibility-filter.js?v=20260828-cwl-planner-v2";
+import { refreshPlannerPriorityLabels } from "../cwl/cwl-priority-labels.js?v=20260828-cwl-planner-v2";
 import { initSpreadsheetImport } from "../cwl/cwl-spreadsheet-import.js";
 import { getClanInfoRequest } from "../API/API-Clan.js";
 import * as conf from "../Data/config.js";
@@ -95,9 +96,17 @@ async function init() {
     initFreeRosterFilter({
         container: availablePlayers,
         input: document.querySelector('#cwl-roster-search'),
-        status: document.querySelector('#cwl-roster-filter-status')
+        status: document.querySelector('#cwl-roster-filter-status'),
+        sourceSelect: document.querySelector('#cwl-roster-source-clan'),
+        performanceMin: document.querySelector('#cwl-roster-performance-min'),
+        performanceMax: document.querySelector('#cwl-roster-performance-max'),
+        availabilitySelect: document.querySelector('#cwl-roster-availability'),
+        sorting: document.querySelector('#cwl-player-sorting')
     });
-    initPlayerSorting();
+    initClanVisibilityFilter({
+        container: allClans,
+        select: document.querySelector('#cwl-clan-visibility')
+    });
     initPlayerPerformanceClient();
     initPlayerPerformancePopover();
     initAutoPlan();
@@ -114,7 +123,6 @@ async function init() {
         await loadAllPlans();
     }
     loadPlanListener();
-    if (!fixture) profileHTML();
 }
 
 function preservePlannerStorage() {
@@ -148,6 +156,7 @@ function initPlanNameSync() {
 function refreshPlannerLabels() {
     availablePlayers.dataset.emptyLabel = t('planner.emptyRoster');
     allClans.dataset.emptyLabel = t('planner.emptyClans');
+    refreshPlannerPriorityLabels();
     document.querySelectorAll('.cwl-clan-format > span').forEach(label => {
         label.textContent = t('planner.format');
     });
@@ -193,27 +202,6 @@ function initPlannerHeaderState() {
     window.addEventListener('clashtools:language-changed', sync);
     sync();
 }
-
-function initPlayerSorting() {
-    const sorting = document.querySelector('#cwl-player-sorting');
-    if (!sorting || !availablePlayers) return;
-    const sortPlayers = () => {
-        const players = Array.from(availablePlayers.querySelectorAll('.cwl-player-article'));
-        players.sort((a, b) => {
-            if (sorting.value === 'name') {
-                return getName(a).localeCompare(getName(b), undefined, { sensitivity: 'base' });
-            }
-            return getTownHall(b) - getTownHall(a) || getName(a).localeCompare(getName(b), undefined, { sensitivity: 'base' });
-        });
-        players.forEach(player => availablePlayers.appendChild(player));
-    };
-    sorting.addEventListener('change', sortPlayers);
-    window.addEventListener('clashtools:cwl-player-added', sortPlayers);
-    window.addEventListener('clashtools:cwl-player-removed', sortPlayers);
-    window.addEventListener('clashtools:cwl-plan-loaded', sortPlayers);
-}
-function getName(card) { return card.querySelector('.cwl-player-name')?.textContent?.trim().toLowerCase() || ''; }
-function getTownHall(card) { return Number(card.dataset.townHall || 0); }
 
 function savePlanButton() {
     savePlanBtn.addEventListener("click", async () => {

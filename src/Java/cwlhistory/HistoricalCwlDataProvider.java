@@ -15,5 +15,7 @@ public interface HistoricalCwlDataProvider {
         return seasons;
     }
 
+    default void clearCaches() {}
+
     String providerName();
 }

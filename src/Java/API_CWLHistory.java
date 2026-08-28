@@ -49,6 +49,7 @@ public final class API_CWLHistory {
     }
 
     private void getSeason(HttpExchange exchange) throws Exception {
+        clearCachesIfRequested(exchange);
         String clanTag = requiredQuery(exchange, "clanTag");
         String season = requiredQuery(exchange, "season");
         HistoricalCwlSeason result = service.getSeason(clanTag, season);
@@ -58,6 +59,7 @@ public final class API_CWLHistory {
     }
 
     private void getSeasons(HttpExchange exchange) throws Exception {
+        clearCachesIfRequested(exchange);
         String clanTag = requiredQuery(exchange, "clanTag");
         int limit = intQuery(exchange, "limit", HistoricalCwlService.DEFAULT_SEASON_LIMIT);
         List<HistoricalCwlSeasonSummary> result =
@@ -69,6 +71,7 @@ public final class API_CWLHistory {
     }
 
     private void getOverview(HttpExchange exchange) throws Exception {
+        clearCachesIfRequested(exchange);
         String clanTag = requiredQuery(exchange, "clanTag");
         int limit = intQuery(exchange, "limit", HistoricalCwlService.DEFAULT_SEASON_LIMIT);
         List<HistoricalCwlSeason> result = service.getOverview(clanTag, limit);
@@ -76,6 +79,10 @@ public final class API_CWLHistory {
         response.addProperty("clanTag", clanTag);
         response.add("seasons", gson.toJsonTree(result));
         utils.sendJsonResponse(exchange, gson.toJson(response), 200);
+    }
+
+    private void clearCachesIfRequested(HttpExchange exchange) {
+        if (API_Utils.requestsFreshData(exchange)) service.clearCaches();
     }
 
     private static String requiredQuery(HttpExchange exchange, String name) {

@@ -296,12 +296,34 @@ public class API_Utils {
     }
 
     public void clashGetCached(HttpExchange exchange, String path, long ttlMs) throws Exception {
+        clashGetCached(exchange, path, ttlMs, null);
+    }
+
+    public void clashGetCachedOrNotFoundDefault(
+            HttpExchange exchange,
+            String path,
+            long ttlMs,
+            String notFoundJson
+    ) throws Exception {
+        clashGetCached(exchange, path, ttlMs, notFoundJson);
+    }
+
+    private void clashGetCached(
+            HttpExchange exchange,
+            String path,
+            long ttlMs,
+            String notFoundJson
+    ) throws Exception {
         if (!conf.isCacheEnabled() || ttlMs <= 0 || "none".equalsIgnoreCase(conf.getCacheMode())) {
-            clashGet(exchange, path);
+            clashGetOrDefault(exchange, path, notFoundJson);
             return;
         }
 
         String key = CacheKeys.clashGet(path);
+        if (requestsFreshData(exchange)) {
+            sendRefreshedOrDefault(exchange, key, path, ttlMs, notFoundJson);
+            return;
+        }
         CacheEntry cached = L1_CACHE.get(key);
         String cacheLayer = "l1";
         if (cached == null && "layered".equalsIgnoreCase(conf.getCacheMode())) {
@@ -309,25 +331,56 @@ public class API_Utils {
             cacheLayer = "l2";
             if (cached != null) L1_CACHE.put(key, cached);
         }
+        if (sendUsableCache(exchange, cached, cacheLayer, key, path, ttlMs, notFoundJson)) return;
+        sendRefreshedOrDefault(exchange, key, path, ttlMs, notFoundJson);
+    }
 
-        if (cached != null && cached.isFresh()) {
-            sendCachedResponse(exchange, cached, cacheLayer + "-fresh");
-            return;
-        }
-        if (cached != null && cached.isUsable()) {
-            sendCachedResponse(exchange, cached, cacheLayer + "-stale");
-            refreshSingleFlight(key, path, ttlMs).exceptionally(error -> null);
-            return;
-        }
+    private boolean sendUsableCache(
+            HttpExchange exchange,
+            CacheEntry cached,
+            String cacheLayer,
+            String key,
+            String path,
+            long ttlMs,
+            String notFoundJson
+    ) throws Exception {
+        if (cached == null || !cached.isUsable()) return false;
+        String freshness = cached.isFresh() ? "-fresh" : "-stale";
+        sendCachedResponse(exchange, cached, cacheLayer + freshness, notFoundJson);
+        if (!cached.isFresh()) refreshSingleFlight(key, path, ttlMs).exceptionally(error -> null);
+        return true;
+    }
 
+    private void sendRefreshedOrDefault(
+            HttpExchange exchange,
+            String key,
+            String path,
+            long ttlMs,
+            String notFoundJson
+    ) throws Exception {
         try {
             CacheEntry refreshed = refreshSingleFlight(key, path, ttlMs).join();
-            sendCachedResponse(exchange, refreshed, "source");
+            sendCachedResponse(exchange, refreshed, "source", notFoundJson);
         } catch (CompletionException wrapped) {
             Throwable cause = wrapped.getCause();
-            if (cause instanceof HttpException httpException) throw httpException;
+            if (cause instanceof HttpException httpException) {
+                if (sendNotFoundDefault(exchange, httpException.getStatusCode(), notFoundJson, "source")) return;
+                throw httpException;
+            }
             if (cause instanceof Exception exception) throw exception;
             throw wrapped;
+        }
+    }
+
+    private void clashGetOrDefault(
+            HttpExchange exchange,
+            String path,
+            String notFoundJson
+    ) throws Exception {
+        try {
+            clashGet(exchange, path);
+        } catch (HttpException error) {
+            if (!sendNotFoundDefault(exchange, error.getStatusCode(), notFoundJson, "source")) throw error;
         }
     }
 
@@ -360,7 +413,7 @@ public class API_Utils {
                         if (isNegativeCacheable(sourceError.getStatusCode())) {
                             CacheEntry entry = CacheEntry.create(
                                     sourceError.getResponseBody(),
-                                    negativeTtl(sourceError.getStatusCode()),
+                                    negativeTtl(),
                                     2 * 60 * 1000L,
                                     sourceError.getStatusCode()
                             );
@@ -379,10 +432,28 @@ public class API_Utils {
         if ("layered".equalsIgnoreCase(conf.getCacheMode())) L2_CACHE.put(key, entry);
     }
 
-    private void sendCachedResponse(HttpExchange exchange, CacheEntry entry, String cacheState) throws Exception {
+    private void sendCachedResponse(
+            HttpExchange exchange,
+            CacheEntry entry,
+            String cacheState,
+            String notFoundJson
+    ) throws Exception {
         exchange.getResponseHeaders().set("X-ClashTools-Cache", cacheState);
         exchange.getResponseHeaders().set("X-ClashTools-Cache-Age", Long.toString(entry.ageMs() / 1000));
+        if (sendNotFoundDefault(exchange, entry.sourceStatus(), notFoundJson, null)) return;
         sendJsonResponse(exchange, entry.value(), entry.sourceStatus());
+    }
+
+    private boolean sendNotFoundDefault(
+            HttpExchange exchange,
+            int status,
+            String notFoundJson,
+            String cacheState
+    ) throws Exception {
+        if (status != 404 || notFoundJson == null) return false;
+        if (cacheState != null) exchange.getResponseHeaders().set("X-ClashTools-Cache", cacheState);
+        sendJsonResponse(exchange, notFoundJson, 200);
+        return true;
     }
 
     private long retentionFor(long ttlMs) {
@@ -391,12 +462,27 @@ public class API_Utils {
         return Math.min(maximum, Math.max(minimum, ttlMs * 8));
     }
 
-    private boolean isNegativeCacheable(int status) {
-        return status == 403 || status == 404 || status == 429;
+    static boolean requestsFreshData(HttpExchange exchange) {
+        String cacheControl = exchange.getRequestHeaders().getFirst("Cache-Control");
+        if (cacheControl != null) {
+            for (String directive : cacheControl.split(",")) {
+                String normalized = directive.trim();
+                if (normalized.equalsIgnoreCase("no-cache")
+                        || normalized.equalsIgnoreCase("no-store")
+                        || normalized.equalsIgnoreCase("max-age=0")) return true;
+            }
+        }
+        return "no-cache".equalsIgnoreCase(
+                exchange.getRequestHeaders().getFirst("Pragma")
+        );
     }
 
-    private long negativeTtl(int status) {
-        return status == 429 ? 10_000L : 30_000L;
+    static boolean isNegativeCacheable(int status) {
+        return status == 404;
+    }
+
+    private long negativeTtl() {
+        return 30_000L;
     }
 
     public void clashPost(HttpExchange exchange, String path, String body) throws Exception {

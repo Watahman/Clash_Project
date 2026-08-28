@@ -117,4 +117,72 @@ describe('CWL plan switching', () => {
         expect(refs.loadPlan.value).toBe('plan-a');
         expect(localStorage.getItem('planner_id')).toBe('plan-a');
     });
+
+    it('round-trips clan and player priorities through plan save/load data', async () => {
+        const { getCurrentPlanSnapshot, initPlanIO, loadPlanById } = await import(
+            '../../src/assets/js/cwl/cwl-plan-io.js'
+        );
+        const refs = {
+            availablePlayers: document.querySelector('#available'),
+            allClans: document.querySelector('#clans'),
+            totalPlayerAmount: document.querySelector('#total'),
+            planName: document.querySelector('#name'),
+            loadPlan: document.querySelector('#plans'),
+            saveStatus: document.querySelector('#status')
+        };
+        refs.availablePlayers.innerHTML = `
+            <article class="cwl-player-article" data-planner-card="true"
+                     data-player-tag="#FREE" data-town-hall="17"
+                     data-player-priority="high">
+                <p class="cwl-player-name">Free</p>
+                <p class="cwl-player-clan">Alpha</p>
+                <p class="cwl-player-hashtag">#FREE</p>
+            </article>`;
+        refs.allClans.innerHTML = `
+            <article class="cwl-clan-article" id="cwl-clan-template_alpha"
+                     data-clan-tag="#ALPHA" data-clan-name="Alpha"
+                     data-clan-capacity="15" data-clan-priority="primary">
+                <select class="cwl-clan-capacity"><option selected>15</option></select>
+                <img class="cwl-clan-logo" src="">
+                <div class="cwl-clan-player-list">
+                    <article class="cwl-player-article" data-planner-card="true"
+                             data-player-tag="#LOCKED" data-town-hall="17"
+                             data-player-priority="exclude">
+                        <p class="cwl-player-name">Locked</p>
+                        <p class="cwl-player-clan">Alpha</p>
+                        <p class="cwl-player-hashtag">#LOCKED</p>
+                    </article>
+                </div>
+            </article>`;
+
+        initPlanIO(refs);
+        const snapshot = getCurrentPlanSnapshot({ now: '2026-08-28T00:00:00.000Z' });
+
+        expect(snapshot.schemaVersion).toBe(5);
+        expect(snapshot.freePlayers[0].playerPriority).toBe('high');
+        expect(snapshot.clans[0].clanPriority).toBe('primary');
+        expect(snapshot.clans[0].players[0].playerPriority).toBe('exclude');
+
+        const loading = loadPlanById('round-trip');
+        mocks.pending.get('round-trip').resolve({
+            id: 'round-trip',
+            name: 'Round trip',
+            info: snapshot
+        });
+        await loading;
+
+        expect(mocks.createPlayerCard).toHaveBeenCalledWith(
+            expect.objectContaining({ tag: '#FREE', playerPriority: 'high' }),
+            null
+        );
+        expect(mocks.createPlayerCard).toHaveBeenCalledWith(
+            expect.objectContaining({ tag: '#LOCKED', playerPriority: 'exclude' }),
+            'alpha'
+        );
+        expect(mocks.createClanCard).toHaveBeenCalledWith(
+            expect.objectContaining({ tag: '#ALPHA', clanPriority: 'primary' }),
+            15,
+            'alpha'
+        );
+    });
 });

@@ -7,7 +7,6 @@ import {
     findCompeteKey,
     initCompeteI18n
 } from '../operation-board/compete-locales.js';
-import { profileHTML } from '../profile/profile_popup.js';
 import { loadLinkedWarClans } from '../war-operation-board/war-clan-source.js';
 import { createWarLoadController } from '../war-operation-board/war-page-loader.js';
 import { bindWarPageEvents } from '../war-operation-board/war-page-events.js';
@@ -38,7 +37,6 @@ async function init() {
     });
     initI18n();
     if (!activeFixture) await Promise.resolve(syncAuthSession()).catch(() => null);
-    profileHTML();
     warLoader = createWarLoadController({
         refs,
         getSelectedTag: () => selectedTag,

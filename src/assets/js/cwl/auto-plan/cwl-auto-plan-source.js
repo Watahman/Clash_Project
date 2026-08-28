@@ -11,6 +11,10 @@ import {
 } from '../cwl-planner-card-state.js';
 import { syncPlayerRosterStatus } from '../cwl-player-controls.js';
 import { getCardTag, normalizeTag } from '../cwl-utils.js';
+import {
+    normalizeClanPriority,
+    normalizePlayerPriority
+} from '../cwl-plan-schema.js';
 import { isRedesignFixtureRequested } from '../../fixtures/redesign-fixture-mode.js';
 
 export async function collectAutoPlanInput(root = document) {
@@ -119,7 +123,8 @@ function readClan(card) {
         league: card.dataset.clanLeague
             || card.querySelector('.cwl-clan-league')?.textContent?.replace(/^.*?·\s*/, '').trim()
             || '',
-        capacity: Number(card.querySelector('.cwl-clan-capacity')?.value) === 30 ? 30 : 15
+        capacity: Number(card.querySelector('.cwl-clan-capacity')?.value) === 30 ? 30 : 15,
+        clanPriority: normalizeClanPriority(card.dataset.clanPriority)
     };
 }
 
@@ -133,6 +138,7 @@ function readPlayer(card, performance) {
         townHallLevel: Number(card.dataset.townHall) || 1,
         currentClanId: currentClan ? clanId(currentClan) : null,
         currentRole: card.dataset.rosterStatus || '',
+        playerPriority: normalizePlayerPriority(card.dataset.playerPriority),
         availability: getPlayerAvailability(tag),
         performance: performance || card._cwlPlayer?.performance || { status: 'unavailable' }
     };

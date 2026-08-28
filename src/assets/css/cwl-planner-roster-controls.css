@@ -1,0 +1,49 @@
+/* Filter and priority controls load after the compact roster layout. */
+.workspace-planner #cwl-available-players .cwl-player-article[hidden],
+.workspace-planner #cwl-all-clans .cwl-clan-article[hidden] { display: none !important; }
+
+.workspace-planner .cwl-clan-info-card { grid-template-columns: 38px minmax(0, 1fr) auto auto auto auto; }
+.workspace-planner .cwl-clan-format,
+.workspace-planner .cwl-clan-priority { align-items: center; display: flex; gap: 6px; }
+.workspace-planner .cwl-player-control-group .cwl-player-priority { max-width: 92px; }
+.workspace-planner .cwl-player-article[data-player-priority="high"] .cwl-player-priority { border-color: color-mix(in srgb, var(--accent) 38%, var(--planner-border)) !important; color: var(--accent-strong); }
+.workspace-planner .cwl-player-article[data-player-priority="low"] .cwl-player-priority { color: var(--planner-muted); }
+.workspace-planner .cwl-player-article[data-player-priority="exclude"] .cwl-player-priority { border-color: color-mix(in srgb, var(--danger) 35%, var(--planner-border)) !important; color: var(--danger); }
+
+@media (max-width: 64rem) {
+    .workspace-planner .cwl-clan-info-card { grid-template-columns: 2.5rem minmax(0, 1fr) auto 2.75rem; }
+    .workspace-planner .cwl-clan-priority { grid-column: 2; grid-row: 2; } .workspace-planner .cwl-clan-format { grid-column: 2; grid-row: 3; }
+    .workspace-planner .cwl-amount-of-players-in-clan { grid-column: 3; grid-row: 1; } .workspace-planner .cwl-delete-clan { grid-column: 4; grid-row: 1; }
+}
+@media (max-width: 620px) {
+    .workspace-planner .cwl-clan-info-card { grid-template-columns: 34px minmax(0, 1fr) auto; }
+    .workspace-planner .cwl-clan-priority { grid-column: 2; grid-row: 2; } .workspace-planner .cwl-clan-format { grid-column: 2; grid-row: 3; }
+    .workspace-planner .cwl-clan-format > span, .workspace-planner .cwl-clan-priority > span { display: none; }
+    .workspace-planner .cwl-delete-clan { grid-column: 3; grid-row: 2; }
+}
+@media (max-width: 46rem) {
+    .workspace-planner #cwl-available-players .cwl-player-article,
+    .workspace-planner .cwl-clan-player-list .cwl-player-article {
+        grid-template-columns: 2.35rem minmax(0, 1fr) 2.75rem !important;
+        row-gap: var(--space-2);
+    }
+    .workspace-planner #cwl-available-players .cwl-availability-indicator,
+    .workspace-planner .cwl-clan-player-list .cwl-availability-indicator { grid-column: 2 !important; grid-row: 2 !important; max-width: 100%; }
+    .workspace-planner #cwl-available-players .cwl-player-control-group,
+    .workspace-planner .cwl-clan-player-list .cwl-player-control-group {
+        display: grid !important;
+        grid-column: 1 / -1 !important;
+        grid-row: 3 !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+    }
+    .workspace-planner #cwl-available-players .cwl-delete-player,
+    .workspace-planner .cwl-clan-player-list .cwl-delete-player { grid-column: 3 !important; grid-row: 1 !important; width: 2.75rem; height: 2.75rem; }
+    .workspace-planner .cwl-clan-player-list .cwl-player-article { grid-template-areas: "avatar info delete" "availability availability availability" "controls controls controls"; }
+    .workspace-planner .cwl-clan-player-list .cwl-availability-indicator { grid-area: availability !important; }
+    .workspace-planner .cwl-clan-player-list .cwl-player-control-group { grid-area: controls !important; }
+    .workspace-planner .cwl-clan-player-list .cwl-delete-player { grid-area: delete !important; }
+}
+@media (max-width: 34rem) {
+    .workspace-planner .cwl-clan-player-list .cwl-player-control-group { grid-template-columns: minmax(0, 1fr); }
+}

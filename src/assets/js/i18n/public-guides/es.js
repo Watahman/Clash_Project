@@ -4,7 +4,7 @@ export default Object.freeze({
     "guides.heroKicker": "Centro de guías",
     "guides.heroTitle": "Decisiones prácticas, no consejos genéricos.",
     "guides.heroIntro": "Estas guías explican las decisiones de plantilla, disponibilidad y revisión que ClashPanel pretende hacer visibles. Cada flujo describe sus concesiones y cuándo un líder debería apartarse de él.",
-    "guides.heroMeta": "Escrito por ClashPanel · Publicado y actualizado el 4 de agosto de 2026",
+    "guides.heroMeta": "Escrito por ClashPanel · Publicado el 4 de agosto · hub actualizado el 28 de agosto de 2026",
     "guides.tocLabel": "Lista de guías",
     "guides.tocTitle": "Ocho guías",
     "guides.tocFair": "Plantilla justa",

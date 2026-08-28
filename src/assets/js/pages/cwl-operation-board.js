@@ -4,7 +4,7 @@ import { initI18n, t } from '../i18n/i18n.js';
 import { exportOperationReport } from '../operation-board/operation-board-import-export.js';
 import { createCwlOperationBoardBootstrap } from '../operation-board/cwl-operation-board-bootstrap.js';
 import { createCwlOperationBoardControllers } from '../operation-board/cwl-operation-board-controllers.js?v=20260827-cwl-league-history';
-import { createCwlOperationBoardReportLoader } from '../operation-board/cwl-operation-board-report-loader.js';
+import { createCwlOperationBoardReportLoader } from '../operation-board/cwl-operation-board-report-loader.js?v=20260826-live-refresh';
 import { renderBoardContext } from '../operation-board/operation-board-context-renderer.js';
 import { bindOperationBoardEvents } from '../operation-board/operation-board-page-events.js';
 import { initOperationBoardRefs } from '../operation-board/operation-board-page-refs.js';
@@ -22,7 +22,6 @@ import {
 } from '../operation-board/operation-board-source-controls.js';
 import { applyOperationTabState, getBoardIdentity, getDefaultOperationTab, hasUsableBoardData } from '../operation-board/operation-board-tabs.js';
 import { looksLikeClashTag, normalizeTag } from '../operation-board/operation-board-utils.js';
-import { profileHTML } from '../profile/profile_popup.js';
 import { getCurrentUserId } from '../utils/user.js';
 let refs;
 const planStore = createOperationPlanStore();
@@ -175,8 +174,8 @@ function hasLoadedPlans() {
     );
 }
 
-function refreshClanReport(clan) {
-    return reportLoader?.refreshClanReport(clan);
+function refreshClanReport(clan, forceRefresh = false) {
+    return reportLoader?.refreshClanReport(clan, forceRefresh);
 }
 
 function cancelReportLoad() {
@@ -302,7 +301,6 @@ async function init() {
     if (!sourceBootstrap.usesFixture()) {
         await Promise.resolve(syncAuthSession()).catch(() => null);
     }
-    profileHTML();
     bindOperationBoardEvents(refs, {
         selectPlan,
         selectClan,
@@ -311,7 +309,7 @@ async function init() {
         refresh: () => {
             if (!selectedClan) return;
             if (historyController.getMode() === 'current') {
-                void refreshClanReport(selectedClan);
+                void refreshClanReport(selectedClan, true);
             } else {
                 void historyController.refresh();
             }

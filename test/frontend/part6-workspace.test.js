@@ -31,46 +31,6 @@ describe('Part 6 profile and settings', () => {
         localStorage.clear();
     });
 
-    it('uses a reusable fragment with unique controls, safe image sources and all approved tabs', () => {
-        const html = readFileSync('src/subpages/popup_htmls/profile_popup.html', 'utf8');
-        const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]);
-
-        expect(html).not.toMatch(/<!doctype|<html|<head|<body/i);
-        expect(html).not.toContain('src=""');
-        expect(new Set(ids).size).toBe(ids.length);
-        expect([...html.matchAll(/class="po-tab(?: [^"]*)?"/g)]).toHaveLength(4);
-        expect(html).toContain('id="po-settings-language-button"');
-        expect(html).toContain('id="po-loading-state"');
-    });
-
-    it('keeps friend and add dialogs centered without legacy global overlay styles', () => {
-        const html = readFileSync('src/subpages/popup_htmls/profile_popup.html', 'utf8');
-        const css = readFileSync('src/assets/css/profile-overlay.css', 'utf8');
-
-        expect(html).toContain('id="po-friend-list" role="dialog" aria-modal="true"');
-        expect(css).toMatch(/\.profile-placeholder > \.overlay\s*\{[^}]*position:\s*fixed;/s);
-        expect(css).toMatch(/\.profile-placeholder > \.overlay\s*\{[^}]*align-items:\s*center;/s);
-        expect(css).toMatch(/\.profile-placeholder > \.overlay > \.overlay-container\s*\{[^}]*background:/s);
-        expect(css).toContain('.profile-placeholder > .overlay.hidden { display: none; }');
-    });
-
-    it('keeps profile popup controls padded, segmented, contained and touch-friendly', () => {
-        const html = readFileSync('src/subpages/popup_htmls/profile_popup.html', 'utf8');
-        const css = readFileSync('src/assets/css/profile-overlay.css', 'utf8');
-
-        expect(html).toMatch(/id="po-code-btn"[^>]*type="button"/);
-        expect(html).toMatch(/class="po-theme-option"[^>]*data-theme-choice="dark"[^>]*aria-pressed="false"/);
-        expect(html).toMatch(/class="po-theme-option"[^>]*data-theme-choice="light"[^>]*aria-pressed="false"/);
-        expect(css).toMatch(/#profile-overlay #po-code-btn\s*\{[^}]*min-height:\s*2\.5rem;/s);
-        expect(css).toMatch(/#profile-overlay #po-code-btn\s*\{[^}]*padding:\s*0\.45rem 0\.75rem;/s);
-        expect(css).toMatch(/#profile-overlay #po-code-btn\s*\{[^}]*border-radius:\s*0\.5rem;/s);
-        expect(css).toMatch(/#profile-overlay \.po-theme-options\s*\{[^}]*display:\s*grid;[^}]*border-radius:\s*0\.5rem;/s);
-        expect(css).toMatch(/#profile-overlay \.po-theme-option\.po-theme-active,\s*#profile-overlay \.po-theme-option\[aria-pressed="true"\]/s);
-        expect(css).toMatch(/#profile-overlay \.language-switcher--profile \.language-switcher-menu\s*\{[^}]*top:\s*calc\(100% \+ 0\.5rem\);[^}]*right:\s*auto;[^}]*left:\s*0;/s);
-        expect(css).toMatch(/#profile-overlay #po-logout-btn\s*\{[^}]*min-height:\s*2\.5rem;[^}]*var\(--cp-danger/si);
-        expect(css).toMatch(/@media \(max-width: 42rem\), \(pointer: coarse\)[\s\S]*#profile-overlay #po-logout-btn[\s\S]*min-height:\s*2\.75rem;/);
-    });
-
     it('binds setting controls only once when the profile is initialized again', () => {
         document.body.innerHTML = `
             <button class="po-theme-option" data-theme-choice="dark"></button>
@@ -91,6 +51,18 @@ describe('Part 6 profile and settings', () => {
         expect(document.querySelectorAll('[data-language-switcher]')).toHaveLength(1);
         language.querySelector('[data-language-option="en"]').click();
         expect(localStorage.getItem('clashtools_language')).toBe('en');
+    });
+
+    it('uses a semantic password-change form with password-manager metadata', () => {
+        const html = readFileSync('src/subpages/profile.html', 'utf8');
+        const page = new DOMParser().parseFromString(html, 'text/html');
+        const form = page.querySelector('#profile-password-form');
+
+        expect(form).not.toBeNull();
+        expect(form.querySelector('[autocomplete="username"]')?.hidden).toBe(true);
+        expect(form.querySelector('[autocomplete="current-password"]')).not.toBeNull();
+        expect(form.querySelectorAll('[autocomplete="new-password"]')).toHaveLength(2);
+        expect(form.querySelector('#po-save-password')?.getAttribute('type')).toBe('submit');
     });
 
     it('provides every new label in all supported languages', () => {

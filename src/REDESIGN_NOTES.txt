@@ -4,12 +4,9 @@ Aangepast:
 - assets/css/Main-css.css: centraal design system, homepage, auth, shared components
 - assets/css/cwlPlanner.css: CWL dashboard/cards/drag-drop visuals
 - assets/css/groups.css: groepen sidebar/detail layout
-- assets/css/profile-overlay.css: profielmodal + suboverlays
 - assets/css/login-css.css en register-css.css: bewust klein, gebruiken centrale auth-stijl
 - assets/css/drafts-css.css: drafts overview
 - index.html, login.html, register.html, cwl-planner.html, groups.html, cwl-planner-drafts.html, bracket-generator.html
-- assets/js/profile/profile_popup.js: pad gecorrigeerd van /subpages naar /subPages
-- assets/js/mainJS.js toegevoegd voor drafts/bracket profiel-overlay
 
 Belangrijk:
 De bestaande JS-IDs voor CWL en Groups zijn behouden zodat functionaliteit niet bewust gebroken wordt.

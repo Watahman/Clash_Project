@@ -4,7 +4,7 @@ export default Object.freeze({
     "guides.heroKicker": "Guide hub",
     "guides.heroTitle": "Practical decisions, not generic tips.",
     "guides.heroIntro": "These guides explain the roster, availability and review decisions ClashPanel is designed to make visible. Each workflow names its trade-offs and when a leader should override it.",
-    "guides.heroMeta": "Written by ClashPanel · Published and updated 4 August 2026",
+    "guides.heroMeta": "Written by ClashPanel · Published 4 August · hub updated 28 August 2026",
     "guides.tocLabel": "Guide list",
     "guides.tocTitle": "Eight guides",
     "guides.tocFair": "Fair roster",

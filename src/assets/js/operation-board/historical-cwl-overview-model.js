@@ -49,6 +49,18 @@ export function getLeagueChangeForSeason(
     seasonIndex = [],
     { position = null, groupSize = null } = {}
 ) {
+    const placementState = outcomeFromPosition(
+        season,
+        league,
+        position,
+        groupSize
+    );
+    if (placementState !== 'unknown') {
+        return {
+            state: placementState,
+            nextLeague: adjacentLeague(league, placementState)
+        };
+    }
     const ordered = seasonIndex
         .filter(item => item?.season)
         .sort((a, b) => a.season.localeCompare(b.season));
@@ -62,18 +74,6 @@ export function getLeagueChangeForSeason(
                 nextLeague: next.league || null
             };
         }
-    }
-    const state = outcomeFromPosition(
-        season,
-        league,
-        position,
-        groupSize
-    );
-    if (state !== 'unknown') {
-        return {
-            state,
-            nextLeague: adjacentLeague(league, state)
-        };
     }
     return {
         state: 'unknown',
@@ -173,6 +173,13 @@ function leagueChange(previous, current) {
 }
 
 function placementOutcome(item, next) {
+    const placementState = outcomeFromPosition(
+        item.data.season,
+        item.summary.league,
+        item.summary.position,
+        item.data.standings?.length
+    );
+    if (placementState !== 'unknown') return placementState;
     if (next) {
         const actual = leagueChange(
             item.summary.league,
@@ -180,13 +187,6 @@ function placementOutcome(item, next) {
         );
         if (actual !== 'unknown') return actual;
     }
-    const inferred = outcomeFromPosition(
-        item.data.season,
-        item.summary.league,
-        item.summary.position,
-        item.data.standings?.length
-    );
-    if (inferred !== 'unknown') return inferred;
     return 'unknown';
 }
 

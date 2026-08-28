@@ -66,8 +66,8 @@ export function normalizePublicHeader(root = document) {
         <div class="public-actions">
             <button type="button" data-language-control data-i18n="header.language">Language</button>
             <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme">${THEME_TOGGLE_MARKUP}</button>
-            <a class="link-button" href="/subpages/login.html" data-i18n="auth.login">Log in</a>
-            <a class="button button-primary" href="/subpages/register.html" data-i18n="public.startFree">Start for free</a>
+            <a class="link-button" href="/subpages/login" data-i18n="auth.login">Log in</a>
+            <a class="button button-primary" href="/subpages/register" data-i18n="public.startFree">Start for free</a>
         </div>
         <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" data-i18n-aria-label="public.openMenu" aria-label="Open menu">
             <span aria-hidden="true"></span>

@@ -11,7 +11,7 @@ const clanApi = vi.hoisted(() => ({
 }));
 
 vi.mock(
-    '../../src/assets/js/operation-board/historical-cwl-client.js',
+    '../../src/assets/js/operation-board/historical-cwl-client.js?v=20260826-cwl-cache-reset',
     () => client
 );
 

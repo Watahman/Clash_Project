@@ -1,5 +1,4 @@
 import { initI18n } from '../i18n/i18n.js';
-import { profileHTML } from '../profile/profile_popup.js';
 import { syncAuthSession } from '../auth/auth-client.js';
 import { createBracketController } from '../bracket/bracket-page-controller.js';
 import { bindBracketEvents } from '../bracket/bracket-page-events.js';
@@ -40,7 +39,6 @@ export async function initBracketGenerator({
         controller.restore();
     }
     controller.render();
-    profileHTML();
     windowRef.setTimeout(() => updateGuidanceCopy(documentRef), 0);
     return controller;
 }

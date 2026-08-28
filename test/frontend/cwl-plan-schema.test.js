@@ -21,6 +21,9 @@ describe('CWL plan schema', () => {
         });
         expect(document.clans[0].players.map(player => player.tag)).toEqual(['#BBB']);
         expect(document.pollMeta).toEqual({ groupId: 'group-1', pollId: 'poll-1' });
+        expect(document.clans[0].clanPriority).toBe('auto');
+        expect(document.freePlayers[0].playerPriority).toBe('normal');
+        expect(document.clans[0].players[0].playerPriority).toBe('normal');
     });
 
     it('rejects duplicate players across the free list and clans', () => {
@@ -74,5 +77,51 @@ describe('CWL plan schema', () => {
         });
 
         expect(document.clans[0].players[0].legacySchedule).toEqual([1, 3, 7]);
+    });
+
+    it('round-trips clan and player priorities in the v5 document', () => {
+        const source = {
+            schemaVersion: 4,
+            freePlayers: [{ tag: '#FREE', playerPriority: 'high' }],
+            clans: [{
+                id: 'alpha',
+                tag: '#ALPHA',
+                name: 'Alpha',
+                priority: 'primary',
+                players: [{ tag: '#LOCKED', priority: 'exclude' }]
+            }]
+        };
+
+        const document = normalizePlanDocument(source);
+        const roundTrip = normalizePlanDocument(document);
+
+        expect(document.schemaVersion).toBe(5);
+        expect(document.clans[0].clanPriority).toBe('primary');
+        expect(document.freePlayers[0].playerPriority).toBe('high');
+        expect(document.clans[0].players[0].playerPriority).toBe('exclude');
+        expect(roundTrip).toEqual(document);
+        expect(validatePlanDocument(document)).toEqual(document);
+    });
+
+    it('defaults invalid priority values without changing legacy roster data', () => {
+        const document = normalizePlanDocument({
+            clans: [{
+                tag: '#CLAN',
+                clanPriority: 'unsupported',
+                players: [{
+                    tag: '#PLAYER',
+                    rosterStatus: 'rotation',
+                    playerPriority: 'unsupported'
+                }]
+            }],
+            freePlayers: [{ tag: '#FREE', playerPriority: 'unsupported' }]
+        });
+
+        expect(document.clans[0].clanPriority).toBe('auto');
+        expect(document.clans[0].players[0]).toMatchObject({
+            rosterStatus: 'rotation',
+            playerPriority: 'normal'
+        });
+        expect(document.freePlayers[0].playerPriority).toBe('normal');
     });
 });

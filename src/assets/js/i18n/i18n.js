@@ -1,4 +1,4 @@
-import '../theme/theme-manager.js?v=20260821-public-pages';
+import '../theme/theme-manager.js?v=20260828-seo-final';
 import {
     ensureLanguage,
     getTranslationValue,

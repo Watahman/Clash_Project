@@ -2,7 +2,7 @@ import {
     loadHistoricalCwlOverview,
     loadHistoricalCwlSeason,
     loadHistoricalCwlSeasons
-} from './historical-cwl-client.js';
+} from './historical-cwl-client.js?v=20260826-cwl-cache-reset';
 import {
     buildHistoricalCwlOverview,
     getLeagueChangeForSeason

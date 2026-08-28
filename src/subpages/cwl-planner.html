@@ -12,24 +12,24 @@
     <link rel="stylesheet" href="../assets/css/Main-css.css">
     <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="../assets/css/cwlPlanner.css">
-    <link rel="stylesheet" href="../assets/css/profile-overlay.css">
     <link rel="stylesheet" href="../assets/css/workspace-system.css">
-    <link rel="stylesheet" href="../assets/css/cwl-planner-workspace.css">
-    <link rel="stylesheet" href="../assets/css/cwl-player-card.css?v=20260813-compact">
-    <link rel="stylesheet" href="../assets/css/cwl-player-performance-popover.css">
+    <link rel="stylesheet" href="../assets/css/cwl-planner-workspace.css?v=20260828-cwl-planner-v2">
+    <link rel="stylesheet" href="../assets/css/cwl-player-card.css?v=20260828-cwl-planner-v2">
+    <link rel="stylesheet" href="../assets/css/cwl-player-performance-popover.css?v=20260828-cwl-planner-v2">
     <link rel="stylesheet" href="../assets/css/cwl-spreadsheet-import.css">
     <link rel="stylesheet" href="../assets/css/cwl-auto-plan.css">
     <link rel="stylesheet" href="../assets/css/cwl-optimize-plan.css">
     <script src="../assets/js/Data/runtime-config.js"></script>
     <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260812-redesign"></script>
     <script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-    <script type="module" src="../assets/js/pages/cwl-planner.js?v=20260821-badge-v2"></script>
+    <script type="module" src="../assets/js/pages/cwl-planner.js?v=20260828-cwl-planner-v2"></script>
     <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
     <link rel="stylesheet" href="../assets/css/workspace-v2.css?v=20260812-redesign">
     <link rel="stylesheet" href="../assets/css/cwl-planner-redesign.css?v=20260813-title-space">
-    <link rel="stylesheet" href="../assets/css/cwl-planner-roster.css?v=20260813-roster3">
+    <link rel="stylesheet" href="../assets/css/cwl-planner-roster.css?v=20260828-cwl-planner-v2">
+    <link rel="stylesheet" href="../assets/css/cwl-planner-roster-controls.css?v=20260828-cwl-planner-v2">
     <link rel="stylesheet" href="../assets/css/cwl-planner-drawers.css">
     <link rel="stylesheet" href="../assets/css/cwl-export.css?v=20260821-export-v1">
 </head>
@@ -181,7 +181,14 @@
             <div class="cwl-roster-tools">
                 <label class="cwl-roster-search"><span data-i18n="planner.searchRoster">Search free roster</span><input id="cwl-roster-search" type="search" autocomplete="off" aria-controls="cwl-available-players" data-i18n-placeholder="planner.searchRosterPlaceholder" placeholder="Search by name or tag"></label>
                 <div class="cwl-roster-select-row">
-                    <label><span data-i18n="cwl.sortPlayers">Sort players</span><select id="cwl-player-sorting" data-i18n-aria-label="cwl.sortPlayers" aria-label="Sort players"><option value="townhall" data-i18n="cwl.sortTownhall">Town Hall</option><option value="name" data-i18n="cwl.sortName">Name</option></select></label>
+                    <label><span data-i18n="planner.sourceClan">Source clan</span><select id="cwl-roster-source-clan" aria-label="Source clan"><option value="" data-i18n="planner.allSourceClans">All source clans</option></select></label>
+                    <label><span data-i18n="planner.availability">Availability</span><select id="cwl-roster-availability" aria-label="Availability"><option value="all" data-i18n="planner.allAvailability">All</option><option value="yes" data-i18n="planner.available">Available</option><option value="partial" data-i18n="planner.partiallyAvailable">Partial</option><option value="no" data-i18n="planner.unavailable">Unavailable</option><option value="unknown" data-i18n="planner.unknownAvailability">Unknown</option></select></label>
+                </div>
+                <div class="cwl-roster-select-row">
+                    <fieldset class="cwl-performance-range"><legend data-i18n="planner.performanceRange">Performance range</legend><label><span data-i18n="planner.minimum">Min</span><input id="cwl-roster-performance-min" type="number" min="0" max="100" inputmode="numeric" placeholder="0"></label><label><span data-i18n="planner.maximum">Max</span><input id="cwl-roster-performance-max" type="number" min="0" max="100" inputmode="numeric" placeholder="100"></label></fieldset>
+                    <label><span data-i18n="cwl.sortPlayers">Sort players</span><select id="cwl-player-sorting" data-i18n-aria-label="cwl.sortPlayers" aria-label="Sort players"><option value="townhall" data-i18n="cwl.sortTownhall">Town Hall</option><option value="name" data-i18n="cwl.sortName">Name</option><option value="performance" data-i18n="planner.performance">Performance</option><option value="reliability" data-i18n="performance.reliability">Reliability</option><option value="clan" data-i18n="planner.clan">Clan</option></select></label>
+                </div>
+                <div class="cwl-roster-select-row cwl-roster-poll-row">
                     <label><span data-i18n="cwl.pollResults">Poll result</span><select id="cwl-roster-poll-select" data-i18n-aria-label="cwl.pollResults" aria-label="Poll result" disabled><option value="" data-i18n="cwl.pollSelectLoading">Loading polls...</option></select></label>
                 </div>
                 <p class="cwl-roster-filter-status" id="cwl-roster-filter-status" role="status" aria-live="polite"></p>
@@ -192,6 +199,7 @@
         <section class="cwl-board cwl-clan-board" aria-labelledby="cwl-clans-title">
             <div class="cwl-board-heading">
                 <div><p data-i18n="cwl.clansSub">Planning board</p><h2 id="cwl-clans-title" data-i18n="cwl.clansTitle">Clans</h2></div>
+                <label class="cwl-clan-visibility-filter"><span data-i18n="planner.showClanColumns">Show clan columns</span><select id="cwl-clan-visibility" aria-controls="cwl-all-clans"><option value="" data-i18n="planner.allClans">All clans</option></select></label>
             </div>
             <article id="cwl-all-clans" aria-live="polite"></article>
         </section>
@@ -306,7 +314,6 @@
     </div>
 </div>
 
-<div class="profile-placeholder"></div>
 
 <template id="cwl-player-template">
     <article class="cwl-player-article">
@@ -324,6 +331,7 @@
         <div class="cwl-clan-info-card">
             <img src="../assets/placeholders/clan-badge.svg" alt="" class="cwl-clan-logo">
             <div class="cwl-clan-title"><h3 class="cwl-clan-name">Clan name</h3><p><span class="cwl-clan-tag"></span><span class="cwl-clan-league"></span></p></div>
+            <label class="cwl-clan-priority"><span data-i18n="planner.clanPriority">Priority</span><select aria-label="Clan priority"><option value="auto" data-i18n="planner.clanPriorityAuto">Auto</option><option value="primary" data-i18n="planner.clanPriorityPrimary">Primary</option><option value="secondary" data-i18n="planner.clanPrioritySecondary">Secondary</option><option value="development" data-i18n="planner.clanPriorityDevelopment">Development</option></select></label>
             <label class="cwl-clan-format"><span data-i18n="planner.format">Format</span><select class="cwl-clan-capacity" aria-label="Rosterformaat"><option value="15">15v15</option><option value="30">30v30</option></select></label>
             <p class="cwl-amount-of-players-in-clan">0/30</p>
             <button class="cwl-delete-clan" type="button"><img src="../assets/css/pictures/bin.svg" alt=""></button>

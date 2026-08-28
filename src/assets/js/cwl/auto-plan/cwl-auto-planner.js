@@ -4,6 +4,10 @@ import {
 } from './cwl-auto-plan-assignment.js';
 import { calculateClanReadiness } from './cwl-auto-plan-readiness.js';
 import { selectActiveClans } from './cwl-auto-plan-selection.js';
+import {
+    normalizeClanPriority,
+    normalizePlayerPriority
+} from '../cwl-plan-schema.js';
 
 export function buildAutoPlan(input) {
     const players = normalizePlayers(input?.players);
@@ -95,7 +99,10 @@ function normalizePlayers(players) {
             tag,
             name: String(player.name || tag),
             townHallLevel: Math.max(1, Number(player.townHallLevel) || 1),
-            currentClanId: player.currentClanId || null
+            currentClanId: player.currentClanId || null,
+            playerPriority: normalizePlayerPriority(
+                player.playerPriority || player.player_priority || player.priority
+            )
         });
     });
     return [...byPlayerTag.values()].sort(byTag);
@@ -110,7 +117,10 @@ function normalizeClans(clans) {
             tag: normalizeTag(clan.tag),
             name: String(clan.name || clan.tag),
             league: String(clan.league || ''),
-            capacity: Number(clan.capacity) === 30 ? 30 : 15
+            capacity: Number(clan.capacity) === 30 ? 30 : 15,
+            clanPriority: normalizeClanPriority(
+                clan.clanPriority || clan.clan_priority || clan.priority
+            )
         }))
         .sort((left, right) => left.tag.localeCompare(right.tag));
 }

@@ -10,7 +10,9 @@ import { hasReachedPlanLimit } from './cwl-plan-limits.js';
 import { escapeCssIdentifier, getCardTag, normalizeTag } from './cwl-utils.js';
 import {
     CWL_PLAN_SCHEMA_VERSION,
+    normalizeClanPriority,
     normalizePlanDocument,
+    normalizePlayerPriority,
     normalizeRosterStatus,
     validatePlanDocument
 } from './cwl-plan-schema.js';
@@ -155,7 +157,8 @@ function readPlayerCard(player) {
         name: player.querySelector('.cwl-player-name')?.textContent || '',
         clanName: player.querySelector('.cwl-player-clan')?.textContent || '',
         tag: getCardTag(player),
-        townHallLevel: Number(player.dataset.townHall || 1)
+        townHallLevel: Number(player.dataset.townHall || 1),
+        playerPriority: normalizePlayerPriority(player.dataset.playerPriority)
     };
     const rosterStatus = normalizeRosterStatus(player.dataset.rosterStatus);
     if (rosterStatus) snapshot.rosterStatus = rosterStatus;
@@ -181,6 +184,7 @@ function serializePlan({ persistCache = true } = {}) {
             name: clan.dataset.clanName || clan.querySelector('.cwl-clan-name')?.textContent || '',
             capacity: Number(clan.querySelector('.cwl-clan-capacity')?.value || clan.dataset.clanCapacity || 15),
             badgeUrl: clan.querySelector('.cwl-clan-logo')?.src || '',
+            clanPriority: normalizeClanPriority(clan.dataset.clanPriority),
             players: Array.from(
                 clan.querySelectorAll('.cwl-player-article[data-planner-card="true"]'),
                 readPlayerCard
@@ -554,7 +558,8 @@ function renderPlanSnapshot(plan, token) {
         createClanCard({
             tag: clan.tag,
             name: clan.name,
-            badgeUrls: { small: clan.badgeUrl }
+            badgeUrls: { small: clan.badgeUrl },
+            clanPriority: clan.clanPriority
         }, clan.capacity, clan.id);
         clan.players.forEach(player => createPlayerCard(player, clan.id));
     });

@@ -1,7 +1,7 @@
-import { initI18n, t } from '../i18n/i18n.js?v=20260821-product-home';
+import { initI18n, t } from '../i18n/i18n.js?v=20260828-seo-final';
 import { syncAuthSession } from '../auth/auth-client.js';
-import { toggleTheme as toggleThemePreference } from '../theme/theme-manager.js?v=20260821-public-pages';
-import { normalizePublicShell } from '../shell/public-header.js?v=20260821-public-pages';
+import { toggleTheme as toggleThemePreference } from '../theme/theme-manager.js?v=20260828-seo-final';
+import { normalizePublicShell } from '../shell/public-header.js?v=20260828-seo-final';
 import { ensureThemeToggleMarkup } from '../theme/theme-toggle-markup.js';
 import { initPublicPageBindings } from './public-page-bindings.js';
 import { initPublicResourcePages } from './public-resource-pages.js?v=20260821-authentic-pages';

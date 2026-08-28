@@ -185,6 +185,8 @@ function bindRefs() {
         email: q('#po-settings-email'),
         nameInput: q('#po-settings-name'),
         saveNameBtn: q('#po-save-name'),
+        passwordForm: q('#profile-password-form'),
+        passwordUsername: q('#po-password-username'),
         currentPassword: q('#po-current-password'),
         newPassword: q('#po-new-password'),
         confirmPassword: q('#po-confirm-password'),
@@ -220,7 +222,10 @@ export function initProfileSettings(options = {}) {
     bindOnce(refs.nameInput, 'keydown', event => {
         if (event.key === 'Enter') saveName();
     }, 'NameEnter');
-    bindOnce(refs.savePasswordBtn, 'click', savePassword, 'SavePassword');
+    bindOnce(refs.passwordForm, 'submit', event => {
+        event.preventDefault();
+        savePassword();
+    }, 'PasswordSubmit');
     bindOnce(refs.clearCacheBtn, 'click', clearAppCache, 'ClearCache');
     bindOnce(refs.refreshBtn, 'click', refreshProfile, 'Refresh');
 
@@ -237,6 +242,7 @@ export function syncProfileSettings(profile) {
     bindRefs();
     if (refs.nameInput) refs.nameInput.value = currentProfile?.name || '';
     if (refs.email) refs.email.textContent = currentProfile?.email || '-';
+    if (refs.passwordUsername) refs.passwordUsername.value = currentProfile?.email || '';
     syncThemeButtons();
 }
 
