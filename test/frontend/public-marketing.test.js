@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
 import { describe, expect, it } from 'vitest';
+import { publicHomeV3Locales } from '../../src/assets/js/i18n/public-home-v3-locales.js';
 
 const publicPages = [
     'src/index.html',
@@ -53,7 +54,7 @@ describe('Public marketing shell', () => {
         const document = documentFor('src/index.html');
 
         expect(document.querySelector('h1')?.textContent.replace(/\s+/g, ' ').trim())
-            .toBe('Everything your Clash life needs. One place.');
+            .toBe('Clash of Clans tools for CWL planning and clan management');
         expect(document.querySelector('.home3-product-stage')).toBeNull();
         expect(document.querySelectorAll('.home3-pillar-grid > a')).toHaveLength(5);
         expect(document.querySelectorAll('.home3-feature')).toHaveLength(3);
@@ -70,6 +71,37 @@ describe('Public marketing shell', () => {
         expect(document.querySelector('.home3-trust')).not.toBeNull();
         expect(document.querySelector('.home3-final')).not.toBeNull();
         expect(document.querySelector('.home-v2-hero-background')).toBeNull();
+    });
+
+    it('links the homepage to the public bracket generator', () => {
+        const document = documentFor('src/index.html');
+
+        expect(document.querySelector('a[href="/bracket-generator"]')).not.toBeNull();
+        expect(document.querySelector('a[href="/cwl-tracker"]')).not.toBeNull();
+    });
+
+    it('keeps public feature CTAs on the permanent application routes', () => {
+        const tracker = documentFor('src/cwl-tracker.html');
+        const family = documentFor('src/clan-management.html');
+
+        expect(tracker.querySelectorAll('a[href="/app/cwl-tracker"]')).toHaveLength(2);
+        expect(tracker.querySelector('a[href="/app/cwl-operation-board"]')).toBeNull();
+        expect(family.querySelectorAll('a[href="/app/clan-management"]')).toHaveLength(2);
+        expect(family.querySelector('a[href="/app/groups"]')).toBeNull();
+    });
+
+    it('keeps the homepage H1 specific across supported languages', () => {
+        const titles = {
+            en: 'Clash of Clans tools for CWL planning and clan management',
+            nl: 'Clash of Clans-tools voor CWL-planning en clanbeheer',
+            fr: 'Outils Clash of Clans pour planifier la CWL et gérer votre clan',
+            de: 'Clash of Clans-Tools für CWL-Planung und Clanverwaltung',
+            es: 'Herramientas de Clash of Clans para planificar CWL y gestionar tu clan'
+        };
+
+        Object.entries(titles).forEach(([language, title]) => {
+            expect(publicHomeV3Locales[language]['homeV3.title']).toBe(title);
+        });
     });
 
     it('loads the dedicated connected-product homepage theme', () => {

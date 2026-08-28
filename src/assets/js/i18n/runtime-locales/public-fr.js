@@ -49,7 +49,7 @@ export default Object.freeze({
     "planner.cta.desc": "Commencez avec un clan, une Clan Family ou une feuille existante et gardez le roster, les rôles et les disponibilités au même endroit.",
     "planner.cta.button": "Ouvrir le planificateur CWL",
     "tracker.kicker": "Clash of Clans CWL Tracker",
-    "tracker.h1": "Voyez toute la CWL.",
+    "tracker.h1": "Suivez les guerres, statistiques et historiques CWL.",
     "tracker.lead": "Suivez les guerres CWL en direct, les attaques, les attaques manquées, le classement, les performances et les saisons précédentes dans une seule vue.",
     "tracker.primary": "Ouvrir le suivi CWL",
     "tracker.secondary": "Planifier un roster CWL",

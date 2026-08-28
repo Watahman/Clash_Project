@@ -42,6 +42,13 @@ describe('public shell normalization', () => {
         expect(footer.querySelector('.public-disclaimer')?.dataset.i18n).toBe('public.disclaimer');
     });
 
+    it('keeps Guides active on a guide detail route', () => {
+        const { header } = mountShell('/guides/fair-cwl-roster');
+
+        expect(header.querySelector('[href="/guides"]')?.getAttribute('aria-current'))
+            .toBe('page');
+    });
+
     it('does not mark a section link as the current page on product or legal pages', () => {
         let { header } = mountShell('/cwl-planner');
         expect(header.querySelector('[aria-current="page"]')).toBeNull();

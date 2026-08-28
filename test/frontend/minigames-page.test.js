@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 describe('ClashPanel minigames public page', () => {
@@ -38,6 +38,16 @@ describe('ClashPanel minigames public page', () => {
         expect(page).toContain('<title>Daily Clash of Clans Minigames | ClashPanel</title>');
         expect(page).toContain('Entity Guesser and Higher or Lower games');
         expect(page).toContain('ClashPanel Higher or Lower');
+    });
+
+    it('publishes a complete large social preview for both daily games', () => {
+        expect(existsSync('src/assets/social/minigames.png')).toBe(true);
+        expect(page).toContain('<meta property="og:image" content="https://clashpanel.com/assets/social/minigames.png">');
+        expect(page).toContain('<meta property="og:image:width" content="1200">');
+        expect(page).toContain('<meta property="og:image:height" content="630">');
+        expect(page).toContain('<meta name="twitter:card" content="summary_large_image">');
+        expect(page).toContain('<meta name="twitter:image" content="https://clashpanel.com/assets/social/minigames.png">');
+        expect(page).toContain('<meta name="twitter:image:alt"');
     });
 
     it('presents the complete catalog as four broad newcomer-friendly categories', () => {

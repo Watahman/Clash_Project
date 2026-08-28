@@ -33,10 +33,10 @@ describe('public resources redesign surfaces', () => {
         expect(read('src/minigames.html')).toContain('"@type":"Game"');
 
         const bracket = dom('src/bracket-generator.html');
-        expect(bracket.querySelector('meta[name="robots"]')?.content).toMatch(/noindex/);
+        expect(bracket.querySelector('meta[name="robots"]')?.content).toMatch(/\bindex\b/);
         expect(bracket.querySelector('.bracket-public-preview')).not.toBeNull();
         expect(read('src/sitemap.xml')).toContain('/minigames');
-        expect(read('src/sitemap.xml')).not.toContain('/bracket-generator');
+        expect(read('src/sitemap.xml')).toContain('https://clashpanel.com/bracket-generator');
     });
 
     it('sets readable document measures and maintains localized methodology metadata', () => {

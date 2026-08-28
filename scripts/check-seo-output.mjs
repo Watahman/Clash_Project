@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { JSDOM } from 'jsdom';
 import { canonicalUrl, publicRoutes } from './public-routes.mjs';
+import { APP_ALIASES } from '../worker/app-routes.js';
 
 const titles = new Set();
 const descriptions = new Set();
@@ -53,6 +54,7 @@ for (const route of publicRoutes) {
             || url.pathname.startsWith('/app/')
             || ['/subpages/login.html', '/subpages/register.html'].includes(url.pathname);
         assert(knownPublicPaths.has(url.pathname) || allowedApplicationTarget, `${route.file}: unknown internal target ${href}`);
+        assert(!APP_ALIASES.has(url.pathname.toLowerCase()), `${route.file}: internal target uses redirecting alias ${href}`);
     }
     publicDocuments.push({ route, document, source });
 }

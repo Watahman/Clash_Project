@@ -14,10 +14,7 @@ const publicPages = new Map([
     ['src/subpages/privacy.html', 'https://clashpanel.com/privacy'],
     ['src/subpages/cookies.html', 'https://clashpanel.com/cookies'],
     ['src/subpages/terms.html', 'https://clashpanel.com/terms'],
-    ['src/subpages/contact.html', 'https://clashpanel.com/contact']
-]);
-
-const bracketPreviewPages = new Map([
+    ['src/subpages/contact.html', 'https://clashpanel.com/contact'],
     ['src/bracket-generator.html', 'https://clashpanel.com/bracket-generator']
 ]);
 
@@ -57,19 +54,6 @@ describe('Pre-launch static contract', () => {
         expect(document.querySelector('meta[name="twitter:card"]')?.content).toMatch(/^summary/);
     });
 
-    it.each([...bracketPreviewPages])('%s remains discoverable but follows the existing preview index policy', (path, canonical) => {
-        const document = documentFor(path);
-        expect(document.querySelector('meta[name="robots"]')?.content).toMatch(/\bnoindex\b/i);
-        expect(document.querySelector('meta[name="robots"]')?.content).toMatch(/\bfollow\b/i);
-        expect(document.querySelector('link[rel="canonical"]')?.href).toBe(canonical);
-        expect(document.body.textContent).not.toMatch(/coming\s+soon/i);
-        expect(
-            [...document.querySelectorAll('script[type="application/ld+json"]')]
-                .map(script => script.textContent)
-                .join('')
-        ).not.toContain('WebApplication');
-    });
-
     it.each(privatePages)('%s explicitly opts out of indexing', path => {
         const robots = documentFor(path).querySelector('meta[name="robots"]')?.content || '';
         expect(robots).toMatch(/\bnoindex\b/i);
@@ -92,11 +76,11 @@ describe('Pre-launch static contract', () => {
             expect(sitemap).not.toContain(`https://clashpanel.com/subpages/${name}`);
         }
         expect(sitemap).toContain(
-            '<loc>https://clashpanel.com/changelog</loc><lastmod>2026-08-14</lastmod>'
+            '<loc>https://clashpanel.com/changelog</loc><lastmod>2026-08-21</lastmod>'
         );
-        expect(sitemap).not.toContain('/bracket-generator');
-        expect(sitemap.match(/https:\/\/clashpanel\.com/g)).toHaveLength(13);
-        expect(sitemap.match(/<url>/g)).toHaveLength(13);
+        expect(sitemap).toContain('https://clashpanel.com/bracket-generator');
+        expect(sitemap.match(/https:\/\/clashpanel\.com/g)).toHaveLength(22);
+        expect(sitemap.match(/<url>/g)).toHaveLength(22);
     });
 
     it('defines permanent static fallbacks for legacy legal URLs', () => {
@@ -141,7 +125,6 @@ describe('Pre-launch static contract', () => {
     it('uses explicit button types in every HTML source', () => {
         const pages = [
             ...publicPages.keys(),
-            ...bracketPreviewPages.keys(),
             ...privatePages
         ];
         for (const path of new Set(pages)) {
