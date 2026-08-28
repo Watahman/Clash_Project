@@ -4,7 +4,7 @@ export default Object.freeze({
     "guides.heroKicker": "Gidsen",
     "guides.heroTitle": "Praktische beslissingen, geen algemene tips.",
     "guides.heroIntro": "Deze gidsen leggen de beslissingen rond rosters, beschikbaarheid en evaluatie uit die ClashPanel zichtbaar maakt. Elke werkwijze benoemt haar afwegingen en wanneer een leider ervan moet afwijken.",
-    "guides.heroMeta": "Geschreven door ClashPanel · Gepubliceerd en bijgewerkt op 4 augustus 2026",
+    "guides.heroMeta": "Geschreven door ClashPanel · Gepubliceerd op 4 augustus · hub bijgewerkt op 28 augustus 2026",
     "guides.tocLabel": "Lijst met gidsen",
     "guides.tocTitle": "Acht gidsen",
     "guides.tocFair": "Eerlijk roster",

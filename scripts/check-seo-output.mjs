@@ -7,6 +7,12 @@ import { APP_ALIASES } from '../worker/app-routes.js';
 const titles = new Set();
 const descriptions = new Set();
 const knownPublicPaths = new Set(publicRoutes.map(route => route.path));
+const authPaths = new Set(['/subpages/login', '/subpages/register']);
+const redirectingTargets = new Set([
+    ...APP_ALIASES,
+    '/subpages/login.html',
+    '/subpages/register.html'
+]);
 const publicDocuments = [];
 
 for (const route of publicRoutes) {
@@ -52,9 +58,9 @@ for (const route of publicRoutes) {
         const url = new URL(href, 'https://clashpanel.com');
         const allowedApplicationTarget = url.pathname === '/dashboard'
             || url.pathname.startsWith('/app/')
-            || ['/subpages/login.html', '/subpages/register.html'].includes(url.pathname);
+            || authPaths.has(url.pathname);
         assert(knownPublicPaths.has(url.pathname) || allowedApplicationTarget, `${route.file}: unknown internal target ${href}`);
-        assert(!APP_ALIASES.has(url.pathname.toLowerCase()), `${route.file}: internal target uses redirecting alias ${href}`);
+        assert(!redirectingTargets.has(url.pathname.toLowerCase()), `${route.file}: internal target uses redirecting alias ${href}`);
     }
     publicDocuments.push({ route, document, source });
 }

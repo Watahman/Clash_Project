@@ -76,7 +76,7 @@ describe('Pre-launch static contract', () => {
             expect(sitemap).not.toContain(`https://clashpanel.com/subpages/${name}`);
         }
         expect(sitemap).toContain(
-            '<loc>https://clashpanel.com/changelog</loc><lastmod>2026-08-21</lastmod>'
+            '<loc>https://clashpanel.com/changelog</loc><lastmod>2026-08-14</lastmod>'
         );
         expect(sitemap).toContain('https://clashpanel.com/bracket-generator');
         expect(sitemap.match(/https:\/\/clashpanel\.com/g)).toHaveLength(22);

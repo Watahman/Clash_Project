@@ -126,10 +126,10 @@ describe('Public marketing shell', () => {
     it('cache-busts the complete changed public module graph', () => {
         const productVersion = 'v=20260821-product-home';
         const translationsVersion = 'v=20260823-achievement-card-assets-1';
-        const publicVersion = 'v=20260821-public-pages';
+        const publicVersion = 'v=20260828-seo-final';
         const entry = read('src/assets/js/pages/public-site.js');
 
-        expect(entry).toContain(`i18n.js?${productVersion}`);
+        expect(entry).toContain(`i18n.js?${publicVersion}`);
         ['theme-manager.js', 'public-header.js']
             .forEach(file => expect(entry).toContain(`${file}?${publicVersion}`));
         expect(entry).toContain('public-resource-pages.js?v=20260821-authentic-pages');
