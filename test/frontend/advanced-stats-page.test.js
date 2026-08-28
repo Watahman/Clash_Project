@@ -103,8 +103,8 @@ describe('Advanced Stats workspace page', () => {
         expect(page).toContain("advanced-stats-army-view.js?v=20260809-4");
         expect(page).toContain('applyI18n(document)');
         expect(i18n).toContain("runtime-translations.js?v=20260823-achievement-card-assets-1");
-        expect(runtime).toContain("runtime-locales/workspace-en.js?v=20260809-4");
-        expect(runtime).toContain("runtime-locales/workspace-nl.js?v=20260809-4");
+        expect(runtime).toContain("runtime-locales/workspace-en.js?v=20260828-cwl-planner-v2-i18n");
+        expect(runtime).toContain("runtime-locales/workspace-nl.js?v=20260828-cwl-planner-v2-i18n");
         expect(runtime).toContain("advanced-stats-locales.js?v=20260814-advanced-stats-v4");
         expect(runtime).toContain("advanced-stats-extra-locales.js?v=20260814-advanced-stats-v4");
         expect(runtime).toContain("advanced-stats-ui-locales.js?v=20260814-advanced-stats-v4");

@@ -4,13 +4,21 @@ const performanceMocks = vi.hoisted(() => ({
     getPlayerPerformance: vi.fn(),
     schedulePlayerPerformanceBatch: vi.fn()
 }));
+const fitMocks = vi.hoisted(() => ({
+    getPlayerFitContext: vi.fn(() => null)
+}));
 
 vi.mock('../../src/assets/js/cwl/player-performance-client.js', () => performanceMocks);
+vi.mock('../../src/assets/js/cwl/cwl-player-fit-context.js', () => fitMocks);
 
 describe('CWL historical performance popover', () => {
     beforeEach(() => {
         vi.useFakeTimers();
         vi.resetModules();
+        performanceMocks.getPlayerPerformance.mockReset();
+        performanceMocks.schedulePlayerPerformanceBatch.mockReset();
+        fitMocks.getPlayerFitContext.mockReset();
+        fitMocks.getPlayerFitContext.mockReturnValue(null);
         performanceMocks.getPlayerPerformance.mockReturnValue({
             playerTag: '#P0L',
             status: 'ready',
@@ -77,7 +85,9 @@ describe('CWL historical performance popover', () => {
         expect(popover.textContent).toContain('Current CWL');
         expect(popover.textContent).toContain('91.4%');
         expect(popover.textContent).toContain('Rounds played');
-        expect(popover.textContent).not.toContain('Reliability');
+        expect(popover.textContent).toContain('Reliability');
+        expect(popover.textContent).toContain('Confidence');
+        expect(popover.textContent).toContain('Attack coverage');
         expect(popover.textContent).not.toContain('Attacks used');
 
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
@@ -108,6 +118,60 @@ describe('CWL historical performance popover', () => {
         expect(popover.textContent).toContain('Offensive rank');
         expect(popover.textContent).not.toContain('108');
         expect(popover.textContent).not.toContain('Matchups');
+    });
+
+    it('shows cached overview and local clan-fit context without requesting performance again', async () => {
+        fitMocks.getPlayerFitContext.mockReturnValue({
+            mode: 'assigned',
+            fits: [{ clanId: 'alpha', clanName: 'Alpha', fit: 81.234 }]
+        });
+        const { initPlayerPerformancePopover } = await import(
+            '../../src/assets/js/cwl/cwl-player-performance-popover.js'
+        );
+        const popover = initPlayerPerformancePopover();
+        const info = document.querySelector('.cwl-player-info');
+
+        info.dispatchEvent(pointerEvent('pointerup', 'touch'));
+
+        expect(popover.textContent).toContain('War Performance');
+        expect(popover.textContent).toContain('Current clan fit');
+        expect(popover.textContent).toContain('Alpha');
+        expect(popover.textContent).toContain('81.2');
+        expect(performanceMocks.schedulePlayerPerformanceBatch).not.toHaveBeenCalled();
+        expect(fitMocks.getPlayerFitContext).toHaveBeenCalledWith(
+            document.querySelector('.cwl-player-article'),
+            expect.objectContaining({ performance: 108 })
+        );
+    });
+
+    it('repositions the expanded popover after an async performance update', async () => {
+        const { initPlayerPerformancePopover } = await import(
+            '../../src/assets/js/cwl/cwl-player-performance-popover.js'
+        );
+        const popover = initPlayerPerformancePopover();
+        const info = document.querySelector('.cwl-player-info');
+        Object.defineProperty(window, 'innerWidth', { configurable: true, value: 800 });
+        Object.defineProperty(window, 'innerHeight', { configurable: true, value: 600 });
+        info.getBoundingClientRect = () => ({
+            left: 740, right: 760, top: 560, bottom: 580, width: 20, height: 20
+        });
+        let popupHeight = 80;
+        popover.getBoundingClientRect = () => ({
+            left: 0, right: 200, top: 0, bottom: popupHeight,
+            width: 200, height: popupHeight
+        });
+
+        info.dispatchEvent(pointerEvent('pointerup', 'touch'));
+        expect(popover.style.top).toBe('508px');
+        expect(popover.style.left).toBe('528px');
+
+        popupHeight = 560;
+        window.dispatchEvent(new CustomEvent('clashtools:player-performance-updated', {
+            detail: { tags: ['#P0L'] }
+        }));
+
+        expect(popover.style.top).toBe('28px');
+        expect(popover.style.left).toBe('528px');
     });
 });
 

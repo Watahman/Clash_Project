@@ -1,4 +1,11 @@
 import { normalizeCwlLeagueName } from '../cwl-league-rules.js';
+import {
+    normalizeClanPriority,
+    normalizePlayerPriority
+} from '../cwl-plan-schema.js';
+
+const PLAYER_PRIORITY_MODIFIERS = Object.freeze({ high: 1.5, normal: 0, low: -1.5, exclude: 0 });
+const CLAN_PRIORITY_TIERS = Object.freeze({ primary: 3, auto: 2, secondary: 1, development: 0 });
 
 const LEAGUE_PROFILES = Object.freeze({
     elite: Object.freeze({
@@ -67,6 +74,9 @@ export function scorePlayerForClan(player, clan) {
     const confidencePenalty = history.status === 'ready'
         ? ({ High: 0, Medium: 2, Low: 5 }[history.confidence] ?? 5)
         : 8;
+    const priorityModifier = PLAYER_PRIORITY_MODIFIERS[
+        normalizePlayerPriority(player?.playerPriority)
+    ];
     const fit = performance * 0.58
         + reliability * 0.16
         + form * 0.1
@@ -74,14 +84,16 @@ export function scorePlayerForClan(player, clan) {
         + matchupImpact * 0.07
         + scopeBonus
         - townHallGap * profile.rank * 2.1
-        - confidencePenalty;
+        - confidencePenalty
+        + priorityModifier;
     return {
         fit: round(fit, 3),
         reliability: round(reliability, 1),
         performance: round(performance, 1),
         expectedStars: finite(history.avgStars) ? round(history.avgStars, 2) : null,
         hasHistory: history.status === 'ready' && finite(history.performance),
-        townHall
+        townHall,
+        priorityModifier
     };
 }
 
@@ -94,10 +106,16 @@ export function comparePlayerScores(left, right) {
 }
 
 export function compareClanPriority(left, right) {
+    const priorityDifference = clanPriorityTier(right) - clanPriorityTier(left);
+    if (priorityDifference) return priorityDifference;
     const leftProfile = leagueProfile(left);
     const rightProfile = leagueProfile(right);
     return rightProfile.rank - leftProfile.rank
         || String(left.tag).localeCompare(String(right.tag));
+}
+
+export function clanPriorityTier(clan) {
+    return CLAN_PRIORITY_TIERS[normalizeClanPriority(clan?.clanPriority)];
 }
 
 function finite(value) {

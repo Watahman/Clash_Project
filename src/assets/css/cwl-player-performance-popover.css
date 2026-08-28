@@ -21,10 +21,11 @@
 .cwl-performance-header { display: grid; gap: 0.15rem; border-bottom: 1px solid var(--border); }
 .cwl-performance-header strong { font-size: 0.9rem; }
 .cwl-performance-header span { color: var(--text-muted); font-family: var(--font-mono); font-size: 0.68rem; }
-.cwl-performance-score { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 0.1rem 0.5rem; }
-.cwl-performance-score .cwl-performance-label { grid-column: 1; color: var(--text-muted); font-size: 0.68rem; }
+.cwl-performance-score { display: grid; grid-template-columns: auto 1fr auto; align-items: end; gap: 0.1rem 0.35rem; }
+.cwl-performance-score .cwl-performance-label { grid-column: 1 / 3; color: var(--text-muted); font-size: 0.68rem; }
 .cwl-performance-score strong { grid-column: 1; font-family: var(--font-heading); font-size: 2rem; line-height: 1; }
-.cwl-performance-score em { grid-column: 2; grid-row: 1 / 3; align-self: center; border-radius: 999px; background: var(--accent-soft); padding: 0.25rem 0.5rem; color: var(--accent-strong); font-size: 0.65rem; font-style: normal; font-weight: 700; }
+.cwl-performance-score .cwl-performance-scale { grid-column: 2; grid-row: 2; color: var(--text-muted); font-size: 0.72rem; font-weight: 700; }
+.cwl-performance-score em { grid-column: 3; grid-row: 1 / 3; align-self: center; border-radius: 999px; background: var(--accent-soft); padding: 0.25rem 0.5rem; color: var(--accent-strong); font-size: 0.65rem; font-style: normal; font-weight: 700; }
 .cwl-performance-form { display: flex; justify-content: space-between; border-block: 1px solid var(--border); color: var(--text-muted); font-size: 0.72rem; }
 .cwl-performance-form strong { color: var(--text); }
 .cwl-performance-form .is-strong { color: var(--success); }
@@ -33,6 +34,9 @@
 .cwl-performance-current h3 { margin: 0 0 0.45rem; color: var(--text); font-size: 0.72rem; }
 .cwl-performance-section { border-top: 1px solid var(--border); }
 .cwl-performance-section h3 { margin: 0 0 0.45rem; color: var(--text-muted); font-size: 0.66rem; }
+.cwl-performance-overview { border-bottom: 1px solid var(--border); background: var(--surface-subtle); }
+.cwl-performance-overview > .cwl-performance-metrics { padding: 0 0.9rem 0.85rem; }
+.cwl-performance-context-label { margin: 0 0 0.55rem; color: var(--text-muted); font-size: 0.68rem; }
 .cwl-performance-metrics { display: grid; grid-template-columns: 1fr auto; gap: 0.35rem 0.8rem; margin: 0; font-size: 0.72rem; }
 .cwl-performance-metrics dt { color: var(--text-muted); }
 .cwl-performance-metrics dd { margin: 0; font-family: var(--font-mono); font-weight: 600; text-align: right; }
@@ -77,6 +81,15 @@ body[data-workspace-page="planner"] .cwl-performance-score {
 
 body[data-workspace-page="planner"] .cwl-performance-score strong {
     font-size: 2.1rem;
+}
+
+body[data-workspace-page="planner"] .cwl-performance-overview > .cwl-performance-metrics {
+    padding: 0 1.1rem 0.95rem;
+}
+
+body[data-workspace-page="planner"] .cwl-performance-planner-context {
+    border-top: 0;
+    border-bottom: 1px solid var(--border);
 }
 
 body[data-workspace-page="planner"] .cwl-performance-form {

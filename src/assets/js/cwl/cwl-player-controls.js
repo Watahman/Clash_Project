@@ -1,6 +1,10 @@
 import { savePlan } from './cwl-plan-io.js';
 import { escapeCssIdentifier } from './cwl-utils.js';
-import { normalizeRosterStatus } from './cwl-plan-schema.js';
+import {
+    CWL_PLAYER_PRIORITIES,
+    normalizePlayerPriority,
+    normalizeRosterStatus
+} from './cwl-plan-schema.js';
 import { t } from '../i18n/i18n.js';
 import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js';
 
@@ -43,8 +47,44 @@ function statusOption(value) {
     return option;
 }
 
+function priorityOption(value) {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = t(`planner.playerPriority${capitalize(value)}`);
+    return option;
+}
+
+function translatePlayerPriorityOptions(select) {
+    Array.from(select.options).forEach(option => {
+        const value = normalizePlayerPriority(option.value);
+        option.textContent = t(`planner.playerPriority${capitalize(value)}`);
+    });
+}
+
 function isFreeRosterPlayer(element) {
     return Boolean(element?.closest('#cwl-available-players'));
+}
+
+export function attachPlayerPriorityControl(element) {
+    let select = element.querySelector('.cwl-player-priority');
+    if (!select) {
+        select = document.createElement('select');
+        select.className = 'cwl-player-priority';
+        select.append(...CWL_PLAYER_PRIORITIES.map(priorityOption));
+        select.addEventListener('pointerdown', event => event.stopPropagation());
+        select.addEventListener('mousedown', event => event.stopPropagation());
+        select.addEventListener('change', () => {
+            element.dataset.playerPriority = normalizePlayerPriority(select.value);
+            rememberPlannerPlayers();
+            savePlan();
+        });
+    }
+    translatePlayerPriorityOptions(select);
+    select.value = normalizePlayerPriority(element.dataset.playerPriority);
+    select.title = t('planner.playerPriority');
+    select.setAttribute('aria-label', t('planner.playerPriority'));
+    ensurePlayerControlGroup(element).prepend(select);
+    return select;
 }
 
 function attachRosterStatusControl(element) {
@@ -209,4 +249,8 @@ export function syncPlayerMoveControl(element) {
     if (!refresh) return '';
     refresh();
     return element.querySelector('.cwl-move-player')?.value || '';
+}
+
+function capitalize(value) {
+    return value ? value[0].toUpperCase() + value.slice(1) : '';
 }

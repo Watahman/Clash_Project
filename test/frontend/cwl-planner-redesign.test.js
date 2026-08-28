@@ -89,6 +89,33 @@ describe('CWL planner redesign surface', () => {
         expect(html).not.toContain('cwl-planner-schedule.css');
     });
 
+    it('keeps planner priority labels refreshable and its changed graph cache-busted', () => {
+        const planner = readFileSync('src/assets/js/pages/cwl-planner.js', 'utf8');
+        const html = readFileSync('src/subpages/cwl-planner.html', 'utf8');
+        expect(planner).toContain("window.addEventListener('clashtools:language-changed', refreshPlannerLabels);");
+        expect(planner).toContain('refreshPlannerPriorityLabels();');
+        expect(planner).toContain('cwl-priority-labels.js?v=20260828-cwl-planner-v2');
+        const priorityLabels = readFileSync('src/assets/js/cwl/cwl-priority-labels.js', 'utf8');
+        expect(priorityLabels).toContain('export function refreshPlannerPriorityLabels');
+        expect(priorityLabels).toContain("select.setAttribute('aria-label', playerLabel)");
+        expect(priorityLabels).toContain("select.setAttribute('aria-label', clanLabel)");
+        expect(priorityLabels.trimEnd().split(/\r?\n/).length).toBeLessThanOrEqual(300);
+
+        const assets = [
+            'cwl-planner-workspace.css',
+            'cwl-player-card.css',
+            'cwl-player-performance-popover.css',
+            'cwl-planner-roster.css',
+            'cwl-planner-roster-controls.css',
+            'pages/cwl-planner.js'
+        ];
+        const versions = assets.map(asset => html.match(
+            new RegExp(`${asset.replace('.', '\\.?')}\\?v=([^\\\"]+)`)
+        )?.[1]).filter(Boolean);
+        expect(versions).toHaveLength(assets.length);
+        expect(new Set(versions).size).toBe(1);
+    });
+
     it('keeps saved plans as stacked mobile records with an explicit delete dialog', () => {
         const css = readFileSync('src/assets/css/cwl-saved-plans.css', 'utf8');
         const html = readFileSync('src/subpages/cwl-planner-drafts.html', 'utf8');

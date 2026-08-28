@@ -1,9 +1,11 @@
 import { fillRequiredLineups, hasRequiredCoverage } from './cwl-auto-plan-minimum.js';
 import {
+    clanPriorityTier,
     compareClanPriority,
     leagueProfile,
     scorePlayerForClan
 } from './cwl-auto-plan-scoring.js';
+import { normalizePlayerPriority } from '../cwl-plan-schema.js';
 
 const MAX_COMBINATIONS_PER_SIZE = 10000;
 
@@ -102,6 +104,7 @@ function simulateSelection({
         stability: sum(activeEntries, entry =>
             Number(entry.player.currentClanId === clanForEntry(clans, buckets, entry)?.id)
         ),
+        clanPriority: sum(clans, clanPriorityTier),
         leagueRank: sum(clans, clan => leagueProfile(clan).rank),
         key: clans.map(clan => clan.tag).sort().join('|')
     };
@@ -113,6 +116,7 @@ function compareSelections(left, right) {
         || right.reliability - left.reliability
         || right.performance - left.performance
         || right.stability - left.stability
+        || right.clanPriority - left.clanPriority
         || right.leagueRank - left.leagueRank
         || left.key.localeCompare(right.key);
 }
@@ -139,7 +143,8 @@ function sum(items, getter) {
 }
 
 function isEligible(player) {
-    return player.availability?.state !== 'no';
+    return player.availability?.state !== 'no'
+        && normalizePlayerPriority(player.playerPriority) !== 'exclude';
 }
 
 function byTag(left, right) {

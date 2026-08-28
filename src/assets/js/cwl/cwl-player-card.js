@@ -6,9 +6,13 @@ import {
     plannerHasPlayer,
     uniquePlayers
 } from './cwl-utils.js';
-import { normalizeRosterStatus } from './cwl-plan-schema.js';
+import {
+    normalizePlayerPriority,
+    normalizeRosterStatus
+} from './cwl-plan-schema.js';
 import { t } from '../i18n/i18n.js';
 import {
+    attachPlayerPriorityControl,
     attachDeleteButton,
     attachMoveControl,
     syncPlayerRosterStatus
@@ -40,6 +44,7 @@ export function createPlayerCard(playerInfo, clanUuid, options = {}) {
 
         makePlayerDraggable(element);
         attachDeleteButton(element);
+        attachPlayerPriorityControl(element);
         if (clanUuid == null) attachMoveControl(element);
         const preferredStatus = normalizeRosterStatus(
             player.rosterStatus || player.roster_status || player.status
@@ -133,7 +138,10 @@ function buildPlayerElement(player, targetInfo) {
 
     element.dataset.playerTag = normalized.tag;
     element.dataset.townHall = String(normalized.townHallLevel);
-        element.dataset.source = normalized.source || normalized.origin || targetInfo.source;
+    element.dataset.playerPriority = normalizePlayerPriority(
+        normalized.playerPriority || normalized.player_priority || normalized.priority
+    );
+    element.dataset.source = normalized.source || normalized.origin || targetInfo.source;
     if (normalized.legacySchedule?.length) {
         element.dataset.legacySchedule = normalized.legacySchedule.join(',');
     }

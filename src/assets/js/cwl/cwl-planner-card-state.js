@@ -1,5 +1,8 @@
 import { getCardTag } from './cwl-utils.js';
-import { normalizeRosterStatus } from './cwl-plan-schema.js';
+import {
+    normalizePlayerPriority,
+    normalizeRosterStatus
+} from './cwl-plan-schema.js';
 import { t } from '../i18n/i18n.js';
 import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 
@@ -12,7 +15,8 @@ export function rememberPlannerPlayers() {
         clanName: player.querySelector('.cwl-player-clan')?.textContent || '',
         tag: getCardTag(player),
         townHall: Number(player.dataset.townHall || 1),
-        rosterStatus: normalizeRosterStatus(player.dataset.rosterStatus)
+        rosterStatus: normalizeRosterStatus(player.dataset.rosterStatus),
+        playerPriority: normalizePlayerPriority(player.dataset.playerPriority)
     })).filter(player => player.tag);
     localStorage.setItem('clashtools_last_planner_players', JSON.stringify(players));
 }

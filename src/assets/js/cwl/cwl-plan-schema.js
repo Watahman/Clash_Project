@@ -1,12 +1,26 @@
 import { normalizeTag } from './cwl-utils.js';
 
-export const CWL_PLAN_SCHEMA_VERSION = 4;
+export const CWL_PLAN_SCHEMA_VERSION = 5;
 
 export const CWL_ROSTER_STATUSES = Object.freeze(['core', 'rotation', 'reserve']);
+export const CWL_CLAN_PRIORITIES = Object.freeze([
+    'auto', 'primary', 'secondary', 'development'
+]);
+export const CWL_PLAYER_PRIORITIES = Object.freeze([
+    'high', 'normal', 'low', 'exclude'
+]);
 
 export function normalizeRosterStatus(value, fallback = '') {
     const status = String(value || '').trim().toLowerCase();
     return CWL_ROSTER_STATUSES.includes(status) ? status : fallback;
+}
+
+export function normalizeClanPriority(value, fallback = 'auto') {
+    return normalizePriority(value, CWL_CLAN_PRIORITIES, fallback);
+}
+
+export function normalizePlayerPriority(value, fallback = 'normal') {
+    return normalizePriority(value, CWL_PLAYER_PRIORITIES, fallback);
 }
 
 function normalizeLegacySchedule(value) {
@@ -24,7 +38,8 @@ export function normalizePlayerSnapshot(player, fallbackClanName = '', fallbackR
             name: tag,
             townHallLevel: 1,
             clanName: fallbackClanName,
-            rosterStatus: normalizeRosterStatus('', fallbackRosterStatus)
+            rosterStatus: normalizeRosterStatus('', fallbackRosterStatus),
+            playerPriority: 'normal'
         } : null;
     }
     if (!player || typeof player !== 'object') return null;
@@ -39,6 +54,9 @@ export function normalizePlayerSnapshot(player, fallbackClanName = '', fallbackR
         rosterStatus: normalizeRosterStatus(
             player.rosterStatus || player.roster_status || player.status,
             fallbackRosterStatus
+        ),
+        playerPriority: normalizePlayerPriority(
+            player.playerPriority || player.player_priority || player.priority
         )
     };
     const legacySchedule = normalizeLegacySchedule(
@@ -69,8 +87,16 @@ function normalizeClan(clan, index) {
             ? Number(clan?.capacity || clan?.amountOfPlayers || clan?.maxPlayers)
             : 15,
         badgeUrl: String(clan?.badgeUrl || clan?.badge_url || '').trim(),
+        clanPriority: normalizeClanPriority(
+            clan?.clanPriority || clan?.clan_priority || clan?.priority
+        ),
         players: uniquePlayerSnapshots(clan?.players, name)
     };
+}
+
+function normalizePriority(value, allowed, fallback) {
+    const priority = String(value || '').trim().toLowerCase();
+    return allowed.includes(priority) ? priority : fallback;
 }
 
 export function normalizePlanDocument(input) {

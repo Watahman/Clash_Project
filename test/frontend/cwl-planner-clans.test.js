@@ -144,12 +144,15 @@ describe('CWL planner clan rows', () => {
         syncPlayerRosterStatus(player);
 
         expect(player.querySelector('.cwl-move-player')).toBeNull();
-        expect(player.querySelectorAll('.cwl-player-control-group > select')).toHaveLength(1);
+        expect(player.querySelector('.cwl-roster-status')).not.toBeNull();
+        expect(player.querySelector('.cwl-player-priority')).not.toBeNull();
+        expect(player.querySelectorAll('.cwl-player-control-group > select')).toHaveLength(2);
 
         document.querySelector('#cwl-available-players').appendChild(player);
         syncPlayerRosterStatus(player);
         expect(player.querySelector('.cwl-move-player')?.value).toBe('free');
-        expect(player.querySelectorAll('.cwl-player-control-group > select')).toHaveLength(1);
+        expect(player.querySelector('.cwl-player-priority')).not.toBeNull();
+        expect(player.querySelectorAll('.cwl-player-control-group > select')).toHaveLength(2);
     });
 
 });
