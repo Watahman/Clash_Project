@@ -5,9 +5,8 @@ import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js
 const performanceByTag = new Map();
 const pendingTags = new Set();
 const inFlightByTag = new Map();
-const MAX_BATCH_SIZE = 100;
+const REQUEST_BATCH_SIZE = 20;
 let batchTimer;
-let observer;
 
 function normalizeTag(tag = '') {
     const clean = String(tag).trim().toUpperCase();
@@ -44,31 +43,30 @@ export async function flushPlayerPerformanceBatch() {
 
     let requestPromise;
     requestPromise = (async () => {
+        const results = {};
+        const errorsByTag = new Map();
         try {
-            const batches = [];
-            for (let index = 0; index < tags.length; index += MAX_BATCH_SIZE) {
-                batches.push(tags.slice(index, index + MAX_BATCH_SIZE));
-            }
-            const responses = await Promise.all(batches.map(playerTags => requestJson(
-                config._BASE_URL + config._EXT_PLAYER_PERFORMANCE,
-                {
-                    body: { playerTags },
-                    loading: 'background',
-                    timeoutMs: 30_000
+            for (const playerTags of chunkTags(tags, REQUEST_BATCH_SIZE)) {
+                try {
+                    const response = await requestJson(
+                        config._BASE_URL + config._EXT_PLAYER_PERFORMANCE,
+                        {
+                            body: { playerTags },
+                            loading: 'background',
+                            timeoutMs: 30_000
+                        }
+                    );
+                    Object.assign(results, response?.results || {});
+                } catch (error) {
+                    playerTags.forEach(tag => errorsByTag.set(tag, error));
                 }
-            )));
-            const results = Object.assign(
-                {},
-                ...responses.map(response => response?.results || {})
-            );
+            }
             tags.forEach(tag => {
                 performanceByTag.set(
                     tag,
-                    normalizePerformanceResult(results[tag], tag)
+                    normalizePerformanceResult(results[tag], tag, errorsByTag.get(tag))
                 );
             });
-        } catch (error) {
-            tags.forEach(tag => performanceByTag.set(tag, unavailableResult(tag, error)));
         } finally {
             tags.forEach(tag => {
                 if (inFlightByTag.get(tag) === requestPromise) inFlightByTag.delete(tag);
@@ -108,24 +106,8 @@ export function primePlannerPlayerPerformance(root = document) {
 
 export function initPlayerPerformanceClient(root = document) {
     if (isRedesignFixtureRequested()) return;
-    void primePlannerPlayerPerformance(root);
-    const refresh = () => {
-        void primePlannerPlayerPerformance(root);
-    };
-    const queueRefresh = () => {
-        schedulePlayerPerformanceBatch(collectPlannerPlayerTags(root));
-    };
-    for (const eventName of [
-        'clashtools:cwl-player-added',
-        'clashtools:cwl-player-removed',
-        'clashtools:cwl-plan-loaded'
-    ]) {
-        window.addEventListener(eventName, refresh);
-    }
-    observer?.disconnect();
-    observer = new MutationObserver(queueRefresh);
-    const planner = root.querySelector('.workspace-planner') || root.body;
-    if (planner) observer.observe(planner, { childList: true, subtree: true });
+    // Performance is requested by the Auto Plan action or the player popover.
+    // Avoid a full-roster request while the planner is still being assembled.
 }
 
 export function clearPlayerPerformanceCache() {
@@ -135,8 +117,8 @@ export function clearPlayerPerformanceCache() {
     inFlightByTag.clear();
 }
 
-function normalizePerformanceResult(result, tag) {
-    if (!result || typeof result !== 'object') return unavailableResult(tag);
+function normalizePerformanceResult(result, tag, error = null) {
+    if (!result || typeof result !== 'object') return unavailableResult(tag, error);
     const value = Number(result.performance);
     return {
         ...result,
@@ -145,6 +127,14 @@ function normalizePerformanceResult(result, tag) {
             ? Math.min(100, Math.max(0, value))
             : result.performance
     };
+}
+
+function chunkTags(tags, size) {
+    const chunks = [];
+    for (let index = 0; index < tags.length; index += size) {
+        chunks.push(tags.slice(index, index + size));
+    }
+    return chunks;
 }
 
 function unavailableResult(tag, error = null) {

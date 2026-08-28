@@ -84,6 +84,26 @@ class PlayerPerformanceCalculatorTest {
         assertEquals(100.0, result.performance());
     }
 
+    @Test
+    void ignoresCwlOutsideTheBaselineWhenChoosingThePerformanceScope() {
+        List<HistoricalAttack> attacks = new ArrayList<>();
+        for (int index = 0; index < 5; index++) {
+            attacks.add(attack(
+                    HistoricalWarType.CWL, NOW.minus(91L + index, ChronoUnit.DAYS),
+                    17, 17, 3, 100
+            ));
+        }
+        attacks.add(attack(HistoricalWarType.REGULAR, NOW, 17, 17, 2, 80));
+
+        PlayerPerformanceResult result = calculator.calculate(new HistoricalPlayerData(
+                "#P0L", attacks, List.of(), "test", true
+        ));
+
+        assertEquals("All wars", result.scope());
+        assertEquals(1, result.attackCount());
+        assertEquals(2.0, result.avgStars());
+    }
+
     private HistoricalAttack attack(
             HistoricalWarType type,
             Instant time,

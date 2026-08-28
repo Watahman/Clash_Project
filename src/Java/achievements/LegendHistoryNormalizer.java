@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
@@ -124,12 +125,19 @@ public final class LegendHistoryNormalizer {
     }
 
     private static YearMonth season(String value) {
-        if (value == null || !value.matches("^20\\d{2}-(0[1-9]|1[0-2])$")) return null;
+        if (value == null) return null;
+        String normalized = value.trim();
         try {
-            return YearMonth.parse(value);
+            if (normalized.matches("^20\\d{2}-(0[1-9]|1[0-2])$")) {
+                return YearMonth.parse(normalized);
+            }
+            if (normalized.matches("^20\\d{2}-(0[1-9]|1[0-2])-([0-2]\\d|3[01])$")) {
+                return YearMonth.from(LocalDate.parse(normalized));
+            }
         } catch (DateTimeParseException ignored) {
-            return null;
+            // Keep malformed dates in coverage as invalid season records.
         }
+        return null;
     }
 
     private static String normalizedTag(String value) {
