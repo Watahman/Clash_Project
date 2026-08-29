@@ -13,6 +13,9 @@ import com.google.gson.JsonObject;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -20,6 +23,10 @@ import java.util.List;
 /** Decodes the three route-specific V2 payloads into transient attack observations. */
 final class ClashKingV2AdvancedStatsParser {
     private static final ArmyShareCodeParser ARMY_PARSER = new ArmyShareCodeParser();
+    private static final List<DateTimeFormatter> CLASH_TIME_FORMATS = List.of(
+            DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss.SSSX").withZone(ZoneOffset.UTC),
+            DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmssX").withZone(ZoneOffset.UTC)
+    );
 
     private ClashKingV2AdvancedStatsParser() {}
 
@@ -264,8 +271,37 @@ final class ClashKingV2AdvancedStatsParser {
     private static Instant instant(JsonObject row, Instant fallback, String... names) {
         String value = text(row, names);
         if (value.isBlank()) return fallback;
-        try { return Instant.parse(value); }
-        catch (RuntimeException ignored) { return OffsetDateTime.parse(value).toInstant(); }
+
+        if (value.chars().allMatch(Character::isDigit)) {
+            try {
+                long timestamp = Long.parseLong(value);
+                return Instant.ofEpochSecond(timestamp > 10_000_000_000L ? timestamp / 1000 : timestamp);
+            } catch (NumberFormatException ignored) {
+                // Continue with textual timestamp formats.
+            }
+        }
+
+        try {
+            return Instant.parse(value);
+        } catch (DateTimeParseException ignored) {
+            // Continue with other documented/upstream timestamp formats.
+        }
+
+        try {
+            return OffsetDateTime.parse(value).toInstant();
+        } catch (DateTimeParseException ignored) {
+            // Clash war history also returns compact timestamps such as 20260809T200137.000Z.
+        }
+
+        for (DateTimeFormatter formatter : CLASH_TIME_FORMATS) {
+            try {
+                return Instant.from(formatter.parse(value));
+            } catch (DateTimeParseException ignored) {
+                // Try the next known Clash timestamp format.
+            }
+        }
+
+        throw new IllegalArgumentException("Unsupported ClashKing timestamp: " + value);
     }
 
     private static Integer positive(Integer value) {
