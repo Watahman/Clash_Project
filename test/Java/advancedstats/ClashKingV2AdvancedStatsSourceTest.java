@@ -97,8 +97,8 @@ class ClashKingV2AdvancedStatsSourceTest {
     void warRouteKeepsAttackAndDefenseForWatermarkButRepositoryCanSkipDefense() throws Exception {
         FakeTransport transport = new FakeTransport();
         transport.war = json("{\"items\":["
-                + "{\"side\":\"attacks\",\"war_id\":\"w1\",\"warEndTime\":\"2026-08-14T19:00:00Z\",\"attackOrder\":1,\"stars\":2},"
-                + "{\"side\":\"defenses\",\"war_id\":\"w1\",\"warEndTime\":\"2026-08-14T19:00:00Z\",\"attackOrder\":2}]}");
+                + "{\"side\":\"attacks\",\"war_id\":\"w1\",\"warEndTime\":\"20260809T200137.000Z\",\"attackOrder\":1,\"stars\":2},"
+                + "{\"side\":\"defenses\",\"war_id\":\"w1\",\"warEndTime\":\"20260809T200137Z\",\"attackOrder\":2}]}");
         ClashKingV2AdvancedStatsSource source = new ClashKingV2AdvancedStatsSource(transport, 1L);
 
         var page = source.fetch(request(AdvancedStatsScope.WAR));
@@ -106,6 +106,8 @@ class ClashKingV2AdvancedStatsSourceTest {
         assertEquals(2, page.observations().size());
         assertTrue(page.observations().get(0).attack());
         assertFalse(page.observations().get(1).attack());
+        assertEquals(Instant.parse("2026-08-09T20:01:37Z"), page.observations().get(0).occurredAt());
+        assertEquals(Instant.parse("2026-08-09T20:01:37Z"), page.observations().get(1).occurredAt());
     }
 
     private static HistoryRequest request(AdvancedStatsScope scope) {
