@@ -35,7 +35,7 @@ class AdvancedStatsBattleLogHistorySourceTest {
 
     @Test
     void convertsOfficialArmyShareCodeIntoUnitObservations() throws Exception {
-        String log = "[{\"attack\":true,\"battleType\":\"multiplayer\","
+        String log = "[{\"attack\":true,\"battleType\":\"homeVillage\","
                 + "\"armyShareCode\":\"u8x8-2x6s2x2\",\"opponentPlayerTag\":\"#9GCUV\","
                 + "\"stars\":3,\"destructionPercentage\":100}]";
         AdvancedStatsBattleLogHistorySource source = new AdvancedStatsBattleLogHistorySource(tag -> log);
@@ -46,6 +46,18 @@ class AdvancedStatsBattleLogHistorySourceTest {
         assertFalse(page.observations().getFirst().units().isEmpty());
         assertEquals(12, page.observations().getFirst().units().stream()
                 .mapToInt(AdvancedStatsHistoryModels.UnitObservation::quantity).sum());
+    }
+
+    @Test
+    void excludesRankedEntriesFromNormalRollingScope() throws Exception {
+        String log = "[{\"attack\":true,\"battleType\":\"ranked\","
+                + "\"armyShareCode\":\"u8x8s2x2\",\"opponentPlayerTag\":\"#9GCUV\","
+                + "\"stars\":3,\"destructionPercentage\":100}]";
+        AdvancedStatsBattleLogHistorySource source = new AdvancedStatsBattleLogHistorySource(tag -> log);
+
+        var page = source.fetch(request(AdvancedStatsCapabilityOperation.INCREMENTAL, Checkpoint.initial()));
+
+        assertEquals(0, page.observations().size());
     }
 
     @Test
