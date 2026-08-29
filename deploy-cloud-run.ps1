@@ -30,8 +30,10 @@ if (-not $collectionEnabled -and -not $AllowAdvancedStatsCollectionDisabled) {
 }
 
 $rankedSeasonConfigured = $cloudRunEnv -match '(?im)^\s*CLASHKING_RANKED_SEASON\s*:\s*["'']?[1-9][0-9]*["'']?\s*(?:#.*)?$'
-if (-not $rankedSeasonConfigured) {
-    Write-Warning "CLASHKING_RANKED_SEASON is niet ingevuld. Normal + war collection kunnen werken, maar ranked history blijft expliciet unsupported."
+if ($rankedSeasonConfigured) {
+    Write-Host "CLASHKING_RANKED_SEASON override gevonden; automatische ClashKing season discovery wordt voor ranked overgeslagen." -ForegroundColor Cyan
+} else {
+    Write-Host "Ranked season wordt automatisch opgelost via ClashKing V2 /v2/dates/current." -ForegroundColor Cyan
 }
 
 gcloud config set project $ProjectId
