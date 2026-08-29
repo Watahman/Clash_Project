@@ -13,14 +13,18 @@ AUTH_EMAIL_CONFIRM_REDIRECT_URL: "https://clashpanel.com/subpages/login.html"
 AUTH_PASSWORD_RESET_REDIRECT_URL: "https://clashpanel.com/subpages/login.html"
 AUTH_GOOGLE_CALLBACK_URL: "https://clashpanel.com/api/AuthGoogleCallback"
 
-# Phase 8 Advanced Stats rollout safety defaults.
-# Keep both false for the first candidate deployment.
-ADVANCED_STATS_COLLECTION_ENABLED: "false"
+# Advanced Stats runtime.
+# Collection and enrollment are separate switches: collection must stay enabled
+# for already-enrolled players even while new enrollment remains restricted.
+ADVANCED_STATS_COLLECTION_ENABLED: "true"
 ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED: "false"
 ADVANCED_STATS_ROLLOUT_USER_IDS: ""
 
-# Conservative collector defaults. These can remain unchanged for the developer stage.
+# Collector defaults. ClashKing V2 history routes allow up to 500 normal/war
+# rows per request; ranked is capped to 200 by the adapter.
 ADVANCED_STATS_BATCH_SIZE: "25"
+ADVANCED_STATS_PAGE_SIZE: "500"
+ADVANCED_STATS_MAX_BOOTSTRAP_PAGES: "20"
 ADVANCED_STATS_LEASE_SECONDS: "600"
 ADVANCED_STATS_ACTIVE_POLL_MINUTES: "15"
 ADVANCED_STATS_IDLE_POLL_MINUTES: "30"
@@ -30,6 +34,12 @@ ADVANCED_STATS_UNKNOWN_BACKOFF_MINUTES: "15"
 ADVANCED_STATS_MAX_BACKOFF_MINUTES: "240"
 ADVANCED_STATS_DEGRADED_THRESHOLD: "3"
 
+# ClashKing V2 historical source.
+CLASHKING_BASE_URL: "https://v2.api.clashk.ing"
+# Ranked history currently requires an explicit season epoch. Keep this value
+# updated until automatic season discovery is implemented.
+CLASHKING_RANKED_SEASON: ""
+
 # Secrets are intentionally NOT stored here.
 # Configure these through Cloud Run / Secret Manager:
 # CLASH_API_KEY_POOL -> one JSON-array secret containing 1 to 10 keys
@@ -37,7 +47,3 @@ ADVANCED_STATS_DEGRADED_THRESHOLD: "3"
 # SUPABASE_SERVICE_ROLE_KEY
 # API_PROXY_SECRET
 # ADVANCED_STATS_SCHEDULER_SECRET
-
-# Phase 8 preview-only Worker variables such as DISABLE_CANONICAL_REDIRECT and
-# UPSTREAM_ORIGIN_OVERRIDE belong in wrangler.phase8-preview.jsonc only.
-# Do not add those preview overrides to production Cloud Run configuration.
