@@ -35,10 +35,15 @@ public final class LegendHistoryNormalizer {
         for (JsonElement element : rows) {
             if (!element.isJsonObject()) continue;
             JsonObject row = element.getAsJsonObject();
-            if (!requestedTag.equals(normalizedTag(string(row, "tag")))) {
+            String upstreamTag = normalizedTag(string(row, "tag"));
+            // /v2/player/{tag}/legend-history is already scoped to the requested
+            // player. Current ClashKing V2 responses can leave row.tag blank, so
+            // only reject a row when the provider explicitly returns a different tag.
+            if (!upstreamTag.isBlank() && !requestedTag.equals(upstreamTag)) {
                 mismatchedPlayerRecords++;
                 continue;
             }
+            String recordTag = upstreamTag.isBlank() ? requestedTag : upstreamTag;
             String seasonText = string(row, "season");
             YearMonth season = season(seasonText);
             if (season == null) {
@@ -67,7 +72,7 @@ public final class LegendHistoryNormalizer {
                     season.toString(),
                     timestamp,
                     finalState,
-                    normalizedTag(string(row, "tag")),
+                    recordTag,
                     string(row, "name"),
                     Map.copyOf(metrics)
             );
