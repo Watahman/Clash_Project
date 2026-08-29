@@ -8,6 +8,11 @@ out/
 cloudrun-env.yaml
 .wrangler.phase8-preview.generated.jsonc
 
+# Codex / agent generated context files
+agent_docs/
+.codex_workflow_hidden_resource/
+AGENTS.md
+
 ### Eclipse ###
 .apt_generated
 .classpath
