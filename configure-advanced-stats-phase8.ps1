@@ -8,7 +8,7 @@ param(
     [string]$Region = "europe-west1",
     [string]$ServiceName = "clashpanel-api",
     [string]$TagName = "phase8",
-    [string]$SchedulerJobName = "clashpanel-advanced-stats-poll",
+    [string]$SchedulerJobName = "clashpanel-advanced-stats-poll-phase8",
     [string]$SecretName = "clashpanel-advanced-stats-scheduler-secret"
 )
 
@@ -127,6 +127,7 @@ Run-Gcloud secrets add-iam-policy-binding $SecretName `
     --role="roles/secretmanager.secretAccessor"
 
 # Create a new tagged candidate revision, still with 0% normal production traffic.
+# Collection intentionally remains disabled until activate-advanced-stats-phase8.ps1 is run.
 Run-Gcloud run services update $ServiceName `
     --project $ProjectId `
     --region $Region `
@@ -139,32 +140,31 @@ $candidateUrl = Get-TaggedCandidateUrl
 
 $jobState = Get-SchedulerJobState
 if ($jobState) {
-    # Existing jobs use --update-headers. --headers is accepted by create but not
-    # by current gcloud scheduler jobs update http.
     Run-GcloudQuiet scheduler jobs update http $SchedulerJobName `
         --project $ProjectId `
         --location $Region `
-        --schedule="*/5 * * * *" `
+        --schedule="* * * * *" `
         --time-zone="Etc/UTC" `
         --uri="$candidateUrl/InternalAdvancedStatsPoll" `
         --http-method=POST `
         --update-headers="X-ClashPanel-Scheduler-Secret=$schedulerSecret" `
-        --attempt-deadline="30s" `
+        --attempt-deadline="120s" `
         --max-retry-attempts=0
 } else {
     Run-GcloudQuiet scheduler jobs create http $SchedulerJobName `
         --project $ProjectId `
         --location $Region `
-        --schedule="*/5 * * * *" `
+        --schedule="* * * * *" `
         --time-zone="Etc/UTC" `
         --uri="$candidateUrl/InternalAdvancedStatsPoll" `
         --http-method=POST `
         --headers="X-ClashPanel-Scheduler-Secret=$schedulerSecret" `
-        --attempt-deadline="30s" `
+        --attempt-deadline="120s" `
         --max-retry-attempts=0
 }
 
-# The job is intentionally paused during setup. Collection is also still disabled.
+# The preview job is intentionally paused during setup. Activation is a separate,
+# explicit step so production traffic remains untouched and no collection starts accidentally.
 $jobState = Get-SchedulerJobState
 if ($jobState -ne "PAUSED") {
     Run-Gcloud scheduler jobs pause $SchedulerJobName --project $ProjectId --location $Region
@@ -174,10 +174,9 @@ Write-Host "Phase 8 developer-only runtime configuration prepared." -ForegroundC
 Write-Host "  Tagged candidate URL: $candidateUrl"
 Write-Host "  Normal production traffic to candidate: 0%"
 Write-Host "  Public enrollment: OFF"
-Write-Host "  Collection: OFF"
+Write-Host "  Collection: OFF until explicit activation"
 Write-Host "  Rollout allowlist: developer UUID only"
 Write-Host "  Scheduler secret: Secret Manager"
-Write-Host "  Scheduler job: targets tagged candidate, every 5 minutes, PAUSED"
+Write-Host "  Preview scheduler job: $SchedulerJobName, every minute, PAUSED"
 Write-Host ""
-Write-Host "No scheduled Advanced Stats collection is running yet." -ForegroundColor Yellow
-Write-Host "Next: deploy the isolated Cloudflare preview against this tagged candidate and start Advanced Stats for the allowlisted linked account."
+Write-Host "Next: run activate-advanced-stats-phase8.ps1 to enable collection only on the tagged preview revision." -ForegroundColor Yellow
