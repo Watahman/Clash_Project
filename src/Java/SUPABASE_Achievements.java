@@ -317,6 +317,11 @@ public class SUPABASE_Achievements {
                     db.add("unlocked_at", existingUnlockedAt.deepCopy());
                 } else if (unlocked) {
                     db.addProperty("unlocked_at", unlockedNow);
+                } else {
+                    // PostgREST bulk inserts require every object in the JSON array
+                    // to expose the same keys. Explicit null prevents a mixed-shape
+                    // batch when locked and unlocked achievements are persisted together.
+                    db.add("unlocked_at", com.google.gson.JsonNull.INSTANCE);
                 }
                 db.addProperty("source_timestamp", now);
                 changed.add(db);
