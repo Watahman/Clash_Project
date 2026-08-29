@@ -5,17 +5,24 @@ import Java.HttpException;
 import Java.advancedstats.AdvancedStatsHistoryModels.HistoryPage;
 import Java.advancedstats.AdvancedStatsHistoryModels.HistoryRequest;
 import Java.performance.ClashKingHttpClient;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.YearMonth;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Locale;
 
 /** Capability-based adapter for the documented V2 normal, ranked, and war GET routes. */
 public final class ClashKingV2AdvancedStatsSource implements AdvancedStatsHistorySource {
     private static final int MAX_BOOTSTRAP_DAYS = 365;
+    private static final DateTimeFormatter SEASON_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM", Locale.ROOT);
 
     public interface Transport {
         JsonObject normal(String playerTag, int limit, int days) throws Exception;
@@ -23,27 +30,32 @@ public final class ClashKingV2AdvancedStatsSource implements AdvancedStatsHistor
         JsonObject ranked(String playerTag, long seasonSeconds, int limit) throws Exception;
 
         JsonObject war(String playerTag, long startSeconds, long endSeconds, int limit) throws Exception;
+
+        /** Optional metadata lookup used when no explicit ranked season override is configured. */
+        default String currentSeason() throws Exception {
+            return "";
+        }
     }
 
     private final Transport transport;
-    private final Long rankedSeason;
+    private final Long configuredRankedSeason;
     private final String unavailableReason;
-    private final AdvancedStatsSourceCapabilities declaredCapabilities;
+    private Long resolvedRankedSeason;
+    private boolean rankedSeasonResolutionAttempted;
+    private String rankedSeasonResolutionReason = "";
 
     public ClashKingV2AdvancedStatsSource(Config config) {
         if (config == null) throw new IllegalArgumentException("config is required");
         this.transport = configuredTransport(config.getClashKingBaseUrl());
         this.unavailableReason = transport == null
                 ? "ClashKing API base URL is not configured" : "";
-        this.rankedSeason = parseSeason(config.getClashKingRankedSeason());
-        this.declaredCapabilities = buildCapabilities();
+        this.configuredRankedSeason = parseSeason(config.getClashKingRankedSeason());
     }
 
     public ClashKingV2AdvancedStatsSource(Transport transport, Long rankedSeason) {
         this.transport = transport;
         this.unavailableReason = transport == null ? "ClashKing V2 transport is unavailable" : "";
-        this.rankedSeason = rankedSeason;
-        this.declaredCapabilities = buildCapabilities();
+        this.configuredRankedSeason = rankedSeason;
     }
 
     @Override
@@ -53,13 +65,13 @@ public final class ClashKingV2AdvancedStatsSource implements AdvancedStatsHistor
 
     @Override
     public AdvancedStatsSourceCapabilities capabilities() {
-        return declaredCapabilities;
+        return buildCapabilities();
     }
 
     @Override
     public String seasonKey(AdvancedStatsScope scope) {
-        return scope == AdvancedStatsScope.RANKED && rankedSeason != null
-                ? Long.toString(rankedSeason) : "";
+        Long season = scope == AdvancedStatsScope.RANKED ? rankedSeason() : null;
+        return season == null ? "" : Long.toString(season);
     }
 
     @Override
@@ -84,17 +96,18 @@ public final class ClashKingV2AdvancedStatsSource implements AdvancedStatsHistor
     }
 
     private HistoryPage fetchRanked(HistoryRequest request) throws Exception {
-        if (rankedSeason == null) throw new UnsupportedOperationException(rankedReason());
-        ensureSeasonCheckpoint(request);
+        Long season = rankedSeason();
+        if (season == null) throw new UnsupportedOperationException(rankedReason());
+        ensureSeasonCheckpoint(request, season);
         return ClashKingV2AdvancedStatsParser.ranked(
-                transport.ranked(request.playerTag(), rankedSeason, Math.min(request.pageSize(), 200)),
-                request, rankedSeason);
+                transport.ranked(request.playerTag(), season, Math.min(request.pageSize(), 200)),
+                request, season);
     }
 
-    private void ensureSeasonCheckpoint(HistoryRequest request) throws AdvancedStatsSourceUnavailableException {
+    private void ensureSeasonCheckpoint(HistoryRequest request, long season) throws AdvancedStatsSourceUnavailableException {
         if (request.checkpoint() == null || !request.checkpoint().present()
                 || request.checkpoint().watermarkKey().isBlank()) return;
-        String prefix = "ranked-season:" + rankedSeason + ":";
+        String prefix = "ranked-season:" + season + ":";
         if (!request.checkpoint().watermarkKey().startsWith(prefix)) {
             throw new AdvancedStatsSourceUnavailableException(
                     "ranked season changed; state partition reset is required before collection");
@@ -126,14 +139,36 @@ public final class ClashKingV2AdvancedStatsSource implements AdvancedStatsHistor
     private AdvancedStatsCapability rankedCapability(AdvancedStatsCapabilityOperation operation) {
         if (transport == null) return capability(AdvancedStatsScope.RANKED, operation,
                 AdvancedStatsCapabilityStatus.UNSUPPORTED, unavailableReason);
-        if (rankedSeason == null) return capability(AdvancedStatsScope.RANKED, operation,
+        if (rankedSeason() == null) return capability(AdvancedStatsScope.RANKED, operation,
                 AdvancedStatsCapabilityStatus.UNSUPPORTED, rankedReason());
         return capability(AdvancedStatsScope.RANKED, operation, AdvancedStatsCapabilityStatus.PARTIAL,
-                "ranked route has an explicit season but no cursor or total; local watermark is used");
+                "ranked route has an explicit or discovered season but no cursor or total; local watermark is used");
     }
 
     private String rankedReason() {
-        return "ClashKing V2 ranked season is not configured explicitly (Unix seconds required)";
+        if (!rankedSeasonResolutionReason.isBlank()) return rankedSeasonResolutionReason;
+        return "ClashKing V2 current ranked season is unavailable";
+    }
+
+    private synchronized Long rankedSeason() {
+        if (configuredRankedSeason != null) return configuredRankedSeason;
+        if (rankedSeasonResolutionAttempted) return resolvedRankedSeason;
+        rankedSeasonResolutionAttempted = true;
+        if (transport == null) {
+            rankedSeasonResolutionReason = unavailableReason;
+            return null;
+        }
+        try {
+            String current = transport.currentSeason();
+            resolvedRankedSeason = parseSeasonLabel(current);
+            if (resolvedRankedSeason == null) {
+                rankedSeasonResolutionReason = "ClashKing V2 returned an invalid current ranked season";
+            }
+        } catch (Exception unavailable) {
+            rankedSeasonResolutionReason = "ClashKing V2 current ranked season could not be resolved";
+            resolvedRankedSeason = null;
+        }
+        return resolvedRankedSeason;
     }
 
     private long startSeconds(HistoryRequest request) {
@@ -151,6 +186,16 @@ public final class ClashKingV2AdvancedStatsSource implements AdvancedStatsHistor
             long value = Long.parseLong(raw.trim());
             return value > 0 ? value : null;
         } catch (NumberFormatException ignored) {
+            return null;
+        }
+    }
+
+    static Long parseSeasonLabel(String raw) {
+        if (raw == null || raw.isBlank()) return null;
+        try {
+            YearMonth month = YearMonth.parse(raw.trim(), SEASON_FORMAT);
+            return month.atDay(1).atStartOfDay(ZoneOffset.UTC).toEpochSecond();
+        } catch (DateTimeParseException invalid) {
             return null;
         }
     }
@@ -201,6 +246,14 @@ public final class ClashKingV2AdvancedStatsSource implements AdvancedStatsHistor
         @Override
         public JsonObject war(String playerTag, long startSeconds, long endSeconds, int limit) throws Exception {
             return client.get(warPath(playerTag, startSeconds, endSeconds, limit));
+        }
+
+        @Override
+        public String currentSeason() throws Exception {
+            JsonObject response = client.get("/v2/dates/current");
+            JsonElement season = response.get("season");
+            if (season == null || season.isJsonNull() || !season.isJsonPrimitive()) return "";
+            return season.getAsString().trim();
         }
     }
 }
