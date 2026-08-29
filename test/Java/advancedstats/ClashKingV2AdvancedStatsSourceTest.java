@@ -60,7 +60,7 @@ class ClashKingV2AdvancedStatsSourceTest {
     }
 
     @Test
-    void rankedRouteRequiresExplicitSeasonAndFiltersDefensesClientSide() throws Exception {
+    void rankedRouteRequiresAResolvableSeasonAndFiltersDefensesClientSide() throws Exception {
         FakeTransport transport = new FakeTransport();
         transport.ranked = json("{\"battlelogs\":["
                 + "{\"battle_id\":\"r1\",\"timestamp\":\"2026-08-14T19:00:00Z\",\"attack\":true},"
@@ -76,10 +76,52 @@ class ClashKingV2AdvancedStatsSourceTest {
                 source.capabilities().forOperation(AdvancedStatsScope.RANKED,
                         AdvancedStatsCapabilityOperation.BOOTSTRAP).status());
 
-        ClashKingV2AdvancedStatsSource withoutSeason = new ClashKingV2AdvancedStatsSource(transport, null);
+        FakeTransport missingSeasonTransport = new FakeTransport();
+        ClashKingV2AdvancedStatsSource withoutSeason = new ClashKingV2AdvancedStatsSource(missingSeasonTransport, null);
         assertEquals(AdvancedStatsCapabilityStatus.UNSUPPORTED,
                 withoutSeason.capabilities().forOperation(AdvancedStatsScope.RANKED,
                         AdvancedStatsCapabilityOperation.BOOTSTRAP).status());
+    }
+
+    @Test
+    void rankedSeasonIsResolvedFromClashKingCurrentDatesWhenOverrideIsMissing() throws Exception {
+        FakeTransport transport = new FakeTransport();
+        transport.currentSeason = "2026-08";
+        transport.ranked = json("{\"battlelogs\":[],\"season\":1785542400}");
+        ClashKingV2AdvancedStatsSource source = new ClashKingV2AdvancedStatsSource(transport, null);
+
+        assertEquals(1_785_542_400L, ClashKingV2AdvancedStatsSource.parseSeasonLabel("2026-08"));
+        assertEquals("1785542400", source.seasonKey(AdvancedStatsScope.RANKED));
+        assertEquals(AdvancedStatsCapabilityStatus.PARTIAL,
+                source.capabilities().forOperation(AdvancedStatsScope.RANKED,
+                        AdvancedStatsCapabilityOperation.BOOTSTRAP).status());
+        assertEquals(0, source.fetch(request(AdvancedStatsScope.RANKED)).observations().size());
+        assertEquals(1, transport.currentSeasonCalls);
+        assertEquals(1_785_542_400L, transport.lastRankedSeason);
+    }
+
+    @Test
+    void invalidAutomaticRankedSeasonDoesNotBreakNormalOrWarScopes() throws Exception {
+        FakeTransport transport = new FakeTransport();
+        transport.currentSeason = "not-a-season";
+        ClashKingV2AdvancedStatsSource source = new ClashKingV2AdvancedStatsSource(transport, null);
+
+        assertEquals(AdvancedStatsCapabilityStatus.UNSUPPORTED,
+                source.capabilities().forOperation(AdvancedStatsScope.RANKED,
+                        AdvancedStatsCapabilityOperation.BOOTSTRAP).status());
+        assertEquals(0, source.fetch(request(AdvancedStatsScope.NORMAL)).observations().size());
+        assertEquals(0, source.fetch(request(AdvancedStatsScope.WAR)).observations().size());
+        assertEquals(1, transport.currentSeasonCalls);
+    }
+
+    @Test
+    void explicitRankedSeasonOverrideDoesNotCallCurrentDates() {
+        FakeTransport transport = new FakeTransport();
+        transport.currentSeason = "2026-08";
+        ClashKingV2AdvancedStatsSource source = new ClashKingV2AdvancedStatsSource(transport, 1_754_000_000L);
+
+        assertEquals("1754000000", source.seasonKey(AdvancedStatsScope.RANKED));
+        assertEquals(0, transport.currentSeasonCalls);
     }
 
     @Test
@@ -98,16 +140,15 @@ class ClashKingV2AdvancedStatsSourceTest {
         FakeTransport transport = new FakeTransport();
         transport.war = json("{\"items\":["
                 + "{\"side\":\"attacks\",\"war_id\":\"w1\",\"warEndTime\":\"20260809T200137.000Z\",\"attackOrder\":1,\"stars\":2},"
-                + "{\"side\":\"defenses\",\"war_id\":\"w1\",\"warEndTime\":\"20260809T200137Z\",\"attackOrder\":2}]}");
+                + "{\"side\":\"defenses\",\"war_id\":\"w1\",\"warEndTime\":\"20260809T200137.000Z\",\"attackOrder\":2}]}");
         ClashKingV2AdvancedStatsSource source = new ClashKingV2AdvancedStatsSource(transport, 1L);
 
         var page = source.fetch(request(AdvancedStatsScope.WAR));
 
         assertEquals(2, page.observations().size());
+        assertEquals(Instant.parse("2026-08-09T20:01:37Z"), page.observations().get(0).occurredAt());
         assertTrue(page.observations().get(0).attack());
         assertFalse(page.observations().get(1).attack());
-        assertEquals(Instant.parse("2026-08-09T20:01:37Z"), page.observations().get(0).occurredAt());
-        assertEquals(Instant.parse("2026-08-09T20:01:37Z"), page.observations().get(1).occurredAt());
     }
 
     private static HistoryRequest request(AdvancedStatsScope scope) {
@@ -124,6 +165,9 @@ class ClashKingV2AdvancedStatsSourceTest {
         private com.google.gson.JsonObject normal = json("{\"items\":[]}");
         private com.google.gson.JsonObject ranked = json("{\"battlelogs\":[]}");
         private com.google.gson.JsonObject war = json("{\"items\":[]}");
+        private String currentSeason = "";
+        private int currentSeasonCalls;
+        private long lastRankedSeason;
 
         @Override
         public com.google.gson.JsonObject normal(String playerTag, int limit, int days) {
@@ -132,12 +176,19 @@ class ClashKingV2AdvancedStatsSourceTest {
 
         @Override
         public com.google.gson.JsonObject ranked(String playerTag, long seasonSeconds, int limit) {
+            lastRankedSeason = seasonSeconds;
             return ranked;
         }
 
         @Override
         public com.google.gson.JsonObject war(String playerTag, long startSeconds, long endSeconds, int limit) {
             return war;
+        }
+
+        @Override
+        public String currentSeason() {
+            currentSeasonCalls++;
+            return currentSeason;
         }
     }
 }
