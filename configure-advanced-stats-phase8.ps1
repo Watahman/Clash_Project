@@ -9,7 +9,7 @@ param(
     [string]$ServiceName = "clashpanel-api",
     [string]$TagName = "phase8",
     [string]$SchedulerJobName = "clashpanel-advanced-stats-poll-phase8",
-    [string]$SecretName = "clashpanel-advanced-stats-scheduler-secret"
+    [string]$SecretName = "clashpanel-advanced-stats-scheduler-secret-phase8"
 )
 
 $ErrorActionPreference = "Stop"
@@ -176,7 +176,7 @@ Write-Host "  Normal production traffic to candidate: 0%"
 Write-Host "  Public enrollment: OFF"
 Write-Host "  Collection: OFF until explicit activation"
 Write-Host "  Rollout allowlist: developer UUID only"
-Write-Host "  Scheduler secret: Secret Manager"
+Write-Host "  Scheduler secret: isolated Phase 8 Secret Manager secret"
 Write-Host "  Preview scheduler job: $SchedulerJobName, every minute, PAUSED"
 Write-Host ""
 Write-Host "Next: run activate-advanced-stats-phase8.ps1 to enable collection only on the tagged preview revision." -ForegroundColor Yellow
