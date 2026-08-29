@@ -45,19 +45,31 @@ public final class AdvancedStatsCapabilityBasedSource implements AdvancedStatsHi
             throw new UnsupportedOperationException(selected.reason());
         }
         AdvancedStatsHistorySource primary = sourceFor(selected.sourceId());
+        List<AdvancedStatsHistorySource> candidates = fallbackCandidates(primary, request);
         Exception failure = null;
-        for (AdvancedStatsHistorySource candidate : fallbackCandidates(primary, request)) {
+        HistoryPage emptyPartial = null;
+        for (int index = 0; index < candidates.size(); index++) {
+            AdvancedStatsHistorySource candidate = candidates.get(index);
             try {
                 HistoryPage page = candidate.fetch(request);
                 if (page.coverage() == AdvancedStatsHistoryModels.Coverage.UNAVAILABLE) {
                     throw new AdvancedStatsSourceUnavailableException(candidate.sourceId() + " returned unavailable");
                 }
-                return page;
+
+                boolean canTryAnotherPartialSource = page.coverage() == AdvancedStatsHistoryModels.Coverage.PARTIAL
+                        && page.observations().isEmpty() && index + 1 < candidates.size();
+                if (!canTryAnotherPartialSource) return page;
+                if (emptyPartial == null) emptyPartial = page;
             } catch (Exception candidateFailure) {
                 if (failure == null) failure = candidateFailure;
                 else failure.addSuppressed(candidateFailure);
             }
         }
+
+        // A valid empty partial page is still a successful source result. If a
+        // fallback source was temporarily unavailable, do not turn the entire
+        // tracker into FAILED merely because it could not enrich that empty page.
+        if (emptyPartial != null) return emptyPartial;
         throw failure == null ? new IllegalStateException("No source candidate is configured") : failure;
     }
 
