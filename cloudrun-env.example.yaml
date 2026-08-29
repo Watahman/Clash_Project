@@ -36,8 +36,8 @@ ADVANCED_STATS_DEGRADED_THRESHOLD: "3"
 
 # ClashKing V2 historical source.
 CLASHKING_BASE_URL: "https://v2.api.clashk.ing"
-# Ranked history currently requires an explicit season epoch. Keep this value
-# updated until automatic season discovery is implemented.
+# Optional Unix-seconds override. Leave blank to resolve the active ranked
+# season automatically from ClashKing V2 /v2/dates/current.
 CLASHKING_RANKED_SEASON: ""
 
 # Secrets are intentionally NOT stored here.
