@@ -25,6 +25,10 @@ public final class AdvancedStatsCompactEventFingerprint {
     public static String forObservation(AttackObservation observation) {
         if (observation == null) throw new IllegalArgumentException("observation is required");
         NormalizedArmy army = normalizedArmy(observation);
+        if (observation.scope() == AdvancedStatsScope.NORMAL) {
+            return normalFingerprint(observation, army);
+        }
+
         String opponent = observation.scope() == AdvancedStatsScope.WAR ? "" : canonicalTag(observation.opponentTag());
         String eventIdentity = observation.scope() == AdvancedStatsScope.WAR
                 ? canonicalWarIdentity(observation.eventKey()) : "";
@@ -32,6 +36,24 @@ public final class AdvancedStatsCompactEventFingerprint {
                 Boolean.toString(observation.attack()), opponent, eventIdentity, canonicalInteger(observation.stars()),
                 canonicalNumber(observation.destructionPercentage()), Long.toString(observation.goldLooted()),
                 Long.toString(observation.elixirLooted()), Long.toString(observation.darkElixirLooted()), army.hash());
+        return sha256(value);
+    }
+
+    /**
+     * The official CoC rolling battle log has no stable battle timestamp. The
+     * same entry therefore receives a new observedAt on every poll. NORMAL
+     * receipts intentionally use the stable battle payload rather than time so
+     * a rolling entry is not counted again every 15 minutes and the same fight
+     * can also dedupe when ClashKing later exposes it with a real timestamp.
+     */
+    private static String normalFingerprint(AttackObservation observation, NormalizedArmy army) {
+        String opponent = canonicalTag(observation.opponentTag());
+        String fallbackIdentity = opponent.isBlank() ? normalizeEventKey(observation.eventKey()) : "";
+        String value = String.join("\u001f", observation.scope().apiValue(),
+                Boolean.toString(observation.attack()), opponent, fallbackIdentity,
+                canonicalInteger(observation.stars()), canonicalNumber(observation.destructionPercentage()),
+                Long.toString(observation.goldLooted()), Long.toString(observation.elixirLooted()),
+                Long.toString(observation.darkElixirLooted()), army.hash());
         return sha256(value);
     }
 
@@ -76,6 +98,10 @@ public final class AdvancedStatsCompactEventFingerprint {
 
     private static String canonicalTag(String value) {
         return value == null ? "" : value.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private static String normalizeEventKey(String value) {
+        return value == null ? "" : value.trim();
     }
 
     private static String canonicalWarIdentity(String eventKey) {
