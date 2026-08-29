@@ -1,5 +1,5 @@
 import { isAttackCountingState } from './cwl-war-state.js';
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { buildWeightedPrediction } from './cwl-chart-prediction.js';
 
 const DAY_COUNT = 7;

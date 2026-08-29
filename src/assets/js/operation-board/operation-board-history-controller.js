@@ -2,18 +2,18 @@ import {
     loadHistoricalCwlOverview,
     loadHistoricalCwlSeason,
     loadHistoricalCwlSeasons
-} from './historical-cwl-client.js?v=20260826-cwl-cache-reset';
+} from './historical-cwl-client.js?v=20260829-public-auth-v1';
 import {
     buildHistoricalCwlOverview,
     getLeagueChangeForSeason
 } from './historical-cwl-overview-model.js';
 import { reconstructHistoricalLeagues } from './historical-cwl-league-reconstructor.js?v=20260827-cwl-league-history';
-import { getClanInfoRequest } from '../API/API-Clan.js?v=20260826-live-refresh';
+import { getClanInfoRequest } from '../API/API-Clan.js?v=20260829-public-auth-v1';
 import {
     buildHistoricalSeasonModel,
     formatSeason
 } from './historical-cwl-season-model.js';
-import { competeT as t } from './compete-locales.js';
+import { competeT as t } from './compete-locales.js?v=20260829-public-auth-v1';
 
 export function createOperationBoardHistoryController({
                                                           refs,

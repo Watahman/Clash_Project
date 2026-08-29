@@ -1,6 +1,6 @@
 import { getCardTag } from './cwl-utils.js';
-import { getPlayerPerformance } from './player-performance-client.js';
-import { t } from '../i18n/i18n.js';
+import { getPlayerPerformance } from './player-performance-client.js?v=20260829-public-auth-v1';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { createPlayerInspectorController } from './cwl-player-inspector-controller.js';
 
 export function initPlayerInspector({ root = document } = {}) {

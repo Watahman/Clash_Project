@@ -1,7 +1,9 @@
-import { getAchievements, importAchievementBaseData } from '../Supabase/Supabase-Achievements.js';
-import { checkUserId } from '../Supabase/Supabase-User.js';
+import { getAchievements, importAchievementBaseData } from '../Supabase/Supabase-Achievements.js?v=20260829-public-auth-v1';
+import { checkUserId } from '../Supabase/Supabase-User.js?v=20260829-public-auth-v1';
+import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260829-public-auth-v1';
+import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
 import { getCurrentUserId } from '../utils/user.js';
-import { applyI18n, getLanguage, t } from '../i18n/i18n.js?v=20260823-achievement-card-assets-1';
+import { applyI18n, getLanguage, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import {
     collectLinkedAccounts,
     normalizePlayerTag,
@@ -13,7 +15,7 @@ import {
     renderAll,
     renderSources,
     renderAchievements
-} from './achievements-renderer.js?v=20260824-achievement-raster-color-1';
+} from './achievements-renderer.js?v=20260829-public-auth-v1';
 
 const PAGE_SIZE = 48;
 const ACCOUNT_STORAGE_KEY = 'clashpanel_achievements_account';
@@ -204,6 +206,12 @@ function bindEvents() {
 }
 
 async function initialize() {
+    const requestedFixture = await getRedesignFixture().catch(() => null);
+    const fixtureMode = requestedFixture?.module === 'achievements';
+    if (!fixtureMode) {
+        const authState = await resolveAuthState().catch(() => null);
+        if (authState?.status !== AUTH_STATES.AUTHENTICATED) return;
+    }
     captureRefs(); bindEvents(); applyI18n(document); updateMetadata();
     const fixture = await getAchievementsFixture().catch(error => { console.error('[achievements-fixture]', error); return null; });
     if (fixture) {
@@ -214,7 +222,7 @@ async function initialize() {
         return;
     }
     const userId = getCurrentUserId();
-    if (!userId) { setStatus(t('achievements.sessionError'), 'error'); renderAll(refs, state, PAGE_SIZE); return; }
+    if (!userId) return;
     try {
         state.accounts = collectLinkedAccounts(await checkUserId(userId)); state.selectedTag = selectInitialAccount(state.accounts);
         writeStorage(ACCOUNT_STORAGE_KEY, state.selectedTag); renderAll(refs, state, PAGE_SIZE);

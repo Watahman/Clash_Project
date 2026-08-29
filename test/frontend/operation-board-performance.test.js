@@ -10,13 +10,13 @@ vi.mock('../../src/assets/js/cwl/cwl-performance-prediction.js?v=20260729-2', ()
     applyCwlPredictions: performanceMocks.applyCwlPredictions,
     collectPredictionPlayerTags: performanceMocks.collectPredictionPlayerTags
 }));
-vi.mock('../../src/assets/js/cwl/player-performance-client.js', () => ({
+vi.mock('../../src/assets/js/cwl/player-performance-client.js?v=20260829-public-auth-v1', () => ({
     loadPlayerPerformanceBatch: performanceMocks.loadPlayerPerformanceBatch
 }));
 
 import {
     enrichWithHistoricalPerformance
-} from '../../src/assets/js/operation-board/operation-board-performance.js';
+} from '../../src/assets/js/operation-board/operation-board-performance.js?v=20260829-public-auth-v1';
 
 describe('Operation Board shared historical performance', () => {
     beforeEach(() => {

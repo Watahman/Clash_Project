@@ -1,22 +1,22 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { applyI18n, getLanguage, setLanguage } from '../../src/assets/js/i18n/i18n.js';
-import { getTranslationValue } from '../../src/assets/js/i18n/runtime-translations.js';
+import { applyI18n, getLanguage, setLanguage } from '../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1';
+import { getTranslationValue } from '../../src/assets/js/i18n/runtime-translations.js?v=20260829-public-auth-v1';
 import {
     applyCompeteI18n,
     competeLocales,
     competeT,
     initCompeteI18n
-} from '../../src/assets/js/operation-board/compete-locales.js';
-import { buildWarBoardReport } from '../../src/assets/js/war-operation-board/war-report-model.js';
-import { fixtureWar } from '../../src/assets/js/war-operation-board/war-page-utils.js';
+} from '../../src/assets/js/operation-board/compete-locales.js?v=20260829-public-auth-v1';
+import { buildWarBoardReport } from '../../src/assets/js/war-operation-board/war-report-model.js?v=20260829-public-auth-v1';
+import { fixtureWar } from '../../src/assets/js/war-operation-board/war-page-utils.js?v=20260829-public-auth-v1';
 import { buildWarHistory } from '../../src/assets/js/war-operation-board/war-history-model.js';
 import {
     renderRoster,
     renderScoreStrip,
     renderStats
-} from '../../src/assets/js/war-operation-board/war-renderer.js';
-import { renderWarHistory } from '../../src/assets/js/war-operation-board/war-history-renderer.js';
+} from '../../src/assets/js/war-operation-board/war-renderer.js?v=20260829-public-auth-v1';
+import { renderWarHistory } from '../../src/assets/js/war-operation-board/war-history-renderer.js?v=20260829-public-auth-v1';
 
 const LANGUAGES = ['nl', 'en', 'fr', 'de', 'es'];
 const WAR_FIXTURES = JSON.parse(readFileSync(

@@ -1,8 +1,8 @@
-import { getPlayerBasicData } from '../API/API-Functions.js';
-import { getClanInfoRequest } from '../API/API-Clan.js';
-import { createPlayerCard, createClanCard } from '../templates/CWLTemplates.js';
+import { getPlayerBasicData } from '../API/API-Functions.js?v=20260829-public-auth-v1';
+import { getClanInfoRequest } from '../API/API-Clan.js?v=20260829-public-auth-v1';
+import { createPlayerCard, createClanCard } from '../templates/CWLTemplates.js?v=20260829-public-auth-v1';
 import { normalizeTag, plannerHasPlayer } from './cwl-utils.js';
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { bindBackdropClick } from '../utils/backdrop-click.js';
 
 const TAG_CHARS = '0289PYLQGRJCUV';

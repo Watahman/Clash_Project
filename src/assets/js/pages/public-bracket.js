@@ -1,4 +1,4 @@
-import { getLanguage } from '../i18n/i18n.js';
+import { getLanguage } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 
 const copy = Object.freeze({
     en: Object.freeze({

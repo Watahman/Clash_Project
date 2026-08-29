@@ -1,8 +1,8 @@
-import { t } from '../i18n/i18n.js';
-import { getGroupInfo, getGroupMembers } from '../Supabase/Supabase-Group.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { getGroupInfo, getGroupMembers } from '../Supabase/Supabase-Group.js?v=20260829-public-auth-v1';
 import { applyRoleBadge, getCurrentUserRole, getMemberRole, isGroupAdmin } from '../groups/groups-roles.js';
 import { renderBadge } from '../groups/groups-badges.js';
-import { renderGroupMemberActivities } from '../groups/groups-member-activity.js';
+import { renderGroupMemberActivities } from '../groups/groups-member-activity.js?v=20260829-public-auth-v1';
 import { getNameInitials } from '../utils/name-initials.js';
 import { onUserProfileUpdate } from '../profile/profile-events.js';
 

@@ -3,7 +3,7 @@ import {
     startGlobalLoading,
     stopGlobalLoading,
     withGlobalLoading
-} from '../../src/assets/js/utils/loading-state.js';
+} from '../../src/assets/js/utils/loading-state.js?v=20260829-public-auth-v1';
 
 describe('global loading state', () => {
     beforeEach(() => {

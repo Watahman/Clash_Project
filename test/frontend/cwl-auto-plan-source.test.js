@@ -5,10 +5,10 @@ const mocks = vi.hoisted(() => ({
     getClanCurrentWarLeagueGroupRequest: vi.fn()
 }));
 
-vi.mock('../../src/assets/js/cwl/cwl-plan-io.js', () => ({
+vi.mock('../../src/assets/js/cwl/cwl-plan-io.js?v=20260829-public-auth-v1', () => ({
     savePlan: mocks.savePlan
 }));
-vi.mock('../../src/assets/js/API/API-Clan.js', () => ({
+vi.mock('../../src/assets/js/API/API-Clan.js?v=20260829-public-auth-v1', () => ({
     getClanCurrentWarLeagueGroupRequest: mocks.getClanCurrentWarLeagueGroupRequest
 }));
 
@@ -43,7 +43,7 @@ describe('CWL Auto Plan source adapter', () => {
             }]
         });
         const { loadCwlRegistrationLocks } = await import(
-            '../../src/assets/js/cwl/auto-plan/cwl-auto-plan-source.js'
+            '../../src/assets/js/cwl/auto-plan/cwl-auto-plan-source.js?v=20260829-public-auth-v1'
         );
 
         const locks = await loadCwlRegistrationLocks([
@@ -60,7 +60,7 @@ describe('CWL Auto Plan source adapter', () => {
 
     it('applies roster placement and roles only after preview confirmation', async () => {
         const { applyAutoPlanResult } = await import(
-            '../../src/assets/js/cwl/auto-plan/cwl-auto-plan-source.js'
+            '../../src/assets/js/cwl/auto-plan/cwl-auto-plan-source.js?v=20260829-public-auth-v1'
         );
 
         await applyAutoPlanResult({

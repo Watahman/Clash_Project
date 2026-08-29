@@ -10,14 +10,21 @@ const playerApiMocks = vi.hoisted(() => ({
     getPlayerBattleLogRequest: vi.fn(),
     getPlayerInfoRequest: vi.fn()
 }));
+const authMocks = vi.hoisted(() => ({
+    syncAuthSession: vi.fn().mockResolvedValue(null),
+    onAuthStateChange: vi.fn(),
+    requireAuthForAction: vi.fn()
+}));
 
-vi.mock('../../src/assets/js/API/API-Clan.js', () => clanApiMocks);
-vi.mock('../../src/assets/js/API/API-Clan.js?v=20260826-live-refresh', () => clanApiMocks);
-vi.mock('../../src/assets/js/API/API-Player.js', () => playerApiMocks);
+vi.mock('../../src/assets/js/API/API-Clan.js?v=20260829-public-auth-v1', () => clanApiMocks);
+vi.mock('../../src/assets/js/API/API-Clan.js?v=20260829-public-auth-v1', () => clanApiMocks);
+vi.mock('../../src/assets/js/API/API-Player.js?v=20260829-public-auth-v1', () => playerApiMocks);
+vi.mock('../../src/assets/js/API/API-Player.js?v=20260829-public-auth-v1', () => playerApiMocks);
 
-vi.mock('../../src/assets/js/auth/auth-client.js', () => ({ syncAuthSession: vi.fn().mockResolvedValue(null) }));
+vi.mock('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1', () => authMocks);
+vi.mock('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1', () => authMocks);
 vi.mock('../../src/assets/js/utils/user.js', () => ({ getCurrentUserId: () => null }));
-vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
+vi.mock('../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1', () => ({
     initI18n: vi.fn(),
     t: (key, values = {}) => ({
         'groups.login': 'Log in',
@@ -74,6 +81,8 @@ describe('CWL Operation Board', () => {
     beforeEach(() => {
         vi.resetModules();
         vi.clearAllMocks();
+        authMocks.syncAuthSession.mockResolvedValue(null);
+        authMocks.onAuthStateChange.mockImplementation(() => () => {});
         clanApiMocks.getClanInfoRequest.mockResolvedValue({ tag: '#PQL', name: 'Belgian Warriors' });
         clanApiMocks.getClanMembersRequest.mockResolvedValue({ items: [] });
         clanApiMocks.getClanCurrentWarLeagueGroupRequest.mockResolvedValue({ state: 'inWar', rounds: [{ warTags: ['#0'] }] });
@@ -103,7 +112,7 @@ describe('CWL Operation Board', () => {
     });
 
     it('renders imported live data with all standings rows and marks the own clan', async () => {
-        const { applyImportedJson } = await import('../../src/assets/js/pages/cwl-operation-board.js');
+        const { applyImportedJson } = await import('../../src/assets/js/pages/cwl-operation-board.js?v=20260829-public-auth-v1');
         await vi.waitFor(() => expect(document.querySelector('#op-roster-body').children.length).toBe(1));
 
         applyImportedJson({
@@ -157,7 +166,7 @@ describe('CWL Operation Board', () => {
         const noCwlError = Object.assign(new Error('notFound'), { status: 404 });
         clanApiMocks.getClanCurrentWarLeagueGroupRequest.mockRejectedValueOnce(noCwlError);
 
-        await import('../../src/assets/js/pages/cwl-operation-board.js');
+        await import('../../src/assets/js/pages/cwl-operation-board.js?v=20260829-public-auth-v1');
         await vi.waitFor(() => expect(document.querySelector('#op-roster-body').children.length).toBe(1));
 
         document.querySelector('#op-standalone-clan-tag').value = '#PQL';
@@ -181,7 +190,7 @@ describe('CWL Operation Board', () => {
             items: [{ tag: '#P0L', name: 'Emile', townHallLevel: 17 }]
         });
 
-        await import('../../src/assets/js/pages/cwl-operation-board.js');
+        await import('../../src/assets/js/pages/cwl-operation-board.js?v=20260829-public-auth-v1');
         await vi.waitFor(() => expect(document.querySelector('#op-roster-body').children.length).toBe(1));
 
         document.querySelector('#op-standalone-clan-tag').value = '#PQL';
@@ -233,7 +242,7 @@ describe('CWL Operation Board', () => {
             }))
             .mockResolvedValueOnce({ state: 'inWar', rounds: [{ warTags: ['#0'] }] });
 
-        await import('../../src/assets/js/pages/cwl-operation-board.js');
+        await import('../../src/assets/js/pages/cwl-operation-board.js?v=20260829-public-auth-v1');
         await vi.waitFor(() => expect(document.querySelector('#op-roster-body').children.length).toBe(1));
 
         const clanInput = document.querySelector('#op-standalone-clan-tag');
@@ -250,6 +259,76 @@ describe('CWL Operation Board', () => {
 
         expect(document.querySelector('#op-roster-body').textContent).toContain('Second Player');
         expect(document.querySelector('#op-roster-body').textContent).not.toContain('First Player');
+    });
+
+    it('clears private report state on logout while keeping direct clan loading available', async () => {
+        const userState = {
+            status: 'authenticated',
+            session: { user: { id: 'user-a' } }
+        };
+        let authListener;
+        authMocks.syncAuthSession.mockResolvedValue(userState.session);
+        authMocks.onAuthStateChange.mockImplementation(callback => {
+            authListener = callback;
+            return () => {};
+        });
+        authMocks.requireAuthForAction.mockResolvedValue({
+            executed: true,
+            state: userState,
+            result: []
+        });
+
+        await import('../../src/assets/js/pages/cwl-operation-board.js?v=20260829-public-auth-v1');
+        await vi.waitFor(() => expect(authListener).toBeTypeOf('function'));
+        const clanInput = document.querySelector('#op-standalone-clan-tag');
+        clanInput.value = '#PQL';
+        document.querySelector('#op-standalone-load').click();
+        await vi.waitFor(() => expect(document.querySelector('#op-live-state').dataset.state).toBe('ready'));
+        expect(document.querySelector('#op-board-context').textContent).toContain('PQL');
+
+        authListener(null, { status: 'guest', session: null });
+
+        expect(document.querySelector('#op-roster-body').textContent).not.toContain('PQL');
+        expect(document.querySelector('#op-plan-select').options).toHaveLength(1);
+        expect(document.querySelector('#op-plan-select').value).toBe('');
+        clanInput.value = '#PQL';
+        document.querySelector('#op-standalone-load').click();
+        await vi.waitFor(() => expect(document.querySelector('#op-live-state').dataset.state).toBe('ready'));
+    });
+
+    it('authorizes a saved-plan selection exactly once', async () => {
+        const userState = {
+            status: 'authenticated',
+            session: { user: { id: 'user-a' } }
+        };
+        authMocks.syncAuthSession.mockResolvedValue(userState.session);
+        authMocks.requireAuthForAction
+            .mockResolvedValueOnce({ executed: true, state: userState, result: [] })
+            .mockResolvedValueOnce({
+                executed: true,
+                state: userState,
+                result: {
+                    id: 'plan-a',
+                    name: 'Plan A',
+                    info: { clans: [{ tag: '#PQL', name: 'Belgian Warriors', players: [] }] }
+                }
+            });
+
+        await import('../../src/assets/js/pages/cwl-operation-board.js?v=20260829-public-auth-v1');
+        await vi.waitFor(() => expect(document.querySelector('#op-plan-select').options.length).toBe(1));
+        authMocks.requireAuthForAction.mockClear();
+
+        const planSelect = document.querySelector('#op-plan-select');
+        const planOption = document.createElement('option');
+        planOption.value = 'plan-a';
+        planOption.textContent = 'Plan A';
+        planSelect.appendChild(planOption);
+        planSelect.value = 'plan-a';
+        planSelect.dispatchEvent(new Event('change'));
+
+        await vi.waitFor(() => expect(document.querySelector('#op-clan-select').options.length).toBe(2));
+        expect(authMocks.requireAuthForAction).toHaveBeenCalledOnce();
+        expect(authMocks.requireAuthForAction.mock.calls[0][0].reason).toBe('saved-plan');
     });
 
 });

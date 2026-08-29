@@ -1,10 +1,10 @@
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { hasReachedPlanLimit } from '../cwl/cwl-plan-limits.js';
 import {
     copyPlan,
     deletePlan,
     renamePlan
-} from '../Supabase/Supabase-Plan.js';
+} from '../Supabase/Supabase-Plan.js?v=20260829-public-auth-v1';
 
 export function createSavedPlansActions(options) {
     return {
@@ -101,7 +101,7 @@ async function removePlan(plan, options) {
         await deletePlan(plan.id, options.getUserId());
         const remaining = options.getPlans().filter(item => item.id !== plan.id);
         options.setPlans(remaining);
-        if (localStorage.getItem('planner_id') === plan.id) localStorage.removeItem('planner_id');
+        options.clearActivePlan?.(plan.id);
         options.setControlsEnabled(remaining.length > 0);
         options.render();
         options.setStatus(t('drafts.deleted'), 'success');

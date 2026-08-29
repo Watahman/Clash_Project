@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
     renderLeagueSections
-} from '../../src/assets/js/operation-board/operation-board-league-renderer.js';
+} from '../../src/assets/js/operation-board/operation-board-league-renderer.js?v=20260829-public-auth-v1';
 
 describe('Operation Board League renderer', () => {
     beforeEach(() => {

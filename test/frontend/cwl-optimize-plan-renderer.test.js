@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { renderOptimizePlanPreview } from '../../src/assets/js/cwl/optimize-plan/cwl-optimize-plan-renderer.js';
+import { renderOptimizePlanPreview } from '../../src/assets/js/cwl/optimize-plan/cwl-optimize-plan-renderer.js?v=20260829-public-auth-v1';
 
 describe('CWL Optimize Plan preview', () => {
     beforeEach(() => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { setLanguage } from '../../src/assets/js/i18n/i18n.js';
+import { setLanguage } from '../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1';
 import { buildWarHistory } from '../../src/assets/js/war-operation-board/war-history-model.js';
-import { renderWarHistory } from '../../src/assets/js/war-operation-board/war-history-renderer.js';
+import { renderWarHistory } from '../../src/assets/js/war-operation-board/war-history-renderer.js?v=20260829-public-auth-v1';
 
 describe('regular war history', () => {
     it('excludes CWL aggregates from all regular-war summary metrics', () => {

@@ -1,10 +1,10 @@
-import { t } from '../../i18n/i18n.js';
+import { t } from '../../i18n/i18n.js?v=20260829-public-auth-v1';
 import { buildAutoPlan } from './cwl-auto-planner.js';
-import { renderAutoPlanPreview } from './cwl-auto-plan-renderer.js';
+import { renderAutoPlanPreview } from './cwl-auto-plan-renderer.js?v=20260829-public-auth-v1';
 import {
     applyAutoPlanResult,
     collectAutoPlanInput
-} from './cwl-auto-plan-source.js';
+} from './cwl-auto-plan-source.js?v=20260829-public-auth-v1';
 
 let refs;
 let baseInput;

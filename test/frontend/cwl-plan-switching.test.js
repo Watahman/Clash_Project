@@ -14,22 +14,22 @@ vi.mock('../../src/assets/js/Data/config.js', () => ({
     setCanAutosave: mocks.setCanAutosave,
     setLoading: mocks.setLoading
 }));
-vi.mock('../../src/assets/js/templates/CWLTemplates.js', () => ({
+vi.mock('../../src/assets/js/templates/CWLTemplates.js?v=20260829-public-auth-v1', () => ({
     createPlayerCard: mocks.createPlayerCard,
     createClanCard: mocks.createClanCard
 }));
-vi.mock('../../src/assets/js/Supabase/Supabase-Plan.js', () => ({
+vi.mock('../../src/assets/js/Supabase/Supabase-Plan.js?v=20260829-public-auth-v1', () => ({
     getAllPlansFromDatabase: vi.fn(),
     getPlanFromDatabase: vi.fn(planId => new Promise((resolve, reject) => {
         mocks.pending.set(planId, { resolve, reject });
     })),
     setPlanToDatabase: vi.fn()
 }));
-vi.mock('../../src/assets/js/API/API-Clan.js', () => ({ getClanInfoRequest: vi.fn() }));
-vi.mock('../../src/assets/js/API/API-Functions.js', () => ({ getPlayerBasicData: vi.fn() }));
+vi.mock('../../src/assets/js/API/API-Clan.js?v=20260829-public-auth-v1', () => ({ getClanInfoRequest: vi.fn() }));
+vi.mock('../../src/assets/js/API/API-Functions.js?v=20260829-public-auth-v1', () => ({ getPlayerBasicData: vi.fn() }));
 vi.mock('../../src/assets/js/utils/user.js', () => ({ getCurrentUserId: () => 'user-1' }));
-vi.mock('../../src/assets/js/i18n/i18n.js', () => ({ t: key => key }));
-vi.mock('../../src/assets/js/cwl/cwl-availability.js', () => ({
+vi.mock('../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1', () => ({ t: key => key }));
+vi.mock('../../src/assets/js/cwl/cwl-availability.js?v=20260829-public-auth-v1', () => ({
     getActiveCwlPollMeta: () => ({ groupId: '', pollId: '' })
 }));
 
@@ -52,7 +52,7 @@ describe('CWL plan switching', () => {
     });
 
     it('does not let a stale plan A response overwrite the newer plan B', async () => {
-        const { initPlanIO, loadPlanById } = await import('../../src/assets/js/cwl/cwl-plan-io.js');
+        const { initPlanIO, loadPlanById } = await import('../../src/assets/js/cwl/cwl-plan-io.js?v=20260829-public-auth-v1');
         const refs = {
             availablePlayers: document.querySelector('#available'),
             allClans: document.querySelector('#clans'),
@@ -86,7 +86,7 @@ describe('CWL plan switching', () => {
     });
 
     it('restores the previous plan id when the next plan fails to load', async () => {
-        const { initPlanIO, loadPlanById } = await import('../../src/assets/js/cwl/cwl-plan-io.js');
+        const { initPlanIO, loadPlanById } = await import('../../src/assets/js/cwl/cwl-plan-io.js?v=20260829-public-auth-v1');
         const refs = {
             availablePlayers: document.querySelector('#available'),
             allClans: document.querySelector('#clans'),
@@ -120,7 +120,7 @@ describe('CWL plan switching', () => {
 
     it('round-trips clan and player priorities through plan save/load data', async () => {
         const { getCurrentPlanSnapshot, initPlanIO, loadPlanById } = await import(
-            '../../src/assets/js/cwl/cwl-plan-io.js'
+            '../../src/assets/js/cwl/cwl-plan-io.js?v=20260829-public-auth-v1'
         );
         const refs = {
             availablePlayers: document.querySelector('#available'),

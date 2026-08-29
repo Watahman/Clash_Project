@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
+vi.mock('../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1', () => ({
     t: (key, values = {}) => ({
         'op.bonusRecipientsUnset': 'Enter the available number',
         'op.bonusRecipientsManual': 'Manually configured',
@@ -43,7 +43,7 @@ describe('Operation Board bonus renderer', () => {
 
     it('supports manual recipients, strategy switching and score details', async () => {
         const { renderBonusCalculator } = await import(
-            '../../src/assets/js/operation-board/operation-board-bonus-renderer.js'
+            '../../src/assets/js/operation-board/operation-board-bonus-renderer.js?v=20260829-public-auth-v1'
         );
         const root = document.querySelector('#panel');
         const refs = {

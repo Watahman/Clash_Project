@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => ({
     applyAutoPlanResult: vi.fn(() => Promise.resolve())
 }));
 
-vi.mock('../../src/assets/js/cwl/auto-plan/cwl-auto-plan-source.js', () => mocks);
+vi.mock('../../src/assets/js/cwl/auto-plan/cwl-auto-plan-source.js?v=20260829-public-auth-v1', () => mocks);
 
 describe('CWL Optimize Plan controller', () => {
     beforeEach(() => {
@@ -26,7 +26,7 @@ describe('CWL Optimize Plan controller', () => {
 
     it('does not mutate the plan until an accepted suggestion is applied', async () => {
         const { getOptimizePlanPreview, initOptimizePlan } = await import(
-            '../../src/assets/js/cwl/optimize-plan/cwl-optimize-plan-ui.js'
+            '../../src/assets/js/cwl/optimize-plan/cwl-optimize-plan-ui.js?v=20260829-public-auth-v1'
         );
         initOptimizePlan();
 
@@ -66,7 +66,7 @@ describe('CWL Optimize Plan controller', () => {
     }) => {
         mocks.collectAutoPlanInput.mockResolvedValue(incompleteInput);
         const { initOptimizePlan } = await import(
-            '../../src/assets/js/cwl/optimize-plan/cwl-optimize-plan-ui.js'
+            '../../src/assets/js/cwl/optimize-plan/cwl-optimize-plan-ui.js?v=20260829-public-auth-v1'
         );
         initOptimizePlan();
 

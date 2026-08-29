@@ -1,5 +1,5 @@
 import { normalizeWarState } from '../cwl/cwl-war-state.js';
-import { competeT as t } from '../operation-board/compete-locales.js';
+import { competeT as t } from '../operation-board/compete-locales.js?v=20260829-public-auth-v1';
 import { getWarSide, normalizeTag, number } from '../operation-board/operation-board-utils.js';
 
 export class ActiveCwlWarError extends Error {

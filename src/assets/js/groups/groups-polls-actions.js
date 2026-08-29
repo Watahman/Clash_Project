@@ -1,12 +1,12 @@
-import { answerGroupPoll, createGroupPoll, deleteGroupPoll, getGroupPolls, sendGroupPollReminder, setGroupPollStatus } from '../Supabase/Supabase-GroupPolls.js';
-import { checkUserId } from '../Supabase/Supabase-User.js';
+import { answerGroupPoll, createGroupPoll, deleteGroupPoll, getGroupPolls, sendGroupPollReminder, setGroupPollStatus } from '../Supabase/Supabase-GroupPolls.js?v=20260829-public-auth-v1';
+import { checkUserId } from '../Supabase/Supabase-User.js?v=20260829-public-auth-v1';
 import { getCurrentUserId } from '../utils/user.js';
-import { withGlobalLoading } from '../utils/loading-state.js';
+import { withGlobalLoading } from '../utils/loading-state.js?v=20260829-public-auth-v1';
 import { closeGroupDialog, openGroupDialog } from './groups-dialog.js?v=20260813-redesign';
 import { isGroupAdmin } from './groups-roles.js';
 import { clonePolls, findLatestOpenCwlPoll, MAX_POLLS_PER_GROUP, normalizePolls, readPollAccountAnswer, resetPollView } from './groups-polls-state.js';
 import { OPEN_POLL_STORAGE_KEY } from '../notifications/poll-notifications.js';
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 
 export function createPollActions({ elements, state, renderer, getUserId = getCurrentUserId, loading = withGlobalLoading }) {
     const isAdmin = () => isGroupAdmin(state.currentRole);

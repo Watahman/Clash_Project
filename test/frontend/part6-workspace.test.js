@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { translations } from '../../src/assets/js/i18n/translations.js';
-import { initProfileSettings } from '../../src/assets/js/profile/profile_settings.js';
+import { translations } from '../../src/assets/js/i18n/translations.js?v=20260829-public-auth-v1';
+import { initProfileSettings } from '../../src/assets/js/profile/profile_settings.js?v=20260829-public-auth-v1';
 
 describe('Part 6 bracket workspace', () => {
     it('separates setup from the generated result while keeping every bracket action', () => {

@@ -1,9 +1,9 @@
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import {
     normalizeImportedReport,
     readOperationReportFile
-} from './operation-board-import-export.js';
-import { getPlanClans, normalizePlan } from './operation-board-plan-model.js';
+} from './operation-board-import-export.js?v=20260829-public-auth-v1';
+import { getPlanClans, normalizePlan } from './operation-board-plan-model.js?v=20260829-public-auth-v1';
 
 export function createOperationBoardImportController({
     refs,

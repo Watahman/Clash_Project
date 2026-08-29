@@ -1,9 +1,9 @@
-import { updateUserName } from "../Supabase/Supabase-User.js";
-import { mountLanguageSwitcher, t } from "../i18n/i18n.js";
-import { clearCachePrefix, invalidateUserCache } from "../cache/local-cache.js";
+import { updateUserName } from "../Supabase/Supabase-User.js?v=20260829-public-auth-v1";
+import { mountLanguageSwitcher, t } from "../i18n/i18n.js?v=20260829-public-auth-v1";
+import { clearCachePrefix, invalidateUserCache } from "../cache/local-cache.js?v=20260829-public-auth-v1";
 import { getCurrentUserId } from "../utils/user.js";
-import { getThemePreference, setThemePreference } from "../theme/theme-manager.js";
-import { changeAuthenticatedPassword } from "../auth/auth-client.js";
+import { getThemePreference, setThemePreference } from "../theme/theme-manager.js?v=20260829-public-auth-v1";
+import { changeAuthenticatedPassword } from "../auth/auth-client.js?v=20260829-public-auth-v1";
 import { isStrongPassword } from "../utils/password.js";
 import { publishUserProfileUpdate } from "./profile-events.js";
 

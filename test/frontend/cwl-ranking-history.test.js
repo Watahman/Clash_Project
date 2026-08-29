@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
+vi.mock('../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1', () => ({
     t: (key, values = {}) => ({
         'op.positionChartLabel': 'Positie per CWL-dag',
         'op.chartDaysAvailable': `${values.count}/${values.total} dagen`,
@@ -50,7 +50,7 @@ describe('CWL ranking history', () => {
     });
 
     it('reconstructs cumulative positions only from fully completed rounds', async () => {
-        const { buildRankingHistory } = await import('../../src/assets/js/cwl/cwl-ranking-history.js');
+        const { buildRankingHistory } = await import('../../src/assets/js/cwl/cwl-ranking-history.js?v=20260829-public-auth-v1');
         const buildStandings = vi.fn(standingsForHistory);
         const history = buildRankingHistory({
             leagueGroup: leagueGroup(),
@@ -71,7 +71,7 @@ describe('CWL ranking history', () => {
     });
 
     it('leaves the day and every later position empty when an expected war is missing', async () => {
-        const { buildRankingHistory } = await import('../../src/assets/js/cwl/cwl-ranking-history.js');
+        const { buildRankingHistory } = await import('../../src/assets/js/cwl/cwl-ranking-history.js?v=20260829-public-auth-v1');
         const buildStandings = vi.fn(standingsForHistory);
         const history = buildRankingHistory({
             leagueGroup: leagueGroup(),
@@ -86,7 +86,7 @@ describe('CWL ranking history', () => {
     });
 
     it('does not publish a position for a live or partially completed round', async () => {
-        const { buildRankingHistory } = await import('../../src/assets/js/cwl/cwl-ranking-history.js');
+        const { buildRankingHistory } = await import('../../src/assets/js/cwl/cwl-ranking-history.js?v=20260829-public-auth-v1');
         const buildStandings = vi.fn(standingsForHistory);
         const liveWar = { ...completedWar(2, '#WAR3', '#PQL', '#BBB'), state: 'inWar' };
         const history = buildRankingHistory({
@@ -107,7 +107,7 @@ describe('CWL ranking history', () => {
     });
 
     it('renders rank one at the top with accessible cumulative details', async () => {
-        const { renderRankingHistoryChart } = await import('../../src/assets/js/cwl/cwl-ranking-history.js');
+        const { renderRankingHistoryChart } = await import('../../src/assets/js/cwl/cwl-ranking-history.js?v=20260829-public-auth-v1');
         const container = document.querySelector('#chart');
         renderRankingHistoryChart(container, [
             { day: 1, rank: 3, clanCount: 4, stars: 31, destruction: 89.4 },
@@ -125,7 +125,7 @@ describe('CWL ranking history', () => {
         const {
             buildRankingPrediction,
             renderRankingHistoryChart
-        } = await import('../../src/assets/js/cwl/cwl-ranking-history.js');
+        } = await import('../../src/assets/js/cwl/cwl-ranking-history.js?v=20260829-public-auth-v1');
         const history = [
             { day: 1, rank: 3, clanCount: 4, stars: 31, destruction: 89.4 },
             ...Array.from({ length: 6 }, (_, index) => ({

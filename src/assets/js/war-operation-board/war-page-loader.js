@@ -1,12 +1,12 @@
-import { getClanCurrentWarRequest, getClanWarLogRequest } from '../API/API-Clan.js';
-import { competeT as t } from '../operation-board/compete-locales.js';
-import { enrichWithHistoricalPerformance } from '../operation-board/operation-board-performance.js?v=20260729-2';
-import { fixtureWar, setEmptyState } from './war-page-utils.js';
+import { getClanCurrentWarRequest, getClanWarLogRequest } from '../API/API-Clan.js?v=20260829-public-auth-v1';
+import { competeT as t } from '../operation-board/compete-locales.js?v=20260829-public-auth-v1';
+import { enrichWithHistoricalPerformance } from '../operation-board/operation-board-performance.js?v=20260829-public-auth-v1';
+import { fixtureWar, setEmptyState } from './war-page-utils.js?v=20260829-public-auth-v1';
 import { buildWarHistory } from './war-history-model.js';
 import {
     ActiveCwlWarError,
     buildWarBoardReport
-} from './war-report-model.js';
+} from './war-report-model.js?v=20260829-public-auth-v1';
 
 export function createWarLoadController({
     refs,

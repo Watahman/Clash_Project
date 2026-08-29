@@ -34,6 +34,7 @@ public class API_Player {
 
     public void postPlayerVerifyToken() {
         server.createContext(conf._EXT_PLAYER_VERIFY_TOKEN, exchange -> utils.handlePost(exchange, ex -> {
+            utils.requireAuthenticatedUser(ex);
             JsonObject json    = utils.parseBody(ex);
             String playerTag   = CacheKeys.requireValidTag(utils.requireString(json, "playerID"));
             String playerToken = utils.requireString(json, "playerToken");

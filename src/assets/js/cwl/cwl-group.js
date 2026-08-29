@@ -1,22 +1,20 @@
-import { getGroupClans, getGroupInfo, getGroupMembers, getGroupsOfUser } from "../Supabase/Supabase-Group.js";
-import { getGroupPolls } from "../Supabase/Supabase-GroupPolls.js";
-import { getUserBases } from "../Supabase/Supabase-User.js";
-import { createClanCard, createPlayerCard } from "../templates/CWLTemplates.js";
-import { getCurrentUserId } from "../utils/user.js";
-import { clearActiveCwlPoll, getActiveCwlPollMeta, setActiveCwlPoll } from "./cwl-availability.js";
-import { escapeCssIdentifier, normalizeTag, uniquePlayers } from "./cwl-utils.js";
-import { t } from "../i18n/i18n.js";
+import { createClanCard, createPlayerCard } from "../templates/CWLTemplates.js?v=20260829-public-auth-v1";
+import { clearActiveCwlPoll, getActiveCwlPollMeta, setActiveCwlPoll } from "./cwl-availability.js?v=20260829-public-auth-v1";
+import { escapeCssIdentifier, normalizeTag } from "./cwl-utils.js";
+import { createGroupSourceController } from "./cwl-group-source-controller.js?v=20260829-public-auth-v1";
+import { t } from "../i18n/i18n.js?v=20260829-public-auth-v1";
 import { ASSET_FALLBACKS } from "../assets/entity-assets.js";
 
 let refs = {};
-let currentUserId = '';
-let loadToken = 0;
-const groupState = new Map();
-const pollCatalog = new Map();
-let pollCatalogGroups = [];
+const groupSource = createGroupSourceController({
+    onAuthStateChange: handleAuthStateChange,
+    onGroupsLoaded: handleGroupsLoaded,
+    onGroupsLoadError: handleGroupsLoadError,
+    onGroupLoaded: handleGroupLoaded,
+    onGroupLoadError: handleGroupLoadError
+});
 
 export function initGroupOverlay(selectGroup, overlayRefs = {}) {
-    currentUserId = getCurrentUserId();
     refs = {
         selectGroup,
         loadGroupBtn: overlayRefs.loadGroupBtn || document.querySelector('#cwl-overlay-load-group-button'),
@@ -27,14 +25,15 @@ export function initGroupOverlay(selectGroup, overlayRefs = {}) {
         rosterPollSelect: overlayRefs.rosterPollSelect || document.querySelector('#cwl-roster-poll-select')
     };
 
+    groupSource.init(overlayRefs.authState);
     resetPollSelect();
     setRosterPollSelectState('loading');
-    if (!currentUserId || !refs.selectGroup) {
+    if (!groupSource.canRead() || !groupSource.getUserId() || !refs.selectGroup) {
         setRosterPollSelectState('empty');
         return;
     }
 
-    loadGroups();
+    void groupSource.loadGroups();
     refs.selectGroup.addEventListener('change', () => loadSelectedGroup(refs.selectGroup.value));
     refs.pollSelect?.addEventListener('change', () => activateSelectedPoll());
     refs.rosterPollSelect?.addEventListener('change', activateRosterPollSelection);
@@ -44,6 +43,53 @@ export function initGroupOverlay(selectGroup, overlayRefs = {}) {
         applyPlannerGroupSelection(groupId, pollId);
     });
     window.addEventListener('clashtools:language-changed', renderRosterPollSelect);
+}
+
+function handleAuthStateChange(state) {
+    clearActiveCwlPoll();
+    clearGroupPreview();
+    refs.linkedClans?.replaceChildren();
+    refs.linkedClans?.classList.add('hidden');
+    refs.selectGroup?.replaceChildren();
+    resetPollSelect();
+    setRosterPollSelectState(groupSource.canRead() ? 'loading' : 'empty');
+}
+
+function handleGroupsLoaded(groups) {
+    if (!groups.length) {
+        setRosterPollSelectState('empty');
+        return;
+    }
+    groups.forEach(group => appendGroupOption(group));
+    const polls = groupSource.getPollCatalog();
+    if (!polls.size) {
+        const results = groupSource.getPollCatalogGroups();
+        setRosterPollSelectState(results.every(result => result.failed) ? 'error' : 'empty');
+        return;
+    }
+    renderRosterPollSelect();
+}
+
+function handleGroupsLoadError() {
+    setRosterPollSelectState('error');
+}
+
+function handleGroupLoaded(groupId, preferredPollId) {
+    renderGroupPreview(groupId);
+    renderLinkedClans(groupId);
+    renderPollSelect(groupId, preferredPollId);
+}
+
+function handleGroupLoadError() {
+    showPreviewMessage(t('cwl.groupLoadError'));
+}
+
+function appendGroupOption(group) {
+    if (!group?.id || refs.selectGroup.querySelector(`option[value="${escapeCssIdentifier(group.id)}"]`)) return;
+    const optionElement = document.createElement('option');
+    optionElement.value = group.id;
+    optionElement.textContent = group.name;
+    refs.selectGroup.appendChild(optionElement);
 }
 
 export async function applyPlannerGroupSelection(groupId, pollId = '') {
@@ -56,122 +102,17 @@ export async function applyPlannerGroupSelection(groupId, pollId = '') {
     await loadSelectedGroup(groupId, pollId);
 }
 
-async function loadGroups() {
-    try {
-        const memberships = await getGroupsOfUser(currentUserId);
-        if (!Array.isArray(memberships)) {
-            setRosterPollSelectState('empty');
-            return;
-        }
-        const groups = (await Promise.all(memberships.map(async membership => {
-            const info = await getGroupInfo(membership.group_id).catch(() => null);
-            return Array.isArray(info) ? info[0] : info;
-        }))).filter(group => group?.id);
-
-        for (const group of groups) {
-            if (!group?.id || refs.selectGroup.querySelector(`option[value="${escapeCssIdentifier(group.id)}"]`)) continue;
-            const option = document.createElement('option');
-            option.value = group.id;
-            option.textContent = group.name;
-            refs.selectGroup.appendChild(option);
-        }
-        await loadPollCatalog(groups);
-    } catch (error) {
-        console.error(error);
-        setRosterPollSelectState('error');
-    }
-}
-
-async function loadPollCatalog(groups) {
-    pollCatalog.clear();
-    pollCatalogGroups = [];
-    if (!groups.length) {
-        setRosterPollSelectState('empty');
-        return;
-    }
-
-    const results = await Promise.all(groups.map(async group => {
-        try {
-            const polls = normalizePolls(await getGroupPolls(group.id, currentUserId));
-            return { group, polls, failed: false };
-        } catch (error) {
-            console.error(error);
-            return { group, polls: [], failed: true };
-        }
-    }));
-
-    pollCatalogGroups = results;
-    results.forEach(({ group, polls }) => {
-        const existing = groupState.get(group.id) || {};
-        groupState.set(group.id, { ...existing, polls });
-        polls.forEach(poll => pollCatalog.set(pollSelectionValue(group.id, poll.id), { group, poll }));
-    });
-
-    if (!pollCatalog.size) {
-        setRosterPollSelectState(results.every(result => result.failed) ? 'error' : 'empty');
-        return;
-    }
-    renderRosterPollSelect();
-}
-
 async function loadSelectedGroup(groupId, preferredPollId = '') {
-    const token = ++loadToken;
     clearGroupPreview();
     resetPollSelect();
     clearActiveCwlPoll();
     syncRosterPollSelection();
-    if (!groupId) return;
-
-    try {
-        const [members, clans, polls] = await Promise.all([
-            getGroupMembers(groupId).catch(error => {
-                console.error(error);
-                return [];
-            }),
-            getGroupClans(groupId).catch(error => {
-                console.error(error);
-                return [];
-            }),
-            getGroupPolls(groupId, currentUserId).catch(error => {
-                console.error(error);
-                return [];
-            })
-        ]);
-        const players = await loadGroupPlayers(members);
-        if (token !== loadToken) return;
-        const safePolls = normalizePolls(polls);
-        groupState.set(groupId, { members, clans: Array.isArray(clans) ? clans : [], polls: safePolls, players });
-        renderGroupPreview(groupId);
-        renderLinkedClans(groupId);
-        renderPollSelect(groupId, preferredPollId);
-    } catch (error) {
-        console.error(error);
-        showPreviewMessage(t('cwl.groupLoadError'));
-    }
-}
-
-async function loadGroupPlayers(members) {
-    const users = await Promise.all((Array.isArray(members) ? members : []).map(member =>
-        getUserBases(member.user_id).catch(() => null)
-    ));
-    const accounts = users.flatMap(userData => parseAccounts((Array.isArray(userData) ? userData[0] : userData)?.accounts));
-    return uniquePlayers(accounts);
-}
-
-function parseAccounts(accounts) {
-    if (Array.isArray(accounts)) return accounts;
-    if (typeof accounts !== 'string' || !accounts.trim()) return [];
-    try {
-        const parsed = JSON.parse(accounts);
-        return Array.isArray(parsed) ? parsed : [];
-    } catch {
-        return [];
-    }
+    await groupSource.loadSelectedGroup(groupId, preferredPollId);
 }
 
 function renderGroupPreview(groupId) {
     clearGroupPreview();
-    const state = groupState.get(groupId);
+    const state = groupSource.getGroupState(groupId);
     if (!state?.players?.length) {
         showPreviewMessage(t('cwl.noValidGroupAccounts'));
         return;
@@ -185,7 +126,7 @@ function renderGroupPreview(groupId) {
 
 function renderLinkedClans(groupId) {
     refs.linkedClans?.replaceChildren();
-    const clans = groupState.get(groupId)?.clans || [];
+    const clans = groupSource.getGroupState(groupId)?.clans || [];
     refs.linkedClans?.classList.toggle('hidden', clans.length === 0);
     clans.forEach(clan => {
         const button = document.createElement('button');
@@ -201,7 +142,7 @@ function renderLinkedClans(groupId) {
 
 function renderPollSelect(groupId, preferredPollId = '') {
     resetPollSelect();
-    const polls = groupState.get(groupId)?.polls || [];
+    const polls = groupSource.getGroupState(groupId)?.polls || [];
     polls.forEach(poll => {
         const option = document.createElement('option');
         option.value = poll.id;
@@ -221,12 +162,12 @@ function renderPollSelect(groupId, preferredPollId = '') {
 function activateSelectedPoll(notify = true) {
     const groupId = refs.selectGroup?.value || '';
     const pollId = refs.pollSelect?.value || '';
-    const poll = groupState.get(groupId)?.polls?.find(item => item.id === pollId);
+    const poll = groupSource.getGroupState(groupId)?.polls?.find(item => item.id === pollId);
     activatePoll(groupId, poll || null, notify);
 }
 
 function activateRosterPollSelection() {
-    const selection = pollCatalog.get(refs.rosterPollSelect?.value || '');
+    const selection = groupSource.getPollCatalog().get(refs.rosterPollSelect?.value || '');
     activatePoll(selection?.group?.id || '', selection?.poll || null, true);
 }
 
@@ -241,8 +182,9 @@ function activatePoll(groupId, poll, notify = false) {
 }
 
 function addSelectedGroupToPlanner() {
+    if (!groupSource.canRead()) return;
     const groupId = refs.selectGroup?.value || '';
-    const state = groupState.get(groupId);
+    const state = groupSource.getGroupState(groupId);
     if (!state) return;
     createPlayerCard(state.players.map(player => ({ ...player, source: 'group' })));
     state.clans.forEach(clan => createClanCard(toPlannerClan(clan), 15));
@@ -260,11 +202,12 @@ function toPlannerClan(clan) {
 
 function renderRosterPollSelect() {
     const select = refs.rosterPollSelect;
+    const pollCatalog = groupSource.getPollCatalog();
     if (!select || !pollCatalog.size) return;
     const selectedValue = activePollSelectionValue();
     select.replaceChildren(option('', t('cwl.noPollSelected')));
 
-    pollCatalogGroups.forEach(({ group, polls }) => {
+    groupSource.getPollCatalogGroups().forEach(({ group, polls }) => {
         if (!polls.length) return;
         const groupOptions = document.createElement('optgroup');
         groupOptions.label = group.name;
@@ -298,7 +241,7 @@ function syncRosterPollSelection() {
     const select = refs.rosterPollSelect;
     if (!select || select.disabled) return;
     const value = activePollSelectionValue();
-    select.value = pollCatalog.has(value) ? value : '';
+    select.value = groupSource.getPollCatalog().has(value) ? value : '';
 }
 
 function activePollSelectionValue() {
@@ -317,12 +260,6 @@ function pollStatusLabel(status) {
         archived: 'cwl.pollStatusArchived'
     }[status];
     return key ? t(key) : String(status || '');
-}
-
-function normalizePolls(polls) {
-    return (Array.isArray(polls) ? polls : [])
-        .filter(poll => poll?.type === 'cwl_availability')
-        .sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
 }
 
 function clearGroupPreview() {

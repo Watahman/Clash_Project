@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { initPlannerSurface } from '../../src/assets/js/cwl/cwl-planner-ui.js';
+import { initPlannerSurface } from '../../src/assets/js/cwl/cwl-planner-ui.js?v=20260829-public-auth-v1';
 
 describe('CWL planner redesign surface', () => {
     beforeEach(() => {
@@ -94,7 +94,7 @@ describe('CWL planner redesign surface', () => {
         const html = readFileSync('src/subpages/cwl-planner.html', 'utf8');
         expect(planner).toContain("window.addEventListener('clashtools:language-changed', refreshPlannerLabels);");
         expect(planner).toContain('refreshPlannerPriorityLabels();');
-        expect(planner).toContain('cwl-priority-labels.js?v=20260828-cwl-planner-v2');
+        expect(planner).toContain('cwl-priority-labels.js?v=20260829-public-auth-v1');
         const priorityLabels = readFileSync('src/assets/js/cwl/cwl-priority-labels.js', 'utf8');
         expect(priorityLabels).toContain('export function refreshPlannerPriorityLabels');
         expect(priorityLabels).toContain("select.setAttribute('aria-label', playerLabel)");
@@ -113,7 +113,14 @@ describe('CWL planner redesign surface', () => {
             new RegExp(`${asset.replace('.', '\\.?')}\\?v=([^\\\"]+)`)
         )?.[1]).filter(Boolean);
         expect(versions).toHaveLength(assets.length);
-        expect(new Set(versions).size).toBe(1);
+        expect(versions).toEqual([
+            '20260829-public-auth-v1',
+            '20260828-cwl-planner-v2',
+            '20260828-cwl-planner-v2',
+            '20260828-cwl-planner-v2',
+            '20260828-cwl-planner-v2',
+            '20260829-public-auth-v1'
+        ]);
     });
 
     it('keeps saved plans as stacked mobile records with an explicit delete dialog', () => {

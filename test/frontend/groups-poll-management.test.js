@@ -10,14 +10,14 @@ const mocks = vi.hoisted(() => ({
     sendGroupPollReminder: vi.fn()
 }));
 
-vi.mock('../../src/assets/js/Supabase/Supabase-GroupPolls.js', () => mocks);
-vi.mock('../../src/assets/js/Supabase/Supabase-User.js', () => ({
+vi.mock('../../src/assets/js/Supabase/Supabase-GroupPolls.js?v=20260829-public-auth-v1', () => mocks);
+vi.mock('../../src/assets/js/Supabase/Supabase-User.js?v=20260829-public-auth-v1', () => ({
     checkUserId: vi.fn()
 }));
 vi.mock('../../src/assets/js/utils/user.js', () => ({
     getCurrentUserId: () => 'user-1'
 }));
-vi.mock('../../src/assets/js/utils/loading-state.js', () => ({
+vi.mock('../../src/assets/js/utils/loading-state.js?v=20260829-public-auth-v1', () => ({
     withGlobalLoading: operation => operation()
 }));
 vi.mock('../../src/assets/js/utils/backdrop-click.js', () => ({
@@ -26,7 +26,7 @@ vi.mock('../../src/assets/js/utils/backdrop-click.js', () => ({
 vi.mock('../../src/assets/js/groups/groups-roles.js', () => ({
     isGroupAdmin: role => role === 'leader' || role === 'co_leader'
 }));
-vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
+vi.mock('../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1', () => ({
     getLanguage: () => 'en',
     t: (key, params = {}) => {
         const values = {
@@ -66,7 +66,7 @@ describe('Clan Family poll management', () => {
     });
 
     it('routes create, status, answer and reminder mutations through the existing API seams', async () => {
-        const { createPollActions } = await import('../../src/assets/js/groups/groups-polls-actions.js');
+        const { createPollActions } = await import('../../src/assets/js/groups/groups-polls-actions.js?v=20260829-public-auth-v1');
         const { createPollState } = await import('../../src/assets/js/groups/groups-polls-state.js');
         const poll = { id: 'poll-1', title: 'August CWL', type: 'cwl_availability', status: 'open', rounds: 7, answers: {} };
         mocks.getGroupPolls.mockResolvedValue([poll]);
@@ -130,7 +130,7 @@ describe('Clan Family poll management', () => {
         mocks.deleteGroupPoll.mockResolvedValue([{ id: 'poll-closed' }]);
         vi.spyOn(window, 'confirm').mockReturnValue(true);
 
-        const { initGroupPolls } = await import('../../src/assets/js/groups/groups-polls.js');
+        const { initGroupPolls } = await import('../../src/assets/js/groups/groups-polls.js?v=20260829-public-auth-v1');
         initGroupPolls(message => Object.assign(document.createElement('p'), { textContent: message }));
         window.dispatchEvent(new CustomEvent('clashtools:group-opened', {
             detail: {

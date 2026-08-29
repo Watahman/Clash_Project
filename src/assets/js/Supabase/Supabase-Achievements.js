@@ -1,5 +1,5 @@
 import * as config from '../Data/config.js';
-import { requestJson } from '../utils/request-json.js';
+import { requestJson } from '../utils/request-json.js?v=20260829-public-auth-v1';
 
 const IMPORT_ROUTE = '/AchievementsImport';
 const GET_ROUTE = '/Achievements';
@@ -15,7 +15,8 @@ export function getAchievements(playerTag, options = {}) {
         method: 'GET',
         signal: options.signal,
         loading: options.loading || 'background',
-        timeoutMs: options.deepHistory ? 45_000 : undefined
+        timeoutMs: options.deepHistory ? 45_000 : undefined,
+        sessionBound: true
     });
 }
 
@@ -25,6 +26,7 @@ export function importAchievementBaseData(baseData, options = {}) {
         signal: options.signal,
         loading: options.loading || 'blocking',
         loadingMessage: 'Analyzing your base data…',
-        timeoutMs: 30_000
+        timeoutMs: 30_000,
+        sessionBound: true
     });
 }

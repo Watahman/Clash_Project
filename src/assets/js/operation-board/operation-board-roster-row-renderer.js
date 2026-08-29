@@ -1,9 +1,9 @@
-import { competeT as t } from './compete-locales.js';
+import { competeT as t } from './compete-locales.js?v=20260829-public-auth-v1';
 import {
     escapeHtml,
     number
 } from './operation-board-utils.js';
-import { badge } from './operation-board-render-utils.js';
+import { badge } from './operation-board-render-utils.js?v=20260829-public-auth-v1';
 import {
     ASSET_FALLBACKS,
     getTownHallAsset,

@@ -1,8 +1,8 @@
-import { getGroupInfo, getGroupMembers } from "../Supabase/Supabase-Group.js";
-import { t } from "../i18n/i18n.js";
+import { getGroupInfo, getGroupMembers } from "../Supabase/Supabase-Group.js?v=20260829-public-auth-v1";
+import { t } from "../i18n/i18n.js?v=20260829-public-auth-v1";
 import { getCurrentUserId } from "../utils/user.js";
-import { createClanAdmin } from "./groups-admin-clans.js";
-import { createMemberRoleAdmin } from "./groups-admin-members.js";
+import { createClanAdmin } from "./groups-admin-clans.js?v=20260829-public-auth-v1";
+import { createMemberRoleAdmin } from "./groups-admin-members.js?v=20260829-public-auth-v1";
 import { getCurrentUserRole, isGroupAdmin } from "./groups-roles.js";
 import { bindBackdropClick } from "../utils/backdrop-click.js";
 

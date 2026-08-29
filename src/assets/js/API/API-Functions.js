@@ -1,5 +1,5 @@
-import * as clanAPI from "./API-Clan.js"
-import * as playerAPI from "./API-Player.js"
+import * as clanAPI from "./API-Clan.js?v=20260829-public-auth-v1"
+import * as playerAPI from "./API-Player.js?v=20260829-public-auth-v1"
 
 export function getClanMembersWithBattleData(clanTag) {
     return clanAPI.getClanInfoRequest(clanTag).then(clanData => {

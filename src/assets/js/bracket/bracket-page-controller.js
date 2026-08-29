@@ -5,10 +5,10 @@ import {
     setMatchWinner
 } from './bracket-engine.js';
 import { participantDisplayName } from './bracket-model.js';
-import { t } from '../i18n/i18n.js';
-import { bracketText } from './bracket-copy.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { bracketText } from './bracket-copy.js?v=20260829-public-auth-v1';
 import { createBracketFixture } from './bracket-fixtures.js';
-import { drawBracketConnectors, renderBracketBoard } from './bracket-renderer.js';
+import { drawBracketConnectors, renderBracketBoard } from './bracket-renderer.js?v=20260829-public-auth-v1';
 import { createBracketResetDialog } from './bracket-page-dialog.js';
 import { downloadBracketJson, readBracketFile } from './bracket-page-files.js';
 import { createBracketStorage } from './bracket-page-storage.js';
@@ -16,7 +16,7 @@ import {
     bracketErrorCopy,
     changedMatches,
     snapshotMatches
-} from './bracket-page-utils.js';
+} from './bracket-page-utils.js?v=20260829-public-auth-v1';
 import {
     announce,
     applyBracketToForm,
@@ -28,7 +28,7 @@ import {
     updateGuidanceCopy,
     updateRoundControls,
     updateSetupSummary
-} from './bracket-page-view.js';
+} from './bracket-page-view.js?v=20260829-public-auth-v1';
 
 class BracketController {
     constructor({

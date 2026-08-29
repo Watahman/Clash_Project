@@ -1,15 +1,15 @@
-import { getClanCurrentWarLeagueGroupRequest } from '../../API/API-Clan.js';
+import { getClanCurrentWarLeagueGroupRequest } from '../../API/API-Clan.js?v=20260829-public-auth-v1';
 import {
     getPlayerPerformance,
     loadPlayerPerformanceBatch
-} from '../player-performance-client.js';
-import { getPlayerAvailability } from '../cwl-availability.js';
-import { savePlan } from '../cwl-plan-io.js';
+} from '../player-performance-client.js?v=20260829-public-auth-v1';
+import { getPlayerAvailability } from '../cwl-availability.js?v=20260829-public-auth-v1';
+import { savePlan } from '../cwl-plan-io.js?v=20260829-public-auth-v1';
 import {
     rememberPlannerPlayers,
     updateAllPlayerCounters
-} from '../cwl-planner-card-state.js';
-import { syncPlayerRosterStatus } from '../cwl-player-controls.js';
+} from '../cwl-planner-card-state.js?v=20260829-public-auth-v1';
+import { syncPlayerRosterStatus } from '../cwl-player-controls.js?v=20260829-public-auth-v1';
 import { getCardTag, normalizeTag } from '../cwl-utils.js';
 import {
     normalizeClanPriority,

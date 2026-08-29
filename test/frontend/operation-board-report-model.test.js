@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildReport } from '../../src/assets/js/operation-board/operation-board-report-model.js';
+import { buildReport } from '../../src/assets/js/operation-board/operation-board-report-model.js?v=20260829-public-auth-v1';
 
 describe('Operation Board report model', () => {
     it('builds the same report without mutating its API input', () => {

@@ -1,5 +1,5 @@
-import { getGroupMemberActivity } from '../Supabase/Supabase-Group.js';
-import { getLanguage, t } from '../i18n/i18n.js';
+import { getGroupMemberActivity } from '../Supabase/Supabase-Group.js?v=20260829-public-auth-v1';
+import { getLanguage, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 
 let renderVersion = 0;
 let relativeTimeTimer;

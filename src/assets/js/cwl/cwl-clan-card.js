@@ -1,15 +1,15 @@
-import { savePlan } from './cwl-plan-io.js';
-import { applyAvailabilityToCard } from './cwl-availability.js';
+import { savePlan } from './cwl-plan-io.js?v=20260829-public-auth-v1';
+import { applyAvailabilityToCard } from './cwl-availability.js?v=20260829-public-auth-v1';
 import { normalizeTag } from './cwl-utils.js';
 import { allowsThirtyPlayerCwl, normalizeCwlCapacity } from './cwl-league-rules.js';
-import { t } from '../i18n/i18n.js';
-import { syncPlayerRosterStatus } from './cwl-player-controls.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { syncPlayerRosterStatus } from './cwl-player-controls.js?v=20260829-public-auth-v1';
 import { normalizeClanPriority } from './cwl-plan-schema.js';
 import {
     rememberPlannerPlayers,
     updateAllPlayerCounters,
     updateClanCapacityCounter
-} from './cwl-planner-card-state.js';
+} from './cwl-planner-card-state.js?v=20260829-public-auth-v1';
 import { ASSET_FALLBACKS, installImageFallback } from '../assets/entity-assets.js';
 import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 

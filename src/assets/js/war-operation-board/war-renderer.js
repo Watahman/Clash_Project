@@ -3,7 +3,7 @@ import { buildWinCondition } from '../operation-board/operation-board-win-condit
 import { buildProjectedOutcome } from '../operation-board/operation-board-live-projection.js';
 import { escapeHtml, number } from '../operation-board/operation-board-utils.js';
 import { normalizeWarState, parseClashTime } from '../cwl/cwl-war-state.js';
-import { competeT as t } from '../operation-board/compete-locales.js';
+import { competeT as t } from '../operation-board/compete-locales.js?v=20260829-public-auth-v1';
 import {
     ASSET_FALLBACKS,
     getTownHallAsset,
@@ -12,7 +12,7 @@ import {
 import { buildWarContributions } from './war-contribution.js';
 import { buildWarMap } from './war-map-model.js';
 import { buildMathematicalWarStatus } from './war-outcome-model.js';
-import { renderStats as renderStatsSection } from './war-stats-renderer.js';
+import { renderStats as renderStatsSection } from './war-stats-renderer.js?v=20260829-public-auth-v1';
 
 const WAR_STATE_CLASSES = new Set(['completed', 'live', 'preparation']);
 const BASE_STATE_CLASSES = new Set(['cleared', 'damaged', 'untouched']);

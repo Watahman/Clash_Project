@@ -749,3 +749,83 @@ body.workspace-app > .overlay { grid-column: 1 / -1; }
     color: #71808d !important;
 }
 
+/* Auth-aware shell states. Public tools keep their page visible while the
+   optional session check runs; private routes hold their content briefly. */
+body.workspace-app[data-auth-state="loading"][data-workspace-access="auth"] > .workspace-area > main {
+    visibility: hidden;
+}
+
+.workspace-auth-status {
+    display: flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    border-bottom: 1px solid var(--cp-border-1, var(--border));
+    background: color-mix(in srgb, var(--cp-surface-2, var(--surface)) 88%, var(--cp-brand, var(--accent)));
+    padding: 0.55rem 1rem;
+    color: var(--cp-text-2, var(--text-muted));
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+.workspace-auth-status[hidden],
+.workspace-login-cta[hidden],
+[data-auth-only][hidden],
+[data-guest-only][hidden] { display: none !important; }
+
+.workspace-auth-retry {
+    min-height: 2rem;
+    border: 1px solid var(--cp-border-2, var(--border-strong));
+    border-radius: 6px;
+    background: transparent;
+    padding: 0.35rem 0.75rem;
+    color: var(--cp-text-1, var(--text));
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.workspace-auth-retry:hover {
+    border-color: var(--cp-brand, var(--accent));
+    color: var(--cp-brand-strong, var(--accent-strong));
+}
+
+.workspace-login-cta {
+    display: inline-flex;
+    min-height: 2.35rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--cp-border-2, var(--border-strong));
+    border-radius: 7px;
+    background: var(--cp-surface-2, var(--surface-raised));
+    color: var(--cp-text-1, var(--text));
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: border-color 180ms var(--cp-ease-standard, ease),
+        background 180ms var(--cp-ease-standard, ease), transform 180ms var(--cp-ease-standard, ease);
+}
+
+.workspace-login-cta:hover,
+.workspace-login-cta:focus-visible {
+    border-color: var(--cp-brand, var(--accent));
+    background: var(--cp-surface-hover, var(--surface-raised));
+    color: var(--cp-text-1, var(--text));
+    transform: translateY(-1px);
+}
+
+.workspace-login-cta-top { padding: 0.4rem 0.8rem; }
+.workspace-login-cta-sidebar { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.7rem; padding: 0.6rem; text-align: left; }
+.workspace-login-cta-sidebar .workspace-profile-copy strong { color: var(--cp-text-1, #f4f7fa); }
+.workspace-login-cta-sidebar .workspace-profile-copy small { color: var(--cp-text-3, #7d8995); }
+.workspace-public-link { display: block; margin: 0 0.6rem 0.55rem; color: var(--cp-text-3, #7d8995); font-size: 0.7rem; text-decoration: none; }
+.workspace-public-link:hover, .workspace-public-link:focus-visible { color: var(--cp-brand-strong, var(--accent-strong)); }
+.workspace-nav-lock { flex: 0 0 auto; margin-left: auto; color: var(--cp-text-3, #7d8995); font-size: 0.68rem; line-height: 1; }
+.workspace-nav a[data-workspace-access="auth"]:not([aria-current="page"]) .workspace-nav-lock { opacity: 0.72; }
+
+@media (max-width: 599px) {
+    .workspace-auth-status { align-items: stretch; flex-direction: column; gap: 0.45rem; }
+    .workspace-auth-retry { width: min(100%, 10rem); align-self: center; }
+    .workspace-login-cta-top { padding-inline: 0.65rem; }
+}
+

@@ -1,10 +1,10 @@
-import { getClanInfoRequest } from '../API/API-Clan.js';
-import { createGroup, addGroupClan, joinGroup, leaveGroup } from '../Supabase/Supabase-Group.js';
+import { getClanInfoRequest } from '../API/API-Clan.js?v=20260829-public-auth-v1';
+import { createGroup, addGroupClan, joinGroup, leaveGroup } from '../Supabase/Supabase-Group.js?v=20260829-public-auth-v1';
 import { getCurrentUserId } from '../utils/user.js';
-import { withGlobalLoading } from '../utils/loading-state.js';
+import { withGlobalLoading } from '../utils/loading-state.js?v=20260829-public-auth-v1';
 import { bindGroupDialog, closeGroupDialog, openGroupDialog } from './groups-dialog.js?v=20260813-redesign';
-import { familyCopy } from './clan-family-copy.js';
-import { t } from '../i18n/i18n.js';
+import { familyCopy } from './clan-family-copy.js?v=20260829-public-auth-v1';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 
 const DEFAULT_SELECTED_GROUP_KEY = 'clashtoolsSelectedGroupId';
 const DEFAULT_API = { createGroup, addGroupClan, joinGroup, leaveGroup };

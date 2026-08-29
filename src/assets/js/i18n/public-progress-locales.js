@@ -1,4 +1,4 @@
-import { getLanguage } from './i18n.js?v=20260821-public-pages';
+import { getLanguage } from './i18n.js?v=20260829-public-auth-v1';
 
 /* Copy for the static public product previews. The authenticated shell keeps
    its own dictionaries; this small source map only owns the new demo copy. */

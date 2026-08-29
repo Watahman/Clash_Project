@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { renderAutoPlanPreview } from '../../src/assets/js/cwl/auto-plan/cwl-auto-plan-renderer.js';
+import { renderAutoPlanPreview } from '../../src/assets/js/cwl/auto-plan/cwl-auto-plan-renderer.js?v=20260829-public-auth-v1';
 
 describe('CWL Auto Plan preview', () => {
     beforeEach(() => {

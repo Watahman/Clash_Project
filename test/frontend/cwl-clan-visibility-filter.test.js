@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
+vi.mock('../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1', () => ({
     t: (key) => ({
         'planner.allClans': 'All clans'
     })[key] || key
@@ -21,7 +21,7 @@ describe('CWL clan visibility filter', () => {
 
     it('populates clan choices and hides columns without changing plan data', async () => {
         const { initClanVisibilityFilter } = await import(
-            '../../src/assets/js/cwl/cwl-clan-visibility-filter.js'
+            '../../src/assets/js/cwl/cwl-clan-visibility-filter.js?v=20260829-public-auth-v1'
         );
         const container = document.querySelector('#cwl-all-clans');
         const select = document.querySelector('#visibility');
@@ -53,7 +53,7 @@ describe('CWL clan visibility filter', () => {
 
     it('keeps the visual selection when a new clan column is rendered', async () => {
         const { initClanVisibilityFilter } = await import(
-            '../../src/assets/js/cwl/cwl-clan-visibility-filter.js'
+            '../../src/assets/js/cwl/cwl-clan-visibility-filter.js?v=20260829-public-auth-v1'
         );
         const container = document.querySelector('#cwl-all-clans');
         const select = document.querySelector('#visibility');

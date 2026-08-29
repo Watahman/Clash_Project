@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../../src/assets/js/auth/auth-client.js', () => ({
+vi.mock('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1', () => ({
     getAccessToken: vi.fn().mockResolvedValue('test-token')
 }));
 
-import { HttpError, requestJson } from '../../src/assets/js/utils/request-json.js';
+import { HttpError, requestJson } from '../../src/assets/js/utils/request-json.js?v=20260829-public-auth-v1';
 
 afterEach(() => {
     vi.unstubAllGlobals();
@@ -41,6 +41,25 @@ describe('central JSON request errors', () => {
             status: 200,
             message: 'The server returned an invalid response.'
         });
+    });
+
+    it('only emits session expiry for a session-bound 401', async () => {
+        const expired = vi.fn();
+        window.addEventListener('clashtools:auth-session-expired', expired);
+        vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response('', { status: 401 }))));
+
+        await expect(requestJson('/public')).rejects.toMatchObject({
+            status: 401,
+            sessionBound: false
+        });
+        expect(expired).not.toHaveBeenCalled();
+
+        await expect(requestJson('/private', { sessionBound: true })).rejects.toMatchObject({
+            status: 401,
+            sessionBound: true
+        });
+        expect(expired).toHaveBeenCalledTimes(1);
+        window.removeEventListener('clashtools:auth-session-expired', expired);
     });
 
     it('aborts a request that exceeds the configured timeout', async () => {

@@ -1,11 +1,11 @@
-import { getPlayerWithBattleData } from '../API/API-Functions.js';
-import { addBaseToUser } from '../Supabase/Supabase-User.js';
+import { getPlayerWithBattleData } from '../API/API-Functions.js?v=20260829-public-auth-v1';
+import { addBaseToUser } from '../Supabase/Supabase-User.js?v=20260829-public-auth-v1';
 import {
     acceptFriendRequest,
     addFriend,
     rejectFriendRequest
-} from '../Supabase/Supabase-Friend.js';
-import { t } from '../i18n/i18n.js';
+} from '../Supabase/Supabase-Friend.js?v=20260829-public-auth-v1';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 
 const TAG_PATTERN = /^#[0289PYLQGRJCUV]{3,15}$/;
 

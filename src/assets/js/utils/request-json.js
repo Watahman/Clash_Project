@@ -1,14 +1,48 @@
-import { withGlobalLoading } from './loading-state.js';
-import { t } from '../i18n/i18n.js';
+import { withGlobalLoading } from './loading-state.js?v=20260829-public-auth-v1';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 
 export class HttpError extends Error {
-    constructor(message, { status = 0, code = '', details = null } = {}) {
+    constructor(message, {
+        status = 0,
+        code = '',
+        details = null,
+        sessionBound = false,
+        authGeneration = null
+    } = {}) {
         super(message);
         this.name = 'HttpError';
         this.status = status;
         this.code = code;
         this.details = details;
+        this.sessionBound = Boolean(sessionBound);
+        this.authGeneration = Number.isFinite(authGeneration) ? authGeneration : null;
     }
+}
+
+let sessionContextResolver = null;
+
+export function setSessionContextResolver(resolver) {
+    sessionContextResolver = typeof resolver === 'function' ? resolver : null;
+}
+
+function resolveSessionContext() {
+    try {
+        return sessionContextResolver?.() || null;
+    } catch {
+        return null;
+    }
+}
+
+function notifySessionExpired(url, error) {
+    if (typeof window === 'undefined' || typeof window.dispatchEvent !== 'function') return;
+    window.dispatchEvent(new CustomEvent('clashtools:auth-session-expired', {
+        detail: {
+            url,
+            status: error.status,
+            code: error.code,
+            authGeneration: error.authGeneration
+        }
+    }));
 }
 
 async function parseResponse(response) {
@@ -56,8 +90,16 @@ export async function requestJson(url, {
     signal,
     timeoutMs = 20_000,
     loading = 'background',
-    loadingMessage = t('common.loading')
+    loadingMessage = t('common.loading'),
+    sessionBound = false,
+    authRequired = false,
+    authGeneration = null
 } = {}) {
+    const requestSessionBound = Boolean(sessionBound || authRequired);
+    const context = requestSessionBound ? resolveSessionContext() : null;
+    const requestAuthGeneration = Number.isFinite(authGeneration)
+        ? authGeneration
+        : Number.isFinite(context?.generation) ? context.generation : null;
     const execute = async () => {
         const requestHeaders = {
             Accept: 'application/json',
@@ -99,10 +141,18 @@ export async function requestJson(url, {
                     ? { ...data, retryAfter: retryAfterSeconds }
                     : { retryAfter: retryAfterSeconds };
             }
-            throw new HttpError(
+            const error = new HttpError(
                 data?.error || data?.message || t('errors.requestFailed', { status: response.status }),
-                { status: response.status, code: data?.code || '', details }
+                {
+                    status: response.status,
+                    code: data?.code || '',
+                    details,
+                    sessionBound: requestSessionBound,
+                    authGeneration: requestAuthGeneration
+                }
             );
+            if (response.status === 401 && requestSessionBound) notifySessionExpired(url, error);
+            throw error;
         }
         return data;
     };

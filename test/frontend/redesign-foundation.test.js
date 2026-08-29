@@ -9,7 +9,7 @@ import {
 import {
     getWorkspaceSections,
     WORKSPACE_MODULES
-} from '../../src/assets/js/shell/module-registry.js';
+} from '../../src/assets/js/shell/module-registry.js?v=20260829-public-auth-v1';
 import {
     isRedesignFixtureRequested
 } from '../../src/assets/js/fixtures/redesign-fixture-mode.js';
@@ -54,7 +54,7 @@ describe('redesign shared foundation', () => {
         const dashboard = readFileSync('src/subpages/dashboard.html', 'utf8');
         const shell = readFileSync('src/assets/js/shell/workspace-shell-markup.js', 'utf8');
         expect(dashboard.indexOf('workspace-v2.css')).toBeGreaterThan(dashboard.indexOf('workspace-polish-batch2.css'));
-        expect(shell).toContain("from './module-registry.js'");
+        expect(shell).toContain("from './module-registry.js?v=20260829-public-auth-v1'");
         expect(shell).toContain('workspace-nav-coming-soon');
         expect(shell).toContain('module.comingSoon');
     });

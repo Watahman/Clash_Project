@@ -2,8 +2,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
     normalizePublicFooter,
     normalizePublicHeader,
-    normalizePublicShell
-} from '../../src/assets/js/shell/public-header.js';
+    normalizePublicShell,
+    updatePublicHeaderAuth
+} from '../../src/assets/js/shell/public-header.js?v=20260829-public-auth-v1';
 
 function mountShell(pathname) {
     window.history.replaceState({}, '', pathname);
@@ -28,9 +29,27 @@ describe('public shell normalization', () => {
 
         expect(navLabels).toEqual(['Tools', 'Games', 'Guides', 'Methodology', 'About', 'Changelog']);
         expect(header.querySelectorAll('.public-nav [data-i18n]').length).toBe(5);
-        expect(header.querySelector('[href="/subpages/login"]')?.textContent.trim()).toBe('Log in');
-        expect(header.querySelector('[href="/subpages/register"]')?.textContent.trim()).toBe('Start for free');
+        expect(header.querySelector('[data-public-auth-guest][href*="/subpages/login.html"]')?.textContent.trim()).toBe('Log in');
+        expect(header.querySelector('[data-public-auth-guest][href*="/subpages/register.html"]')?.textContent.trim()).toBe('Start for free');
+        expect(header.querySelector('[data-public-authenticated]')).toHaveProperty('hidden', true);
         expect(header.querySelector('[href="/methodology"]')?.getAttribute('aria-current')).toBe('page');
+    });
+
+    it('switches between guest and authenticated actions without replacing controls', () => {
+        const { header } = mountShell('/cwl-tracker');
+        const languageControl = header.querySelector('[data-language-control]');
+
+        updatePublicHeaderAuth({ status: 'authenticated' });
+        expect(header.dataset.authState).toBe('authenticated');
+        expect(header.querySelectorAll('[data-public-auth-guest]:not([hidden])')).toHaveLength(0);
+        expect(header.querySelector('[data-public-authenticated]')).toHaveProperty('hidden', false);
+        expect(header.querySelector('[data-language-control]')).toBe(languageControl);
+
+        updatePublicHeaderAuth({ status: 'auth-unavailable' });
+        expect(header.dataset.authState).toBe('auth-unavailable');
+        expect(header.querySelectorAll('[data-public-auth-guest]:not([hidden])')).toHaveLength(2);
+        expect(header.querySelector('[data-public-authenticated]')).toHaveProperty('hidden', true);
+        expect(header.textContent).not.toContain('Log out');
     });
 
     it('uses one translated footer structure on every public page', () => {

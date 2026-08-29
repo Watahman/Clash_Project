@@ -24,6 +24,26 @@ const sections = Object.freeze([
     { id: 'progress', key: 'shell.progression', fallback: 'Progress' }
 ]);
 
+export const ACCESS = Object.freeze({
+    PUBLIC: 'public',
+    AUTH: 'auth'
+});
+
+const MODULE_ACCESS = Object.freeze({
+    dashboard: ACCESS.AUTH,
+    explore: ACCESS.PUBLIC,
+    groups: ACCESS.AUTH,
+    planner: ACCESS.PUBLIC,
+    drafts: ACCESS.AUTH,
+    operation: ACCESS.PUBLIC,
+    warOperation: ACCESS.PUBLIC,
+    bracket: ACCESS.PUBLIC,
+    minigames: ACCESS.PUBLIC,
+    advancedStats: ACCESS.AUTH,
+    achievements: ACCESS.AUTH,
+    profile: ACCESS.AUTH
+});
+
 const modules = Object.freeze([
     ['dashboard', 'nav.dashboard', 'Dashboard', 'home', '/dashboard', true],
     ['explore', 'nav.explore', 'Explore', 'home', '/app/explore', true],
@@ -46,10 +66,17 @@ const modules = Object.freeze([
     href,
     available,
     comingSoon,
-    access: 'private'
+    access: MODULE_ACCESS[id] || ACCESS.PUBLIC
 })));
 
 const moduleById = new Map(modules.map(module => [module.id, module]));
+const moduleByPath = new Map(modules.map(module => [module.href, module]));
+
+function normalizeWorkspacePath(pathname) {
+    const value = String(pathname || '').trim();
+    if (!value) return '/dashboard';
+    return value.length > 1 ? value.replace(/\/+$/, '') : value;
+}
 
 export function getWorkspaceModule(id) {
     return moduleById.get(id) || moduleById.get('dashboard');
@@ -60,6 +87,22 @@ export function getWorkspaceSections() {
         ...section,
         modules: modules.filter(module => module.available && module.section === section.id)
     }));
+}
+
+export function getWorkspaceAccess(id) {
+    return getWorkspaceModule(id).access;
+}
+
+export function getWorkspaceModuleByPath(pathname) {
+    return moduleByPath.get(normalizeWorkspacePath(pathname)) || null;
+}
+
+export function getWorkspaceAccessForPath(pathname) {
+    return getWorkspaceModuleByPath(pathname)?.access || null;
+}
+
+export function requiresWorkspaceAuth(id) {
+    return getWorkspaceAccess(id) === ACCESS.AUTH;
 }
 
 export { modules as WORKSPACE_MODULES, sections as WORKSPACE_SECTIONS };

@@ -1,6 +1,6 @@
 import { bindGroupDialog, closeGroupDialog } from './groups-dialog.js?v=20260813-redesign';
-import { createPollActions } from './groups-polls-actions.js?v=20260813-redesign';
-import { createPollRenderer } from './groups-polls-render.js';
+import { createPollActions } from './groups-polls-actions.js?v=20260829-public-auth-v1';
+import { createPollRenderer } from './groups-polls-render.js?v=20260829-public-auth-v1';
 import { createPollState } from './groups-polls-state.js';
 
 export function initGroupPolls(emptyMessage = message => Object.assign(document.createElement('p'), { textContent: message })) {

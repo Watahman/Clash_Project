@@ -1,7 +1,7 @@
-import { t } from '../i18n/i18n.js?v=20260811-2';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260811-2';
 import { entityImage } from './progress-asset-view.js?v=20260811-2';
-import { formatNumber, formatPercent } from './advanced-stats-formatters.js?v=20260811-2';
+import { formatNumber, formatPercent } from './advanced-stats-formatters.js?v=20260829-public-auth-v1';
 
 function setVisibility(element, visible) {
     if (element) element.hidden = !visible;

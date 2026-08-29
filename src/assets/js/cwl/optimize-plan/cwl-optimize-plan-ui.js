@@ -1,13 +1,13 @@
-import { t } from '../../i18n/i18n.js';
+import { t } from '../../i18n/i18n.js?v=20260829-public-auth-v1';
 import {
     applyAutoPlanResult,
     collectAutoPlanInput
-} from '../auto-plan/cwl-auto-plan-source.js';
+} from '../auto-plan/cwl-auto-plan-source.js?v=20260829-public-auth-v1';
 import {
     buildAcceptedOptimization,
     buildOptimizePlan
 } from './cwl-optimize-planner.js';
-import { renderOptimizePlanPreview } from './cwl-optimize-plan-renderer.js?v=20260812-1';
+import { renderOptimizePlanPreview } from './cwl-optimize-plan-renderer.js?v=20260829-public-auth-v1';
 
 let refs;
 let currentResult;

@@ -1,4 +1,4 @@
-import { t } from '../i18n/i18n.js?v=20260809-4';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 
 const HINTS_KEY = 'clashtools_guidance_dismissed';
 const INTENT_KEY = 'clashtools_first_intent';

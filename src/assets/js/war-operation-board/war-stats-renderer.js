@@ -1,7 +1,7 @@
 import { buildImportantAttacks } from '../operation-board/operation-board-live-recommendations.js';
 import { buildLiveView } from '../operation-board/operation-board-live-model.js';
 import { escapeHtml, number } from '../operation-board/operation-board-utils.js';
-import { competeT as t } from '../operation-board/compete-locales.js';
+import { competeT as t } from '../operation-board/compete-locales.js?v=20260829-public-auth-v1';
 import { attacksByOrder } from './war-contribution.js';
 
 export function renderStats(element, report) {

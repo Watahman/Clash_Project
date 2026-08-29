@@ -1,7 +1,7 @@
-import { savePlan } from './cwl-plan-io.js';
+import { savePlan } from './cwl-plan-io.js?v=20260829-public-auth-v1';
 import { normalizeRosterStatus } from './cwl-plan-schema.js';
-import { syncPlayerRosterStatus } from './cwl-player-controls.js';
-import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js';
+import { syncPlayerRosterStatus } from './cwl-player-controls.js?v=20260829-public-auth-v1';
+import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js?v=20260829-public-auth-v1';
 
 const CONTROL_SELECTOR = '.cwl-delete-player, .cwl-move-player, .cwl-roster-status';
 

@@ -1,7 +1,7 @@
-import { t } from '../i18n/i18n.js';
-import { familyCopy } from './clan-family-copy.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { familyCopy } from './clan-family-copy.js?v=20260829-public-auth-v1';
 import { renderBadge } from './groups-badges.js';
-import { groupMemberSummary } from '../templates/GroupTemplates.js?v=20260813-redesign';
+import { groupMemberSummary } from '../templates/GroupTemplates.js?v=20260829-public-auth-v1';
 
 let currentEntry = null;
 let currentDetail = null;

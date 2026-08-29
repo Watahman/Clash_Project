@@ -1,4 +1,4 @@
-import { getLanguage, t } from '../i18n/i18n.js?v=20260809-4';
+import { getLanguage, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 
 export function formatNumber(value, fallback = '—') {
     if (value === null || value === undefined || value === '' || !Number.isFinite(Number(value))) return fallback;

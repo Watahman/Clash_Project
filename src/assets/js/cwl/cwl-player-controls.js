@@ -1,12 +1,12 @@
-import { savePlan } from './cwl-plan-io.js';
+import { savePlan } from './cwl-plan-io.js?v=20260829-public-auth-v1';
 import { escapeCssIdentifier } from './cwl-utils.js';
 import {
     CWL_PLAYER_PRIORITIES,
     normalizePlayerPriority,
     normalizeRosterStatus
 } from './cwl-plan-schema.js';
-import { t } from '../i18n/i18n.js';
-import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js?v=20260829-public-auth-v1';
 
 const moveControlRefreshers = new WeakMap();
 

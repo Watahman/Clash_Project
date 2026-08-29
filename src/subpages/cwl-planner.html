@@ -12,17 +12,17 @@
     <link rel="stylesheet" href="../assets/css/Main-css.css">
     <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="../assets/css/cwlPlanner.css">
-    <link rel="stylesheet" href="../assets/css/workspace-system.css">
-    <link rel="stylesheet" href="../assets/css/cwl-planner-workspace.css?v=20260828-cwl-planner-v2">
+    <link rel="stylesheet" href="../assets/css/workspace-system.css?v=20260829-public-auth-v1">
+    <link rel="stylesheet" href="../assets/css/cwl-planner-workspace.css?v=20260829-public-auth-v1">
     <link rel="stylesheet" href="../assets/css/cwl-player-card.css?v=20260828-cwl-planner-v2">
     <link rel="stylesheet" href="../assets/css/cwl-player-performance-popover.css?v=20260828-cwl-planner-v2">
     <link rel="stylesheet" href="../assets/css/cwl-spreadsheet-import.css">
     <link rel="stylesheet" href="../assets/css/cwl-auto-plan.css">
     <link rel="stylesheet" href="../assets/css/cwl-optimize-plan.css">
     <script src="../assets/js/Data/runtime-config.js"></script>
-    <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260812-redesign"></script>
+    <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260829-public-auth-v1"></script>
     <script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-    <script type="module" src="../assets/js/pages/cwl-planner.js?v=20260828-cwl-planner-v2"></script>
+    <script type="module" src="../assets/js/pages/cwl-planner.js?v=20260829-public-auth-v1"></script>
     <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
@@ -65,7 +65,7 @@
             </div>
             <p>Build and balance your CWL clan rosters.</p>
         </div>
-        <span class="cwl-save-status" id="cwl-save-status" role="status" aria-live="polite" data-state="idle" data-i18n="cwl.saved">Saved</span>
+        <span class="cwl-save-status" id="cwl-save-status" role="status" aria-live="polite" data-state="guest" data-i18n="planner.guestStored">Guest plan · Stored on this device</span>
     </header>
 
     <section class="cwl-context-toolbar" aria-label="Plan settings" data-i18n-aria-label="planner.settings">
@@ -168,6 +168,18 @@
         </footer>
     </dialog>
 
+    <dialog id="cwl-guest-save-dialog" class="cp-modal cwl-guest-save-dialog" aria-labelledby="cwl-guest-save-title" aria-describedby="cwl-guest-save-description">
+        <div class="cwl-guest-save-dialog__body">
+            <p class="page-kicker" data-i18n="planner.kicker">CWL Planner</p>
+            <h2 id="cwl-guest-save-title" data-i18n="planner.saveGuestTitle">Sign in to save your plan</h2>
+            <p id="cwl-guest-save-description" data-i18n="planner.saveGuestDescription">Your current plan will stay available while you sign in.</p>
+            <div class="cwl-guest-save-dialog__actions">
+                <button class="button button-secondary" type="button" data-cwl-guest-save-close data-i18n="common.close">Close</button>
+                <button class="button button-primary" type="button" data-cwl-guest-save-login data-i18n="auth.login">Log in</button>
+            </div>
+        </div>
+    </dialog>
+
     <div class="cwl-mobile-view-tabs" role="tablist" aria-label="Planner view">
         <button type="button" role="tab" data-planner-mobile-view="players" aria-selected="true">Players</button>
         <button type="button" role="tab" data-planner-mobile-view="clans" aria-selected="false">Clans</button>
@@ -217,8 +229,8 @@
 
         <div class="modal-tabs">
             <button class="modal-tab-btn active" type="button" data-tab="tag" data-i18n="cwl.addByTag">By tag</button>
-            <button class="modal-tab-btn" type="button" data-tab="accounts" data-i18n="dashboard.linkedAccounts">Linked accounts</button>
-            <button class="modal-tab-btn" type="button" data-tab="group" data-i18n="cwl.fromGroup">From Clan Family</button>
+            <button class="modal-tab-btn" type="button" data-tab="accounts" data-auth-required><span data-i18n="dashboard.linkedAccounts">Linked accounts</span><span class="cwl-source-lock" aria-hidden="true">&#128274;</span></button>
+            <button class="modal-tab-btn" type="button" data-tab="group" data-auth-required><span data-i18n="cwl.fromGroup">From Clan Family</span><span class="cwl-source-lock" aria-hidden="true">&#128274;</span></button>
         </div>
 
         <!-- Tab 1: by tag -->

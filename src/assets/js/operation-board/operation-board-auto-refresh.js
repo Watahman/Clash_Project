@@ -1,4 +1,4 @@
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 
 const STORAGE_KEY = 'clashtools_op_auto_refresh_paused';
 const DEFAULT_INTERVAL_MS = 60_000;

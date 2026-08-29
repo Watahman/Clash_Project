@@ -5,7 +5,7 @@ import {
     inferTagContext,
     lookupWithRateLimitRetry,
     runWithConcurrency
-} from '../../src/assets/js/cwl/cwl-spreadsheet-import.js';
+} from '../../src/assets/js/cwl/cwl-spreadsheet-import.js?v=20260829-public-auth-v1';
 
 describe('CWL spreadsheet import', () => {
     it('extracts hash tags and URL encoded tags without duplicates', () => {

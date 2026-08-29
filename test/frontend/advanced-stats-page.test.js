@@ -32,11 +32,11 @@ describe('Advanced Stats workspace page', () => {
         expect([...document.querySelectorAll('button:not([type])')]).toHaveLength(0);
     });
 
-    it('keeps the unreleased workspace behind the Coming Soon route guard', () => {
+    it('keeps the unreleased workspace behind the central route guard', () => {
         const source = readFileSync('src/subpages/advanced-stats.html', 'utf8');
         const document = documentFor('src/subpages/advanced-stats.html');
 
-        expect(source).toContain("window.location.replace('/dashboard')");
+        expect(source).not.toContain("window.location.replace('/dashboard')");
         expect(document.title).toContain('Coming soon');
         expect(document.querySelector('.workspace-coming-soon-badge')).not.toBeNull();
     });
@@ -95,16 +95,16 @@ describe('Advanced Stats workspace page', () => {
         const i18n = readFileSync('src/assets/js/i18n/i18n.js', 'utf8');
         const runtime = readFileSync('src/assets/js/i18n/runtime-translations.js', 'utf8');
 
-        expect(html).toContain('advanced-stats-bootstrap.js?v=20260814-advanced-stats-v4');
+        expect(html).toContain('advanced-stats-bootstrap.js?v=20260829-public-auth-v1');
         expect(html).toContain('advanced-stats.css?v=20260814-advanced-stats-v4');
-        expect(html).toContain('workspace-shell.js?v=20260812-redesign');
-        expect(bootstrap).toContain("advanced-stats.js?v=20260814-advanced-stats-v4");
-        expect(page).toContain("i18n/i18n.js?v=20260809-4");
+        expect(html).toContain('workspace-shell.js?v=20260829-public-auth-v1');
+        expect(bootstrap).toContain("advanced-stats.js?v=20260829-public-auth-v1");
+        expect(page).toContain("i18n/i18n.js?v=20260829-public-auth-v1");
         expect(page).toContain("advanced-stats-army-view.js?v=20260809-4");
         expect(page).toContain('applyI18n(document)');
-        expect(i18n).toContain("runtime-translations.js?v=20260823-achievement-card-assets-1");
-        expect(runtime).toContain("runtime-locales/workspace-en.js?v=20260828-cwl-planner-v2-i18n");
-        expect(runtime).toContain("runtime-locales/workspace-nl.js?v=20260828-cwl-planner-v2-i18n");
+        expect(i18n).toContain("runtime-translations.js?v=20260829-public-auth-v1");
+        expect(runtime).toContain("runtime-locales/workspace-en.js?v=20260829-public-auth-v1");
+        expect(runtime).toContain("runtime-locales/workspace-nl.js?v=20260829-public-auth-v1");
         expect(runtime).toContain("advanced-stats-locales.js?v=20260814-advanced-stats-v4");
         expect(runtime).toContain("advanced-stats-extra-locales.js?v=20260814-advanced-stats-v4");
         expect(runtime).toContain("advanced-stats-ui-locales.js?v=20260814-advanced-stats-v4");

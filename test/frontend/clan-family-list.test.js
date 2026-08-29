@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createClanFamilyListController } from '../../src/assets/js/groups/clan-family-list.js';
+import { createClanFamilyListController } from '../../src/assets/js/groups/clan-family-list.js?v=20260829-public-auth-v1';
 import { buildClanFamilyFixture } from '../../src/assets/js/groups/clan-family-fixtures.js';
 
 describe('Clan Family list controller', () => {

@@ -1,13 +1,14 @@
-import { getLanguage, initI18n, t } from '../i18n/i18n.js';
-import { syncAuthSession } from '../auth/auth-client.js';
+import { getLanguage, initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260829-public-auth-v1';
 import { getCurrentUserId } from '../utils/user.js';
-import { checkUserId } from '../Supabase/Supabase-User.js';
-import { getAllPlansFromDatabase } from '../Supabase/Supabase-Plan.js';
-import { getGroupInfo, getGroupsOfUser } from '../Supabase/Supabase-Group.js';
+import { checkUserId } from '../Supabase/Supabase-User.js?v=20260829-public-auth-v1';
+import { getAllPlansFromDatabase } from '../Supabase/Supabase-Plan.js?v=20260829-public-auth-v1';
+import { getGroupInfo, getGroupsOfUser } from '../Supabase/Supabase-Group.js?v=20260829-public-auth-v1';
 import { roleLabelKey } from '../groups/groups-roles.js';
 import { summarizePlan } from '../cwl/cwl-plan-summary.js';
 import { getNameInitials } from '../utils/name-initials.js';
 import { onUserProfileUpdate } from '../profile/profile-events.js';
+import * as plannerStorage from '../cwl/cwl-planner-guest-storage.js?v=20260829-public-auth-v1';
 
 const refs = {};
 const state = {
@@ -51,7 +52,7 @@ function setStatus(element, key = '', stateName = '') {
 }
 
 function selectPlan(planId) {
-    localStorage.setItem('planner_id', planId);
+    plannerStorage.persistActivePlannerId(planId);
 }
 
 function tableMessage(key, actionKey = '', actionHref = '') {
@@ -241,6 +242,9 @@ async function loadRecentGroups(userId) {
 }
 
 async function init() {
+    const authState = await resolveAuthState().catch(() => null);
+    if (authState?.status !== AUTH_STATES.AUTHENTICATED) return;
+    plannerStorage.configureGuestPlanner({ authState });
     initI18n();
     initRefs();
     onUserProfileUpdate(profile => {
@@ -249,7 +253,6 @@ async function init() {
     });
     refs.accountLine.addEventListener('click', () => document.querySelector('#profile-btn')?.click());
     window.addEventListener('clashtools:language-changed', renderAll);
-    await syncAuthSession().catch(() => null);
     const userId = getCurrentUserId();
     state.loggedIn = Boolean(userId);
     if (!userId) {

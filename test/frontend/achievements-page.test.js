@@ -28,11 +28,11 @@ describe('Achievements workspace page', () => {
         expect([...document.querySelectorAll('button:not([type])')]).toHaveLength(0);
     });
 
-    it('keeps the unreleased workspace behind the Coming Soon route guard', () => {
+    it('keeps the unreleased workspace behind the central route guard', () => {
         const source = readFileSync('src/subpages/achievements.html', 'utf8');
         const document = documentFor('src/subpages/achievements.html');
 
-        expect(source).toContain("window.location.replace('/dashboard')");
+        expect(source).not.toContain("window.location.replace('/dashboard')");
         expect(document.title).toContain('Coming soon');
         expect(document.querySelector('.workspace-coming-soon-badge')).not.toBeNull();
     });

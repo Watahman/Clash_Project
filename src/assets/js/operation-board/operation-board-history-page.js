@@ -1,7 +1,7 @@
 import { getCurrentCwlPlayerContext } from './operation-board-player-context.js';
-import { createOperationBoardHistoryController } from './operation-board-history-controller.js?v=20260827-cwl-league-history';
+import { createOperationBoardHistoryController } from './operation-board-history-controller.js?v=20260829-public-auth-v1';
 import { getHistoricalCwlPlayerContext } from './historical-cwl-season-model.js';
-import { renderHistoryOverview } from './operation-board-renderer.js';
+import { renderHistoryOverview } from './operation-board-renderer.js?v=20260829-public-auth-v1';
 
 export function createOperationBoardHistoryPage({
                                                     refs,

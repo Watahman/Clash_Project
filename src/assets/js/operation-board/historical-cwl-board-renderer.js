@@ -1,18 +1,18 @@
 import {
     clearBonusCalculator
-} from './operation-board-bonus-renderer.js';
-import { renderBoardContext } from './operation-board-context-renderer.js';
+} from './operation-board-bonus-renderer.js?v=20260829-public-auth-v1';
+import { renderBoardContext } from './operation-board-context-renderer.js?v=20260829-public-auth-v1';
 import {
     clearLeagueSections,
     renderLeagueSections
-} from './operation-board-league-renderer.js';
-import { clearLiveTab } from './operation-board-live-renderer.js';
+} from './operation-board-league-renderer.js?v=20260829-public-auth-v1';
+import { clearLiveTab } from './operation-board-live-renderer.js?v=20260829-public-auth-v1';
 import {
     renderEmptyRoster,
     renderRoster,
     renderRosterViewOptions,
     syncRosterMode
-} from './operation-board-roster-renderer.js';
+} from './operation-board-roster-renderer.js?v=20260829-public-auth-v1';
 import { applyOperationTabState } from './operation-board-tabs.js';
 import {
     clearHistoricalOverview,

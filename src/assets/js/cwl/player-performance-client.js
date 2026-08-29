@@ -1,4 +1,4 @@
-import { requestJson } from '../utils/request-json.js';
+import { requestJson } from '../utils/request-json.js?v=20260829-public-auth-v1';
 import * as config from '../Data/config.js';
 import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 

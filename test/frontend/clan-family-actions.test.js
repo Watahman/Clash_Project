@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { initClanFamilyActions, normalizeClanTag } from '../../src/assets/js/groups/clan-family-actions.js';
+import { initClanFamilyActions, normalizeClanTag } from '../../src/assets/js/groups/clan-family-actions.js?v=20260829-public-auth-v1';
 
 function makeRefs() {
     document.body.innerHTML = `

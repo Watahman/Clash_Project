@@ -1,4 +1,9 @@
 import { THEME_TOGGLE_MARKUP } from '../theme/theme-toggle-markup.js';
+import {
+    buildLoginUrl,
+    getCurrentReturnPath,
+    getSafeReturnPath
+} from '../auth/auth-navigation.js?v=20260829-public-auth-v1';
 
 const PUBLIC_NAV_ITEMS = Object.freeze([
     { id: 'tools', href: '/#features', key: 'public.nav.tools', label: 'Tools' },
@@ -48,6 +53,36 @@ function navMarkup(activeSection) {
     }).join('');
 }
 
+function buildRegisterUrl(returnTo = getCurrentReturnPath()) {
+    const safeReturnPath = getSafeReturnPath(returnTo);
+    return `/subpages/register.html?next=${encodeURIComponent(safeReturnPath)}`;
+}
+
+function setAuthControlVisibility(element, visible) {
+    if (!element) return;
+    element.hidden = !visible;
+    element.setAttribute('aria-hidden', String(!visible));
+}
+
+/**
+ * Reflect an auth-client state without replacing the header controls.
+ * Keeping the language/theme nodes in place preserves their event bindings.
+ */
+export function updatePublicHeaderAuth(state = {}, root = document) {
+    const header = root.querySelector('header.public-header');
+    if (!header) return;
+
+    const status = state?.status || 'guest';
+    const authenticated = status === 'authenticated';
+    header.dataset.authState = status;
+    header.querySelectorAll('[data-public-auth-guest]').forEach(control => {
+        setAuthControlVisibility(control, !authenticated);
+    });
+    header.querySelectorAll('[data-public-authenticated]').forEach(control => {
+        setAuthControlVisibility(control, authenticated);
+    });
+}
+
 export function normalizePublicHeader(root = document) {
     if (!root.body?.classList.contains('public-site')) return;
 
@@ -55,6 +90,7 @@ export function normalizePublicHeader(root = document) {
     if (!header || header.dataset.publicHeaderNormalized === 'true') return;
 
     const activeSection = currentPublicSection(window.location.pathname);
+    const returnTo = getCurrentReturnPath();
     header.innerHTML = `
         <a class="public-brand" href="/" data-i18n-aria-label="public.homeLabel" aria-label="ClashPanel home">
             <img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160">
@@ -66,15 +102,17 @@ export function normalizePublicHeader(root = document) {
         <div class="public-actions">
             <button type="button" data-language-control data-i18n="header.language">Language</button>
             <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme">${THEME_TOGGLE_MARKUP}</button>
-            <a class="link-button" href="/subpages/login" data-i18n="auth.login">Log in</a>
-            <a class="button button-primary" href="/subpages/register" data-i18n="public.startFree">Start for free</a>
+            <a class="link-button" href="${buildLoginUrl(returnTo)}" data-public-auth-guest data-i18n="auth.login">Log in</a>
+            <a class="button button-primary" href="${buildRegisterUrl(returnTo)}" data-public-auth-guest data-i18n="public.startFree">Start for free</a>
+            <a class="button button-primary" href="/dashboard" data-public-authenticated data-i18n="nav.dashboard" hidden aria-hidden="true">Dashboard</a>
         </div>
         <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" data-i18n-aria-label="public.openMenu" aria-label="Open menu">
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
         </button>`;
     header.dataset.publicHeaderNormalized = 'true';
+    updatePublicHeaderAuth({ status: 'guest' }, root);
 }
 
 export function normalizePublicFooter(root = document) {
@@ -118,7 +156,7 @@ function loadPolicyOverlay(root) {
     if (!root.querySelector('[data-policy-document]')) return;
     if (root.body.dataset.policyOverlayLoaded === 'true') return;
     root.body.dataset.policyOverlayLoaded = 'true';
-    void import('../pages/public-policy-overlay.js')
+    void import('../pages/public-policy-overlay.js?v=20260829-public-auth-v1')
         .then(module => module.initPublicPolicyOverlay())
         .catch(() => {
             delete root.body.dataset.policyOverlayLoaded;

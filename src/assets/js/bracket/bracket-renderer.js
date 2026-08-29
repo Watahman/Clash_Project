@@ -1,6 +1,6 @@
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { bracketChampion } from './bracket-engine.js';
-import { bracketText } from './bracket-copy.js';
+import { bracketText } from './bracket-copy.js?v=20260829-public-auth-v1';
 import { drawBracketConnectors } from './bracket-connectors.js';
 import { bracketIcon } from './bracket-icons.js';
 import { participantDisplayName } from './bracket-model.js';

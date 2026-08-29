@@ -1,4 +1,4 @@
-import { competeT as t } from './compete-locales.js';
+import { competeT as t } from './compete-locales.js?v=20260829-public-auth-v1';
 import {
     lower,
     number
@@ -6,9 +6,9 @@ import {
 import {
     option,
     stateText
-} from './operation-board-render-utils.js';
+} from './operation-board-render-utils.js?v=20260829-public-auth-v1';
 import { matchesRosterView } from './operation-board-roster-filter.js';
-import { renderPlayerRow } from './operation-board-roster-row-renderer.js';
+import { renderPlayerRow } from './operation-board-roster-row-renderer.js?v=20260829-public-auth-v1';
 
 export function isStandaloneMode(report, selectedClan = null) {
     return Boolean(

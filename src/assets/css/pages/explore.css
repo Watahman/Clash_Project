@@ -60,6 +60,12 @@
 .explore-grid h2 { font-size: 1.125rem; }
 .explore-grid p { color: var(--cp-text-2); font-size: .875rem; margin: 8px 0 24px; }
 .explore-grid strong { font-size: .8125rem; margin-top: auto; }
+.explore-card-status--locked {
+    align-items: center;
+    color: var(--cp-text-1);
+    display: inline-flex;
+    gap: .35rem;
+}
 .explore-grid [hidden] { display: none; }
 
 @media (max-width: 1099px) {

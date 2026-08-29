@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
     downloadCwlExportWorkbook: vi.fn(() => Promise.resolve())
 }));
 
-vi.mock('../../src/assets/js/cwl/cwl-plan-io.js', () => ({
+vi.mock('../../src/assets/js/cwl/cwl-plan-io.js?v=20260829-public-auth-v1', () => ({
     getCurrentPlanSnapshot: mocks.getCurrentPlanSnapshot
 }));
 vi.mock('../../src/assets/js/cwl/export/cwl-export-renderer.js?v=20260821-badge-v2', () => ({
@@ -38,7 +38,7 @@ describe('CWL export controller', () => {
     it('takes one snapshot per open and shares it between PNG and Excel exports', async () => {
         const opener = document.querySelector('#cwl-export-plan-button');
         const { initCwlPlanExport } = await import(
-            '../../src/assets/js/cwl/export/cwl-export-ui.js'
+            '../../src/assets/js/cwl/export/cwl-export-ui.js?v=20260829-public-auth-v1'
         );
         initCwlPlanExport();
 
@@ -81,7 +81,7 @@ describe('CWL export controller', () => {
     it('keeps download actions disabled for an empty plan and announces the empty state', async () => {
         mocks.getCurrentPlanSnapshot.mockReturnValue({ name: 'Empty', clans: [], freePlayers: [] });
         const { initCwlPlanExport } = await import(
-            '../../src/assets/js/cwl/export/cwl-export-ui.js'
+            '../../src/assets/js/cwl/export/cwl-export-ui.js?v=20260829-public-auth-v1'
         );
         initCwlPlanExport();
         document.querySelector('#cwl-export-plan-button').click();

@@ -1,10 +1,13 @@
-import { initI18n, t } from '../i18n/i18n.js?v=20260828-seo-final';
-import { syncAuthSession } from '../auth/auth-client.js';
-import { toggleTheme as toggleThemePreference } from '../theme/theme-manager.js?v=20260828-seo-final';
-import { normalizePublicShell } from '../shell/public-header.js?v=20260828-seo-final';
+import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { onAuthStateChange } from '../auth/auth-client.js?v=20260829-public-auth-v1';
+import { toggleTheme as toggleThemePreference } from '../theme/theme-manager.js?v=20260829-public-auth-v1';
+import {
+    normalizePublicShell,
+    updatePublicHeaderAuth
+} from '../shell/public-header.js?v=20260829-public-auth-v1';
 import { ensureThemeToggleMarkup } from '../theme/theme-toggle-markup.js';
-import { initPublicPageBindings } from './public-page-bindings.js';
-import { initPublicResourcePages } from './public-resource-pages.js?v=20260821-authentic-pages';
+import { initPublicPageBindings } from './public-page-bindings.js?v=20260829-public-auth-v1';
+import { initPublicResourcePages } from './public-resource-pages.js?v=20260829-public-auth-v1';
 
 function toggleTheme(event) {
     toggleThemePreference(event.currentTarget);
@@ -237,14 +240,14 @@ function initProductFlow() {
     });
 }
 
-async function redirectReturningUser() {
-    if (document.body.dataset.redirectAuthenticated !== 'true') return;
-    const session = await syncAuthSession().catch(() => null);
-    if (session) window.location.replace('/dashboard');
+function initPublicAuthNavigation() {
+    if (!document.body?.classList.contains('public-site')) return;
+    onAuthStateChange((_session, state) => updatePublicHeaderAuth(state));
 }
 
 function init() {
     normalizePublicShell();
+    initPublicAuthNavigation();
     initI18n();
     initPublicPageBindings();
     initPublicResourcePages();
@@ -256,7 +259,6 @@ function init() {
     initHomepageDemo();
     initProductFlow();
     window.addEventListener('clashtools:language-changed', updateThemeButtons);
-    void redirectReturningUser();
 }
 
 init();

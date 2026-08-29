@@ -1,23 +1,27 @@
-import { initI18n, t } from '../i18n/i18n.js';
-import { syncAuthSession } from "../auth/auth-client.js";
-import { initOverlayHide, initAddPlayersOverlay, initAddClanButton, applyCwlSizeRestriction } from "../cwl/cwl-overlay.js";
-import { initPlanIO, savePlan, loadAllPlans, loadPlanListener, startNewPlan, undoLastPlanChange } from "../cwl/cwl-plan-io.js";
-import { initFreeRosterFilter } from "../cwl/cwl-roster-filter.js?v=20260828-cwl-planner-v2";
-import { initClanVisibilityFilter } from "../cwl/cwl-clan-visibility-filter.js?v=20260828-cwl-planner-v2";
-import { refreshPlannerPriorityLabels } from "../cwl/cwl-priority-labels.js?v=20260828-cwl-planner-v2";
-import { initSpreadsheetImport } from "../cwl/cwl-spreadsheet-import.js";
-import { getClanInfoRequest } from "../API/API-Clan.js";
+import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import {
+    getAuthState,
+    syncAuthSession
+} from "../auth/auth-client.js?v=20260829-public-auth-v1";
+import { initOverlayHide, initAddPlayersOverlay, initAddClanButton, applyCwlSizeRestriction } from "../cwl/cwl-overlay.js?v=20260829-public-auth-v1";
+import { initPlanIO, savePlan, loadAllPlans, loadPlanListener, startNewPlan, undoLastPlanChange } from "../cwl/cwl-plan-io.js?v=20260829-public-auth-v1";
+import { initFreeRosterFilter } from "../cwl/cwl-roster-filter.js?v=20260829-public-auth-v1";
+import { initClanVisibilityFilter } from "../cwl/cwl-clan-visibility-filter.js?v=20260829-public-auth-v1";
+import { refreshPlannerPriorityLabels } from "../cwl/cwl-priority-labels.js?v=20260829-public-auth-v1";
+import { initSpreadsheetImport } from "../cwl/cwl-spreadsheet-import.js?v=20260829-public-auth-v1";
+import { getClanInfoRequest } from "../API/API-Clan.js?v=20260829-public-auth-v1";
 import * as conf from "../Data/config.js";
-import { initPlayerPerformanceClient } from "../cwl/player-performance-client.js";
-import { initPlayerPerformancePopover } from "../cwl/cwl-player-performance-popover.js";
-import { initAutoPlan } from "../cwl/auto-plan/cwl-auto-plan-ui.js";
-import { initOptimizePlan } from "../cwl/optimize-plan/cwl-optimize-plan-ui.js?v=20260812-1";
-import { initCwlPlanExport } from "../cwl/export/cwl-export-ui.js?v=20260821-badge-v2";
-import { initPlannerSurface } from "../cwl/cwl-planner-ui.js";
+import { initPlayerPerformanceClient } from "../cwl/player-performance-client.js?v=20260829-public-auth-v1";
+import { initPlayerPerformancePopover } from "../cwl/cwl-player-performance-popover.js?v=20260829-public-auth-v1";
+import { initAutoPlan } from "../cwl/auto-plan/cwl-auto-plan-ui.js?v=20260829-public-auth-v1";
+import { initOptimizePlan } from "../cwl/optimize-plan/cwl-optimize-plan-ui.js?v=20260829-public-auth-v1";
+import { initCwlPlanExport } from "../cwl/export/cwl-export-ui.js?v=20260829-public-auth-v1";
+import { initPlannerSurface } from "../cwl/cwl-planner-ui.js?v=20260829-public-auth-v1";
+import { initPlannerSaveAction } from "../cwl/cwl-planner-save-action.js?v=20260829-public-auth-v1";
 import {
     applyPlannerFixture,
     getRequestedPlannerFixture
-} from '../fixtures/planner-fixtures.js';
+} from '../fixtures/planner-fixtures.js?v=20260829-public-auth-v1';
 import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 
 export { savePlan };
@@ -25,8 +29,7 @@ export { savePlan };
 let addClanBtn, overlayAddClanBtn;
 let cwlInputTag, cwlInputClanCode, selectAmountPlayers;
 let savePlanBtn, newPlanBtn, undoPlanBtn, planName, loadPlan;
-let manualSaveInFlight = false;
-let saveFeedbackTimer;
+let plannerAuthState = null;
 let availablePlayers, allClans, totalPlayerAmount;
 let pageTitle;
 let addPlayersBtn, overlayConfirmTagBtn, accountList,
@@ -69,6 +72,9 @@ async function init() {
     initI18n();
     const fixture = isRedesignFixtureRequested() ? await getRequestedPlannerFixture() : null;
     if (!fixture) await syncAuthSession().catch(() => null);
+    plannerAuthState = fixture
+        ? { status: 'guest', session: null }
+        : getAuthState();
     const restoreFixtureStorage = fixture ? preservePlannerStorage() : null;
     if (fixture) {
         conf.setCanAutosave(false);
@@ -76,17 +82,17 @@ async function init() {
     }
     labelInit();
     initOverlayHide();
-    initPlanIO({ availablePlayers, allClans, totalPlayerAmount, planName, loadPlan });
+    initPlanIO({ availablePlayers, allClans, totalPlayerAmount, planName, loadPlan, authState: plannerAuthState });
     restoreFixtureStorage?.();
     initAddPlayersOverlay({
         addPlayersBtn, modalTabBtn, segBtns, selectGroup, overlayConfirmTagBtn,
         cwlInputTag, addSelectedBtn, accountList, modalAccountListEmpty,
         groupPreview, groupPreviewList, loadGroupBtn, selectGroupPoll, groupLinkedClans,
-        rosterPollSelect
+        rosterPollSelect, authState: plannerAuthState
     });
     initAddClanButton({ addClanBtn, overlayAddClanBtn, cwlInputClanCode, selectAmountPlayers });
     initSpreadsheetImport();
-    savePlanButton();
+    initPlannerSaveAction({ button: savePlanBtn, onStateChange: updateSaveButtonState });
     initSaveButtonState();
     newPlanBtn?.addEventListener('click', startNewPlan);
     undoPlanBtn?.addEventListener('click', () => void undoLastPlanChange());
@@ -201,44 +207,6 @@ function initPlannerHeaderState() {
     window.addEventListener('clashtools:cwl-plan-name-defaulted', sync);
     window.addEventListener('clashtools:language-changed', sync);
     sync();
-}
-
-function savePlanButton() {
-    savePlanBtn.addEventListener("click", async () => {
-        updateSaveButtonState();
-        if (savePlanBtn.disabled || manualSaveInFlight) return;
-
-        manualSaveInFlight = true;
-        conf.setCanAutosave(true);
-        setSaveButtonFeedback('saving');
-
-        const [result] = await Promise.all([
-            savePlan({ immediate: true }),
-            wait(500)
-        ]);
-
-        setSaveButtonFeedback(result ? 'saved' : 'error');
-        saveFeedbackTimer = window.setTimeout(() => {
-            setSaveButtonFeedback('idle');
-        }, result ? 900 : 1400);
-        manualSaveInFlight = false;
-        updateSaveButtonState();
-    });
-}
-
-function setSaveButtonFeedback(state) {
-    if (!savePlanBtn) return;
-    if (saveFeedbackTimer) {
-        window.clearTimeout(saveFeedbackTimer);
-        saveFeedbackTimer = undefined;
-    }
-    if (state === 'idle') delete savePlanBtn.dataset.saveFeedback;
-    else savePlanBtn.dataset.saveFeedback = state;
-    savePlanBtn.setAttribute('aria-busy', state === 'saving' ? 'true' : 'false');
-}
-
-function wait(milliseconds) {
-    return new Promise(resolve => window.setTimeout(resolve, milliseconds));
 }
 
 function initSaveButtonState() {

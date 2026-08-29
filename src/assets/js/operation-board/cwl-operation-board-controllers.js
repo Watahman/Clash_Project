@@ -1,5 +1,5 @@
-import { createOperationBoardHistoryPage } from './operation-board-history-page.js?v=20260827-cwl-league-history';
-import { createOperationBoardImportController } from './operation-board-import-controller.js';
+import { createOperationBoardHistoryPage } from './operation-board-history-page.js?v=20260829-public-auth-v1';
+import { createOperationBoardImportController } from './operation-board-import-controller.js?v=20260829-public-auth-v1';
 
 export function createCwlOperationBoardControllers({
     refs,

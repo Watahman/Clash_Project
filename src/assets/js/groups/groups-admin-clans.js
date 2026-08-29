@@ -1,9 +1,9 @@
-import { getClanInfoRequest, getClanMembersRequest } from '../API/API-Clan.js';
-import { addGroupClan, getGroupClans, getGroupInfo, removeGroupClan } from '../Supabase/Supabase-Group.js';
-import { t } from '../i18n/i18n.js';
-import { withGlobalLoading } from '../utils/loading-state.js';
+import { getClanInfoRequest, getClanMembersRequest } from '../API/API-Clan.js?v=20260829-public-auth-v1';
+import { addGroupClan, getGroupClans, getGroupInfo, removeGroupClan } from '../Supabase/Supabase-Group.js?v=20260829-public-auth-v1';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { withGlobalLoading } from '../utils/loading-state.js?v=20260829-public-auth-v1';
 import { renderBadge } from './groups-badges.js';
-import { familyCopy } from './clan-family-copy.js';
+import { familyCopy } from './clan-family-copy.js?v=20260829-public-auth-v1';
 
 export function createClanAdmin(elements, getState, setMessage, emptyMessage) {
     let linkedClans = [];

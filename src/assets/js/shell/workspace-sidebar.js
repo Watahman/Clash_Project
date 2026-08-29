@@ -1,4 +1,4 @@
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 
 const SIDEBAR_COLLAPSED_KEY = 'clashtools_workspace_sidebar_collapsed';
 

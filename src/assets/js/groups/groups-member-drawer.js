@@ -1,12 +1,12 @@
-import { kickGroupMember, setGroupMemberRole, transferGroupLeadership } from '../Supabase/Supabase-GroupRoles.js';
-import { getGroupInfo, getGroupMembers } from '../Supabase/Supabase-Group.js';
-import { t } from '../i18n/i18n.js';
+import { kickGroupMember, setGroupMemberRole, transferGroupLeadership } from '../Supabase/Supabase-GroupRoles.js?v=20260829-public-auth-v1';
+import { getGroupInfo, getGroupMembers } from '../Supabase/Supabase-Group.js?v=20260829-public-auth-v1';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { getCurrentUserId } from '../utils/user.js';
-import { withGlobalLoading } from '../utils/loading-state.js';
+import { withGlobalLoading } from '../utils/loading-state.js?v=20260829-public-auth-v1';
 import { applyRoleBadge, canManageGroupMembers, canManageGroupRoles, getCurrentUserRole, normalizeGroupRole, ROLE_CO_LEADER, ROLE_MEMBER } from './groups-roles.js';
-import { familyCopy } from './clan-family-copy.js';
+import { familyCopy } from './clan-family-copy.js?v=20260829-public-auth-v1';
 import { closeGroupDialog, bindGroupDialog, openGroupDialog } from './groups-dialog.js?v=20260813-redesign';
-import { memberAccounts } from '../templates/GroupTemplates.js?v=20260813-redesign';
+import { memberAccounts } from '../templates/GroupTemplates.js?v=20260829-public-auth-v1';
 import { getNameInitials } from '../utils/name-initials.js';
 
 export function initGroupMemberDrawer(emptyMessage = () => document.createElement('p')) {

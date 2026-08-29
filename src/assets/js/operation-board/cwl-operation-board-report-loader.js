@@ -1,7 +1,7 @@
-import { competeT as t } from './compete-locales.js';
-import { enrichWithHistoricalPerformance } from './operation-board-performance.js';
-import { buildReport } from './operation-board-report-model.js';
-import { loadOperationSource, NoActiveCwlError } from './operation-board-source.js?v=20260826-live-refresh';
+import { competeT as t } from './compete-locales.js?v=20260829-public-auth-v1';
+import { enrichWithHistoricalPerformance } from './operation-board-performance.js?v=20260829-public-auth-v1';
+import { buildReport } from './operation-board-report-model.js?v=20260829-public-auth-v1';
+import { loadOperationSource, NoActiveCwlError } from './operation-board-source.js?v=20260829-public-auth-v1';
 
 export function createCwlOperationBoardReportLoader({
     getSelectedPlan,

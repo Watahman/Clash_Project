@@ -1,5 +1,5 @@
 import * as config from '../Data/config.js';
-import { requestJson } from '../utils/request-json.js';
+import { requestJson } from '../utils/request-json.js?v=20260829-public-auth-v1';
 import { normalizeTag } from './operation-board-utils.js';
 import { loadCwlFixture } from './operation-board-fixtures.js';
 

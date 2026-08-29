@@ -1,5 +1,5 @@
-import { t } from '../i18n/i18n.js?v=20260814-advanced-stats-v4';
-import { arrayValue } from './advanced-stats-formatters.js?v=20260814-advanced-stats-v4';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { arrayValue } from './advanced-stats-formatters.js?v=20260829-public-auth-v1';
 import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260811-2';
 
 const BATTLE_PAGE_SIZE = 20;

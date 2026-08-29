@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
 import { describe, expect, it } from 'vitest';
 import { createBracketFixture } from '../../src/assets/js/bracket/bracket-fixtures.js';
-import { createBracketController } from '../../src/assets/js/bracket/bracket-page-controller.js';
-import { collectBracketRefs } from '../../src/assets/js/bracket/bracket-page-view.js';
+import { createBracketController } from '../../src/assets/js/bracket/bracket-page-controller.js?v=20260829-public-auth-v1';
+import { collectBracketRefs } from '../../src/assets/js/bracket/bracket-page-view.js?v=20260829-public-auth-v1';
 
 const privateHtml = readFileSync('src/subpages/bracket-generator.html', 'utf8');
 

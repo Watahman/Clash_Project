@@ -2,11 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { savePlan } = vi.hoisted(() => ({ savePlan: vi.fn() }));
 
-vi.mock('../../src/assets/js/cwl/cwl-plan-io.js', () => ({ savePlan }));
-vi.mock('../../src/assets/js/cwl/cwl-availability.js', () => ({
+vi.mock('../../src/assets/js/cwl/cwl-plan-io.js?v=20260829-public-auth-v1', () => ({ savePlan }));
+vi.mock('../../src/assets/js/cwl/cwl-availability.js?v=20260829-public-auth-v1', () => ({
     applyAvailabilityToCard: vi.fn()
 }));
-vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
+vi.mock('../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1', () => ({
     t: (key, params = {}) => {
         let value = ({
             'cwl.clan': 'Clan',
@@ -67,7 +67,7 @@ describe('CWL planner clan rows', () => {
     });
 
     it('renders stacked clan metadata and persists a changed 15/30 capacity', async () => {
-        const { createClanCard } = await import('../../src/assets/js/templates/CWLTemplates.js');
+        const { createClanCard } = await import('../../src/assets/js/templates/CWLTemplates.js?v=20260829-public-auth-v1');
         createClanCard({
             tag: '#AAA111',
             name: 'North Guard',
@@ -91,7 +91,7 @@ describe('CWL planner clan rows', () => {
     });
 
     it('allows players beyond capacity and automatically marks overflow as reserve', async () => {
-        const { createClanCard, createPlayerCard } = await import('../../src/assets/js/templates/CWLTemplates.js');
+        const { createClanCard, createPlayerCard } = await import('../../src/assets/js/templates/CWLTemplates.js?v=20260829-public-auth-v1');
         createClanCard({ tag: '#AAA111', name: 'North Guard' }, 15, 'north');
 
         for (let index = 0; index < 16; index += 1) {
@@ -118,7 +118,7 @@ describe('CWL planner clan rows', () => {
     });
 
     it('only shows the roster role selector while a player is inside a clan', async () => {
-        const { createPlayerCard } = await import('../../src/assets/js/templates/CWLTemplates.js');
+        const { createPlayerCard } = await import('../../src/assets/js/templates/CWLTemplates.js?v=20260829-public-auth-v1');
         createPlayerCard({ tag: '#FREE1', name: 'Free player', townHallLevel: 16 }, null);
 
         const player = document.querySelector('#cwl-available-players .cwl-player-article');
@@ -130,10 +130,10 @@ describe('CWL planner clan rows', () => {
 
     it('shows move controls only while a player is in the free roster', async () => {
         const { createClanCard, createPlayerCard } = await import(
-            '../../src/assets/js/templates/CWLTemplates.js'
+            '../../src/assets/js/templates/CWLTemplates.js?v=20260829-public-auth-v1'
         );
         const { syncPlayerRosterStatus } = await import(
-            '../../src/assets/js/cwl/cwl-player-controls.js'
+            '../../src/assets/js/cwl/cwl-player-controls.js?v=20260829-public-auth-v1'
         );
         createClanCard({ tag: '#AAA111', name: 'North Guard' }, 15, 'north');
         createPlayerCard({ tag: '#FREE1', name: 'Free player', townHallLevel: 16 }, null);

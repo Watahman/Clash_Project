@@ -1,4 +1,4 @@
-import { t } from '../i18n/i18n.js?v=20260811-2';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import {
     arrayValue,
     dateGapDays,
@@ -7,7 +7,7 @@ import {
     formatNumber,
     formatPercent,
     formatShortDate
-} from './advanced-stats-formatters.js?v=20260811-2';
+} from './advanced-stats-formatters.js?v=20260829-public-auth-v1';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const CHART_WIDTH = 720;

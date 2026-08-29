@@ -1,4 +1,4 @@
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 
 function normalizedPath() {
     return String(window.location.pathname || '/')

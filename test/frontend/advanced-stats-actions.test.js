@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createTrackingActions } from '../../src/assets/js/pages/advanced-stats-actions.js';
+import { createTrackingActions } from '../../src/assets/js/pages/advanced-stats-actions.js?v=20260829-public-auth-v1';
 
 function actionContext() {
     const state = {

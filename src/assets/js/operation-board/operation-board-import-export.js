@@ -1,4 +1,4 @@
-import { buildRankingHistory } from '../cwl/cwl-ranking-history.js';
+import { buildRankingHistory } from '../cwl/cwl-ranking-history.js?v=20260829-public-auth-v1';
 import { createEmptyRound } from './operation-board-roster-model.js';
 import { buildStandings } from './operation-board-standings-model.js';
 import {

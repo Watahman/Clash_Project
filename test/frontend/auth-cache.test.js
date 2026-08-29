@@ -1,12 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { clearCachePrefix } = vi.hoisted(() => ({
-    clearCachePrefix: vi.fn().mockResolvedValue(undefined)
+const { clearCachePrefix, invalidatePrivateCache } = vi.hoisted(() => ({
+    clearCachePrefix: vi.fn().mockResolvedValue(undefined),
+    invalidatePrivateCache: vi.fn()
 }));
 
-vi.mock('../../src/assets/js/cache/local-cache.js', () => ({ clearCachePrefix }));
+vi.mock('../../src/assets/js/cache/local-cache.js?v=20260829-public-auth-v1', () => ({
+    clearCachePrefix,
+    clearPrivateCache: undefined,
+    invalidatePrivateCache
+}));
 
-import { signInWithPassword, signOut } from '../../src/assets/js/auth/auth-client.js';
+import { signInWithPassword, signOut } from '../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1';
 
 describe('authentication cache isolation', () => {
     beforeEach(() => {

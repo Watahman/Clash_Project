@@ -1,5 +1,5 @@
 import { parseClashTime } from '../cwl/cwl-war-state.js';
-import { competeT as t } from './compete-locales.js';
+import { competeT as t } from './compete-locales.js?v=20260829-public-auth-v1';
 import { buildLiveView } from './operation-board-live-model.js';
 import {
     buildProjectedOutcome
@@ -10,11 +10,11 @@ import {
 import {
     resultText,
     stateText
-} from './operation-board-render-utils.js';
+} from './operation-board-render-utils.js?v=20260829-public-auth-v1';
 import {
     installLiveBadgeFallbacks,
     liveSideMarkup
-} from './operation-board-live-side-renderer.js';
+} from './operation-board-live-side-renderer.js?v=20260829-public-auth-v1';
 import { buildWinCondition } from './operation-board-win-condition.js';
 import {
     escapeHtml,

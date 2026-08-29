@@ -1,9 +1,9 @@
-import { normalizePlan } from './operation-board-plan-model.js';
-import { competeT as t } from './compete-locales.js';
+import { normalizePlan } from './operation-board-plan-model.js?v=20260829-public-auth-v1';
+import { competeT as t } from './compete-locales.js?v=20260829-public-auth-v1';
 import {
     renderPlanOptions,
     renderStandaloneMode
-} from './operation-board-source-controls.js';
+} from './operation-board-source-controls.js?v=20260829-public-auth-v1';
 
 export function setSourceMode(mode, root = document) {
     root.querySelectorAll('[data-op-source-mode]').forEach(button => {

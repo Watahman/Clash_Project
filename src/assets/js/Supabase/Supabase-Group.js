@@ -1,8 +1,8 @@
 import * as config from "../Data/config.js";
-import { databaseRequestWithBody } from "./Supabase-Client.js";
+import { databaseRequestWithBody } from "./Supabase-Client.js?v=20260829-public-auth-v1";
 import { cacheKeys } from "../cache/cache-keys.js";
 import { CACHE_STALE, CACHE_TTL } from "../cache/cache-policy.js";
-import { clearCachePrefix, removeCached } from "../cache/local-cache.js";
+import { clearCachePrefix, removeCached } from "../cache/local-cache.js?v=20260829-public-auth-v1";
 
 function invalidateGroup(groupId) {
     if (!groupId) return;

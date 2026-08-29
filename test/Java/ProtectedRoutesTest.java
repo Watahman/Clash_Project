@@ -101,4 +101,27 @@ class ProtectedRoutesTest {
         assertFalse(response.body().contains("spoofed"));
     }
 
+    @Test
+    void playerOwnershipVerificationRequiresAnAuthenticatedSession() throws Exception {
+        Config config = new Config();
+        server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        new API_Player(server, config).postPlayerVerifyToken();
+        server.start();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(
+                        "http://127.0.0.1:" + server.getAddress().getPort() + config._EXT_PLAYER_VERIFY_TOKEN
+                ))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(
+                        "{\"playerID\":\"#VALIDTAG\",\"playerToken\":\"token\"}",
+                        StandardCharsets.UTF_8
+                ))
+                .build();
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(401, response.statusCode());
+        assertFalse(response.body().contains("#VALIDTAG"));
+    }
+
 }

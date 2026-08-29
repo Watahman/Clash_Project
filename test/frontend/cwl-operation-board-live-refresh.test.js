@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createCwlOperationBoardReportLoader } from '../../src/assets/js/operation-board/cwl-operation-board-report-loader.js';
+import { createCwlOperationBoardReportLoader } from '../../src/assets/js/operation-board/cwl-operation-board-report-loader.js?v=20260829-public-auth-v1';
 
 describe('CWL Operation Board live refresh', () => {
     it('passes an explicit force-refresh request to the live source', async () => {

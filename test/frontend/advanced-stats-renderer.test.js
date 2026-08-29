@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { renderArmies } from '../../src/assets/js/pages/advanced-stats-armies-renderer.js';
-import { renderBattles } from '../../src/assets/js/pages/advanced-stats-battles-renderer.js';
-import { renderOverview } from '../../src/assets/js/pages/advanced-stats-renderer.js';
-import { renderCoverageStatus, renderHistoryAnalysis } from '../../src/assets/js/pages/advanced-stats-analysis-renderer.js';
+import { renderArmies } from '../../src/assets/js/pages/advanced-stats-armies-renderer.js?v=20260829-public-auth-v1';
+import { renderBattles } from '../../src/assets/js/pages/advanced-stats-battles-renderer.js?v=20260829-public-auth-v1';
+import { renderOverview } from '../../src/assets/js/pages/advanced-stats-renderer.js?v=20260829-public-auth-v1';
+import { renderCoverageStatus, renderHistoryAnalysis } from '../../src/assets/js/pages/advanced-stats-analysis-renderer.js?v=20260829-public-auth-v1';
 import { normalizeAnalysis } from '../../src/assets/js/pages/advanced-stats-analysis.js';
-import { createTrendValue, renderTrends } from '../../src/assets/js/pages/advanced-stats-trends-renderer.js';
-import { renderUnits } from '../../src/assets/js/pages/advanced-stats-units-renderer.js';
+import { createTrendValue, renderTrends } from '../../src/assets/js/pages/advanced-stats-trends-renderer.js?v=20260829-public-auth-v1';
+import { renderUnits } from '../../src/assets/js/pages/advanced-stats-units-renderer.js?v=20260829-public-auth-v1';
 
 beforeEach(() => {
     document.body.replaceChildren();

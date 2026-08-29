@@ -1,10 +1,10 @@
-import { getLanguage, t } from '../i18n/i18n.js';
+import { getLanguage, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { filterAndSortPlans } from '../cwl/cwl-plan-list.js';
 
 export function createSavedPlansView(options) {
     const { refs, getPlans, getUserId, listState, setStatus } = options;
     return {
-        bindControls: () => bindListControls(refs, listState, render),
+        bindControls: () => bindListControls(refs, listState, render, options),
         render: () => renderPlanTable({ refs, getPlans, getUserId, listState, setStatus, options }),
         setControlsEnabled: enabled => setListControlsEnabled(refs, enabled)
     };
@@ -37,7 +37,7 @@ function renderPlanTable({ refs, getPlans, getUserId, listState, setStatus, opti
     visiblePlans.forEach(plan => refs.container.appendChild(renderPlan(plan, options)));
 }
 
-function bindListControls(refs, listState, render) {
+function bindListControls(refs, listState, render, options) {
     refs.search?.addEventListener('input', event => {
         listState.query = event.currentTarget.value;
         render();
@@ -47,7 +47,7 @@ function bindListControls(refs, listState, render) {
         render();
     });
     document.querySelector('[data-new-plan]')?.addEventListener('click', () => {
-        localStorage.removeItem('planner_id');
+        options.clearActivePlan?.();
     });
 }
 
@@ -62,12 +62,12 @@ function updateFilterStatus(refs, visible, total) {
     refs.filterStatus.hidden = !total;
 }
 
-function openPlanLink(planId, className = 'button button-small button-primary') {
+function openPlanLink(planId, className = 'button button-small button-primary', options = {}) {
     const link = document.createElement('a');
     link.href = './cwl-planner.html';
     link.className = className;
     link.textContent = t('drafts.open');
-    link.addEventListener('click', () => localStorage.setItem('planner_id', planId));
+    link.addEventListener('click', () => options.selectPlan?.(planId));
     return link;
 }
 
@@ -136,7 +136,7 @@ function renderPlan(plan, options) {
     const row = document.createElement('tr');
     row.dataset.planId = plan.id;
     row.append(
-        createPlanNameCell(plan),
+        createPlanNameCell(plan, options),
         cell('plans.clans', String(plan.clanCount)),
         cell('plans.freeRoster', String(plan.freePlayerCount)),
         cell('plans.updated', formatUpdatedAt(plan.updatedAt)),
@@ -145,9 +145,9 @@ function renderPlan(plan, options) {
     return row;
 }
 
-function createPlanNameCell(plan) {
+function createPlanNameCell(plan, options) {
     const name = cell('plans.name', '');
-    const nameLink = openPlanLink(plan.id, 'draft-plan-name-link');
+    const nameLink = openPlanLink(plan.id, 'draft-plan-name-link', options);
     const heading = document.createElement('strong');
     heading.textContent = plan.name || t('plans.unnamed');
     nameLink.replaceChildren(heading);
@@ -160,7 +160,7 @@ function createPlanNameCell(plan) {
 function createPlanActions(plan, row, options) {
     const actions = document.createElement('td');
     actions.className = 'draft-actions workspace-row-actions';
-    actions.appendChild(openPlanLink(plan.id));
+    actions.appendChild(openPlanLink(plan.id, undefined, options));
     const more = document.createElement('details');
     more.className = 'draft-plan-actions-menu';
     const summary = document.createElement('summary');

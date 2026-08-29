@@ -1,8 +1,8 @@
-import { getClanInfoRequest } from "../API/API-Clan.js";
-import { createClanCard } from "../templates/CWLTemplates.js";
-import { initAddPlayersOverlay as initPlayerPicker, resetPlayerOverlayState } from "./cwl-overlay-player-picker.js";
+import { getClanInfoRequest } from "../API/API-Clan.js?v=20260829-public-auth-v1";
+import { createClanCard } from "../templates/CWLTemplates.js?v=20260829-public-auth-v1";
+import { initAddPlayersOverlay as initPlayerPicker, resetPlayerOverlayState } from "./cwl-overlay-player-picker.js?v=20260829-public-auth-v1";
 import { initOverlayDismissal } from "./cwl-overlay-interactions.js";
-import { t } from "../i18n/i18n.js";
+import { t } from "../i18n/i18n.js?v=20260829-public-auth-v1";
 import { allowsThirtyPlayerCwl } from "./cwl-league-rules.js";
 import { isRedesignFixtureRequested } from "../fixtures/redesign-fixture-mode.js";
 

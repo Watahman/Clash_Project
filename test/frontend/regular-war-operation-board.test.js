@@ -4,7 +4,7 @@ import {
     ActiveCwlWarError,
     buildWarBoardReport,
     currentWarPlayerContext
-} from '../../src/assets/js/war-operation-board/war-report-model.js';
+} from '../../src/assets/js/war-operation-board/war-report-model.js?v=20260829-public-auth-v1';
 import { buildWarContributions } from '../../src/assets/js/war-operation-board/war-contribution.js';
 import { buildWarMap } from '../../src/assets/js/war-operation-board/war-map-model.js';
 import { buildMathematicalWarStatus } from '../../src/assets/js/war-operation-board/war-outcome-model.js';

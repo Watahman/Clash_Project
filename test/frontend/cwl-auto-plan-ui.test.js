@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => ({
     applyAutoPlanResult: vi.fn(() => Promise.resolve())
 }));
 
-vi.mock('../../src/assets/js/cwl/auto-plan/cwl-auto-plan-source.js', () => mocks);
+vi.mock('../../src/assets/js/cwl/auto-plan/cwl-auto-plan-source.js?v=20260829-public-auth-v1', () => mocks);
 
 describe('CWL Auto Plan controller', () => {
     beforeEach(() => {
@@ -59,7 +59,7 @@ describe('CWL Auto Plan controller', () => {
 
     it('shows a preview first and only mutates the plan after Apply plan', async () => {
         const { initAutoPlan } = await import(
-            '../../src/assets/js/cwl/auto-plan/cwl-auto-plan-ui.js'
+            '../../src/assets/js/cwl/auto-plan/cwl-auto-plan-ui.js?v=20260829-public-auth-v1'
         );
         initAutoPlan();
 

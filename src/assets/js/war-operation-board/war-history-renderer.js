@@ -1,6 +1,6 @@
 import { escapeHtml, number } from '../operation-board/operation-board-utils.js';
-import { getLanguage } from '../i18n/i18n.js';
-import { competeT as t } from '../operation-board/compete-locales.js';
+import { getLanguage } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { competeT as t } from '../operation-board/compete-locales.js?v=20260829-public-auth-v1';
 
 const RESULT_CLASSES = new Set(['draw', 'loss', 'win']);
 

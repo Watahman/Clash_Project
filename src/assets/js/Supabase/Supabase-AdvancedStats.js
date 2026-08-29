@@ -1,5 +1,5 @@
 import * as config from '../Data/config.js';
-import { databaseRequestWithBody } from './Supabase-Client.js';
+import { databaseRequestWithBody } from './Supabase-Client.js?v=20260829-public-auth-v1';
 
 function request(endpoint, body = {}) {
     return databaseRequestWithBody(config._BASE_URL + endpoint, body, null, {

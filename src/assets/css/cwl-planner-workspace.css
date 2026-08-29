@@ -126,6 +126,71 @@
     background: var(--danger-soft);
 }
 
+.workspace-planner #cwl-save-status[data-state="guest"] {
+    border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
+    color: var(--accent-strong);
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface-subtle));
+}
+
+dialog#cwl-guest-save-dialog.cp-modal {
+    width: min(28rem, calc(100vw - 2rem));
+    padding: 0;
+}
+
+dialog#cwl-guest-save-dialog.cp-modal:not([open]) { display: none; }
+dialog#cwl-guest-save-dialog.cp-modal::backdrop { background: rgb(2 5 8 / 68%); }
+
+.cwl-guest-save-dialog__body {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-6);
+}
+
+.cwl-guest-save-dialog__body .page-kicker {
+    margin: 0 !important;
+    color: var(--accent);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.cwl-guest-save-dialog__body h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: 1.3rem;
+    line-height: 1.2;
+}
+
+.cwl-guest-save-dialog__body > p:not(.page-kicker) {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.55;
+}
+
+.cwl-guest-save-dialog__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+@media (max-width: 599px) {
+    .cwl-guest-save-dialog__body { padding: var(--space-5); }
+    .cwl-guest-save-dialog__actions { flex-direction: column-reverse; }
+    .cwl-guest-save-dialog__actions .button { width: 100%; }
+}
+
+.workspace-planner .modal-tab-btn[data-auth-required] {
+    white-space: nowrap;
+}
+
+.workspace-planner .cwl-source-lock {
+    margin-inline-start: 0.3rem;
+    font-size: 0.72em;
+    opacity: 0.72;
+}
+
 .cwl-header-actions {
     display: flex;
     gap: var(--space-2);

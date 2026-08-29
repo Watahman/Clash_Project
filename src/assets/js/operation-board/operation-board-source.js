@@ -3,15 +3,15 @@ import {
     getClanInfoRequest,
     getClanMembersRequest,
     getClanWarLeagueWarRequest
-} from '../API/API-Clan.js?v=20260826-live-refresh';
-import { getPlayerInfoRequest } from '../API/API-Player.js';
+} from '../API/API-Clan.js?v=20260829-public-auth-v1';
+import { getPlayerInfoRequest } from '../API/API-Player.js?v=20260829-public-auth-v1';
 import {
     getAllPlansFromDatabase,
     getPlanFromDatabase
-} from '../Supabase/Supabase-Plan.js';
+} from '../Supabase/Supabase-Plan.js?v=20260829-public-auth-v1';
 import {
     normalizePlan
-} from './operation-board-plan-model.js';
+} from './operation-board-plan-model.js?v=20260829-public-auth-v1';
 import {
     cleanDisplayName,
     getWarSide,
@@ -19,7 +19,7 @@ import {
     normalizeLeaguePhase,
     normalizeTag
 } from './operation-board-utils.js';
-import { competeT as t } from './compete-locales.js';
+import { competeT as t } from './compete-locales.js?v=20260829-public-auth-v1';
 import { loadCwlFixture } from './operation-board-fixtures.js';
 
 export class NoActiveCwlError extends Error {

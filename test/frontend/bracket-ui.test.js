@@ -7,7 +7,7 @@ import { participantName } from '../../src/assets/js/bracket/bracket-model.js';
 import {
     drawBracketConnectors,
     renderBracketBoard
-} from '../../src/assets/js/bracket/bracket-renderer.js';
+} from '../../src/assets/js/bracket/bracket-renderer.js?v=20260829-public-auth-v1';
 
 const privateHtml = readFileSync('src/subpages/bracket-generator.html', 'utf8');
 const privateCss = readFileSync('src/assets/css/bracket.css', 'utf8');

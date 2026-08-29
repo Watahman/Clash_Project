@@ -1,4 +1,4 @@
-import { initPlayerInspector } from './cwl-player-inspector.js';
+import { initPlayerInspector } from './cwl-player-inspector.js?v=20260829-public-auth-v1';
 
 export function initPlannerSurface({ root = document } = {}) {
     if (!root) return { openPlayer: () => {}, closePlayer: () => {} };

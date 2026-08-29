@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
+vi.mock('../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1', () => ({
     t: (key, values = {}) => ({
         'op.starsChartLabel': 'Grafiek met sterren per CWL-dag',
         'op.chartDaysAvailable': `${values.count}/${values.total} dagen`,
@@ -21,7 +21,7 @@ describe('stars per war day chart', () => {
     });
 
     it('keeps future days empty instead of turning them into zero-star points', async () => {
-        const { buildStarsPerDaySeries } = await import('../../src/assets/js/cwl/cwl-stars-chart.js');
+        const { buildStarsPerDaySeries } = await import('../../src/assets/js/cwl/cwl-stars-chart.js?v=20260829-public-auth-v1');
         const series = buildStarsPerDaySeries([
             { day: 1, state: 'completed', stars: 31, destruction: 90.4, opponent: 'North' },
             { day: 2, state: 'live', stars: 0, destruction: 0, opponent: 'South' },
@@ -36,7 +36,7 @@ describe('stars per war day chart', () => {
     });
 
     it('renders accessible real-data points and seven explicit day labels', async () => {
-        const { renderStarsPerDayChart } = await import('../../src/assets/js/cwl/cwl-stars-chart.js');
+        const { renderStarsPerDayChart } = await import('../../src/assets/js/cwl/cwl-stars-chart.js?v=20260829-public-auth-v1');
         const container = document.querySelector('#chart');
         const status = document.querySelector('#status');
         renderStarsPerDayChart(container, [
@@ -52,7 +52,7 @@ describe('stars per war day chart', () => {
     });
 
     it('does not connect a line across a missing day', async () => {
-        const { buildStarsPerDaySeries, getLineSegments } = await import('../../src/assets/js/cwl/cwl-stars-chart.js');
+        const { buildStarsPerDaySeries, getLineSegments } = await import('../../src/assets/js/cwl/cwl-stars-chart.js?v=20260829-public-auth-v1');
         const series = buildStarsPerDaySeries([
             { day: 1, state: 'completed', stars: 31 },
             { day: 3, state: 'completed', stars: 29 }
@@ -66,7 +66,7 @@ describe('stars per war day chart', () => {
         const {
             buildPredictionSeries,
             buildStarsPerDaySeries
-        } = await import('../../src/assets/js/cwl/cwl-stars-chart.js');
+        } = await import('../../src/assets/js/cwl/cwl-stars-chart.js?v=20260829-public-auth-v1');
         const series = buildStarsPerDaySeries([
             {
                 day: 1,

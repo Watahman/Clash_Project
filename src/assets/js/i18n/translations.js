@@ -3,7 +3,7 @@ import { en } from './locales/en.js';
 import { fr } from './locales/fr.js';
 import { de } from './locales/de.js';
 import { es } from './locales/es.js';
-import { workspaceLocales } from './workspace-locales.js';
+import { workspaceLocales } from './workspace-locales.js?v=20260829-public-auth-v1';
 import { publicPageLocales } from './public-pages-locales.js';
 import { achievementLocales } from './achievement-locales.js?v=20260823-achievement-card-assets-1';
 

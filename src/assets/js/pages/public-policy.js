@@ -1,4 +1,4 @@
-import { getLanguage, initI18n } from '../i18n/i18n.js';
+import { getLanguage, initI18n } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { _BASE_URL } from '../Data/config.js';
 
 const SUPPORT_EMAIL = 'support.clashpanel@gmail.com';

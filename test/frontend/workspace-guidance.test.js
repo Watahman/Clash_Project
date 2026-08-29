@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { initWorkspaceGuidance } from '../../src/assets/js/shell/workspace-guidance.js';
-import { initI18n } from '../../src/assets/js/i18n/i18n.js';
+import { initWorkspaceGuidance } from '../../src/assets/js/shell/workspace-guidance.js?v=20260829-public-auth-v1';
+import { initI18n } from '../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1';
 
 const guidanceCss = readFileSync(
     'src/assets/css/workspace-guidance.css',

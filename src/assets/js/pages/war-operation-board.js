@@ -1,25 +1,37 @@
-import { syncAuthSession } from '../auth/auth-client.js';
-import { initPlayerPerformancePopover } from '../cwl/cwl-player-performance-popover.js';
-import { initI18n } from '../i18n/i18n.js';
+import * as authClient from '../auth/auth-client.js?v=20260829-public-auth-v1';
+import { initPlayerPerformancePopover } from '../cwl/cwl-player-performance-popover.js?v=20260829-public-auth-v1';
+import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { looksLikeClashTag, normalizeTag } from '../operation-board/operation-board-utils.js';
 import {
     competeT,
     findCompeteKey,
     initCompeteI18n
-} from '../operation-board/compete-locales.js';
-import { loadLinkedWarClans } from '../war-operation-board/war-clan-source.js';
-import { createWarLoadController } from '../war-operation-board/war-page-loader.js';
+} from '../operation-board/compete-locales.js?v=20260829-public-auth-v1';
+import {
+    createWarSourceGuard,
+    loadLinkedWarClans
+} from '../war-operation-board/war-clan-source.js?v=20260829-public-auth-v1';
+import { createWarLoadController } from '../war-operation-board/war-page-loader.js?v=20260829-public-auth-v1';
 import { bindWarPageEvents } from '../war-operation-board/war-page-events.js';
-import { renderWarHistory } from '../war-operation-board/war-history-renderer.js';
+import { renderWarHistory } from '../war-operation-board/war-history-renderer.js?v=20260829-public-auth-v1';
+import {
+    createWarAuthLifecycle,
+    createWarUnavailableState,
+    resolveWarAuthState
+} from '../war-operation-board/war-page-auth.js?v=20260829-public-auth-v1';
+import {
+    renderGuestWarClanOption,
+    resetWarSourceState
+} from '../war-operation-board/war-page-source-reset.js?v=20260829-public-auth-v1';
 import { loadWarFixture } from '../operation-board/operation-board-fixtures.js';
-import { currentWarPlayerContext } from '../war-operation-board/war-report-model.js';
+import { currentWarPlayerContext } from '../war-operation-board/war-report-model.js?v=20260829-public-auth-v1';
 import {
     renderBaseDetail,
     renderRoster,
     renderScoreStrip,
     renderStats,
     renderWarMap
-} from '../war-operation-board/war-renderer.js';
+} from '../war-operation-board/war-renderer.js?v=20260829-public-auth-v1';
 
 const refs = {};
 let selectedTag = '';
@@ -28,6 +40,41 @@ let selectedPosition = 1;
 let activeFixture = null;
 let warLoader;
 let lastStatusCopy = null;
+let authState = null;
+let linkedClans = [];
+let authLifecycleReady = false;
+const warSourceGuard = createWarSourceGuard();
+
+const warAuth = createWarAuthLifecycle({
+    authClient,
+    sourceGuard: warSourceGuard,
+    getAuthState: () => authState,
+    setAuthState: state => { authState = state; },
+    isReady: () => authLifecycleReady,
+    onReset: () => {
+        linkedClans = [];
+        resetWarSourceState({
+            refs,
+            loader: warLoader,
+            createLoader: createWarLoader,
+            setLoader: loader => { warLoader = loader; },
+            setSelectedTag: value => { selectedTag = value; },
+            setMapSide: value => { mapSide = value; },
+            setSelectedPosition: value => { selectedPosition = value; },
+            competeT,
+            setStatus
+        });
+    },
+    onAuthenticated: nextState => loadClanOptions({
+        allowLinked: true,
+        authState: nextState
+    }),
+    onGuest: () => renderGuestWarClanOption({
+        refs,
+        competeT,
+        loginLabel: t('auth.login')
+    })
+});
 
 async function init() {
     collectRefs();
@@ -36,15 +83,11 @@ async function init() {
         return null;
     });
     initI18n();
-    if (!activeFixture) await Promise.resolve(syncAuthSession()).catch(() => null);
-    warLoader = createWarLoadController({
-        refs,
-        getSelectedTag: () => selectedTag,
-        getFixture: () => activeFixture,
-        setStatus,
-        renderCurrent,
-        selectHistoryTab: () => selectTab('history')
-    });
+    authState = await resolveWarAuthState(authClient, {
+        fixture: Boolean(activeFixture)
+    }).catch(error => createWarUnavailableState(authClient, error));
+    warAuth.initialize(authState);
+    warLoader = createWarLoader();
     initCompeteI18n(document, refreshLabels);
     bindWarPageEvents({
         refs,
@@ -67,7 +110,11 @@ async function init() {
             tag
         )
     });
-    await loadClanOptions();
+    warAuth.bind();
+    authLifecycleReady = true;
+    await loadClanOptions({
+        allowLinked: warAuth.isAuthenticated() || Boolean(activeFixture)
+    });
     const queryTag = normalizeTag(new URLSearchParams(location.search).get('clan') || '');
     const fixtureTag = normalizeTag(activeFixture?.data?.clan?.tag || '');
     const initialTag = queryTag || fixtureTag;
@@ -97,19 +144,56 @@ function collectRefs() {
     });
 }
 
-async function loadClanOptions() {
+async function loadClanOptions({
+    allowLinked = false,
+    authState: sourceState = authState
+} = {}) {
+    const sourceRequest = warSourceGuard.begin(sourceState);
+    refs.clanSelect.replaceChildren();
+    refs.clanSelect.disabled = true;
+    const loadingOption = document.createElement('option');
+    loadingOption.value = '';
+    loadingOption.disabled = true;
+    loadingOption.selected = true;
+    loadingOption.textContent = competeT('war.selectLinkedClan');
+    refs.clanSelect.appendChild(loadingOption);
+    if (!allowLinked) {
+        renderGuestWarClanOption({
+            refs,
+            competeT,
+            loginLabel: t('auth.login')
+        });
+        return;
+    }
     try {
         const fixtureClan = activeFixture?.data?.clan;
-        const clans = fixtureClan ? [fixtureClan] : await loadLinkedWarClans();
+        const clans = fixtureClan
+            ? [fixtureClan]
+            : await loadLinkedWarClans({ authState: sourceState });
+        if (!warSourceGuard.isCurrent(sourceRequest, authState)) return;
+        linkedClans = clans;
         clans.forEach(clan => {
             const option = document.createElement('option');
             option.value = clan.tag;
             option.textContent = `${clan.name || clan.tag} · ${clan.tag}`;
             refs.clanSelect.appendChild(option);
         });
+        refs.clanSelect.disabled = false;
     } catch {
+        if (!warSourceGuard.isCurrent(sourceRequest, authState)) return;
         refs.clanSelect.options[0].textContent = competeT('war.enterClanTag');
     }
+}
+
+function createWarLoader() {
+    return createWarLoadController({
+        refs,
+        getSelectedTag: () => selectedTag,
+        getFixture: () => activeFixture,
+        setStatus,
+        renderCurrent,
+        selectHistoryTab: () => selectTab('history')
+    });
 }
 
 function submitClan(value) {

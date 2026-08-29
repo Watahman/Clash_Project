@@ -1,9 +1,9 @@
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import {
     getPlayerPerformance,
     schedulePlayerPerformanceBatch
-} from './player-performance-client.js';
-import { renderCurrentCwlSection } from './cwl-player-performance-current.js';
+} from './player-performance-client.js?v=20260829-public-auth-v1';
+import { renderCurrentCwlSection } from './cwl-player-performance-current.js?v=20260829-public-auth-v1';
 import { getPlayerFitContext } from './cwl-player-fit-context.js';
 
 const OPEN_DELAY_MS = 300;

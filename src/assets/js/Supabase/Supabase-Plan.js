@@ -1,8 +1,8 @@
 import * as config from "../Data/config.js";
-import {databaseRequestWithBody} from "./Supabase-Client.js";
+import {databaseRequestWithBody} from "./Supabase-Client.js?v=20260829-public-auth-v1";
 import { cacheKeys } from "../cache/cache-keys.js";
 import { CACHE_STALE, CACHE_TTL } from "../cache/cache-policy.js";
-import { removeCached, setCached } from "../cache/local-cache.js";
+import { removeCached, setCached } from "../cache/local-cache.js?v=20260829-public-auth-v1";
 
 export async function setPlanToDatabase(userId, planId, name, planInfo, revision = null) {
     const path = config._BASE_URL + config._EXT_SUPA_CWLPLANNER_DATA_SET

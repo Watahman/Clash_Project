@@ -1,9 +1,10 @@
-import { initI18n, t } from '../i18n/i18n.js';
+import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import {
     signInWithGoogle,
     signUpWithPassword,
-    syncAuthSession
-} from '../auth/auth-client.js';
+    syncAuthSession,
+    getSafeReturnPath
+} from '../auth/auth-client.js?v=20260829-public-auth-v1';
 import { isStrongPassword } from '../utils/password.js';
 
 const form = document.querySelector('#auth-form');
@@ -15,6 +16,19 @@ const submitButton = document.querySelector('#submit-button');
 const googleButton = document.querySelector('#google-login');
 const status = document.querySelector('#auth-status');
 const strengthSegments = [1, 2, 3].map(index => document.querySelector(`#seg${index}`));
+
+function destinationAfterRegistration() {
+    return getSafeReturnPath(new URLSearchParams(window.location.search).get('next'));
+}
+
+function preserveReturnPath(link, path) {
+    if (!link || !new URLSearchParams(window.location.search).has('next')) return;
+    link.href = `${path}?next=${encodeURIComponent(destinationAfterRegistration())}`;
+}
+
+function preserveAuthLinks() {
+    preserveReturnPath(document.querySelector('a[href="login.html"]'), 'login.html');
+}
 
 function setStatus(message = '', state = '') {
     status.textContent = message;
@@ -31,7 +45,7 @@ async function registerWithGoogle() {
     setBusy(true);
     setStatus(t('auth.redirecting'), 'loading');
     try {
-        await signInWithGoogle('/dashboard');
+        await signInWithGoogle(destinationAfterRegistration());
     } catch (error) {
         setStatus(error?.code === 'AUTH_NOT_CONFIGURED' ? t('auth.notConfigured') : t('auth.oauthUnavailable'), 'error');
         setBusy(false);
@@ -71,7 +85,7 @@ async function submitRegistration(event) {
     try {
         const data = await signUpWithPassword(nameInput.value, emailInput.value, passwordInput.value);
         if (data.session) {
-            window.location.href = '/dashboard';
+            window.location.href = destinationAfterRegistration();
             return;
         }
         form.reset();
@@ -95,8 +109,9 @@ async function init() {
     passwordInput.addEventListener('input', updatePasswordHints);
     confirmationInput.addEventListener('input', updatePasswordHints);
     googleButton.addEventListener('click', registerWithGoogle);
+    preserveAuthLinks();
     const session = await syncAuthSession().catch(() => null);
-    if (session) window.location.href = '/dashboard';
+    if (session) window.location.href = destinationAfterRegistration();
 }
 
 const initialRegisterLoad = init();

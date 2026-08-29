@@ -13,23 +13,23 @@ vi.mock('../../src/assets/js/Data/config.js', () => ({
     setCanAutosave: mocks.setCanAutosave,
     setLoading: vi.fn()
 }));
-vi.mock('../../src/assets/js/templates/CWLTemplates.js', () => ({
+vi.mock('../../src/assets/js/templates/CWLTemplates.js?v=20260829-public-auth-v1', () => ({
     createPlayerCard: vi.fn(),
     createClanCard: vi.fn(),
     applyClanLeagueRestriction: vi.fn()
 }));
-vi.mock('../../src/assets/js/Supabase/Supabase-Plan.js', () => ({
+vi.mock('../../src/assets/js/Supabase/Supabase-Plan.js?v=20260829-public-auth-v1', () => ({
     getAllPlansFromDatabase: mocks.getAllPlansFromDatabase,
     getPlanFromDatabase: mocks.getPlanFromDatabase,
     setPlanToDatabase: mocks.setPlanToDatabase
 }));
-vi.mock('../../src/assets/js/API/API-Clan.js', () => ({ getClanInfoRequest: vi.fn() }));
-vi.mock('../../src/assets/js/API/API-Functions.js', () => ({ getPlayerBasicData: vi.fn() }));
+vi.mock('../../src/assets/js/API/API-Clan.js?v=20260829-public-auth-v1', () => ({ getClanInfoRequest: vi.fn() }));
+vi.mock('../../src/assets/js/API/API-Functions.js?v=20260829-public-auth-v1', () => ({ getPlayerBasicData: vi.fn() }));
 vi.mock('../../src/assets/js/utils/user.js', () => ({ getCurrentUserId: () => 'user-1' }));
-vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
+vi.mock('../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1', () => ({
     t: key => key === 'cwl.defaultPlanName' ? 'Untitled' : key
 }));
-vi.mock('../../src/assets/js/cwl/cwl-availability.js', () => ({
+vi.mock('../../src/assets/js/cwl/cwl-availability.js?v=20260829-public-auth-v1', () => ({
     getActiveCwlPollMeta: () => ({ groupId: '', pollId: '' })
 }));
 
@@ -87,7 +87,7 @@ describe('CWL saved plan limit', () => {
 
     it('blocks a fourth new plan and shows localized feedback', async () => {
         const { initPlanIO, loadAllPlans, savePlan } = await import(
-            '../../src/assets/js/cwl/cwl-plan-io.js'
+            '../../src/assets/js/cwl/cwl-plan-io.js?v=20260829-public-auth-v1'
         );
         initPlanIO(plannerRefs());
         await loadAllPlans();
@@ -108,7 +108,7 @@ describe('CWL saved plan limit', () => {
             revision: 2
         });
         const { initPlanIO, loadAllPlans, savePlan } = await import(
-            '../../src/assets/js/cwl/cwl-plan-io.js'
+            '../../src/assets/js/cwl/cwl-plan-io.js?v=20260829-public-auth-v1'
         );
         const refs = plannerRefs();
         initPlanIO(refs);
@@ -138,7 +138,7 @@ describe('CWL saved plan limit', () => {
             revision: 1
         });
         const { initPlanIO, loadAllPlans, savePlan } = await import(
-            '../../src/assets/js/cwl/cwl-plan-io.js'
+            '../../src/assets/js/cwl/cwl-plan-io.js?v=20260829-public-auth-v1'
         );
         const refs = plannerRefs();
         initPlanIO(refs);
@@ -160,7 +160,7 @@ describe('CWL saved plan limit', () => {
                 revision: 1
             });
             const { initPlanIO, loadAllPlans, savePlan } = await import(
-                '../../src/assets/js/cwl/cwl-plan-io.js'
+                '../../src/assets/js/cwl/cwl-plan-io.js?v=20260829-public-auth-v1'
             );
             const refs = plannerRefs();
             refs.planName.value = enteredName;
@@ -185,7 +185,7 @@ describe('CWL saved plan limit', () => {
         localStorage.setItem('planner_id', 'plan-1');
         mocks.setPlanToDatabase.mockResolvedValue({ uuid: 'plan-1', revision: 2 });
         const { initPlanIO, loadAllPlans, savePlan } = await import(
-            '../../src/assets/js/cwl/cwl-plan-io.js'
+            '../../src/assets/js/cwl/cwl-plan-io.js?v=20260829-public-auth-v1'
         );
         const refs = plannerRefs();
         initPlanIO(refs);
@@ -226,10 +226,10 @@ describe('CWL saved plan limit', () => {
             savedAt: new Date().toISOString()
         }));
         mocks.getAllPlansFromDatabase.mockResolvedValue([]);
-        const templates = await import('../../src/assets/js/templates/CWLTemplates.js');
+        const templates = await import('../../src/assets/js/templates/CWLTemplates.js?v=20260829-public-auth-v1');
         templates.createPlayerCard.mockClear();
         const { initPlanIO, loadAllPlans } = await import(
-            '../../src/assets/js/cwl/cwl-plan-io.js'
+            '../../src/assets/js/cwl/cwl-plan-io.js?v=20260829-public-auth-v1'
         );
         const refs = plannerRefs();
         initPlanIO(refs);

@@ -1,10 +1,11 @@
-import { initI18n, t } from '../i18n/i18n.js';
+import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import {
     requestPasswordReset,
     signInWithGoogle,
     signInWithPassword,
-    syncAuthSession
-} from '../auth/auth-client.js';
+    syncAuthSession,
+    getSafeReturnPath
+} from '../auth/auth-client.js?v=20260829-public-auth-v1';
 
 const form = document.querySelector('#auth-form');
 const emailInput = document.querySelector('#email');
@@ -15,20 +16,23 @@ const googleButton = document.querySelector('#google-login');
 const status = document.querySelector('#auth-status');
 
 function destinationAfterLogin() {
-    const requested = new URLSearchParams(window.location.search).get('next');
-    if (!requested) return '/dashboard';
-    try {
-        const destination = new URL(requested, window.location.origin);
-        if (destination.origin !== window.location.origin
-            || (destination.pathname !== '/dashboard'
-                && !destination.pathname.startsWith('/app/')
-                && !destination.pathname.startsWith('/subpages/'))) {
-            return '/dashboard';
-        }
-        return `${destination.pathname}${destination.search}${destination.hash}`;
-    } catch {
-        return '/dashboard';
-    }
+    return getSafeReturnPath(new URLSearchParams(window.location.search).get('next'));
+}
+
+function preserveReturnPath(link, path) {
+    if (!link || !new URLSearchParams(window.location.search).has('next')) return;
+    link.href = `${path}?next=${encodeURIComponent(destinationAfterLogin())}`;
+}
+
+function preserveAuthLinks() {
+    preserveReturnPath(document.querySelector('a[href="register.html"]'), 'register.html');
+}
+
+function clearOAuthFailureMarker() {
+    const params = new URLSearchParams(window.location.search);
+    params.delete('oauth');
+    const query = params.toString();
+    window.history.replaceState({}, '', `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`);
 }
 
 function setStatus(message = '', state = '') {
@@ -100,8 +104,9 @@ async function init() {
     googleButton.addEventListener('click', loginWithGoogle);
     if (new URLSearchParams(window.location.search).get('oauth') === 'failed') {
         setStatus(t('auth.oauthUnavailable'), 'error');
-        window.history.replaceState({}, '', window.location.pathname);
+        clearOAuthFailureMarker();
     }
+    preserveAuthLinks();
     const session = await syncAuthSession().catch(() => null);
     if (session) window.location.href = destinationAfterLogin();
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { translations } from '../../src/assets/js/i18n/translations.js';
+import { translations } from '../../src/assets/js/i18n/translations.js?v=20260829-public-auth-v1';
 import { de } from '../../src/assets/js/i18n/locales/de.js';
 import { en } from '../../src/assets/js/i18n/locales/en.js';
 import { es } from '../../src/assets/js/i18n/locales/es.js';

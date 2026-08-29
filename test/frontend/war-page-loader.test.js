@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
     ActiveCwlWarError
-} from '../../src/assets/js/war-operation-board/war-report-model.js';
+} from '../../src/assets/js/war-operation-board/war-report-model.js?v=20260829-public-auth-v1';
 import {
     createWarLoadController
-} from '../../src/assets/js/war-operation-board/war-page-loader.js';
+} from '../../src/assets/js/war-operation-board/war-page-loader.js?v=20260829-public-auth-v1';
 
 describe('War page load controller', () => {
     it('exposes loading state and commits a current-war response', async () => {

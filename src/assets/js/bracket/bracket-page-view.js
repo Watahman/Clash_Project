@@ -1,6 +1,6 @@
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { bracketIcon } from './bracket-icons.js';
-import { bracketText } from './bracket-copy.js';
+import { bracketText } from './bracket-copy.js?v=20260829-public-auth-v1';
 
 const REF_IDS = Object.freeze({
     name: 'bracket-name',

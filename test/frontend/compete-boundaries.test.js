@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
     ActiveCwlWarError,
     buildWarBoardReport
-} from '../../src/assets/js/war-operation-board/war-report-model.js';
+} from '../../src/assets/js/war-operation-board/war-report-model.js?v=20260829-public-auth-v1';
 
 const cwlFixtures = JSON.parse(readFileSync(
     'src/fixtures/redesign/compete-cwl.json',

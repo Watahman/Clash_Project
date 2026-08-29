@@ -1,9 +1,9 @@
-import { t } from '../i18n/i18n.js';
-import { getPlayerAvailability } from './cwl-availability.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { getPlayerAvailability } from './cwl-availability.js?v=20260829-public-auth-v1';
 import {
     getPlayerPerformance,
     loadPlayerPerformanceBatch
-} from './player-performance-client.js';
+} from './player-performance-client.js?v=20260829-public-auth-v1';
 
 function normalizeSearchValue(value) {
     return String(value || '').trim().toLocaleLowerCase().replace(/\s+/g, ' ');

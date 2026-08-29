@@ -1,4 +1,4 @@
-import { competeT as t } from '../operation-board/compete-locales.js';
+import { competeT as t } from '../operation-board/compete-locales.js?v=20260829-public-auth-v1';
 
 export function fixtureWar(fixture) {
     const raw = fixture?.data?.currentWar || { state: 'notInWar' };

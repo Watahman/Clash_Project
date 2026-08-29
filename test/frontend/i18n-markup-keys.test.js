@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { getTranslationValue } from '../../src/assets/js/i18n/runtime-translations.js';
+import { getTranslationValue } from '../../src/assets/js/i18n/runtime-translations.js?v=20260829-public-auth-v1';
 
 const languages = ['en', 'nl', 'fr', 'de', 'es'];
 const files = [

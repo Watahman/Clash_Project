@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getGoogleSignInUrl } from '../../src/assets/js/auth/auth-client.js';
+import { getGoogleSignInUrl } from '../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1';
 
 afterEach(() => {
     vi.unstubAllGlobals();
@@ -22,6 +22,21 @@ describe('Google authentication', () => {
         expect(options.credentials).toBe('include');
     });
 
+    it('preserves a public destination with query and hash for OAuth', async () => {
+        const fetchMock = vi.fn().mockResolvedValue(new Response(
+            JSON.stringify({ url: 'https://project.supabase.co/auth/v1/authorize?provider=google' }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+        ));
+        vi.stubGlobal('fetch', fetchMock);
+
+        await getGoogleSignInUrl('/cwl-tracker?clan=%23ABC123#standings');
+
+        const [, options] = fetchMock.mock.calls[0];
+        expect(JSON.parse(options.body)).toEqual({
+            next: '/cwl-tracker?clan=%23ABC123#standings'
+        });
+    });
+
     it('rejects an invalid OAuth-start response', async () => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(
             JSON.stringify({}),
@@ -38,5 +53,15 @@ describe('Google authentication', () => {
         const register = readFileSync('src/subpages/register.html', 'utf8');
         expect(login).toContain('id="google-login"');
         expect(register).toContain('id="google-login"');
+    });
+
+    it('keeps login and registration wired to the shared safe return policy', () => {
+        const login = readFileSync('src/assets/js/pages/login.js', 'utf8');
+        const register = readFileSync('src/assets/js/pages/register.js', 'utf8');
+
+        expect(login).toContain('getSafeReturnPath');
+        expect(register).toContain('getSafeReturnPath');
+        expect(register).toContain('signInWithGoogle(destinationAfterRegistration())');
+        expect(register).toContain('window.location.href = destinationAfterRegistration()');
     });
 });

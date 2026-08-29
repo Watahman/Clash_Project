@@ -1,28 +1,22 @@
 import { canAutosave, isLoading, setLoading, setCanAutosave } from '../Data/config.js';
-import { getClanInfoRequest } from '../API/API-Clan.js';
-import { getPlayerBasicData } from '../API/API-Functions.js';
-import { createPlayerCard, createClanCard, applyClanLeagueRestriction } from '../templates/CWLTemplates.js';
-import { getAllPlansFromDatabase, getPlanFromDatabase, setPlanToDatabase } from '../Supabase/Supabase-Plan.js';
+import { createPlayerCard, createClanCard } from '../templates/CWLTemplates.js?v=20260829-public-auth-v1';
+import { getAllPlansFromDatabase, getPlanFromDatabase, setPlanToDatabase } from '../Supabase/Supabase-Plan.js?v=20260829-public-auth-v1';
 import { getCurrentUserId } from '../utils/user.js';
-import { t } from '../i18n/i18n.js';
-import { getActiveCwlPollMeta } from './cwl-availability.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { clearActiveCwlPoll } from './cwl-availability.js?v=20260829-public-auth-v1';
 import { hasReachedPlanLimit } from './cwl-plan-limits.js';
-import { escapeCssIdentifier, getCardTag, normalizeTag } from './cwl-utils.js';
+import { normalizePlanDocument } from './cwl-plan-schema.js';
+import { enrichPlanSnapshot as enrichPlanData } from './cwl-plan-enrichment.js?v=20260829-public-auth-v1';
+import { installPlannerLifecycle } from './cwl-planner-lifecycle.js?v=20260829-public-auth-v1';
+import { mergePlanRecovery } from './cwl-planner-recovery.js?v=20260829-public-auth-v1';
+import { createPlannerSaveController } from './cwl-planner-save-controller.js?v=20260829-public-auth-v1';
 import {
-    CWL_PLAN_SCHEMA_VERSION,
-    normalizeClanPriority,
-    normalizePlanDocument,
-    normalizePlayerPriority,
-    normalizeRosterStatus,
-    validatePlanDocument
-} from './cwl-plan-schema.js';
-import { getTownHallAsset, installImageFallback } from '../assets/entity-assets.js';
-
-const PLAN_CACHE_KEY = 'clashtools_planner_cache';
-const PLAN_RECOVERY_KEY = 'clashtools_planner_recovery_v1';
-const ACTIVE_PLAN_KEY = 'planner_id';
-const AUTOSAVE_DELAY_MS = 500;
-const ENRICH_CONCURRENCY = 6;
+    cleanPlanId,
+    createCurrentPlanSnapshot,
+    normalizePlan,
+    serializePlanDocument
+} from './cwl-plan-serialization.js?v=20260829-public-auth-v1';
+import * as guestPlanner from './cwl-planner-guest-storage.js?v=20260829-public-auth-v1';
 const UNDO_HISTORY_LIMIT = 20;
 
 let availablePlayers;
@@ -34,17 +28,12 @@ let saveStatus;
 let planLimitFeedback;
 const planCache = new Map();
 const planRevisions = new Map();
-let saveStatusTimer;
-let debounceTimer;
-let pendingSave;
-let saveQueue = Promise.resolve();
 let activeLoadToken = 0;
 let planContextToken = 0;
 let activeLoadController;
 let activePlanId = null;
 let suppressSave = false;
-let saveSequence = 0;
-let lifecycleInstalled = false;
+let saveController;
 let undoHistory = [];
 let lastUndoSnapshot = null;
 
@@ -81,62 +70,81 @@ export function initPlanIO(refs) {
     loadPlan = refs.loadPlan;
     saveStatus = document.querySelector('#cwl-save-status');
     planLimitFeedback = document.querySelector('#cwl-plan-limit-feedback');
-    activePlanId = cleanPlanId(localStorage.getItem(ACTIVE_PLAN_KEY));
+    guestPlanner.configureGuestPlanner({ authState: refs.authState, fallbackUserId: getCurrentUserId(), loadPlan,
+        renderPlanOptions, clearCurrentPlan: () => { activePlanId = null; },
+        renderSnapshot: (snapshot, token) => { suppressSave = true; renderPlanSnapshot(snapshot, token); suppressSave = false; },
+        nextLoadToken: () => ++activeLoadToken, setAutosave: setCanAutosave, setStatus: setSaveStatus,
+        resetUndoHistory,
+        notify: () => window.dispatchEvent(new CustomEvent('clashtools:cwl-plan-loaded')) });
+    activePlanId = cleanPlanId(guestPlanner.readActivePlannerId());
+    saveController = createPlannerSaveController({
+        setStatus: setSaveStatus,
+        setPlanToDatabase,
+        matchesAuth: guestPlanner.matchesPlannerAuth,
+        clearRecovery: guestPlanner.clearPlannerRecovery,
+        resolvePlanId: cleanPlanId,
+        planCache,
+        planRevisions,
+        upsertPlanOption,
+        persistPlannerCache: guestPlanner.persistPlannerCache,
+        getActivePlanId: () => activePlanId,
+        setActivePlan,
+        getPlanContextToken: () => planContextToken,
+        clearGuestDraftAfterCloudSave: guestPlanner.clearGuestPlannerDraftAfterCloudSave,
+        showPlanLimitFeedback,
+        recordUndoSnapshot
+    });
     hidePlanLimitFeedback();
-    setSaveStatus('idle');
-    installAutosaveLifecycle();
+    setSaveStatus(guestPlanner.hasCloudPlannerAccess() ? 'idle' : 'guest');
+    installPlannerLifecycle({
+        shouldWarnBeforeUnload: guestPlanner.shouldWarnBeforeUnload,
+        flushPendingSave: () => saveController?.flush()
+    });
     resetUndoHistory({ name: '', info: serializePlan() });
+    guestPlanner.bindPlannerAuthTransitions(refs.authState, handlePlannerAuthTransition);
 }
 
-function installAutosaveLifecycle() {
-    if (lifecycleInstalled) return;
-    lifecycleInstalled = true;
-
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') flushPendingSave();
-    });
-    window.addEventListener('pagehide', flushPendingSave);
-    window.addEventListener('beforeunload', event => {
-        if (!readPlanRecovery(getCurrentUserId())) return;
-        event.preventDefault();
-        event.returnValue = '';
-    });
+function handlePlannerAuthTransition() {
+    saveController?.cancel();
+    activeLoadToken += 1;
+    planContextToken += 1;
+    activeLoadController?.abort();
+    activePlanId = cleanPlanId(guestPlanner.readActivePlannerId());
+    clearRenderedPlan();
+    planCache.clear();
+    planRevisions.clear();
+    void loadAllPlans();
 }
 
-function cleanPlanId(value) {
-    const id = String(value || '').trim();
-    return id && id !== 'undefined' && id !== 'null' ? id : null;
-}
-
-function normalizePlan(plan) {
-    if (!plan) return null;
-    if (typeof plan === 'string') return { id: plan, uuid: plan, name: plan, info: null, revision: null };
-    const id = cleanPlanId(plan.id || plan.uuid || plan.planId);
-    if (!id) return null;
-    const rawInfo = plan.info ?? plan.planInfo ?? null;
-    return {
-        ...plan,
-        id,
-        uuid: plan.uuid || id,
-        name: String(plan.name || plan.plan_name || t('cwl.unnamedPlan')).trim(),
-        info: rawInfo == null ? null : normalizePlanDocument(rawInfo),
-        revision: Number.isFinite(Number(plan.revision)) ? Number(plan.revision) : null
-    };
+function clearRenderedPlan() {
+    suppressSave = true;
+    availablePlayers?.replaceChildren();
+    allClans?.replaceChildren();
+    if (totalPlayerAmount) totalPlayerAmount.textContent = '0';
+    if (planName) planName.value = '';
+    if (loadPlan) {
+        loadPlan.value = '';
+        loadPlan.replaceChildren(option('', t('cwl.noPlan')));
+        loadPlan.disabled = true;
+    }
+    activePlanId = null;
+    clearActiveCwlPoll();
+    resetUndoHistory();
+    window.dispatchEvent(new CustomEvent('clashtools:cwl-plan-meta-loaded', {
+        detail: { groupId: '', pollId: '' }
+    }));
+    window.dispatchEvent(new CustomEvent('clashtools:cwl-plan-loaded'));
+    suppressSave = false;
 }
 
 function setSaveStatus(state) {
     if (!saveStatus) return;
     saveStatus.dataset.state = state;
-    saveStatus.textContent = t(
-        state === 'saving' ? 'cwl.saving'
-            : state === 'error' ? 'cwl.saveError'
-                : state === 'conflict' ? 'cwl.saveConflict'
-                    : 'cwl.saved'
-    );
+    saveStatus.textContent = t(guestPlanner.getPlannerSaveStatusKey(state));
 }
 
 function showPlanLimitFeedback() {
-    clearTimeout(saveStatusTimer);
+    saveController?.clearStatusTimer();
     setSaveStatus('error');
     if (!planLimitFeedback) return;
     planLimitFeedback.textContent = t('cwl.planLimitReached');
@@ -152,85 +160,29 @@ function isNewPlanAtLimit() {
     return !activePlanId && hasReachedPlanLimit(planCache.values());
 }
 
-function readPlayerCard(player) {
-    const snapshot = {
-        name: player.querySelector('.cwl-player-name')?.textContent || '',
-        clanName: player.querySelector('.cwl-player-clan')?.textContent || '',
-        tag: getCardTag(player),
-        townHallLevel: Number(player.dataset.townHall || 1),
-        playerPriority: normalizePlayerPriority(player.dataset.playerPriority)
-    };
-    const rosterStatus = normalizeRosterStatus(player.dataset.rosterStatus);
-    if (rosterStatus) snapshot.rosterStatus = rosterStatus;
-    const legacySchedule = String(player.dataset.legacySchedule || '')
-        .split(',')
-        .map(Number)
-        .filter(day => Number.isInteger(day) && day >= 1 && day <= 7);
-    if (legacySchedule.length) snapshot.plannedDays = legacySchedule;
-    return snapshot;
-}
-
 function serializePlan({ persistCache = true } = {}) {
-    const pollMeta = getActiveCwlPollMeta();
-    const document = {
-        schemaVersion: CWL_PLAN_SCHEMA_VERSION,
-        freePlayers: Array.from(
-            availablePlayers.querySelectorAll('.cwl-player-article[data-planner-card="true"]'),
-            readPlayerCard
-        ).filter(player => player.tag),
-        clans: Array.from(allClans.querySelectorAll('.cwl-clan-article')).map(clan => ({
-            id: clan.id.split('_').at(-1),
-            tag: normalizeTag(clan.dataset.clanTag),
-            name: clan.dataset.clanName || clan.querySelector('.cwl-clan-name')?.textContent || '',
-            capacity: Number(clan.querySelector('.cwl-clan-capacity')?.value || clan.dataset.clanCapacity || 15),
-            badgeUrl: clan.querySelector('.cwl-clan-logo')?.src || '',
-            clanPriority: normalizeClanPriority(clan.dataset.clanPriority),
-            players: Array.from(
-                clan.querySelectorAll('.cwl-player-article[data-planner-card="true"]'),
-                readPlayerCard
-            ).filter(player => player.tag)
-        })),
-        pollMeta: {
-            groupId: pollMeta.groupId || '',
-            pollId: pollMeta.pollId || ''
-        }
-    };
-    const validated = validatePlanDocument(document);
-    if (persistCache) {
-        localStorage.setItem(
-            'clashtools_last_planner_players',
-            JSON.stringify([...validated.freePlayers, ...validated.clans.flatMap(clan => clan.players)])
-        );
-    }
-    return validated;
-}
-
-function freezeDeep(value, seen = new WeakSet()) {
-    if (!value || typeof value !== 'object' || seen.has(value)) return value;
-    seen.add(value);
-    Object.values(value).forEach(child => freezeDeep(child, seen));
-    return Object.freeze(value);
-}
-
-function exportTimestamp(now) {
-    const date = now instanceof Date ? new Date(now.getTime()) : new Date(now ?? Date.now());
-    return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
+    return serializePlanDocument({
+        availablePlayers,
+        allClans,
+        persistCache,
+        persistCacheIfAllowed: guestPlanner.persistPlannerCacheIfAllowed
+    });
 }
 
 export function getCurrentPlanSnapshot({ now } = {}) {
-    const info = serializePlan({ persistCache: false });
-    const name = String(planName?.value || '').trim() || t('cwl.defaultPlanName');
-    return freezeDeep({
-        name,
-        exportedAt: exportTimestamp(now),
-        ...info
+    return createCurrentPlanSnapshot({
+        availablePlayers,
+        allClans,
+        planName,
+        now,
+        persistCacheIfAllowed: guestPlanner.persistPlannerCacheIfAllowed
     });
 }
 
 export function savePlan(options = {}) {
     const immediate = options.immediate === true;
-    const userId = getCurrentUserId();
-    if (isLoading || suppressSave || !canAutosave || !userId) return Promise.resolve(null);
+    const { userId, isGuest } = guestPlanner.getPlannerSaveContext();
+    if (isLoading || suppressSave || !canAutosave) return Promise.resolve(null);
 
     const enteredName = planName.value.trim();
     const name = enteredName || t('cwl.defaultPlanName');
@@ -255,11 +207,15 @@ export function savePlan(options = {}) {
 
     let info;
     try {
-        info = serializePlan();
+        info = serializePlan({ persistCache: !isGuest });
     } catch {
         setSaveStatus('error');
         return Promise.resolve(null);
     }
+
+    if (isGuest) return Promise.resolve(
+        guestPlanner.persistGuestPlannerDraft(name, info, options.skipHistory)
+    );
 
     const job = {
         userId,
@@ -268,145 +224,55 @@ export function savePlan(options = {}) {
         info,
         revision: activePlanId ? planRevisions.get(activePlanId) ?? null : null,
         contextToken: planContextToken,
-        recoveryId: `${Date.now()}-${++saveSequence}`
+        authGeneration: guestPlanner.getPlannerAuthGeneration(),
+        recoveryId: saveController.nextRecoveryId()
     };
-    persistPlanRecovery(job);
+    guestPlanner.persistPlannerRecovery(job);
 
-    if (debounceTimer) clearTimeout(debounceTimer);
-    if (!pendingSave) {
-        pendingSave = { resolvers: [] };
-    }
-    recordUndoSnapshot({ name, info }, options.skipHistory === true);
-    pendingSave.job = job;
-    const promise = new Promise(resolve => pendingSave.resolvers.push(resolve));
-    debounceTimer = setTimeout(flushPendingSave, immediate ? 0 : AUTOSAVE_DELAY_MS);
-    return promise;
-}
-
-function flushPendingSave() {
-    if (!pendingSave?.job) return;
-    const batch = pendingSave;
-    pendingSave = null;
-    debounceTimer = null;
-    setSaveStatus('saving');
-
-    saveQueue = saveQueue
-        .catch(() => null)
-        .then(() => persistSave(batch.job))
-        .then(result => {
-            batch.resolvers.forEach(resolve => resolve(result));
-            return result;
-        });
-}
-
-async function persistSave(job) {
-    try {
-        const data = await setPlanToDatabase(
-            job.userId,
-            job.planId,
-            job.name,
-            job.info,
-            job.revision
-        );
-        const savedId = cleanPlanId(data?.uuid || data?.id || job.planId);
-        const revision = Number(data?.revision || job.revision || 1);
-        if (savedId) {
-            planRevisions.set(savedId, revision);
-            const cached = {
-                id: savedId,
-                uuid: savedId,
-                name: job.name,
-                info: job.info,
-                revision,
-                isOwner: true
-            };
-            planCache.set(savedId, cached);
-            upsertPlanOption(savedId, job.name);
-            persistPlanCache();
-            if (!job.planId && activePlanId === null && job.contextToken === planContextToken) {
-                setActivePlan(savedId);
-            }
-        }
-        clearPlanRecovery(job.recoveryId);
-        clearTimeout(saveStatusTimer);
-        saveStatusTimer = setTimeout(() => setSaveStatus('idle'), 700);
-        return data;
-    } catch (error) {
-        if (error?.code === 'PLAN_LIMIT_REACHED') {
-            showPlanLimitFeedback();
-        } else {
-            setSaveStatus(error?.status === 409 ? 'conflict' : 'error');
-        }
-        return null;
-    }
+    return saveController.enqueue(job, {
+        immediate,
+        snapshot: { name, info },
+        skipHistory: options.skipHistory
+    });
 }
 
 export function loadAllPlans() {
-    const userId = getCurrentUserId();
     planCache.clear();
     planRevisions.clear();
-    const recovery = readPlanRecovery(userId);
-    const cachedPlans = mergePlanRecovery(readPlanCache(), recovery);
+    return guestPlanner.loadPlannerPlans(loadCloudPlans);
+}
+
+function loadCloudPlans(userId, restoredGuestDraft, generation) {
+    if (!guestPlanner.isCurrentPlannerGeneration(generation)) return Promise.resolve([]);
+    const recovery = guestPlanner.readPlannerRecovery(userId);
+    const cachedPlans = mergePlanRecovery(guestPlanner.readPlannerCache(), recovery);
     renderPlanOptions(cachedPlans, true);
-
-    if (!userId) {
-        loadPlan.disabled = true;
-        if (!cachedPlans.length) loadPlan.replaceChildren(option('', t('cwl.noPlan')));
-        return Promise.resolve([]);
-    }
-
     loadPlan.disabled = false;
     return getAllPlansFromDatabase(userId)
         .then(data => {
+            if (!guestPlanner.isCurrentPlannerGeneration(generation)) return [];
             const plans = mergePlanRecovery(
                 Array.isArray(data) ? data.map(normalizePlan).filter(Boolean) : [],
                 recovery
             );
             renderPlanOptions(plans, false);
-            persistPlanCache();
+            guestPlanner.persistPlannerCache(planCache.values());
             const selected = activePlanId && planCache.has(activePlanId) ? activePlanId : null;
-            if (selected) {
+            if (selected && !restoredGuestDraft) {
                 loadPlan.value = selected;
                 return loadPlanById(selected).then(() => plans);
             }
             if (activePlanId) setActivePlan(null);
-            if (recovery && !recovery.planId) restoreNewPlanRecovery(recovery);
+            if (!restoredGuestDraft && recovery && !recovery.planId) restoreNewPlanRecovery(recovery);
+            if (!restoredGuestDraft) setSaveStatus('idle');
             return plans;
         })
         .catch(() => {
+            if (!guestPlanner.isCurrentPlannerGeneration(generation)) return [];
             if (!cachedPlans.length) loadPlan.replaceChildren(option('', t('cwl.noPlan')));
-            if (recovery && !recovery.planId) restoreNewPlanRecovery(recovery);
+            if (!restoredGuestDraft && recovery && !recovery.planId) restoreNewPlanRecovery(recovery);
             return cachedPlans;
         });
-}
-
-function mergePlanRecovery(plans, recovery) {
-    if (!recovery?.planId) return plans;
-    let found = false;
-    const merged = plans.map(plan => {
-        if (cleanPlanId(plan.id || plan.uuid) !== recovery.planId) return plan;
-        found = true;
-        return {
-            ...plan,
-            id: recovery.planId,
-            uuid: recovery.planId,
-            name: recovery.name,
-            info: recovery.info,
-            revision: recovery.revision ?? plan.revision,
-            isOwner: true
-        };
-    });
-    if (!found) {
-        merged.push({
-            id: recovery.planId,
-            uuid: recovery.planId,
-            name: recovery.name,
-            info: recovery.info,
-            revision: recovery.revision,
-            isOwner: true
-        });
-    }
-    return merged;
 }
 
 function restoreNewPlanRecovery(recovery) {
@@ -430,66 +296,6 @@ function renderPlanOptions(plans, isSnapshot) {
     if (isSnapshot && activePlanId && planCache.has(activePlanId)) loadPlan.value = activePlanId;
 }
 
-function readPlanCache() {
-    try {
-        const parsed = JSON.parse(localStorage.getItem(PLAN_CACHE_KEY) || '[]');
-        return Array.isArray(parsed) ? parsed : [];
-    } catch {
-        return [];
-    }
-}
-
-function persistPlanCache() {
-    localStorage.setItem(PLAN_CACHE_KEY, JSON.stringify([...planCache.values()]));
-}
-
-function persistPlanRecovery(job) {
-    try {
-        localStorage.setItem(PLAN_RECOVERY_KEY, JSON.stringify({
-            version: 1,
-            recoveryId: job.recoveryId,
-            userId: job.userId,
-            planId: job.planId,
-            name: job.name,
-            info: job.info,
-            revision: job.revision,
-            savedAt: new Date().toISOString()
-        }));
-    } catch {
-        // The normal server save still proceeds if browser storage is unavailable.
-    }
-}
-
-function readPlanRecovery(userId) {
-    if (!userId) return null;
-    try {
-        const recovery = JSON.parse(localStorage.getItem(PLAN_RECOVERY_KEY) || 'null');
-        if (!recovery || recovery.version !== 1 || recovery.userId !== userId) return null;
-        if (!recovery.info || typeof recovery.info !== 'object') return null;
-        return {
-            ...recovery,
-            planId: cleanPlanId(recovery.planId),
-            name: String(recovery.name || t('cwl.defaultPlanName')).trim(),
-            info: normalizePlanDocument(recovery.info),
-            revision: Number.isFinite(Number(recovery.revision)) ? Number(recovery.revision) : null
-        };
-    } catch {
-        return null;
-    }
-}
-
-function clearPlanRecovery(recoveryId = null) {
-    try {
-        if (recoveryId) {
-            const current = JSON.parse(localStorage.getItem(PLAN_RECOVERY_KEY) || 'null');
-            if (current?.recoveryId !== recoveryId) return;
-        }
-        localStorage.removeItem(PLAN_RECOVERY_KEY);
-    } catch {
-        // Ignore unavailable or malformed browser storage.
-    }
-}
-
 export function loadPlanListener() {
     loadPlan.addEventListener('change', event => {
         const planId = cleanPlanId(event.target.value);
@@ -498,6 +304,7 @@ export function loadPlanListener() {
 }
 
 export async function loadPlanById(planId) {
+    if (guestPlanner.blockGuestCloudLoad(setSaveStatus)) return;
     const token = ++activeLoadToken;
     const previousPlanId = activePlanId;
     const previousAutosaveState = canAutosave;
@@ -525,7 +332,11 @@ export async function loadPlanById(planId) {
         renderPlanSnapshot(normalized, token);
         resetUndoHistory({ name: normalized.name, info: normalizePlanDocument(normalized.info) });
         loadSucceeded = true;
-        void enrichPlanSnapshot(normalized.info, token, activeLoadController.signal);
+        void enrichPlanData(normalized.info, {
+            token,
+            signal: activeLoadController.signal,
+            isCurrent: currentToken => currentToken === activeLoadToken
+        });
     } catch (error) {
         if (error?.name !== 'AbortError' && token === activeLoadToken) {
             setActivePlan(previousPlanId);
@@ -568,109 +379,6 @@ function renderPlanSnapshot(plan, token) {
     }));
 }
 
-function needsPlayerEnrichment(player) {
-    const tag = normalizeTag(player?.tag);
-    const name = String(player?.name || '').trim();
-    const townHallLevel = Number(player?.townHallLevel);
-
-    return Boolean(tag) && (
-        !name ||
-        name === tag ||
-        !Number.isFinite(townHallLevel) ||
-        townHallLevel < 1
-    );
-}
-
-async function enrichPlanSnapshot(info, token, signal) {
-    const planDocument = normalizePlanDocument(info);
-
-    const playerTags = new Set(
-        [
-            ...planDocument.freePlayers,
-            ...planDocument.clans.flatMap(clan => clan.players)
-        ]
-            .filter(needsPlayerEnrichment)
-            .map(player => normalizeTag(player.tag))
-            .filter(Boolean)
-    );
-
-    const clanTasks = planDocument.clans
-        .filter(clan => normalizeTag(clan?.tag))
-        .map(clan => () => enrichClan(clan, token, signal));
-
-    const playerTasks = [...playerTags]
-        .map(tag => () => enrichPlayer(tag, token, signal));
-
-    await runLimited(
-        [...clanTasks, ...playerTasks],
-        ENRICH_CONCURRENCY
-    );
-}
-
-async function enrichPlayer(tag, token, signal) {
-    try {
-        const data = await getPlayerBasicData(tag, { signal });
-        if (token !== activeLoadToken) return;
-        const normalizedTag = normalizeTag(tag);
-        const cards = Array.from(
-            document.querySelectorAll('.cwl-player-article[data-planner-card="true"]')
-        ).filter(element => getCardTag(element) === normalizedTag);
-
-        cards.forEach(card => {
-            const name = card.querySelector('.cwl-player-name');
-            const clan = card.querySelector('.cwl-player-clan');
-            const townHallLevel = Number(data.townHallLevel) || 1;
-
-            if (name) name.textContent = data.name || tag;
-            if (clan) clan.textContent = data.clanName || t('cwl.noClan');
-            card.dataset.townHall = String(townHallLevel);
-
-            const image = card.querySelector('.cwl-player-townhall-foto');
-            if (image) {
-                image.src = getTownHallAsset(townHallLevel);
-                installImageFallback(image);
-            }
-        });
-    } catch (error) {
-        if (error?.name !== 'AbortError') return;
-    }
-}
-
-async function enrichClan(clan, token, signal) {
-    try {
-        const data = await getClanInfoRequest(clan.tag, { signal });
-        if (token !== activeLoadToken) return;
-        const card = document.querySelector(`#cwl-clan-template_${escapeCssIdentifier(clan.id)}`);
-        if (!card) return;
-        const clanName = data.name || clan.name || clan.tag || t('cwl.clan');
-        const clanTag = normalizeTag(data.tag || clan.tag);
-        const leagueName = data?.warLeague?.name || '';
-        card.dataset.clanName = clanName;
-        card.dataset.clanTag = clanTag;
-        card.querySelector('.cwl-clan-name').textContent = clanName;
-        card.querySelector('.cwl-clan-tag').textContent = clanTag;
-        card.querySelector('.cwl-clan-league').textContent = leagueName ? ` · ${leagueName}` : '';
-        applyClanLeagueRestriction(card, leagueName, { persist: false });
-        const badge = data?.badgeUrls?.small;
-        const logo = card.querySelector('.cwl-clan-logo');
-        if (badge) logo.src = badge;
-        logo.alt = clanName;
-    } catch (error) {
-        if (error?.name !== 'AbortError') return;
-    }
-}
-
-async function runLimited(tasks, concurrency) {
-    let cursor = 0;
-    const workers = Array.from({ length: Math.min(concurrency, tasks.length) }, async () => {
-        while (cursor < tasks.length) {
-            const task = tasks[cursor++];
-            await task();
-        }
-    });
-    await Promise.allSettled(workers);
-}
-
 export function startNewPlan() {
     activeLoadToken += 1;
     planContextToken += 1;
@@ -684,7 +392,7 @@ export function startNewPlan() {
     allClans.replaceChildren();
     totalPlayerAmount.textContent = '0';
     hidePlanLimitFeedback();
-    setSaveStatus('idle');
+    guestPlanner.prepareNewPlanner(setSaveStatus);
     suppressSave = false;
     setCanAutosave(false);
     resetUndoHistory({ name: '', info: serializePlan() });
@@ -693,7 +401,7 @@ export function startNewPlan() {
 
 export function undoLastPlanChange() {
     if (!undoHistory.length || isLoading) return Promise.resolve(false);
-    flushPendingSave();
+    saveController?.flush();
     const snapshot = undoHistory.pop();
     const token = ++activeLoadToken;
     suppressSave = true;
@@ -708,8 +416,7 @@ export function undoLastPlanChange() {
 
 function setActivePlan(planId) {
     activePlanId = cleanPlanId(planId);
-    if (activePlanId) localStorage.setItem(ACTIVE_PLAN_KEY, activePlanId);
-    else localStorage.removeItem(ACTIVE_PLAN_KEY);
+    guestPlanner.persistActivePlannerId(activePlanId);
 }
 
 function upsertPlanOption(planId, name) {

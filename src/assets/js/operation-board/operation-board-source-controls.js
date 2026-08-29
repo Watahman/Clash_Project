@@ -1,10 +1,10 @@
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import {
     getPlanClans,
     hasUsefulClanName
-} from './operation-board-plan-model.js';
-import { option } from './operation-board-render-utils.js';
-import { fetchClanName } from './operation-board-source.js';
+} from './operation-board-plan-model.js?v=20260829-public-auth-v1';
+import { option } from './operation-board-render-utils.js?v=20260829-public-auth-v1';
+import { fetchClanName } from './operation-board-source.js?v=20260829-public-auth-v1';
 
 export function renderPlanLoading(refs, userId) {
     refs.planSelect.replaceChildren(option(

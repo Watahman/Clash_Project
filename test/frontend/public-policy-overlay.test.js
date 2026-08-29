@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { initPublicPolicyOverlay } from '../../src/assets/js/pages/public-policy-overlay.js';
+import { initPublicPolicyOverlay } from '../../src/assets/js/pages/public-policy-overlay.js?v=20260829-public-auth-v1';
 
 function mountPolicy(page) {
     document.body.innerHTML = `<main><article data-policy-document="${page}"></article></main>`;

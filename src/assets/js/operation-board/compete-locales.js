@@ -1,4 +1,4 @@
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import en from './compete-locale-en.js';
 import nl from './compete-locale-nl.js';
 import fr from './compete-locale-fr.js';

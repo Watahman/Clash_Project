@@ -8,7 +8,7 @@ const fitMocks = vi.hoisted(() => ({
     getPlayerFitContext: vi.fn(() => null)
 }));
 
-vi.mock('../../src/assets/js/cwl/player-performance-client.js', () => performanceMocks);
+vi.mock('../../src/assets/js/cwl/player-performance-client.js?v=20260829-public-auth-v1', () => performanceMocks);
 vi.mock('../../src/assets/js/cwl/cwl-player-fit-context.js', () => fitMocks);
 
 describe('CWL historical performance popover', () => {
@@ -62,7 +62,7 @@ describe('CWL historical performance popover', () => {
             roundsPlayed: 5
         };
         const { initPlayerPerformancePopover } = await import(
-            '../../src/assets/js/cwl/cwl-player-performance-popover.js'
+            '../../src/assets/js/cwl/cwl-player-performance-popover.js?v=20260829-public-auth-v1'
         );
         const popover = initPlayerPerformancePopover({
             getCurrentContext: () => currentContext
@@ -126,7 +126,7 @@ describe('CWL historical performance popover', () => {
             fits: [{ clanId: 'alpha', clanName: 'Alpha', fit: 81.234 }]
         });
         const { initPlayerPerformancePopover } = await import(
-            '../../src/assets/js/cwl/cwl-player-performance-popover.js'
+            '../../src/assets/js/cwl/cwl-player-performance-popover.js?v=20260829-public-auth-v1'
         );
         const popover = initPlayerPerformancePopover();
         const info = document.querySelector('.cwl-player-info');
@@ -146,7 +146,7 @@ describe('CWL historical performance popover', () => {
 
     it('repositions the expanded popover after an async performance update', async () => {
         const { initPlayerPerformancePopover } = await import(
-            '../../src/assets/js/cwl/cwl-player-performance-popover.js'
+            '../../src/assets/js/cwl/cwl-player-performance-popover.js?v=20260829-public-auth-v1'
         );
         const popover = initPlayerPerformancePopover();
         const info = document.querySelector('.cwl-player-info');

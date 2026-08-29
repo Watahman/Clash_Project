@@ -9,7 +9,7 @@ import {
 import {
     renderRoster,
     syncRosterMode
-} from '../../src/assets/js/operation-board/operation-board-roster-renderer.js';
+} from '../../src/assets/js/operation-board/operation-board-roster-renderer.js?v=20260829-public-auth-v1';
 
 describe('Historical CWL renderers', () => {
     it('shows a stable empty state when ClashKing has no CWL history', () => {

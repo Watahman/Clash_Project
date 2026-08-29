@@ -1,24 +1,28 @@
-import { getClanMembersBasicData, getPlayerBasicData } from "../API/API-Functions.js";
-import { createPlayerCard } from "../templates/CWLTemplates.js";
-import { getUserBases } from "../Supabase/Supabase-User.js";
-import { getFriends } from "../Supabase/Supabase-Friend.js";
-import { initGroupOverlay } from "./cwl-group.js";
+import { getClanMembersBasicData, getPlayerBasicData } from "../API/API-Functions.js?v=20260829-public-auth-v1";
+import { createPlayerCard } from "../templates/CWLTemplates.js?v=20260829-public-auth-v1";
+import { getUserBases } from "../Supabase/Supabase-User.js?v=20260829-public-auth-v1";
+import { getFriends } from "../Supabase/Supabase-Friend.js?v=20260829-public-auth-v1";
+import { initGroupOverlay } from "./cwl-group.js?v=20260829-public-auth-v1";
 import { getCurrentUserId } from "../utils/user.js";
 import { uniquePlayers } from "./cwl-utils.js";
-import { t } from "../i18n/i18n.js";
+import { t } from "../i18n/i18n.js?v=20260829-public-auth-v1";
 import { isRedesignFixtureRequested } from "../fixtures/redesign-fixture-mode.js";
+import { getCurrentReturnPath, requireAuthForAction } from "../auth/auth-client.js?v=20260829-public-auth-v1";
+import { createPrivateSourceAuth } from "./cwl-private-source-auth.js?v=20260829-public-auth-v1";
 
-let accountLoadToken = 0;
 let activeAccountSource = 'user';
 let refsCache = {};
+const privateAuth = createPrivateSourceAuth({ getFallbackUserId: getCurrentUserId });
 
 export function initAddPlayersOverlay(refs, onReset = resetPlayerOverlayState) {
     refsCache = refs;
+    privateAuth.configure(refs.authState);
+    privateAuth.bind(handleAuthStateChange);
     bindPlayerPickerToggle(refs);
     bindPlayerPickerTabs(refs.modalTabBtn, refs.segBtns, refs.addSelectedBtn);
     bindPlayerPickerActions(refs, onReset);
     loadAccountSources(refs.addSelectedBtn);
-    if (!isRedesignFixtureRequested()) initGroupOverlay(refs.selectGroup, refs);
+    if (!isRedesignFixtureRequested() && privateAuth.canRead()) initGroupOverlay(refs.selectGroup, refs);
 }
 
 function bindPlayerPickerToggle({ addPlayersBtn, cwlInputTag, addSelectedBtn }) {
@@ -36,7 +40,13 @@ function bindPlayerPickerToggle({ addPlayersBtn, cwlInputTag, addSelectedBtn }) 
 
 function bindPlayerPickerTabs(modalTabBtn, segBtns, addSelectedBtn) {
     modalTabBtn.forEach(tab => {
-        tab.onclick = () => showMainTab(tab.dataset.tab, modalTabBtn);
+        tab.onclick = () => {
+            if (isPrivateSource(tab.dataset.tab) && !privateAuth.canRead()) {
+                void requirePrivateSourceAccess();
+                return;
+            }
+            showMainTab(tab.dataset.tab, modalTabBtn);
+        };
     });
     segBtns.forEach(tab => {
         tab.onclick = () => {
@@ -49,6 +59,28 @@ function bindPlayerPickerTabs(modalTabBtn, segBtns, addSelectedBtn) {
     });
 }
 
+function isPrivateSource(tabName) {
+    return tabName === 'accounts' || tabName === 'group';
+}
+
+function handleAuthStateChange(state) {
+    refsCache.authState = state;
+    resetPlayerOverlayState();
+    resetAccountList();
+    if (privateAuth.canRead()) loadAccountSources(refsCache.addSelectedBtn);
+}
+
+async function requirePrivateSourceAccess() {
+    try {
+        await requireAuthForAction({
+            reason: 'planner-private-source',
+            returnTo: getCurrentReturnPath()
+        });
+    } catch {
+        setOverlayMessage(t('planner.privateSourceUnavailable'), 'error');
+    }
+}
+
 function bindPlayerPickerActions({ overlayConfirmTagBtn, cwlInputTag, addSelectedBtn }, onReset) {
     overlayConfirmTagBtn.onclick = () => addPlayersByTag(cwlInputTag, overlayConfirmTagBtn, onReset);
     addSelectedBtn?.addEventListener('click', () => addSelectedAccounts(addSelectedBtn, onReset));
@@ -58,7 +90,7 @@ function bindPlayerPickerActions({ overlayConfirmTagBtn, cwlInputTag, addSelecte
 }
 
 export function resetPlayerOverlayState() {
-    accountLoadToken += 1;
+    privateAuth.invalidate();
     activeAccountSource = 'user';
     const tagInput = document.querySelector('#cwl-input-tag');
     if (tagInput) tagInput.value = '';
@@ -195,15 +227,17 @@ function closeAndResetAddPlayersOverlay(onReset) {
 }
 
 function loadAccountSources(addSelectedBtn) {
-    const token = ++accountLoadToken;
-    const userId = getCurrentUserId();
+    const token = privateAuth.startRequest();
     resetAccountList();
+    if (!privateAuth.canRead()) return;
+    const userId = privateAuth.getUserId();
     if (isRedesignFixtureRequested()) return;
     if (!userId) return;
+    if (!privateAuth.isCurrent(token, userId)) return;
 
     getUserBases(userId)
         .then(data => {
-            if (token !== accountLoadToken) return;
+            if (!privateAuth.isCurrent(token, userId)) return;
             const accounts = data?.[0]?.accounts;
             if (Array.isArray(accounts) && accounts.length > 0) {
                 createPlayerCard(accounts, "user");
@@ -211,31 +245,34 @@ function loadAccountSources(addSelectedBtn) {
                 updateAddSelectedButton(addSelectedBtn);
             }
         })
-        .catch(error => reportAccountLoadError(error));
+        .catch(error => reportAccountLoadError(error, token, userId));
 
+    if (!privateAuth.isCurrent(token, userId)) return;
     getFriends(userId)
         .then(data => loadFriendAccounts(data, userId, token, addSelectedBtn))
-        .catch(error => reportAccountLoadError(error));
+        .catch(error => reportAccountLoadError(error, token, userId));
 }
 
 function loadFriendAccounts(data, userId, token, addSelectedBtn) {
-    if (token !== accountLoadToken || !Array.isArray(data)) return;
+    if (!privateAuth.isCurrent(token, userId) || !Array.isArray(data)) return;
     data.filter(friend => !friend.status || friend.status === 'accepted').forEach(friend => {
         const friendId = friend.user_a === userId ? friend.user_b : friend.user_a;
         if (!friendId || friendId === userId) return;
+        if (!privateAuth.isCurrent(token, userId)) return;
         getUserBases(friendId).then(userData => {
-            if (token !== accountLoadToken) return;
+            if (!privateAuth.isCurrent(token, userId)) return;
             const accounts = userData?.[0]?.accounts;
             if (Array.isArray(accounts) && accounts.length > 0) {
                 createPlayerCard(accounts, "friends");
                 showAccountSource(activeAccountSource);
                 updateAddSelectedButton(addSelectedBtn);
             }
-        }).catch(error => reportAccountLoadError(error));
+        }).catch(error => reportAccountLoadError(error, token, userId));
     });
 }
 
-function reportAccountLoadError(error) {
+function reportAccountLoadError(error, token, userId) {
+    if (token != null && !privateAuth.isCurrent(token, userId)) return;
     console.error(error);
     setOverlayMessage(t('cwl.playerAddError'), 'error');
 }

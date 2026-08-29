@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { renderPlayerRow } from '../../src/assets/js/operation-board/operation-board-roster-row-renderer.js';
-import { buildWarBoardReport } from '../../src/assets/js/war-operation-board/war-report-model.js';
-import { renderScoreStrip } from '../../src/assets/js/war-operation-board/war-renderer.js';
+import { renderPlayerRow } from '../../src/assets/js/operation-board/operation-board-roster-row-renderer.js?v=20260829-public-auth-v1';
+import { buildWarBoardReport } from '../../src/assets/js/war-operation-board/war-report-model.js?v=20260829-public-auth-v1';
+import { renderScoreStrip } from '../../src/assets/js/war-operation-board/war-renderer.js?v=20260829-public-auth-v1';
 
 describe('Compete renderer safety', () => {
     it('escapes roster names and tags while keeping Town Hall assets local', () => {

@@ -1,27 +1,27 @@
-import { syncAuthSession, signOut } from '../auth/auth-client.js';
+import { AUTH_STATES, resolveAuthState, signOut } from '../auth/auth-client.js?v=20260829-public-auth-v1';
 import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
-import { initI18n, t } from '../i18n/i18n.js';
-import { getGroupsOfUser } from '../Supabase/Supabase-Group.js';
+import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { getGroupsOfUser } from '../Supabase/Supabase-Group.js?v=20260829-public-auth-v1';
 import {
     getFriendRequests,
     getFriends,
     getPendingFriendRequests
-} from '../Supabase/Supabase-Friend.js';
-import { checkUserId } from '../Supabase/Supabase-User.js';
+} from '../Supabase/Supabase-Friend.js?v=20260829-public-auth-v1';
+import { checkUserId } from '../Supabase/Supabase-User.js?v=20260829-public-auth-v1';
 import { getCurrentUserId } from '../utils/user.js';
-import { initProfileSettings, syncProfileSettings } from '../profile/profile_settings.js?v=20260824-password-form';
+import { initProfileSettings, syncProfileSettings } from '../profile/profile_settings.js?v=20260829-public-auth-v1';
 import {
     resolveFriendRequest,
     sendFriendRequest,
     verifyAndAddAccount
-} from '../profile/profile-page-actions.js';
+} from '../profile/profile-page-actions.js?v=20260829-public-auth-v1';
 import {
     profileFixtureData,
     renderAccounts,
     renderFriendList,
     renderIdentity,
     renderOverview
-} from '../profile/profile-page-view.js';
+} from '../profile/profile-page-view.js?v=20260829-public-auth-v1';
 
 const state = {
     profile: null,
@@ -88,7 +88,8 @@ async function loadProfileData() {
         setStatus();
         return state.profile;
     }
-    await syncAuthSession().catch(() => null);
+    const authState = await resolveAuthState().catch(() => null);
+    if (authState?.status !== AUTH_STATES.AUTHENTICATED) return null;
     const userId = getCurrentUserId();
     if (!userId) return null;
     try {
@@ -222,6 +223,12 @@ function bindInteractions() {
 }
 
 async function init() {
+    const requestedFixture = await getRedesignFixture().catch(() => null);
+    const fixtureMode = requestedFixture?.module === 'profile';
+    if (!fixtureMode) {
+        const authState = await resolveAuthState().catch(() => null);
+        if (authState?.status !== AUTH_STATES.AUTHENTICATED) return;
+    }
     initI18n();
     initRefs();
     bindInteractions();

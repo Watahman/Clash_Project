@@ -1,5 +1,5 @@
-import { t } from '../i18n/i18n.js?v=20260814-advanced-stats-v4';
-import { formatNumber } from './advanced-stats-formatters.js?v=20260814-advanced-stats-v4';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { formatNumber } from './advanced-stats-formatters.js?v=20260829-public-auth-v1';
 import {
     normalizeCoverage,
     normalizeCoverageDetails

@@ -1,4 +1,5 @@
 import { normalizePlanDocument } from '../cwl/cwl-plan-schema.js';
+import * as authClient from '../auth/auth-client.js?v=20260829-public-auth-v1';
 import {
     cleanDisplayName,
     looksLikeClashTag,
@@ -8,14 +9,33 @@ import {
 } from './operation-board-utils.js';
 
 function readPlannerPlayerCache() {
+    const key = getPlannerPlayerCacheKey();
+    if (!key) return new Map();
     try {
-        const raw = JSON.parse(localStorage.getItem('clashtools_last_planner_players') || '[]');
+        const raw = JSON.parse(localStorage.getItem(key) || '[]');
         if (!Array.isArray(raw)) return new Map();
         return new Map(
             raw.map(player => [normalizeTag(player?.tag), player]).filter(([tag]) => tag)
         );
     } catch {
         return new Map();
+    }
+}
+
+function getPlannerPlayerCacheKey() {
+    const state = getAuthStateSafely();
+    if (state === undefined) return 'clashtools_last_planner_players';
+    if (state?.status !== 'authenticated' || !state.session?.user?.id) return null;
+    return `clashpanel:planner:${encodeURIComponent(state.session.user.id)}:players`;
+}
+
+function getAuthStateSafely() {
+    try {
+        return typeof authClient.getAuthState === 'function'
+            ? authClient.getAuthState()
+            : undefined;
+    } catch {
+        return undefined;
     }
 }
 

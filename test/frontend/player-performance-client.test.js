@@ -4,7 +4,7 @@ const requestMocks = vi.hoisted(() => ({
     requestJson: vi.fn()
 }));
 
-vi.mock('../../src/assets/js/utils/request-json.js', () => requestMocks);
+vi.mock('../../src/assets/js/utils/request-json.js?v=20260829-public-auth-v1', () => requestMocks);
 
 describe('player performance batch client', () => {
     beforeEach(async () => {
@@ -14,7 +14,7 @@ describe('player performance batch client', () => {
                 <article class="cwl-player-article" data-planner-card="true" data-player-tag="#P0L"></article>
                 <article class="cwl-player-article" data-planner-card="true" data-player-tag="#P2Y"></article>
             </main>`;
-        const module = await import('../../src/assets/js/cwl/player-performance-client.js');
+        const module = await import('../../src/assets/js/cwl/player-performance-client.js?v=20260829-public-auth-v1');
         module.clearPlayerPerformanceCache();
     });
 
@@ -25,7 +25,7 @@ describe('player performance batch client', () => {
                 '#P2Y': { playerTag: '#P2Y', status: 'ready', performance: 98 }
             }
         });
-        const client = await import('../../src/assets/js/cwl/player-performance-client.js');
+        const client = await import('../../src/assets/js/cwl/player-performance-client.js?v=20260829-public-auth-v1');
 
         client.schedulePlayerPerformanceBatch(client.collectPlannerPlayerTags());
         await client.flushPlayerPerformanceBatch();
@@ -42,7 +42,7 @@ describe('player performance batch client', () => {
     });
 
     it('keeps planner initialization lazy until performance is requested', async () => {
-        const client = await import('../../src/assets/js/cwl/player-performance-client.js');
+        const client = await import('../../src/assets/js/cwl/player-performance-client.js?v=20260829-public-auth-v1');
 
         client.initPlayerPerformanceClient();
 
@@ -59,7 +59,7 @@ describe('player performance batch client', () => {
         });
         const planner = document.querySelector('.workspace-planner');
         planner.replaceChildren();
-        const client = await import('../../src/assets/js/cwl/player-performance-client.js');
+        const client = await import('../../src/assets/js/cwl/player-performance-client.js?v=20260829-public-auth-v1');
         client.initPlayerPerformanceClient();
         planner.innerHTML = `
             <article class="cwl-player-article" data-planner-card="true"
@@ -95,7 +95,7 @@ describe('player performance batch client', () => {
             return { results };
         });
 
-        const client = await import('../../src/assets/js/cwl/player-performance-client.js');
+        const client = await import('../../src/assets/js/cwl/player-performance-client.js?v=20260829-public-auth-v1');
         await client.loadPlayerPerformanceBatch(tags);
 
         expect(requestMocks.requestJson).toHaveBeenCalledTimes(3);
@@ -115,7 +115,7 @@ describe('player performance batch client', () => {
             })
             .mockRejectedValueOnce(Object.assign(new Error('offline'), { code: 'NETWORK_ERROR' }));
 
-        const client = await import('../../src/assets/js/cwl/player-performance-client.js');
+        const client = await import('../../src/assets/js/cwl/player-performance-client.js?v=20260829-public-auth-v1');
         const result = await client.loadPlayerPerformanceBatch(tags);
 
         expect(result[tags[0]].status).toBe('ready');
@@ -127,7 +127,7 @@ describe('player performance batch client', () => {
             new Error('offline'),
             { code: 'NETWORK_ERROR' }
         ));
-        const client = await import('../../src/assets/js/cwl/player-performance-client.js');
+        const client = await import('../../src/assets/js/cwl/player-performance-client.js?v=20260829-public-auth-v1');
 
         client.schedulePlayerPerformanceBatch(['#P0L']);
         await client.flushPlayerPerformanceBatch();
@@ -143,7 +143,7 @@ describe('player performance batch client', () => {
         requestMocks.requestJson.mockReturnValue(new Promise(resolve => {
             resolveRequest = resolve;
         }));
-        const client = await import('../../src/assets/js/cwl/player-performance-client.js');
+        const client = await import('../../src/assets/js/cwl/player-performance-client.js?v=20260829-public-auth-v1');
 
         client.schedulePlayerPerformanceBatch(['#P0L']);
         const runningBatch = client.flushPlayerPerformanceBatch();
@@ -165,7 +165,7 @@ describe('player performance batch client', () => {
         requestMocks.requestJson.mockReturnValue(new Promise(resolve => {
             resolveRequest = resolve;
         }));
-        const client = await import('../../src/assets/js/cwl/player-performance-client.js');
+        const client = await import('../../src/assets/js/cwl/player-performance-client.js?v=20260829-public-auth-v1');
 
         const firstConsumer = client.loadPlayerPerformanceBatch(['#P0L']);
         await vi.waitFor(() => expect(requestMocks.requestJson).toHaveBeenCalledTimes(1));

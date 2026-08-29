@@ -9,26 +9,26 @@ const mocks = vi.hoisted(() => ({
     activeMeta: { groupId: '', pollId: '' }
 }));
 
-vi.mock('../../src/assets/js/Supabase/Supabase-Group.js', () => ({
+vi.mock('../../src/assets/js/Supabase/Supabase-Group.js?v=20260829-public-auth-v1', () => ({
     getGroupsOfUser: mocks.getGroupsOfUser,
     getGroupInfo: mocks.getGroupInfo,
     getGroupMembers: vi.fn().mockResolvedValue([]),
     getGroupClans: vi.fn().mockResolvedValue([])
 }));
-vi.mock('../../src/assets/js/Supabase/Supabase-GroupPolls.js', () => ({
+vi.mock('../../src/assets/js/Supabase/Supabase-GroupPolls.js?v=20260829-public-auth-v1', () => ({
     getGroupPolls: mocks.getGroupPolls
 }));
-vi.mock('../../src/assets/js/Supabase/Supabase-User.js', () => ({
+vi.mock('../../src/assets/js/Supabase/Supabase-User.js?v=20260829-public-auth-v1', () => ({
     getUserBases: vi.fn().mockResolvedValue([])
 }));
-vi.mock('../../src/assets/js/templates/CWLTemplates.js', () => ({
+vi.mock('../../src/assets/js/templates/CWLTemplates.js?v=20260829-public-auth-v1', () => ({
     createClanCard: vi.fn(),
     createPlayerCard: vi.fn()
 }));
 vi.mock('../../src/assets/js/utils/user.js', () => ({
     getCurrentUserId: () => 'user-1'
 }));
-vi.mock('../../src/assets/js/cwl/cwl-availability.js', () => ({
+vi.mock('../../src/assets/js/cwl/cwl-availability.js?v=20260829-public-auth-v1', () => ({
     clearActiveCwlPoll: () => {
         mocks.activeMeta = { groupId: '', pollId: '' };
         mocks.clearActiveCwlPoll();
@@ -39,7 +39,7 @@ vi.mock('../../src/assets/js/cwl/cwl-availability.js', () => ({
         mocks.setActiveCwlPoll(groupId, poll);
     }
 }));
-vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
+vi.mock('../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1', () => ({
     t: key => ({
         'cwl.noPollSelected': 'No poll selected',
         'cwl.pollSelectLoading': 'Loading polls...',
@@ -84,7 +84,7 @@ describe('CWL roster poll selector', () => {
     });
 
     it('groups every available poll and activates a selection immediately', async () => {
-        const { initGroupOverlay } = await import('../../src/assets/js/cwl/cwl-group.js');
+        const { initGroupOverlay } = await import('../../src/assets/js/cwl/cwl-group.js?v=20260829-public-auth-v1');
         const rosterPollSelect = document.querySelector('#roster-poll-select');
         const changed = vi.fn();
         window.addEventListener('clashtools:cwl-active-poll-changed', changed, { once: true });

@@ -1,11 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { groupMemberSummary, memberAccounts } from '../../src/assets/js/templates/GroupTemplates.js';
+import { groupMemberSummary, memberAccounts } from '../../src/assets/js/templates/GroupTemplates.js?v=20260829-public-auth-v1';
 import { canKickGroupMember, canManageGroupMembers, canManageGroupRoles, isGroupAdmin } from '../../src/assets/js/groups/groups-roles.js';
 import { activateGroupTab, bindGroupTabs, normalizeGroupTab } from '../../src/assets/js/groups/groups-tabs.js';
 import { renderBadge } from '../../src/assets/js/groups/groups-badges.js';
-import { createMemberRoleAdmin } from '../../src/assets/js/groups/groups-admin-members.js';
-import { initGroupIndexSlider } from '../../src/assets/js/groups/groups-index-slider.js';
+import { createMemberRoleAdmin } from '../../src/assets/js/groups/groups-admin-members.js?v=20260829-public-auth-v1';
+import { initGroupIndexSlider } from '../../src/assets/js/groups/groups-index-slider.js?v=20260829-public-auth-v1';
 
 describe('Clan Family workspace', () => {
     it('keeps the approved five-section information architecture and owned controls', () => {

@@ -4,7 +4,7 @@ import {
 } from '../cwl/cwl-performance-prediction.js?v=20260729-2';
 import {
     loadPlayerPerformanceBatch
-} from '../cwl/player-performance-client.js';
+} from '../cwl/player-performance-client.js?v=20260829-public-auth-v1';
 import {
     getWarSide,
     normalizeTag,

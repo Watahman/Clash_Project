@@ -1,6 +1,6 @@
-import { kickGroupMember, setGroupMemberRole, transferGroupLeadership } from "../Supabase/Supabase-GroupRoles.js";
-import { t } from "../i18n/i18n.js";
-import { withGlobalLoading } from "../utils/loading-state.js";
+import { kickGroupMember, setGroupMemberRole, transferGroupLeadership } from "../Supabase/Supabase-GroupRoles.js?v=20260829-public-auth-v1";
+import { t } from "../i18n/i18n.js?v=20260829-public-auth-v1";
+import { withGlobalLoading } from "../utils/loading-state.js?v=20260829-public-auth-v1";
 import { bindBackdropClick } from "../utils/backdrop-click.js";
 import { getNameInitials } from "../utils/name-initials.js";
 import {

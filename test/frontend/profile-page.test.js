@@ -3,8 +3,8 @@ import { readFileSync } from 'node:fs';
 import {
     normalizePlayerTag,
     sendFriendRequest
-} from '../../src/assets/js/profile/profile-page-actions.js';
-import { renderAccounts } from '../../src/assets/js/profile/profile-page-view.js';
+} from '../../src/assets/js/profile/profile-page-actions.js?v=20260829-public-auth-v1';
+import { renderAccounts } from '../../src/assets/js/profile/profile-page-view.js?v=20260829-public-auth-v1';
 
 describe('dedicated profile page', () => {
     it('normalizes player tags from text and share links', () => {

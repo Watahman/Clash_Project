@@ -2,7 +2,7 @@ import {
     BRACKET_MAX_PARTICIPANTS,
     BRACKET_MIN_PARTICIPANTS
 } from './bracket-engine.js';
-import { bracketText } from './bracket-copy.js';
+import { bracketText } from './bracket-copy.js?v=20260829-public-auth-v1';
 
 export function snapshotMatches(bracket) {
     return new Map(bracket.rounds.flat().map(match => [

@@ -1,5 +1,5 @@
-import { getCachedThenRefresh } from "../cache/local-cache.js?v=20260826-live-refresh";
-import { requestJson } from "../utils/request-json.js";
+import { getCachedThenRefresh } from "../cache/local-cache.js?v=20260829-public-auth-v1";
+import { requestJson } from "../utils/request-json.js?v=20260829-public-auth-v1";
 
 export async function fetchClashAPIRequest(path, body, cacheOptions = null, requestOptions = {}) {
     const forceRefresh = requestOptions.forceRefresh === true;

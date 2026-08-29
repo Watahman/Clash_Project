@@ -6,7 +6,7 @@ import {
     ensureLanguage,
     getTranslationValue,
     isLanguageLoaded
-} from '../../src/assets/js/i18n/runtime-translations.js';
+} from '../../src/assets/js/i18n/runtime-translations.js?v=20260829-public-auth-v1';
 
 const languages = ['nl', 'fr', 'de', 'es'];
 const dashboardKeys = [

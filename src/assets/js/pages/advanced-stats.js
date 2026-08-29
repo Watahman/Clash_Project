@@ -1,6 +1,8 @@
-import { applyI18n, t } from '../i18n/i18n.js?v=20260809-4';
+import { applyI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260829-public-auth-v1';
+import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
 import { getCurrentUserId } from '../utils/user.js';
-import { checkUserId } from '../Supabase/Supabase-User.js';
+import { checkUserId } from '../Supabase/Supabase-User.js?v=20260829-public-auth-v1';
 import {
     deleteAdvancedStatsData,
     getAdvancedStatsArmies,
@@ -13,17 +15,17 @@ import {
     resumeAdvancedStatsTracking,
     startAdvancedStatsTracking,
     stopAdvancedStatsTracking
-} from '../Supabase/Supabase-AdvancedStats.js';
+} from '../Supabase/Supabase-AdvancedStats.js?v=20260829-public-auth-v1';
 import { getAdvancedStatsFixture } from './advanced-stats-fixtures.js?v=20260811-1';
 import {
     renderAccountSelector,
     renderStatistics,
     renderTracking,
     syncPeriodButtons
-} from './advanced-stats-renderer.js?v=20260814-advanced-stats-v4';
+} from './advanced-stats-renderer.js?v=20260829-public-auth-v1';
 import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260809-4';
 import { accountsFromProfile, normalizeTag, selectInitialAccount } from './advanced-stats-account.js?v=20260811-2';
-import { createTrackingActions } from './advanced-stats-actions.js?v=20260811-2';
+import { createTrackingActions } from './advanced-stats-actions.js?v=20260829-public-auth-v1';
 import {
     normalizeAnalysis,
     queuedAnalysis
@@ -31,7 +33,7 @@ import {
 import {
     loadMoreBattles as loadMoreBattlesFromApi,
     loadStatistics as loadStatisticsFromApi
-} from './advanced-stats-data-loader.js?v=20260814-advanced-stats-v4';
+} from './advanced-stats-data-loader.js?v=20260829-public-auth-v1';
 import { waitForHistoricalAnalysis } from './advanced-stats-analysis-controller.js?v=20260814-advanced-stats-v4';
 
 const PERIOD_DEFAULT = '30d';
@@ -190,6 +192,12 @@ function failHistoricalAnalysis() {
 }
 
 async function initialize() {
+    const requestedFixture = await getRedesignFixture().catch(() => null);
+    const fixtureMode = requestedFixture?.module === 'advanced-stats';
+    if (!fixtureMode) {
+        const authState = await resolveAuthState().catch(() => null);
+        if (authState?.status !== AUTH_STATES.AUTHENTICATED) return;
+    }
     cacheElements();
     trackingActions = createTrackingActions({
         state, elements, setBusy, setDataStatus, refreshTrackingAndData,
@@ -202,7 +210,7 @@ async function initialize() {
     const fixture = await getAdvancedStatsFixture().catch(error => { console.error('[advanced-stats-fixture]', error); return null; });
     if (fixture) { state.api = fixture; state.accounts = fixture.accounts; state.playerTag = fixture.accounts[0]?.tag || ''; renderPage(); if (state.playerTag) await refreshTrackingAndData(); else setPageStatus(''); return; }
     const userId = getCurrentUserId();
-    if (!userId) { window.location.assign('/subpages/login.html'); return; }
+    if (!userId) return;
     try {
         state.accounts = accountsFromProfile(await checkUserId(userId));
         state.profileError = false;

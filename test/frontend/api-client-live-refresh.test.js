@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fetchClashAPIRequest } from '../../src/assets/js/API/API-Client.js';
+import { fetchClashAPIRequest } from '../../src/assets/js/API/API-Client.js?v=20260829-public-auth-v1';
 
 afterEach(() => {
     vi.unstubAllGlobals();

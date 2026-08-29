@@ -1,9 +1,40 @@
-import { getGroupsOfUser, getGroupClans } from '../Supabase/Supabase-Group.js';
-import { getCurrentUserId } from '../utils/user.js';
+import { getGroupsOfUser, getGroupClans } from '../Supabase/Supabase-Group.js?v=20260829-public-auth-v1';
 import { normalizeTag } from '../operation-board/operation-board-utils.js';
 
-export async function loadLinkedWarClans() {
-    const userId = getCurrentUserId();
+export function getWarSourceUserId(authState = {}) {
+    if (authState?.status !== 'authenticated') return '';
+    return String(authState.session?.user?.id || '').trim();
+}
+
+export function createWarSourceGuard() {
+    let token = 0;
+    let currentUserId = '';
+
+    function transition(authState) {
+        const nextUserId = getWarSourceUserId(authState);
+        const changed = nextUserId !== currentUserId;
+        if (changed) token += 1;
+        currentUserId = nextUserId;
+        return { changed, token, userId: nextUserId };
+    }
+
+    function begin(authState) {
+        token += 1;
+        return { token, userId: getWarSourceUserId(authState) };
+    }
+
+    function isCurrent(request, authState) {
+        if (!request) return false;
+        return request.token === token
+            && request.userId === currentUserId
+            && request.userId === getWarSourceUserId(authState);
+    }
+
+    return { begin, isCurrent, transition };
+}
+
+export async function loadLinkedWarClans({ authState } = {}) {
+    const userId = getWarSourceUserId(authState);
     if (!userId) return [];
     const groups = await getGroupsOfUser(userId);
     const clanLists = await Promise.allSettled(

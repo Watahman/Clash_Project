@@ -5,9 +5,9 @@ const performanceMocks = vi.hoisted(() => ({
     loadPlayerPerformanceBatch: vi.fn(() => Promise.resolve({}))
 }));
 
-vi.mock('../../src/assets/js/cwl/player-performance-client.js', () => performanceMocks);
+vi.mock('../../src/assets/js/cwl/player-performance-client.js?v=20260829-public-auth-v1', () => performanceMocks);
 
-vi.mock('../../src/assets/js/i18n/i18n.js', () => ({
+vi.mock('../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1', () => ({
     t: (key, params = {}) => ({
         'planner.noRosterMatches': 'Geen spelers gevonden voor deze zoekopdracht.',
         'planner.rosterResults': `${params.visible} van ${params.total} spelers zichtbaar`
@@ -39,7 +39,7 @@ describe('free roster filter', () => {
     });
 
     it('filters existing cards client-side by player name or tag', async () => {
-        const { initFreeRosterFilter } = await import('../../src/assets/js/cwl/cwl-roster-filter.js');
+        const { initFreeRosterFilter } = await import('../../src/assets/js/cwl/cwl-roster-filter.js?v=20260829-public-auth-v1');
         const container = document.querySelector('#roster');
         const input = document.querySelector('#search');
         const status = document.querySelector('#status');
@@ -64,7 +64,7 @@ describe('free roster filter', () => {
     });
 
     it('shows a distinct no-results state without changing roster data', async () => {
-        const { initFreeRosterFilter } = await import('../../src/assets/js/cwl/cwl-roster-filter.js');
+        const { initFreeRosterFilter } = await import('../../src/assets/js/cwl/cwl-roster-filter.js?v=20260829-public-auth-v1');
         const container = document.querySelector('#roster');
         const input = document.querySelector('#search');
         container.append(playerCard('North Guard', '#ABC123'));
@@ -82,7 +82,7 @@ describe('free roster filter', () => {
     });
 
     it('reapplies the active query when a player is added or enriched', async () => {
-        const { initFreeRosterFilter } = await import('../../src/assets/js/cwl/cwl-roster-filter.js');
+        const { initFreeRosterFilter } = await import('../../src/assets/js/cwl/cwl-roster-filter.js?v=20260829-public-auth-v1');
         const container = document.querySelector('#roster');
         const input = document.querySelector('#search');
         input.value = 'guard';
@@ -97,7 +97,7 @@ describe('free roster filter', () => {
     });
 
     it('combines roster filters and sorts without changing planner ownership data', async () => {
-        const { initFreeRosterFilter } = await import('../../src/assets/js/cwl/cwl-roster-filter.js');
+        const { initFreeRosterFilter } = await import('../../src/assets/js/cwl/cwl-roster-filter.js?v=20260829-public-auth-v1');
         const container = document.querySelector('#roster');
         const input = document.querySelector('#search');
         const sourceSelect = document.createElement('select');
@@ -160,7 +160,7 @@ describe('free roster filter', () => {
     });
 
     it('keeps performance loading lazy until a performance filter or sort is used', async () => {
-        const { initFreeRosterFilter } = await import('../../src/assets/js/cwl/cwl-roster-filter.js');
+        const { initFreeRosterFilter } = await import('../../src/assets/js/cwl/cwl-roster-filter.js?v=20260829-public-auth-v1');
         const container = document.querySelector('#roster');
         const input = document.querySelector('#search');
         const sorting = document.createElement('select');
@@ -183,7 +183,7 @@ describe('free roster filter', () => {
     });
 
     it('orders the same free-roster cards by each supported sort key', async () => {
-        const { initFreeRosterFilter } = await import('../../src/assets/js/cwl/cwl-roster-filter.js');
+        const { initFreeRosterFilter } = await import('../../src/assets/js/cwl/cwl-roster-filter.js?v=20260829-public-auth-v1');
         const container = document.querySelector('#roster');
         const input = document.querySelector('#search');
         const sorting = document.createElement('select');

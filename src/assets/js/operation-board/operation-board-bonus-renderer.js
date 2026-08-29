@@ -1,4 +1,4 @@
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { buildBonusCalculator } from './operation-board-bonus-calculator.js';
 import { BONUS_STRATEGIES } from './operation-board-bonus-strategies.js';
 import {

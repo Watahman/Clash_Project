@@ -3,8 +3,9 @@ import {
     normalizePlayerPriority,
     normalizeRosterStatus
 } from './cwl-plan-schema.js';
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
+import { getPlannerStorageKey } from './cwl-planner-guest-storage.js?v=20260829-public-auth-v1';
 
 export function rememberPlannerPlayers() {
     if (isRedesignFixtureRequested()) return;
@@ -18,7 +19,8 @@ export function rememberPlannerPlayers() {
         rosterStatus: normalizeRosterStatus(player.dataset.rosterStatus),
         playerPriority: normalizePlayerPriority(player.dataset.playerPriority)
     })).filter(player => player.tag);
-    localStorage.setItem('clashtools_last_planner_players', JSON.stringify(players));
+    const storageKey = getPlannerStorageKey('players');
+    if (storageKey) localStorage.setItem(storageKey, JSON.stringify(players));
 }
 
 export function updateClanCapacityCounter(article) {

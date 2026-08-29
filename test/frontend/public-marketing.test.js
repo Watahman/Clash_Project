@@ -125,14 +125,14 @@ describe('Public marketing shell', () => {
 
     it('cache-busts the complete changed public module graph', () => {
         const productVersion = 'v=20260821-product-home';
-        const translationsVersion = 'v=20260823-achievement-card-assets-1';
-        const publicVersion = 'v=20260828-seo-final';
+        const translationsVersion = 'v=20260829-public-auth-v1';
+        const publicVersion = 'v=20260829-public-auth-v1';
         const entry = read('src/assets/js/pages/public-site.js');
 
         expect(entry).toContain(`i18n.js?${publicVersion}`);
         ['theme-manager.js', 'public-header.js']
             .forEach(file => expect(entry).toContain(`${file}?${publicVersion}`));
-        expect(entry).toContain('public-resource-pages.js?v=20260821-authentic-pages');
+        expect(entry).toContain('public-resource-pages.js?v=20260829-public-auth-v1');
         expect(read('src/assets/js/i18n/i18n.js')).toContain(`runtime-translations.js?${translationsVersion}`);
         expect(read('src/assets/js/i18n/runtime-translations.js')).toContain(`public-resource-locales.js?${productVersion}`);
         const resources = read('src/assets/js/i18n/public-resource-locales.js');

@@ -11,12 +11,12 @@ const clanApi = vi.hoisted(() => ({
 }));
 
 vi.mock(
-    '../../src/assets/js/operation-board/historical-cwl-client.js?v=20260826-cwl-cache-reset',
+    '../../src/assets/js/operation-board/historical-cwl-client.js?v=20260829-public-auth-v1',
     () => client
 );
 
 vi.mock(
-    '../../src/assets/js/API/API-Clan.js?v=20260826-live-refresh',
+    '../../src/assets/js/API/API-Clan.js?v=20260829-public-auth-v1',
     () => clanApi
 );
 
@@ -48,7 +48,7 @@ describe('Operation Board history controller', () => {
 
     it('loads only the season index until a historical season is selected', async () => {
         const { createOperationBoardHistoryController } = await import(
-            '../../src/assets/js/operation-board/operation-board-history-controller.js'
+            '../../src/assets/js/operation-board/operation-board-history-controller.js?v=20260829-public-auth-v1'
         );
         const current = {
             leagueGroup: { season: '2026-07' },
@@ -90,7 +90,7 @@ describe('Operation Board history controller', () => {
 
     it('loads the multi-season batch only when Overview is selected', async () => {
         const { createOperationBoardHistoryController } = await import(
-            '../../src/assets/js/operation-board/operation-board-history-controller.js'
+            '../../src/assets/js/operation-board/operation-board-history-controller.js?v=20260829-public-auth-v1'
         );
         const onOverview = vi.fn();
         const controller = createOperationBoardHistoryController({
@@ -119,7 +119,7 @@ describe('Operation Board history controller', () => {
 
     it('selects Overview when no current CWL exists', async () => {
         const { createOperationBoardHistoryController } = await import(
-            '../../src/assets/js/operation-board/operation-board-history-controller.js'
+            '../../src/assets/js/operation-board/operation-board-history-controller.js?v=20260829-public-auth-v1'
         );
         const select = document.querySelector('select');
         const onOverview = vi.fn();

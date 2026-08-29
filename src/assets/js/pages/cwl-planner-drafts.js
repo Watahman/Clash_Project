@@ -1,12 +1,13 @@
-import { initI18n, t } from '../i18n/i18n.js';
-import { syncAuthSession } from '../auth/auth-client.js';
+import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260829-public-auth-v1';
 import { getCurrentUserId } from '../utils/user.js';
 import { summarizePlan } from '../cwl/cwl-plan-summary.js';
-import { createSavedPlansView } from './cwl-planner-drafts-view.js';
-import { createSavedPlansActions } from './cwl-planner-drafts-actions.js';
+import { createSavedPlansView } from './cwl-planner-drafts-view.js?v=20260829-public-auth-v1';
+import { createSavedPlansActions } from './cwl-planner-drafts-actions.js?v=20260829-public-auth-v1';
 import {
     getAllPlansFromDatabase
-} from '../Supabase/Supabase-Plan.js';
+} from '../Supabase/Supabase-Plan.js?v=20260829-public-auth-v1';
+import * as plannerStorage from '../cwl/cwl-planner-guest-storage.js?v=20260829-public-auth-v1';
 
 const refs = {};
 let plans = [];
@@ -15,6 +16,12 @@ let activeController;
 let savedPlansView;
 let savedPlanActions;
 const listState = { query: '', sort: 'updated-desc' };
+
+function clearActivePlan(planId = '') {
+    if (!planId || plannerStorage.readActivePlannerId() === planId) {
+        plannerStorage.persistActivePlannerId(null);
+    }
+}
 
 function initRefs() {
     refs.container = document.querySelector('#draft-cwl-container');
@@ -32,7 +39,8 @@ function initRefs() {
         setStatus,
         render,
         setControlsEnabled: enabled => savedPlansView.setControlsEnabled(enabled),
-        reloadPlans: loadPlans
+        reloadPlans: loadPlans,
+        clearActivePlan
     });
     savedPlansView = createSavedPlansView({
         refs,
@@ -40,6 +48,8 @@ function initRefs() {
         getUserId: () => userId,
         listState,
         setStatus,
+        selectPlan: plannerStorage.persistActivePlannerId,
+        clearActivePlan,
         onRename: savedPlanActions.rename,
         onCopy: savedPlanActions.copy,
         onDelete: savedPlanActions.remove
@@ -80,8 +90,10 @@ async function loadPlans() {
 }
 
 async function init() {
+    const authState = await resolveAuthState().catch(() => null);
+    if (authState?.status !== AUTH_STATES.AUTHENTICATED) return;
+    plannerStorage.configureGuestPlanner({ authState });
     initI18n();
-    await syncAuthSession().catch(() => null);
     initRefs();
     bindListControls();
     setListControlsEnabled(false);

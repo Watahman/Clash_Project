@@ -1,5 +1,5 @@
 import * as config from "../Data/config.js"
-import {fetchClashAPIRequest} from "./API-Client.js?v=20260826-live-refresh"
+import {fetchClashAPIRequest} from "./API-Client.js?v=20260829-public-auth-v1"
 import { cacheKeys } from "../cache/cache-keys.js";
 import { CACHE_STALE, CACHE_TTL } from "../cache/cache-policy.js";
 

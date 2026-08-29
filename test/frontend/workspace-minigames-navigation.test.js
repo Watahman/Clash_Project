@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { workspaceLocales } from '../../src/assets/js/i18n/workspace-locales.js';
+import { workspaceLocales } from '../../src/assets/js/i18n/workspace-locales.js?v=20260829-public-auth-v1';
 
 describe('workspace Minigames navigation', () => {
     it('shows Minigames as a normal workspace link', () => {

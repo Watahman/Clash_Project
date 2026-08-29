@@ -68,7 +68,9 @@ describe('Privacy-aware third-party loading', () => {
 
         expect(bootstrap).toContain("document.body?.classList.contains('public-site')");
         expect(bootstrap).toContain("html.classList.contains('public-page')");
-        expect(publicSite).toContain('void redirectReturningUser()');
+        expect(publicSite).toContain('onAuthStateChange');
+        expect(publicSite).not.toContain('redirectReturningUser');
+        expect(publicSite).not.toContain('location.replace(\'/dashboard\')');
         expect(publicSite).not.toContain('clashtoolsRegisterInitialLoad');
         expect(workspaceCss).not.toContain('@import url');
         expect(publicCss).not.toContain('@import url');

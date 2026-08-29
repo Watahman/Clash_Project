@@ -4,7 +4,7 @@ import { ASSET_FALLBACKS } from '../../src/assets/js/assets/entity-assets.js';
 import {
     installLiveBadgeFallbacks,
     liveSideMarkup
-} from '../../src/assets/js/operation-board/operation-board-live-side-renderer.js';
+} from '../../src/assets/js/operation-board/operation-board-live-side-renderer.js?v=20260829-public-auth-v1';
 
 const side = {
     name: 'Belgian Warriors',

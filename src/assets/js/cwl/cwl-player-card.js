@@ -1,5 +1,5 @@
-import { savePlan } from './cwl-plan-io.js';
-import { applyAvailabilityToCard } from './cwl-availability.js';
+import { savePlan } from './cwl-plan-io.js?v=20260829-public-auth-v1';
+import { applyAvailabilityToCard } from './cwl-availability.js?v=20260829-public-auth-v1';
 import {
     escapeCssIdentifier,
     normalizePlayer,
@@ -10,15 +10,15 @@ import {
     normalizePlayerPriority,
     normalizeRosterStatus
 } from './cwl-plan-schema.js';
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import {
     attachPlayerPriorityControl,
     attachDeleteButton,
     attachMoveControl,
     syncPlayerRosterStatus
-} from './cwl-player-controls.js';
-import { makePlayerDraggable } from './cwl-player-drag.js';
-import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js';
+} from './cwl-player-controls.js?v=20260829-public-auth-v1';
+import { makePlayerDraggable } from './cwl-player-drag.js?v=20260829-public-auth-v1';
+import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js?v=20260829-public-auth-v1';
 import { getTownHallAsset, installImageFallback } from '../assets/entity-assets.js';
 import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 

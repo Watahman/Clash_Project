@@ -3,8 +3,8 @@ import {
     applyPlannerFixture,
     getPlannerFixtureData,
     getRequestedPlannerFixture
-} from '../../src/assets/js/fixtures/planner-fixtures.js';
-import { getPlayerAvailability } from '../../src/assets/js/cwl/cwl-availability.js';
+} from '../../src/assets/js/fixtures/planner-fixtures.js?v=20260829-public-auth-v1';
+import { getPlayerAvailability } from '../../src/assets/js/cwl/cwl-availability.js?v=20260829-public-auth-v1';
 import { normalizePlayer } from '../../src/assets/js/cwl/cwl-utils.js';
 
 describe('CWL planner redesign fixtures', () => {
@@ -120,7 +120,7 @@ describe('CWL planner redesign fixtures', () => {
         window.history.replaceState({}, '', '/app/cwl-planner?cpFixture=planner-auto-preview');
         addToolMarkup('auto');
         document.querySelector('#cwl-auto-plan-panel').scrollIntoView = vi.fn();
-        const { initAutoPlan } = await import('../../src/assets/js/cwl/auto-plan/cwl-auto-plan-ui.js');
+        const { initAutoPlan } = await import('../../src/assets/js/cwl/auto-plan/cwl-auto-plan-ui.js?v=20260829-public-auth-v1');
         initAutoPlan();
         applyPlannerFixture(fixture('planner-auto-preview'), { location: localUrl() });
         await vi.waitFor(() => expect(document.querySelector('#cwl-auto-plan-panel').classList.contains('hidden')).toBe(false));
@@ -131,7 +131,7 @@ describe('CWL planner redesign fixtures', () => {
         window.history.replaceState({}, '', '/app/cwl-planner?cpFixture=planner-optimize');
         addToolMarkup('optimize');
         document.querySelector('#cwl-optimize-plan-panel').scrollIntoView = vi.fn();
-        const { initOptimizePlan } = await import('../../src/assets/js/cwl/optimize-plan/cwl-optimize-plan-ui.js');
+        const { initOptimizePlan } = await import('../../src/assets/js/cwl/optimize-plan/cwl-optimize-plan-ui.js?v=20260829-public-auth-v1');
         initOptimizePlan();
         applyPlannerFixture(fixture('planner-optimize'), { location: localUrl() });
         await vi.waitFor(() => expect(document.querySelector('#cwl-optimize-plan-panel').classList.contains('hidden')).toBe(false));

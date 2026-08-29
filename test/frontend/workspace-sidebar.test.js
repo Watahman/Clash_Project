@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
     initDesktopSidebar,
     initMobileSidebar
-} from '../../src/assets/js/shell/workspace-sidebar.js';
+} from '../../src/assets/js/shell/workspace-sidebar.js?v=20260829-public-auth-v1';
 
 function desktopSidebar() {
     document.body.innerHTML = `

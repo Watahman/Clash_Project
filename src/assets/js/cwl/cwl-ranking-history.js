@@ -1,5 +1,5 @@
 import { normalizeWarState } from './cwl-war-state.js';
-import { t } from '../i18n/i18n.js';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 
 const DAY_COUNT = 7;
 const SVG_NS = 'http://www.w3.org/2000/svg';

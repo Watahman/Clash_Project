@@ -1,5 +1,10 @@
-import { initI18n, t } from '../i18n/i18n.js';
-import { WORKSPACE_MODULES, WORKSPACE_SECTIONS } from '../shell/module-registry.js';
+import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import * as authClient from '../auth/auth-client.js?v=20260829-public-auth-v1';
+import {
+    ACCESS,
+    WORKSPACE_MODULES,
+    WORKSPACE_SECTIONS
+} from '../shell/module-registry.js?v=20260829-public-auth-v1';
 
 const visibleIds = new Set([
     'groups', 'planner', 'operation', 'warOperation',
@@ -17,7 +22,29 @@ const EXPLORE_ART = Object.freeze({
     achievements: `<svg viewBox="0 0 240 170" fill="none" focusable="false"><path d="M87 31h66v41c0 24-14 39-33 39S87 96 87 72V31Z"/><path d="M87 43H63v10c0 17 10 28 27 28M153 43h24v10c0 17-10 28-27 28M120 111v24M91 145h58M104 31V18M120 31V13M136 31V18"/><path d="m42 44 12 8M198 44l-12 8M44 95l13-4M196 95l-13-4"/></svg>`
 });
 
-function cardMarkup(module) {
+function authExport(name) {
+    try {
+        return authClient[name];
+    } catch {
+        return undefined;
+    }
+}
+
+function isAuthenticated(state) {
+    return state?.status === (authExport('AUTH_STATES')?.AUTHENTICATED || 'authenticated');
+}
+
+function actionMarkup(module, authState) {
+    if (module.comingSoon) {
+        return '<strong class="explore-card-status" data-i18n="common.comingSoon">Coming soon</strong>';
+    }
+    if (module.access === ACCESS.AUTH && !isAuthenticated(authState)) {
+        return '<strong class="explore-card-status explore-card-status--locked"><span aria-hidden="true">🔒</span> <span data-i18n="auth.login">Sign in</span></strong>';
+    }
+    return '<strong data-i18n="explore.open">Open →</strong>';
+}
+
+function cardMarkup(module, authState) {
     const descriptionKey = `explore.${module.id}.description`;
     const section = WORKSPACE_SECTIONS.find(candidate => candidate.id === module.section);
     const tag = module.comingSoon ? 'div' : 'a';
@@ -27,9 +54,7 @@ function cardMarkup(module) {
     const title = module.comingSoon
         ? `<h2><span data-i18n="${module.key}">${module.fallback}</span> <span class="workspace-coming-soon-badge" data-i18n="common.comingSoon">(Coming soon)</span></h2>`
         : `<h2 data-i18n="${module.key}">${module.fallback}</h2>`;
-    const action = module.comingSoon
-        ? '<strong class="explore-card-status" data-i18n="common.comingSoon">Coming soon</strong>'
-        : '<strong data-i18n="explore.open">Open →</strong>';
+    const action = actionMarkup(module, authState);
     return `<${tag} class="cp-module-card explore-card explore-card--${module.id}${module.comingSoon ? ' explore-card--coming-soon' : ''}" data-pillar="${module.section}" data-explore-card="${module.section}" ${state}>
         <span class="explore-card-heading">${module.icon}<span class="page-kicker" data-i18n="${section.key}">${section.fallback}</span></span>
         ${title}
@@ -39,9 +64,9 @@ function cardMarkup(module) {
     </${tag}>`;
 }
 
-function renderCards(container) {
+function renderCards(container, authState) {
     const modules = WORKSPACE_MODULES.filter(module => visibleIds.has(module.id));
-    container.innerHTML = modules.map(cardMarkup).join('');
+    container.innerHTML = modules.map(module => cardMarkup(module, authState)).join('');
 }
 
 function applyFilter(filter, cards) {
@@ -62,10 +87,18 @@ function initFilters() {
     });
 }
 
-function init() {
+async function init() {
     initI18n();
-    renderCards(document.querySelector('.explore-grid'));
-    initI18n(document.querySelector('.explore-grid'));
+    const container = document.querySelector('.explore-grid');
+    if (!container) return;
+    const initialState = { status: authExport('AUTH_STATES')?.LOADING || 'loading' };
+    renderCards(container, initialState);
+    const resolveState = authExport('resolveAuthState');
+    const authState = typeof resolveState === 'function'
+        ? await resolveState().catch(() => initialState)
+        : { status: authExport('AUTH_STATES')?.GUEST || 'guest' };
+    renderCards(container, authState);
+    initI18n(container);
     initFilters();
 }
 

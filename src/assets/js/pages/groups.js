@@ -1,16 +1,17 @@
-import { initI18n } from '../i18n/i18n.js';
+import { initI18n } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { getCurrentUserId } from '../utils/user.js';
-import { initGroupPolls } from '../groups/groups-polls.js?v=20260813-redesign';
-import { createClanAdmin } from '../groups/groups-admin-clans.js';
-import { initGroupMemberDrawer } from '../groups/groups-member-drawer.js?v=20260813-redesign';
-import { initClanFamilyOverview } from '../groups/clan-family-overview.js?v=20260813-redesign';
-import { initClanFamilyMembers } from '../groups/clan-family-members.js';
-import { applyFamilyCopy, familyCopy } from '../groups/clan-family-copy.js';
+import { initGroupPolls } from '../groups/groups-polls.js?v=20260829-public-auth-v1';
+import { createClanAdmin } from '../groups/groups-admin-clans.js?v=20260829-public-auth-v1';
+import { initGroupMemberDrawer } from '../groups/groups-member-drawer.js?v=20260829-public-auth-v1';
+import { initClanFamilyOverview } from '../groups/clan-family-overview.js?v=20260829-public-auth-v1';
+import { initClanFamilyMembers } from '../groups/clan-family-members.js?v=20260829-public-auth-v1';
+import { applyFamilyCopy, familyCopy } from '../groups/clan-family-copy.js?v=20260829-public-auth-v1';
 import { activateGroupTab, bindGroupTabs, normalizeGroupTab } from '../groups/groups-tabs.js';
-import { initGroupIndexSlider } from '../groups/groups-index-slider.js';
-import { syncAuthSession } from '../auth/auth-client.js';
-import { initClanFamilyActions } from '../groups/clan-family-actions.js?v=20260813-redesign';
-import { createClanFamilyListController } from '../groups/clan-family-list.js?v=20260813-redesign';
+import { initGroupIndexSlider } from '../groups/groups-index-slider.js?v=20260829-public-auth-v1';
+import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260829-public-auth-v1';
+import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
+import { initClanFamilyActions } from '../groups/clan-family-actions.js?v=20260829-public-auth-v1';
+import { createClanFamilyListController } from '../groups/clan-family-list.js?v=20260829-public-auth-v1';
 import {
     GROUP_TAB_STORAGE_PREFIX, OPEN_GROUP_STORAGE_KEY, OPEN_POLL_STORAGE_KEY,
     readGroupPollTarget, unreadPollNotificationCount
@@ -22,11 +23,16 @@ const state = { group: null, members: [], entry: {}, currentRole: 'member', user
 let clanAdmin;
 
 async function init() {
+    const requestedFixture = await getRedesignFixture().catch(() => null);
+    const fixtureMode = requestedFixture?.module === 'clan-family';
+    if (!fixtureMode) {
+        const authState = await resolveAuthState().catch(() => null);
+        if (authState?.status !== AUTH_STATES.AUTHENTICATED) return;
+    }
     initI18n();
     applyFamilyCopy(document);
     initGroupIndexSlider(refs.workspace, refs.indexToggle);
     stageRequestedPollTarget();
-    await syncAuthSession().catch(() => null);
     const familyList = createClanFamilyListController({
         refs,
         state,

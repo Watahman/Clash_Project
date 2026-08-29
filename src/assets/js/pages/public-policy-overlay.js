@@ -1,4 +1,4 @@
-import { getLanguage } from '../i18n/i18n.js';
+import { getLanguage } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { publicPolicyExtraLocales } from '../i18n/public-policy-extra-locales.js';
 import { _BASE_URL } from '../Data/config.js';
 

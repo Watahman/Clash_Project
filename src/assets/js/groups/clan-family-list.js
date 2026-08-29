@@ -1,10 +1,10 @@
-import { getGroupsOfUser } from '../Supabase/Supabase-Group.js';
+import { getGroupsOfUser } from '../Supabase/Supabase-Group.js?v=20260829-public-auth-v1';
 import { getCurrentUserId } from '../utils/user.js';
-import { withGlobalLoading } from '../utils/loading-state.js';
-import { createGroupCard } from '../templates/GroupTemplates.js?v=20260813-redesign';
+import { withGlobalLoading } from '../utils/loading-state.js?v=20260829-public-auth-v1';
+import { createGroupCard } from '../templates/GroupTemplates.js?v=20260829-public-auth-v1';
 import { loadClanFamilyFixture } from './clan-family-fixtures.js';
-import { familyCopy } from './clan-family-copy.js';
-import { t } from '../i18n/i18n.js';
+import { familyCopy } from './clan-family-copy.js?v=20260829-public-auth-v1';
+import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { OPEN_GROUP_STORAGE_KEY } from '../notifications/poll-notifications.js';
 
 const DEFAULT_SELECTED_GROUP_KEY = 'clashtoolsSelectedGroupId';

@@ -1,7 +1,7 @@
 import {
     applyCwlFixture,
     setSourceMode
-} from './operation-board-fixture-controls.js';
+} from './operation-board-fixture-controls.js?v=20260829-public-auth-v1';
 import { loadCwlFixture } from './operation-board-fixtures.js';
 
 export function createCwlOperationBoardBootstrap({
@@ -13,6 +13,7 @@ export function createCwlOperationBoardBootstrap({
     setSelectedClan,
     setHelp,
     onSourceModeChange,
+    onSourceModeRequest,
     root = document
 }) {
     let activeFixture = null;
@@ -34,14 +35,19 @@ export function createCwlOperationBoardBootstrap({
         setSourceMode(mode, root);
     }
 
+    async function handleSourceModeClick(button) {
+        const mode = button.dataset.opSourceMode;
+        const wasActive = button.getAttribute('aria-pressed') === 'true';
+        if (wasActive) return;
+        const allowed = await onSourceModeRequest?.(mode);
+        if (allowed === false) return;
+        setSourceMode(mode, root);
+        onSourceModeChange?.(mode);
+    }
+
     function bindSourceMode() {
         root.querySelectorAll('[data-op-source-mode]').forEach(button => {
-            button.addEventListener('click', () => {
-                const mode = button.dataset.opSourceMode;
-                const wasActive = button.getAttribute('aria-pressed') === 'true';
-                setSourceMode(mode, root);
-                if (!wasActive) onSourceModeChange?.(mode);
-            });
+            button.addEventListener('click', () => void handleSourceModeClick(button));
         });
     }
 

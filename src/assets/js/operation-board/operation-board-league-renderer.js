@@ -1,6 +1,6 @@
-import { renderRankingHistoryChart } from '../cwl/cwl-ranking-history.js';
-import { renderStarsPerDayChart } from '../cwl/cwl-stars-chart.js';
-import { competeT as t } from './compete-locales.js';
+import { renderRankingHistoryChart } from '../cwl/cwl-ranking-history.js?v=20260829-public-auth-v1';
+import { renderStarsPerDayChart } from '../cwl/cwl-stars-chart.js?v=20260829-public-auth-v1';
+import { competeT as t } from './compete-locales.js?v=20260829-public-auth-v1';
 import {
     escapeHtml,
     number
@@ -9,7 +9,7 @@ import {
     chip,
     resultText,
     stateText
-} from './operation-board-render-utils.js';
+} from './operation-board-render-utils.js?v=20260829-public-auth-v1';
 import { buildLeagueModel } from './operation-board-league-model.js';
 
 const ROUND_RESULT_CLASSES = new Set([
