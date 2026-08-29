@@ -4,7 +4,8 @@ param(
 
     [string]$Region = "europe-west1",
     [string]$ServiceName = "clashpanel-api",
-    [string]$ClashApiKeyPoolSecret = "clashpanel-coc-api-key-pool"
+    [string]$ClashApiKeyPoolSecret = "clashpanel-coc-api-key-pool",
+    [switch]$AllowAdvancedStatsCollectionDisabled
 )
 
 $ErrorActionPreference = "Stop"
@@ -15,6 +16,22 @@ if (-not (Test-Path "./Dockerfile")) {
 
 if (-not (Test-Path "./cloudrun-env.yaml")) {
     throw "Maak eerst cloudrun-env.yaml op basis van cloudrun-env.example.yaml."
+}
+
+# A production deploy used to be able to silently copy the old rollout default
+# ADVANCED_STATS_COLLECTION_ENABLED=false back into Cloud Run. Existing trackers
+# would then stay INITIALIZING forever because /InternalAdvancedStatsPoll returns
+# 404 before the scheduler can collect anything. Require an explicit kill-switch
+# override when collection is intentionally disabled.
+$cloudRunEnv = Get-Content "./cloudrun-env.yaml" -Raw
+$collectionEnabled = $cloudRunEnv -match '(?im)^\s*ADVANCED_STATS_COLLECTION_ENABLED\s*:\s*["'']?true["'']?\s*(?:#.*)?$'
+if (-not $collectionEnabled -and -not $AllowAdvancedStatsCollectionDisabled) {
+    throw "ADVANCED_STATS_COLLECTION_ENABLED moet true zijn voor een normale production deploy. Gebruik -AllowAdvancedStatsCollectionDisabled alleen als bewuste kill switch."
+}
+
+$rankedSeasonConfigured = $cloudRunEnv -match '(?im)^\s*CLASHKING_RANKED_SEASON\s*:\s*["'']?[1-9][0-9]*["'']?\s*(?:#.*)?$'
+if (-not $rankedSeasonConfigured) {
+    Write-Warning "CLASHKING_RANKED_SEASON is niet ingevuld. Normal + war collection kunnen werken, maar ranked history blijft expliciet unsupported."
 }
 
 gcloud config set project $ProjectId
@@ -37,15 +54,19 @@ gcloud run deploy $ServiceName `
     --min-instances 0 `
     --max-instances 1 `
     --concurrency 40 `
-    --timeout 30s `
+    --timeout 120s `
     --cpu-boost `
     --env-vars-file ./cloudrun-env.yaml `
     --update-secrets="CLASH_API_KEY_POOL=${ClashApiKeyPoolSecret}:latest" `
     --remove-secrets="_API_KEY_ALL,_API_KEY_ALL2,_API_KEY_ALL3"
 
-Write-Host "Deploy klaar. Configureer daarna de secrets in Cloud Run / Secret Manager:" -ForegroundColor Green
+if ($LASTEXITCODE -ne 0) {
+    throw "Cloud Run deploy is mislukt."
+}
+
+Write-Host "Deploy klaar. Controleer daarna de Advanced Stats scheduler met configure-advanced-stats-production.ps1." -ForegroundColor Green
 Write-Host "  CLASH_API_KEY_POOL -> $ClashApiKeyPoolSecret"
 Write-Host "  _API_KEY_SUPABASE"
 Write-Host "  SUPABASE_SERVICE_ROLE_KEY"
 Write-Host "  API_PROXY_SECRET (dezelfde waarde als de Cloudflare Worker secret)"
-Write-Host "  ADVANCED_STATS_SCHEDULER_SECRET (alleen nodig voor de Advanced Stats scheduler rollout)"
+Write-Host "  ADVANCED_STATS_SCHEDULER_SECRET"

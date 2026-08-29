@@ -56,7 +56,7 @@ public final class AdvancedStatsCollectorConfig {
         AdvancedStatsScheduledCollector.Settings legacy = settings();
         return new AdvancedStatsCompactScheduledCollector.Settings(
                 legacy.batchSize(),
-                boundedInt("ADVANCED_STATS_PAGE_SIZE", 100, 1, 500),
+                boundedInt("ADVANCED_STATS_PAGE_SIZE", 500, 1, 500),
                 boundedInt("ADVANCED_STATS_MAX_BOOTSTRAP_PAGES", 20, 1, 1000),
                 legacy.leaseSeconds(),
                 legacy.activePollDelay(),

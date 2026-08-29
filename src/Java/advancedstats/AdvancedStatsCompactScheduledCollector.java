@@ -33,7 +33,7 @@ public final class AdvancedStatsCompactScheduledCollector {
         }
 
         public static Settings defaults() {
-            return new Settings(25, 100, 20, 600, Duration.ofMinutes(15), Duration.ofMinutes(30));
+            return new Settings(25, 500, 20, 600, Duration.ofMinutes(15), Duration.ofMinutes(30));
         }
 
         private static Duration positive(Duration value, String field) {
@@ -120,7 +120,7 @@ public final class AdvancedStatsCompactScheduledCollector {
 
     private RunResult collect(AdvancedStatsModels.TrackingState tracker, String workerId) throws Exception {
         AdvancedStatsHistorySource source = sourceFactory.create(workerId);
-        AdvancedStatsCompactRepository compactStore = new AdvancedStatsCompactRepository(workerId);
+        AdvancedStatsCollectionStore compactStore = new AdvancedStatsBatchedCompactRepository(workerId);
         prepareRankedSeason(source, compactStore, tracker, workerId);
         AdvancedStatsCollectionCoordinator coordinator = new AdvancedStatsCollectionCoordinator(source, compactStore);
         if (needsBootstrap(compactStore, tracker.id())) {
@@ -131,7 +131,7 @@ public final class AdvancedStatsCompactScheduledCollector {
     }
 
     private void prepareRankedSeason(AdvancedStatsHistorySource source,
-                                     AdvancedStatsCompactRepository store,
+                                     AdvancedStatsCollectionStore store,
                                      AdvancedStatsModels.TrackingState tracker,
                                      String workerId) throws Exception {
         String season = source.seasonKey(AdvancedStatsScope.RANKED);
@@ -143,7 +143,7 @@ public final class AdvancedStatsCompactScheduledCollector {
         }
     }
 
-    private boolean needsBootstrap(AdvancedStatsCompactRepository store, UUID trackingId) throws Exception {
+    private boolean needsBootstrap(AdvancedStatsCollectionStore store, UUID trackingId) throws Exception {
         for (AdvancedStatsScope scope : EnumSet.allOf(AdvancedStatsScope.class)) {
             ScopeState state = store.load(trackingId, scope);
             if (state == null || !state.bootstrapped()) return true;

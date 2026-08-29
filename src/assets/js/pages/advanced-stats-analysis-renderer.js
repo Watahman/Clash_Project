@@ -118,12 +118,13 @@ function scopeCountText(scope) {
 }
 
 function renderScopeSteps(root, analysis) {
-    const scopeRoot = root?.querySelector('[data-analysis-scopes]');
+    const scopeRoot = root?.querySelector('[data-analysis-scopes], #advanced-stats-analysis-scopes');
     const genericRoot = root?.querySelector('.advanced-stats__analysis-steps');
     const scopes = analysis.scopes;
-    setVisibility(scopeRoot, Boolean(scopes?.available));
-    setVisibility(genericRoot, !scopes?.available);
-    if (!scopes?.available) return;
+    const hasScopeMarkup = Boolean(scopeRoot);
+    setVisibility(scopeRoot, Boolean(scopes?.available && hasScopeMarkup));
+    setVisibility(genericRoot, !scopes?.available || !hasScopeMarkup);
+    if (!scopes?.available || !scopeRoot) return;
     scopeRoot.querySelectorAll('[data-analysis-scope]').forEach(item => {
         const key = item.dataset.analysisScope;
         const scope = scopes[key] || { phase: 'QUEUED', progress: null };

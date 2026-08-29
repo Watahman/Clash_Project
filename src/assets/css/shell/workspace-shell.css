@@ -201,7 +201,7 @@ body.workspace-app.workspace-sidebar-collapsed {
 }
 .cp-fixture-badge[data-fixture-error="true"] { background: var(--cp-danger-soft); color: var(--cp-danger); }
 
-@media (max-width: 1099px) and (min-width: 900px) {
+@media (max-width: 1099px) and (min-width: 62.001rem) {
     body.workspace-app {
         --workspace-sidebar-width: 72px;
         --workspace-sidebar-current-width: 72px;
@@ -214,7 +214,7 @@ body.workspace-app.workspace-sidebar-collapsed {
     .workspace-sidebar .workspace-nav a { justify-content: center; padding: 0; }
 }
 
-@media (max-width: 899px) {
+@media (max-width: 62rem) {
     body.workspace-app { display: block; }
     .workspace-sidebar { width: min(320px, calc(100vw - 48px)); }
     .workspace-content { padding: 24px; }
