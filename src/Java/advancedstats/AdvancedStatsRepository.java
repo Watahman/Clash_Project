@@ -45,8 +45,13 @@ public final class AdvancedStatsRepository implements AdvancedStatsLifecycleServ
         JsonObject insert = new JsonObject();
         insert.addProperty("user_id", userId.toString());
         insert.addProperty("player_tag", playerTag);
-        // Identity only: an idempotent start never resets an existing paused/stopped row.
+        // Identity remains idempotent for healthy, paused and stopped trackers.
         SUPABASE_Client.upsert(TRACKING_TABLE, "user_id,player_tag", insert.toString());
+        // The same start action powers the UI's "Try again" control. The RPC is a
+        // no-op unless this exact tracker has a FAILED bootstrap; in that case it
+        // clears stale failure state and makes the tracker due immediately while
+        // preserving already collected compact statistics.
+        retryFailedBootstrap(userId, playerTag);
         return requireTracking(userId, playerTag);
     }
 
@@ -106,6 +111,14 @@ public final class AdvancedStatsRepository implements AdvancedStatsLifecycleServ
                 body.toString()
         ));
         return booleanValue(result, "deleted", false);
+    }
+
+    private void retryFailedBootstrap(UUID userId, String playerTag) throws Exception {
+        JsonObject body = new JsonObject();
+        body.addProperty("p_user_id", userId.toString());
+        body.addProperty("p_player_tag", playerTag);
+        body.addProperty("p_now", Instant.now().toString());
+        SUPABASE_Client.rpc("retry_advanced_stats_tracking_v1", body.toString());
     }
 
     private AdvancedStatsModels.TrackingState requireTracking(UUID userId, String playerTag) throws Exception {
