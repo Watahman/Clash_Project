@@ -4,7 +4,7 @@ import {
     normalizePublicHeader,
     normalizePublicShell,
     updatePublicHeaderAuth
-} from '../../src/assets/js/shell/public-header.js?v=20260829-public-auth-v1';
+} from '../../src/assets/js/shell/public-header.js?v=20260829-public-header-cta-v1';
 
 function mountShell(pathname) {
     window.history.replaceState({}, '', pathname);
@@ -30,25 +30,30 @@ describe('public shell normalization', () => {
         expect(navLabels).toEqual(['Tools', 'Games', 'Guides', 'Methodology', 'About', 'Changelog']);
         expect(header.querySelectorAll('.public-nav [data-i18n]').length).toBe(5);
         expect(header.querySelector('[data-public-auth-guest][href*="/subpages/login.html"]')?.textContent.trim()).toBe('Log in');
-        expect(header.querySelector('[data-public-auth-guest][href*="/subpages/register.html"]')?.textContent.trim()).toBe('Start for free');
-        expect(header.querySelector('[data-public-authenticated]')).toHaveProperty('hidden', true);
+        const startButton = header.querySelector('[data-public-start]');
+        expect(startButton?.textContent.trim()).toBe('Start for free');
+        expect(startButton?.getAttribute('href')).toContain('/subpages/register.html');
+        expect(header.querySelector('[data-public-authenticated]')).toBeNull();
         expect(header.querySelector('[href="/methodology"]')?.getAttribute('aria-current')).toBe('page');
     });
 
-    it('switches between guest and authenticated actions without replacing controls', () => {
+    it('keeps the start button and routes authenticated users to Dashboard', () => {
         const { header } = mountShell('/cwl-tracker');
         const languageControl = header.querySelector('[data-language-control]');
+        const startButton = header.querySelector('[data-public-start]');
 
         updatePublicHeaderAuth({ status: 'authenticated' });
         expect(header.dataset.authState).toBe('authenticated');
         expect(header.querySelectorAll('[data-public-auth-guest]:not([hidden])')).toHaveLength(0);
-        expect(header.querySelector('[data-public-authenticated]')).toHaveProperty('hidden', false);
+        expect(startButton).toHaveProperty('hidden', false);
+        expect(startButton?.textContent.trim()).toBe('Start for free');
+        expect(startButton?.getAttribute('href')).toBe('/dashboard');
         expect(header.querySelector('[data-language-control]')).toBe(languageControl);
 
         updatePublicHeaderAuth({ status: 'auth-unavailable' });
         expect(header.dataset.authState).toBe('auth-unavailable');
-        expect(header.querySelectorAll('[data-public-auth-guest]:not([hidden])')).toHaveLength(2);
-        expect(header.querySelector('[data-public-authenticated]')).toHaveProperty('hidden', true);
+        expect(header.querySelectorAll('[data-public-auth-guest]:not([hidden])')).toHaveLength(1);
+        expect(startButton?.getAttribute('href')).toContain('/subpages/register.html');
         expect(header.textContent).not.toContain('Log out');
     });
 

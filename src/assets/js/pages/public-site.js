@@ -1,10 +1,10 @@
 import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { onAuthStateChange } from '../auth/auth-client.js?v=20260829-public-auth-v1';
-import { toggleTheme as toggleThemePreference } from '../theme/theme-manager.js?v=20260829-public-auth-v1';
+import { toggleTheme as toggleThemePreference } from '../theme/theme-manager.js?v=20260829-public-header-cta-v1';
 import {
     normalizePublicShell,
     updatePublicHeaderAuth
-} from '../shell/public-header.js?v=20260829-public-auth-v1';
+} from '../shell/public-header.js?v=20260829-public-header-cta-v1';
 import { ensureThemeToggleMarkup } from '../theme/theme-toggle-markup.js';
 import { initPublicPageBindings } from './public-page-bindings.js?v=20260829-public-auth-v1';
 import { initPublicResourcePages } from './public-resource-pages.js?v=20260829-public-auth-v1';

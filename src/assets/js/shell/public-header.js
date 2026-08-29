@@ -78,9 +78,11 @@ export function updatePublicHeaderAuth(state = {}, root = document) {
     header.querySelectorAll('[data-public-auth-guest]').forEach(control => {
         setAuthControlVisibility(control, !authenticated);
     });
-    header.querySelectorAll('[data-public-authenticated]').forEach(control => {
-        setAuthControlVisibility(control, authenticated);
-    });
+    const startButton = header.querySelector('[data-public-start]');
+    startButton?.setAttribute(
+        'href',
+        authenticated ? '/dashboard' : buildRegisterUrl(getCurrentReturnPath())
+    );
 }
 
 export function normalizePublicHeader(root = document) {
@@ -103,8 +105,7 @@ export function normalizePublicHeader(root = document) {
             <button type="button" data-language-control data-i18n="header.language">Language</button>
             <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme">${THEME_TOGGLE_MARKUP}</button>
             <a class="link-button" href="${buildLoginUrl(returnTo)}" data-public-auth-guest data-i18n="auth.login">Log in</a>
-            <a class="button button-primary" href="${buildRegisterUrl(returnTo)}" data-public-auth-guest data-i18n="public.startFree">Start for free</a>
-            <a class="button button-primary" href="/dashboard" data-public-authenticated data-i18n="nav.dashboard" hidden aria-hidden="true">Dashboard</a>
+            <a class="button button-primary" href="${buildRegisterUrl(returnTo)}" data-public-start data-i18n="public.startFree">Start for free</a>
         </div>
         <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" data-i18n-aria-label="public.openMenu" aria-label="Open menu">
         <span aria-hidden="true"></span>

@@ -1,4 +1,4 @@
-import { normalizePublicHeader } from '../shell/public-header.js?v=20260829-public-auth-v1';
+import { normalizePublicHeader } from '../shell/public-header.js?v=20260829-public-header-cta-v1';
 import { ensureThemeToggleMarkup } from './theme-toggle-markup.js';
 
 const THEME_STORAGE_KEY = 'clashtools_theme';
