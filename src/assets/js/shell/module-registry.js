@@ -30,7 +30,7 @@ export const ACCESS = Object.freeze({
 });
 
 const MODULE_ACCESS = Object.freeze({
-    dashboard: ACCESS.AUTH,
+    dashboard: ACCESS.PUBLIC,
     explore: ACCESS.PUBLIC,
     groups: ACCESS.AUTH,
     planner: ACCESS.PUBLIC,

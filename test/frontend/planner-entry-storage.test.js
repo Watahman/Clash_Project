@@ -71,7 +71,7 @@ async function mountDashboard(userId, plan) {
     mocks.checkUserId.mockResolvedValue({ id: userId, name: userId, accounts: [] });
     mocks.getAllPlans.mockResolvedValue(plan ? [plan] : []);
     renderDashboardShell();
-    await import('../../src/assets/js/pages/dashboard.js?v=20260829-public-auth-v1');
+    await import('../../src/assets/js/pages/dashboard.js?v=20260829-public-dashboard-v1');
     await vi.waitFor(() => expect(mocks.getAllPlans).toHaveBeenCalledWith(userId));
     await vi.waitFor(() => expect(document.querySelector('[data-plan-open-ready]') ||
         document.querySelector('#dashboard-plan-list a')).not.toBeNull());

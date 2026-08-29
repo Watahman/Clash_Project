@@ -4,7 +4,7 @@ import {
     ACCESS,
     WORKSPACE_MODULES,
     WORKSPACE_SECTIONS
-} from '../shell/module-registry.js?v=20260829-public-auth-v1';
+} from '../shell/module-registry.js?v=20260829-public-dashboard-v1';
 
 const visibleIds = new Set([
     'groups', 'planner', 'operation', 'warOperation',

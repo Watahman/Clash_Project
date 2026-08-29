@@ -14,13 +14,13 @@ import {
     initDesktopSidebar,
     initMobileSidebar
 } from './workspace-sidebar.js?v=20260829-public-auth-v1';
-import { buildWorkspaceShellMarkup } from './workspace-shell-markup.js?v=20260829-public-auth-v1';
+import { buildWorkspaceShellMarkup } from './workspace-shell-markup.js?v=20260829-public-dashboard-v1';
 import {
     clearWorkspaceUserIdentity,
     loadWorkspaceUserIdentity,
     subscribeWorkspaceUserIdentity
 } from './workspace-user.js?v=20260829-public-auth-v1';
-import { ACCESS, getWorkspaceModule } from './module-registry.js?v=20260829-public-auth-v1';
+import { ACCESS, getWorkspaceModule } from './module-registry.js?v=20260829-public-dashboard-v1';
 
 const GUIDANCE_STYLESHEET = '../assets/css/workspace-guidance.css?v=20260812-redesign';
 let workspaceAuthGeneration = 0;

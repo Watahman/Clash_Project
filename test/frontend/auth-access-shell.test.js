@@ -164,11 +164,11 @@ describe('auth state and action access contracts', () => {
 
 describe('workspace access registry and guest shell markup', () => {
     it('exposes the definitive public and auth route matrix', async () => {
-        const { ACCESS, WORKSPACE_MODULES, getWorkspaceAccessForPath } = await import('../../src/assets/js/shell/module-registry.js?v=20260829-public-auth-v1');
+        const { ACCESS, WORKSPACE_MODULES, getWorkspaceAccessForPath } = await import('../../src/assets/js/shell/module-registry.js?v=20260829-public-dashboard-v1');
         const access = Object.fromEntries(WORKSPACE_MODULES.map(module => [module.id, module.access]));
 
         expect(access).toEqual({
-            dashboard: ACCESS.AUTH,
+            dashboard: ACCESS.PUBLIC,
             explore: ACCESS.PUBLIC,
             groups: ACCESS.AUTH,
             planner: ACCESS.PUBLIC,

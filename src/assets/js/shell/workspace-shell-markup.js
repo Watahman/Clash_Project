@@ -1,4 +1,4 @@
-import { ACCESS, getWorkspaceModule, getWorkspaceSections } from './module-registry.js?v=20260829-public-auth-v1';
+import { ACCESS, getWorkspaceModule, getWorkspaceSections } from './module-registry.js?v=20260829-public-dashboard-v1';
 import { THEME_TOGGLE_MARKUP } from '../theme/theme-toggle-markup.js';
 
 const shellIcons = Object.freeze({

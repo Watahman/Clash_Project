@@ -243,7 +243,6 @@ async function loadRecentGroups(userId) {
 
 async function init() {
     const authState = await resolveAuthState().catch(() => null);
-    if (authState?.status !== AUTH_STATES.AUTHENTICATED) return;
     plannerStorage.configureGuestPlanner({ authState });
     initI18n();
     initRefs();
@@ -254,8 +253,8 @@ async function init() {
     refs.accountLine.addEventListener('click', () => document.querySelector('#profile-btn')?.click());
     window.addEventListener('clashtools:language-changed', renderAll);
     const userId = getCurrentUserId();
-    state.loggedIn = Boolean(userId);
-    if (!userId) {
+    state.loggedIn = authState?.status === AUTH_STATES.AUTHENTICATED && Boolean(userId);
+    if (!state.loggedIn) {
         renderAll();
         return;
     }

@@ -97,7 +97,7 @@ describe('Advanced Stats workspace page', () => {
 
         expect(html).toContain('advanced-stats-bootstrap.js?v=20260829-public-auth-v1');
         expect(html).toContain('advanced-stats.css?v=20260814-advanced-stats-v4');
-        expect(html).toContain('workspace-shell.js?v=20260829-public-auth-v1');
+        expect(html).toContain('workspace-shell.js?v=20260829-public-dashboard-v1');
         expect(bootstrap).toContain("advanced-stats.js?v=20260829-public-auth-v1");
         expect(page).toContain("i18n/i18n.js?v=20260829-public-auth-v1");
         expect(page).toContain("advanced-stats-army-view.js?v=20260809-4");

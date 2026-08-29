@@ -72,7 +72,7 @@ vi.mock('../../src/assets/js/auth/auth-navigation.js?v=20260829-public-auth-v1',
     getCurrentReturnPath: () => '/dashboard',
     redirectToLogin: vi.fn()
 }));
-vi.mock('../../src/assets/js/shell/module-registry.js?v=20260829-public-auth-v1', () => ({
+vi.mock('../../src/assets/js/shell/module-registry.js?v=20260829-public-dashboard-v1', () => ({
     ACCESS: { PUBLIC: 'public', AUTH: 'auth' },
     getWorkspaceModule: page => ({ access: page === 'explore' ? 'public' : 'auth' })
 }));
@@ -97,7 +97,7 @@ describe('workspace auth transitions', () => {
     });
 
     it('redirects a protected route on a later guest transition and keeps unavailable private content retryable', async () => {
-        await import('../../src/assets/js/shell/workspace-shell.js?v=20260829-public-auth-v1');
+        await import('../../src/assets/js/shell/workspace-shell.js?v=20260829-public-dashboard-v1');
         await vi.waitFor(() => expect(document.body.dataset.authInitialReady).toBe('true'));
 
         mocks.authCallback(null, { status: 'auth-unavailable', session: null, error: new Error('offline') });
@@ -117,7 +117,7 @@ describe('workspace auth transitions', () => {
 
     it('keeps a public route usable when a later transition becomes guest', async () => {
         document.body.dataset.workspacePage = 'explore';
-        await import('../../src/assets/js/shell/workspace-shell.js?v=20260829-public-auth-v1');
+        await import('../../src/assets/js/shell/workspace-shell.js?v=20260829-public-dashboard-v1');
         await vi.waitFor(() => expect(document.body.dataset.authInitialReady).toBe('true'));
 
         mocks.authCallback(null, { status: 'guest', session: null, error: null });
