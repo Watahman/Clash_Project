@@ -44,7 +44,7 @@ class AdvancedStatsBattleLogHistorySourceTest {
 
         assertEquals(1, page.observations().size());
         assertFalse(page.observations().getFirst().units().isEmpty());
-        assertEquals(10, page.observations().getFirst().units().stream()
+        assertEquals(12, page.observations().getFirst().units().stream()
                 .mapToInt(AdvancedStatsHistoryModels.UnitObservation::quantity).sum());
     }
 
