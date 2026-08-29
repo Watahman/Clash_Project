@@ -52,7 +52,11 @@ class ClashKingAchievementHistoryProviderTest {
         ClashKingV2LegendHistoryProvider legends =
                 new ClashKingV2LegendHistoryProvider(baseUrl);
 
-        assertEquals(1, legends.getHistory("#PQL").records().size());
+        LegendHistoryNormalizer.History history = legends.getHistory("#PQL");
+
+        assertEquals(1, history.records().size());
+        assertEquals("#PQL", history.records().getFirst().playerTag());
+        assertEquals(0, history.coverage().mismatchedPlayerRecords());
         assertEquals(List.of("/v2/player/%23PQL/legend-history"), requests);
     }
 
@@ -76,7 +80,7 @@ class ClashKingAchievementHistoryProviderTest {
         requests.add(target);
         String body = target.contains("%23BAD")
                 ? "{\"Count\":0}"
-                : "{\"items\":[{\"tag\":\"#PQL\",\"name\":\"Player\",\"trophies\":5100,"
+                : "{\"items\":[{\"tag\":\"\",\"name\":\"Player\",\"trophies\":5100,"
                     + "\"rank\":12345,\"season\":\"2025-09\"}]}";
         byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-Type", "application/json");
