@@ -105,6 +105,7 @@ public final class AchievementMetricCollector {
         boolean cachedRaid = hasMetricPrefix(cached.metrics(), "raid_");
         boolean cachedLegend = hasMetricPrefix(cached.metrics(), "legend_")
                 || hasMetricPrefix(cached.metrics(), "ranking_");
+        boolean clashKingEvidence = cachedLegend;
         String clanTag = fast.clanTag();
 
         if (includeDeepHistory) {
@@ -163,12 +164,13 @@ public final class AchievementMetricCollector {
                             : "ClashKing V2 does not expose per-player raid-weekend history; no new raid-history progress can be measured."
             );
             boolean legendAvailable = refresh.legendAvailable() || cachedLegend;
+            clashKingEvidence = clashKingEvidence || legendAvailable;
             source(
                     sources,
                     AchievementSources.LEGEND_HISTORY,
                     legendAvailable,
                     legendAvailable
-                            ? "Legend season rankings loaded from normalized history."
+                            ? "Legend season rankings loaded from normalized ClashKing history."
                             : "No measurable Legend season ranking is available yet."
             );
         } else {
@@ -206,15 +208,23 @@ public final class AchievementMetricCollector {
                     AchievementSources.LEGEND_HISTORY,
                     cachedLegend,
                     cachedLegend
-                            ? "Cached Legend season rankings loaded."
+                            ? "Cached Legend season rankings loaded from ClashKing."
                             : "Legend season rankings are checked after the fast first render."
             );
         }
 
-        // v2 sources that are present in the specification but do not yet have a
-        // trustworthy evaluator in this branch stay explicitly unavailable.
-        source(sources, AchievementSources.CLASHKING_HISTORY, false,
-                "ClashKing-backed history remains UNKNOWN until its normalized evidence is connected.");
+        // ClashKing is a provider umbrella, not a promise that every CK-* family
+        // is measurable. Keep unsupported/unbound families UNKNOWN while reporting
+        // the provider as partially connected when normalized CK evidence exists.
+        source(
+                sources,
+                AchievementSources.CLASHKING_HISTORY,
+                clashKingEvidence,
+                clashKingEvidence ? "partial" : "unavailable",
+                clashKingEvidence
+                        ? "ClashKing is connected and normalized for Legend/ranking history. Other generic player-history endpoints remain unavailable or unbound, so their achievements stay UNKNOWN."
+                        : "No normalized ClashKing-backed history is currently available for this player."
+        );
         source(sources, AchievementSources.CLAN_PROFILE, fast.clanProfileAvailable(),
                 fast.clanProfileAvailable()
                         ? "Current clan profile and member roster loaded. Shared clan badges use the clan tag as owner."
@@ -240,8 +250,13 @@ public final class AchievementMetricCollector {
     }
 
     private static void source(JsonObject sources, String key, boolean available, String detail) {
+        source(sources, key, available, available ? "available" : "unavailable", detail);
+    }
+
+    private static void source(JsonObject sources, String key, boolean available, String status, String detail) {
         JsonObject item = new JsonObject();
         item.addProperty("available", available);
+        item.addProperty("status", status);
         item.addProperty("detail", detail);
         sources.add(key, item);
     }
