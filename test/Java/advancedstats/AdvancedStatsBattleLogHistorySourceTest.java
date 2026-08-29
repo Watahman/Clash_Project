@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AdvancedStatsBattleLogHistorySourceTest {
@@ -30,6 +31,21 @@ class AdvancedStatsBattleLogHistorySourceTest {
         assertEquals(1, first.observations().size());
         assertEquals(0, next.observations().size());
         assertEquals("coc-battlelog", first.provenance().sourceId());
+    }
+
+    @Test
+    void convertsOfficialArmyShareCodeIntoUnitObservations() throws Exception {
+        String log = "[{\"attack\":true,\"battleType\":\"multiplayer\","
+                + "\"armyShareCode\":\"u8x8-2x6s2x2\",\"opponentPlayerTag\":\"#9GCUV\","
+                + "\"stars\":3,\"destructionPercentage\":100}]";
+        AdvancedStatsBattleLogHistorySource source = new AdvancedStatsBattleLogHistorySource(tag -> log);
+
+        var page = source.fetch(request(AdvancedStatsCapabilityOperation.INCREMENTAL, Checkpoint.initial()));
+
+        assertEquals(1, page.observations().size());
+        assertFalse(page.observations().getFirst().units().isEmpty());
+        assertEquals(10, page.observations().getFirst().units().stream()
+                .mapToInt(AdvancedStatsHistoryModels.UnitObservation::quantity).sum());
     }
 
     @Test
