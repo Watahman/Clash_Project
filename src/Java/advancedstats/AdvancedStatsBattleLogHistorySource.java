@@ -11,6 +11,7 @@ import Java.advancedstats.AdvancedStatsHistoryModels.UnitObservation;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 /** Converts the rolling CoC battle-log proxy into partial normal-scope observations. */
 public final class AdvancedStatsBattleLogHistorySource implements AdvancedStatsHistorySource {
@@ -80,13 +81,26 @@ public final class AdvancedStatsBattleLogHistorySource implements AdvancedStatsH
         );
         List<AttackObservation> observations = new ArrayList<>();
         for (AdvancedStatsModels.BattleCandidate candidate : candidates) {
+            if (!belongsToNormalScope(candidate.battleType())) continue;
             AttackObservation observation = toObservation(candidate);
             if (afterCheckpoint(observation, request.checkpoint())) observations.add(observation);
         }
         Checkpoint next = nextCheckpoint(observations, request.checkpoint());
         return new HistoryPage(observations, next, false, Coverage.PARTIAL,
-                new Provenance(sourceId(), "battlelog-proxy-v1", request.requestedAt(),
-                        "rolling battlelog; absence of upstream history is reported as PARTIAL"));
+                new Provenance(sourceId(), "battlelog-proxy-v2", request.requestedAt(),
+                        "rolling official battlelog; ranked and war entries are excluded from normal scope"));
+    }
+
+    static boolean belongsToNormalScope(String battleType) {
+        String normalized = battleType == null ? "" : battleType.trim().toLowerCase(Locale.ROOT)
+                .replace("_", "").replace("-", "").replace(" ", "");
+        if (normalized.isBlank()) return true;
+        return !normalized.contains("ranked")
+                && !normalized.contains("clanwar")
+                && !normalized.equals("war")
+                && !normalized.contains("friendly")
+                && !normalized.contains("builder")
+                && !normalized.contains("capital");
     }
 
     private AttackObservation toObservation(AdvancedStatsModels.BattleCandidate candidate) {
