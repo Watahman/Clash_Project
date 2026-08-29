@@ -54,8 +54,8 @@ const modules = Object.freeze([
     ['warOperation', 'nav.warOperation', 'War Board', 'compete', '/app/war-board', true],
     ['bracket', 'nav.bracket', 'Brackets', 'compete', '/app/brackets', true],
     ['minigames', 'nav.minigames', 'Minigames', 'play', '/app/minigames', true],
-    ['advancedStats', 'nav.advancedStats', 'Advanced Stats', 'progress', '/app/advanced-stats', true, true],
-    ['achievements', 'nav.achievements', 'Achievements', 'progress', '/app/achievements', true, true],
+    ['advancedStats', 'nav.advancedStats', 'Advanced Stats', 'progress', '/app/advanced-stats', true],
+    ['achievements', 'nav.achievements', 'Achievements', 'progress', '/app/achievements', true],
     ['profile', 'profile.title', 'Profile', 'home', '/app/profile', false]
 ].map(([id, key, fallback, section, href, available, comingSoon = false]) => Object.freeze({
     id,
