@@ -56,6 +56,22 @@ class LegendHistoryNormalizerTest {
     }
 
     @Test
+    void acceptsBlankTagFromPlayerScopedClashKingResponse() {
+        LegendHistoryNormalizer.History history = LegendHistoryNormalizer.normalize(
+                JsonParser.parseString("""
+                [{"tag":"","name":"Disturbed Emile","trophies":5643,"rank":332804,"season":"2025-10-06"}]
+                """).getAsJsonArray(),
+                "#LQURPQJ0Y",
+                FETCHED_AT
+        );
+
+        assertEquals(1, history.records().size());
+        assertEquals("#LQURPQJ0Y", history.records().getFirst().playerTag());
+        assertEquals(0, history.coverage().mismatchedPlayerRecords());
+        assertEquals(1, history.coverage().measurableRecords());
+    }
+
+    @Test
     void deduplicatesMonthAndDateAliasesWithBetterRankingAndTrophyValues() {
         LegendHistoryNormalizer.History history = LegendHistoryNormalizer.normalize(
                 JsonParser.parseString("""
