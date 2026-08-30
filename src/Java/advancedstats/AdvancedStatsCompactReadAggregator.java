@@ -74,7 +74,9 @@ final class AdvancedStatsCompactReadAggregator {
             AdvancedStatsUnitCategory category
     ) throws Exception {
         List<ScopeSnapshot> snapshots = new ArrayList<>();
-        for (AdvancedStatsScope scope : AdvancedStatsScope.values()) {
+        // Unit/army composition is only available for multiplayer history. War/CWL remains
+        // part of the other Advanced Stats views, but must not dilute Unit Usage rates.
+        for (AdvancedStatsScope scope : List.of(AdvancedStatsScope.NORMAL, AdvancedStatsScope.RANKED)) {
             snapshots.add(new ScopeSnapshot(
                     scope,
                     reader.overview(trackingId, scope, from),

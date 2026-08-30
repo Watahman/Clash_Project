@@ -32,9 +32,10 @@ function numericValue(value) {
 function mergeUnitRecord(target, unit) {
     target.totalQuantity += Math.max(0, numericValue(unit.totalQuantity));
     target.battlesPresent += Math.max(0, numericValue(unit.battlesPresent));
+    target.usageRate = Math.max(target.usageRate, Math.max(0, numericValue(unit.usageRate)));
 }
 
-function mergedUnits(units, state) {
+function mergedUnits(units) {
     const grouped = new Map();
     units.forEach(unit => {
         const name = unitDisplayName(unit);
@@ -42,14 +43,28 @@ function mergedUnits(units, state) {
         const key = name.toLocaleLowerCase();
         const existing = grouped.get(key);
         if (existing) mergeUnitRecord(existing, unit);
-        else grouped.set(key, { ...unit, name, totalQuantity: Math.max(0, numericValue(unit.totalQuantity)), battlesPresent: Math.max(0, numericValue(unit.battlesPresent)) });
+        else grouped.set(key, {
+            ...unit,
+            name,
+            totalQuantity: Math.max(0, numericValue(unit.totalQuantity)),
+            battlesPresent: Math.max(0, numericValue(unit.battlesPresent)),
+            usageRate: Math.max(0, numericValue(unit.usageRate))
+        });
     });
 
-    const totalAttacks = numericValue(state.overview?.data?.summary?.attacks);
-    return [...grouped.values()].map(unit => {
-        const battlesPresent = totalAttacks > 0 ? Math.min(totalAttacks, unit.battlesPresent) : unit.battlesPresent;
-        return { ...unit, battlesPresent, usageRate: totalAttacks > 0 ? (100 * battlesPresent) / totalAttacks : unit.usageRate };
-    }).sort((left, right) => right.totalQuantity - left.totalQuantity || right.battlesPresent - left.battlesPresent || left.name.localeCompare(right.name));
+    return [...grouped.values()].map(unit => ({
+        ...unit,
+        usageRate: Math.min(100, unit.usageRate)
+    })).sort((left, right) => right.totalQuantity - left.totalQuantity || right.battlesPresent - left.battlesPresent || left.name.localeCompare(right.name));
+}
+
+function ensureUnitUsageScopeNote() {
+    const title = document.getElementById('advanced-stats-units-title');
+    if (!title || title.querySelector('[data-unit-usage-scope-note]')) return;
+    const note = document.createElement('small');
+    note.dataset.unitUsageScopeNote = '';
+    note.textContent = 'Multiplayer only — War & CWL unit data is unavailable.';
+    title.append(document.createTextNode(' '), note);
 }
 
 function unitNameElement(unit) {
@@ -93,7 +108,8 @@ function unitMobileCard(unit, name) {
 }
 
 export function renderUnits(elements, state) {
-    const units = mergedUnits(Array.isArray(state.units) ? state.units : [], state);
+    ensureUnitUsageScopeNote();
+    const units = mergedUnits(Array.isArray(state.units) ? state.units : []);
     elements.units.replaceChildren();
     elements.unitsMobile.replaceChildren();
     units.forEach(unit => {

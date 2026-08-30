@@ -39,15 +39,16 @@ class AdvancedStatsCompactReadAggregatorTest {
     }
 
     @Test
-    void unitsArmiesAndTrendsMergeByStableKeys() throws Exception {
+    void unitsUseMultiplayerScopesWhileArmiesAndTrendsStillMergeAllScopes() throws Exception {
         FakeReader reader = new FakeReader();
         AdvancedStatsCompactReadAggregator aggregator = new AdvancedStatsCompactReadAggregator(reader);
 
         JsonArray units = aggregator.units(TRACKING_ID, FROM, null).getAsJsonArray();
+        assertEquals(1, units.size());
         JsonObject barbarian = units.get(0).getAsJsonObject();
         assertEquals("barbarian", barbarian.get("key").getAsString());
         assertEquals(130, barbarian.get("totalQuantity").getAsInt());
-        assertEquals(88.24, barbarian.get("usageRate").getAsDouble(), 0.001);
+        assertEquals(100.0, barbarian.get("usageRate").getAsDouble(), 0.001);
 
         JsonArray armies = aggregator.armies(TRACKING_ID, FROM, 20).getAsJsonArray();
         assertEquals("army-a", armies.get(0).getAsJsonObject().get("armyHash").getAsString());
