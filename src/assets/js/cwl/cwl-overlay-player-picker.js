@@ -1,8 +1,8 @@
 import { getClanMembersBasicData, getPlayerBasicData } from "../API/API-Functions.js?v=20260829-public-auth-v1";
-import { createPlayerCard } from "../templates/CWLTemplates.js?v=20260830-card-settings";
+import { createPlayerCard } from "../templates/CWLTemplates.js?v=20260830-player-drag-v2";
 import { getUserBases } from "../Supabase/Supabase-User.js?v=20260829-public-auth-v1";
 import { getFriends } from "../Supabase/Supabase-Friend.js?v=20260829-public-auth-v1";
-import { initGroupOverlay } from "./cwl-group.js?v=20260830-card-settings";
+import { initGroupOverlay } from "./cwl-group.js?v=20260830-player-drag-v2";
 import { getCurrentUserId } from "../utils/user.js";
 import { uniquePlayers } from "./cwl-utils.js";
 import { t } from "../i18n/i18n.js?v=20260829-public-auth-v1";

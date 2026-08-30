@@ -1,0 +1,19 @@
+.workspace-planner .cwl-player-drag-placeholder {
+    width: 100%;
+    min-width: 0;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-small);
+    background: color-mix(in srgb, var(--accent-soft) 55%, transparent);
+    pointer-events: none;
+}
+
+.workspace-planner .cwl-player-article.cwl-player-dragging {
+    margin: 0 !important;
+    cursor: grabbing !important;
+    transform: none !important;
+    transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .workspace-planner .cwl-player-drag-placeholder { transition: none; }
+}

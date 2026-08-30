@@ -8,7 +8,7 @@ import {
     clearActiveCwlPoll,
     setActiveCwlPoll
 } from '../cwl/cwl-availability.js?v=20260829-public-auth-v1';
-import { createClanCard, createPlayerCard } from '../templates/CWLTemplates.js?v=20260830-card-settings';
+import { createClanCard, createPlayerCard } from '../templates/CWLTemplates.js?v=20260830-player-drag-v2';
 import { updateAllPlayerCounters } from '../cwl/cwl-planner-card-state.js?v=20260829-public-auth-v1';
 
 const DAYS = Object.freeze([1, 2, 3, 4, 5, 6, 7]);

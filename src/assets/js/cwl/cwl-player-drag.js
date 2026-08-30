@@ -3,95 +3,129 @@ import { normalizeRosterStatus } from './cwl-plan-schema.js';
 import { syncPlayerRosterStatus } from './cwl-player-controls.js?v=20260829-public-auth-v1';
 import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js?v=20260829-public-auth-v1';
 
-const CONTROL_SELECTOR = '.cwl-delete-player, .cwl-move-player, .cwl-roster-status';
+const CONTROL_SELECTOR = 'button, select, input, a, [role="button"]';
+const DRAG_THRESHOLD = 7;
+const CLICK_SUPPRESSION_MS = 300;
 
 export function makePlayerDraggable(element) {
-    if (!element) return;
+    if (!element || element.dataset.cwlDragBound === 'true') return;
+    element.dataset.cwlDragBound = 'true';
     element.originalContainer = element.parentElement;
     element.classList.add('draggable');
-    element.addEventListener('mousedown', event => startDrag(element, event));
+    element.addEventListener('mousedown', event => startPendingDrag(element, event));
+    element.addEventListener('click', event => suppressClickAfterDrag(element, event), true);
 }
 
-function startDrag(element, event) {
-    if (event.target.closest(CONTROL_SELECTOR) || element._cwlDragState?.dragging) return;
-    event.preventDefault();
-    event.stopPropagation();
-    const document = element.ownerDocument || globalThis.document;
+function startPendingDrag(element, event) {
+    if (event.button !== 0 || event.target.closest(CONTROL_SELECTOR)) return;
+    if (element._cwlDragState) return;
+    const document = element.ownerDocument;
     const state = createDragState(element, event);
     element._cwlDragState = state;
-    document.defaultView?.dispatchEvent(new CustomEvent('clashtools:cwl-player-drag-start'));
-    prepareDraggedElement(element, state, document);
-    state.onMouseMove = moveEvent => updateDrag(element, state, moveEvent, document);
-    state.onMouseUp = upEvent => finishDrag(element, state, upEvent, document);
-    document.addEventListener('mousemove', state.onMouseMove);
-    document.addEventListener('mouseup', state.onMouseUp);
+    bindDragListeners(element, state, document);
 }
 
 function createDragState(element, event) {
     const rect = element.getBoundingClientRect();
     return {
-        dragging: true,
+        activeTarget: null,
+        dragging: false,
         offsetX: event.clientX - rect.left,
         offsetY: event.clientY - rect.top,
+        placeholder: null,
         previousContainer: element.parentElement,
-        activeTarget: null
+        startX: event.clientX,
+        startY: event.clientY
     };
 }
 
-function prepareDraggedElement(element, state, document) {
-    const rect = element.getBoundingClientRect();
-    const dragLayer = element.closest('.workspace-planner') || document.body;
-    element.originalContainer = state.previousContainer;
-    element.classList.add('cwl-player-dragging');
-    Object.assign(element.style, {
-        position: 'fixed',
-        left: `${rect.left}px`,
-        top: `${rect.top}px`,
-        zIndex: '1000',
-        pointerEvents: 'none'
-    });
-    element.style.setProperty('width', `${rect.width}px`, 'important');
-    element.style.setProperty('height', `${rect.height}px`, 'important');
-    dragLayer.appendChild(element);
+function bindDragListeners(element, state, document) {
+    state.onMouseMove = event => updateDrag(element, state, event, document);
+    state.onMouseUp = event => finishDrag(element, state, event, document);
+    state.onKeyDown = event => {
+        if (event.key === 'Escape') cancelDrag(element, state, document);
+    };
+    state.onBlur = () => cancelDrag(element, state, document);
+    document.addEventListener('mousemove', state.onMouseMove);
+    document.addEventListener('mouseup', state.onMouseUp);
+    document.addEventListener('keydown', state.onKeyDown);
+    document.defaultView?.addEventListener('blur', state.onBlur);
 }
 
 function updateDrag(element, state, event, document) {
+    if (!state.dragging && !passedDragThreshold(state, event)) return;
+    event.preventDefault();
+    if (!state.dragging) activateDrag(element, state, document);
     element.style.left = `${event.clientX - state.offsetX}px`;
     element.style.top = `${event.clientY - state.offsetY}px`;
     state.activeTarget = findDropTarget(document, event.clientX, event.clientY);
-    updateDropFeedback(element, state.activeTarget, document);
+    updateDropFeedback(state.activeTarget, document);
+}
+
+function passedDragThreshold(state, event) {
+    return Math.hypot(event.clientX - state.startX, event.clientY - state.startY) >= DRAG_THRESHOLD;
+}
+
+function activateDrag(element, state, document) {
+    state.dragging = true;
+    document.defaultView?.dispatchEvent(new CustomEvent('clashtools:cwl-player-drag-start'));
+    const rect = element.getBoundingClientRect();
+    state.placeholder = createPlaceholder(document, rect.height);
+    state.previousContainer.insertBefore(state.placeholder, element);
+    const dragLayer = element.closest('.workspace-planner') || document.body;
+    dragLayer.appendChild(element);
+    applyDraggedStyles(element, rect);
+}
+
+function createPlaceholder(document, height) {
+    const placeholder = document.createElement('div');
+    placeholder.className = 'cwl-player-drag-placeholder';
+    placeholder.setAttribute('aria-hidden', 'true');
+    placeholder.style.height = `${height}px`;
+    return placeholder;
+}
+
+function applyDraggedStyles(element, rect) {
+    element.classList.add('cwl-player-dragging');
+    Object.assign(element.style, {
+        left: `${rect.left}px`,
+        pointerEvents: 'none',
+        position: 'fixed',
+        top: `${rect.top}px`,
+        zIndex: '1000'
+    });
+    element.style.setProperty('width', `${rect.width}px`, 'important');
+    element.style.setProperty('height', `${rect.height}px`, 'important');
 }
 
 function finishDrag(element, state, event, document) {
-    const result = resolveDrop(element, state, event, document);
-    commitDrop(element, state, result, document);
+    if (!state.dragging) {
+        cleanupDrag(element, state, document);
+        return;
+    }
+    event.preventDefault();
+    const target = state.activeTarget || findDropTarget(document, event.clientX, event.clientY);
+    const moved = Boolean(target && target !== state.previousContainer);
+    placeDraggedElement(element, state, moved ? target : null);
+    if (moved) commitRosterDrop(element, state, target);
+    element.dataset.cwlSuppressClickUntil = String(Date.now() + CLICK_SUPPRESSION_MS);
     cleanupDrag(element, state, document);
 }
 
-function resolveDrop(element, state, event, document) {
-    const target = state.activeTarget || findDropTarget(document, event.clientX, event.clientY);
-    return {
-        dropAllowed: Boolean(target),
-        finalContainer: target || state.previousContainer
-    };
+function placeDraggedElement(element, state, target) {
+    if (target) target.appendChild(element);
+    else if (state.placeholder?.isConnected) {
+        state.placeholder.parentElement.insertBefore(element, state.placeholder);
+    } else state.previousContainer?.appendChild(element);
+    element.originalContainer = element.parentElement;
 }
 
-function commitDrop(element, state, result, document) {
-    const { finalContainer, dropAllowed } = result;
+function commitRosterDrop(element, state, finalContainer) {
     const previousStatus = normalizeRosterStatus(element.dataset.rosterStatus);
-    if (finalContainer) finalContainer.appendChild(element);
-    element.originalContainer = finalContainer;
-    if (dropAllowed) commitRosterDrop(element, state, finalContainer, previousStatus);
-}
-
-function commitRosterDrop(element, state, finalContainer, previousStatus) {
     syncPlayerRosterStatus(element, {
         preferredStatus: previousStatus,
-        autoReserve: Boolean(
-            finalContainer
+        autoReserve: finalContainer.matches('.cwl-clan-player-list')
             && finalContainer !== state.previousContainer
-            && finalContainer.matches('.cwl-clan-player-list')
-        )
     });
     updateAllPlayerCounters();
     rememberPlannerPlayers();
@@ -99,35 +133,49 @@ function commitRosterDrop(element, state, finalContainer, previousStatus) {
     savePlan();
 }
 
+function cancelDrag(element, state, document) {
+    if (element._cwlDragState !== state) return;
+    if (state.dragging) placeDraggedElement(element, state, null);
+    cleanupDrag(element, state, document);
+}
+
 function cleanupDrag(element, state, document) {
-    state.dragging = false;
     element._cwlDragState = null;
     element.classList.remove('cwl-player-dragging');
+    state.placeholder?.remove();
     clearDropFeedback(document);
-    for (const property of ['position', 'left', 'top', 'width', 'height', 'z-index', 'pointer-events']) {
-        element.style.removeProperty(property);
-    }
+    clearDraggedStyles(element);
     document.removeEventListener('mousemove', state.onMouseMove);
     document.removeEventListener('mouseup', state.onMouseUp);
+    document.removeEventListener('keydown', state.onKeyDown);
+    document.defaultView?.removeEventListener('blur', state.onBlur);
+}
+
+function clearDraggedStyles(element) {
+    for (const property of [
+        'position', 'left', 'top', 'width', 'height', 'z-index', 'pointer-events'
+    ]) element.style.removeProperty(property);
+}
+
+function suppressClickAfterDrag(element, event) {
+    const suppressUntil = Number(element.dataset.cwlSuppressClickUntil || 0);
+    if (Date.now() >= suppressUntil) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
 }
 
 function findDropTarget(document, x, y) {
-    const lists = document.querySelectorAll(
-        '.cwl-clan-player-list, #cwl-available-players'
-    );
+    const lists = document.querySelectorAll('.cwl-clan-player-list, #cwl-available-players');
     for (const list of lists) {
         const rect = list.getBoundingClientRect();
-        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-            return list;
-        }
+        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return list;
     }
     return null;
 }
 
-function updateDropFeedback(card, target, document) {
+function updateDropFeedback(target, document) {
     clearDropFeedback(document);
-    if (!target) return;
-    target.classList.add('cwl-drop-valid');
+    target?.classList.add('cwl-drop-valid');
 }
 
 function clearDropFeedback(document) {

@@ -3,12 +3,12 @@ import {
     getAuthState,
     syncAuthSession
 } from "../auth/auth-client.js?v=20260829-public-auth-v1";
-import { initOverlayHide, initAddPlayersOverlay, initAddClanButton, applyCwlSizeRestriction } from "../cwl/cwl-overlay.js?v=20260830-card-settings";
-import { initPlanIO, savePlan, loadAllPlans, loadPlanListener, startNewPlan, undoLastPlanChange } from "../cwl/cwl-plan-io.js?v=20260830-card-settings";
+import { initOverlayHide, initAddPlayersOverlay, initAddClanButton, applyCwlSizeRestriction } from "../cwl/cwl-overlay.js?v=20260830-player-drag-v2";
+import { initPlanIO, savePlan, loadAllPlans, loadPlanListener, startNewPlan, undoLastPlanChange } from "../cwl/cwl-plan-io.js?v=20260830-player-drag-v2";
 import { initFreeRosterFilter } from "../cwl/cwl-roster-filter.js?v=20260829-public-auth-v1";
 import { initClanVisibilityFilter } from "../cwl/cwl-clan-visibility-filter.js?v=20260829-public-auth-v1";
 import { refreshPlannerPriorityLabels } from "../cwl/cwl-priority-labels.js?v=20260829-public-auth-v1";
-import { initSpreadsheetImport } from "../cwl/cwl-spreadsheet-import.js?v=20260830-card-settings";
+import { initSpreadsheetImport } from "../cwl/cwl-spreadsheet-import.js?v=20260830-player-drag-v2";
 import { getClanInfoRequest } from "../API/API-Clan.js?v=20260829-public-auth-v1";
 import * as conf from "../Data/config.js";
 import { initPlayerPerformanceClient } from "../cwl/player-performance-client.js?v=20260829-public-auth-v1";
@@ -21,7 +21,7 @@ import { initPlannerSaveAction } from "../cwl/cwl-planner-save-action.js?v=20260
 import {
     applyPlannerFixture,
     getRequestedPlannerFixture
-} from '../fixtures/planner-fixtures.js?v=20260830-card-settings';
+} from '../fixtures/planner-fixtures.js?v=20260830-player-drag-v2';
 import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 
 export { savePlan };

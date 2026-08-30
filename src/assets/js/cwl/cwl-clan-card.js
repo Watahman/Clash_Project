@@ -4,7 +4,7 @@ import { normalizeTag } from './cwl-utils.js';
 import { allowsThirtyPlayerCwl, normalizeCwlCapacity } from './cwl-league-rules.js';
 import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { syncPlayerRosterStatus } from './cwl-player-controls.js?v=20260829-public-auth-v1';
-import { attachClanCardSettings } from './cwl-card-settings.js?v=20260830-card-settings';
+import { attachClanCardSettings } from './cwl-card-settings.js?v=20260830-player-drag-v2';
 import { normalizeClanPriority } from './cwl-plan-schema.js';
 import {
     rememberPlannerPlayers,
