@@ -1,0 +1,133 @@
+/* Shared artwork treatment for public feature heroes. Artwork supports the
+   product story while the overlay keeps the hierarchy readable in both themes. */
+body.public-feature-v2 .cp-feature-hero.cp-hero-background {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    width: 100%;
+    min-height: clamp(38rem, 72vh, 52rem);
+    margin: 0;
+    grid-template-columns: minmax(0, 48rem);
+    align-items: center;
+    padding-inline: max(1.25rem, calc((100vw - 80rem) / 2));
+    background: var(--cp-bg, var(--bg));
+}
+
+body.public-feature-v2 .cp-feature-hero.cp-hero-background::before {
+    position: absolute;
+    z-index: -2;
+    inset: -2%;
+    display: block;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    content: "";
+    animation: cp-feature-hero-background-drift 24s cubic-bezier(.77, 0, .175, 1) infinite alternate;
+    pointer-events: none;
+}
+
+body.public-feature-v2 .cp-feature-hero.cp-hero-background::after {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background:
+        linear-gradient(90deg, rgb(5 8 13 / 94%) 0%, rgb(5 8 13 / 84%) 42%, rgb(5 8 13 / 58%) 76%, rgb(5 8 13 / 42%) 100%),
+        linear-gradient(180deg, rgb(5 8 13 / 26%) 0%, rgb(5 8 13 / 72%) 100%);
+    content: "";
+    pointer-events: none;
+}
+
+body.public-feature-v2 .cp-feature-hero.cp-hero-background.cp-hero-background--tracker::before {
+    background-image: url("/assets/css/pictures/public-pages/battle-charge.a426f5172d.avif");
+    background-position: center 58%;
+}
+
+body.public-feature-v2 .cp-feature-hero.cp-hero-background.cp-hero-background--bracket::before {
+    background-image: url("/assets/css/pictures/public-pages/pekka-barbarians.6446bf60da.avif");
+    background-position: center 52%;
+}
+
+body.public-feature-v2 .cp-feature-hero.cp-hero-background.cp-hero-background--clan::before {
+    background-image: url("/assets/css/pictures/public-pages/clan-campfire.0d358ff2d8.avif");
+    background-position: center 52%;
+}
+
+body.public-feature-v2 .cp-feature-hero.cp-hero-background.cp-hero-background--planner::before {
+    background-image: url("/assets/css/pictures/public-pages/townhall-blueprints.8832d64e9a.avif");
+    background-position: center 54%;
+}
+
+body.public-feature-v2 .cp-feature-hero.cp-hero-background .home-v2-hero-copy {
+    position: relative;
+    z-index: 0;
+    max-width: 48rem;
+}
+
+body.public-feature-v2 .cp-feature-hero.cp-hero-background .home-v2-hero-copy h1 {
+    color: #f4f7fa;
+    text-shadow: 0 2px 18px rgb(0 0 0 / 24%);
+}
+
+body.public-feature-v2 .cp-feature-hero.cp-hero-background .home-v2-lead {
+    color: rgb(237 242 247 / 82%);
+}
+
+body.public-feature-v2 .cp-feature-hero.cp-hero-background .home-v2-hero-copy .eyebrow {
+    color: #f2d48f !important;
+}
+
+body.public-feature-v2 .cp-feature-hero.cp-hero-background .hero-footnote {
+    color: rgb(237 242 247 / 66%) !important;
+}
+
+body.public-feature-v2 .cp-feature-hero.cp-hero-background .button-secondary {
+    border-color: rgb(237 242 247 / 35%);
+    background: rgb(5 8 13 / 56%);
+    color: #f4f7fa !important;
+}
+
+body.public-feature-v2 .cp-feature-hero.cp-hero-background .button-secondary:hover,
+body.public-feature-v2 .cp-feature-hero.cp-hero-background .button-secondary:focus-visible {
+    border-color: rgb(237 242 247 / 62%);
+    background: rgb(5 8 13 / 72%);
+}
+
+body.public-feature-v2 .cp-detail-section--text-only {
+    grid-template-columns: minmax(0, 48rem);
+}
+
+body.public-feature-bracket .bracket-public-products .home-v2-product-section {
+    grid-template-columns: minmax(0, 48rem);
+}
+
+@keyframes cp-feature-hero-background-drift {
+    from { transform: scale(1.02); }
+    to { transform: scale(1.06) translate3d(-.5%, -1%, 0); }
+}
+
+@media (max-width: 68rem) {
+    body.public-feature-v2 .cp-feature-hero.cp-hero-background {
+        min-height: clamp(34rem, 70vh, 46rem);
+        padding-inline: max(1.25rem, var(--marketing-pad, 2rem));
+    }
+}
+
+@media (max-width: 42rem) {
+    body.public-feature-v2 .cp-feature-hero.cp-hero-background {
+        min-height: min(42rem, calc(100svh - var(--marketing-header, 0px)));
+        padding-inline: 1.25rem;
+    }
+
+    body.public-feature-v2 .cp-feature-hero.cp-hero-background::after {
+        background:
+            linear-gradient(90deg, rgb(5 8 13 / 94%) 0%, rgb(5 8 13 / 78%) 100%),
+            linear-gradient(180deg, rgb(5 8 13 / 34%) 0%, rgb(5 8 13 / 78%) 100%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.public-feature-v2 .cp-feature-hero.cp-hero-background::before {
+        animation: none;
+        transform: none;
+    }
+}

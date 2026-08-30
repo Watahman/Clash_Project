@@ -126,12 +126,9 @@ describe('translation completeness', () => {
         });
     });
 
-    it('contains explicit translated metadata and samples for every public feature page', () => {
+    it('contains explicit translated metadata and authentication copy', () => {
         languages.forEach(language => {
             expect(getTranslationValue(language, 'feature.about.documentTitle')).not.toBe(publicResourceLocales.en['feature.about.documentTitle']);
-            expect(getTranslationValue(language, 'feature.planner.sampleHtml')).not.toBe(publicResourceLocales.en['feature.planner.sampleHtml']);
-            expect(getTranslationValue(language, 'feature.tracker.sampleHtml')).not.toBe(publicResourceLocales.en['feature.tracker.sampleHtml']);
-            expect(getTranslationValue(language, 'feature.family.sampleHtml')).not.toBe(publicResourceLocales.en['feature.family.sampleHtml']);
             expect(getTranslationValue(language, 'authPage.loginTitle')).not.toBe(publicResourceLocales.en['authPage.loginTitle']);
             expect(getTranslationValue(language, 'authPage.registerTitle')).not.toBe(publicResourceLocales.en['authPage.registerTitle']);
         });

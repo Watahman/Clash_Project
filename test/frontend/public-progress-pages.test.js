@@ -17,26 +17,39 @@ const read = path => readFileSync(path, 'utf8');
 const documentFor = path => new JSDOM(read(path)).window.document;
 const privateScriptPattern = /(?:supabase|\/api\/|auth-client|\/auth\/)/i;
 const playerIdentityPattern = /\b(?:playerTag|clanTag|playerName|clanName)\b|#[0289PYLQGRJCUV]{6,}/i;
+const removedProgressSelectors = [
+    '.pp-dashboard', '.pp-dashboard-preview', '.pp-panel', '.pp-filter', '.pp-filter-bar',
+    '.pp-card', '.pp-achievement-card',
+    '.pp-signal-strip', '[data-stat-period]', '[data-achievement-filter]'
+].join(', ');
 
 describe('Public progress page contracts', () => {
-    it.each([...progressPages])('%s is a noindex preview with one canonical H1', (path, canonical) => {
+    it.each([...progressPages])('%s is a noindex Coming Soon page with one canonical H1', (path, canonical) => {
         const document = documentFor(path);
+        const h1 = document.querySelector('h1');
+        const status = document.querySelector('.pp-coming-soon-status');
 
         expect(document.querySelector('meta[name="robots"]')?.content).toMatch(/^noindex,\s*follow$/i);
         expect(document.querySelector('link[rel="canonical"]')?.href).toBe(canonical);
         expect(document.querySelectorAll('h1')).toHaveLength(1);
         expect(document.querySelector('.workspace-coming-soon-badge')).not.toBeNull();
+        expect(status).not.toBeNull();
+        expect(status?.closest('h1')).toBeNull();
+        expect(h1?.textContent).not.toMatch(/coming\s+soon/i);
         expect(document.body.textContent).toMatch(/coming\s+soon/i);
     });
 
-    it.each([...progressPages])('%s labels controlled values as non-live public content', path => {
+    it.each([...progressPages])('%s keeps the public surface text-only and source-aware', path => {
         const document = documentFor(path);
-        const labels = [...document.querySelectorAll('.sample-label, .pp-sample-badge, .pp-privacy-note, .pp-callout')]
-            .map(element => element.textContent)
-            .join(' ');
+        const source = read(path);
 
-        expect(labels).toMatch(/(?:controlled sample|illustrative preview|read-only preview)/i);
-        expect(labels).toMatch(/(?:not live|not personal progress|private progress)/i);
+        expect(document.querySelector('.pp-coming-soon-hero')).not.toBeNull();
+        expect(document.querySelectorAll(removedProgressSelectors)).toHaveLength(0);
+        expect(document.querySelectorAll('main img')).toHaveLength(0);
+        expect(document.querySelectorAll('form, input, textarea, [contenteditable="true"]')).toHaveLength(0);
+        expect(document.body.textContent).toMatch(/private|coverage|tracked/i);
+        expect(source).not.toMatch(/(?:sample|fixture|controlled values|illustrative preview|read-only dashboard)/i);
+        expect(source).not.toContain('public-progress-pages.js');
     });
 
     it.each([...progressPages])('%s has no private API, Supabase or auth script', path => {
@@ -68,52 +81,28 @@ describe('Public progress page contracts', () => {
             .toHaveLength(0);
     });
 
-    it('keeps Advanced Stats as a product-led read-only preview', () => {
+    it('keeps Advanced Stats as a credible Coming Soon explanation', () => {
         const document = documentFor('src/advanced-stats.html');
         const source = read('src/advanced-stats.html');
 
-        expect(document.querySelector('.pp-dashboard-preview')).not.toBeNull();
-        expect(document.querySelectorAll('.pp-panel')).toHaveLength(4);
-        expect(document.querySelectorAll('[data-stat-period]')).toHaveLength(2);
-        expect(document.querySelectorAll('form, input, textarea, [contenteditable="true"]')).toHaveLength(0);
-        expect(document.body.textContent).toMatch(/opts? in to tracking/i);
-        expect(document.body.textContent).toMatch(/incomplete history|missing history/i);
-        expect(source).toContain('2.80');
-        expect(source).toContain('80%');
-        expect(source).toContain('91%');
-        expect(source).not.toMatch(/2\.72|72\.2%|88\.4%/);
-        expect(source).toContain('canonical 20-battle fixture');
-        expect(source).toContain('separate illustrative trend sample');
+        expect(document.querySelector('.pp-detail-list')).not.toBeNull();
+        expect(document.querySelectorAll('.pp-detail-list li')).toHaveLength(3);
+        expect(document.querySelector('.pp-boundary')).not.toBeNull();
+        expect(document.body.textContent).toMatch(/tracked attacks|coverage|private workspace/i);
+        expect(source).not.toMatch(/(?:sample|fixture|\b\d+(?:\.\d+)?%|20-battle)/i);
     });
 
-    it('keeps Achievements browseable with filters and personal progress private', () => {
+    it('keeps Achievements as a credible Coming Soon explanation', () => {
         const document = documentFor('src/achievements.html');
         const bodyText = document.body.textContent;
+        const source = read('src/achievements.html');
 
-        expect(document.querySelector('.pp-dashboard-preview')).not.toBeNull();
-        expect(document.querySelectorAll('select[data-achievement-filter]')).toHaveLength(2);
-        expect(document.querySelector('[data-achievement-filter="category"]')).not.toBeNull();
-        expect(document.querySelector('[data-achievement-filter="rarity"]')).not.toBeNull();
-        expect(document.querySelectorAll('.pp-achievement-card')).toHaveLength(8);
-        expect(document.querySelector('[data-achievement-empty]')).not.toBeNull();
-        expect(document.querySelector('[data-achievement-count]')).not.toBeNull();
-        expect(bodyText).toContain('340 catalog families');
-        expect(bodyText).toContain('1,331 fixed tiers');
-        expect(bodyText).toContain('Town Hall Trailblazer');
-        expect(bodyText).toContain('CWL Veteran');
+        expect(document.querySelector('.pp-detail-list')).not.toBeNull();
+        expect(document.querySelectorAll('.pp-detail-list li')).toHaveLength(3);
+        expect(document.querySelector('.pp-boundary')).not.toBeNull();
         expect(document.querySelectorAll('form, input, textarea, [contenteditable="true"]')).toHaveLength(0);
-        expect(bodyText).toMatch(/read-only catalog/i);
-        expect(bodyText).toMatch(/personal progress/i);
-        expect(bodyText).toMatch(/signed-in private workspace/i);
-    });
-
-    it('keeps the public progress runtime filter and trend hooks present', () => {
-        const source = read('src/assets/js/pages/public-progress-pages.js');
-
-        expect(source).toContain("data-achievement-filter");
-        expect(source).toContain("card.dataset[key] === value");
-        expect(source).toContain("canonicalStars");
-        expect(source).toContain("window.dispatchEvent(new CustomEvent('clashtools:public-progress-updated'))");
+        expect(bodyText).toMatch(/milestones|personal progress|private workspace/i);
+        expect(source).not.toMatch(/(?:sample|fixture|catalog families|fixed tiers|data-achievement-filter)/i);
     });
 
     it('covers the five-locale public demo module and feature-page navigation state', () => {
@@ -123,10 +112,8 @@ describe('Public progress page contracts', () => {
             expect(localeSource).toMatch(new RegExp(`\\b${language}\\b`));
         });
         expect(localeSource).toContain('stats.title');
-        expect(localeSource).toContain('ach.catalogTitle');
-        expect(localeSource).toContain('sample.plannerTitle');
-        expect(localeSource).toContain('sample.trackerTitle');
-        expect(localeSource).toContain('sample.familyTitle');
+        expect(localeSource).toContain('ach.title');
+        expect(localeSource).toContain('common.comingSoon');
         featurePages.forEach(path => {
             const document = documentFor(path);
             expect(document.querySelector('script[src*="public-progress-locales.js"]')).not.toBeNull();
@@ -134,13 +121,12 @@ describe('Public progress page contracts', () => {
         });
     });
 
-    it('keeps public product previews visible in both themes without glow styling', () => {
-        const previewCss = read('src/assets/css/public-feature-previews.css');
+    it('keeps the Coming Soon surface visible in both themes with restrained motion', () => {
         const progressCss = read('src/assets/css/public-progress-pages.css');
 
-        expect(previewCss).toMatch(/\.cp-product-preview\s*\{[\s\S]*?margin:\s*0;/);
-        expect(progressCss).toMatch(/:root:not\(\[data-theme="light"\]\)[\s\S]*?\.pp-achievement-icon img/);
-        expect(progressCss).not.toMatch(/\.pp-achievement-icon[^}]*box-shadow/);
-        expect(progressCss).not.toMatch(/\.pp-achievement-icon img[^}]*drop-shadow/);
+        expect(progressCss).toContain('var(--cp-progress)');
+        expect(progressCss).toContain('.pp-coming-soon-hero::after');
+        expect(progressCss).toContain('@media (prefers-reduced-motion: reduce)');
+        expect(progressCss).not.toMatch(/\.pp-(?:dashboard-preview|preview|panel|filter|achievement|signal|chart)/i);
     });
 });

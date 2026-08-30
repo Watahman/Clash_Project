@@ -43,8 +43,9 @@
     <link rel="stylesheet" href="/assets/css/public-home-v2.css">
     <link rel="stylesheet" href="/assets/css/public-feature-v2.css?v=20260812-redesign">
     <link rel="stylesheet" href="/assets/css/public-v2.css?v=20260812-redesign">
-    <link rel="stylesheet" href="/assets/css/bracket-public.css">
-    <link rel="stylesheet" href="/assets/css/bracket-public-content.css">
+    <link rel="stylesheet" href="/assets/css/bracket-public.css?v=20260830-public-feature-cleanup">
+    <link rel="stylesheet" href="/assets/css/bracket-public-content.css?v=20260830-public-feature-cleanup">
+    <link rel="stylesheet" href="/assets/css/public-feature-hero-backgrounds.css?v=20260830-public-feature-cleanup">
 </head>
 <body class="public-site public-home-v2 public-feature-v2 public-feature-bracket">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
@@ -61,19 +62,7 @@
 </header>
 
 <main id="main-content">
-    <section class="home-v2-hero feature-v2-hero bracket-public-hero" id="product">
-        <div class="feature-v2-hero-media bracket-public-hero-media">
-            <div class="bracket-public-preview" aria-label="Example bracket preview">
-                <div class="bracket-public-preview-header"><div><span class="bracket-public-kicker">Compete</span><strong data-bracket-copy="preview">Example bracket preview</strong></div><span class="bracket-public-state">8 participants</span></div>
-                <div class="bracket-public-preview-canvas">
-                    <svg class="bracket-public-preview-connectors" viewBox="0 0 620 300" aria-hidden="true"><path d="M174 68h38v48h38M174 232h38v-48h38M384 116h38v34h38M384 184h38v-34h38"/></svg>
-                    <div class="bracket-public-preview-round"><small>Opening round</small><div class="bracket-public-preview-match"><span>Seed 01</span><span>Seed 02</span></div><div class="bracket-public-preview-match"><span>Seed 03</span><span>Seed 04</span></div></div>
-                    <div class="bracket-public-preview-round"><small>Round 2</small><div class="bracket-public-preview-match is-winner"><span>Seed 01</span><span>Waiting</span></div><div class="bracket-public-preview-match"><span>Seed 04</span><span>Seed 05</span></div></div>
-                    <div class="bracket-public-preview-round"><small>Final</small><div class="bracket-public-preview-match is-final"><span>Seed 01</span><span>Waiting</span></div></div>
-                </div>
-                <div class="bracket-public-preview-footer"><span>Winner progression</span><span>Local preview</span></div>
-            </div>
-        </div>
+    <section class="home-v2-hero feature-v2-hero cp-feature-hero bracket-public-hero cp-hero-background cp-hero-background--bracket" id="product">
         <div class="home-v2-hero-copy">
             <p class="eyebrow" data-bracket-copy="kicker">Compete · Brackets</p>
             <h1 data-bracket-copy="title">Build the bracket. Follow every winner.</h1>
@@ -90,12 +79,11 @@
             <p class="eyebrow" data-bracket-copy="workflowKicker">A clear tournament flow</p>
             <h2 data-bracket-copy="workflowTitle">From roster to champion, one decision at a time.</h2>
             <p data-bracket-copy="workflowIntro">The editor keeps setup compact and gives every round enough room to stay readable. Choose a participant, then move forward when the next match is ready.</p>
-            <figure class="bracket-public-mini-preview"><div class="bracket-public-mini-row"><span>01</span><i></i><strong>Opening matches</strong></div><div class="bracket-public-mini-row"><span>02</span><i></i><strong>Winner path</strong></div><div class="bracket-public-mini-row is-final"><span>03</span><i></i><strong>Champion</strong></div><figcaption data-bracket-copy="workflowCaption">Example bracket preview · no production data</figcaption></figure>
         </div>
         <ol class="home-v2-workflow-list"><li><span>01</span><div><h3 data-bracket-copy="step1Title">Add participants</h3><p data-bracket-copy="step1Desc">Enter 4–128 unique player or clan names, one per line.</p></div></li><li><span>02</span><div><h3 data-bracket-copy="step2Title">Seed or shuffle</h3><p data-bracket-copy="step2Desc">Keep an existing order or create a neutral opening draw.</p></div></li><li><span>03</span><div><h3 data-bracket-copy="step3Title">Advance winners</h3><p data-bracket-copy="step3Desc">Pick a winner in each match and let the next round update automatically.</p></div></li></ol>
     </section>
 
-    <section class="home-v2-products bracket-public-products"><article class="home-v2-product-section"><div class="home-v2-product-copy"><p class="eyebrow">Compete</p><h2 data-bracket-copy="seedTitle">Start with the right opening round.</h2><p data-bracket-copy="seedCopy">Use supplied order when your event already has seeds. Shuffle when the draw should be neutral. BYEs are placed and advanced for you.</p><div class="home-v2-feature-lines"><div><strong data-bracket-copy="seedLabel">Seeded or shuffled</strong><span data-bracket-copy="seedValue">Opening round ready</span></div><div><strong>4–128</strong><span>Unique participants with plain-language validation.</span></div></div></div><div class="bracket-public-feature-panel" aria-label="Seeded opening round preview"><header><span>Opening round</span><strong data-bracket-copy="seedValue">Opening round ready</strong></header><div class="bracket-public-feature-list"><div><b>01</b><span>Seed 01</span><em>Seed 1</em></div><div><b>02</b><span>Seed 02</span><em>Seed 2</em></div><div><b>03</b><span>Seed 03</span><em>Seed 3</em></div><div><b>04</b><span>Seed 04</span><em>Seed 4</em></div></div><footer><span>BYEs advance automatically</span><i aria-hidden="true"></i></footer></div></article><article class="home-v2-product-section home-v2-product-operation"><div class="home-v2-product-copy"><p class="eyebrow">Winner state</p><h2 data-bracket-copy="changeTitle">Change a winner without rebuilding.</h2><p data-bracket-copy="changeCopy">If a result changes, the affected path is cleared and the bracket stays honest. The final card only carries a champion when every decision is complete.</p><div class="home-v2-feature-lines"><div><strong data-bracket-copy="changeLabel">Winner change</strong><span data-bracket-copy="changeValue">Path updated</span></div><div><strong>Local restore</strong><span>Return to the last saved browser state or import a JSON copy.</span></div></div></div><div class="bracket-public-feature-panel bracket-public-feature-panel-change" aria-label="Winner change preview"><header><span>Winner state</span><strong class="bracket-public-success" data-bracket-copy="changeValue">Path updated</strong></header><div class="bracket-public-change-line"><span class="bracket-public-avatar">S</span><div><strong>Seed 01 replaces Seed 02</strong><small>Downstream match updated</small></div><b>→</b></div><div class="bracket-public-change-line is-muted"><span class="bracket-public-avatar">?</span><div><strong>Final</strong><small>Waiting for one more winner</small></div></div><footer><span>Champion emphasis stays restrained</span></footer></div></article></section>
+    <section class="home-v2-products bracket-public-products"><article class="home-v2-product-section"><div class="home-v2-product-copy"><p class="eyebrow">Compete</p><h2 data-bracket-copy="seedTitle">Start with the right opening round.</h2><p data-bracket-copy="seedCopy">Use supplied order when your event already has seeds. Shuffle when the draw should be neutral. BYEs are placed and advanced for you.</p><div class="home-v2-feature-lines"><div><strong data-bracket-copy="seedLabel">Seeded or shuffled</strong><span data-bracket-copy="seedValue">Opening round ready</span></div><div><strong>4–128</strong><span>Unique participants with plain-language validation.</span></div></div></div></article><article class="home-v2-product-section home-v2-product-operation"><div class="home-v2-product-copy"><p class="eyebrow">Winner state</p><h2 data-bracket-copy="changeTitle">Change a winner without rebuilding.</h2><p data-bracket-copy="changeCopy">If a result changes, the affected path is cleared and the bracket stays honest. The final card only carries a champion when every decision is complete.</p><div class="home-v2-feature-lines"><div><strong data-bracket-copy="changeLabel">Winner change</strong><span data-bracket-copy="changeValue">Path updated</span></div><div><strong>Local restore</strong><span>Return to the last saved browser state or import a JSON copy.</span></div></div></div></article></section>
 
     <section class="home-v2-bottom-cta bracket-public-cta"><div><p class="eyebrow" data-bracket-copy="ctaKicker">Ready to run the bracket?</p><h2 data-bracket-copy="ctaTitle">Open the editor in your workspace.</h2><p data-bracket-copy="ctaCopy">Brackets are a local workspace tool with browser restore and JSON export. Cloud saves and spectator links are not part of this release.</p></div><a class="button button-primary button-large" href="/app/brackets" data-bracket-copy="ctaButton">Open bracket editor</a></section>
 </main>

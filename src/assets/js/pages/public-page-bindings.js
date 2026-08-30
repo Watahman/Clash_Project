@@ -60,7 +60,6 @@ function renderAboutCopy() {
 
 function renderPlannerCopy() {
     setPageMetadata('feature.planner');
-    replaceResourceArticle('.resource-page[aria-labelledby="planner-sample-title"]', 'feature.planner.sampleHtml');
     setAttribute('.feature-v2-workflow .home-v2-workflow-art img', 'alt', 'feature.planner.workflowAlt');
     setAttribute('.home-v2-products .home-v2-product-section:nth-child(1) .home-v2-artwork-main', 'alt', 'planner.week.imageAltMain');
     setAttribute('.home-v2-products .home-v2-product-section:nth-child(1) .home-v2-artwork-inset', 'alt', 'planner.week.imageAltInset');
@@ -70,7 +69,6 @@ function renderPlannerCopy() {
 
 function renderTrackerCopy() {
     setPageMetadata('feature.tracker');
-    replaceResourceArticle('.resource-page[aria-labelledby="tracker-sample-title"]', 'feature.tracker.sampleHtml');
     setAttribute('.feature-v2-workflow .home-v2-workflow-art img', 'alt', 'feature.tracker.workflowAlt');
     setAttribute('.home-v2-products .home-v2-product-section:nth-child(1) .home-v2-artwork-main', 'alt', 'tracker.live.imageAltMain');
     setAttribute('.home-v2-products .home-v2-product-section:nth-child(1) .home-v2-artwork-inset', 'alt', 'tracker.live.imageAltInset');
@@ -80,7 +78,6 @@ function renderTrackerCopy() {
 
 function renderFamilyCopy() {
     setPageMetadata('feature.family');
-    replaceResourceArticle('.resource-page[aria-labelledby="family-capture-title"]', 'feature.family.sampleHtml');
     setAttribute('.feature-v2-workflow .home-v2-workflow-art img', 'alt', 'feature.family.workflowAlt');
     setAttribute('.home-v2-products .home-v2-product-section:nth-child(1) .home-v2-artwork-main', 'alt', 'family.network.imageAltMain');
     setAttribute('.home-v2-products .home-v2-product-section:nth-child(1) .home-v2-artwork-inset', 'alt', 'family.network.imageAltInset');

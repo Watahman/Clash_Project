@@ -61,12 +61,16 @@ describe('Public marketing shell', () => {
         expect(document.querySelector('.home3-ecosystem')).not.toBeNull();
         expect(document.querySelectorAll('.home3-flow > li')).toHaveLength(6);
         expect(document.querySelector('.home3-progress-showcase')).not.toBeNull();
-        expect(document.querySelectorAll('.home3-product-shot > img')).toHaveLength(5);
+        expect(document.querySelectorAll('.home3-product-shot > img')).toHaveLength(3);
         expect(document.querySelector('a[href="/advanced-stats"]')).toBeNull();
         expect(document.querySelector('a[href="/achievements"]')).toBeNull();
         expect(document.querySelector('.home3-pillar--coming-soon[aria-disabled="true"]')).not.toBeNull();
         expect(document.querySelectorAll('.home3-progress-card--coming-soon')).toHaveLength(2);
         expect(document.querySelectorAll('.home3-progress-card--coming-soon .workspace-coming-soon-badge')).toHaveLength(2);
+        expect(document.querySelectorAll('.home3-progress-card--coming-soon img')).toHaveLength(0);
+        expect(document.querySelectorAll('.home3-progress-card--coming-soon .home3-progress-art')).toHaveLength(2);
+        expect(document.querySelectorAll('.home3-progress-card--coming-soon .home3-progress-title')).toHaveLength(2);
+        expect(read('src/index.html')).not.toMatch(/previews\/home\/(?:advanced-stats|achievements)\.webp/);
         expect(document.querySelector('.home3-feature-photo')).toBeNull();
         expect(document.querySelector('.home3-trust')).not.toBeNull();
         expect(document.querySelector('.home3-final')).not.toBeNull();
@@ -186,14 +190,20 @@ describe('Public marketing shell', () => {
         expect(css).not.toContain('body.workspace-app');
     });
 
-    it('uses real Planner and Clan Family captures instead of invented public tables', () => {
-        const planner = documentFor('src/cwl-planner.html');
-        const localized = read('src/assets/js/i18n/public-feature-extra-locales.js');
+    it('uses one current lower capture for Planner and Clan Family', () => {
+        const captures = [
+            ['src/cwl-planner.html', '/assets/previews/home/cwl-auto-plan.jpg?v=20260830-authentic'],
+            ['src/clan-management.html', '/assets/previews/home/clan-family.webp?v=20260821-authentic']
+        ];
 
-        expect(planner.querySelector('.cp-screenshot-sample img[src="/assets/previews/home/cwl-planner.webp?v=20260821-authentic"]')).not.toBeNull();
-        expect(localized.match(/clan-family\.webp\?v=20260821-authentic/g)).toHaveLength(5);
-        expect(planner.querySelector('.resource-page .sample-panel table')).toBeNull();
-        expect(localized).not.toMatch(/Sample North|Voorbeeld Noord|Exemple Nord|Beispiel Nord|Ejemplo Norte/);
-        expect(localized.match(/cp-screenshot-sample/g)).toHaveLength(10);
+        captures.forEach(([path, source]) => {
+            const document = documentFor(path);
+            const capturesOnPage = document.querySelectorAll('main img[src*="/assets/previews/home/"]');
+
+            expect(capturesOnPage).toHaveLength(1);
+            expect(document.querySelector(`.cp-detail-section img[src="${source}"]`)).not.toBeNull();
+            expect(document.querySelector('.cp-feature-hero img[src*="/assets/previews/home/"]')).toBeNull();
+            expect(document.querySelector('.home-v2-products img[src*="/assets/previews/home/"]')).toBeNull();
+        });
     });
 });
