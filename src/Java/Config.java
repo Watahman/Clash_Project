@@ -30,7 +30,7 @@ public class Config {
     String _BASE_URL_CLASH = firstNonBlank(env("_BASE_URL_CLASH"), "https://cocproxy.royaleapi.dev/v1");
     String _CLASHKING_BASE_URL = firstNonBlank(
             env("CLASHKING_BASE_URL"),
-            "https://v2.api.clashk.ing"
+            "https://api.clashk.ing"
     );
     String _CLASHKING_RANKED_SEASON = firstNonBlank(
             env("CLASHKING_RANKED_SEASON")
