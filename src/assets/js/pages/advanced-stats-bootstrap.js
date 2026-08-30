@@ -9,5 +9,5 @@ async function canInitialize() {
 }
 
 if (await canInitialize()) {
-    await import('./advanced-stats.js?v=20260829-public-auth-v1');
+    await import('./advanced-stats.js?v=20260830-monthly-trends-v1');
 }

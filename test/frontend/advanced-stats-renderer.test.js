@@ -1,10 +1,16 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { renderArmies } from '../../src/assets/js/pages/advanced-stats-armies-renderer.js?v=20260829-public-auth-v1';
 import { renderBattles } from '../../src/assets/js/pages/advanced-stats-battles-renderer.js?v=20260829-public-auth-v1';
-import { renderOverview } from '../../src/assets/js/pages/advanced-stats-renderer.js?v=20260829-public-auth-v1';
+import { renderOverview } from '../../src/assets/js/pages/advanced-stats-renderer.js?v=20260830-monthly-trends-v1';
 import { renderCoverageStatus, renderHistoryAnalysis } from '../../src/assets/js/pages/advanced-stats-analysis-renderer.js?v=20260829-public-auth-v1';
 import { normalizeAnalysis } from '../../src/assets/js/pages/advanced-stats-analysis.js';
-import { createTrendValue, renderTrends } from '../../src/assets/js/pages/advanced-stats-trends-renderer.js?v=20260829-public-auth-v1';
+import { createTrendValue, renderTrends } from '../../src/assets/js/pages/advanced-stats-trends-renderer.js?v=20260830-monthly-trends-v1';
+import {
+    aggregateMonthlyTrends,
+    calendarMonthGap,
+    formatMonthLabel,
+    monthKeyForDate
+} from '../../src/assets/js/pages/advanced-stats-trends.js?v=20260830-monthly-trends-v1';
 import { renderUnits } from '../../src/assets/js/pages/advanced-stats-units-renderer.js?v=20260829-public-auth-v1';
 
 beforeEach(() => {
@@ -186,8 +192,8 @@ describe('Advanced Stats extracted renderers', () => {
     });
 
     it('exposes known and unknown trend values with range semantics', () => {
-        const known = createTrendValue({ date: '2026-08-10', attacks: 2, averageStars: 2.5, averageDestruction: 88 }, 0);
-        const unknown = createTrendValue({ date: '2026-08-11', attacks: null, averageStars: null, averageDestruction: null }, 1);
+        const known = createTrendValue({ date: '2026-08-01', attacks: 2, averageStars: 2.5, averageDestruction: 88 }, 0);
+        const unknown = createTrendValue({ date: '2026-08-01', attacks: null, averageStars: null, averageDestruction: null }, 1);
 
         expect(known.getAttribute('role')).toBe('meter');
         expect(known.getAttribute('aria-valuenow')).toBe('2');
@@ -199,12 +205,50 @@ describe('Advanced Stats extracted renderers', () => {
         expect(unknown.dataset.known).toBe('false');
     });
 
+    it('aggregates daily trend points by UTC month with weighted metrics and null semantics', () => {
+        const points = aggregateMonthlyTrends([
+            {
+                date: '2026-02-28', attacks: 2, averageStars: 2, averageDestruction: 80,
+                threeStarRate: 50, goldLooted: 10
+            },
+            {
+                date: '2026-02-01', attacks: 4, averageStars: 3, averageDestruction: 90,
+                threeStarRate: 25, goldLooted: 20
+            },
+            { date: '2026-04-15', attacks: null, averageStars: null, averageDestruction: null }
+        ]);
+
+        expect(points).toHaveLength(2);
+        expect(points[0]).toMatchObject({
+            date: '2026-02-01', attacks: 6, averageStars: 2.67,
+            averageDestruction: 86.67, threeStarRate: 33.33, goldLooted: 30
+        });
+        expect(points[0].elixirLooted).toBeNull();
+        expect(points[1]).toMatchObject({
+            date: '2026-04-01', attacks: null, averageStars: null,
+            averageDestruction: null, threeStarRate: null,
+            goldLooted: null, elixirLooted: null, darkElixirLooted: null
+        });
+    });
+
+    it('formats month labels in UTC and identifies missing calendar months', () => {
+        const label = formatMonthLabel('2026-03-01');
+        expect(label).toContain('Mar');
+        expect(label).toContain('2026');
+        expect(label).not.toContain('28');
+        expect(formatMonthLabel('2026-03-01T00:00:00Z')).toBe(label);
+        expect(monthKeyForDate('2026-03-01T00:30:00+02:00')).toBe('2026-02');
+        expect(monthKeyForDate('2026-03-01T00:30:00')).toBe('2026-03');
+        expect(calendarMonthGap('2026-01-31', '2026-03-01')).toBe(1);
+        expect(calendarMonthGap('2026-01-01', '2026-02-01')).toBe(0);
+    });
+
     it('preserves trend gaps and battle army filtering', () => {
         const trendRefs = { trendChart: element(), trendEmpty: element() };
         renderTrends(trendRefs, {
             trends: [
                 { date: '2026-08-01', attacks: 1, averageStars: 2, averageDestruction: 80 },
-                { date: '2026-08-03', attacks: 1, averageStars: 3, averageDestruction: 90 }
+                { date: '2026-10-03', attacks: 1, averageStars: 3, averageDestruction: 90 }
             ]
         });
         expect(trendRefs.trendChart.querySelector('.advanced-stats__trend-svg')).not.toBeNull();
@@ -213,6 +257,7 @@ describe('Advanced Stats extracted renderers', () => {
         expect(trendRefs.trendChart.querySelectorAll('.advanced-stats__trend-grid-label')).toHaveLength(3);
         expect([...trendRefs.trendChart.querySelectorAll('.advanced-stats__trend-grid-label')].map(label => label.textContent).join(' ')).not.toContain('%');
         expect(trendRefs.trendChart.querySelector('.advanced-stats__trend-gap')).not.toBeNull();
+        expect(trendRefs.trendChart.querySelector('.advanced-stats__trend-gap').dataset.gap).toBe('1');
         expect(trendRefs.trendChart.querySelectorAll('[role="meter"]')).toHaveLength(2);
 
         const battleRefs = { battles: element(), battlesEmpty: element(), loadMore: element() };

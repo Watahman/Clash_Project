@@ -92,21 +92,26 @@ describe('Advanced Stats workspace page', () => {
         const html = readFileSync('src/subpages/advanced-stats.html', 'utf8');
         const bootstrap = readFileSync('src/assets/js/pages/advanced-stats-bootstrap.js', 'utf8');
         const page = readFileSync('src/assets/js/pages/advanced-stats.js', 'utf8');
+        const renderer = readFileSync('src/assets/js/pages/advanced-stats-renderer.js', 'utf8');
+        const trendRenderer = readFileSync('src/assets/js/pages/advanced-stats-trends-renderer.js', 'utf8');
         const i18n = readFileSync('src/assets/js/i18n/i18n.js', 'utf8');
         const runtime = readFileSync('src/assets/js/i18n/runtime-translations.js', 'utf8');
 
-        expect(html).toContain('advanced-stats-bootstrap.js?v=20260829-public-auth-v1');
+        expect(html).toContain('advanced-stats-bootstrap.js?v=20260830-monthly-trends-v1');
         expect(html).toContain('advanced-stats.css?v=20260814-advanced-stats-v4');
         expect(html).toContain('workspace-shell.js?v=20260829-public-dashboard-v1');
-        expect(bootstrap).toContain("advanced-stats.js?v=20260829-public-auth-v1");
-        expect(page).toContain("i18n/i18n.js?v=20260829-public-auth-v1");
+        expect(bootstrap).toContain("advanced-stats.js?v=20260830-monthly-trends-v1");
+        expect(page).toContain("advanced-stats-renderer.js?v=20260830-monthly-trends-v1");
+        expect(renderer).toContain("advanced-stats-trends-renderer.js?v=20260830-monthly-trends-v1");
+        expect(trendRenderer).toContain("advanced-stats-trends.js?v=20260830-monthly-trends-v1");
+        expect(page).toContain("i18n/i18n.js?v=20260830-monthly-trends-v1");
         expect(page).toContain("advanced-stats-army-view.js?v=20260809-4");
         expect(page).toContain('applyI18n(document)');
-        expect(i18n).toContain("runtime-translations.js?v=20260829-public-auth-v1");
+        expect(i18n).toContain("runtime-translations.js?v=20260830-monthly-trends-v1");
         expect(runtime).toContain("runtime-locales/workspace-en.js?v=20260829-public-auth-v1");
         expect(runtime).toContain("runtime-locales/workspace-nl.js?v=20260829-public-auth-v1");
-        expect(runtime).toContain("advanced-stats-locales.js?v=20260814-advanced-stats-v4");
-        expect(runtime).toContain("advanced-stats-extra-locales.js?v=20260814-advanced-stats-v4");
+        expect(runtime).toContain("advanced-stats-locales.js?v=20260830-monthly-trends-v1");
+        expect(runtime).toContain("advanced-stats-extra-locales.js?v=20260830-monthly-trends-v1");
         expect(runtime).toContain("advanced-stats-ui-locales.js?v=20260814-advanced-stats-v4");
     });
 

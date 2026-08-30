@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { advancedStatsLocales } from '../../src/assets/js/i18n/advanced-stats-locales.js';
 import { advancedStatsExtraLocales } from '../../src/assets/js/i18n/advanced-stats-extra-locales.js';
 import { advancedStatsUiLocales } from '../../src/assets/js/i18n/advanced-stats-ui-locales.js';
-import { translations } from '../../src/assets/js/i18n/runtime-translations.js?v=20260829-public-auth-v1';
+import { translations } from '../../src/assets/js/i18n/runtime-translations.js?v=20260830-monthly-trends-v1';
 
 const featureLocales = Object.fromEntries(
     ['en', 'nl', 'fr', 'de', 'es'].map(language => [

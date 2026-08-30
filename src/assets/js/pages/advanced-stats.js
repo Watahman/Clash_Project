@@ -1,4 +1,4 @@
-import { applyI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { applyI18n, t } from '../i18n/i18n.js?v=20260830-monthly-trends-v1';
 import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260829-public-auth-v1';
 import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
 import { getCurrentUserId } from '../utils/user.js';
@@ -22,7 +22,7 @@ import {
     renderStatistics,
     renderTracking,
     syncPeriodButtons
-} from './advanced-stats-renderer.js?v=20260829-public-auth-v1';
+} from './advanced-stats-renderer.js?v=20260830-monthly-trends-v1';
 import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260809-4';
 import { accountsFromProfile, normalizeTag, selectInitialAccount } from './advanced-stats-account.js?v=20260811-2';
 import { createTrackingActions } from './advanced-stats-actions.js?v=20260829-public-auth-v1';

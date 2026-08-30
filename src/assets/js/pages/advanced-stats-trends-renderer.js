@@ -1,13 +1,15 @@
-import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { t } from '../i18n/i18n.js?v=20260830-monthly-trends-v1';
 import {
     arrayValue,
-    dateGapDays,
-    formatDate,
     formatDecimal,
     formatNumber,
-    formatPercent,
-    formatShortDate
+    formatPercent
 } from './advanced-stats-formatters.js?v=20260829-public-auth-v1';
+import {
+    aggregateMonthlyTrends,
+    calendarMonthGap,
+    formatMonthLabel
+} from './advanced-stats-trends.js?v=20260830-monthly-trends-v1';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const CHART_WIDTH = 720;
@@ -46,7 +48,7 @@ function trendScale(points) {
 export function trendLabel(point, attacksKnown, attacks) {
     const attackCount = attacksKnown ? attacks : attackValue(point);
     const attackLabel = t(attackCount === 1 ? 'advancedStats.attack' : 'advancedStats.attacks').toLowerCase();
-    return `${formatDate(point?.date)} · ${formatNumber(attackCount)} ${attackLabel} · ${formatDecimal(point?.averageStars)} · ${formatPercent(point?.averageDestruction)}`;
+    return `${formatMonthLabel(point?.date)} · ${formatNumber(attackCount)} ${attackLabel} · ${formatDecimal(point?.averageStars)} · ${formatPercent(point?.averageDestruction)}`;
 }
 
 export function createTrendValue(point, index, { x = 0, y = 0, maxValue } = {}) {
@@ -135,9 +137,9 @@ function appendChartGuides(svg, scale) {
     });
 }
 
-function appendTrendDay(svg, point, index, x, showLabel, maximum) {
-    const day = svgElement('g', { class: 'advanced-stats__trend-day' });
-    day.append(createTrendValue(point, index, { maxValue: maximum, x, y: chartY(attackValue(point) ?? 0, maximum) }));
+function appendTrendMonth(svg, point, index, x, showLabel, maximum) {
+    const month = svgElement('g', { class: 'advanced-stats__trend-day' });
+    month.append(createTrendValue(point, index, { maxValue: maximum, x, y: chartY(attackValue(point) ?? 0, maximum) }));
     if (showLabel) {
         const label = svgElement('text', {
             class: 'advanced-stats__trend-day-label',
@@ -145,15 +147,15 @@ function appendTrendDay(svg, point, index, x, showLabel, maximum) {
             y: CHART_HEIGHT - 8,
             'text-anchor': 'middle'
         });
-        label.textContent = formatShortDate(point?.date);
-        day.append(label);
+        label.textContent = formatMonthLabel(point?.date);
+        month.append(label);
     }
-    svg.append(day);
+    svg.append(month);
 }
 
 export function renderTrends(elements, state) {
     const root = elements.trendChart;
-    const points = arrayValue(state.trends);
+    const points = aggregateMonthlyTrends(arrayValue(state.trends));
     root.replaceChildren();
     setVisibility(root, points.length > 0);
     setVisibility(elements.trendEmpty, points.length === 0);
@@ -176,9 +178,9 @@ export function renderTrends(elements, state) {
     const labelStep = Math.max(1, Math.ceil(points.length / 8));
     let previousDate = null;
     points.forEach((point, index) => {
-        const gap = dateGapDays(previousDate, point?.date);
+        const gap = calendarMonthGap(previousDate, point?.date);
         if (gap) svg.append(createTrendGap(gap, xForIndex(index)));
-        appendTrendDay(svg, point, index, xForIndex(index), index % labelStep === 0 || index === points.length - 1, scale.maximum);
+        appendTrendMonth(svg, point, index, xForIndex(index), index % labelStep === 0 || index === points.length - 1, scale.maximum);
         previousDate = point?.date;
     });
     root.append(svg);
