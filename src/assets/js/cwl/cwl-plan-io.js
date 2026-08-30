@@ -1,12 +1,12 @@
 import { canAutosave, isLoading, setLoading, setCanAutosave } from '../Data/config.js';
-import { createPlayerCard, createClanCard } from '../templates/CWLTemplates.js?v=20260830-player-drag-v2';
+import { createPlayerCard, createClanCard } from '../templates/CWLTemplates.js?v=20260830-player-drag-v3';
 import { getAllPlansFromDatabase, getPlanFromDatabase, setPlanToDatabase } from '../Supabase/Supabase-Plan.js?v=20260829-public-auth-v1';
 import { getCurrentUserId } from '../utils/user.js';
 import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { clearActiveCwlPoll } from './cwl-availability.js?v=20260829-public-auth-v1';
 import { hasReachedPlanLimit } from './cwl-plan-limits.js';
 import { normalizePlanDocument } from './cwl-plan-schema.js';
-import { enrichPlanSnapshot as enrichPlanData } from './cwl-plan-enrichment.js?v=20260830-player-drag-v2';
+import { enrichPlanSnapshot as enrichPlanData } from './cwl-plan-enrichment.js?v=20260830-player-drag-v3';
 import { installPlannerLifecycle } from './cwl-planner-lifecycle.js?v=20260829-public-auth-v1';
 import { mergePlanRecovery } from './cwl-planner-recovery.js?v=20260829-public-auth-v1';
 import { createPlannerSaveController } from './cwl-planner-save-controller.js?v=20260829-public-auth-v1';

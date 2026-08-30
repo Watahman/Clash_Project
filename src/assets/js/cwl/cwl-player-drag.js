@@ -3,7 +3,7 @@ import { normalizeRosterStatus } from './cwl-plan-schema.js';
 import { syncPlayerRosterStatus } from './cwl-player-controls.js?v=20260829-public-auth-v1';
 import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js?v=20260829-public-auth-v1';
 
-const CONTROL_SELECTOR = 'button, select, input, a, [role="button"]';
+const CONTROL_SELECTOR = 'button, select, input, textarea, a, [contenteditable="true"]';
 const DRAG_THRESHOLD = 7;
 const CLICK_SUPPRESSION_MS = 300;
 
@@ -12,12 +12,13 @@ export function makePlayerDraggable(element) {
     element.dataset.cwlDragBound = 'true';
     element.originalContainer = element.parentElement;
     element.classList.add('draggable');
-    element.addEventListener('mousedown', event => startPendingDrag(element, event));
+    element.addEventListener('pointerdown', event => startPendingDrag(element, event));
     element.addEventListener('click', event => suppressClickAfterDrag(element, event), true);
 }
 
 function startPendingDrag(element, event) {
-    if (event.button !== 0 || event.target.closest(CONTROL_SELECTOR)) return;
+    if (event.button !== 0 || event.isPrimary === false) return;
+    if (event.target.closest?.(CONTROL_SELECTOR)) return;
     if (element._cwlDragState) return;
     const document = element.ownerDocument;
     const state = createDragState(element, event);
@@ -29,10 +30,12 @@ function createDragState(element, event) {
     const rect = element.getBoundingClientRect();
     return {
         activeTarget: null,
+        captureTarget: element.closest('.workspace-planner'),
         dragging: false,
         offsetX: event.clientX - rect.left,
         offsetY: event.clientY - rect.top,
         placeholder: null,
+        pointerId: event.pointerId,
         previousContainer: element.parentElement,
         startX: event.clientX,
         startY: event.clientY
@@ -40,19 +43,22 @@ function createDragState(element, event) {
 }
 
 function bindDragListeners(element, state, document) {
-    state.onMouseMove = event => updateDrag(element, state, event, document);
-    state.onMouseUp = event => finishDrag(element, state, event, document);
+    state.onPointerMove = event => updateDrag(element, state, event, document);
+    state.onPointerUp = event => finishDrag(element, state, event, document);
+    state.onPointerCancel = event => cancelPointerDrag(element, state, event, document);
     state.onKeyDown = event => {
         if (event.key === 'Escape') cancelDrag(element, state, document);
     };
     state.onBlur = () => cancelDrag(element, state, document);
-    document.addEventListener('mousemove', state.onMouseMove);
-    document.addEventListener('mouseup', state.onMouseUp);
+    document.addEventListener('pointermove', state.onPointerMove);
+    document.addEventListener('pointerup', state.onPointerUp);
+    document.addEventListener('pointercancel', state.onPointerCancel);
     document.addEventListener('keydown', state.onKeyDown);
     document.defaultView?.addEventListener('blur', state.onBlur);
 }
 
 function updateDrag(element, state, event, document) {
+    if (!isActivePointer(state, event)) return;
     if (!state.dragging && !passedDragThreshold(state, event)) return;
     event.preventDefault();
     if (!state.dragging) activateDrag(element, state, document);
@@ -68,7 +74,8 @@ function passedDragThreshold(state, event) {
 
 function activateDrag(element, state, document) {
     state.dragging = true;
-    document.defaultView?.dispatchEvent(new CustomEvent('clashtools:cwl-player-drag-start'));
+    capturePointer(state);
+    dispatchWindowEvent(document, 'clashtools:cwl-player-drag-start');
     const rect = element.getBoundingClientRect();
     state.placeholder = createPlaceholder(document, rect.height);
     state.previousContainer.insertBefore(state.placeholder, element);
@@ -99,6 +106,7 @@ function applyDraggedStyles(element, rect) {
 }
 
 function finishDrag(element, state, event, document) {
+    if (!isActivePointer(state, event)) return;
     if (!state.dragging) {
         cleanupDrag(element, state, document);
         return;
@@ -129,8 +137,12 @@ function commitRosterDrop(element, state, finalContainer) {
     });
     updateAllPlayerCounters();
     rememberPlannerPlayers();
-    element.ownerDocument.defaultView.dispatchEvent(new CustomEvent('clashtools:cwl-player-added'));
+    dispatchWindowEvent(element.ownerDocument, 'clashtools:cwl-player-added');
     savePlan();
+}
+
+function cancelPointerDrag(element, state, event, document) {
+    if (isActivePointer(state, event)) cancelDrag(element, state, document);
 }
 
 function cancelDrag(element, state, document) {
@@ -145,10 +157,39 @@ function cleanupDrag(element, state, document) {
     state.placeholder?.remove();
     clearDropFeedback(document);
     clearDraggedStyles(element);
-    document.removeEventListener('mousemove', state.onMouseMove);
-    document.removeEventListener('mouseup', state.onMouseUp);
+    releasePointer(state);
+    document.removeEventListener('pointermove', state.onPointerMove);
+    document.removeEventListener('pointerup', state.onPointerUp);
+    document.removeEventListener('pointercancel', state.onPointerCancel);
     document.removeEventListener('keydown', state.onKeyDown);
     document.defaultView?.removeEventListener('blur', state.onBlur);
+}
+
+function isActivePointer(state, event) {
+    return state.pointerId == null || event.pointerId === state.pointerId;
+}
+
+function capturePointer(state) {
+    try {
+        state.captureTarget?.setPointerCapture?.(state.pointerId);
+    } catch {
+        // The document listeners still provide a safe fallback.
+    }
+}
+
+function releasePointer(state) {
+    try {
+        if (state.captureTarget?.hasPointerCapture?.(state.pointerId)) {
+            state.captureTarget.releasePointerCapture(state.pointerId);
+        }
+    } catch {
+        // Capture can already be released automatically after pointerup.
+    }
+}
+
+function dispatchWindowEvent(document, eventName) {
+    const EventConstructor = document.defaultView?.CustomEvent || CustomEvent;
+    document.defaultView?.dispatchEvent(new EventConstructor(eventName));
 }
 
 function clearDraggedStyles(element) {

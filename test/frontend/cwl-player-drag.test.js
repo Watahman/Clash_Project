@@ -30,6 +30,8 @@ describe('CWL player drag interaction', () => {
     let source;
     let target;
     let card;
+    let playerInfo;
+    let workspace;
 
     beforeEach(() => {
         const dom = new JSDOM(`
@@ -40,48 +42,67 @@ describe('CWL player drag interaction', () => {
         `);
         ({ document } = dom.window);
         window = dom.window;
+        workspace = document.querySelector('.workspace-planner');
         source = document.querySelector('#cwl-available-players');
         target = document.querySelector('.cwl-clan-player-list');
         card = document.createElement('article');
         card.className = 'cwl-player-article';
         card.dataset.rosterStatus = 'core';
+        playerInfo = document.createElement('div');
+        playerInfo.className = 'cwl-player-info';
+        playerInfo.setAttribute('role', 'button');
+        playerInfo.textContent = 'Player name';
+        card.appendChild(playerInfo);
         source.appendChild(card);
         mockRect(card, 0, 0, 180, 56);
         mockRect(source, 0, 0, 220, 400);
         mockRect(target, 300, 0, 220, 400);
+        workspace.setPointerCapture = vi.fn();
+        workspace.hasPointerCapture = vi.fn(() => true);
+        workspace.releasePointerCapture = vi.fn();
         vi.stubGlobal('CustomEvent', window.CustomEvent);
         vi.clearAllMocks();
         makePlayerDraggable(card);
     });
 
-    it('keeps a normal click in the original position', () => {
-        dispatchMouse(card, 'mousedown', 20, 20);
-        dispatchMouse(document, 'mouseup', 20, 20);
+    it('keeps a click on the player name available for the inspector', () => {
+        const inspectorClick = vi.fn();
+        playerInfo.addEventListener('click', inspectorClick);
+        dispatchPointer(playerInfo, 'pointerdown', 20, 20);
+        dispatchPointer(document, 'pointerup', 20, 20);
+        playerInfo.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
 
         expect(card.parentElement).toBe(source);
         expect(source.firstElementChild).toBe(card);
         expect(document.querySelector('.cwl-player-drag-placeholder')).toBeNull();
+        expect(inspectorClick).toHaveBeenCalledTimes(1);
+        expect(workspace.setPointerCapture).not.toHaveBeenCalled();
     });
 
     it('uses a placeholder and restores an invalid drop', () => {
-        dispatchMouse(card, 'mousedown', 20, 20);
-        dispatchMouse(document, 'mousemove', 60, 40, 1);
+        dispatchPointer(card, 'pointerdown', 20, 20);
+        dispatchPointer(document, 'pointermove', 60, 40, 1);
 
         expect(card.classList.contains('cwl-player-dragging')).toBe(true);
         expect(source.querySelector('.cwl-player-drag-placeholder')).not.toBeNull();
 
-        dispatchMouse(document, 'mouseup', 700, 500);
+        dispatchPointer(document, 'pointerup', 700, 500);
         expect(card.parentElement).toBe(source);
         expect(source.firstElementChild).toBe(card);
         expect(document.querySelector('.cwl-player-drag-placeholder')).toBeNull();
+        expect(workspace.releasePointerCapture).toHaveBeenCalledWith(1);
     });
 
-    it('commits a valid cross-roster drop once', () => {
+    it('drags from the player name and commits a cross-roster drop once', () => {
         const clickHandler = vi.fn();
         card.addEventListener('click', clickHandler);
-        dispatchMouse(card, 'mousedown', 20, 20);
-        dispatchMouse(document, 'mousemove', 350, 40, 1);
-        dispatchMouse(document, 'mouseup', 350, 40);
+        dispatchPointer(playerInfo, 'pointerdown', 20, 20);
+        dispatchPointer(document, 'pointermove', 350, 40, 1);
+
+        expect(workspace.setPointerCapture).toHaveBeenCalledWith(1);
+        expect(card.classList.contains('cwl-player-dragging')).toBe(true);
+
+        dispatchPointer(document, 'pointerup', 350, 40);
         card.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
 
         expect(card.parentElement).toBe(target);
@@ -90,17 +111,32 @@ describe('CWL player drag interaction', () => {
         expect(mocks.savePlan).toHaveBeenCalledTimes(1);
         expect(clickHandler).not.toHaveBeenCalled();
     });
+
+    it('restores the card when the captured pointer is cancelled', () => {
+        dispatchPointer(playerInfo, 'pointerdown', 20, 20);
+        dispatchPointer(document, 'pointermove', 350, 40, 1);
+        dispatchPointer(document, 'pointercancel', 350, 40);
+
+        expect(card.parentElement).toBe(source);
+        expect(card.classList.contains('cwl-player-dragging')).toBe(false);
+        expect(document.querySelector('.cwl-player-drag-placeholder')).toBeNull();
+    });
 });
 
-function dispatchMouse(target, type, clientX, clientY, buttons = 0) {
+function dispatchPointer(target, type, clientX, clientY, buttons = 0) {
     const document = target.ownerDocument || target;
-    target.dispatchEvent(new document.defaultView.MouseEvent(type, {
+    const event = new document.defaultView.MouseEvent(type, {
         bubbles: true,
         button: 0,
         buttons,
         clientX,
         clientY
-    }));
+    });
+    Object.defineProperties(event, {
+        isPrimary: { value: true },
+        pointerId: { value: 1 }
+    });
+    target.dispatchEvent(event);
 }
 
 function mockRect(element, left, top, width, height) {

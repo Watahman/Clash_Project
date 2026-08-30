@@ -1,3 +1,9 @@
+.workspace-planner .cwl-player-article.draggable {
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
 .workspace-planner .cwl-player-drag-placeholder {
     width: 100%;
     min-width: 0;
