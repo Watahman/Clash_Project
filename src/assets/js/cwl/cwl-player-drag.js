@@ -31,7 +31,7 @@ function createDragState(element, event) {
     const rect = element.getBoundingClientRect();
     return {
         activeTarget: null,
-        captureTarget: element.closest('.workspace-planner'),
+        captureTarget: element,
         dragging: false,
         offsetX: event.clientX - rect.left,
         offsetY: event.clientY - rect.top,
@@ -47,13 +47,19 @@ function bindDragListeners(element, state, document) {
     state.onPointerMove = event => updateDrag(element, state, event, document);
     state.onPointerUp = event => finishDrag(element, state, event, document);
     state.onPointerCancel = event => cancelPointerDrag(element, state, event, document);
+    state.onLostPointerCapture = event => {
+        if (element._cwlDragState === state && isActivePointer(state, event)) {
+            cancelDrag(element, state, document);
+        }
+    };
     state.onKeyDown = event => {
         if (event.key === 'Escape') cancelDrag(element, state, document);
     };
     state.onBlur = () => cancelDrag(element, state, document);
-    document.addEventListener('pointermove', state.onPointerMove, { passive: false });
-    document.addEventListener('pointerup', state.onPointerUp);
-    document.addEventListener('pointercancel', state.onPointerCancel);
+    document.addEventListener('pointermove', state.onPointerMove, { passive: false, capture: true });
+    document.addEventListener('pointerup', state.onPointerUp, true);
+    document.addEventListener('pointercancel', state.onPointerCancel, true);
+    state.captureTarget?.addEventListener('lostpointercapture', state.onLostPointerCapture);
     document.addEventListener('keydown', state.onKeyDown);
     document.defaultView?.addEventListener('blur', state.onBlur);
 }
@@ -122,15 +128,19 @@ function finishDrag(element, state, event, document) {
     event.preventDefault();
     const target = state.activeTarget || findDropTarget(document, event.clientX, event.clientY);
     const moved = Boolean(target && target !== state.previousContainer);
-    if (moved) {
-        target.appendChild(element);
-        element.originalContainer = target;
-        commitRosterDrop(element, state, target);
-    } else {
-        element.originalContainer = state.previousContainer;
+
+    try {
+        if (moved) {
+            target.appendChild(element);
+            element.originalContainer = target;
+            commitRosterDrop(element, state, target);
+        } else {
+            element.originalContainer = state.previousContainer;
+        }
+    } finally {
+        element.dataset.cwlSuppressClickUntil = String(Date.now() + CLICK_SUPPRESSION_MS);
+        cleanupDrag(element, state, document);
     }
-    element.dataset.cwlSuppressClickUntil = String(Date.now() + CLICK_SUPPRESSION_MS);
-    cleanupDrag(element, state, document);
 }
 
 function commitRosterDrop(element, state, finalContainer) {
@@ -156,14 +166,17 @@ function cancelDrag(element, state, document) {
 }
 
 function cleanupDrag(element, state, document) {
+    if (element._cwlDragState !== state && !state.preview) return;
     element._cwlDragState = null;
     element.classList.remove('cwl-player-drag-source');
     state.preview?.remove();
+    state.preview = null;
     clearDropFeedback(document);
     releasePointer(state);
-    document.removeEventListener('pointermove', state.onPointerMove);
-    document.removeEventListener('pointerup', state.onPointerUp);
-    document.removeEventListener('pointercancel', state.onPointerCancel);
+    document.removeEventListener('pointermove', state.onPointerMove, true);
+    document.removeEventListener('pointerup', state.onPointerUp, true);
+    document.removeEventListener('pointercancel', state.onPointerCancel, true);
+    state.captureTarget?.removeEventListener('lostpointercapture', state.onLostPointerCapture);
     document.removeEventListener('keydown', state.onKeyDown);
     document.defaultView?.removeEventListener('blur', state.onBlur);
 }
@@ -176,7 +189,7 @@ function capturePointer(state) {
     try {
         state.captureTarget?.setPointerCapture?.(state.pointerId);
     } catch {
-        // The document listeners still provide a safe fallback.
+        // The capture-phase document listeners still provide a safe fallback.
     }
 }
 
