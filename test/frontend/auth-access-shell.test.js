@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 
 describe('auth state and action access contracts', () => {
     beforeEach(() => {
@@ -197,5 +199,20 @@ describe('workspace access registry and guest shell markup', () => {
         expect(topbar).toContain('workspace-auth-status');
         expect(topbar).toContain('data-auth-only');
         expect(topbar).toContain('data-guest-only');
+    });
+
+    it('marks planner private-source locks for authenticated shell presentation', async () => {
+        const planner = await readFile(
+            resolve(process.cwd(), 'src/subpages/cwl-planner.html'),
+            'utf8'
+        );
+        const markup = document.createElement('template');
+        markup.innerHTML = planner;
+        const privateSourceTabs = markup.content.querySelectorAll('[data-auth-required]');
+
+        expect(privateSourceTabs).toHaveLength(2);
+        privateSourceTabs.forEach(tab => {
+            expect(tab.querySelector('[data-workspace-auth-lock]')).not.toBeNull();
+        });
     });
 });
