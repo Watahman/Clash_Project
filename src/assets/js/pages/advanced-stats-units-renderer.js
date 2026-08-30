@@ -58,14 +58,39 @@ function mergedUnits(units) {
     })).sort((left, right) => right.totalQuantity - left.totalQuantity || right.battlesPresent - left.battlesPresent || left.name.localeCompare(right.name));
 }
 
+function ensureUnitUsageScopeStyles() {
+    if (document.getElementById('advanced-stats-unit-scope-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'advanced-stats-unit-scope-styles';
+    style.textContent = `
+        .advanced-stats__section-heading .advanced-stats__unit-scope-note {
+            background: var(--cp-warning-soft);
+            border: 1px solid color-mix(in srgb, var(--cp-warning) 34%, var(--cp-border-1));
+            border-left: 3px solid var(--cp-warning);
+            border-radius: 7px;
+            color: var(--cp-text-2);
+            display: inline-block;
+            font-size: .74rem;
+            font-weight: 600;
+            line-height: 1.35;
+            margin-top: 8px;
+            max-width: 100%;
+            padding: 6px 9px;
+        }
+    `;
+    document.head.append(style);
+}
+
 function ensureUnitUsageScopeNote() {
     const title = document.getElementById('advanced-stats-units-title');
     const headingCopy = title?.parentElement;
     if (!headingCopy || headingCopy.querySelector('[data-unit-usage-scope-note]')) return;
+    ensureUnitUsageScopeStyles();
     const note = document.createElement('p');
     note.dataset.unitUsageScopeNote = '';
     note.className = 'advanced-stats__unit-scope-note';
-    note.textContent = 'Multiplayer data only. War & CWL unit compositions are unavailable and are excluded from Unit Usage.';
+    note.textContent = 'Multiplayer only — War & CWL unit data unavailable.';
+    note.setAttribute('role', 'note');
     headingCopy.append(note);
 }
 
