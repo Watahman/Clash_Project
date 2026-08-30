@@ -60,11 +60,13 @@ function mergedUnits(units) {
 
 function ensureUnitUsageScopeNote() {
     const title = document.getElementById('advanced-stats-units-title');
-    if (!title || title.querySelector('[data-unit-usage-scope-note]')) return;
-    const note = document.createElement('small');
+    const headingCopy = title?.parentElement;
+    if (!headingCopy || headingCopy.querySelector('[data-unit-usage-scope-note]')) return;
+    const note = document.createElement('p');
     note.dataset.unitUsageScopeNote = '';
-    note.textContent = 'Multiplayer only — War & CWL unit data is unavailable.';
-    title.append(document.createTextNode(' '), note);
+    note.className = 'advanced-stats__unit-scope-note';
+    note.textContent = 'Multiplayer data only. War & CWL unit compositions are unavailable and are excluded from Unit Usage.';
+    headingCopy.append(note);
 }
 
 function unitNameElement(unit) {
