@@ -471,10 +471,14 @@ dialog#cwl-guest-save-dialog.cp-modal::backdrop { background: rgb(2 5 8 / 68%); 
 .workspace-planner #cwl-available-players {
     display: flex;
     flex-direction: column;
+    flex: 0 0 auto;
+    height: auto;
+    max-height: none;
     gap: 0;
     min-height: 10rem;
     padding: var(--space-3) var(--space-4) var(--space-4);
     overflow: visible;
+    scrollbar-gutter: auto;
 }
 
 .workspace-planner #cwl-available-players:empty::before,
@@ -635,13 +639,6 @@ dialog#cwl-guest-save-dialog.cp-modal::backdrop { background: rgb(2 5 8 / 68%); 
         border-bottom: 1px solid var(--border);
     }
 
-    .workspace-planner #cwl-available-players {
-        max-height: min(60dvh, 40rem);
-        overflow-x: hidden;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-        scrollbar-gutter: stable;
-    }
 }
 
 @media (max-width: 46rem) {

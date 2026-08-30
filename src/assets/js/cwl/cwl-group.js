@@ -1,4 +1,4 @@
-import { createClanCard, createPlayerCard } from "../templates/CWLTemplates.js?v=20260829-public-auth-v1";
+import { createClanCard, createPlayerCard } from "../templates/CWLTemplates.js?v=20260830-card-settings";
 import { clearActiveCwlPoll, getActiveCwlPollMeta, setActiveCwlPoll } from "./cwl-availability.js?v=20260829-public-auth-v1";
 import { escapeCssIdentifier, normalizeTag } from "./cwl-utils.js";
 import { createGroupSourceController } from "./cwl-group-source-controller.js?v=20260829-public-auth-v1";

@@ -4,6 +4,7 @@ import { normalizeTag } from './cwl-utils.js';
 import { allowsThirtyPlayerCwl, normalizeCwlCapacity } from './cwl-league-rules.js';
 import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { syncPlayerRosterStatus } from './cwl-player-controls.js?v=20260829-public-auth-v1';
+import { attachClanCardSettings } from './cwl-card-settings.js?v=20260830-card-settings';
 import { normalizeClanPriority } from './cwl-plan-schema.js';
 import {
     rememberPlannerPlayers,
@@ -84,6 +85,7 @@ export function createClanCard(clanInfo, playerAmount, uuid = '', options = {}) 
     article.dataset.clanPriority = priority;
     applyClanLeagueRestriction(article, leagueName, { persist: false });
     attachDeleteClan(template.querySelector('.cwl-delete-clan'));
+    attachClanCardSettings(article);
 
     document.querySelector('#cwl-all-clans').appendChild(template);
     if (persist && clanInfo?.name && clanTag) localStorage.setItem(`clanId_${clanInfo.name}`, clanTag);

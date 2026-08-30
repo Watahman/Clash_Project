@@ -8,10 +8,12 @@
 }
 .workspace-planner #cwl-available-players {
     display: grid;
-    max-height: min(67vh, 760px);
+    flex: 0 0 auto;
+    height: auto;
+    max-height: none;
     min-width: 0;
-    overflow: auto;
-    scrollbar-gutter: stable;
+    overflow: visible;
+    scrollbar-gutter: auto;
 }
 .workspace-planner #cwl-all-clans {
     align-content: start; display: grid !important;

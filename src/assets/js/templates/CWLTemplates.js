@@ -1,6 +1,6 @@
-export { createPlayerCard } from '../cwl/cwl-player-card.js?v=20260829-public-auth-v1';
+export { createPlayerCard } from '../cwl/cwl-player-card.js?v=20260830-card-settings';
 export {
     applyClanLeagueRestriction,
     createClanCard
-} from '../cwl/cwl-clan-card.js?v=20260829-public-auth-v1';
+} from '../cwl/cwl-clan-card.js?v=20260830-card-settings';
 export { updateAllPlayerCounters } from '../cwl/cwl-planner-card-state.js?v=20260829-public-auth-v1';

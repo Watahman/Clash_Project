@@ -1,6 +1,6 @@
 import { getClanInfoRequest } from '../API/API-Clan.js?v=20260829-public-auth-v1';
 import { getPlayerBasicData } from '../API/API-Functions.js?v=20260829-public-auth-v1';
-import { applyClanLeagueRestriction } from '../templates/CWLTemplates.js?v=20260829-public-auth-v1';
+import { applyClanLeagueRestriction } from '../templates/CWLTemplates.js?v=20260830-card-settings';
 import { getTownHallAsset, installImageFallback } from '../assets/entity-assets.js';
 import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { normalizePlanDocument } from './cwl-plan-schema.js';
