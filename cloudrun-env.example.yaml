@@ -35,7 +35,7 @@ ADVANCED_STATS_MAX_BACKOFF_MINUTES: "240"
 ADVANCED_STATS_DEGRADED_THRESHOLD: "3"
 
 # ClashKing V2 historical source.
-CLASHKING_BASE_URL: "https://v2.api.clashk.ing"
+CLASHKING_BASE_URL: "https://api.clashk.ing"
 # Optional Unix-seconds override. Leave blank to resolve the active ranked
 # season automatically from ClashKing V2 /v2/dates/current.
 CLASHKING_RANKED_SEASON: ""
