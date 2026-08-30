@@ -186,13 +186,14 @@ describe('Public marketing shell', () => {
         expect(css).not.toContain('body.workspace-app');
     });
 
-    it('uses a real Planner capture instead of an invented public roster table', () => {
+    it('uses real Planner and Clan Family captures instead of invented public tables', () => {
         const planner = documentFor('src/cwl-planner.html');
         const localized = read('src/assets/js/i18n/public-feature-extra-locales.js');
 
         expect(planner.querySelector('.cp-screenshot-sample img[src="/assets/previews/home/cwl-planner.webp?v=20260821-authentic"]')).not.toBeNull();
+        expect(localized.match(/clan-family\.webp\?v=20260821-authentic/g)).toHaveLength(5);
         expect(planner.querySelector('.resource-page .sample-panel table')).toBeNull();
         expect(localized).not.toMatch(/Sample North|Voorbeeld Noord|Exemple Nord|Beispiel Nord|Ejemplo Norte/);
-        expect(localized.match(/cp-screenshot-sample/g)).toHaveLength(5);
+        expect(localized.match(/cp-screenshot-sample/g)).toHaveLength(10);
     });
 });

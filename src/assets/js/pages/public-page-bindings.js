@@ -80,7 +80,7 @@ function renderTrackerCopy() {
 
 function renderFamilyCopy() {
     setPageMetadata('feature.family');
-    replaceResourceArticle('.resource-page[aria-labelledby="family-sample-title"]', 'feature.family.sampleHtml');
+    replaceResourceArticle('.resource-page[aria-labelledby="family-capture-title"]', 'feature.family.sampleHtml');
     setAttribute('.feature-v2-workflow .home-v2-workflow-art img', 'alt', 'feature.family.workflowAlt');
     setAttribute('.home-v2-products .home-v2-product-section:nth-child(1) .home-v2-artwork-main', 'alt', 'family.network.imageAltMain');
     setAttribute('.home-v2-products .home-v2-product-section:nth-child(1) .home-v2-artwork-inset', 'alt', 'family.network.imageAltInset');
