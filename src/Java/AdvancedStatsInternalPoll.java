@@ -1,7 +1,5 @@
 package Java;
 
-import Java.advancedstats.AdvancedStatsBattleLogHistorySource;
-import Java.advancedstats.AdvancedStatsCapabilityBasedSource;
 import Java.advancedstats.AdvancedStatsCompactScheduledCollector;
 import Java.advancedstats.AdvancedStatsCollectorRepository;
 import Java.advancedstats.ClashKingV2AdvancedStatsSource;
@@ -11,7 +9,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
 import java.time.Clock;
-import java.util.List;
 
 /** Protected Cloud Scheduler trigger for one bounded Advanced Stats collection pass. */
 public final class AdvancedStatsInternalPoll {
@@ -31,13 +28,9 @@ public final class AdvancedStatsInternalPoll {
         this.utils = new API_Utils(config);
         this.collectorConfig = new AdvancedStatsCollectorConfig();
 
-        AdvancedStatsBattleLogSource officialBattleLog = new AdvancedStatsBattleLogSource(config);
         this.compactCollector = new AdvancedStatsCompactScheduledCollector(
                 new AdvancedStatsCollectorRepository(),
-                workerId -> new AdvancedStatsCapabilityBasedSource(List.of(
-                        new ClashKingV2AdvancedStatsSource(config),
-                        new AdvancedStatsBattleLogHistorySource(officialBattleLog::fetchFresh)
-                )),
+                workerId -> new ClashKingV2AdvancedStatsSource(config),
                 Clock.systemUTC(),
                 collectorConfig.compactSettings()
         );
