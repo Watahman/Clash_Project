@@ -13,34 +13,41 @@ describe('ClashPanel minigames public page', () => {
     const higherLowerEngine = readFileSync('src/assets/js/minigames/higher-lower-engine.js', 'utf8');
     const higherLowerRenderer = readFileSync('src/assets/js/minigames/higher-lower-renderer.js', 'utf8');
     const minigamesState = readFileSync('src/assets/js/minigames/minigames-state.js', 'utf8');
+    const sceneryCopy = readFileSync('src/assets/js/minigames/scenery-scout-copy.js', 'utf8');
+    const sceneryController = readFileSync('src/assets/js/pages/scenery-scout.js', 'utf8');
     const hubController = readFileSync('src/assets/js/pages/minigames-hub.js', 'utf8');
 
-    it('loads the game hub, Entity Guesser and Higher or Lower controllers', () => {
+    it('loads the hub and all three game controllers', () => {
         expect(page).toContain('/assets/js/pages/minigames-hub.js?v=20260828-seo-links');
         expect(page).toContain('/assets/js/pages/minigames-phase2b.js');
         expect(page).toContain('/assets/js/pages/higher-lower.js');
+        expect(page).toContain('/assets/js/pages/scenery-scout.js?v=20260831-v1');
         expect(page).toContain('/assets/css/minigames-entity-guesser.css');
         expect(page).toContain('/assets/css/minigames-higher-lower-responsive.css');
         expect(page).not.toContain('src="/assets/js/pages/minigames.js"');
     });
 
-    it('contains two isolated, switchable game views', () => {
+    it('contains three isolated, switchable game views', () => {
         expect(page).toContain('data-minigame-select="entity"');
         expect(page).toContain('data-minigame-select="higher-lower"');
         expect(page).toContain('data-minigame-view="entity"');
         expect(page).toContain('data-minigame-view="higher-lower"');
+        expect(page).toContain('data-minigame-select="scenery-scout"');
+        expect(page).toContain('data-minigame-view="scenery-scout"');
+        expect(page).toContain('data-scenery-scout-game');
         expect(page).toContain('data-higher-lower-game');
         expect(hubController).toContain("url.searchParams.set('game', selected)");
         expect(hubController).toContain("url.searchParams.delete('game')");
     });
 
     it('uses minigames metadata rather than Entity-Guesser-only metadata', () => {
-        expect(page).toContain('<title>Daily Clash of Clans Minigames | ClashPanel</title>');
-        expect(page).toContain('Entity Guesser and Higher or Lower games');
+        expect(page).toContain('<title>Daily Clash of Clans Minigames &amp; Scenery Quiz | ClashPanel</title>');
+        expect(page).toContain('Entity Guesser, Higher or Lower and Scenery Scout');
         expect(page).toContain('ClashPanel Higher or Lower');
+        expect(page).toContain('ClashPanel Scenery Scout');
     });
 
-    it('publishes a complete large social preview for both daily games', () => {
+    it('publishes a complete large social preview for the games hub', () => {
         expect(existsSync('src/assets/social/minigames.png')).toBe(true);
         expect(page).toContain('<meta property="og:image" content="https://clashpanel.com/assets/social/minigames.png">');
         expect(page).toContain('<meta property="og:image:width" content="1200">');
@@ -74,15 +81,16 @@ describe('ClashPanel minigames public page', () => {
         expect(entityCopy).toContain("spellsEquipment: 'Spells & Equipment'");
     });
 
-    it('gives new players a concise, keyboard-accessible guide to both games', () => {
+    it('gives new players a concise, keyboard-accessible guide to all games', () => {
         expect(page).toContain('<details class="minigames-help">');
         expect(page).toContain('<strong>What can I do here?</strong>');
         expect(page).toContain('You have six tries and two optional hints.');
         expect(page).toContain('Judge nine fair comparisons.');
+        expect(page).toContain('Recognize the world beyond the village.');
         expect(page).toContain('resets at 00:00 UTC');
     });
 
-    it('keeps all five supported interface languages in both games', () => {
+    it('keeps all five supported interface languages in every game', () => {
         [
             'en: {',
             'nl: {',
@@ -98,6 +106,8 @@ describe('ClashPanel minigames public page', () => {
             "fr: {",
             "es: {"
         ].forEach(locale => expect(higherLowerCopy).toContain(locale));
+
+        ['en:', 'nl:', 'de:', 'fr:', 'es:'].forEach(locale => expect(sceneryCopy).toContain(locale));
     });
 
     it('wires all Higher or Lower controls without reusing Entity Guesser attributes', () => {
@@ -167,6 +177,8 @@ describe('ClashPanel minigames public page', () => {
     it('versions the changed module graph so existing browsers cannot keep the broken picker', () => {
         expect(page).toContain('/assets/js/pages/minigames-phase2b.js?v=20260814-entity-mode-fix');
         expect(page).toContain('/assets/js/pages/higher-lower.js?v=20260814-metric-card-labels');
+        expect(page).toContain('/assets/js/pages/scenery-scout.js?v=20260831-v1');
+        expect(sceneryController).toContain("scenery-scout-engine.js");
         expect(page).toContain('/assets/css/minigames.css?v=20260814-games-header-visible');
         expect(hubController).toContain("higher-lower-engine.js?v=20260809-3");
         expect(hubController).toContain("minigames-state.js?v=20260809-3");
@@ -181,7 +193,7 @@ describe('ClashPanel minigames public page', () => {
 
     it('provides high-contrast dark variants for every game icon used on the page', () => {
         const styles = readFileSync('src/assets/css/minigames.css', 'utf8');
-        ['daily', 'guess', 'higher-lower', 'streak'].forEach(icon => {
+        ['daily', 'guess', 'higher-lower', 'streak', 'scenery-scout'].forEach(icon => {
             expect(page).toContain(`/assets/icons/games/${icon}.svg`);
             expect(styles).toContain(`/assets/icons/games/dark/${icon}.svg`);
             expect(readFileSync(`src/assets/icons/games/dark/${icon}.svg`, 'utf8')).toContain('stroke="#c8bfff"');

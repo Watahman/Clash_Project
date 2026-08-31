@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <meta name="description" content="Play the ClashPanel daily Entity Guesser and Higher or Lower games inside your workspace.">
+    <meta name="description" content="Play Entity Guesser, Higher or Lower and Scenery Scout inside your ClashPanel workspace.">
     <script src="../assets/js/Data/analytics.js"></script>
     <title>Minigames · ClashPanel</title>
     <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
@@ -25,11 +25,14 @@
     <link rel="stylesheet" href="../assets/css/minigames-entity-guesser-responsive.css?v=20260811-1">
     <link rel="stylesheet" href="../assets/css/minigames-higher-lower.css?v=20260811-1">
     <link rel="stylesheet" href="../assets/css/minigames-higher-lower-responsive.css?v=20260811-1">
+    <link rel="stylesheet" href="../assets/css/minigames-scenery-scout.css?v=20260831-v1">
+    <link rel="stylesheet" href="../assets/css/minigames-scenery-scout-responsive.css?v=20260831-v1">
     <script src="../assets/js/Data/runtime-config.js"></script>
     <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260829-public-dashboard-v1"></script>
     <script type="module" src="../assets/js/pages/minigames-hub.js?v=20260828-seo-links"></script>
     <script type="module" src="../assets/js/pages/minigames-phase2b.js?v=20260814-entity-mode-fix"></script>
     <script type="module" src="../assets/js/pages/higher-lower.js?v=20260814-metric-card-labels"></script>
+    <script type="module" src="../assets/js/pages/scenery-scout.js?v=20260831-v1"></script>
 </head>
 <body class="workspace-app minigames-page" data-workspace-page="minigames">
 <main id="main-content" class="minigames-main">
@@ -37,14 +40,14 @@
         <div class="minigames-hero-copy">
             <p class="eyebrow" data-hub-i18n="kicker">ClashPanel Minigames</p>
             <h1 id="games-hub-title" data-hub-i18n="title">A different Clash challenge every day.</h1>
-            <p data-hub-i18n="lead">Solve the Entity Guesser or test your stat knowledge in Higher or Lower, then switch to practice whenever you want.</p>
+            <p data-hub-i18n="lead">Solve Entity Guesser, compare stats or recognize tiny scenery details, then practice whenever you want.</p>
             <div class="games-daily-status" role="status" aria-live="polite">
                 <img src="/assets/icons/games/daily.svg" alt="" aria-hidden="true" width="24" height="24">
                 <div>
                     <strong data-hub-i18n="today">Today's daily</strong>
                     <span data-hub-date>UTC date</span>
                 </div>
-                <p data-hub-daily-summary>Both games share a daily challenge. Your progress stays on this device.</p>
+                <p data-hub-daily-summary>All three games offer daily play. Your progress stays on this device.</p>
                 <span class="games-daily-reset" data-hub-i18n="reset">Resets at 00:00 UTC</span>
             </div>
         </div>
@@ -56,6 +59,10 @@
             <div class="hero-note-row">
                 <img src="/assets/icons/games/higher-lower.svg" alt="" aria-hidden="true" width="24" height="24">
                 <div><strong data-hub-i18n="higherName">Higher or Lower</strong><span data-hub-i18n="higherDescription">Read the shown metric, choose a direction, and build a combo across nine comparisons.</span></div>
+            </div>
+            <div class="hero-note-row">
+                <img src="/assets/icons/games/scenery-scout.svg" alt="" aria-hidden="true" width="24" height="24">
+                <div><strong data-hub-i18n="sceneryName">Scenery Scout</strong><span data-hub-i18n="sceneryDescription">Recognize tiny details from Clash of Clans sceneries before time runs out.</span></div>
             </div>
             <p class="hero-note-foot" data-hub-i18n="practiceNote">Practice is unlimited and never overwrites your Daily result.</p>
         </div>
@@ -70,11 +77,15 @@
             <span class="minigame-switch-icon"><img src="/assets/icons/games/higher-lower.svg" alt="" aria-hidden="true" width="22" height="22"></span>
             <span class="minigame-switch-copy"><strong data-minigame-label>Higher or Lower</strong><small data-hub-i18n="higherCard">Compare nine values and build a combo.</small><em data-hub-game-status="higher-lower">Ready to play</em><span class="minigame-switch-play" data-hub-i18n="playNow">Play now</span></span>
         </button>
+        <button class="minigame-switch-button" type="button" role="tab" data-minigame-select="scenery-scout" aria-controls="minigame-panel-scenery-scout">
+            <span class="minigame-switch-icon"><img src="/assets/icons/games/scenery-scout.svg" alt="" aria-hidden="true" width="22" height="22"></span>
+            <span class="minigame-switch-copy"><strong data-minigame-label>Scenery Scout</strong><small data-hub-i18n="sceneryCard">Identify zoomed scenery details across five modes.</small><em data-hub-game-status="scenery-scout">Ready to play</em><span class="minigame-switch-play" data-hub-i18n="playNow">Play now</span></span>
+        </button>
     </nav>
 
     <details class="minigames-help">
         <summary>
-            <span data-hub-help-title><strong>What can I do here?</strong><small data-hub-i18n="helpSubtitle">A quick guide to both games</small></span>
+            <span data-hub-help-title><strong>What can I do here?</strong><small data-hub-i18n="helpSubtitle">A quick guide to all three games</small></span>
             <span class="minigames-help-toggle" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span>
         </summary>
         <div class="minigames-help-content">
@@ -87,6 +98,11 @@
                 <p class="eyebrow" data-hub-i18n="higherName">Higher or Lower</p>
                 <h2 data-hub-i18n="helpHigherTitle">Judge nine fair comparisons.</h2>
                 <p data-hub-i18n="helpHigherBody">Use the shown value to decide whether the hidden value is higher or lower. Correct answers build your combo; equal-value pairs are excluded.</p>
+            </article>
+            <article>
+                <p class="eyebrow" data-hub-i18n="sceneryName">Scenery Scout</p>
+                <h2 data-hub-i18n="helpSceneryTitle">Recognize the world beyond the village.</h2>
+                <p data-hub-i18n="helpSceneryBody">Study a cropped outer scenery detail, choose the matching scenery and build score through speed and streaks.</p>
             </article>
             <p class="minigames-help-note"><strong data-hub-i18n="dailyLabel">Daily</strong> <span data-hub-i18n="dailyHelp">gives everyone the same challenge and resets at 00:00 UTC.</span> <strong data-hub-i18n="practiceLabel">Practice</strong> <span data-hub-i18n="practiceHelp">lets you choose a category and play freely without changing the daily result.</span></p>
         </div>
@@ -172,8 +188,25 @@
         </div>
     </section>
 
+    <section class="game-shell scenery-scout-shell" aria-labelledby="ss-title" data-minigame-view="scenery-scout" data-scenery-scout-game hidden>
+        <div class="game-toolbar"><div class="game-toolbar-leading"><span class="game-toolbar-icon"><img src="/assets/icons/games/scenery-scout.svg" alt="" aria-hidden="true" width="20" height="20"></span><div><p class="ss-kicker">Scenery Scout</p><strong id="ss-title" data-ss-i18n="toolbarTitle">Spot the scenery from one small detail.</strong></div></div><p class="game-toolbar-note" data-ss-i18n="toolbarNote">67 verified sceneries · progress stays on this device</p></div>
+        <div class="ss-screen ss-loading" data-ss-screen="loading" role="status"><div><div class="ss-loading-mark" aria-hidden="true"></div><p data-ss-i18n="loading">Preparing the scenery library…</p></div></div>
+        <div class="ss-screen ss-landing" data-ss-screen="landing" hidden>
+            <div class="ss-landing-header"><div><p class="ss-kicker" data-ss-i18n="landingKicker">Image-first recognition</p><h2 data-ss-i18n="landingTitle">How well do you know Clash sceneries?</h2><p class="ss-intro" data-ss-i18n="landingIntro">Identify details from the outer scenery, earn more with fast answers and protect your streak as the crops get tougher.</p></div><p class="ss-device-note" data-ss-i18n="deviceNote">Saved locally on this device</p></div>
+            <div class="ss-primary-actions"><button class="ss-start is-daily" type="button" data-ss-start="daily"><span><strong data-ss-i18n="dailyName">Daily challenge</strong><span data-ss-i18n="dailyDesc">The same five-round set for everyone today</span></span><em><span data-ss-lifetime="daily-streak">0</span> <span data-ss-i18n="dayStreak">day streak</span></em></button><button class="ss-start" type="button" data-ss-start="normal"><span><strong data-ss-i18n="quickName">Quick play</strong><span data-ss-i18n="quickDesc">10 balanced rounds · 20 seconds</span></span><em data-ss-i18n="start">Start</em></button></div>
+            <div class="ss-mode-list" aria-label="Scenery Scout modes"><button class="ss-start" type="button" data-ss-start="hard"><span><strong data-ss-i18n="hardName">Hard</strong><span data-ss-i18n="hardDesc">Smaller details · 6 choices</span></span><em>15s</em></button><button class="ss-start" type="button" data-ss-start="expert"><span><strong data-ss-i18n="expertName">Expert</strong><span data-ss-i18n="expertDesc">Tiny details · 8 choices</span></span><em>10s</em></button><button class="ss-start" type="button" data-ss-start="sudden-death"><span><strong data-ss-i18n="suddenName">Sudden Death</strong><span data-ss-i18n="suddenDesc">One miss ends the run</span></span><em data-ss-i18n="oneLife">1 life</em></button></div>
+            <div class="ss-lifetime" aria-label="Scenery Scout statistics"><div><span data-ss-i18n="gamesPlayed">Games played</span><strong data-ss-lifetime="games">0</strong></div><div><span data-ss-i18n="accuracy">Accuracy</span><strong data-ss-lifetime="accuracy">0%</strong></div><div><span data-ss-i18n="dailyStreak">Daily streak</span><strong data-ss-lifetime="daily-streak">0</strong></div></div>
+        </div>
+        <div class="ss-screen ss-game" data-ss-screen="game" hidden>
+            <div class="ss-game-bar"><div class="ss-game-stat"><span data-ss-i18n="round">Round</span><strong data-ss-stat="round">1 / 10</strong></div><div class="ss-game-stat"><span data-ss-i18n="time">Time</span><strong data-ss-stat="timer">20.0s</strong></div><div class="ss-game-stat"><span data-ss-i18n="score">Score</span><strong data-ss-stat="score">0</strong></div><div class="ss-game-stat"><span data-ss-i18n="streak">Streak</span><strong data-ss-stat="streak">0</strong></div><p data-ss-i18n="keyboard">Keyboard: 1–8 to answer · Enter to continue</p></div>
+            <figure class="ss-image-frame"><img data-ss-image alt="Scenery clue" width="960" height="600" draggable="false"></figure><h2 class="ss-question" data-ss-question>Which scenery is this?</h2><div class="ss-answers" data-ss-answers role="group" aria-label="Choose the scenery"></div><div class="ss-feedback" data-ss-feedback role="status" aria-live="polite" hidden></div><div class="ss-game-actions"><button class="game-action" type="button" data-ss-next hidden>Next round</button></div>
+        </div>
+        <div class="ss-screen ss-result" data-ss-screen="result" hidden><div class="ss-result-mark" aria-hidden="true">⌖</div><h2 data-ss-result-title>Scouting complete</h2><p data-ss-result-summary></p><span class="ss-best" data-ss-new-best hidden data-ss-i18n="newBest">New personal best</span><div class="ss-result-grid"><div><span data-ss-i18n="score">Score</span><strong data-ss-result-score>0</strong></div><div><span data-ss-i18n="accuracy">Accuracy</span><strong data-ss-result-accuracy>0%</strong></div><div><span data-ss-i18n="averageTime">Average time</span><strong data-ss-result-time>0.0s</strong></div><div><span data-ss-i18n="bestStreak">Best streak</span><strong data-ss-result-streak>0</strong></div></div><div class="ss-result-actions"><button class="game-action" type="button" data-ss-start="normal" data-ss-i18n="playAgain">Quick play again</button><button class="game-action secondary" type="button" data-ss-back data-ss-i18n="back">Choose another mode</button></div></div>
+        <div class="ss-screen ss-error" data-ss-screen="error" hidden><div><h2 data-ss-i18n="unavailable">Scenery Scout is unavailable</h2><p data-ss-error-message>The scenery library could not be loaded.</p><button class="game-action secondary" type="button" data-ss-retry data-ss-i18n="retry">Try again</button></div></div>
+    </section>
+
     <section class="minigames-category-summary" aria-labelledby="category-summary-title"><div><p class="eyebrow" data-hub-i18n="catalogKicker">The shared catalog</p><h2 id="category-summary-title" data-hub-i18n="catalogTitle">Four broad categories. Less menu, more guessing.</h2><p data-hub-i18n="catalogBody">Related Clash items now play together, while every comparison still uses a fair shared property.</p></div><ul><li><strong>29</strong><span data-hub-i18n="categoryDefenses">Defenses</span></li><li><strong>25</strong><span data-hub-i18n="categoryBuildings">Other buildings</span></li><li><strong>50</strong><span data-hub-i18n="categoryTroopsHeroes">Troops &amp; Heroes</span></li><li><strong>59</strong><span data-hub-i18n="categorySpellsEquipment">Spells &amp; Equipment</span></li></ul></section>
-    <aside class="minigames-policy" data-hub-i18n="policy">These are unofficial, text-and-statistics based fan quizzes. Images are recognition aids from the central local entity library and fall back gracefully when unavailable. ClashPanel is not endorsed by Supercell.</aside>
+    <aside class="minigames-policy" data-hub-i18n="policy">This material is unofficial and is not endorsed by Supercell. Game images are stored locally as recognition clues for this fan-made quiz. See Supercell's Fan Content Policy for more information.</aside>
 </main>
 </body>
 </html>

@@ -28,8 +28,8 @@ describe('public resources redesign surfaces', () => {
 
     it('keeps the released games and bracket actions discoverable', () => {
         const games = dom('src/minigames.html');
-        expect(games.querySelectorAll('[data-minigame-select]')).toHaveLength(2);
-        expect(games.querySelectorAll('[data-hub-i18n="playNow"]')).toHaveLength(2);
+        expect(games.querySelectorAll('[data-minigame-select]')).toHaveLength(3);
+        expect(games.querySelectorAll('[data-hub-i18n="playNow"]')).toHaveLength(3);
         expect(read('src/minigames.html')).toContain('"@type":"Game"');
 
         const bracket = dom('src/bracket-generator.html');
