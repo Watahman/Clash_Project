@@ -38,15 +38,27 @@ describe('Achievements workspace page', () => {
     });
 
     it('keeps unavailable sources separate from zero progress', () => {
-        const source = readFileSync('src/assets/js/pages/achievements-renderer.js', 'utf8');
+        const source = `${readFileSync('src/assets/js/pages/achievements-renderer.js', 'utf8')}\n${readFileSync('src/assets/js/pages/achievement-chronicle-renderer.js', 'utf8')}`;
         expect(source).toContain("'live_profile'");
         expect(source).toContain("'cwl_history'");
         expect(source).toContain("'raid_history'");
         expect(source).toContain("'legend_history'");
         expect(source).toContain("'clashking_history'");
         expect(source).toContain("'clan_profile'");
-        expect(source).toContain('!family.sourceAvailable');
+        expect(source).toContain('!family?.sourceAvailable');
         expect(source).toContain('Waiting for this data source');
+    });
+
+    it('presents the private collection as a Chronicle instead of achievement cards', () => {
+        const document = documentFor('src/subpages/achievements.html');
+        const renderer = readFileSync('src/assets/js/pages/achievement-chronicle-renderer.js', 'utf8');
+
+        expect(document.querySelector('#achievement-grid.achievement-chronicle')).not.toBeNull();
+        expect(document.querySelector('.achievement-chronicle-legend')?.textContent).toContain('◇');
+        expect(document.querySelector('.achievement-chronicle-legend')?.textContent).toContain('◆');
+        expect(document.querySelector('.achievement-chronicle-legend')?.textContent).toContain('★');
+        expect(renderer).toContain("node.className = 'achievement-chronicle-node'");
+        expect(renderer).not.toContain('achievement-card');
     });
 
     it('uses the v2 XP level formula and hides the dynamic catalog template', () => {

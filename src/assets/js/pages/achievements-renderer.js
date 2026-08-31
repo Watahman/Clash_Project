@@ -4,6 +4,10 @@ import {
     filterAchievementFamilies
 } from '../achievements/achievement-view-model.js';
 import { achievementFamilyImage } from './achievement-asset-view.js?v=20260824-achievement-raster-color-1';
+import {
+    applyAchievementChronicleI18n,
+    renderAchievementChronicle
+} from './achievement-chronicle-renderer.js?v=20260831-achievement-chronicle-v1';
 
 const SOURCE_ORDER = Object.freeze([
     'live_profile', 'base_data', 'base_history', 'advanced_stats', 'war', 'cwl_history', 'raid_history',
@@ -21,7 +25,6 @@ function translated(key, fallback = key, params = {}) {
 }
 
 function sourceLabel(source) { return translated(`achievements.source.${source}`, SOURCE_FALLBACKS[source] || source); }
-function rarityLabel(rarity) { const value = String(rarity || 'common').toLowerCase(); return translated(`achievements.${value}`, value[0].toUpperCase() + value.slice(1)); }
 function categoryLabel(state, category) {
     const exact = state.families.find(family => family.category === category)?.categoryLabel;
     const fallback = exact || category.replaceAll('_', ' ').replace(/\b\w/g, letter => letter.toUpperCase());
@@ -166,70 +169,6 @@ export function renderFilterOptions(refs, state) {
     state.filters.source = refs.source.value;
 }
 
-function tierMarker(tier) {
-    const marker = document.createElement('span');
-    marker.className = 'achievement-tier-marker';
-    marker.dataset.rarity = tier.rarity;
-    marker.dataset.unlocked = String(tier.unlocked);
-    marker.textContent = tier.tierLabel || String(tier.tier);
-    marker.title = tier.progressKnown ? `${tier.tierLabel}: ${number(tier.progress)} / ${tier.thresholdText || number(tier.target)}` : translated('achievements.waitingForSource', 'Waiting for this data source');
-    return marker;
-}
-
-export function achievementCard(family, state) {
-    const card = document.createElement('article');
-    card.className = 'achievement-card';
-    card.dataset.state = family.state;
-    card.dataset.rarity = family.currentTier?.rarity || family.highestUnlocked?.rarity || 'common';
-    card.dataset.sourceAvailable = String(family.sourceAvailable);
-    const heading = document.createElement('header');
-    const icon = achievementFamilyImage(family, categoryLabel(state, family.category));
-    const copy = document.createElement('div');
-    const title = document.createElement('h3'); title.textContent = family.title;
-    const meta = document.createElement('p'); meta.textContent = `${categoryLabel(state, family.category)} / ${sourceLabel(family.source)}`;
-    copy.append(title, meta);
-    const badge = document.createElement('span'); badge.className = 'achievement-rarity-badge'; badge.textContent = family.complete ? t('achievements.complete') : rarityLabel(family.currentTier?.rarity);
-    heading.append(icon, copy, badge);
-    const description = document.createElement('p'); description.className = 'achievement-card-description'; description.textContent = family.description;
-    const tierRow = document.createElement('div'); tierRow.className = 'achievement-tier-row'; family.tiers.forEach(tier => tierRow.append(tierMarker(tier)));
-    const current = family.currentTier;
-    const progressCopy = document.createElement('div'); progressCopy.className = 'achievement-progress-copy';
-    progressCopy.append(newElement('strong', family.complete ? t('achievements.allTiersUnlocked') : current?.tierLabel || family.title), newElement('span', progressText(family)));
-    const track = document.createElement('div'); track.className = 'achievement-progress-track'; track.dataset.known = String(family.sourceAvailable); track.setAttribute('role', 'progressbar'); track.setAttribute('aria-valuemin', '0'); track.setAttribute('aria-label', family.title);
-    if (family.sourceAvailable) {
-        const fill = document.createElement('span');
-        fill.style.width = `${Math.round(family.progressRatio * 100)}%`;
-        track.append(fill);
-        track.setAttribute('aria-valuemax', String(current?.target || 1));
-        track.setAttribute('aria-valuenow', String(Math.min(current?.progress || 0, current?.target || 1)));
-    } else {
-        track.dataset.known = 'false';
-        track.setAttribute('aria-valuetext', translated('achievements.waitingForSource', 'Waiting for this data source'));
-        track.append(newElement('small', translated('achievements.waitingForSource', 'Waiting for this data source')));
-    }
-    const footer = document.createElement('footer');
-    const status = newElement('span', statusText(family)); status.className = 'achievement-status-label';
-    const xp = newElement('strong', family.complete ? `+${number(family.totalXp)} XP` : t('achievements.nextXp', { xp: number(current?.xp) })); footer.append(status, xp);
-    card.append(heading, description, tierRow, progressCopy, track, footer);
-    return card;
-}
-
-function progressText(family) {
-    const current = family.currentTier;
-    if (!family.sourceAvailable) return current?.hasStoredProgress ? `${t('achievements.lastKnown')}: ${number(current.progress)}` : translated('achievements.waitingForSource', 'Waiting for this data source');
-    return family.complete ? t('achievements.xpEarned', { xp: number(family.totalXp) }) : t('achievements.progressValue', { progress: number(current?.progress), target: current?.thresholdText || number(current?.target) });
-}
-
-function statusText(family) {
-    if (family.complete) return t('achievements.completed');
-    if (!family.sourceAvailable) return translated('achievements.waitingForData', 'Waiting for data');
-    if (family.unlockedTiers.length > 1) return t('achievements.tiersUnlocked', { count: number(family.unlockedTiers.length) });
-    if (family.unlockedTiers.length === 1) return t('achievements.oneTierUnlocked');
-    return family.currentTier?.progress > 0 ? t('achievements.inProgress') : t('achievements.notStarted');
-}
-
-function newElement(tag, text) { const element = document.createElement(tag); element.textContent = text; return element; }
-
 export function renderAchievements(refs, state, pageSize) {
     refs.grid.replaceChildren();
     const families = localizeFamilies(state);
@@ -241,7 +180,7 @@ export function renderAchievements(refs, state, pageSize) {
     if (!families.length) return showEmpty(refs, 'catalog', translated('achievements.catalogEmptyTitle', 'Achievements could not be loaded'), translated('achievements.catalogEmptyText', 'Refresh the page.'));
     if (!filtered.length) return showEmpty(refs, 'filters', t('achievements.noMatchTitle'), t('achievements.noMatchText'));
     refs.emptyState.hidden = true; refs.grid.hidden = false;
-    filtered.slice(0, state.visibleLimit).forEach(family => refs.grid.append(achievementCard(family, state)));
+    renderAchievementChronicle(refs.grid, filtered.slice(0, state.visibleLimit));
     const remaining = filtered.length - Math.min(filtered.length, state.visibleLimit);
     refs.loadMore.hidden = remaining <= 0;
     refs.loadMore.textContent = translated('achievements.showMore', `Show more (${remaining} remaining)`, { count: remaining });
@@ -254,6 +193,7 @@ function showEmpty(refs, reason, title, copy) {
 
 export function renderAll(refs, state, pageSize) {
     applyI18n(document);
+    applyAchievementChronicleI18n(document);
     renderAccountSelector(refs, state);
     renderSummary(refs, state);
     renderSources(refs, state);

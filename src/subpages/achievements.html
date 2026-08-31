@@ -11,11 +11,11 @@
     <title>Achievements (Coming soon) · ClashPanel</title>
     <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="../assets/css/workspace-system.css?v=20260829-public-auth-v1">
-    <link rel="stylesheet" href="../assets/css/achievements.css?v=20260824-achievement-raster-color-1">
-    <link rel="stylesheet" href="../assets/css/achievements-expanded.css">
+    <link rel="stylesheet" href="../assets/css/achievements.css?v=20260831-achievement-chronicle-v1">
+    <link rel="stylesheet" href="../assets/css/achievement-chronicle.css?v=20260831-achievement-chronicle-v1">
     <script src="../assets/js/Data/runtime-config.js"></script>
     <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260829-public-dashboard-v1"></script>
-    <script type="module" src="../assets/js/pages/achievements.js?v=20260829-public-auth-v1"></script>
+    <script type="module" src="../assets/js/pages/achievements.js?v=20260831-achievement-chronicle-v1"></script>
     <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
@@ -88,8 +88,15 @@
 
     <section class="achievement-library" aria-labelledby="achievement-library-title">
         <header class="achievement-library-heading">
-            <div><p class="page-kicker" data-i18n="achievements.collection">Collection</p><h2 id="achievement-library-title" data-i18n="achievements.libraryTitle">Achievement library</h2><p id="achievement-results-count">0 achievements</p></div>
+            <div><p class="page-kicker" data-i18n="achievements.collection">Collection</p><h2 id="achievement-library-title" data-chronicle-i18n="achievements.chronicle.title">Achievement Chronicle</h2><p data-chronicle-i18n="achievements.chronicle.intro">Follow your achievement paths across every part of ClashPanel.</p><p id="achievement-results-count">0 achievements</p></div>
         </header>
+
+        <div class="achievement-chronicle-legend" data-chronicle-i18n-aria-label="achievements.chronicle.legend" aria-label="Chronicle legend">
+            <span><b aria-hidden="true">◇</b><span data-chronicle-i18n="achievements.chronicle.locked">Locked</span></span>
+            <span><b aria-hidden="true">◆</b><span data-chronicle-i18n="achievements.chronicle.unlocked">Unlocked</span></span>
+            <span><b aria-hidden="true">★</b><span data-chronicle-i18n="achievements.chronicle.milestone">Milestone</span></span>
+            <small data-chronicle-i18n="achievements.chronicle.pathNote">Lines group achievements by theme; they are not unlock requirements.</small>
+        </div>
 
         <section id="achievement-filter-dialog" class="achievement-filter-dialog" aria-labelledby="achievement-filter-title">
             <div class="achievement-filter-heading"><h2 id="achievement-filter-title" data-i18n="achievements.filters">Filters</h2></div>
@@ -107,7 +114,7 @@
             <h2 data-i18n="achievements.linkAccountTitle">Link a Clash account first</h2><p data-i18n="achievements.linkAccountText">Achievements are stored per verified Clash account. Open your profile to link one.</p>
             <div><button class="cp-button cp-button--primary" type="button" data-empty-import data-i18n="achievements.importButton">Import base data</button><button class="cp-button cp-button--secondary" type="button" data-empty-profile data-i18n="achievements.openProfile">Open profile</button></div>
         </div>
-        <div id="achievement-grid" class="achievement-grid" hidden></div>
+        <div id="achievement-grid" class="achievement-grid achievement-chronicle" role="list" data-chronicle-i18n-aria-label="achievements.chronicle.title" aria-label="Achievement Chronicle" hidden></div>
         <button id="achievement-load-more" class="cp-button cp-button--secondary achievement-load-more" type="button" hidden data-i18n="achievements.showMore">Show more achievements</button>
     </section>
 </main>

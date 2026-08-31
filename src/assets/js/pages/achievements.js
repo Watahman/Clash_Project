@@ -15,7 +15,7 @@ import {
     renderAll,
     renderSources,
     renderAchievements
-} from './achievements-renderer.js?v=20260829-public-auth-v1';
+} from './achievements-renderer.js?v=20260831-achievement-chronicle-v1';
 
 const PAGE_SIZE = 48;
 const ACCOUNT_STORAGE_KEY = 'clashpanel_achievements_account';

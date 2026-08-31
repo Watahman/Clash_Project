@@ -27,6 +27,7 @@ function row(family, tier, config = {}) {
         category_label: config.categoryLabel || '',
         scope: config.scope || 'player',
         rarity: config.rarity || ['common', 'uncommon', 'rare', 'epic'][tier - 1] || 'legendary',
+        priority: config.priority || 'P2',
         tier,
         tier_label: `Tier ${tier}`,
         xp: tier * 50,
@@ -34,6 +35,7 @@ function row(family, tier, config = {}) {
         target,
         threshold_text: String(target),
         unlocked,
+        unlocked_at: unlocked ? (config.unlockedAt || '2026-08-09T10:00:00.000Z') : null,
         progress_known: known,
         source_available: known,
         has_stored_progress: unlocked || Boolean(config.progress),
@@ -60,12 +62,14 @@ function catalog(id) {
         ...family(1, { title: 'First steps', category: 'progression', progress: 80 }),
         ...family(2, { title: 'Root Rider captain', category: 'attack', source: 'advanced_stats', progress: 64, entity: 'root-rider' }),
         ...family(3, { title: 'Village curator', category: 'village', source: 'base_data', unlocked: true, entity: 'town-hall-17' }),
-        ...family(4, { title: 'War record', category: 'war', source: 'war', unlocked: true }),
+        ...family(4, { title: 'War record', category: 'war', source: 'war', unlocked: true, priority: 'P0' }),
         ...family(5, { title: 'Snapshot historian', category: 'collection', source: 'base_history', progress: 120 }),
-        ...family(6, { title: 'Waiting source', category: 'stats', source: 'raid_history', known: false })
+        ...family(6, { title: 'Waiting source', category: 'stats', source: 'raid_history', known: false }),
+        ...family(7, { title: 'League campaign', category: 'clan_war_league', source: 'cwl_history', progress: 140 }),
+        ...family(8, { title: 'Tactical planner', category: 'clashpanel_workflow', source: 'clashpanel', progress: 80 })
     ];
     if (id === 'achievements-rich') {
-        for (let index = 7; index <= 90; index += 1) rows.push(...family(index, {
+        for (let index = 9; index <= 92; index += 1) rows.push(...family(index, {
             title: `Collector ${index}`,
             category: ['progression', 'collection', 'attack', 'defense', 'war', 'stats'][index % 6],
             source: index % 4 === 0 ? 'clashpanel' : 'live_profile',
@@ -74,11 +78,11 @@ function catalog(id) {
         }));
     }
     if (id === 'achievements-missing-source') {
-        rows.push(...family(7, { title: 'Historical raids', category: 'stats', source: 'raid_history', known: false }));
-        rows.push(...family(8, { title: 'Legend archive', category: 'stats', source: 'legend_history', known: false }));
+        rows.push(...family(93, { title: 'Historical raids', category: 'stats', source: 'raid_history', known: false }));
+        rows.push(...family(94, { title: 'Legend archive', category: 'stats', source: 'legend_history', known: false }));
     }
     if (id === 'achievements-import-valid' || id === 'achievements-import-invalid') {
-        rows.push(...family(7, { title: 'Village snapshot', category: 'village', source: 'base_data', progress: 300, entity: 'town-hall-17' }));
+        rows.push(...family(95, { title: 'Village snapshot', category: 'village', source: 'base_data', progress: 300, entity: 'town-hall-17' }));
     }
     return rows;
 }

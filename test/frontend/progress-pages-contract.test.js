@@ -32,7 +32,7 @@ describe('Progress workspace page contracts', () => {
     it('uses the central entity resolver and gives achievement families semantic assets', () => {
         const helper = read('src/assets/js/pages/progress-asset-view.js');
         const assetView = read('src/assets/js/pages/achievement-asset-view.js');
-        const renderer = read('src/assets/js/pages/achievements-renderer.js');
+        const renderer = read('src/assets/js/pages/achievement-chronicle-renderer.js');
 
         expect(helper).toContain("from '../assets/entity-assets.js'");
         expect(helper).toContain('ASSET_FALLBACKS.entity');
@@ -46,6 +46,7 @@ describe('Progress workspace page contracts', () => {
     it('keeps both progress pages usable on narrow screens without hiding their data model', () => {
         const advancedStats = read('src/assets/css/advanced-stats.css');
         const achievements = read('src/assets/css/achievements.css');
+        const chronicle = read('src/assets/css/achievement-chronicle.css');
 
         expect(advancedStats).toContain('@media (max-width: 599px)');
         expect(advancedStats).toContain('.advanced-stats__units-mobile { display: grid;');
@@ -53,8 +54,9 @@ describe('Progress workspace page contracts', () => {
         expect(advancedStats).toContain('.advanced-stats__army-list { display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); }');
         expect(advancedStats).toContain('.advanced-stats__trend-tooltip');
         expect(achievements).toContain('.achievement-filter-dialog { border-top:');
-        expect(achievements).toContain('.achievement-grid { grid-template-columns: 1fr;');
-        expect(achievements).not.toMatch(/glow/i);
+        expect(chronicle).toContain('.achievement-chronicle-map { background-size: 20px 20px; display: grid;');
+        expect(chronicle).toContain('.achievement-chronicle-paths { display: none; }');
+        expect(`${achievements}\n${chronicle}`).not.toMatch(/glow/i);
     });
 
     it('registers the requested localhost fixture boundaries', () => {
