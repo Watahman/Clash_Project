@@ -21,7 +21,7 @@ vi.mock('../../src/assets/js/Data/config.js', () => ({
     setCanAutosave: mocks.setCanAutosave,
     setLoading: mocks.setLoading
 }));
-vi.mock('../../src/assets/js/templates/CWLTemplates.js?v=20260829-public-auth-v1', () => ({
+vi.mock('../../src/assets/js/templates/CWLTemplates.js?v=20260830-player-drag-v3', () => ({
     createPlayerCard: vi.fn(),
     createClanCard: vi.fn(),
     applyClanLeagueRestriction: vi.fn()
@@ -149,7 +149,7 @@ describe('CWL Planner guest flow', () => {
             savedAt: '2026-08-28T00:00:00.000Z'
         }));
 
-        const templates = await import('../../src/assets/js/templates/CWLTemplates.js?v=20260829-public-auth-v1');
+        const templates = await import('../../src/assets/js/templates/CWLTemplates.js?v=20260830-player-drag-v3');
         const { initPlanIO, loadAllPlans } = await import(
             '../../src/assets/js/cwl/cwl-plan-io.js?v=20260829-public-auth-v1'
         );

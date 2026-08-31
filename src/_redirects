@@ -13,14 +13,11 @@
 /subpages/cwl-operation-board.html /cwl-tracker 301
 /subpages/groups.html /clan-management 301
 /subpages/bracket-generator.html /bracket-generator 301
-/subpages/privacy /privacy 301
-/subpages/privacy.html /privacy 301
-/subpages/cookies /cookies 301
-/subpages/cookies.html /cookies 301
-/subpages/terms /terms 301
-/subpages/terms.html /terms 301
-/subpages/contact /contact 301
-/subpages/contact.html /contact 301
+# Worker-owned legacy legal routes stay out of the asset redirect table so internal asset fetches cannot loop.
+/privacy.html /privacy 301
+/cookies.html /cookies 301
+/terms.html /terms 301
+/contact.html /contact 301
 /privacy/ /privacy 301
 /cookies/ /cookies 301
 /terms/ /terms 301

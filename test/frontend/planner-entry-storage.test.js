@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
     onUserProfileUpdate: vi.fn()
 }));
 
-vi.mock('../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1', () => ({
+vi.mock('../../src/assets/js/i18n/i18n.js?v=20260831-master-live-v1', () => ({
     getLanguage: () => 'en',
     initI18n: vi.fn(),
     t: (key, values = {}) => Object.entries(values).reduce(
@@ -71,7 +71,7 @@ async function mountDashboard(userId, plan) {
     mocks.checkUserId.mockResolvedValue({ id: userId, name: userId, accounts: [] });
     mocks.getAllPlans.mockResolvedValue(plan ? [plan] : []);
     renderDashboardShell();
-    await import('../../src/assets/js/pages/dashboard.js?v=20260829-public-dashboard-v1');
+    await import('../../src/assets/js/pages/dashboard.js?v=20260831-dashboard-v1');
     await vi.waitFor(() => expect(mocks.getAllPlans).toHaveBeenCalledWith(userId));
     await vi.waitFor(() => expect(document.querySelector('[data-plan-open-ready]') ||
         document.querySelector('#dashboard-plan-list a')).not.toBeNull());
@@ -111,5 +111,28 @@ describe('planner entry storage flow', () => {
         expect(localStorage.getItem('clashpanel:planner:user-a:active')).toBe('plan-a');
         expect(localStorage.getItem('clashpanel:planner:user-b:active')).toBe('plan-b');
         expect(localStorage.getItem('planner_id')).toBeNull();
+    });
+
+    it('shows and prioritizes the local guest draft without requiring cloud access', async () => {
+        mocks.resolveAuthState.mockResolvedValue({ status: 'guest', session: null });
+        localStorage.setItem('clashpanel:guest:planner:current', JSON.stringify({
+            version: 1,
+            name: 'September CWL',
+            info: { schemaVersion: 5, freePlayers: [], clans: [], pollMeta: {} },
+            savedAt: '2026-08-31T12:00:00Z'
+        }));
+        renderDashboardShell();
+
+        await import('../../src/assets/js/pages/dashboard.js?v=20260831-dashboard-v1');
+        await vi.waitFor(() => expect(document.querySelector('#dashboard-plan-list strong')?.textContent)
+            .toBe('September CWL'));
+
+        expect(document.querySelector('#dashboard-plan-list a')?.getAttribute('href'))
+            .toBe('/app/cwl-planner');
+        expect(document.querySelector('#dashboard-next-action')?.getAttribute('href'))
+            .toBe('/app/cwl-planner');
+        expect(document.querySelector('#dashboard-next-title')?.textContent)
+            .toBe('dashboard.v2ContinueTitle');
+        expect(mocks.getAllPlans).not.toHaveBeenCalled();
     });
 });

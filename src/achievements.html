@@ -6,7 +6,7 @@
     <script src="/assets/js/Data/analytics.js" defer></script>
     <title>Achievements Coming Soon | ClashPanel</title>
     <meta name="description" content="Achievements are coming soon to ClashPanel: a private way to understand milestones across your tracked activity.">
-    <meta name="robots" content="noindex, follow">
+    <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#0d1117">
     <link rel="canonical" href="https://clashpanel.com/achievements">
     <meta property="og:type" content="website">
@@ -18,7 +18,7 @@
     <meta name="twitter:title" content="Achievements Coming Soon | ClashPanel">
     <meta name="twitter:description" content="Achievements are coming soon to ClashPanel.">
     <script type="application/ld+json">
-        {"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"ClashPanel Achievements","url":"https://clashpanel.com/achievements","description":"Achievements are a planned private workspace for understanding milestones across tracked ClashPanel activity.","applicationCategory":"GameApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ClashPanel","item":"https://clashpanel.com/"},{"@type":"ListItem","position":2,"name":"Achievements","item":"https://clashpanel.com/achievements"}]}]}
+        {"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"ClashPanel Achievements","url":"https://clashpanel.com/achievements","description":"Coming soon: a planned private workspace for understanding milestones across tracked ClashPanel activity.","applicationCategory":"GameApplication","operatingSystem":"Any"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ClashPanel","item":"https://clashpanel.com/"},{"@type":"ListItem","position":2,"name":"Achievements","item":"https://clashpanel.com/achievements"}]}]}
     </script>
     <link rel="icon" type="image/png" href="/assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="/assets/css/workspace-loading.css">
@@ -37,8 +37,8 @@
 <a class="skip-link" href="#main-content">Skip to content</a>
 <header class="public-header">
     <a class="public-brand" href="/" aria-label="ClashPanel home"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
-    <nav class="public-nav" id="public-nav" aria-label="Public navigation"><a href="/#features">Tools</a><a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about">About</a><a href="/changelog">Changelog</a></nav>
-    <div class="public-actions"><button type="button" data-language-control>Language</button><button class="theme-button" type="button" data-theme-toggle aria-label="Switch theme"><span aria-hidden="true">◐</span></button><a class="link-button" href="/subpages/login">Log in</a><a class="button button-primary" href="/subpages/register">Start for free</a></div>
+    <nav class="public-nav" id="public-nav" data-i18n-aria-label="public.navigation" aria-label="Public navigation"><a href="/#features" data-i18n="public.nav.tools">Tools</a><a href="/minigames">Games</a><a href="/guides" data-i18n="public.nav.guides">Guides</a><a href="/methodology" data-i18n="public.nav.methodology">Methodology</a><a href="/about" data-i18n="public.nav.about">About</a><a href="/changelog" data-i18n="public.nav.changelog">Changelog</a></nav>
+    <div class="public-actions"><button type="button" data-language-control data-i18n="header.language">Language</button><button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme"><span aria-hidden="true">◐</span></button><a class="link-button" href="/subpages/login" data-public-auth-guest data-i18n="auth.login">Log in</a><a class="button button-primary" href="/dashboard" data-public-start data-i18n="public.startFree">Start for free</a></div>
     <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" aria-label="Open menu"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
 </header>
 
@@ -67,8 +67,29 @@
         <div class="pp-boundary" data-reveal><p class="eyebrow">Private by design</p><h2 id="achievement-boundary-title">Personal progress stays inside your workspace.</h2><p>Public pages will explain the system without showing player names, tags or account history. When the feature is ready, your own results will remain available only after you choose to connect an account.</p><a href="/privacy" class="text-link">Read the privacy page <span aria-hidden="true">→</span></a></div>
     </section>
 
-    <section class="pp-bottom-cta" data-reveal><div><p class="eyebrow">Make progress yours</p><h2>Build your ClashPanel workspace.</h2><p>Start free and keep your clan work in one place while Achievements is in development.</p></div><a class="button button-primary button-large" href="/subpages/register">Start for free</a></section>
+    <section class="pp-bottom-cta" data-reveal><div><p class="eyebrow">Make progress yours</p><h2>Build your ClashPanel workspace.</h2><p>Start free and keep your clan work in one place while Achievements is in development.</p></div><a class="button button-primary button-large" href="/dashboard" data-public-start>Start for free</a></section>
 </main>
-<footer class="public-footer"><div class="public-footer-main"><a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a><nav aria-label="Footer navigation"><a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about">About</a><a href="/changelog">Changelog</a><a href="/privacy">Privacy</a><a href="/cookies">Cookies</a><a href="/terms">Terms of use</a><a href="/contact">Contact</a><a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer">Supercell Fan Content Policy</a><button type="button" class="public-footer-link" data-cookie-preferences hidden>Cookie preferences</button></nav></div><p class="public-disclaimer">ClashPanel is unofficial and is not endorsed by Supercell. For more information, see Supercell's Fan Content Policy.</p><p class="public-footer-meta">© 2026 ClashPanel · Not affiliated with Supercell</p></footer>
+<footer class="public-footer">
+    <div class="public-footer-main">
+        <a class="public-brand" href="/" data-i18n-aria-label="public.homeLabel" aria-label="ClashPanel home">
+            <img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160">
+            <span>ClashPanel</span>
+        </a>
+        <nav data-i18n-aria-label="public.footerNav" aria-label="Footer navigation">
+            <a href="/guides" data-i18n="public.footer.guides">Guides</a>
+            <a href="/methodology" data-i18n="public.footer.methodology">Methodology</a>
+            <a href="/about" data-i18n="public.footer.about">About</a>
+            <a href="/changelog" data-i18n="public.footer.changelog">Changelog</a>
+            <a href="/privacy" data-i18n="public.privacy">Privacy</a>
+            <a href="/cookies" data-i18n="public.cookies">Cookies</a>
+            <a href="/terms" data-i18n="public.terms">Terms of use</a>
+            <a href="/contact" data-i18n="public.contact">Contact</a>
+            <a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer" data-i18n="public.fanPolicy">Supercell Fan Content Policy</a>
+            <button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button>
+        </nav>
+    </div>
+    <p class="public-disclaimer" data-i18n="public.disclaimer">ClashPanel is unofficial and is not endorsed by Supercell. For more information, see Supercell's Fan Content Policy.</p>
+    <p class="public-footer-meta" data-i18n="public.footer.meta">© 2026 ClashPanel · Not affiliated with Supercell</p>
+</footer>
 </body>
 </html>

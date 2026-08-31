@@ -7,6 +7,7 @@ import { extname, resolve, sep } from 'node:path';
 import { Readable } from 'node:stream';
 import { APP_ALIASES, APP_ASSETS } from '../worker/app-routes.js';
 import { isExportAssetPath, proxyExportAsset } from '../worker/export-assets.js';
+import { PUBLIC_ASSETS, publicRouteRedirect } from '../worker/public-routes.js';
 
 const root = resolve(process.env.STATIC_ROOT || 'src');
 const port = Number(process.env.STATIC_PORT || 5173);
@@ -61,6 +62,47 @@ async function proxyExportAssetLocally(request, response) {
     }
 }
 
+function normalizedPublicPath(pathname) {
+    return pathname.toLowerCase().replace(/\/+$/, '') || '/';
+}
+
+function writeRouteRedirect(response, incoming, destination) {
+    response.writeHead(301, { Location: `${destination}${incoming.search}` });
+    response.end();
+}
+
+function resolveStaticPath(incoming) {
+    const publicPath = normalizedPublicPath(incoming.pathname);
+    const publicAsset = PUBLIC_ASSETS.get(publicPath);
+    if (publicAsset) return `${publicAsset}.html`;
+
+    const canonical = APP_ALIASES.get(incoming.pathname) || incoming.pathname;
+    return APP_ASSETS.get(canonical) || canonical;
+}
+
+async function serveResolvedFile(request, response, requested) {
+    const metadata = await stat(requested);
+    const file = metadata.isDirectory() ? resolve(requested, 'index.html') : requested;
+    const fileMetadata = metadata.isDirectory() ? await stat(file) : metadata;
+    response.writeHead(200, {
+        'Content-Type': mimeTypes.get(extname(file).toLowerCase()) || 'application/octet-stream',
+        'Content-Length': fileMetadata.size,
+        'Cache-Control': 'no-cache'
+    });
+    if (request.method === 'HEAD') response.end();
+    else createReadStream(file).pipe(response);
+}
+
+async function serveHtmlFallback(request, response, requested) {
+    if (extname(requested)) return false;
+    try {
+        await serveResolvedFile(request, response, `${requested}.html`);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
 async function serveFile(request, response) {
     if (!['GET', 'HEAD'].includes(request.method || 'GET')) {
         response.writeHead(405, { Allow: 'GET, HEAD' });
@@ -77,8 +119,13 @@ async function serveFile(request, response) {
         response.end('Bad request');
         return;
     }
-    const canonical = APP_ALIASES.get(pathname) || pathname;
-    const mapped = APP_ASSETS.get(canonical) || canonical;
+    const redirect = publicRouteRedirect(pathname);
+    if (redirect) {
+        writeRouteRedirect(response, incoming, redirect);
+        return;
+    }
+
+    const mapped = resolveStaticPath(incoming);
     const requested = resolve(root, `.${mapped === '/' ? '/index.html' : mapped}`);
     if (requested !== root && !requested.startsWith(`${root}${sep}`)) {
         response.writeHead(403);
@@ -87,34 +134,12 @@ async function serveFile(request, response) {
     }
 
     try {
-        const metadata = await stat(requested);
-        const file = metadata.isDirectory() ? resolve(requested, 'index.html') : requested;
-        const fileMetadata = metadata.isDirectory() ? await stat(file) : metadata;
-        response.writeHead(200, {
-            'Content-Type': mimeTypes.get(extname(file).toLowerCase()) || 'application/octet-stream',
-            'Content-Length': fileMetadata.size,
-            'Cache-Control': 'no-cache'
-        });
-        if (request.method === 'HEAD') response.end();
-        else createReadStream(file).pipe(response);
-    } catch {
-        if (!extname(requested)) {
-            try {
-                const htmlFile = `${requested}.html`;
-                const htmlMetadata = await stat(htmlFile);
-                response.writeHead(200, {
-                    'Content-Type': mimeTypes.get('.html'),
-                    'Content-Length': htmlMetadata.size,
-                    'Cache-Control': 'no-cache'
-                });
-                if (request.method === 'HEAD') response.end();
-                else createReadStream(htmlFile).pipe(response);
-                return;
-            } catch {}
-        }
-        response.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-        response.end('Not found');
-    }
+        await serveResolvedFile(request, response, requested);
+        return;
+    } catch {}
+    if (await serveHtmlFallback(request, response, requested)) return;
+    response.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+    response.end('Not found');
 }
 
 createServer((request, response) => {

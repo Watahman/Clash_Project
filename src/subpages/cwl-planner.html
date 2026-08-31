@@ -20,9 +20,9 @@
     <link rel="stylesheet" href="../assets/css/cwl-auto-plan.css">
     <link rel="stylesheet" href="../assets/css/cwl-optimize-plan.css">
     <script src="../assets/js/Data/runtime-config.js"></script>
-    <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260829-public-dashboard-v1"></script>
+    <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260831-master-live-v1"></script>
     <script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-    <script type="module" src="../assets/js/pages/cwl-planner.js?v=20260830-player-drag-v3"></script>
+    <script type="module" src="../assets/js/pages/cwl-planner.js?v=20260831-master-live-v1"></script>
     <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
@@ -67,7 +67,7 @@
             </div>
             <p>Build and balance your CWL clan rosters.</p>
         </div>
-        <span class="cwl-save-status" id="cwl-save-status" role="status" aria-live="polite" data-state="guest" data-i18n="planner.guestStored">Guest plan · Stored on this device</span>
+        <span class="cwl-save-status" id="cwl-save-status" role="status" aria-live="polite" data-state="guest" data-i18n="planner.guestStored">Saved locally on this device</span>
     </header>
 
     <section class="cwl-context-toolbar" aria-label="Plan settings" data-i18n-aria-label="planner.settings">
@@ -89,7 +89,7 @@
             </details>
             <button class="button button-secondary" id="cwl-undo-plan-button" type="button" disabled>Undo</button>
             <button class="button button-secondary" id="cwl-new-plan-button" type="button" data-i18n="cwl.newPlan">New plan</button>
-            <button class="button button-primary" id="cwl-save-plan-button" type="button" data-i18n="cwl.save">Save</button>
+            <button class="button button-primary" id="cwl-save-plan-button" type="button" data-i18n="planner.saveToAccount">Save to account</button>
         </div>
         <p class="cwl-plan-limit-feedback" id="cwl-plan-limit-feedback" role="alert" data-i18n="cwl.planLimitReached" hidden>You can save up to 3 plans. Delete an existing plan before saving a new one.</p>
     </section>
@@ -173,8 +173,8 @@
     <dialog id="cwl-guest-save-dialog" class="cp-modal cwl-guest-save-dialog" aria-labelledby="cwl-guest-save-title" aria-describedby="cwl-guest-save-description">
         <div class="cwl-guest-save-dialog__body">
             <p class="page-kicker" data-i18n="planner.kicker">CWL Planner</p>
-            <h2 id="cwl-guest-save-title" data-i18n="planner.saveGuestTitle">Sign in to save your plan</h2>
-            <p id="cwl-guest-save-description" data-i18n="planner.saveGuestDescription">Your current plan will stay available while you sign in.</p>
+            <h2 id="cwl-guest-save-title" data-i18n="planner.saveGuestTitle">Save this plan to your account</h2>
+            <p id="cwl-guest-save-description" data-i18n="planner.saveGuestDescription">It is already saved locally on this device. Sign in to keep it across devices.</p>
             <div class="cwl-guest-save-dialog__actions">
                 <button class="button button-secondary" type="button" data-cwl-guest-save-close data-i18n="common.close">Close</button>
                 <button class="button button-primary" type="button" data-cwl-guest-save-login data-i18n="auth.login">Log in</button>

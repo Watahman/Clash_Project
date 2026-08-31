@@ -32,7 +32,7 @@
     <link rel="stylesheet" href="/assets/css/workspace-system.css?v=20260829-public-auth-v1">
     <script src="/assets/js/Data/runtime-config.js"></script>
     <script type="module" src="/assets/js/pages/public-site.js?v=20260829-public-header-cta-v2"></script>
-    <script type="module" src="/assets/js/pages/minigames-hub.js?v=20260828-seo-links"></script>
+    <script type="module" src="/assets/js/pages/minigames-hub.js?v=20260831-guest-local-v1"></script>
     <script type="module" src="/assets/js/pages/minigames-phase2b.js?v=20260814-entity-mode-fix"></script>
     <script type="module" src="/assets/js/pages/higher-lower.js?v=20260814-metric-card-labels"></script>
     <link rel="stylesheet" href="/assets/css/light-theme.css?v=20260812-redesign">
@@ -53,12 +53,12 @@
 <a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
 <header class="public-header">
     <a class="public-brand" href="/" aria-label="ClashPanel home"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
-    <nav class="public-nav" id="public-nav" aria-label="Public navigation"><a href="/#features">Tools</a><a href="/minigames" aria-current="page">Games</a><a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about">About</a><a href="/changelog">Changelog</a></nav>
+    <nav class="public-nav" id="public-nav" data-i18n-aria-label="public.navigation" aria-label="Public navigation"><a href="/#features" data-i18n="public.nav.tools">Tools</a><a href="/minigames" aria-current="page">Games</a><a href="/guides" data-i18n="public.nav.guides">Guides</a><a href="/methodology" data-i18n="public.nav.methodology">Methodology</a><a href="/about" data-i18n="public.nav.about">About</a><a href="/changelog" data-i18n="public.nav.changelog">Changelog</a></nav>
     <div class="public-actions">
         <button type="button" data-language-control data-i18n="header.language">Language</button>
         <button class="theme-button" type="button" data-theme-toggle aria-label="Switch theme"><span aria-hidden="true">◐</span></button>
         <a class="link-button" href="/subpages/login" data-i18n="auth.login">Log in</a>
-        <a class="button button-primary" href="/subpages/register" data-i18n="public.startFree">Start for free</a>
+        <a class="button button-primary" href="/dashboard" data-public-start data-i18n="public.startFree">Start for free</a>
     </div>
     <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" aria-label="Open menu"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
 </header>
@@ -209,6 +209,27 @@
     <aside class="minigames-policy" data-hub-i18n="policy">These are unofficial, text-and-statistics based fan quizzes. Images are recognition aids from the central local entity library and fall back gracefully when unavailable. ClashPanel is not endorsed by Supercell.</aside>
 </main>
 
-<footer class="public-footer"><div class="public-footer-main"><a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a><nav aria-label="Footer navigation"><a href="/privacy">Privacy</a><a href="/cookies">Cookies</a><a href="/terms">Terms of use</a><a href="/contact">Contact</a><a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer">Supercell Fan Content Policy</a></nav></div><p class="public-disclaimer">ClashPanel is unofficial and is not endorsed by Supercell. For more information, see Supercell's Fan Content Policy.</p><p class="public-footer-meta">© 2026 ClashPanel · Not affiliated with Supercell</p></footer>
+<footer class="public-footer">
+    <div class="public-footer-main">
+        <a class="public-brand" href="/" data-i18n-aria-label="public.homeLabel" aria-label="ClashPanel home">
+            <img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160">
+            <span>ClashPanel</span>
+        </a>
+        <nav data-i18n-aria-label="public.footerNav" aria-label="Footer navigation">
+            <a href="/guides" data-i18n="public.footer.guides">Guides</a>
+            <a href="/methodology" data-i18n="public.footer.methodology">Methodology</a>
+            <a href="/about" data-i18n="public.footer.about">About</a>
+            <a href="/changelog" data-i18n="public.footer.changelog">Changelog</a>
+            <a href="/privacy" data-i18n="public.privacy">Privacy</a>
+            <a href="/cookies" data-i18n="public.cookies">Cookies</a>
+            <a href="/terms" data-i18n="public.terms">Terms of use</a>
+            <a href="/contact" data-i18n="public.contact">Contact</a>
+            <a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer" data-i18n="public.fanPolicy">Supercell Fan Content Policy</a>
+            <button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button>
+        </nav>
+    </div>
+    <p class="public-disclaimer" data-i18n="public.disclaimer">ClashPanel is unofficial and is not endorsed by Supercell. For more information, see Supercell's Fan Content Policy.</p>
+    <p class="public-footer-meta" data-i18n="public.footer.meta">© 2026 ClashPanel · Not affiliated with Supercell</p>
+</footer>
 </body>
 </html>

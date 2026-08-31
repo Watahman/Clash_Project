@@ -24,12 +24,12 @@ const removedProgressSelectors = [
 ].join(', ');
 
 describe('Public progress page contracts', () => {
-    it.each([...progressPages])('%s is a noindex Coming Soon page with one canonical H1', (path, canonical) => {
+    it.each([...progressPages])('%s is an indexable Coming Soon page with one canonical H1', (path, canonical) => {
         const document = documentFor(path);
         const h1 = document.querySelector('h1');
         const status = document.querySelector('.pp-coming-soon-status');
 
-        expect(document.querySelector('meta[name="robots"]')?.content).toMatch(/^noindex,\s*follow$/i);
+        expect(document.querySelector('meta[name="robots"]')?.content).toMatch(/^index,\s*follow$/i);
         expect(document.querySelector('link[rel="canonical"]')?.href).toBe(canonical);
         expect(document.querySelectorAll('h1')).toHaveLength(1);
         expect(document.querySelector('.workspace-coming-soon-badge')).not.toBeNull();
@@ -37,6 +37,10 @@ describe('Public progress page contracts', () => {
         expect(status?.closest('h1')).toBeNull();
         expect(h1?.textContent).not.toMatch(/coming\s+soon/i);
         expect(document.body.textContent).toMatch(/coming\s+soon/i);
+        expect(JSON.parse(document.querySelector('script[type="application/ld+json"]')?.textContent || '{}'))
+            .toMatchObject({ '@graph': expect.arrayContaining([
+                expect.objectContaining({ description: expect.stringMatching(/coming soon/i) })
+            ]) });
     });
 
     it.each([...progressPages])('%s keeps the public surface text-only and source-aware', path => {

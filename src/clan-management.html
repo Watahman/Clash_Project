@@ -45,8 +45,8 @@
 <a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
 <header class="public-header">
     <a class="public-brand" href="/" aria-label="ClashPanel home"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
-    <nav class="public-nav" id="public-nav" aria-label="Public navigation"><a href="/#features">Tools</a><a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about">About</a><a href="/changelog">Changelog</a></nav>
-    <div class="public-actions"><button type="button" data-language-control data-i18n="header.language">Language</button><button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme"><span aria-hidden="true">◐</span></button><a class="link-button" href="/subpages/login" data-i18n="auth.login">Log in</a><a class="button button-primary" href="/subpages/register" data-i18n="public.startFree">Start for free</a></div>
+    <nav class="public-nav" id="public-nav" data-i18n-aria-label="public.navigation" aria-label="Public navigation"><a href="/#features" data-i18n="public.nav.tools">Tools</a><a href="/minigames">Games</a><a href="/guides" data-i18n="public.nav.guides">Guides</a><a href="/methodology" data-i18n="public.nav.methodology">Methodology</a><a href="/about" data-i18n="public.nav.about">About</a><a href="/changelog" data-i18n="public.nav.changelog">Changelog</a></nav>
+    <div class="public-actions"><button type="button" data-language-control data-i18n="header.language">Language</button><button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme"><span aria-hidden="true">◐</span></button><a class="link-button" href="/subpages/login" data-public-auth-guest data-i18n="auth.login">Log in</a><a class="button button-primary" href="/dashboard" data-public-start data-i18n="public.startFree">Start for free</a></div>
     <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" data-i18n-aria-label="public.openMenu" aria-label="Open menu"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
 </header>
 <main id="main-content">
@@ -59,6 +59,27 @@
     <section class="home-v2-products"><article class="home-v2-product-section"><div class="home-v2-product-copy" data-reveal="left"><p class="eyebrow" data-i18n="family.workflow.kicker">Shared clan context</p><h2 data-i18n="family.workflow.title">One family. Shared context.</h2><p data-i18n="family.workflow.intro">Keep the relationships between clans, members and player accounts intact so the same information can be reused when CWL planning starts.</p><div class="home-v2-feature-lines"><div><strong data-i18n="family.network.f1.title">Linked clans</strong><span data-i18n="family.network.f1.desc">Keep each clan in the family visible and reusable in the same workspace.</span></div><div><strong data-i18n="family.people.f1.title">Multiple player accounts</strong><span data-i18n="family.people.f1.desc">Link several player tags to one member instead of treating every account as a separate person.</span></div><div><strong data-i18n="family.people.f2.title">Per-account availability</strong><span data-i18n="family.people.f2.desc">Collect CWL availability separately for each linked account and each league day.</span></div></div></div><div class="cp-preview-note" data-reveal="right"><strong data-public-copy="demo.familySourceLabel">Use your own source data</strong><p data-public-copy="demo.familySource">To create a real family, bring the invitation code, member list, account tags and poll answers from your private workspace. The names here are fixture values.</p><div class="resource-links"><a class="button button-secondary" href="/cwl-planner">Planner overview</a><a class="button button-secondary" href="/guides#availability">Availability guide</a><a class="button button-secondary" href="/methodology#limitations">Data limitations</a></div></div></article></section>
     <section class="home-v2-bottom-cta" data-reveal><div><p class="eyebrow" data-i18n="family.cta.kicker">Managing more than one clan?</p><h2 data-i18n="family.cta.title">Organize your Clan Family.</h2><p data-i18n="family.cta.desc">Connect the clans, members and accounts you already manage and reuse that context across ClashPanel.</p></div><a class="button button-primary button-large" href="/app/clan-management" data-i18n="family.cta.button">Open Clan Families</a></section>
 </main>
-<footer class="public-footer"><div class="public-footer-main"><a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a><nav aria-label="Footer navigation" data-i18n-aria-label="public.footerNav"><a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about" data-i18n="public.about">About</a><a href="/changelog">Changelog</a><a href="/privacy" data-i18n="public.privacy">Privacy</a><a href="/cookies" data-i18n="public.cookies">Cookies</a><a href="/terms" data-i18n="public.terms">Terms of use</a><a href="/contact" data-i18n="public.contact">Contact</a><a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer" data-i18n="public.fanPolicy">Supercell Fan Content Policy</a><button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button></nav></div><p class="public-disclaimer" data-i18n="public.disclaimer">ClashPanel is unofficial and is not endorsed by Supercell. For more information, see Supercell's Fan Content Policy.</p><p class="public-footer-meta" data-i18n="home.footer">© 2026 ClashPanel · Not affiliated with Supercell</p></footer>
+<footer class="public-footer">
+    <div class="public-footer-main">
+        <a class="public-brand" href="/" data-i18n-aria-label="public.homeLabel" aria-label="ClashPanel home">
+            <img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160">
+            <span>ClashPanel</span>
+        </a>
+        <nav data-i18n-aria-label="public.footerNav" aria-label="Footer navigation">
+            <a href="/guides" data-i18n="public.footer.guides">Guides</a>
+            <a href="/methodology" data-i18n="public.footer.methodology">Methodology</a>
+            <a href="/about" data-i18n="public.footer.about">About</a>
+            <a href="/changelog" data-i18n="public.footer.changelog">Changelog</a>
+            <a href="/privacy" data-i18n="public.privacy">Privacy</a>
+            <a href="/cookies" data-i18n="public.cookies">Cookies</a>
+            <a href="/terms" data-i18n="public.terms">Terms of use</a>
+            <a href="/contact" data-i18n="public.contact">Contact</a>
+            <a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer" data-i18n="public.fanPolicy">Supercell Fan Content Policy</a>
+            <button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button>
+        </nav>
+    </div>
+    <p class="public-disclaimer" data-i18n="public.disclaimer">ClashPanel is unofficial and is not endorsed by Supercell. For more information, see Supercell's Fan Content Policy.</p>
+    <p class="public-footer-meta" data-i18n="public.footer.meta">© 2026 ClashPanel · Not affiliated with Supercell</p>
+</footer>
 </body>
 </html>

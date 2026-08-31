@@ -70,6 +70,8 @@ describe('Public marketing shell', () => {
         expect(document.querySelectorAll('.home3-progress-card--coming-soon img')).toHaveLength(0);
         expect(document.querySelectorAll('.home3-progress-card--coming-soon .home3-progress-art')).toHaveLength(2);
         expect(document.querySelectorAll('.home3-progress-card--coming-soon .home3-progress-title')).toHaveLength(2);
+        expect(document.querySelector('.home3-ecosystem')?.textContent).toMatch(/Advanced Stats[\s\S]*Coming soon[\s\S]*Achievements[\s\S]*Coming soon/i);
+        expect(document.querySelector('.home3-lead')?.textContent).toMatch(/Advanced Stats and Achievements are coming soon/i);
         expect(read('src/index.html')).not.toMatch(/previews\/home\/(?:advanced-stats|achievements)\.webp/);
         expect(document.querySelector('.home3-feature-photo')).toBeNull();
         expect(document.querySelector('.home3-trust')).not.toBeNull();
@@ -82,6 +84,35 @@ describe('Public marketing shell', () => {
 
         expect(document.querySelector('a[href="/bracket-generator"]')).not.toBeNull();
         expect(document.querySelector('a[href="/cwl-tracker"]')).not.toBeNull();
+    });
+
+    it('labels unreleased progress claims throughout the homepage ecosystem', () => {
+        const document = documentFor('src/index.html');
+        const ecosystem = document.querySelector('.home3-ecosystem')?.textContent || '';
+        const progress = document.querySelector('.home3-progress-showcase')?.textContent || '';
+
+        expect(document.querySelector('.home3-lead')?.textContent)
+            .toMatch(/Advanced Stats and Achievements are coming soon/i);
+        expect(ecosystem).toMatch(/Advanced Stats[\s\S]*Coming soon[\s\S]*Achievements[\s\S]*Coming soon/i);
+        expect(progress).toMatch(/Advanced Stats[\s\S]*Coming soon[\s\S]*Achievements[\s\S]*Coming soon/i);
+    });
+
+    it('publishes complete initial legal content without requiring JavaScript', () => {
+        const privacy = documentFor('src/subpages/privacy.html').body.textContent;
+        const cookies = documentFor('src/subpages/cookies.html').body.textContent;
+        const terms = documentFor('src/subpages/terms.html').body.textContent;
+
+        expect(privacy).toMatch(/account|authentication/i);
+        expect(privacy).toMatch(/analytics|technical/i);
+        expect(privacy).toMatch(/retention|rights|delete|erase/i);
+        expect(cookies).toMatch(/essential storage/i);
+        expect(cookies).toMatch(/functional storage/i);
+        expect(cookies).toMatch(/analytics storage/i);
+        expect(cookies).toMatch(/advertising storage/i);
+        expect(cookies).toMatch(/guest CWL Planner drafts|bracket state|minigame progress/i);
+        expect(terms).toMatch(/unofficial.*not endorsed by Supercell/i);
+        expect(terms).toMatch(/misuse|account trading|cheating/i);
+        expect(terms).toMatch(/availability|liability|Belgian law|contact/i);
     });
 
     it('keeps public feature CTAs on the permanent application routes', () => {
@@ -129,18 +160,25 @@ describe('Public marketing shell', () => {
 
     it('cache-busts the complete changed public module graph', () => {
         const productVersion = 'v=20260821-product-home';
-        const translationsVersion = 'v=20260829-public-auth-v1';
+        const changedGraphVersion = 'v=20260831-master-live-v1';
         const publicVersion = 'v=20260829-public-auth-v1';
+        const publicHeaderVersion = 'v=20260829-public-header-cta-v2';
         const entry = read('src/assets/js/pages/public-site.js');
 
-        expect(entry).toContain(`i18n.js?${publicVersion}`);
+        expect(read('src/index.html')).toContain(`public-site.js?${changedGraphVersion}`);
+        ['contact', 'privacy', 'cookies', 'terms'].forEach(name => {
+            const policyPage = read(`src/subpages/${name}.html`);
+            expect(policyPage).toContain(`public-site.js?${changedGraphVersion}`);
+            expect(policyPage).toContain(`public-policy.js?${changedGraphVersion}`);
+        });
+        expect(entry).toContain(`i18n.js?${changedGraphVersion}`);
         ['theme-manager.js', 'public-header.js']
-            .forEach(file => expect(entry).toContain(`${file}?${publicVersion}`));
+            .forEach(file => expect(entry).toContain(`${file}?${publicHeaderVersion}`));
         expect(entry).toContain('public-resource-pages.js?v=20260829-public-auth-v1');
-        expect(read('src/assets/js/i18n/i18n.js')).toContain(`runtime-translations.js?${translationsVersion}`);
-        expect(read('src/assets/js/i18n/runtime-translations.js')).toContain(`public-resource-locales.js?${productVersion}`);
+        expect(read('src/assets/js/i18n/i18n.js')).toContain(`runtime-translations.js?${changedGraphVersion}`);
+        expect(read('src/assets/js/i18n/runtime-translations.js')).toContain(`public-resource-locales.js?${changedGraphVersion}`);
         const resources = read('src/assets/js/i18n/public-resource-locales.js');
-        expect(resources).toContain(`public-home-v3-locales.js?${productVersion}`);
+        expect(resources).toContain(`public-home-v3-locales.js?${changedGraphVersion}`);
         expect(resources).toContain(`public-home-v3-micro-locales.js?${productVersion}`);
         expect(resources).toContain(`public-feature-extra-locales.js?${productVersion}`);
     });

@@ -12,8 +12,8 @@
     <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="../assets/css/workspace-system.css?v=20260829-public-auth-v1">
     <script src="../assets/js/Data/runtime-config.js"></script>
-    <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260829-public-dashboard-v1"></script>
-    <script type="module" src="../assets/js/pages/dashboard.js?v=20260829-public-dashboard-v1"></script>
+    <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260831-master-live-v1"></script>
+    <script type="module" src="../assets/js/pages/dashboard.js?v=20260831-dashboard-v1"></script>
     <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
@@ -54,7 +54,7 @@
             <section class="workspace-section-block" aria-labelledby="recent-plans-title">
                 <div class="workspace-section-heading">
                     <div><p class="page-kicker" data-i18n="dashboard.recent">Recent</p><h2 id="recent-plans-title" data-i18n="nav.savedPlans">Saved plans</h2></div>
-                    <a href="/app/cwl-planner-drafts" data-i18n="dashboard.allPlans">All plans →</a>
+                    <a href="/app/cwl-planner-drafts" data-module-id="drafts" data-module-action data-i18n="dashboard.allPlans">All plans →</a>
                 </div>
                 <p id="dashboard-plan-status" class="workspace-inline-status" role="status" aria-live="polite" data-i18n="dashboard.loadingPlans">Loading plans…</p>
                 <div class="workspace-table-wrap">
@@ -68,13 +68,13 @@
             <aside class="workspace-section-block workspace-groups-summary" aria-labelledby="recent-groups-title">
                 <div class="workspace-section-heading">
                     <div><p class="page-kicker" data-i18n="dashboard.recent">Recent</p><h2 id="recent-groups-title" data-i18n="nav.groups">Clan Family</h2></div>
-                    <a href="/app/clan-management" data-i18n="dashboard.manageGroups">Manage →</a>
+                    <a href="/app/clan-management" data-module-id="groups" data-module-action data-i18n="dashboard.manageGroups">Manage →</a>
                 </div>
                 <p id="dashboard-group-status" class="workspace-inline-status" role="status" aria-live="polite" data-i18n="dashboard.loadingGroups">Loading Clan Families…</p>
                 <div id="dashboard-group-list"></div>
-                <button id="dashboard-account-line" class="workspace-account-line" type="button" hidden>
+                <button id="dashboard-account-line" class="workspace-account-line" type="button" data-module-id="profile" hidden>
                     <span><strong id="dashboard-account-count">0</strong><small data-i18n="dashboard.linkedAccounts">linked accounts</small></span>
-                    <span data-i18n="dashboard.openProfile">Open profile →</span>
+                    <span data-module-action data-i18n="dashboard.openProfile">Open profile →</span>
                 </button>
             </aside>
         </div>
@@ -87,11 +87,11 @@
             <a href="/app/explore" data-i18n="dashboard.v2ExploreAll">View all tools →</a>
         </div>
         <div class="dashboard-pillar-grid">
-            <a class="cp-module-card" data-pillar="manage" href="/app/clan-management"><img src="/assets/icons/pillars/manage.svg" alt=""><span class="page-kicker" data-i18n="shell.manage">Manage</span><h3 data-i18n="nav.groups">Clan Family</h3><p data-i18n="explore.groups.description">Keep members, linked accounts, clans and availability together.</p><strong data-i18n="explore.open">Open →</strong></a>
-            <a class="cp-module-card" data-pillar="plan" href="/app/cwl-planner"><img src="/assets/icons/pillars/plan.svg" alt=""><span class="page-kicker" data-i18n="shell.plan">Plan</span><h3 data-i18n="nav.cwl">CWL Planner</h3><p data-i18n="explore.planner.description">Build multi-clan rosters and seven-day CWL lineups.</p><strong data-i18n="explore.open">Open →</strong></a>
-            <a class="cp-module-card" data-pillar="compete" href="/app/cwl-tracker"><img src="/assets/icons/pillars/compete.svg" alt=""><span class="page-kicker" data-i18n="shell.compete">Compete</span><h3 data-i18n="nav.operation">CWL Tracker</h3><p data-i18n="explore.operation.description">Follow CWL rounds, standings, performance, bonuses and history.</p><strong data-i18n="explore.open">Open →</strong></a>
-            <a class="cp-module-card" data-pillar="play" href="/app/minigames"><img src="/assets/icons/pillars/play.svg" alt=""><span class="page-kicker" data-i18n="shell.play">Play</span><h3 data-i18n="nav.minigames">Games</h3><p data-i18n="explore.minigames.description">Take on daily and practice Clash knowledge challenges.</p><strong data-i18n="explore.open">Open →</strong></a>
-            <div class="cp-module-card cp-module-card--coming-soon" data-pillar="progress" aria-disabled="true"><img src="/assets/icons/pillars/progress.svg" alt=""><span class="page-kicker" data-i18n="shell.progression">Progress</span><h3><span data-i18n="nav.advancedStats">Advanced Stats</span> <span class="workspace-coming-soon-badge" data-i18n="common.comingSoon">(Coming soon)</span></h3><p data-i18n="explore.advancedStats.description">Understand tracked attacks, armies and long-term trends.</p><strong data-i18n="common.comingSoon">Coming soon</strong></div>
+            <a class="cp-module-card" data-module-id="groups" data-pillar="manage" href="/app/clan-management"><img src="/assets/icons/pillars/manage.svg" alt=""><span class="page-kicker" data-i18n="shell.manage">Manage</span><h3 data-i18n="nav.groups">Clan Family</h3><p data-i18n="explore.groups.description">Keep members, linked accounts, clans and availability together.</p><strong data-module-action data-i18n="explore.open">Open →</strong></a>
+            <a class="cp-module-card" data-module-id="planner" data-pillar="plan" href="/app/cwl-planner"><img src="/assets/icons/pillars/plan.svg" alt=""><span class="page-kicker" data-i18n="shell.plan">Plan</span><h3 data-i18n="nav.cwl">CWL Planner</h3><p data-i18n="explore.planner.description">Build multi-clan rosters and seven-day CWL lineups.</p><strong data-module-action data-i18n="explore.open">Open →</strong></a>
+            <a class="cp-module-card" data-module-id="operation" data-pillar="compete" href="/app/cwl-tracker"><img src="/assets/icons/pillars/compete.svg" alt=""><span class="page-kicker" data-i18n="shell.compete">Compete</span><h3 data-i18n="nav.operation">CWL Tracker</h3><p data-i18n="explore.operation.description">Follow CWL rounds, standings, performance, bonuses and history.</p><strong data-module-action data-i18n="explore.open">Open →</strong></a>
+            <a class="cp-module-card" data-module-id="minigames" data-pillar="play" href="/app/minigames"><img src="/assets/icons/pillars/play.svg" alt=""><span class="page-kicker" data-i18n="shell.play">Play</span><h3 data-i18n="nav.minigames">Games</h3><p data-i18n="explore.minigames.description">Take on daily and practice Clash knowledge challenges.</p><strong data-module-action data-i18n="explore.open">Open →</strong></a>
+            <div class="cp-module-card cp-module-card--coming-soon" data-module-id="advancedStats" data-pillar="progress" aria-disabled="true"><img src="/assets/icons/pillars/progress.svg" alt=""><span class="page-kicker" data-i18n="shell.progression">Progress</span><h3><span data-i18n="nav.advancedStats">Advanced Stats</span> <span class="workspace-coming-soon-badge" data-i18n="common.comingSoon">(Coming soon)</span></h3><p data-i18n="explore.advancedStats.description">Understand tracked attacks, armies and long-term trends.</p><strong data-module-action data-i18n="common.comingSoon">Coming soon</strong></div>
         </div>
     </section>
 </main>

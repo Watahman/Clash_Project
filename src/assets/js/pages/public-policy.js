@@ -1,15 +1,15 @@
-import { getLanguage, initI18n } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { getLanguage, initI18n } from '../i18n/i18n.js?v=20260831-master-live-v1';
 import { _BASE_URL } from '../Data/config.js';
 
 const SUPPORT_EMAIL = 'support.clashpanel@gmail.com';
-const LAST_UPDATED_EN = '27 August 2026';
-const LAST_UPDATED_NL = '27 augustus 2026';
+const LAST_UPDATED_EN = '31 August 2026';
+const LAST_UPDATED_NL = '31 augustus 2026';
 
 const content = {
     privacy: {
         en: {
             title: 'Privacy policy',
-            description: 'How ClashPanel processes account, linked Clash, Advanced Stats tracking, planner, Clan Family, advertising and technical data.',
+            description: 'How ClashPanel processes account, linked Clash, Advanced Stats, analytics, planner, Clan Family, advertising and technical data.',
             summary: 'This policy explains what personal data ClashPanel processes, why it is used, who may receive it and what choices and rights you have.',
             sections: [
                 ['Who is responsible', [
@@ -22,7 +22,8 @@ const content = {
                     'If you choose to start Advanced Stats for a linked account, ClashPanel may store long-term battle-log observations and derived statistics for that account. These can include battle time or first-observed time, opponent public tag/name, Town Hall information, stars, destruction, looted or available resources when supplied upstream, recorded army composition and unit identifiers, aggregate usage/performance statistics, tracking status and known-gap metadata. Historical battle-log, war-attack and ranked battle-log records may be supplied by ClashKing V2, an external historical service, depending on the enabled scope and upstream availability.',
                     'Content and settings you create in ClashPanel, such as CWL plans, Clan Families, memberships, polls, reminders, planner drafts and related configuration.',
                     'Device and technical information generated when you use the service, such as IP address, browser or device information, request metadata, security events and diagnostic logs produced by hosting or infrastructure providers.',
-                    'Cookie, local-storage and similar-technology data used for authentication, preferences, caching, consent choices and, where advertising is enabled, ad delivery and measurement.'
+                    'Analytics data, such as aggregate page-use, reliability or error measurements, when Google Analytics is enabled under the applicable consent settings.',
+                    'Cookie, local-storage and similar-technology data used for authentication, functional preferences, caching, consent choices and, where analytics or advertising is enabled, aggregate measurement or ad delivery.'
                 ]],
                 ['How we obtain data', [
                     'We receive information directly from you when you create an account, sign in, link a player, create content or contact support.',
@@ -34,12 +35,12 @@ const content = {
                     'We process account, planner and Clan Family data to provide the functions you request, maintain your account and deliver the ClashPanel service.',
                     'When you enable Advanced Stats, its tracking data is processed to provide the requested long-term attack history, statistics, trends and Advanced Achievements that rely on those tracked statistics. ClashPanel does not start this personal tracking automatically for every player you search.',
                     'We may process limited technical and security data where necessary for legitimate interests such as protecting accounts, preventing abuse, troubleshooting failures and maintaining service reliability, while considering the rights and interests of users.',
-                    'Where consent is legally required, consent is used for optional advertising cookies, local storage or related advertising purposes. You may withdraw consent through the available consent controls without affecting processing that occurred before withdrawal.',
+                    'Where consent is legally required, consent is used for optional analytics or advertising cookies, local storage or related purposes. You may withdraw consent through the available consent controls without affecting processing that occurred before withdrawal.',
                     'We may also process information where necessary to comply with applicable legal obligations or to establish, exercise or defend legal claims.'
                 ]],
                 ['Service providers and data sharing', [
                     'ClashPanel does not sell personal data. Information is shared only when needed to provide the service, comply with law, protect the service or when you direct us to do so.',
-                    'Infrastructure and application providers may include Supabase for authentication and application data, Google Cloud for backend hosting, Cloudflare for website delivery and security, Google for sign-in or fonts, Supercell services for current Clash of Clans API data and ClashKing V2 for historical Advanced Stats requests.',
+                    'Infrastructure and application providers may include Supabase for authentication and application data, Google Cloud for backend hosting, Cloudflare for website delivery and security, Google Analytics for aggregate measurement, Google for sign-in or fonts, Supercell services for current Clash of Clans API data and ClashKing V2 for historical Advanced Stats requests.',
                     'When historical Advanced Stats is requested, the linked player tag and requested history scope may be sent to ClashKing V2. That external provider may retain or return historical records under its own service terms; ClashPanel does not control the provider\'s retention, availability or completeness.',
                     'ClashPanel uses or may use Google AdSense on selected pages. Google and its advertising partners may receive information such as IP address, page URL, browser or device information, cookies, local-storage identifiers and ad interaction data when advertising services are used.'
                 ]],
@@ -77,7 +78,7 @@ const content = {
         },
         nl: {
             title: 'Privacybeleid',
-            description: 'Hoe ClashPanel account-, gekoppelde Clash-, Advanced Stats-, planner-, Clan Family-, advertentie- en technische gegevens verwerkt.',
+            description: 'Hoe ClashPanel account-, gekoppelde Clash-, Advanced Stats-, analytics-, planner-, Clan Family-, advertentie- en technische gegevens verwerkt.',
             summary: 'Dit beleid legt uit welke persoonsgegevens ClashPanel verwerkt, waarom dat gebeurt, met wie gegevens kunnen worden gedeeld en welke keuzes en rechten je hebt.',
             sections: [
                 ['Wie verantwoordelijk is', [
@@ -90,7 +91,8 @@ const content = {
                     'Als je Advanced Stats voor een gekoppeld account activeert, kan ClashPanel langdurige battlelogwaarnemingen en afgeleide statistieken voor dat account bewaren. Dit kan onder meer de tijd van de aanval of eerste waarneming, openbare tag/naam van de tegenstander, informatie over het stadhuis, sterren, vernietiging, geplunderde of beschikbare grondstoffen wanneer die upstream worden aangeleverd, geregistreerde legersamenstelling en unit-ID’s, geaggregeerde gebruiks- en prestatiestatistieken, trackingstatus en bekende-gatmetadata omvatten. Historische battlelog-, war-aanvals- en ranked-battleloggegevens kunnen afhankelijk van de gekozen scope en beschikbaarheid van de upstream bron door ClashKing V2, een externe historische dienst, worden aangeleverd.',
                     'Inhoud en instellingen die je in ClashPanel maakt, zoals CWL-plannen, Clan Families, lidmaatschappen, polls, reminders, planner-drafts en bijhorende configuratie.',
                     'Apparaat- en technische gegevens die bij gebruik van de dienst ontstaan, zoals IP-adres, browser- of apparaatinformatie, requestmetadata, beveiligingsgebeurtenissen en diagnostische logs van hosting- of infrastructuurproviders.',
-                    'Cookie-, local-storage- en vergelijkbare gegevens voor authenticatie, voorkeuren, caching, toestemmingskeuzes en, waar advertenties actief zijn, advertentieweergave en -meting.'
+                    'Analyticsgegevens, zoals geaggregeerde metingen van paginagebruik, betrouwbaarheid of fouten, wanneer Google Analytics volgens de toepasselijke toestemmingsinstellingen actief is.',
+                    'Cookie-, local-storage- en vergelijkbare gegevens voor authenticatie, functionele voorkeuren, caching, toestemmingskeuzes en, waar analytics of advertenties actief zijn, geaggregeerde meting of advertentieweergave.'
                 ]],
                 ['Hoe we gegevens verkrijgen', [
                     'We ontvangen gegevens rechtstreeks van jou wanneer je een account maakt, inlogt, een speler koppelt, inhoud maakt of support contacteert.',
@@ -102,12 +104,12 @@ const content = {
                     'We verwerken account-, planner- en Clan Family-gegevens om de functies te leveren die je vraagt, je account te beheren en de ClashPanel-dienst uit te voeren.',
                     'Wanneer je Advanced Stats activeert, verwerken we de trackinggegevens om de gevraagde langdurige aanvalsgeschiedenis, statistieken, trends en Advanced Achievements te leveren die op die tracking gebaseerd zijn. ClashPanel start deze persoonlijke tracking niet automatisch voor elke speler die je opzoekt.',
                     'Beperkte technische en beveiligingsgegevens kunnen worden verwerkt op basis van gerechtvaardigde belangen, bijvoorbeeld om accounts te beschermen, misbruik te voorkomen, fouten te onderzoeken en de betrouwbaarheid van de dienst te behouden, met aandacht voor de rechten en belangen van gebruikers.',
-                    'Waar toestemming wettelijk vereist is, gebruiken we toestemming voor optionele advertentiecookies, lokale opslag of bijhorende advertentiedoeleinden. Je kunt toestemming via de beschikbare toestemmingsinstellingen intrekken zonder dat dit eerdere rechtmatige verwerking ongeldig maakt.',
+                    'Waar toestemming wettelijk vereist is, gebruiken we toestemming voor optionele analytics- of advertentiecookies, lokale opslag of bijhorende doeleinden. Je kunt toestemming via de beschikbare toestemmingsinstellingen intrekken zonder dat dit eerdere rechtmatige verwerking ongeldig maakt.',
                     'Gegevens kunnen ook worden verwerkt wanneer dit nodig is om aan wettelijke verplichtingen te voldoen of om rechtsvorderingen vast te stellen, uit te oefenen of te verdedigen.'
                 ]],
                 ['Dienstverleners en delen van gegevens', [
                     'ClashPanel verkoopt geen persoonsgegevens. Gegevens worden alleen gedeeld wanneer dit nodig is om de dienst te leveren, aan de wet te voldoen, de dienst te beschermen of wanneer jij daar opdracht toe geeft.',
-                    'Infrastructuur- en applicatieproviders kunnen onder meer Supabase omvatten voor authenticatie en applicatiegegevens, Google Cloud voor backendhosting, Cloudflare voor levering en beveiliging van de website, Google voor login of lettertypes, Supercell-diensten voor actuele Clash of Clans API-gegevens en ClashKing V2 voor historische Advanced Stats-verzoeken.',
+                    'Infrastructuur- en applicatieproviders kunnen onder meer Supabase omvatten voor authenticatie en applicatiegegevens, Google Cloud voor backendhosting, Cloudflare voor levering en beveiliging van de website, Google Analytics voor geaggregeerde meting, Google voor login of lettertypes, Supercell-diensten voor actuele Clash of Clans API-gegevens en ClashKing V2 voor historische Advanced Stats-verzoeken.',
                     'Wanneer historische Advanced Stats wordt opgevraagd, kunnen de gekoppelde spelerstag en de gevraagde historische scope naar ClashKing V2 worden gestuurd. Die externe provider kan historische gegevens bewaren of teruggeven volgens de eigen dienstvoorwaarden; ClashPanel beheert de bewaartermijnen, beschikbaarheid of volledigheid bij die provider niet.',
                     'ClashPanel gebruikt of kan Google AdSense gebruiken op geselecteerde pagina’s. Google en advertentiepartners kunnen bij advertentiediensten gegevens ontvangen zoals IP-adres, pagina-URL, browser- of apparaatinformatie, cookies, lokale identificatoren en informatie over interacties met advertenties.'
                 ]],
@@ -147,29 +149,33 @@ const content = {
     cookies: {
         en: {
             title: 'Cookie policy',
-            description: 'Cookies, local storage, advertising technologies and consent choices used by ClashPanel.',
-            summary: 'ClashPanel uses essential browser technologies for the service and may use Google advertising technologies on pages where ads are enabled.',
+            description: 'How ClashPanel separates essential, functional, analytics and advertising cookies and browser storage.',
+            summary: 'ClashPanel uses essential browser storage for sessions and local features. Optional analytics and advertising are described separately and are subject to the applicable consent choices.',
             sections: [
                 ['What this policy covers', [
                     'This policy covers cookies, local storage, IndexedDB and similar browser technologies used directly by ClashPanel or by third-party services loaded through ClashPanel.',
                     'Some technologies are necessary for requested functions. Others, especially advertising technologies, may require consent depending on your location and the purpose for which they are used.'
                 ]],
-                ['Essential authentication cookies', [
+                ['Essential storage', [
                     'ClashPanel uses HttpOnly authentication cookies such as ct_access and ct_refresh to keep signed-in sessions working. Temporary cookies may also be used during the Google sign-in flow.',
-                    'Authentication cookies are necessary to provide account functions. Signing out or clearing relevant browser data can remove or invalidate session information.'
+                    'These cookies and other strictly necessary storage are required for requested account and security functions. Signing out or clearing relevant browser data can remove or invalidate session information.'
                 ]],
-                ['Local storage and IndexedDB', [
-                    'Local storage may remember interface preferences such as language, theme and selected ClashPanel context. IndexedDB may cache recent application responses to improve loading and reduce repeated requests.',
-                    'You can clear browser storage through your browser settings. Doing so can reset preferences or cached data but does not by itself delete server-side account records.'
+                ['Functional storage', [
+                    'Functional local storage keeps guest CWL Planner drafts, bracket state and minigame progress on this device. It can also remember interface preferences such as language, theme and selected ClashPanel context; session storage can hold short-lived navigation state, and IndexedDB may cache recent application responses.',
+                    'You can clear browser storage through your browser settings. Doing so can remove a guest draft, bracket state, minigame progress, preferences or cached data, but does not by itself delete server-side account records.'
                 ]],
-                ['Google AdSense and advertising technologies', [
+                ['Analytics storage', [
+                    'ClashPanel may load Google Analytics after the page is idle or after an interaction to understand aggregate usage, reliability and errors. It is not used to provide a personal player or clan profile.',
+                    'Analytics storage is initialized as denied by default. Optional analytics cookies or similar storage are used only when enabled by the applicable consent settings.'
+                ]],
+                ['Advertising storage', [
                     'Selected ClashPanel pages include or may include Google AdSense. Third-party vendors, including Google, may place or read cookies or use similar technologies, IP addresses and other identifiers to deliver ads, control ad frequency, measure performance and help detect fraud or abuse.',
                     'When personalised advertising is permitted, advertising cookies may be used to select ads based on prior visits to ClashPanel and/or other websites. If personalised advertising is not permitted, ads may still be contextual or otherwise non-personalised while limited storage or identifiers may be used where allowed.',
                     'Google provides information about how it uses data from partner sites and provides Ads Settings where users can control personalised advertising.'
                 ]],
                 ['Consent and changing your choice', [
-                    'Where consent is required by applicable law, the advertising consent interface or consent-management platform determines whether optional advertising storage and purposes are allowed.',
-                    'You may refuse or withdraw optional consent without losing access to the core ClashPanel service. You can also use browser controls to delete or block cookies, although blocking essential storage may prevent account functions from working correctly.'
+                    'Where consent is required by applicable law, the configured consent interface or consent-management platform determines whether optional analytics or advertising storage and purposes are allowed. Essential storage remains available because it is needed for requested functions.',
+                    'You may refuse or withdraw optional consent without losing access to the core ClashPanel service. Use the Cookie preferences control in the footer when a consent platform is configured. You can also use browser controls to delete or block cookies, although blocking essential storage may prevent account functions from working correctly.'
                 ]],
                 ['Other third-party resources', [
                     'ClashPanel may load services such as Google Fonts or Google sign-in. Requests to third-party services can disclose technical connection information such as IP address, browser information and the requested resource to that provider.',
@@ -187,29 +193,34 @@ const content = {
         },
         nl: {
             title: 'Cookiebeleid',
-            description: 'Cookies, lokale opslag, advertentietechnologieën en toestemmingskeuzes die ClashPanel gebruikt.',
-            summary: 'ClashPanel gebruikt noodzakelijke browsertechnologieën voor de dienst en kan Google-advertentietechnologie gebruiken op pagina’s waar advertenties actief zijn.',
+            description: 'Hoe ClashPanel essentiële, functionele, analytics- en advertentiecookies en browseropslag onderscheidt.',
+            summary: 'ClashPanel gebruikt essentiële browseropslag voor sessies en lokale functies. Optionele analytics en advertenties worden afzonderlijk beschreven en vallen onder de toepasselijke toestemmingskeuzes.',
             sections: [
                 ['Wat dit beleid omvat', [
                     'Dit beleid gaat over cookies, local storage, IndexedDB en vergelijkbare browsertechnologie die rechtstreeks door ClashPanel of via externe diensten op ClashPanel wordt gebruikt.',
                     'Sommige technologie is noodzakelijk voor gevraagde functies. Andere technologie, vooral voor advertenties, kan afhankelijk van je locatie en het doel toestemming vereisen.'
                 ]],
-                ['Essentiële authenticatiecookies', [
+                ['Essentiële opslag', [
                     'ClashPanel gebruikt HttpOnly-authenticatiecookies zoals ct_access en ct_refresh om aangemelde sessies te laten werken. Tijdens de Google-loginflow kunnen ook tijdelijke cookies worden gebruikt.',
                     'Authenticatiecookies zijn nodig voor accountfuncties. Uitloggen of relevante browsergegevens wissen kan sessiegegevens verwijderen of ongeldig maken.'
                 ]],
-                ['Local storage en IndexedDB', [
-                    'Local storage kan interfacevoorkeuren zoals taal, thema en geselecteerde ClashPanel-context onthouden. IndexedDB kan recente applicatie-antwoorden cachen om sneller te laden en dubbele requests te beperken.',
-                    'Je kunt browseropslag via je browserinstellingen wissen. Daardoor kunnen voorkeuren of cachegegevens verdwijnen, maar server-side accountrecords worden daardoor niet automatisch verwijderd.'
+                ['Functionele opslag', [
+                    'Functionele browseropslag kan gastconcepten van de CWL Planner, bracketstatus en minigamevoortgang op je apparaat bewaren. Ze kan ook voorkeuren zoals taal, thema en geselecteerde ClashPanel-context onthouden.',
+                    'Session storage en IndexedDB kunnen worden gebruikt voor tijdelijke UI-status en recente applicatie-antwoorden, zodat pagina’s sneller laden en dubbele requests worden beperkt.',
+                    'Je kunt browseropslag via je browserinstellingen wissen. Daardoor kunnen concepten, voortgang, voorkeuren of cachegegevens verdwijnen, maar server-side accountrecords worden daardoor niet automatisch verwijderd.'
                 ]],
-                ['Google AdSense en advertentietechnologie', [
+                ['Analyticsopslag', [
+                    'ClashPanel kan Google Analytics laden nadat de pagina inactief is geworden of na een interactie, om geaggregeerd gebruik, betrouwbaarheid en fouten te begrijpen. Het wordt niet gebruikt om een persoonlijk spelers- of clanprofiel te maken.',
+                    'Analyticsopslag wordt standaard als geweigerd geïnitialiseerd. Optionele analytics-cookies of vergelijkbare opslag worden alleen gebruikt wanneer de toepasselijke toestemmingsinstellingen dit inschakelen.'
+                ]],
+                ['Advertentieopslag', [
                     'Geselecteerde ClashPanel-pagina’s bevatten of kunnen Google AdSense bevatten. Externe leveranciers, waaronder Google, kunnen cookies plaatsen of lezen of vergelijkbare technologie, IP-adressen en andere identificatoren gebruiken om advertenties te leveren, frequentie te beperken, prestaties te meten en fraude of misbruik tegen te gaan.',
                     'Wanneer gepersonaliseerde advertenties zijn toegestaan, kunnen advertentiecookies worden gebruikt om advertenties te selecteren op basis van eerdere bezoeken aan ClashPanel en/of andere websites. Als gepersonaliseerde advertenties niet zijn toegestaan, kunnen nog contextuele of andere niet-gepersonaliseerde advertenties worden getoond en kunnen beperkte opslag of identificatoren worden gebruikt waar dit is toegestaan.',
                     'Google biedt informatie over het gebruik van gegevens van partnerwebsites en Ads Settings waarmee gebruikers gepersonaliseerde advertenties kunnen beheren.'
                 ]],
                 ['Toestemming en je keuze wijzigen', [
-                    'Waar de toepasselijke wet toestemming vereist, bepaalt de advertentie-consentinterface of consent-managementplatform of optionele advertentieopslag en advertentiedoeleinden zijn toegestaan.',
-                    'Je kunt optionele toestemming weigeren of intrekken zonder de kernfuncties van ClashPanel te verliezen. Je kunt ook via je browser cookies verwijderen of blokkeren, maar het blokkeren van essentiële opslag kan accountfuncties verstoren.'
+                    'Waar de toepasselijke wet toestemming vereist, bepaalt de geconfigureerde toestemmingsinterface of het consent-managementplatform of optionele analytics- of advertentieopslag en de bijbehorende doeleinden zijn toegestaan. Essentiële opslag blijft beschikbaar omdat die nodig is voor gevraagde functies.',
+                    'Je kunt optionele toestemming weigeren of intrekken zonder de kernfuncties van ClashPanel te verliezen. Gebruik de cookievoorkeuren in de footer wanneer een consentplatform is geconfigureerd. Je kunt ook via je browser cookies verwijderen of blokkeren, maar het blokkeren van essentiële opslag kan accountfuncties verstoren.'
                 ]],
                 ['Andere externe bronnen', [
                     'ClashPanel kan diensten laden zoals Google Fonts of Google-login. Requests naar externe diensten kunnen technische verbindingsinformatie zoals IP-adres, browserinformatie en de opgevraagde resource aan die provider doorgeven.',
@@ -234,6 +245,7 @@ const content = {
             sections: [
                 ['About ClashPanel', [
                     'ClashPanel is an unofficial fan-made tool for organising and planning Clash of Clans activities. ClashPanel is not affiliated with, endorsed by or sponsored by Supercell.',
+                    'This material is unofficial and is not endorsed by Supercell. For more information, see Supercell’s Fan Content Policy: www.supercell.com/fan-content-policy.',
                     'References to Clash of Clans, Supercell and related game content remain the property of their respective owners and use of fan content is subject to applicable Supercell policies.'
                 ]],
                 ['Using the service', [
@@ -243,7 +255,7 @@ const content = {
                 ]],
                 ['Accounts and access', [
                     'You are responsible for providing accurate information where the service requires it and for maintaining control of your account. Never share authentication tokens or verification codes with other people.',
-                    'ClashPanel may restrict, suspend or terminate access when reasonably necessary to protect users or infrastructure, investigate abuse, comply with law or address a serious breach of these terms.'
+                    'You may stop using the service and request deletion of your ClashPanel account through the privacy contact. ClashPanel may restrict, suspend or terminate access when reasonably necessary to protect users or infrastructure, investigate abuse, comply with law or address a serious breach of these terms.'
                 ]],
                 ['Your content and Clan Family data', [
                     'You remain responsible for plan names, Clan Family content, polls, imported spreadsheet data and other information you submit. Do not submit confidential information you are not authorised to share, unlawful material or content that infringes another person’s rights.',
@@ -290,6 +302,7 @@ const content = {
             sections: [
                 ['Over ClashPanel', [
                     'ClashPanel is een onofficiële, door fans gemaakte tool voor het organiseren en plannen van Clash of Clans-activiteiten. ClashPanel is niet verbonden met, goedgekeurd door of gesponsord door Supercell.',
+                    'Dit materiaal is onofficieel en niet goedgekeurd door Supercell. Meer informatie vind je in Supercells Fan Content Policy: www.supercell.com/fan-content-policy.',
                     'Verwijzingen naar Clash of Clans, Supercell en bijhorende gamecontent blijven eigendom van hun respectieve rechthebbenden en het gebruik van fancontent valt onder de toepasselijke Supercell-regels.'
                 ]],
                 ['De dienst gebruiken', [
@@ -299,7 +312,7 @@ const content = {
                 ]],
                 ['Accounts en toegang', [
                     'Je bent verantwoordelijk voor correcte informatie waar de dienst die nodig heeft en voor het behouden van controle over je account. Deel nooit authenticatietokens of verificatiecodes met anderen.',
-                    'ClashPanel kan toegang redelijkerwijs beperken, opschorten of beëindigen om gebruikers of infrastructuur te beschermen, misbruik te onderzoeken, aan de wet te voldoen of een ernstige schending van deze voorwaarden aan te pakken.'
+                    'Je kunt de dienst stopzetten en via het privacycontact vragen om je ClashPanel-account te verwijderen. ClashPanel kan toegang redelijkerwijs beperken, opschorten of beëindigen om gebruikers of infrastructuur te beschermen, misbruik te onderzoeken, aan de wet te voldoen of een ernstige schending van deze voorwaarden aan te pakken.'
                 ]],
                 ['Jouw inhoud en Clan Family-gegevens', [
                     'Je blijft verantwoordelijk voor plannamen, Clan Family-inhoud, polls, geïmporteerde spreadsheetgegevens en andere informatie die je indient. Deel geen vertrouwelijke informatie waarvoor je geen toestemming hebt, onwettige inhoud of materiaal dat rechten van anderen schendt.',

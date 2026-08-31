@@ -1,4 +1,4 @@
-import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { initI18n, t } from '../i18n/i18n.js?v=20260831-master-live-v1';
 import * as authClient from '../auth/auth-client.js?v=20260829-public-auth-v1';
 import {
     ACCESS,
@@ -6,10 +6,9 @@ import {
     WORKSPACE_SECTIONS
 } from '../shell/module-registry.js?v=20260829-public-dashboard-v1';
 
-const visibleIds = new Set([
-    'groups', 'planner', 'operation', 'warOperation',
-    'bracket', 'minigames', 'advancedStats', 'achievements'
-]);
+const visibleModules = WORKSPACE_MODULES.filter(module => (
+    module.available && !['dashboard', 'explore'].includes(module.id)
+));
 
 const EXPLORE_ART = Object.freeze({
     groups: `<svg viewBox="0 0 240 170" fill="none" focusable="false"><path d="m28 72 55-34 62 27 45-25M28 72l58 37 62-34 42 23M86 109V65m62 34V65"/><circle cx="28" cy="72" r="8"/><circle cx="83" cy="38" r="8"/><circle cx="145" cy="65" r="8"/><circle cx="190" cy="40" r="8"/><circle cx="86" cy="109" r="8"/><circle cx="148" cy="99" r="8"/></svg>`,
@@ -44,29 +43,38 @@ function actionMarkup(module, authState) {
     return '<strong data-i18n="explore.open">Open →</strong>';
 }
 
+function loginHref(module) {
+    const buildLoginUrl = authExport('buildLoginUrl');
+    if (typeof buildLoginUrl === 'function') return buildLoginUrl(module.href);
+    return `/subpages/login.html?next=${encodeURIComponent(module.href)}`;
+}
+
 function cardMarkup(module, authState) {
     const descriptionKey = `explore.${module.id}.description`;
     const section = WORKSPACE_SECTIONS.find(candidate => candidate.id === module.section);
     const tag = module.comingSoon ? 'div' : 'a';
+    const requiresLogin = module.access === ACCESS.AUTH && !isAuthenticated(authState);
     const state = module.comingSoon
         ? 'aria-disabled="true"'
-        : `href="${module.href}"`;
+        : `href="${requiresLogin ? loginHref(module) : module.href}"`;
     const title = module.comingSoon
         ? `<h2><span data-i18n="${module.key}">${module.fallback}</span> <span class="workspace-coming-soon-badge" data-i18n="common.comingSoon">(Coming soon)</span></h2>`
         : `<h2 data-i18n="${module.key}">${module.fallback}</h2>`;
     const action = actionMarkup(module, authState);
-    return `<${tag} class="cp-module-card explore-card explore-card--${module.id}${module.comingSoon ? ' explore-card--coming-soon' : ''}" data-pillar="${module.section}" data-explore-card="${module.section}" ${state}>
+    const moduleState = module.comingSoon
+        ? 'coming-soon'
+        : requiresLogin ? 'auth-required' : 'available';
+    return `<${tag} class="cp-module-card explore-card explore-card--${module.id}${module.comingSoon ? ' explore-card--coming-soon' : ''}" data-module-id="${module.id}" data-module-access="${module.access}" data-module-state="${moduleState}" data-pillar="${module.section}" data-explore-card="${module.section}" ${state}>
         <span class="explore-card-heading">${module.icon}<span class="page-kicker" data-i18n="${section.key}">${section.fallback}</span></span>
         ${title}
         <p data-i18n="${descriptionKey}">${t(descriptionKey)}</p>
         ${action}
-        <span class="explore-card-art" aria-hidden="true">${EXPLORE_ART[module.id]}</span>
+        <span class="explore-card-art" aria-hidden="true">${EXPLORE_ART[module.id] || EXPLORE_ART.planner}</span>
     </${tag}>`;
 }
 
 function renderCards(container, authState) {
-    const modules = WORKSPACE_MODULES.filter(module => visibleIds.has(module.id));
-    container.innerHTML = modules.map(module => cardMarkup(module, authState)).join('');
+    container.innerHTML = visibleModules.map(module => cardMarkup(module, authState)).join('');
 }
 
 function applyFilter(filter, cards) {

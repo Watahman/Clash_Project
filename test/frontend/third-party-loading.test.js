@@ -68,6 +68,8 @@ describe('Privacy-aware third-party loading', () => {
 
         expect(bootstrap).toContain("document.body?.classList.contains('public-site')");
         expect(bootstrap).toContain("html.classList.contains('public-page')");
+        expect(bootstrap).toContain("document.body?.dataset.workspaceAccess === 'public'");
+        expect(bootstrap).toContain('function initialContentLoad()');
         expect(publicSite).toContain('onAuthStateChange');
         expect(publicSite).not.toContain('redirectReturningUser');
         expect(publicSite).not.toContain('location.replace(\'/dashboard\')');

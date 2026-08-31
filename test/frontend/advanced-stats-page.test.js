@@ -97,14 +97,14 @@ describe('Advanced Stats workspace page', () => {
 
         expect(html).toContain('advanced-stats-bootstrap.js?v=20260829-public-auth-v1');
         expect(html).toContain('advanced-stats.css?v=20260814-advanced-stats-v4');
-        expect(html).toContain('workspace-shell.js?v=20260829-public-dashboard-v1');
+        expect(html).toContain('workspace-shell.js?v=20260831-master-live-v1');
         expect(bootstrap).toContain("advanced-stats.js?v=20260829-public-auth-v1");
         expect(page).toContain("i18n/i18n.js?v=20260829-public-auth-v1");
         expect(page).toContain("advanced-stats-army-view.js?v=20260809-4");
         expect(page).toContain('applyI18n(document)');
-        expect(i18n).toContain("runtime-translations.js?v=20260829-public-auth-v1");
-        expect(runtime).toContain("runtime-locales/workspace-en.js?v=20260829-public-auth-v1");
-        expect(runtime).toContain("runtime-locales/workspace-nl.js?v=20260829-public-auth-v1");
+        expect(i18n).toContain("runtime-translations.js?v=20260831-master-live-v1");
+        expect(runtime).toContain("runtime-locales/workspace-en.js?v=20260831-master-live-v1");
+        expect(runtime).toContain("runtime-locales/workspace-nl.js?v=20260831-master-live-v1");
         expect(runtime).toContain("advanced-stats-locales.js?v=20260814-advanced-stats-v4");
         expect(runtime).toContain("advanced-stats-extra-locales.js?v=20260814-advanced-stats-v4");
         expect(runtime).toContain("advanced-stats-ui-locales.js?v=20260814-advanced-stats-v4");

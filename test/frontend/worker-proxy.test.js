@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import worker from '../../worker/index.js';
 
@@ -33,25 +34,76 @@ describe('Cloudflare API proxy', () => {
     ])('serves preferred legal route %s from its existing public HTML asset', async (route, assetPath) => {
         const bindings = env({
             ASSETS: {
-                fetch: vi.fn(async request => new Response(
-                    `asset:${new URL(request.url).pathname}`,
-                    {
+                fetch: vi.fn(async request => {
+                    const requestedUrl = new URL(request.url);
+                    return new Response(`asset:${decodeURIComponent(requestedUrl.pathname)}`, {
                         headers: {
                             'Content-Type': 'text/html',
                             'X-Robots-Tag': 'noindex, nofollow'
                         }
-                    }
-                ))
+                    });
+                })
             }
         });
         const request = new Request(`https://clashpanel.com${route}`);
 
         const response = await worker.fetch(request, bindings);
 
+        expect(response.status).toBe(200);
         expect(await response.text()).toBe(`asset:${assetPath}`);
-        expect(new URL(bindings.ASSETS.fetch.mock.calls[0][0].url).pathname)
-            .toBe(assetPath);
+        expect(bindings.ASSETS.fetch).toHaveBeenCalledTimes(1);
+        const internalUrl = new URL(bindings.ASSETS.fetch.mock.calls[0][0].url);
+        expect(internalUrl.hostname).toBe('clashpanel.com');
+        expect(internalUrl.pathname).toBe(assetPath);
         expect(response.headers.get('X-Robots-Tag')).toBeNull();
+    });
+
+    it('keeps legal legacy redirect ownership in the Worker route map', () => {
+        const redirects = readFileSync('src/_redirects', 'utf8');
+        expect(redirects).not.toMatch(
+            /^\/subpages\/(?:privacy|cookies|terms|contact)(?:\.html)?\/?\s/m
+        );
+    });
+
+    it.each([
+        ['/subpages/privacy', '/privacy', '/subpages/privacy'],
+        ['/subpages/privacy.html', '/privacy', '/subpages/privacy'],
+        ['/subpages/cookies', '/cookies', '/subpages/cookies'],
+        ['/subpages/cookies.html', '/cookies', '/subpages/cookies'],
+        ['/subpages/terms', '/terms', '/subpages/terms'],
+        ['/subpages/terms.html', '/terms', '/subpages/terms'],
+        ['/subpages/contact', '/contact', '/subpages/contact'],
+        ['/subpages/contact.html', '/contact', '/subpages/contact']
+    ])('resolves legacy legal route %s with at most one redirect', async (
+        source,
+        destination,
+        assetPath
+    ) => {
+        const bindings = env({
+            ASSETS: {
+                fetch: vi.fn(async request => new Response(
+                    `asset:${decodeURIComponent(new URL(request.url).pathname)}`,
+                    { headers: { 'Content-Type': 'text/html' } }
+                ))
+            }
+        });
+        let response = await worker.fetch(
+            new Request(`https://clashpanel.com${source}`),
+            bindings
+        );
+        let redirectCount = 0;
+        while ([301, 302, 307, 308].includes(response.status)) {
+            redirectCount += 1;
+            response = await worker.fetch(
+                new Request(response.headers.get('Location')),
+                bindings
+            );
+            if (redirectCount > 1) break;
+        }
+
+        expect(redirectCount).toBe(1);
+        expect(response.status).toBe(200);
+        expect(await response.text()).toBe(`asset:${assetPath}`);
     });
 
     it.each([

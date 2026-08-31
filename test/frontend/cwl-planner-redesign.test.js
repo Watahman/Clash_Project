@@ -119,7 +119,7 @@ describe('CWL planner redesign surface', () => {
             '20260828-cwl-planner-v2',
             '20260828-cwl-planner-v2',
             '20260828-cwl-planner-v2',
-            '20260829-public-auth-v1'
+            '20260831-master-live-v1'
         ]);
     });
 

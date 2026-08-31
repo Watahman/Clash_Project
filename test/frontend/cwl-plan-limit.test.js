@@ -13,7 +13,7 @@ vi.mock('../../src/assets/js/Data/config.js', () => ({
     setCanAutosave: mocks.setCanAutosave,
     setLoading: vi.fn()
 }));
-vi.mock('../../src/assets/js/templates/CWLTemplates.js?v=20260829-public-auth-v1', () => ({
+vi.mock('../../src/assets/js/templates/CWLTemplates.js?v=20260830-player-drag-v3', () => ({
     createPlayerCard: vi.fn(),
     createClanCard: vi.fn(),
     applyClanLeagueRestriction: vi.fn()
@@ -226,7 +226,7 @@ describe('CWL saved plan limit', () => {
             savedAt: new Date().toISOString()
         }));
         mocks.getAllPlansFromDatabase.mockResolvedValue([]);
-        const templates = await import('../../src/assets/js/templates/CWLTemplates.js?v=20260829-public-auth-v1');
+        const templates = await import('../../src/assets/js/templates/CWLTemplates.js?v=20260830-player-drag-v3');
         templates.createPlayerCard.mockClear();
         const { initPlanIO, loadAllPlans } = await import(
             '../../src/assets/js/cwl/cwl-plan-io.js?v=20260829-public-auth-v1'

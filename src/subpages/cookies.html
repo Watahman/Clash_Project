@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="../assets/js/Data/analytics.js"></script>
-    <meta name="description" content="Cookies, browser storage, advertising technologies and consent choices used by ClashPanel.">
+    <meta name="description" content="How ClashPanel separates essential, functional, analytics and advertising cookies and browser storage.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://clashpanel.com/cookies">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="ClashPanel">
     <meta property="og:title" content="Cookie policy · ClashPanel">
-    <meta property="og:description" content="Cookies, browser storage, advertising technologies and consent choices used by ClashPanel.">
+    <meta property="og:description" content="How ClashPanel separates essential, functional, analytics and advertising cookies and browser storage.">
     <meta property="og:url" content="https://clashpanel.com/cookies">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Cookie policy · ClashPanel">
-    <meta name="twitter:description" content="Cookies, browser storage, advertising technologies and consent choices used by ClashPanel.">
+    <meta name="twitter:description" content="How ClashPanel separates essential, functional, analytics and advertising cookies and browser storage.">
     <meta name="twitter:url" content="https://clashpanel.com/cookies">
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Cookie policy · ClashPanel","url":"https://clashpanel.com/cookies"}</script>
     <title>Cookie policy · ClashPanel</title>
@@ -26,49 +26,57 @@
     <link rel="stylesheet" href="/assets/css/public-marketing.css">
     <link rel="stylesheet" href="/assets/css/public-info.css?v=20260812-redesign">
     <script src="../assets/js/Data/runtime-config.js"></script>
-    <script type="module" src="../assets/js/pages/public-site.js?v=20260829-public-header-cta-v2" fetchpriority="low"></script>
-    <script type="module" src="../assets/js/pages/public-policy.js?v=20260829-public-auth-v1"></script>
+    <script type="module" src="../assets/js/pages/public-site.js?v=20260831-master-live-v1" fetchpriority="low"></script>
+    <script type="module" src="../assets/js/pages/public-policy.js?v=20260831-master-live-v1"></script>
     <link rel="stylesheet" href="/assets/css/public-v2.css?v=20260812-redesign">
 </head>
 <body class="public-site">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skipContent">Skip to content</a>
 <header class="public-header">
     <a class="public-brand" href="/" aria-label="ClashPanel home"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
-    <nav class="public-nav" id="public-nav" aria-label="Public navigation"><a href="/#features">Tools</a><a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about">About</a><a href="/changelog">Changelog</a></nav>
+    <nav class="public-nav" id="public-nav" data-i18n-aria-label="public.navigation" aria-label="Public navigation"><a href="/#features" data-i18n="public.nav.tools">Tools</a><a href="/minigames">Games</a><a href="/guides" data-i18n="public.nav.guides">Guides</a><a href="/methodology" data-i18n="public.nav.methodology">Methodology</a><a href="/about" data-i18n="public.nav.about">About</a><a href="/changelog" data-i18n="public.nav.changelog">Changelog</a></nav>
     <div class="public-actions">
         <button type="button" data-language-control data-i18n="header.language">Language</button>
         <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme"><span aria-hidden="true">◐</span></button>
         <a class="link-button" href="/subpages/login" data-i18n="auth.login">Log in</a>
-        <a class="button button-primary" href="/subpages/register" data-i18n="public.startFree">Start for free</a>
+        <a class="button button-primary" href="/dashboard" data-public-start data-i18n="public.startFree">Start for free</a>
     </div>
     <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" data-i18n-aria-label="public.openMenu" aria-label="Open menu"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
 </header>
 <main id="main-content" class="policy-page"><article class="policy-document" data-policy-document="cookies" data-static-english="true">
-    <header><h1>Cookie policy</h1><p>ClashPanel uses essential browser technologies for the service and may use Google advertising technologies on pages where ads are enabled.</p><p>Last updated: 27 August 2026</p></header>
-    <nav class="policy-toc" aria-label="On this page"><strong>On this page</strong><a href="#coverage">Coverage</a><a href="#authentication">Authentication</a><a href="#storage">Browser storage</a><a href="#ads">Advertising</a><a href="#consent">Your choice</a><a href="#third-parties">Third parties</a><a href="#cookie-changes">Changes</a></nav>
+    <header><h1>Cookie policy</h1><p>ClashPanel uses essential browser storage for sessions and local features. Optional analytics and advertising are described separately and are subject to the applicable consent choices.</p><p>Last updated: 31 August 2026</p></header>
+    <nav class="policy-toc" aria-label="On this page"><strong>On this page</strong><a href="#coverage">Coverage</a><a href="#essential">Essential storage</a><a href="#functional">Functional storage</a><a href="#analytics">Analytics storage</a><a href="#advertising">Advertising storage</a><a href="#consent">Your choice</a><a href="#third-parties">Third parties</a><a href="#cookie-changes">Changes</a></nav>
     <section id="coverage"><h2>What this policy covers</h2><ul><li>This policy covers cookies, local storage, IndexedDB and similar browser technologies used directly by ClashPanel or by third-party services loaded through ClashPanel.</li><li>Some technologies are necessary for requested functions. Others, especially advertising technologies, may require consent depending on your location and the purpose for which they are used.</li></ul></section>
-    <section id="authentication"><h2>Essential authentication cookies</h2><ul><li>ClashPanel uses HttpOnly authentication cookies such as <code>ct_access</code> and <code>ct_refresh</code> to keep signed-in sessions working. Temporary cookies may also be used during the Google sign-in flow.</li><li>Authentication cookies are necessary to provide account functions. Signing out or clearing relevant browser data can remove or invalidate session information.</li></ul></section>
-    <section id="storage"><h2>Local storage and IndexedDB</h2><ul><li>Local storage may remember interface preferences such as language, theme and selected ClashPanel context. IndexedDB may cache recent application responses to improve loading and reduce repeated requests.</li><li>You can clear browser storage through your browser settings. Doing so can reset preferences or cached data but does not by itself delete server-side account records.</li></ul></section>
-    <section id="ads"><h2>Google AdSense and advertising technologies</h2><ul><li>Selected ClashPanel pages include or may include Google AdSense. Third-party vendors, including Google, may place or read cookies or use similar technologies, IP addresses and other identifiers to deliver ads, control ad frequency, measure performance and help detect fraud or abuse.</li><li>When personalised advertising is permitted, advertising cookies may be used to select ads based on prior visits to ClashPanel and/or other websites. If personalised advertising is not permitted, ads may still be contextual or otherwise non-personalised while limited storage or identifiers may be used where allowed.</li><li>Google provides information about how it uses data from partner sites and provides Ads Settings where users can control personalised advertising.</li></ul></section>
-    <section id="consent"><h2>Consent and changing your choice</h2><ul><li>Where consent is required by applicable law, the advertising consent interface or consent-management platform determines whether optional advertising storage and purposes are allowed.</li><li>You may refuse or withdraw optional consent without losing access to the core ClashPanel service. Use the Cookie preferences control in the footer when a consent platform is configured. You can also use browser controls to delete or block cookies, although blocking essential storage may prevent account functions from working correctly.</li></ul></section>
+    <section id="essential"><h2>Essential storage</h2><ul><li>ClashPanel uses HttpOnly authentication cookies such as <code>ct_access</code> and <code>ct_refresh</code> to keep signed-in sessions working. Temporary cookies may also be used during the Google sign-in flow.</li><li>These cookies and other strictly necessary storage are required for requested account and security functions. Signing out or clearing relevant browser data can remove or invalidate session information.</li></ul></section>
+    <section id="functional"><h2>Functional storage</h2><ul><li>Functional local storage keeps guest CWL Planner drafts, bracket state and minigame progress on this device. It can also remember interface preferences such as language, theme and selected ClashPanel context; session storage can hold short-lived navigation state, and IndexedDB may cache recent application responses.</li><li>You can clear browser storage through your browser settings. Doing so can remove a guest draft, bracket state, minigame progress, preferences or cached data, but does not by itself delete server-side account records.</li></ul></section>
+    <section id="analytics"><h2>Analytics storage</h2><ul><li>ClashPanel may load Google Analytics after the page is idle or after an interaction to understand aggregate usage, reliability and errors. It is not used to provide a personal player or clan profile.</li><li>Analytics storage is initialized as denied by default. Optional analytics cookies or similar storage are used only when enabled by the applicable consent settings.</li></ul></section>
+    <section id="advertising"><h2>Advertising storage</h2><ul><li>Selected ClashPanel pages include or may include Google AdSense. Third-party vendors, including Google, may place or read cookies or use similar technologies, IP addresses and other identifiers to deliver ads, control ad frequency, measure performance and help detect fraud or abuse.</li><li>When personalised advertising is permitted, advertising cookies may be used to select ads based on prior visits to ClashPanel and/or other websites. If personalised advertising is not permitted, ads may still be contextual or otherwise non-personalised while limited storage or identifiers may be used where allowed.</li><li>Google provides information about how it uses data from partner sites and provides Ads Settings where users can control personalised advertising.</li></ul></section>
+    <section id="consent"><h2>Consent and changing your choice</h2><ul><li>Where consent is required by applicable law, the configured consent interface or consent-management platform determines whether optional analytics or advertising storage and purposes are allowed. Essential storage remains available because it is needed for requested functions.</li><li>You may refuse or withdraw optional consent without losing access to the core ClashPanel service. Use the Cookie preferences control in the footer when a consent platform is configured. You can also use browser controls to delete or block cookies, although blocking essential storage may prevent account functions from working correctly.</li></ul></section>
     <section id="third-parties"><h2>Other third-party resources</h2><ul><li>ClashPanel may load services such as Google Fonts or Google sign-in. Requests to third-party services can disclose technical connection information such as IP address, browser information and the requested resource to that provider.</li><li>Third-party providers process information under their own privacy terms in addition to the choices and protections described here.</li></ul></section>
     <section id="cookie-changes"><h2>Changes</h2><ul><li>The technologies used by ClashPanel can change as features, advertising and providers change. This policy will be updated when material cookie or storage practices change.</li></ul></section>
     <div class="policy-actions"><a class="button button-secondary" href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">How Google uses partner data</a><a class="button button-secondary" href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">Google Ads Settings</a><a class="button button-secondary" href="mailto:support.clashpanel@gmail.com?subject=ClashPanel%20cookie%20or%20privacy%20question">Privacy contact</a></div>
 </article></main>
 <footer class="public-footer">
     <div class="public-footer-main">
-        <a class="public-brand" href="/"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
-        <nav aria-label="Footer navigation" data-i18n-aria-label="public.footerNav">
-            <a href="/guides">Guides</a><a href="/methodology">Methodology</a><a href="/about">About</a><a href="/changelog">Changelog</a>
+        <a class="public-brand" href="/" data-i18n-aria-label="public.homeLabel" aria-label="ClashPanel home">
+            <img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160">
+            <span>ClashPanel</span>
+        </a>
+        <nav data-i18n-aria-label="public.footerNav" aria-label="Footer navigation">
+            <a href="/guides" data-i18n="public.footer.guides">Guides</a>
+            <a href="/methodology" data-i18n="public.footer.methodology">Methodology</a>
+            <a href="/about" data-i18n="public.footer.about">About</a>
+            <a href="/changelog" data-i18n="public.footer.changelog">Changelog</a>
             <a href="/privacy" data-i18n="public.privacy">Privacy</a>
             <a href="/cookies" data-i18n="public.cookies">Cookies</a>
             <a href="/terms" data-i18n="public.terms">Terms of use</a>
             <a href="/contact" data-i18n="public.contact">Contact</a>
+            <a href="https://supercell.com/en/fan-content-policy/" target="_blank" rel="noopener noreferrer" data-i18n="public.fanPolicy">Supercell Fan Content Policy</a>
             <button type="button" class="public-footer-link" data-cookie-preferences hidden data-i18n="public.cookiePreferences">Cookie preferences</button>
         </nav>
     </div>
     <p class="public-disclaimer" data-i18n="public.disclaimer">ClashPanel is unofficial and is not endorsed by Supercell. For more information, see Supercell's Fan Content Policy.</p>
-    <p class="public-footer-meta" data-i18n="home.footer">© 2026 ClashPanel · Not affiliated with Supercell</p>
+    <p class="public-footer-meta" data-i18n="public.footer.meta">© 2026 ClashPanel · Not affiliated with Supercell</p>
 </footer>
 </body>
 </html>

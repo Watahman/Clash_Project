@@ -1,16 +1,13 @@
 import { APP_ALIASES, APP_ASSETS } from './app-routes.js';
 import { isExportAssetPath, proxyExportAsset } from './export-assets.js';
+import {
+    PUBLIC_ASSETS,
+    publicRouteRedirect
+} from './public-routes.js';
 
 const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 const PERMANENT_REDIRECT_STATUS = 301;
 const CANONICAL_HOST = "clashpanel.com";
-const PUBLIC_ASSETS = new Map([
-    ["/privacy", "/subpages/privacy"],
-    ["/cookies", "/subpages/cookies"],
-    ["/terms", "/subpages/terms"],
-    ["/contact", "/subpages/contact"]
-]);
-
 const PUBLIC_REDIRECTS = new Map([
     ["/cwl-planner.html", "/cwl-planner"],
     ["/cwl-tracker.html", "/cwl-tracker"],
@@ -37,14 +34,6 @@ const PUBLIC_REDIRECTS = new Map([
     ["/subpages/groups.html", "/clan-management"],
     ["/subpages/bracket-generator", "/bracket-generator"],
     ["/subpages/bracket-generator.html", "/bracket-generator"],
-    ["/subpages/privacy", "/privacy"],
-    ["/subpages/privacy.html", "/privacy"],
-    ["/subpages/cookies", "/cookies"],
-    ["/subpages/cookies.html", "/cookies"],
-    ["/subpages/terms", "/terms"],
-    ["/subpages/terms.html", "/terms"],
-    ["/subpages/contact", "/contact"],
-    ["/subpages/contact.html", "/contact"],
     ["/subpages/dashboard", "/dashboard"],
     ["/subpages/dashboard.html", "/dashboard"],
     ["/subpages/explore", "/app/explore"],
@@ -102,6 +91,9 @@ function routeRedirect(incomingUrl) {
     const path = normalizedPath(incomingUrl.pathname);
     const canonical = PUBLIC_REDIRECTS.get(path) || APP_ALIASES.get(path);
     if (canonical) return canonical;
+
+    const publicCanonical = publicRouteRedirect(incomingUrl.pathname);
+    if (publicCanonical) return publicCanonical;
 
     for (const publicPath of [
         "/cwl-planner",

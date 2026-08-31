@@ -16,7 +16,8 @@ describe('ClashPanel minigames public page', () => {
     const hubController = readFileSync('src/assets/js/pages/minigames-hub.js', 'utf8');
 
     it('loads the game hub, Entity Guesser and Higher or Lower controllers', () => {
-        expect(page).toContain('/assets/js/pages/minigames-hub.js?v=20260828-seo-links');
+        expect(page).toContain('/assets/js/pages/minigames-hub.js?v=20260831-guest-local-v1');
+        expect(hubController).toContain('Your progress stays on this device.');
         expect(page).toContain('/assets/js/pages/minigames-phase2b.js');
         expect(page).toContain('/assets/js/pages/higher-lower.js');
         expect(page).toContain('/assets/css/minigames-entity-guesser.css');

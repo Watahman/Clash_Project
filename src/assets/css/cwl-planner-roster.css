@@ -1,10 +1,8 @@
 .workspace-planner {
-    --planner-trash-filter: brightness(0) saturate(100%) invert(76%) sepia(18%) saturate(1014%) hue-rotate(304deg) brightness(95%) contrast(91%);
-    --planner-trash-opacity: .9;
+    --planner-trash-filter: brightness(0) saturate(100%) invert(76%) sepia(18%) saturate(1014%) hue-rotate(304deg) brightness(95%) contrast(91%); --planner-trash-opacity: .9;
 }
 :root[data-theme="light"] .workspace-planner {
-    --planner-trash-filter: brightness(0) saturate(100%) invert(31%) sepia(24%) saturate(1264%) hue-rotate(319deg) brightness(88%) contrast(91%);
-    --planner-trash-opacity: .76;
+    --planner-trash-filter: brightness(0) saturate(100%) invert(31%) sepia(24%) saturate(1264%) hue-rotate(319deg) brightness(88%) contrast(91%); --planner-trash-opacity: .76;
 }
 .workspace-planner #cwl-available-players {
     display: grid;
@@ -13,7 +11,7 @@
     max-height: none;
     min-width: 0;
     overflow: visible;
-    scrollbar-gutter: auto;
+    scrollbar-gutter: stable;
 }
 .workspace-planner #cwl-all-clans {
     align-content: start; display: grid !important;
