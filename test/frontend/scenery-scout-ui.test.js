@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { initSceneryScout } from '../../src/assets/js/pages/scenery-scout.js';
 
 const source = readFileSync('src/minigames.html', 'utf8');
+const styles = readFileSync('src/assets/css/minigames-scenery-scout.css', 'utf8');
 const manifest = JSON.parse(readFileSync('src/assets/scenery-scout/scenery-manifest.json', 'utf8'));
 const rootMarkup = new JSDOM(source).window.document.querySelector('[data-scenery-scout-game]').outerHTML;
 
@@ -21,6 +22,10 @@ describe('Scenery Scout controller', () => {
         await vi.waitFor(() => expect(root.querySelector('[data-ss-screen="landing"]').hidden).toBe(false));
         expect([...root.querySelectorAll('[data-ss-start]')].map(button => button.dataset.ssStart))
             .toEqual(expect.arrayContaining(['daily', 'normal', 'hard', 'expert', 'sudden-death']));
+    });
+
+    it('visually hides feedback while the next round is awaiting an answer', () => {
+        expect(styles).toMatch(/\.ss-feedback\[hidden\]\s*{\s*display:\s*none\s*!important;/);
     });
 
     it('updates its static and active-round copy when the page language changes', async () => {
@@ -51,6 +56,7 @@ describe('Scenery Scout controller', () => {
             expect([...root.querySelectorAll('[data-ss-answer]')].every(button => button.disabled)).toBe(true);
             expect(root.querySelector('[data-ss-feedback]').textContent).toContain('Correct');
             controller.nextRound();
+            expect(root.querySelector('[data-ss-feedback]').hidden).toBe(true);
         }
 
         const finalQuestion = controller.getRun().questions[4];

@@ -65,6 +65,7 @@
 .ss-answer[data-state="incorrect"] [data-ss-answer-status] { color: var(--danger, #df756f); }
 
 .ss-feedback { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: .75rem; border: 1px solid var(--border); border-radius: 8px; padding: .75rem .9rem; background: var(--surface-subtle); }
+.ss-feedback[hidden] { display: none !important; }
 .ss-feedback strong,
 .ss-feedback span { display: block; }
 .ss-feedback strong { font-size: .84rem; }
