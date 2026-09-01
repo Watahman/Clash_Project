@@ -1,10 +1,10 @@
-export const ENTITY_GUESSER_DATA_VERSION='2026-08-phase-2a';
+export const ENTITY_GUESSER_DATA_VERSION='2026-09-01-equipment-fix-1';
 export const DAILY_CATEGORY_SEQUENCE=Object.freeze(['troops','equipment','spells','troops','pets','equipment','heroes','troops','spells','equipment','pets','troops']);
 export const ENTITY_CATEGORIES=Object.freeze([{"id":"troops","label":"Home Village Troops","shortLabel":"Troops","maxAttempts":6,"columns":[{"key":"resource","label":"Type","labelKey":"type","kind":"exact"},{"key":"movement","label":"Move","labelKey":"move","kind":"exact"},{"key":"targets","label":"Targets","labelKey":"targets","kind":"set"},{"key":"favorite","label":"Favorite","labelKey":"favorite","kind":"exact"},{"key":"housing","label":"Housing","labelKey":"housing","kind":"number","closeWithin":3},{"key":"unlockTh","label":"TH","labelKey":"th","kind":"number","closeWithin":1},{"key":"attackStyle","label":"Attack","labelKey":"attack","kind":"exact"},{"key":"role","label":"Role","labelKey":"role","kind":"exact"}]},{"id":"spells","label":"Home Village Spells","shortLabel":"Spells","maxAttempts":6,"columns":[{"key":"resource","label":"Type","labelKey":"type","kind":"exact"},{"key":"effect","label":"Effect","labelKey":"effect","kind":"exact"},{"key":"affects","label":"Affects","labelKey":"affects","kind":"set"},{"key":"housing","label":"Housing","labelKey":"housing","kind":"number","closeWithin":1},{"key":"unlockTier","label":"Unlock","labelKey":"unlock","kind":"ordered","order":["Early","Mid","Late","Endgame"]},{"key":"duration","label":"Timing","labelKey":"timing","kind":"exact"},{"key":"role","label":"Role","labelKey":"role","kind":"exact"},{"key":"directDamage","label":"Damage","labelKey":"damage","kind":"boolean"}]},{"id":"heroes","label":"Heroes","shortLabel":"Heroes","maxAttempts":5,"columns":[{"key":"unlockTh","label":"TH","labelKey":"th","kind":"number","closeWithin":1},{"key":"movement","label":"Move","labelKey":"move","kind":"exact"},{"key":"targets","label":"Targets","labelKey":"targets","kind":"set"},{"key":"favorite","label":"Favorite","labelKey":"favorite","kind":"exact"},{"key":"attackStyle","label":"Attack","labelKey":"attack","kind":"exact"},{"key":"role","label":"Role","labelKey":"role","kind":"exact"},{"key":"equipmentCount","label":"Equipment","labelKey":"equipment","kind":"number","closeWithin":1},{"key":"form","label":"Form","labelKey":"form","kind":"exact"}]},{"id":"pets","label":"Hero Pets","shortLabel":"Pets","maxAttempts":6,"columns":[{"key":"unlockTh","label":"TH","labelKey":"th","kind":"number","closeWithin":1},{"key":"petHouse","label":"Pet House","labelKey":"petHouse","kind":"number","closeWithin":1},{"key":"movement","label":"Move","labelKey":"move","kind":"exact"},{"key":"targets","label":"Targets","labelKey":"targets","kind":"set"},{"key":"favorite","label":"Favorite","labelKey":"favorite","kind":"exact"},{"key":"attackStyle","label":"Attack","labelKey":"attack","kind":"exact"},{"key":"role","label":"Role","labelKey":"role","kind":"exact"},{"key":"survivesHero","label":"After Hero","labelKey":"afterHero","kind":"boolean"}]},{"id":"equipment","label":"Hero Equipment","shortLabel":"Equipment","maxAttempts":6,"columns":[{"key":"hero","label":"Hero","labelKey":"hero","kind":"exact"},{"key":"rarity","label":"Rarity","labelKey":"rarity","kind":"exact"},{"key":"activation","label":"Activation","labelKey":"activation","kind":"exact"},{"key":"effect","label":"Effect","labelKey":"effect","kind":"exact"},{"key":"affects","label":"Affects","labelKey":"affects","kind":"set"},{"key":"role","label":"Role","labelKey":"role","kind":"exact"},{"key":"maxLevel","label":"Max level","labelKey":"maxLevel","kind":"number","closeWithin":3},{"key":"source","label":"Source","labelKey":"source","kind":"exact"}]}]);
 const t=(id,name,aliases,resource,movement,targets,favorite,housing,unlockTh,attackStyle,role)=>({id,name,aliases,categoryId:'troops',resource,movement,targets,favorite,housing,unlockTh,attackStyle,role,dailyEligible:true});
 const s=(id,name,aliases,resource,effect,affects,housing,unlockTier,duration,role,directDamage)=>({id,name,aliases,categoryId:'spells',resource,effect,affects,housing,unlockTier,duration,role,directDamage,dailyEligible:true});
 const h=(id,name,aliases,unlockTh,movement,targets,favorite,attackStyle,role,equipmentCount,form)=>({id,name,aliases,categoryId:'heroes',unlockTh,movement,targets,favorite,attackStyle,role,equipmentCount,form,dailyEligible:true});
-const p=(id,name,aliases,unlockTh,petHouse,movement,targets,favorite,attackStyle,role,survivesHero)=>({id,name,aliases,categoryId:'pets',unlockTh,petHouse,movement,targets,favorite,attackStyle,role,survivesHero,dailyEligible:true});
+const p=(id,name,aliases,unlockTh,petHouse,movement,targets,favorite,attackStyle,role,survivesHero)=>({id,name,aliases,categoryId:'pets',unlockTh,movement,targets,favorite,petHouse,attackStyle,role,survivesHero,dailyEligible:true});
 const q=(id,name,hero,rarity,activation,effect,affects,role,source,aliases=[])=>({id,name,aliases,categoryId:'equipment',hero,rarity,activation,effect,affects,role,maxLevel:rarity==='Common'?18:27,source,dailyEligible:true});
 export const ENTITIES=Object.freeze([
 t("barbarian","Barbarian",["barb"],"Elixir","Ground",["Ground"],"Any",1,1,"Melee","Damage"),
@@ -82,7 +82,7 @@ q("vampstache","Vampstache","Barbarian King","Common","Passive","Healing",["Hero
 q("giant-gauntlet","Giant Gauntlet","Barbarian King","Epic","Active","Transform",["Hero","Buildings"],"Tank","Event"),
 q("spiky-ball","Spiky Ball","Barbarian King","Epic","Active","Projectile",["Buildings"],"Offense","Event"),
 q("snake-bracelet","Snake Bracelet","Barbarian King","Epic","Passive","Summon",["Hero","Enemy Troops"],"Support","Event"),
-q("stick-horse","Stick Horse","Barbarian King","Epic","Active","Mobility",["Hero"],"Mobility","Event"),
+q("stick-horse","Stick Horse","Barbarian King","Epic","Passive","Mobility",["Hero"],"Mobility","Event"),
 q("archer-puppet","Archer Puppet","Archer Queen","Common","Active","Summon",["Hero","Friendly Troops"],"Support","Starter"),
 q("invisibility-vial","Invisibility Vial","Archer Queen","Common","Active","Stealth",["Hero"],"Survival","Starter"),
 q("giant-arrow","Giant Arrow","Archer Queen","Common","Active","Projectile",["Buildings","Enemy Troops"],"Offense","Blacksmith"),
@@ -90,13 +90,13 @@ q("healer-puppet","Healer Puppet","Archer Queen","Common","Active","Summon",["He
 q("frozen-arrow","Frozen Arrow","Archer Queen","Epic","Passive","Slow",["Enemy Troops","Buildings"],"Control","Event"),
 q("magic-mirror","Magic Mirror","Archer Queen","Epic","Active","Clone",["Hero"],"Offense","Event"),
 q("action-figure","Action Figure","Archer Queen","Epic","Active","Summon",["Friendly Troops"],"Tank","Event"),
-q("monolith-arrow","Monolith Arrow","Archer Queen","Epic","Active","Projectile",["Buildings"],"Offense","Event"),
+q("monolith-arrow","Monolith Arrow","Archer Queen","Epic","Passive","Projectile",["Buildings"],"Offense","Event"),
 q("henchmen-puppet","Henchmen Puppet","Minion Prince","Common","Active","Summon",["Hero","Friendly Troops"],"Support","Starter"),
 q("dark-orb","Dark Orb","Minion Prince","Common","Active","Projectile",["Buildings","Enemy Troops"],"Control","Starter"),
-q("metal-pants","Metal Pants","Minion Prince","Common","Passive","Protection",["Hero"],"Defense","Blacksmith"),
+q("metal-pants","Metal Pants","Minion Prince","Common","Active","Protection",["Hero"],"Defense","Blacksmith"),
 q("noble-iron","Noble Iron","Minion Prince","Common","Passive","Buff",["Hero"],"Offense","Blacksmith"),
 q("dark-crown","Dark Crown","Minion Prince","Epic","Passive","Aura",["Hero","Enemy Buildings"],"Offense","Event"),
-q("meteor-staff","Meteor Staff","Minion Prince","Epic","Active","Area Damage",["Buildings","Enemy Troops"],"Offense","Event"),
+q("meteor-staff","Meteor Staff","Minion Prince","Epic","Passive","Area Damage",["Buildings","Enemy Troops"],"Offense","Event"),
 q("eternal-tome","Eternal Tome","Grand Warden","Common","Active","Invulnerability",["Hero","Friendly Troops"],"Protection","Starter"),
 q("life-gem","Life Gem","Grand Warden","Common","Passive","Aura",["Friendly Troops"],"Support","Starter"),
 q("rage-gem","Rage Gem","Grand Warden","Common","Passive","Aura",["Friendly Troops"],"Offense","Blacksmith"),
@@ -111,11 +111,12 @@ q("haste-vial","Haste Vial","Royal Champion","Common","Active","Buff",["Hero"],"
 q("rocket-spear","Rocket Spear","Royal Champion","Epic","Active","Range Buff",["Hero","Buildings"],"Offense","Event"),
 q("electro-boots","Electro Boots","Royal Champion","Epic","Passive","Aura",["Hero","Enemy Troops","Buildings"],"Offense","Event"),
 q("frost-flake","Frost Flake","Royal Champion","Epic","Active","Control",["Buildings","Enemy Troops"],"Control","Event"),
-q("fire-heart","Fire Heart","Dragon Duke","Common","Active","Buff",["Hero"],"Offense","Starter"),
-q("flame-blower","Flame Blower","Dragon Duke","Common","Passive","Area Damage",["Buildings","Enemy Troops"],"Offense","Starter"),
+q("fire-heart","Fire Heart","Dragon Duke","Common","Passive","Buff",["Hero"],"Offense","Starter"),
+q("flame-blower","Flame Blower","Dragon Duke","Common","Active","Area Damage",["Buildings","Enemy Troops"],"Offense","Starter"),
 q("stun-blaster","Stun Blaster","Dragon Duke","Common","Active","Control",["Buildings","Enemy Troops"],"Control","Blacksmith"),
 q("electro-fangs","Electro Fangs","Dragon Duke","Common","Passive","Chain",["Buildings","Enemy Troops"],"Offense","Blacksmith"),
-q("rocket-backpack","Rocket Backpack","Dragon Duke","Epic","Active","Mobility",["Hero","Buildings"],"Mobility","Event")
+q("rocket-backpack","Rocket Backpack","Dragon Duke","Epic","Active","Mobility",["Hero","Buildings"],"Mobility","Event"),
+q("revenge-deck","Revenge Deck","Dragon Duke","Epic","Passive","Counter Damage",["Buildings","Enemy Troops","Heroes"],"Sustain","Event")
 ]);
 export const CATEGORY_BY_ID=Object.freeze(Object.fromEntries(ENTITY_CATEGORIES.map(category=>[category.id,category])));
 export const ENTITIES_BY_CATEGORY=Object.freeze(Object.fromEntries(ENTITY_CATEGORIES.map(category=>[category.id,Object.freeze(ENTITIES.filter(entity=>entity.categoryId===category.id))])));
