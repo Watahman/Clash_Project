@@ -4,7 +4,7 @@ export const ENTITY_CATEGORIES=Object.freeze([{"id":"troops","label":"Home Villa
 const t=(id,name,aliases,resource,movement,targets,favorite,housing,unlockTh,attackStyle,role)=>({id,name,aliases,categoryId:'troops',resource,movement,targets,favorite,housing,unlockTh,attackStyle,role,dailyEligible:true});
 const s=(id,name,aliases,resource,effect,affects,housing,unlockTier,duration,role,directDamage)=>({id,name,aliases,categoryId:'spells',resource,effect,affects,housing,unlockTier,duration,role,directDamage,dailyEligible:true});
 const h=(id,name,aliases,unlockTh,movement,targets,favorite,attackStyle,role,equipmentCount,form)=>({id,name,aliases,categoryId:'heroes',unlockTh,movement,targets,favorite,attackStyle,role,equipmentCount,form,dailyEligible:true});
-const p=(id,name,aliases,unlockTh,petHouse,movement,targets,favorite,attackStyle,role,survivesHero)=>({id,name,aliases,categoryId:'pets',unlockTh,movement,targets,favorite,petHouse,attackStyle,role,survivesHero,dailyEligible:true});
+const p=(id,name,aliases,unlockTh,petHouse,movement,targets,favorite,attackStyle,role,survivesHero)=>({id,name,aliases,categoryId:'pets',unlockTh,petHouse,movement,targets,favorite,attackStyle,role,survivesHero,dailyEligible:true});
 const q=(id,name,hero,rarity,activation,effect,affects,role,source,aliases=[])=>({id,name,aliases,categoryId:'equipment',hero,rarity,activation,effect,affects,role,maxLevel:rarity==='Common'?18:27,source,dailyEligible:true});
 export const ENTITIES=Object.freeze([
 t("barbarian","Barbarian",["barb"],"Elixir","Ground",["Ground"],"Any",1,1,"Melee","Damage"),
