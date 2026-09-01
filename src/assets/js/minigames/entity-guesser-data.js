@@ -62,7 +62,7 @@ h("archer-queen","Archer Queen",["queen","aq"],8,"Ground",["Ground","Air"],"Any"
 h("minion-prince","Minion Prince",["prince","mp"],9,"Air",["Ground","Air"],"Defenses","Ranged","Debuff",6,"Flying"),
 h("grand-warden","Grand Warden",["warden","gw"],11,"Ground or Air",["Ground","Air"],"Any","Ranged","Support",7,"Switchable"),
 h("royal-champion","Royal Champion",["champion","rc"],13,"Ground",["Ground","Air"],"Defenses","Ranged","Specialist",7,"Normal"),
-h("dragon-duke","Dragon Duke",["duke","dd"],15,"Ground",["Ground"],"Walls","Melee","Frontline",5,"Transform"),
+h("dragon-duke","Dragon Duke",["duke","dd"],15,"Ground",["Ground"],"Walls","Melee","Frontline",6,"Transform"),
 p("lassi","L.A.S.S.I",["lassi"],14,1,"Ground",["Ground"],"Near Hero","Melee","Damage",true),
 p("electro-owl","Electro Owl",["owl"],14,2,"Air",["Ground","Air"],"Hero Target","Ranged","Chain",true),
 p("mighty-yak","Mighty Yak",["yak"],14,3,"Ground",["Ground"],"Hero Target","Melee","Wall Breaker",true),
