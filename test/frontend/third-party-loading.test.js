@@ -35,12 +35,16 @@ describe('Privacy-aware third-party loading', () => {
         expect(source).toMatch(/(?:eligible|allowlist)/i);
         expect(source).toMatch(/(?:consent|adStorage|advertisingConsent)/i);
         expect(source).toMatch(/(?:hasAdvertisingConsent|ad-consent-changed)/i);
-        expect(adsSource).toContain('CONSENT_MODE_DATA_READY');
-        expect(adsSource).toContain('NOT_CONFIGURED');
-        expect(adsSource).toContain('NOT_APPLICABLE');
-        expect(adsSource.indexOf('import(AD_MANAGER_URL)'))
-            .toBeGreaterThan(adsSource.indexOf('CONSENT_MODE_DATA_READY'));
-        expect(adsSource).toContain('const CLIENT_ID = \'ca-pub-7361256415342967\'');
+        expect(adsSource).not.toMatch(/googlefc|CONSENT_MODE_DATA_READY|googletagmanager|pagead\.googlesyndication/i);
+        expect(adsSource).not.toMatch(/ca-pub-|publisher(?:-|\s)?tag|CLIENT_ID/i);
+        expect(adsSource).toContain("fetch('/api/ads-context'");
+        expect(adsSource).toContain('localStorage');
+        expect(adsSource).toContain('STORAGE_KEY');
+        expect(adsSource).toContain('DECISIONS');
+        expect(adsSource).toMatch(/protected/);
+        expect(adsSource).toMatch(/non-eea|non-protected/);
+        expect(adsSource).toContain('advertisingConsent');
+        expect(adsSource).toMatch(/!state\.advertisingConsent[\s\S]*import\(AD_MANAGER_URL\)/);
         expect(adsSource).toContain('window.ClashToolsCMP');
     });
 

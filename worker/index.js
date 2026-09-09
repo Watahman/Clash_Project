@@ -4,6 +4,7 @@ import {
     PUBLIC_ASSETS,
     publicRouteRedirect
 } from './public-routes.js';
+import { adsContextResponse, isAdsContextPath } from './ads-context.js';
 
 const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 const PERMANENT_REDIRECT_STATUS = 301;
@@ -289,6 +290,9 @@ export default {
             return proxyExportAsset(request, incomingUrl);
         }
         if (isApiPath(incomingUrl.pathname)) {
+            if (isAdsContextPath(incomingUrl.pathname)) {
+                return adsContextResponse(request);
+            }
             return proxyApiRequest(request, env, incomingUrl);
         }
         if (redirect) return permanentRedirect(incomingUrl, redirect);

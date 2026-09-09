@@ -8,11 +8,63 @@ const env = overrides => ({
     ...overrides
 });
 
+function adsContextRequest(method = 'GET', country) {
+    const request = new Request('https://clashpanel.com/api/ads-context', { method });
+    Object.defineProperty(request, 'cf', { configurable: true, value: country === undefined ? {} : { country } });
+    return request;
+}
+
 afterEach(() => {
     vi.unstubAllGlobals();
 });
 
 describe('Cloudflare API proxy', () => {
+    it.each(['BE', 'GB', 'CH'])('requires consent for protected country %s', async country => {
+        const response = await worker.fetch(adsContextRequest('GET', country), env());
+
+        expect(response.status).toBe(200);
+        expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+        expect(response.headers.get('Content-Type')).toContain('application/json');
+        expect(await response.json()).toEqual({
+            consentRequired: true,
+            classification: 'protected'
+        });
+    });
+
+    it('allows direct advertising in a non-protected country', async () => {
+        const response = await worker.fetch(adsContextRequest('GET', 'US'), env());
+
+        expect(response.status).toBe(200);
+        expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+        expect(await response.json()).toEqual({
+            consentRequired: false,
+            classification: 'non-protected'
+        });
+    });
+
+    it.each([undefined, '', 'XX', 'ZZ', 'not-a-country'])
+        ('fails closed when the request country is missing or invalid: %s', async country => {
+            const response = await worker.fetch(adsContextRequest('GET', country), env());
+
+            expect(response.status).toBe(200);
+            expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+            const payload = await response.json();
+            expect(payload).toEqual({
+                consentRequired: true,
+                classification: 'unknown'
+            });
+            expect(payload).not.toHaveProperty('country');
+        });
+
+    it.each(['POST', 'PUT', 'OPTIONS'])('rejects non-GET ads context requests: %s', async method => {
+        const response = await worker.fetch(adsContextRequest(method, 'BE'), env());
+
+        expect(response.status).toBe(405);
+        expect(response.headers.get('Allow')).toBe('GET');
+        expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+        expect(await response.text()).toBe('');
+    });
+
     it('checks backend health and readiness from the scheduled monitor', async () => {
         vi.stubGlobal('fetch', vi.fn(async () => Response.json({ status: 'ok' })));
         let scheduledPromise;
