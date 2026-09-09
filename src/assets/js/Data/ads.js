@@ -1,7 +1,7 @@
 (() => {
     'use strict';
 
-    const ADS_ENABLED = false;
+    const ADS_ENABLED = true;
     if (!ADS_ENABLED) return;
 
     const AD_MANAGER_URL = '/assets/js/Data/adsterra-manager.js?v=20260910-adsterra-v3';
