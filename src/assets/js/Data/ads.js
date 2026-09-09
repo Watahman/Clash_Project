@@ -1,6 +1,9 @@
 (() => {
     'use strict';
 
+    const ADS_ENABLED = false;
+    if (!ADS_ENABLED) return;
+
     const AD_MANAGER_URL = '/assets/js/Data/adsterra-manager.js?v=20260910-adsterra-v3';
     const STYLE_ID = 'clashpanel-ad-consent-css';
     const STYLE_URL = '/assets/css/ad-consent.css?v=20260910-ad-consent-v1';
