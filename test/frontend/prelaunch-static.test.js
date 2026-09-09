@@ -126,6 +126,9 @@ describe('Pre-launch static contract', () => {
 
         expect(scriptPolicy).toContain('https://pl31261194.profitableratecpmnetwork.com');
         expect(scriptPolicy).toContain('https://www.highrevenueformat.com');
+        expect(scriptPolicy).toContain('script-src');
+        expect(scriptPolicy).toMatch(/script-src[^;]+https:\/\/fundingchoicesmessages\.google\.com/);
+        expect(scriptPolicy).toMatch(/connect-src[^;]+https:\/\/fundingchoicesmessages\.google\.com/);
         expect(scriptPolicy).not.toMatch(/script-src[^;]*\*/);
         for (const document of [privacy, cookies]) {
             expect(document).toContain('https://adsterra.com/privacy-policy-managed');
