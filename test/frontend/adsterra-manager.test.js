@@ -27,9 +27,18 @@ describe('Adsterra manager contracts', () => {
         expect(manager.AD_ELIGIBLE_ROUTES.has('/')).toBe(true);
         expect(manager.AD_ELIGIBLE_ROUTES.has('/guides/cwl-rotation')).toBe(true);
         expect(manager.AD_ELIGIBLE_ROUTES.has('/advanced-stats')).toBe(false);
-        expect(manager.HARD_EXCLUDED_PREFIXES).toEqual(['/app', '/api', '/dashboard', '/subpages']);
+        expect([...manager.APP_AD_ELIGIBLE_ROUTES]).toEqual([
+            '/dashboard', '/app/advanced-stats', '/app/achievements',
+            '/app/cwl-planner-drafts', '/app/cwl-planner', '/app/cwl-tracker',
+            '/app/war-board', '/app/clan-management', '/app/explore',
+            '/app/brackets', '/app/minigames'
+        ]);
+        expect(manager.HARD_EXCLUDED_PREFIXES).toEqual(['/api', '/subpages']);
         expect(manager.isAdRouteEligible('/', document)).toBe(true);
         expect(manager.isAdRouteEligible('/app', document)).toBe(false);
+        expect(manager.AD_ELIGIBLE_ROUTES.has('/app/profile')).toBe(false);
+        expect(manager.AD_ELIGIBLE_ROUTES.has('/api')).toBe(false);
+        expect(manager.AD_ELIGIBLE_ROUTES.has('/subpages/login')).toBe(false);
     });
 
     it('does not monetize noindex workers.dev preview hosts', () => {
@@ -108,6 +117,9 @@ describe('Adsterra manager contracts', () => {
         expect(adsSource).not.toContain('const AD_ELIGIBLE_ROUTES');
         expect(managerSource).toContain('STYLE_URL');
         expect(managerSource).toContain('setTimeout(() => finish(false), 10000)');
+        expect(managerSource).toContain('APP_AD_ELIGIBLE_ROUTES');
+        expect(managerSource).toContain('creativeDetectorMarkup');
+        expect(managerSource).toContain('waitForNativeCreative');
         expect(managerSource).not.toContain('allow-scripts allow-same-origin');
         expect(managerSource).toContain('allow-scripts allow-popups allow-popups-to-escape-sandbox');
         expect(managerSource).not.toContain("setAttribute('loading', 'lazy')");
@@ -121,6 +133,6 @@ describe('Adsterra manager contracts', () => {
         manager.initAdsterraAds();
         manager.initAdsterraAds();
         expect(document.querySelectorAll('#clashpanel-adsterra-css').length).toBe(1);
-        expect(document.querySelector('#clashpanel-adsterra-css').href).toContain('/assets/css/adsterra.css?v=20260909-adsterra-v1');
+        expect(document.querySelector('#clashpanel-adsterra-css').href).toContain('/assets/css/adsterra.css?v=20260910-adsterra-v2');
     });
 });

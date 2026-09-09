@@ -24,8 +24,9 @@ describe('Privacy-aware third-party loading', () => {
     });
 
     it('keeps ad loading behind the central consent and route manager', () => {
+        const adsSource = readFileSync('src/assets/js/Data/ads.js', 'utf8');
         const source = [
-            readFileSync('src/assets/js/Data/ads.js', 'utf8'),
+            adsSource,
             existsSync('src/assets/js/Data/adsterra-manager.js')
                 ? readFileSync('src/assets/js/Data/adsterra-manager.js', 'utf8')
                 : ''
@@ -34,6 +35,13 @@ describe('Privacy-aware third-party loading', () => {
         expect(source).toMatch(/(?:eligible|allowlist)/i);
         expect(source).toMatch(/(?:consent|adStorage|advertisingConsent)/i);
         expect(source).toMatch(/(?:hasAdvertisingConsent|ad-consent-changed)/i);
+        expect(adsSource).toContain('CONSENT_MODE_DATA_READY');
+        expect(adsSource).toContain('NOT_CONFIGURED');
+        expect(adsSource).toContain('NOT_APPLICABLE');
+        expect(adsSource.indexOf('import(AD_MANAGER_URL)'))
+            .toBeGreaterThan(adsSource.indexOf('CONSENT_MODE_DATA_READY'));
+        expect(adsSource).toContain('const CLIENT_ID = \'ca-pub-7361256415342967\'');
+        expect(adsSource).toContain('window.ClashToolsCMP');
     });
 
     it('reveals public content without waiting for registered application tasks', () => {

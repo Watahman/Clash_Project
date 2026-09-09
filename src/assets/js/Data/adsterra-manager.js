@@ -1,30 +1,24 @@
-const NATIVE_KEY = 'b6ef4e968b1f1a4390ef24f608b1a36e';
-const AD_NETWORK = 'https://www.highrevenueformat.com';
-const NATIVE_NETWORK = 'https://pl31261194.profitableratecpmnetwork.com';
+import {
+    AD_ELIGIBLE_ROUTES, AD_UNITS, APP_AD_ELIGIBLE_ROUTES,
+    APP_PLACEMENTS, GUIDE_ROUTES, HARD_EXCLUDED_PREFIXES, LABELS,
+    PLACEMENTS
+} from './adsterra-config.js';
+import {
+    creativeDetectorMarkup, hasWorkspaceShell, isAppContentReady, isPlacementReady,
+    observeReadiness, waitForNativeCreative
+} from './adsterra-render.js';
+
 const STYLE_ID = 'clashpanel-adsterra-css';
-const STYLE_URL = '/assets/css/adsterra.css?v=20260909-adsterra-v1';
-const AD_ELIGIBLE_ROUTES = new Set(['/', '/guides', '/guides/fair-cwl-roster', '/guides/cwl-rotation', '/guides/cwl-availability', '/guides/missed-attacks', '/guides/cwl-attack-defense', '/guides/cwl-season-history', '/guides/cwl-bonus-medals', '/guides/spreadsheet-vs-cwl-planner', '/methodology', '/cwl-planner', '/cwl-tracker', '/clan-management', '/bracket-generator', '/minigames', '/about', '/changelog']);
-const HARD_EXCLUDED_PREFIXES = ['/app', '/api', '/dashboard', '/subpages'];
-const AD_UNITS = Object.freeze({
-    native: Object.freeze({ type: 'native', key: NATIVE_KEY, containerId: `container-${NATIVE_KEY}`, width: 0, height: 0, src: `${NATIVE_NETWORK}/${NATIVE_KEY}/invoke.js` }),
-    'rectangle-300x250': Object.freeze({ type: 'rectangle-300x250', key: '61a6eb16f5ada2c23381e3dc05d609fa', width: 300, height: 250, src: `${AD_NETWORK}/61a6eb16f5ada2c23381e3dc05d609fa/invoke.js` }),
-    'mobile-320x50': Object.freeze({ type: 'mobile-320x50', key: 'fb56e6640ae77dbed5cc52a16d8531a4', width: 320, height: 50, src: `${AD_NETWORK}/fb56e6640ae77dbed5cc52a16d8531a4/invoke.js` }),
-    'desktop-728x90': Object.freeze({ type: 'desktop-728x90', key: '674c1dce68ef2c0985ffc5aa5ff5ee07', width: 728, height: 90, src: `${AD_NETWORK}/674c1dce68ef2c0985ffc5aa5ff5ee07/invoke.js` })
-});
-const LABELS = Object.freeze({ en: 'Advertisement', nl: 'Advertentie', fr: 'Publicité', de: 'Werbung', es: 'Publicidad' });
-const GUIDE_ROUTES = new Set([...AD_ELIGIBLE_ROUTES].filter(route => route.startsWith('/guides/')));
-const PLACEMENTS = Object.freeze({
-    '/': [{ id: 'home-horizontal', type: 'responsive-horizontal', after: '.home3-featured' }, { id: 'home-native', type: 'native', after: '.home3-ecosystem' }], '/guides': [{ id: 'guides-horizontal', type: 'responsive-horizontal', after: '.resource-hero' }, { id: 'guides-native', type: 'native', after: '.guide-library' }], guidesDetail: [{ id: 'guide-detail-horizontal', type: 'responsive-horizontal', after: '.resource-hero' }],
-    '/methodology': [{ id: 'methodology-horizontal', type: 'responsive-horizontal', after: '.resource-hero' }, { id: 'methodology-native', type: 'native', after: '#performance' }], '/cwl-planner': [{ id: 'planner-horizontal', type: 'responsive-horizontal', after: '.cp-detail-section' }, { id: 'planner-native', type: 'native', after: '.home-v2-products' }], '/cwl-tracker': [{ id: 'tracker-horizontal', type: 'responsive-horizontal', after: '.cp-detail-section' }, { id: 'tracker-native', type: 'native', after: '.home-v2-products' }], '/clan-management': [{ id: 'clan-horizontal', type: 'responsive-horizontal', after: '.cp-detail-section' }, { id: 'clan-native', type: 'native', after: '.home-v2-products' }],
-    '/bracket-generator': [{ id: 'bracket-horizontal', type: 'responsive-horizontal', after: '.bracket-public-products' }], '/minigames': [{ id: 'minigames-horizontal', type: 'responsive-horizontal', before: '.game-shell' }], '/about': [{ id: 'about-horizontal', type: 'responsive-horizontal', after: '.feature-v2-workflow' }], '/changelog': [{ id: 'changelog-horizontal', type: 'responsive-horizontal', after: '#august-4' }]
-});
+const STYLE_URL = '/assets/css/adsterra.css?v=20260910-adsterra-v2';
 const state = {
     initialized: false,
     nativeClaimed: false,
     slotRecords: new Map(),
     atOptionsQueue: Promise.resolve(),
     consentDenied: false,
-    slotSequence: 0
+    slotSequence: 0,
+    readinessObserver: null,
+    nativeSlot: null
 };
 function currentPath(pathname = globalThis.window?.location?.pathname || '/') {
     return (pathname.replace(/\/+$/, '') || '/').toLowerCase();
@@ -56,6 +50,7 @@ function isIndexableCanonicalPage(path, doc = globalThis.document) {
 }
 function isAdRouteEligible(path = currentPath(), doc = globalThis.document) {
     if (!AD_ELIGIBLE_ROUTES.has(path) || isHardExcluded(path)) return false;
+    if (APP_AD_ELIGIBLE_ROUTES.has(path)) return navigationReturnedOk() && hasWorkspaceShell(doc);
     return navigationReturnedOk() && isIndexableCanonicalPage(path, doc) && hasMeaningfulPublisherContent(doc);
 }
 function languageCode() {
@@ -115,7 +110,8 @@ function chooseHorizontalUnit(width) {
 function iframeMarkup(unit, slotId) {
     const options = JSON.stringify({ key: unit.key, format: 'iframe', height: unit.height, width: unit.width, params: {} });
     const src = unit.src.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-    return `<!doctype html><html><body><script>window.atOptions=${options};<\/script><script src="${src}" data-adsterra-slot="${slotId}" onload="parent.postMessage({source:'clashpanel-adsterra',slot:'${slotId}',status:'loaded'},'*')" onerror="parent.postMessage({source:'clashpanel-adsterra',slot:'${slotId}',status:'failed'},'*')"><\/script></body></html>`;
+    const detector = creativeDetectorMarkup(slotId);
+    return `<!doctype html><html><body><script>window.atOptions=${options};<\/script><script>${detector}<\/script><script src="${src}" data-adsterra-slot="${slotId}" onload="window.__clashpanelCheckCreative?.(); parent.postMessage({source:'clashpanel-adsterra',slot:'${slotId}',status:'provider-loaded'},'*')" onerror="parent.postMessage({source:'clashpanel-adsterra',slot:'${slotId}',status:'failed'},'*')"><\/script></body></html>`;
 }
 function loadAtOptionsFrame(slot, unit, slotId) {
     return new Promise(resolve => {
@@ -139,7 +135,8 @@ function loadAtOptionsFrame(slot, unit, slotId) {
         };
         const onMessage = event => {
             if (event.source !== frame.contentWindow || event.data?.source !== 'clashpanel-adsterra' || event.data.slot !== slotId) return;
-            finish(event.data.status === 'loaded');
+            if (event.data.status === 'failed') finish(false);
+            if (event.data.status === 'rendered') finish(true);
         };
         const onError = () => finish(false);
         globalThis.window?.addEventListener('message', onMessage);
@@ -166,9 +163,12 @@ function loadNative(slot) {
     script.src = AD_UNITS.native.src;
     const container = document.createElement('div');
     container.id = AD_UNITS.native.containerId;
+    const renderPromise = waitForNativeCreative(container, script);
     content.append(script, container);
-    script.addEventListener('error', () => collapseSlot(slot));
-    return true;
+    return renderPromise.then(ok => {
+        if (!ok) state.nativeClaimed = false;
+        return ok;
+    });
 }
 function hasConsent() {
     try { return globalThis.window?.ClashToolsCMP?.hasAdvertisingConsent?.() === true; }
@@ -176,6 +176,8 @@ function hasConsent() {
 }
 function loadSlot(slot) {
     if (!slot || ['loaded', 'loading', 'failed', 'too-narrow'].includes(slot.dataset.adsterraState)) return;
+    const path = currentPath();
+    if (APP_AD_ELIGIBLE_ROUTES.has(path) && !isAppContentReady(path, document)) return;
     if (!hasConsent()) return;
     const type = normalizedType(slot.dataset.adsterraSlot);
     const id = slot.dataset.adsterraPlacement || `slot-${state.slotRecords.size + 1}`;
@@ -184,10 +186,13 @@ function loadSlot(slot) {
     slot.dataset.adsterraState = 'loading';
     slot.hidden = false;
     slot.removeAttribute('aria-hidden');
+    slot.classList.remove('is-collapsed');
     if (type === 'native') {
-        if (!loadNative(slot)) return collapseSlot(slot);
-        slot.dataset.adsterraState = 'loaded';
-        state.slotRecords.set(id, slot.dataset.adsterraState);
+        Promise.resolve(loadNative(slot)).then(ok => {
+            if (!ok) return collapseSlot(slot, 'empty-native');
+            slot.dataset.adsterraState = 'loaded';
+            state.slotRecords.set(id, slot.dataset.adsterraState);
+        });
         return;
     }
     queueAtOptionsFrame(slot, unit, id).then(frame => {
@@ -223,11 +228,11 @@ function insertPlacement(anchor, placement, id) {
 function applyConfiguredPlacements(root = globalThis.document) {
     const path = currentPath();
     if (!AD_ELIGIBLE_ROUTES.has(path)) return [];
-    const placements = PLACEMENTS[path] || (GUIDE_ROUTES.has(path) ? PLACEMENTS.guidesDetail : []);
+    const placements = PLACEMENTS[path] || APP_PLACEMENTS[path] || (GUIDE_ROUTES.has(path) ? PLACEMENTS.guidesDetail : []);
     const created = [];
     placements.forEach(placement => {
         const anchor = root.querySelector?.(placement.after || placement.before);
-        if (!anchor) return;
+        if (!anchor || !isPlacementReady(path, anchor)) return;
         const slot = insertPlacement(anchor, placement, placement.id);
         if (slot) created.push(slot);
     });
@@ -242,6 +247,7 @@ function onConsentChange(event) {
             slot.dataset.adsterraState = '';
             slot.classList.remove('is-collapsed');
         });
+        applyConfiguredPlacements();
         hydrateSlots();
     }
     else if (state.consentDenied) document.querySelectorAll('[data-adsterra-slot]').forEach(slot => collapseSlot(slot, 'consent-denied'));
@@ -260,6 +266,7 @@ function initAdsterraAds({ root = globalThis.document } = {}) {
     ensureStylesheet();
     if (!state.initialized) {
         state.initialized = true;
+        state.readinessObserver = observeReadiness(root, () => applyConfiguredPlacements(root));
         window.addEventListener('clashtools:cmp-ready', onConsentChange);
         window.addEventListener('clashtools:ad-consent-changed', onConsentChange);
         window.addEventListener('ad-consent-changed', onConsentChange);
@@ -285,7 +292,8 @@ function mountAdSlot(slot, type) {
 }
 
 const api = {
-    AD_ELIGIBLE_ROUTES, AD_UNITS, HARD_EXCLUDED_PREFIXES, PLACEMENTS,
+    AD_ELIGIBLE_ROUTES, AD_UNITS, APP_AD_ELIGIBLE_ROUTES, APP_PLACEMENTS,
+    HARD_EXCLUDED_PREFIXES, PLACEMENTS,
     currentPath, isAdRouteEligible, chooseHorizontalUnit, createAdSlot,
     mountAdSlot,
     init: initAdsterraAds
@@ -294,7 +302,8 @@ const api = {
 if (globalThis.window) globalThis.window.ClashToolsAdManager = api;
 
 export {
-    AD_ELIGIBLE_ROUTES, AD_UNITS, HARD_EXCLUDED_PREFIXES, PLACEMENTS,
+    AD_ELIGIBLE_ROUTES, AD_UNITS, APP_AD_ELIGIBLE_ROUTES, APP_PLACEMENTS,
+    HARD_EXCLUDED_PREFIXES, PLACEMENTS,
     currentPath, isAdRouteEligible, chooseHorizontalUnit, createAdSlot, mountAdSlot,
     initAdsterraAds
 };

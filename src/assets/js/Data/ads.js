@@ -3,41 +3,113 @@
 
     const SCRIPT_ID = 'clashtools-google-ads';
     const CLIENT_ID = 'ca-pub-7361256415342967';
-    const AD_MANAGER_URL = '/assets/js/Data/adsterra-manager.js?v=20260909-adsterra-v1';
-    let advertisingConsent = false;
+    const AD_MANAGER_URL = '/assets/js/Data/adsterra-manager.js?v=20260910-adsterra-v2';
+    const CONSENT_STATUSES = Object.freeze({
+        GRANTED: 'GRANTED',
+        DENIED: 'DENIED',
+        NOT_APPLICABLE: 'NOT_APPLICABLE',
+        NOT_CONFIGURED: 'NOT_CONFIGURED',
+        UNKNOWN: 'UNKNOWN'
+    });
+    const consentState = {
+        cmpLoaded: false,
+        consentReady: false,
+        consentValues: null,
+        advertisingConsent: false,
+        reason: 'cmp-not-ready'
+    };
     let adsterraManagerPromise;
-    let adsterraManager;
 
-    function loadAdsterraManager() {
-        if (adsterraManagerPromise) return adsterraManagerPromise;
-        adsterraManagerPromise = import(AD_MANAGER_URL).then(manager => {
-            if (!manager.isAdRouteEligible()) return null;
-            adsterraManager = manager;
-            manager.initAdsterraAds();
-            return manager;
-        }).catch(() => null);
-        return adsterraManagerPromise;
+    function isTopLevelPage() {
+        try {
+            return window.top === window.self;
+        } catch {
+            return false;
+        }
     }
 
-    function consentModeAllowsAdvertising() {
-        const googlefc = window.googlefc;
-        const status = googlefc?.getGoogleConsentModeValues?.();
-        const statusEnum = googlefc?.ConsentModePurposeStatusEnum;
-        if (!status || !statusEnum) return false;
+    function statusName(value, statusEnum) {
+        const enumValue = name => statusEnum?.[name]
+            ?? statusEnum?.[`CONSENT_MODE_PURPOSE_STATUS_${name}`];
+        if (value === enumValue('GRANTED')) return CONSENT_STATUSES.GRANTED;
+        if (value === enumValue('DENIED')) return CONSENT_STATUSES.DENIED;
+        if (value === enumValue('NOT_APPLICABLE')) return CONSENT_STATUSES.NOT_APPLICABLE;
+        if (value === enumValue('NOT_CONFIGURED')) return CONSENT_STATUSES.NOT_CONFIGURED;
+        if (value === enumValue('UNKNOWN')) return CONSENT_STATUSES.UNKNOWN;
+        if (typeof value !== 'string') return CONSENT_STATUSES.UNKNOWN;
 
-        const permitsPurpose = value => value === statusEnum.GRANTED || value === statusEnum.NOT_APPLICABLE;
-        return permitsPurpose(status.adStoragePurposeConsentStatus)
-            && permitsPurpose(status.adUserDataPurposeConsentStatus)
-            && permitsPurpose(status.adPersonalizationPurposeConsentStatus);
+        const normalized = value.trim().toUpperCase().replaceAll('-', '_').replaceAll(' ', '_');
+        return Object.values(CONSENT_STATUSES).includes(normalized)
+            ? normalized
+            : CONSENT_STATUSES.UNKNOWN;
+    }
+
+    function readConsentValues() {
+        try {
+            const googlefc = window.googlefc;
+            const values = googlefc?.getGoogleConsentModeValues?.();
+            if (!values) return null;
+
+            const statusEnum = googlefc?.ConsentModePurposeStatusEnum;
+            return {
+                adStorage: statusName(values.adStoragePurposeConsentStatus, statusEnum),
+                adUserData: statusName(values.adUserDataPurposeConsentStatus, statusEnum),
+                adPersonalization: statusName(values.adPersonalizationPurposeConsentStatus, statusEnum)
+            };
+        } catch {
+            return null;
+        }
+    }
+
+    function consentReason(values) {
+        if (!values) return 'consent-not-ready';
+        const statuses = Object.values(values);
+        if (statuses.includes(CONSENT_STATUSES.DENIED)) return 'consent-denied';
+        if (statuses.includes(CONSENT_STATUSES.NOT_CONFIGURED)) return 'consent-not-configured';
+        if (statuses.includes(CONSENT_STATUSES.UNKNOWN)) return 'consent-unknown';
+        if (statuses.every(status => status === CONSENT_STATUSES.NOT_APPLICABLE)) {
+            return 'consent-not-applicable';
+        }
+        if (statuses.every(status => status === CONSENT_STATUSES.GRANTED
+            || status === CONSENT_STATUSES.NOT_APPLICABLE)) {
+            return 'consent-granted';
+        }
+        return 'consent-incomplete';
+    }
+
+    function consentModeAllowsAdvertising(values = readConsentValues()) {
+        if (!values) return false;
+        return Object.values(values).every(status => status === CONSENT_STATUSES.GRANTED
+            || status === CONSENT_STATUSES.NOT_APPLICABLE);
+    }
+
+    function initAdsterraAfterConsent() {
+        if (!consentState.advertisingConsent || adsterraManagerPromise) return;
+
+        adsterraManagerPromise = import(AD_MANAGER_URL).then(manager => {
+            if (!manager.isAdRouteEligible?.()) return null;
+            const init = manager.initAdsterraAds || manager.init;
+            if (typeof init === 'function') init();
+            return manager;
+        }).catch(() => null);
     }
 
     function publishConsentState() {
-        advertisingConsent = consentModeAllowsAdvertising();
+        const values = readConsentValues();
+        consentState.consentReady = Boolean(values);
+        consentState.consentValues = values;
+        consentState.advertisingConsent = consentModeAllowsAdvertising(values);
+        consentState.reason = consentReason(values);
         const detail = {
-            detail: { advertisingConsent }
+            detail: {
+                advertisingConsent: consentState.advertisingConsent,
+                consentValues: values,
+                reason: consentState.reason
+            }
         };
         window.dispatchEvent(new CustomEvent('clashtools:ad-consent-changed', detail));
         window.dispatchEvent(new CustomEvent('ad-consent-changed', detail));
+        if (consentState.advertisingConsent) initAdsterraAfterConsent();
     }
 
     function queueConsentRefresh() {
@@ -46,48 +118,54 @@
 
     function installGoogleCmpBridge() {
         window.googlefc = window.googlefc || {};
-        window.googlefc.callbackQueue = window.googlefc.callbackQueue || [];
+        if (!Array.isArray(window.googlefc.callbackQueue)) window.googlefc.callbackQueue = [];
         queueConsentRefresh();
 
         window.ClashToolsCMP = {
-            hasAdvertisingConsent: () => advertisingConsent,
+            hasAdvertisingConsent: () => consentState.advertisingConsent,
+            debug: () => ({
+                cmpLoaded: consentState.cmpLoaded,
+                consentReady: consentState.consentReady,
+                consentValues: consentState.consentValues,
+                advertisingConsent: consentState.advertisingConsent,
+                reason: consentState.reason
+            }),
             openPreferences: () => {
-                queueConsentRefresh();
-                window.googlefc.callbackQueue.push({
-                    CONSENT_API_READY: () => window.googlefc.showRevocationMessage?.()
-                });
+                try {
+                    queueConsentRefresh();
+                    window.googlefc.callbackQueue.push({
+                        CONSENT_API_READY: () => window.googlefc.showRevocationMessage?.()
+                    });
+                    return true;
+                } catch {
+                    consentState.reason = 'consent-api-unavailable';
+                    return false;
+                }
             }
         };
         window.dispatchEvent(new CustomEvent('clashtools:cmp-ready'));
     }
 
     function loadGoogleCmpAndAds() {
-        if (document.getElementById(SCRIPT_ID)) return;
-        if (!adsterraManager?.isAdRouteEligible()) return;
+        if (!isTopLevelPage() || document.getElementById(SCRIPT_ID)) return;
 
         const script = document.createElement('script');
         script.id = SCRIPT_ID;
         script.async = true;
         script.crossOrigin = 'anonymous';
         script.dataset.adClient = CLIENT_ID;
+        script.addEventListener('load', () => {
+            consentState.cmpLoaded = true;
+        }, { once: true });
+        script.addEventListener('error', () => {
+            consentState.reason = 'cmp-load-failed';
+        }, { once: true });
         script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${CLIENT_ID}`;
-        document.head.append(script);
+        document.head?.append(script);
     }
 
-    function loadGoogleCmpWhenIdle() {
-        const run = () => loadGoogleCmpAndAds();
-        if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 1500 });
-        else run();
+    if (isTopLevelPage()) {
+        installGoogleCmpBridge();
+        loadGoogleCmpAndAds();
     }
-
-    function scheduleGoogleCmp() {
-        loadAdsterraManager().then(manager => {
-            if (!manager) return;
-            installGoogleCmpBridge();
-            loadGoogleCmpWhenIdle();
-        }).catch(() => {});
-    }
-
-    if (document.readyState === 'complete') scheduleGoogleCmp();
-    else window.addEventListener('load', scheduleGoogleCmp, { once: true });
 })();

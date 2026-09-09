@@ -14,7 +14,7 @@ const redirectingTargets = new Set([
     '/subpages/register.html'
 ]);
 const publicDocuments = [];
-const adLoader = '/assets/js/Data/ads.js?v=20260909-adsterra-v1';
+const adLoader = '/assets/js/Data/ads.js?v=20260910-adsterra-v2';
 const adEligibleFiles = new Set([
     'index.html',
     'guides.html',
@@ -33,30 +33,30 @@ const adEligibleFiles = new Set([
     'guides/cwl-season-history.html',
     'guides/fair-cwl-roster.html',
     'guides/missed-attacks.html',
-    'guides/spreadsheet-vs-cwl-planner.html'
-]);
-const adExcludedFiles = new Set([
-    '404.html',
-    'advanced-stats.html',
-    'achievements.html',
+    'guides/spreadsheet-vs-cwl-planner.html',
     'subpages/achievements.html',
     'subpages/advanced-stats.html',
     'subpages/bracket-generator.html',
-    'subpages/contact.html',
-    'subpages/cookies.html',
     'subpages/cwl-operation-board.html',
     'subpages/cwl-planner-drafts.html',
     'subpages/cwl-planner.html',
     'subpages/dashboard.html',
     'subpages/explore.html',
     'subpages/groups.html',
-    'subpages/login.html',
     'subpages/minigames.html',
+    'subpages/war-operation-board.html'
+]);
+const adExcludedFiles = new Set([
+    '404.html',
+    'advanced-stats.html',
+    'achievements.html',
+    'subpages/contact.html',
+    'subpages/cookies.html',
+    'subpages/login.html',
     'subpages/privacy.html',
     'subpages/profile.html',
     'subpages/register.html',
-    'subpages/terms.html',
-    'subpages/war-operation-board.html'
+    'subpages/terms.html'
 ]);
 const directNetworkScript = /https:\/\/(?:www\.googletagmanager\.com|pagead2\.googlesyndication\.com|pl31261194\.profitableratecpmnetwork\.com|www\.highrevenueformat\.com)/i;
 
