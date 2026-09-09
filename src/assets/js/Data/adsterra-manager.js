@@ -4,12 +4,12 @@ import {
     PLACEMENTS
 } from './adsterra-config.js';
 import {
-    creativeDetectorMarkup, hasWorkspaceShell, isAppContentReady, isPlacementReady,
-    observeReadiness, waitForNativeCreative
-} from './adsterra-render.js';
+    hasWorkspaceShell, isAppContentReady, isPlacementReady,
+    observeReadiness, waitForNativeCreative, waitForStandardCreative
+} from './adsterra-render.js?v=20260910-adsterra-v3';
 
 const STYLE_ID = 'clashpanel-adsterra-css';
-const STYLE_URL = '/assets/css/adsterra.css?v=20260910-adsterra-v2';
+const STYLE_URL = '/assets/css/adsterra.css?v=20260910-adsterra-v3';
 const state = {
     initialized: false,
     nativeClaimed: false,
@@ -107,46 +107,29 @@ function chooseHorizontalUnit(width) {
     if (width >= AD_UNITS['mobile-320x50'].width) return AD_UNITS['mobile-320x50'];
     return null;
 }
-function iframeMarkup(unit, slotId) {
-    const options = JSON.stringify({ key: unit.key, format: 'iframe', height: unit.height, width: unit.width, params: {} });
-    const src = unit.src.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-    const detector = creativeDetectorMarkup(slotId);
-    return `<!doctype html><html><body><script>window.atOptions=${options};<\/script><script>${detector}<\/script><script src="${src}" data-adsterra-slot="${slotId}" onload="window.__clashpanelCheckCreative?.(); parent.postMessage({source:'clashpanel-adsterra',slot:'${slotId}',status:'provider-loaded'},'*')" onerror="parent.postMessage({source:'clashpanel-adsterra',slot:'${slotId}',status:'failed'},'*')"><\/script></body></html>`;
-}
-function loadAtOptionsFrame(slot, unit, slotId) {
-    return new Promise(resolve => {
-        const doc = globalThis.document;
-        const frame = doc.createElement('iframe');
-        frame.className = 'cp-ad-frame';
-        frame.width = String(unit.width);
-        frame.height = String(unit.height);
-        frame.title = adLabel();
-        frame.setAttribute('aria-label', adLabel());
-        frame.setAttribute('sandbox', 'allow-scripts allow-popups allow-popups-to-escape-sandbox');
-        frame.dataset.adsterraSlot = slotId;
-        frame.srcdoc = iframeMarkup(unit, slotId);
-        let timer;
-        const finish = ok => {
-            if (timer) globalThis.window?.clearTimeout(timer);
-            globalThis.window?.removeEventListener('message', onMessage);
-            frame.removeEventListener('error', onError);
-            if (!ok) frame.remove();
-            resolve(ok ? frame : null);
-        };
-        const onMessage = event => {
-            if (event.source !== frame.contentWindow || event.data?.source !== 'clashpanel-adsterra' || event.data.slot !== slotId) return;
-            if (event.data.status === 'failed') finish(false);
-            if (event.data.status === 'rendered') finish(true);
-        };
-        const onError = () => finish(false);
-        globalThis.window?.addEventListener('message', onMessage);
-        frame.addEventListener('error', onError, { once: true });
-        timer = globalThis.window?.setTimeout(() => finish(false), 10000);
-        slot.querySelector('.cp-ad-content')?.append(frame);
+function loadAtOptionsBanner(slot, unit, slotId) {
+    const content = slot.querySelector('.cp-ad-content');
+    const win = globalThis.window;
+    if (!content || !win || !hasConsent()) return Promise.resolve(false);
+    const options = { key: unit.key, format: 'iframe', height: unit.height, width: unit.width, params: {} };
+    const previousOptions = win.atOptions;
+    const script = document.createElement('script');
+    script.async = false;
+    script.dataset.cfasync = 'false';
+    script.setAttribute('data-cfasync', 'false');
+    script.dataset.adsterraProviderFor = slotId;
+    script.src = unit.src;
+    win.atOptions = options;
+    const rendered = waitForStandardCreative(content, script);
+    content.append(script);
+    return rendered.finally(() => {
+        if (win.atOptions !== options) return;
+        if (previousOptions === undefined) delete win.atOptions;
+        else win.atOptions = previousOptions;
     });
 }
-function queueAtOptionsFrame(slot, unit, slotId) {
-    const task = state.atOptionsQueue.then(() => loadAtOptionsFrame(slot, unit, slotId));
+function queueAtOptionsBanner(slot, unit, slotId) {
+    const task = state.atOptionsQueue.then(() => loadAtOptionsBanner(slot, unit, slotId));
     state.atOptionsQueue = task.catch(() => null);
     return task;
 }
@@ -195,8 +178,9 @@ function loadSlot(slot) {
         });
         return;
     }
-    queueAtOptionsFrame(slot, unit, id).then(frame => {
-        if (!frame) return collapseSlot(slot);
+    queueAtOptionsBanner(slot, unit, id).then(rendered => {
+        if (!rendered) return collapseSlot(slot);
+        if (!hasConsent()) return collapseSlot(slot, 'consent-denied');
         slot.dataset.adsterraFormat = unit.type;
         slot.dataset.adsterraState = 'loaded';
         state.slotRecords.set(id, slot.dataset.adsterraState);

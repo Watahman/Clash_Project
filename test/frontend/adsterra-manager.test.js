@@ -52,12 +52,12 @@ describe('Adsterra manager contracts', () => {
         expect(manager.chooseHorizontalUnit(319)).toBeNull();
     });
 
-    it('does not inject a provider iframe while consent is unavailable', () => {
+    it('does not inject a provider script while consent is unavailable', () => {
         window.ClashToolsCMP = { hasAdvertisingConsent: () => false };
         const slot = manager.createAdSlot('responsive-horizontal', 'test-horizontal');
         document.querySelector('main').append(slot);
         manager.mountAdSlot(slot);
-        expect(slot.querySelector('iframe')).toBeNull();
+        expect(slot.querySelector('script[src*="highrevenueformat.com"]')).toBeNull();
     });
 
     it('keeps the ad wrapper accessible and collapses blocked provider loads', async () => {
@@ -72,9 +72,9 @@ describe('Adsterra manager contracts', () => {
         manager.mountAdSlot(slot);
         await Promise.resolve();
         await Promise.resolve();
-        const frame = slot.querySelector('iframe');
-        expect(frame).not.toBeNull();
-        frame.dispatchEvent(new window.Event('error'));
+        const script = slot.querySelector('script[src*="highrevenueformat.com"]');
+        expect(script).not.toBeNull();
+        script.dispatchEvent(new window.Event('error'));
         await Promise.resolve();
         await Promise.resolve();
         expect(slot.querySelector('.cp-ad-label').textContent).toBe('Advertisement');
@@ -110,21 +110,20 @@ describe('Adsterra manager contracts', () => {
         expect(document.querySelectorAll(`#container-${manager.AD_UNITS.native.key}`)).toHaveLength(1);
     });
 
-    it('keeps bootstrap ownership central and serializes external frame completion', () => {
+    it('keeps bootstrap ownership central and serializes provider completion', () => {
         const adsSource = readFileSync('src/assets/js/Data/ads.js', 'utf8');
         const managerSource = readFileSync('src/assets/js/Data/adsterra-manager.js', 'utf8');
         expect(adsSource).toContain("import(AD_MANAGER_URL)");
         expect(adsSource).not.toContain('const AD_ELIGIBLE_ROUTES');
         expect(managerSource).toContain('STYLE_URL');
-        expect(managerSource).toContain('setTimeout(() => finish(false), 10000)');
+        expect(managerSource).toContain('queueAtOptionsBanner');
         expect(managerSource).toContain('APP_AD_ELIGIBLE_ROUTES');
-        expect(managerSource).toContain('creativeDetectorMarkup');
+        expect(managerSource).toContain('waitForStandardCreative');
         expect(managerSource).toContain('waitForNativeCreative');
-        expect(managerSource).not.toContain('allow-scripts allow-same-origin');
-        expect(managerSource).toContain('allow-scripts allow-popups allow-popups-to-escape-sandbox');
+        expect(managerSource).not.toContain("setAttribute('sandbox'");
+        expect(managerSource).not.toContain('srcdoc');
         expect(managerSource).not.toContain("setAttribute('loading', 'lazy')");
-        expect(managerSource).toContain('event.source !== frame.contentWindow');
-        expect(managerSource).not.toContain('<script async src=');
+        expect(managerSource).toContain("script.setAttribute('data-cfasync', 'false')");
     });
 
     it('injects the versioned stylesheet once for an eligible page', () => {
@@ -133,6 +132,6 @@ describe('Adsterra manager contracts', () => {
         manager.initAdsterraAds();
         manager.initAdsterraAds();
         expect(document.querySelectorAll('#clashpanel-adsterra-css').length).toBe(1);
-        expect(document.querySelector('#clashpanel-adsterra-css').href).toContain('/assets/css/adsterra.css?v=20260910-adsterra-v2');
+        expect(document.querySelector('#clashpanel-adsterra-css').href).toContain('/assets/css/adsterra.css?v=20260910-adsterra-v3');
     });
 });

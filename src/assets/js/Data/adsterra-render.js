@@ -53,19 +53,42 @@ export function isPlacementReady(path, anchor) {
     return !APP_AD_ELIGIBLE_ROUTES.has(path) || isAppContentReady(path, anchor.ownerDocument);
 }
 
-export function creativeDetectorMarkup(slotId) {
-    return `
-        const report = status => parent.postMessage({ source: 'clashpanel-adsterra', slot: '${slotId}', status }, '*');
-        const visible = node => { const rect = node.getBoundingClientRect?.(); const style = getComputedStyle(node); return rect && rect.width > 16 && rect.height > 16 && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0'; };
-        const creative = () => Array.from(document.body?.children || []).some(node => node.tagName !== 'SCRIPT' && visible(node) && (node.tagName === 'IFRAME' || (node.tagName === 'IMG' && node.complete && node.naturalWidth > 0) || node.tagName === 'VIDEO' || node.tagName === 'OBJECT' || node.textContent.trim().length > 12 || node.querySelector('iframe,video,object,canvas,svg,img[src]')));
-        let rendered = false;
-        const check = () => { if (!rendered && creative()) { rendered = true; report('rendered'); observer.disconnect(); } };
-        window.__clashpanelCheckCreative = check;
+function hasRenderedStandardCreative(container) {
+    const candidates = container.querySelectorAll('iframe,img,video,object,embed,canvas,svg,a');
+    return Array.from(candidates).some(candidate => {
+        if (!isVisibleElement(candidate)) return false;
+        if (candidate.tagName === 'IMG') return candidate.complete && candidate.naturalWidth > 0;
+        if (candidate.tagName !== 'IFRAME') return true;
+        try {
+            const body = candidate.contentDocument?.body;
+            if (!body) return false;
+            return Boolean(body.querySelector('iframe,img,video,object,embed,canvas,svg,a'))
+                || body.textContent.trim().length > 12;
+        } catch { return false; }
+    });
+}
+
+export function waitForStandardCreative(container, script, timeoutMs = 12000) {
+    return new Promise(resolve => {
+        let settled = false;
+        const finish = ok => {
+            if (settled) return;
+            settled = true;
+            observer.disconnect();
+            globalThis.window?.clearInterval(interval);
+            globalThis.window?.clearTimeout(timer);
+            resolve(ok);
+        };
+        const check = () => {
+            if (hasRenderedStandardCreative(container)) finish(true);
+        };
         const observer = new MutationObserver(check);
-        observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true });
-        window.addEventListener('load', check, { once: true });
-        setTimeout(check, 150);
-    `;
+        const interval = globalThis.window?.setInterval(check, 200);
+        const timer = globalThis.window?.setTimeout(() => finish(false), timeoutMs);
+        observer.observe(container, { childList: true, subtree: true, attributes: true });
+        script.addEventListener('load', check, { once: true });
+        script.addEventListener('error', () => finish(false), { once: true });
+    });
 }
 
 function hasVisibleNativeCreative(container) {

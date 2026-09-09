@@ -1,7 +1,7 @@
 (() => {
     'use strict';
 
-    const AD_MANAGER_URL = '/assets/js/Data/adsterra-manager.js?v=20260910-adsterra-v2';
+    const AD_MANAGER_URL = '/assets/js/Data/adsterra-manager.js?v=20260910-adsterra-v3';
     const STYLE_ID = 'clashpanel-ad-consent-css';
     const STYLE_URL = '/assets/css/ad-consent.css?v=20260910-ad-consent-v1';
     const STORAGE_KEY = 'clashpanel:advertising-consent:v1';
