@@ -1,7 +1,7 @@
 const SUPPORT_EMAIL = 'support.clashpanel@gmail.com';
 
 export default Object.freeze({
-    lastUpdated: '27. August 2026',
+    lastUpdated: '9. September 2026',
     tocLabel: 'Inhalt',
     tocTitle: 'Auf dieser Seite',
     privacy: Object.freeze({
@@ -35,14 +35,15 @@ export default Object.freeze({
             ]],
             ['Dienstanbieter und Datenweitergabe', [
                 'ClashPanel verkauft keine personenbezogenen Daten. Informationen werden nur weitergegeben, wenn dies zur Bereitstellung des Dienstes, zur Einhaltung von Gesetzen, zum Schutz des Dienstes oder auf deine Anweisung hin erforderlich ist.',
-                'Infrastruktur- und Anwendungsanbieter können Supabase für Authentifizierung und Anwendungsdaten, Google Cloud für Backend-Hosting, Cloudflare für Websitebereitstellung und Sicherheit, Google für Anmeldung oder Schriftarten, Supercell-Dienste für aktuelle Daten der Clash of Clans API sowie ClashKing V2 für historische Advanced-Stats-Anfragen umfassen.',
+                'Infrastruktur- und Anwendungsanbieter können Supabase für Authentifizierung und Anwendungsdaten, Google Cloud für Backend-Hosting, Cloudflare für Websitebereitstellung und Sicherheit, Google für Anmeldung, Schriftarten oder Werbung, Adsterra für Werbung auf ausgewählten geeigneten öffentlichen Seiten, Supercell-Dienste für aktuelle Daten der Clash of Clans API sowie ClashKing V2 für historische Advanced-Stats-Anfragen umfassen.',
                 'Wenn historische Advanced Stats angefordert werden, können der Tag des verknüpften Spielers und der angeforderte historische Umfang an ClashKing V2 gesendet werden. Dieser externe Anbieter kann historische Datensätze gemäß seinen eigenen Nutzungsbedingungen speichern oder zurückgeben; ClashPanel kontrolliert dessen Aufbewahrung, Verfügbarkeit oder Vollständigkeit nicht.',
-                'ClashPanel verwendet oder kann Google AdSense auf ausgewählten Seiten verwenden. Google und Werbepartner können dabei Informationen wie IP-Adresse, Seiten-URL, Browser- oder Geräteinformationen, Cookies, lokale Kennungen und Daten zu Werbeinteraktionen erhalten.'
+                'ClashPanel verwendet oder kann Google AdSense und Adsterra auf ausgewählten geeigneten öffentlichen Seiten verwenden. Wenn Werbung nach der erforderlichen Werbeeinwilligung geladen wird, können der jeweilige Anbieter und seine Partner technische Informationen wie IP-Adresse, Seiten-URL, Browser- oder Geräteinformationen, Cookies, lokale Kennungen und Daten zu Werbeinteraktionen verarbeiten. Einzelheiten stehen in den Datenschutzrichtlinien der Anbieter.'
             ]],
-            ['Google-Werbung', [
+            ['Google- und Adsterra-Werbung', [
                 'Drittanbieter, darunter Google, können Cookies oder ähnliche Technologien verwenden, um Anzeigen auszuliefern, zu begrenzen, zu messen und zu schützen. Wenn personalisierte Werbung erlaubt ist, können Google-Werbe-Cookies Anzeigen anhand von Besuchen bei ClashPanel und/oder anderen Websites auswählen.',
+                'Adsterra kann im Zusammenhang mit Werbediensten technische Daten und Cookies verarbeiten. Siehe die Datenschutzerklärung und Cookie-Richtlinie von Adsterra in den nachstehenden Links.',
                 'Google erklärt in seinen Informationen zu Partnerwebsites, wie Daten von Websites verarbeitet werden, die Google-Dienste nutzen. Personalisierte Werbung kann außerdem über die Google-Anzeigeneinstellungen verwaltet werden.',
-                'Für Besucher im EWR, im Vereinigten Königreich und in der Schweiz wird die Werbeeinwilligung entsprechend den Auswahlmöglichkeiten der konfigurierten Consent-Management-Lösung und den geltenden Google-Anforderungen behandelt.'
+                'Für Besucher im EWR, im Vereinigten Königreich und in der Schweiz wird die Werbeeinwilligung entsprechend den Auswahlmöglichkeiten der konfigurierten Consent-Management-Lösung und den geltenden Anforderungen des jeweiligen Anbieters behandelt. Adsterra wird nicht geladen, wenn die erforderliche Werbeeinwilligung fehlt oder abgelehnt wurde.'
             ]],
             ['Internationale Verarbeitung', [
                 'Einige Dienstanbieter können Informationen außerhalb Belgiens oder des Europäischen Wirtschaftsraums verarbeiten. Soweit erforderlich, unterliegen solche Verarbeitungen und Übermittlungen den geltenden Übermittlungsmechanismen und Schutzmaßnahmen, die in den Bedingungen und Datenschutzunterlagen der Anbieter beschrieben sind.',
@@ -68,13 +69,15 @@ export default Object.freeze({
         links: Object.freeze([
             ['Datenschutzkontakt', `mailto:${SUPPORT_EMAIL}?subject=ClashPanel%20Datenschutzanfrage`],
             ['So verwendet Google Daten von Partnerwebsites', 'https://policies.google.com/technologies/partner-sites'],
-            ['Google-Anzeigeneinstellungen', 'https://adssettings.google.com/']
+            ['Google-Anzeigeneinstellungen', 'https://adssettings.google.com/'],
+            ['Adsterra-Datenschutzerklärung', 'https://adsterra.com/privacy-policy-managed'],
+            ['Adsterra-Cookie-Richtlinie', 'https://adsterra.com/cookies/']
         ])
     }),
     cookies: Object.freeze({
         title: 'Cookie-Richtlinie',
         description: 'Cookies, lokaler Speicher, Werbetechnologien und Einwilligungsentscheidungen, die ClashPanel verwendet.',
-        summary: 'ClashPanel verwendet für den Dienst erforderliche Browsertechnologien und kann auf Seiten mit Werbung Google-Werbetechnologien verwenden.',
+        summary: 'ClashPanel verwendet für den Dienst erforderliche Browsertechnologien und kann auf Seiten mit Werbung Google- und Adsterra-Werbetechnologien verwenden.',
         sections: Object.freeze([
             ['Geltungsbereich', [
                 'Diese Richtlinie betrifft Cookies, Local Storage, IndexedDB und ähnliche Browsertechnologien, die direkt durch ClashPanel oder durch über ClashPanel geladene Drittanbieter verwendet werden.',
@@ -88,17 +91,17 @@ export default Object.freeze({
                 'Local Storage kann Oberflächeneinstellungen wie Sprache, Theme und ausgewählten ClashPanel-Kontext speichern. IndexedDB kann aktuelle Anwendungsantworten zwischenspeichern, um schneller zu laden und wiederholte Anfragen zu reduzieren.',
                 'Du kannst Browserspeicher über die Browsereinstellungen löschen. Dadurch können Einstellungen oder Cache-Daten zurückgesetzt werden; serverseitige Kontodaten werden dadurch allein nicht gelöscht.'
             ]],
-            ['Google AdSense und Werbetechnologien', [
-                'Ausgewählte ClashPanel-Seiten enthalten oder können Google AdSense enthalten. Drittanbieter, darunter Google, können Cookies setzen oder lesen oder ähnliche Technologien, IP-Adressen und andere Kennungen verwenden, um Anzeigen auszuliefern, die Anzeigenhäufigkeit zu steuern, Leistungen zu messen und Betrug oder Missbrauch zu erkennen.',
+            ['Google, Adsterra und Werbetechnologien', [
+                'Ausgewählte geeignete öffentliche ClashPanel-Seiten enthalten oder können Google AdSense oder Adsterra enthalten. Nach der erforderlichen Werbeeinwilligung können Drittanbieter Cookies setzen oder lesen oder ähnliche Technologien, IP-Adressen und andere technische Kennungen verwenden, um Anzeigen auszuliefern, die Anzeigenhäufigkeit zu steuern, Leistungen zu messen und Betrug oder Missbrauch zu erkennen.',
                 'Wenn personalisierte Werbung erlaubt ist, können Werbe-Cookies Anzeigen anhand früherer Besuche bei ClashPanel und/oder anderen Websites auswählen. Wenn personalisierte Werbung nicht erlaubt ist, können weiterhin kontextbezogene oder andere nicht personalisierte Anzeigen erscheinen und begrenzter Speicher oder Kennungen genutzt werden, soweit dies zulässig ist.',
-                'Google stellt Informationen zur Verwendung von Daten von Partnerwebsites und Anzeigeneinstellungen zur Verwaltung personalisierter Werbung bereit.'
+                'Google stellt Informationen zur Verwendung von Daten von Partnerwebsites und Anzeigeneinstellungen zur Verwaltung personalisierter Werbung bereit. Adsterra stellt eigene Datenschutz- und Cookie-Richtlinien für seine Werbedienste bereit.'
             ]],
             ['Einwilligung und Änderung deiner Auswahl', [
                 'Wenn das anwendbare Recht eine Einwilligung verlangt, bestimmt die Werbeeinwilligungsoberfläche oder Consent-Management-Plattform, ob optionaler Werbespeicher und Werbezwecke erlaubt sind.',
                 'Du kannst optionale Einwilligungen verweigern oder widerrufen, ohne den Zugang zum Kerndienst von ClashPanel zu verlieren. Cookies können auch über den Browser gelöscht oder blockiert werden; das Blockieren erforderlichen Speichers kann jedoch Kontofunktionen beeinträchtigen.'
             ]],
             ['Weitere Drittanbieterressourcen', [
-                'ClashPanel kann Dienste wie Google Fonts oder Google-Anmeldung laden. Anfragen an Drittanbieter können technische Verbindungsinformationen wie IP-Adresse, Browserinformationen und die angeforderte Ressource an den Anbieter übertragen.',
+                'ClashPanel kann Dienste wie Google Fonts, Google-Anmeldung oder Adsterra-Werbung auf ausgewählten geeigneten öffentlichen Seiten laden. Anfragen an Drittanbieter können technische Verbindungsinformationen wie IP-Adresse, Browserinformationen und die angeforderte Ressource an den Anbieter übertragen.',
                 'Drittanbieter verarbeiten Informationen nach ihren eigenen Datenschutzbedingungen zusätzlich zu den hier beschriebenen Auswahlmöglichkeiten und Schutzmaßnahmen.'
             ]],
             ['Änderungen', [
@@ -108,6 +111,8 @@ export default Object.freeze({
         links: Object.freeze([
             ['So verwendet Google Daten von Partnerwebsites', 'https://policies.google.com/technologies/partner-sites'],
             ['Google-Anzeigeneinstellungen', 'https://adssettings.google.com/'],
+            ['Adsterra-Datenschutzerklärung', 'https://adsterra.com/privacy-policy-managed'],
+            ['Adsterra-Cookie-Richtlinie', 'https://adsterra.com/cookies/'],
             ['Datenschutzkontakt', `mailto:${SUPPORT_EMAIL}?subject=ClashPanel%20Cookie-%20oder%20Datenschutzfrage`]
         ])
     }),
@@ -140,7 +145,7 @@ export default Object.freeze({
                 'Planner-Vorschläge, Prognosen, Statusinformationen und importierte Daten sollten geprüft werden, bevor sie für Clanentscheidungen verwendet werden.'
             ]],
             ['Werbung und externe Dienste', [
-                'ClashPanel kann Drittanbieterwerbung einschließlich Google AdSense anzeigen. Eine Anzeige bedeutet nicht, dass ClashPanel den Werbetreibenden, das Produkt oder die externe Website empfiehlt.',
+                'ClashPanel kann Drittanbieterwerbung einschließlich Google AdSense oder Adsterra nur auf ausgewählten geeigneten öffentlichen Seiten und, soweit erforderlich, nach der erforderlichen Werbeeinwilligung anzeigen. Eine Anzeige bedeutet nicht, dass ClashPanel den Werbetreibenden, das Produkt oder die externe Website empfiehlt.',
                 'Externe Dienste und Links unterliegen ihren eigenen Bedingungen und Datenschutzpraktiken. ClashPanel ist nicht für Inhalte oder Transaktionen verantwortlich, die ausschließlich von einem unabhängigen Dritten angeboten werden.'
             ]],
             ['Verfügbarkeit und Änderungen', [
@@ -173,7 +178,7 @@ export default Object.freeze({
         summary: `Die offizielle Kontaktmethode für ClashPanel ist E-Mail: ${SUPPORT_EMAIL}.`,
         sections: Object.freeze([
             ['Support per E-Mail', [
-                `Für Fehler, Funktionswünsche, Kontofragen, Datenschutzanfragen, AdSense- oder Werbefragen und allgemeine Projektanfragen schreibe an ${SUPPORT_EMAIL}.`,
+                `Für Fehler, Funktionswünsche, Kontofragen, Datenschutzanfragen, AdSense-, Adsterra- oder Werbefragen und allgemeine Projektanfragen schreibe an ${SUPPORT_EMAIL}.`,
                 'Gib bei einer Fehlermeldung die betroffene Seite, das erwartete Verhalten, das tatsächliche Verhalten und nützliche Browserfehlermeldungen an. Entferne private Informationen aus Screenshots, bevor du sie sendest.'
             ]],
             ['Datenschutz- und Kontoanfragen', [

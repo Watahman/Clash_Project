@@ -2,8 +2,10 @@ import { getLanguage, initI18n } from '../i18n/i18n.js?v=20260831-master-live-v1
 import { _BASE_URL } from '../Data/config.js';
 
 const SUPPORT_EMAIL = 'support.clashpanel@gmail.com';
-const LAST_UPDATED_EN = '31 August 2026';
-const LAST_UPDATED_NL = '31 augustus 2026';
+const LAST_UPDATED_EN = '9 September 2026';
+const LAST_UPDATED_NL = '9 september 2026';
+const ADSTERRA_PRIVACY_URL = 'https://adsterra.com/privacy-policy-managed';
+const ADSTERRA_COOKIES_URL = 'https://adsterra.com/cookies/';
 
 const content = {
     privacy: {
@@ -40,14 +42,15 @@ const content = {
                 ]],
                 ['Service providers and data sharing', [
                     'ClashPanel does not sell personal data. Information is shared only when needed to provide the service, comply with law, protect the service or when you direct us to do so.',
-                    'Infrastructure and application providers may include Supabase for authentication and application data, Google Cloud for backend hosting, Cloudflare for website delivery and security, Google Analytics for aggregate measurement, Google for sign-in or fonts, Supercell services for current Clash of Clans API data and ClashKing V2 for historical Advanced Stats requests.',
+                    'Infrastructure and application providers may include Supabase for authentication and application data, Google Cloud for backend hosting, Cloudflare for website delivery and security, Google Analytics for aggregate measurement, Google for sign-in, fonts or advertising, Adsterra for advertising on selected eligible public pages, Supercell services for current Clash of Clans API data and ClashKing V2 for historical Advanced Stats requests.',
                     'When historical Advanced Stats is requested, the linked player tag and requested history scope may be sent to ClashKing V2. That external provider may retain or return historical records under its own service terms; ClashPanel does not control the provider\'s retention, availability or completeness.',
-                    'ClashPanel uses or may use Google AdSense on selected pages. Google and its advertising partners may receive information such as IP address, page URL, browser or device information, cookies, local-storage identifiers and ad interaction data when advertising services are used.'
+                    'ClashPanel uses or may use Google AdSense and Adsterra on selected eligible public pages. When advertising is loaded after the required advertising consent, the relevant provider and its partners may process technical information such as IP address, page URL, browser or device information, cookies, local-storage identifiers and ad interaction data. See the providers’ own privacy policies for details.'
                 ]],
-                ['Google advertising', [
+                ['Google and Adsterra advertising', [
                     'Third-party vendors, including Google, may use cookies or similar technologies to serve, limit, measure and protect ads. Google advertising cookies can also be used to show ads based on visits to ClashPanel and/or other websites when personalised advertising is permitted.',
+                    'Adsterra may process technical data and cookies in connection with advertising services. Adsterra describes its processing in its privacy policy and cookies policy, linked below.',
                     'Google explains how it uses information from sites that use Google services in its partner-sites privacy information. You can also control personalised advertising through Google Ads Settings.',
-                    'For visitors in the EEA, United Kingdom and Switzerland, advertising consent is handled according to the consent choices presented by the configured consent-management solution and applicable Google requirements.'
+                    'For visitors in the EEA, United Kingdom and Switzerland, advertising consent is handled according to the consent choices presented by the configured consent-management solution and the applicable requirements for the relevant provider. Adsterra is not loaded when the required advertising consent is unavailable or denied.'
                 ]],
                 ['International processing', [
                     'Some service providers may process information outside Belgium or the European Economic Area. Where required, those providers and transfers are subject to applicable transfer mechanisms and safeguards described in the providers’ terms and privacy documentation.',
@@ -73,7 +76,9 @@ const content = {
             links: [
                 ['Privacy contact', `mailto:${SUPPORT_EMAIL}?subject=ClashPanel%20privacy%20request`],
                 ['How Google uses partner data', 'https://policies.google.com/technologies/partner-sites'],
-                ['Google Ads Settings', 'https://adssettings.google.com/']
+                ['Google Ads Settings', 'https://adssettings.google.com/'],
+                ['Adsterra privacy policy', ADSTERRA_PRIVACY_URL],
+                ['Adsterra cookies policy', ADSTERRA_COOKIES_URL]
             ]
         },
         nl: {
@@ -109,14 +114,15 @@ const content = {
                 ]],
                 ['Dienstverleners en delen van gegevens', [
                     'ClashPanel verkoopt geen persoonsgegevens. Gegevens worden alleen gedeeld wanneer dit nodig is om de dienst te leveren, aan de wet te voldoen, de dienst te beschermen of wanneer jij daar opdracht toe geeft.',
-                    'Infrastructuur- en applicatieproviders kunnen onder meer Supabase omvatten voor authenticatie en applicatiegegevens, Google Cloud voor backendhosting, Cloudflare voor levering en beveiliging van de website, Google Analytics voor geaggregeerde meting, Google voor login of lettertypes, Supercell-diensten voor actuele Clash of Clans API-gegevens en ClashKing V2 voor historische Advanced Stats-verzoeken.',
+                    'Infrastructuur- en applicatieproviders kunnen onder meer Supabase omvatten voor authenticatie en applicatiegegevens, Google Cloud voor backendhosting, Cloudflare voor levering en beveiliging van de website, Google Analytics voor geaggregeerde meting, Google voor login, lettertypes of advertenties, Adsterra voor advertenties op geselecteerde geschikte publieke pagina’s, Supercell-diensten voor actuele Clash of Clans API-gegevens en ClashKing V2 voor historische Advanced Stats-verzoeken.',
                     'Wanneer historische Advanced Stats wordt opgevraagd, kunnen de gekoppelde spelerstag en de gevraagde historische scope naar ClashKing V2 worden gestuurd. Die externe provider kan historische gegevens bewaren of teruggeven volgens de eigen dienstvoorwaarden; ClashPanel beheert de bewaartermijnen, beschikbaarheid of volledigheid bij die provider niet.',
-                    'ClashPanel gebruikt of kan Google AdSense gebruiken op geselecteerde pagina’s. Google en advertentiepartners kunnen bij advertentiediensten gegevens ontvangen zoals IP-adres, pagina-URL, browser- of apparaatinformatie, cookies, lokale identificatoren en informatie over interacties met advertenties.'
+                    'ClashPanel gebruikt of kan Google AdSense en Adsterra gebruiken op geselecteerde geschikte publieke pagina’s. Wanneer advertenties na de vereiste advertentietoestemming worden geladen, kunnen de relevante provider en diens partners technische informatie verwerken zoals IP-adres, pagina-URL, browser- of apparaatinformatie, cookies, lokale identificatoren en informatie over interacties met advertenties. Raadpleeg de privacyvoorwaarden van de providers voor details.'
                 ]],
-                ['Google-advertenties', [
+                ['Google- en Adsterra-advertenties', [
                     'Externe leveranciers, waaronder Google, kunnen cookies of vergelijkbare technologieën gebruiken om advertenties te tonen, te beperken, te meten en tegen fraude te beschermen. Wanneer gepersonaliseerde advertenties zijn toegestaan, kunnen Google-advertentiecookies ook worden gebruikt om advertenties te tonen op basis van bezoeken aan ClashPanel en/of andere websites.',
+                    'Adsterra kan technische gegevens en cookies verwerken in verband met advertentiediensten. Adsterra beschrijft dit in het eigen privacybeleid en cookiebeleid, die hieronder zijn gelinkt.',
                     'Google legt in de informatie over partnerwebsites uit hoe gegevens van websites die Google-diensten gebruiken worden verwerkt. Via Google Ads Settings kun je ook gepersonaliseerde advertenties beheren.',
-                    'Voor bezoekers in de EER, het Verenigd Koninkrijk en Zwitserland wordt advertentietoestemming behandeld volgens de keuzes die via de ingestelde consent-managementoplossing worden aangeboden en de toepasselijke Google-vereisten.'
+                    'Voor bezoekers in de EER, het Verenigd Koninkrijk en Zwitserland wordt advertentietoestemming behandeld volgens de keuzes die via de ingestelde consent-managementoplossing worden aangeboden en de toepasselijke vereisten voor de relevante provider. Adsterra wordt niet geladen wanneer de vereiste advertentietoestemming ontbreekt of is geweigerd.'
                 ]],
                 ['Internationale verwerking', [
                     'Sommige dienstverleners kunnen gegevens buiten België of de Europese Economische Ruimte verwerken. Waar dit vereist is, vallen zulke verwerkingen en doorgiften onder toepasselijke doorgiftemechanismen en waarborgen die in de voorwaarden en privacydocumentatie van de betrokken providers worden beschreven.',
@@ -142,7 +148,9 @@ const content = {
             links: [
                 ['Privacy contacteren', `mailto:${SUPPORT_EMAIL}?subject=ClashPanel%20privacyverzoek`],
                 ['Hoe Google partnergegevens gebruikt', 'https://policies.google.com/technologies/partner-sites'],
-                ['Google Ads Settings', 'https://adssettings.google.com/']
+                ['Google Ads Settings', 'https://adssettings.google.com/'],
+                ['Adsterra-privacybeleid', ADSTERRA_PRIVACY_URL],
+                ['Adsterra-cookiebeleid', ADSTERRA_COOKIES_URL]
             ]
         }
     },
@@ -150,7 +158,7 @@ const content = {
         en: {
             title: 'Cookie policy',
             description: 'How ClashPanel separates essential, functional, analytics and advertising cookies and browser storage.',
-            summary: 'ClashPanel uses essential browser storage for sessions and local features. Optional analytics and advertising are described separately and are subject to the applicable consent choices.',
+            summary: 'ClashPanel uses essential browser storage for sessions and local features. Optional analytics and advertising, including Google and Adsterra where enabled, are described separately and are subject to the applicable consent choices.',
             sections: [
                 ['What this policy covers', [
                     'This policy covers cookies, local storage, IndexedDB and similar browser technologies used directly by ClashPanel or by third-party services loaded through ClashPanel.',
@@ -169,16 +177,16 @@ const content = {
                     'Analytics storage is initialized as denied by default. Optional analytics cookies or similar storage are used only when enabled by the applicable consent settings.'
                 ]],
                 ['Advertising storage', [
-                    'Selected ClashPanel pages include or may include Google AdSense. Third-party vendors, including Google, may place or read cookies or use similar technologies, IP addresses and other identifiers to deliver ads, control ad frequency, measure performance and help detect fraud or abuse.',
+                    'Selected eligible public ClashPanel pages include or may include Google AdSense or Adsterra. After required advertising consent, third-party vendors may place or read cookies or use similar technologies, IP addresses and other technical identifiers to deliver ads, control ad frequency, measure performance and help detect fraud or abuse.',
                     'When personalised advertising is permitted, advertising cookies may be used to select ads based on prior visits to ClashPanel and/or other websites. If personalised advertising is not permitted, ads may still be contextual or otherwise non-personalised while limited storage or identifiers may be used where allowed.',
-                    'Google provides information about how it uses data from partner sites and provides Ads Settings where users can control personalised advertising.'
+                    'Google provides information about how it uses data from partner sites and provides Ads Settings where users can control personalised advertising. Adsterra provides its own privacy and cookies policies for its advertising services.'
                 ]],
                 ['Consent and changing your choice', [
                     'Where consent is required by applicable law, the configured consent interface or consent-management platform determines whether optional analytics or advertising storage and purposes are allowed. Essential storage remains available because it is needed for requested functions.',
                     'You may refuse or withdraw optional consent without losing access to the core ClashPanel service. Use the Cookie preferences control in the footer when a consent platform is configured. You can also use browser controls to delete or block cookies, although blocking essential storage may prevent account functions from working correctly.'
                 ]],
                 ['Other third-party resources', [
-                    'ClashPanel may load services such as Google Fonts or Google sign-in. Requests to third-party services can disclose technical connection information such as IP address, browser information and the requested resource to that provider.',
+                    'ClashPanel may load services such as Google Fonts, Google sign-in or Adsterra advertising on selected eligible public pages. Requests to third-party services can disclose technical connection information such as IP address, browser information and the requested resource to that provider.',
                     'Third-party providers process information under their own privacy terms in addition to the choices and protections described here.'
                 ]],
                 ['Changes', [
@@ -188,13 +196,15 @@ const content = {
             links: [
                 ['How Google uses partner data', 'https://policies.google.com/technologies/partner-sites'],
                 ['Google Ads Settings', 'https://adssettings.google.com/'],
+                ['Adsterra privacy policy', ADSTERRA_PRIVACY_URL],
+                ['Adsterra cookies policy', ADSTERRA_COOKIES_URL],
                 ['Privacy contact', `mailto:${SUPPORT_EMAIL}?subject=ClashPanel%20cookie%20or%20privacy%20question`]
             ]
         },
         nl: {
             title: 'Cookiebeleid',
             description: 'Hoe ClashPanel essentiële, functionele, analytics- en advertentiecookies en browseropslag onderscheidt.',
-            summary: 'ClashPanel gebruikt essentiële browseropslag voor sessies en lokale functies. Optionele analytics en advertenties worden afzonderlijk beschreven en vallen onder de toepasselijke toestemmingskeuzes.',
+            summary: 'ClashPanel gebruikt essentiële browseropslag voor sessies en lokale functies. Optionele analytics en advertenties, waaronder Google en Adsterra waar actief, worden afzonderlijk beschreven en vallen onder de toepasselijke toestemmingskeuzes.',
             sections: [
                 ['Wat dit beleid omvat', [
                     'Dit beleid gaat over cookies, local storage, IndexedDB en vergelijkbare browsertechnologie die rechtstreeks door ClashPanel of via externe diensten op ClashPanel wordt gebruikt.',
@@ -214,16 +224,16 @@ const content = {
                     'Analyticsopslag wordt standaard als geweigerd geïnitialiseerd. Optionele analytics-cookies of vergelijkbare opslag worden alleen gebruikt wanneer de toepasselijke toestemmingsinstellingen dit inschakelen.'
                 ]],
                 ['Advertentieopslag', [
-                    'Geselecteerde ClashPanel-pagina’s bevatten of kunnen Google AdSense bevatten. Externe leveranciers, waaronder Google, kunnen cookies plaatsen of lezen of vergelijkbare technologie, IP-adressen en andere identificatoren gebruiken om advertenties te leveren, frequentie te beperken, prestaties te meten en fraude of misbruik tegen te gaan.',
+                    'Geselecteerde geschikte publieke ClashPanel-pagina’s bevatten of kunnen Google AdSense of Adsterra bevatten. Na de vereiste advertentietoestemming kunnen externe leveranciers cookies plaatsen of lezen of vergelijkbare technologie, IP-adressen en andere technische identificatoren gebruiken om advertenties te leveren, frequentie te beperken, prestaties te meten en fraude of misbruik tegen te gaan.',
                     'Wanneer gepersonaliseerde advertenties zijn toegestaan, kunnen advertentiecookies worden gebruikt om advertenties te selecteren op basis van eerdere bezoeken aan ClashPanel en/of andere websites. Als gepersonaliseerde advertenties niet zijn toegestaan, kunnen nog contextuele of andere niet-gepersonaliseerde advertenties worden getoond en kunnen beperkte opslag of identificatoren worden gebruikt waar dit is toegestaan.',
-                    'Google biedt informatie over het gebruik van gegevens van partnerwebsites en Ads Settings waarmee gebruikers gepersonaliseerde advertenties kunnen beheren.'
+                    'Google biedt informatie over het gebruik van gegevens van partnerwebsites en Ads Settings waarmee gebruikers gepersonaliseerde advertenties kunnen beheren. Adsterra biedt eigen privacy- en cookiebeleid voor de advertentiediensten.'
                 ]],
                 ['Toestemming en je keuze wijzigen', [
                     'Waar de toepasselijke wet toestemming vereist, bepaalt de geconfigureerde toestemmingsinterface of het consent-managementplatform of optionele analytics- of advertentieopslag en de bijbehorende doeleinden zijn toegestaan. Essentiële opslag blijft beschikbaar omdat die nodig is voor gevraagde functies.',
                     'Je kunt optionele toestemming weigeren of intrekken zonder de kernfuncties van ClashPanel te verliezen. Gebruik de cookievoorkeuren in de footer wanneer een consentplatform is geconfigureerd. Je kunt ook via je browser cookies verwijderen of blokkeren, maar het blokkeren van essentiële opslag kan accountfuncties verstoren.'
                 ]],
                 ['Andere externe bronnen', [
-                    'ClashPanel kan diensten laden zoals Google Fonts of Google-login. Requests naar externe diensten kunnen technische verbindingsinformatie zoals IP-adres, browserinformatie en de opgevraagde resource aan die provider doorgeven.',
+                    'ClashPanel kan diensten laden zoals Google Fonts, Google-login of Adsterra-advertenties op geselecteerde geschikte publieke pagina’s. Requests naar externe diensten kunnen technische verbindingsinformatie zoals IP-adres, browserinformatie en de opgevraagde resource aan die provider doorgeven.',
                     'Externe providers verwerken informatie volgens hun eigen privacyvoorwaarden, naast de keuzes en bescherming die hier worden beschreven.'
                 ]],
                 ['Wijzigingen', [
@@ -233,6 +243,8 @@ const content = {
             links: [
                 ['Hoe Google partnergegevens gebruikt', 'https://policies.google.com/technologies/partner-sites'],
                 ['Google Ads Settings', 'https://adssettings.google.com/'],
+                ['Adsterra-privacybeleid', ADSTERRA_PRIVACY_URL],
+                ['Adsterra-cookiebeleid', ADSTERRA_COOKIES_URL],
                 ['Privacy contacteren', `mailto:${SUPPORT_EMAIL}?subject=ClashPanel%20cookie-%20of%20privacyvraag`]
             ]
         }
@@ -268,7 +280,7 @@ const content = {
                     'Planner suggestions, predictions, status information or imported data should be reviewed before relying on them for clan decisions.'
                 ]],
                 ['Advertising and external services', [
-                    'ClashPanel may display third-party advertising, including Google AdSense. An advertisement does not mean ClashPanel endorses the advertiser, product or external website.',
+                    'ClashPanel may display third-party advertising, including Google AdSense or Adsterra, only on selected eligible public pages and after required advertising consent where applicable. An advertisement does not mean ClashPanel endorses the advertiser, product or external website.',
                     'External services and links are governed by their own terms and privacy practices. ClashPanel is not responsible for content or transactions provided solely by an unrelated third party.'
                 ]],
                 ['Availability and changes', [
@@ -325,7 +337,7 @@ const content = {
                     'Controleer plannersuggesties, voorspellingen, statusinformatie en geïmporteerde data voordat je er belangrijke clanbeslissingen op baseert.'
                 ]],
                 ['Advertenties en externe diensten', [
-                    'ClashPanel kan advertenties van derden tonen, waaronder Google AdSense. Een advertentie betekent niet dat ClashPanel de adverteerder, het product of de externe website aanbeveelt.',
+                    'ClashPanel kan advertenties van derden tonen, waaronder Google AdSense of Adsterra, uitsluitend op geselecteerde geschikte publieke pagina’s en, waar van toepassing, na de vereiste advertentietoestemming. Een advertentie betekent niet dat ClashPanel de adverteerder, het product of de externe website aanbeveelt.',
                     'Externe diensten en links vallen onder hun eigen voorwaarden en privacypraktijken. ClashPanel is niet verantwoordelijk voor inhoud of transacties die uitsluitend door een onafhankelijke derde partij worden aangeboden.'
                 ]],
                 ['Beschikbaarheid en wijzigingen', [
@@ -360,7 +372,7 @@ const content = {
             summary: `The official contact method for ClashPanel is email: ${SUPPORT_EMAIL}.`,
             sections: [
                 ['Email support', [
-                    `For bugs, feature requests, account questions, privacy requests, AdSense or advertising questions and general project enquiries, email ${SUPPORT_EMAIL}.`,
+                    `For bugs, feature requests, account questions, privacy requests, AdSense, Adsterra or advertising questions and general project enquiries, email ${SUPPORT_EMAIL}.`,
                     'For a bug report, include the affected page, what you expected, what happened and any useful browser error message. Remove private information from screenshots before sending them.'
                 ]],
                 ['Privacy and account requests', [
@@ -381,7 +393,7 @@ const content = {
             summary: `De officiële contactmethode voor ClashPanel is e-mail: ${SUPPORT_EMAIL}.`,
             sections: [
                 ['Support via e-mail', [
-                    `Voor bugs, feature requests, accountvragen, privacyverzoeken, AdSense- of advertentievragen en algemene vragen kun je mailen naar ${SUPPORT_EMAIL}.`,
+                    `Voor bugs, feature requests, accountvragen, privacyverzoeken, AdSense-, Adsterra- of advertentievragen en algemene vragen kun je mailen naar ${SUPPORT_EMAIL}.`,
                     'Vermeld bij een bug de betrokken pagina, wat je verwachtte, wat er gebeurde en eventuele nuttige foutmeldingen uit de browser. Verwijder privégegevens uit screenshots voordat je ze verstuurt.'
                 ]],
                 ['Privacy- en accountverzoeken', [

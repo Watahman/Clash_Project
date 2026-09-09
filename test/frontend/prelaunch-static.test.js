@@ -118,6 +118,21 @@ describe('Pre-launch static contract', () => {
         expect(headers).toContain('X-Robots-Tag: noindex');
     });
 
+    it('keeps Adsterra policy links and origins constrained to the report-only ad script policy', () => {
+        const headers = readFileSync('src/_headers', 'utf8');
+        const scriptPolicy = headers.match(/Content-Security-Policy-Report-Only:[^\r\n]+/)?.[0] || '';
+        const privacy = readFileSync('src/subpages/privacy.html', 'utf8');
+        const cookies = readFileSync('src/subpages/cookies.html', 'utf8');
+
+        expect(scriptPolicy).toContain('https://pl31261194.profitableratecpmnetwork.com');
+        expect(scriptPolicy).toContain('https://www.highrevenueformat.com');
+        expect(scriptPolicy).not.toMatch(/script-src[^;]*\*/);
+        for (const document of [privacy, cookies]) {
+            expect(document).toContain('https://adsterra.com/privacy-policy-managed');
+            expect(document).toContain('https://adsterra.com/cookies/');
+        }
+    });
+
     it('uses explicit button types in every HTML source', () => {
         const pages = [
             ...publicPages.keys(),

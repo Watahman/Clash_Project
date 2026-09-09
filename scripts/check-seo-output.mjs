@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { JSDOM } from 'jsdom';
 import { canonicalUrl, publicRoutes } from './public-routes.mjs';
@@ -14,6 +14,51 @@ const redirectingTargets = new Set([
     '/subpages/register.html'
 ]);
 const publicDocuments = [];
+const adLoader = '/assets/js/Data/ads.js?v=20260909-adsterra-v1';
+const adEligibleFiles = new Set([
+    'index.html',
+    'guides.html',
+    'methodology.html',
+    'cwl-planner.html',
+    'cwl-tracker.html',
+    'clan-management.html',
+    'bracket-generator.html',
+    'minigames.html',
+    'about.html',
+    'changelog.html',
+    'guides/cwl-attack-defense.html',
+    'guides/cwl-availability.html',
+    'guides/cwl-bonus-medals.html',
+    'guides/cwl-rotation.html',
+    'guides/cwl-season-history.html',
+    'guides/fair-cwl-roster.html',
+    'guides/missed-attacks.html',
+    'guides/spreadsheet-vs-cwl-planner.html'
+]);
+const adExcludedFiles = new Set([
+    '404.html',
+    'advanced-stats.html',
+    'achievements.html',
+    'subpages/achievements.html',
+    'subpages/advanced-stats.html',
+    'subpages/bracket-generator.html',
+    'subpages/contact.html',
+    'subpages/cookies.html',
+    'subpages/cwl-operation-board.html',
+    'subpages/cwl-planner-drafts.html',
+    'subpages/cwl-planner.html',
+    'subpages/dashboard.html',
+    'subpages/explore.html',
+    'subpages/groups.html',
+    'subpages/login.html',
+    'subpages/minigames.html',
+    'subpages/privacy.html',
+    'subpages/profile.html',
+    'subpages/register.html',
+    'subpages/terms.html',
+    'subpages/war-operation-board.html'
+]);
+const directNetworkScript = /https:\/\/(?:www\.googletagmanager\.com|pagead2\.googlesyndication\.com|pl31261194\.profitableratecpmnetwork\.com|www\.highrevenueformat\.com)/i;
 
 for (const route of publicRoutes) {
     const source = await readFile(resolve('dist', route.file), 'utf8');
@@ -83,15 +128,37 @@ for (const file of initialHtmlPolicyFiles) {
     assert(words >= 150, `${file}: policy/support body is not complete in initial HTML`);
 }
 
-const adImports = publicDocuments.filter(item => item.source.includes('/assets/js/Data/ads.js'));
-assert(adImports.length === 1 && adImports[0].route.path === '/', 'AdSense loader must only be imported by the homepage candidate');
-for (const file of ['subpages/dashboard.html', 'subpages/cwl-planner.html', 'subpages/cwl-planner-drafts.html', 'subpages/cwl-operation-board.html', 'subpages/bracket-generator.html', 'subpages/minigames.html']) {
+const generatedHtmlFiles = await listHtmlFiles(resolve('dist'));
+const expectedHtmlFiles = [...adEligibleFiles, ...adExcludedFiles].sort();
+assert(JSON.stringify(generatedHtmlFiles) === JSON.stringify(expectedHtmlFiles), 'HTML inventory changed without an explicit ad eligibility decision');
+
+for (const file of generatedHtmlFiles) {
     const source = await readFile(resolve('dist', file), 'utf8');
-    assert(!source.includes('Data/ads.js'), `${file}: excluded application route imports AdSense`);
+    assertAdContract(file, source, adEligibleFiles.has(file));
+    assert(!directNetworkScript.test(source), `${file}: advertising network script is embedded in HTML`);
 }
 
-console.log(`Validated ${publicRoutes.length} public route definitions, ${expectedSitemapUrls.length} sitemap URLs, initial policy HTML, structured data, links and AdSense exclusions.`);
+console.log(`Validated ${publicRoutes.length} public route definitions, ${expectedSitemapUrls.length} sitemap URLs, initial policy HTML, structured data, links and ad route exclusions.`);
 
 function assert(condition, message) {
     if (!condition) throw new Error(message);
+}
+
+function assertAdContract(file, source, eligible) {
+    const imports = [...source.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi)]
+        .filter(match => match[1] === adLoader);
+    const expectedCount = eligible ? 1 : 0;
+
+    assert(imports.length === expectedCount, `${file}: expected ${expectedCount} central ad manager import(s)`);
+    if (eligible) assert(/\bdefer\b/i.test(imports[0][0]), `${file}: ad manager must be deferred`);
+}
+
+async function listHtmlFiles(directory) {
+    const entries = await readdir(directory, { withFileTypes: true });
+    const files = await Promise.all(entries.map(async entry => {
+        const file = resolve(directory, entry.name);
+        if (entry.isDirectory()) return listHtmlFiles(file);
+        return entry.name.endsWith('.html') ? [file.slice(resolve('dist').length + 1).replaceAll('\\', '/')] : [];
+    }));
+    return files.flat().sort();
 }

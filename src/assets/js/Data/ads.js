@@ -3,49 +3,20 @@
 
     const SCRIPT_ID = 'clashtools-google-ads';
     const CLIENT_ID = 'ca-pub-7361256415342967';
+    const AD_MANAGER_URL = '/assets/js/Data/adsterra-manager.js?v=20260909-adsterra-v1';
     let advertisingConsent = false;
+    let adsterraManagerPromise;
+    let adsterraManager;
 
-    // Deliberately conservative during the next AdSense review. A route belongs
-    // here only after its initial HTML is a useful, indexable public resource.
-    const AD_ELIGIBLE_ROUTES = new Set(['/']);
-    const ALWAYS_EXCLUDED_PREFIXES = ['/app/', '/api/', '/dashboard', '/subpages/'];
-
-    function normalizedPath() {
-        return (window.location.pathname.replace(/\/+$/, '') || '/').toLowerCase();
-    }
-
-    function navigationReturnedOk() {
-        const navigation = performance.getEntriesByType?.('navigation')?.[0];
-        return !navigation?.responseStatus || navigation.responseStatus === 200;
-    }
-
-    function hasMeaningfulPublisherContent() {
-        const main = document.querySelector('main');
-        if (!main || main.hidden || main.getAttribute('aria-busy') === 'true') return false;
-        if (document.body.matches('.workspace-app, .auth-page, .error-page')) return false;
-        if (main.matches('[data-loading="true"], [data-empty="true"], [data-error="true"]')) return false;
-        return (main.textContent || '').replace(/\s+/g, ' ').trim().length >= 800;
-    }
-
-    function isIndexableCanonicalPage(path) {
-        const robots = document.querySelector('meta[name="robots"]')?.content.toLowerCase() || '';
-        const canonical = document.querySelector('link[rel="canonical"]')?.href;
-        if (robots.includes('noindex') || !canonical) return false;
-        try {
-            const canonicalUrl = new URL(canonical);
-            return canonicalUrl.origin === 'https://clashpanel.com'
-                && (canonicalUrl.pathname.replace(/\/+$/, '') || '/').toLowerCase() === path;
-        } catch {
-            return false;
-        }
-    }
-
-    function isRouteEligible() {
-        const path = normalizedPath();
-        if (!AD_ELIGIBLE_ROUTES.has(path)) return false;
-        if (ALWAYS_EXCLUDED_PREFIXES.some(prefix => path === prefix || path.startsWith(prefix))) return false;
-        if (!navigationReturnedOk() || !isIndexableCanonicalPage(path)) return false;
-        return hasMeaningfulPublisherContent();
+    function loadAdsterraManager() {
+        if (adsterraManagerPromise) return adsterraManagerPromise;
+        adsterraManagerPromise = import(AD_MANAGER_URL).then(manager => {
+            if (!manager.isAdRouteEligible()) return null;
+            adsterraManager = manager;
+            manager.initAdsterraAds();
+            return manager;
+        }).catch(() => null);
+        return adsterraManagerPromise;
     }
 
     function consentModeAllowsAdvertising() {
@@ -62,9 +33,11 @@
 
     function publishConsentState() {
         advertisingConsent = consentModeAllowsAdvertising();
-        window.dispatchEvent(new CustomEvent('clashtools:ad-consent-changed', {
+        const detail = {
             detail: { advertisingConsent }
-        }));
+        };
+        window.dispatchEvent(new CustomEvent('clashtools:ad-consent-changed', detail));
+        window.dispatchEvent(new CustomEvent('ad-consent-changed', detail));
     }
 
     function queueConsentRefresh() {
@@ -90,7 +63,7 @@
 
     function loadGoogleCmpAndAds() {
         if (document.getElementById(SCRIPT_ID)) return;
-        if (!isRouteEligible()) return;
+        if (!adsterraManager?.isAdRouteEligible()) return;
 
         const script = document.createElement('script');
         script.id = SCRIPT_ID;
@@ -108,9 +81,11 @@
     }
 
     function scheduleGoogleCmp() {
-        if (!isRouteEligible()) return;
-        installGoogleCmpBridge();
-        loadGoogleCmpWhenIdle();
+        loadAdsterraManager().then(manager => {
+            if (!manager) return;
+            installGoogleCmpBridge();
+            loadGoogleCmpWhenIdle();
+        }).catch(() => {});
     }
 
     if (document.readyState === 'complete') scheduleGoogleCmp();
