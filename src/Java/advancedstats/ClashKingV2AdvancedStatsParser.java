@@ -12,128 +12,180 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-/** Decodes the three route-specific V2 payloads into transient attack observations. */
+import static Java.advancedstats.ClashKingV2AdvancedStatsParserSupport.array;
+import static Java.advancedstats.ClashKingV2AdvancedStatsParserSupport.integer;
+import static Java.advancedstats.ClashKingV2AdvancedStatsParserSupport.instant;
+import static Java.advancedstats.ClashKingV2AdvancedStatsParserSupport.longValue;
+import static Java.advancedstats.ClashKingV2AdvancedStatsParserSupport.number;
+import static Java.advancedstats.ClashKingV2AdvancedStatsParserSupport.object;
+import static Java.advancedstats.ClashKingV2AdvancedStatsParserSupport.percentage;
+import static Java.advancedstats.ClashKingV2AdvancedStatsParserSupport.positive;
+import static Java.advancedstats.ClashKingV2AdvancedStatsParserSupport.text;
+import static Java.advancedstats.ClashKingV2AdvancedStatsParserSupport.textPrimitive;
+
+/** Decodes ClashKing V2 normal, ranked/legend, and war payloads. */
 final class ClashKingV2AdvancedStatsParser {
     private static final ArmyShareCodeParser ARMY_PARSER = new ArmyShareCodeParser();
-    private static final List<DateTimeFormatter> CLASH_TIME_FORMATS = List.of(
-            DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss.SSSX").withZone(ZoneOffset.UTC),
-            DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmssX").withZone(ZoneOffset.UTC)
-    );
 
     private ClashKingV2AdvancedStatsParser() {}
 
     static HistoryPage normal(JsonObject response, HistoryRequest request) {
-        JsonArray items = array(response, "items");
         List<AttackObservation> observations = new ArrayList<>();
+        JsonArray items = array(response, "items");
         for (int index = 0; index < items.size(); index++) {
-            if (items.get(index).isJsonObject()) {
-                observations.add(observation(items.get(index), request, "normal", index));
-            }
+            JsonObject row = object(items.get(index));
+            if (row != null) observations.add(observation(row, request, "normal", index, true));
         }
-        return page(observations, request, "v2-normal-history-v1",
-                "GET /v2/player/{tag}/battlelog/history; no upstream cursor or total");
+        return page(observations, request, "v2-normal-history-v2",
+                "GET /v2/player/{tag}/battlelog/history; local watermark; duration is transient");
     }
 
+    /** Compatibility for the original ranked battlelogs envelope. */
     static HistoryPage ranked(JsonObject response, HistoryRequest request, long season) {
-        JsonArray items = array(response, "battlelogs");
         List<AttackObservation> observations = new ArrayList<>();
+        JsonArray items = array(response, "battlelogs");
         for (int index = 0; index < items.size(); index++) {
-            JsonElement value = items.get(index);
-            if (!value.isJsonObject() || !isAttack(value.getAsJsonObject(), false)) continue;
-            observations.add(observation(value, request, "ranked-season:" + season, index));
+            JsonObject row = object(items.get(index));
+            if (row != null && isAttack(row, false)) {
+                observations.add(observation(row, request, "ranked-season:" + season, index, false));
+            }
         }
-        return page(observations, request, "v2-ranked-battlelog-v1",
-                "GET /v2/player/{tag}/ranked/{season}/battlelog; season is explicit; no cursor",
-                Long.toString(season));
+        return page(observations, request, "v2-ranked-battlelog-v2",
+                "GET /v2/player/{tag}/ranked/{season}/battlelog; attacks only; no cursor",
+                numericSeason(Long.toString(season)));
+    }
+
+    /**
+     * Merges the new ranked and legend envelopes into the existing RANKED scope.
+     * Only rows under attacks are observations; defenses are intentionally ignored.
+     */
+    static HistoryPage league(JsonObject ranked, String seasonId, JsonObject legend, String day,
+                              HistoryRequest request) {
+        List<AttackObservation> observations = new ArrayList<>();
+        appendLeagueAttacks(observations, ranked, "ranked", seasonId, day, request);
+        appendLeagueAttacks(observations, legend, "legend", seasonId, day, request);
+        String seasonKey = numericSeason(seasonId);
+        return page(observations, request, "v2-league-battlelog-v1",
+                "GET /v2/player/{tag}/ranked/{seasonId}/battlelog and /v2/player/{tag}/legend/{day}/battlelog; attacks only",
+                seasonKey);
     }
 
     static HistoryPage war(JsonObject response, HistoryRequest request) {
-        JsonArray items = array(response, "items");
         List<AttackObservation> observations = new ArrayList<>();
+        JsonArray items = array(response, "items");
         for (int index = 0; index < items.size(); index++) {
-            if (items.get(index).isJsonObject()) {
-                observations.add(warObservation(items.get(index), request, index));
-            }
+            JsonObject row = object(items.get(index));
+            if (row != null) observations.add(warObservation(row, request, index));
         }
-        return page(observations, request, "v2-war-attacks-v1",
+        return page(observations, request, "v2-war-attacks-v2",
                 "GET /v2/player/{tag}/war/attacks; no upstream cursor or total", "");
     }
 
-    private static AttackObservation observation(JsonElement value, HistoryRequest request,
-                                                 String prefix, int index) {
-        JsonObject row = object(value);
-        Instant occurredAt = instant(row, request.requestedAt(), "timestamp", "time", "created_at");
+    private static void appendLeagueAttacks(List<AttackObservation> target, JsonObject envelope,
+                                            String type, String season, String day,
+                                            HistoryRequest request) {
+        JsonArray attacks = array(envelope, "attacks");
+        for (int index = 0; index < attacks.size(); index++) {
+            JsonObject row = object(attacks.get(index));
+            if (row != null) target.add(leagueObservation(row, type, season, day, request, index));
+        }
+    }
+
+    private static AttackObservation observation(JsonObject row, HistoryRequest request,
+                                                 String prefix, int index, boolean defaultAttack) {
+        Instant occurredAt = instant(row, request.requestedAt(),
+                "battleTime", "time", "timestamp", "created_at");
+        boolean attack = isAttack(row, defaultAttack);
         String id = text(row, "battle_id", "battleId", "id");
-        if (id.isBlank()) id = prefix + ":" + occurredAt + ":" + index;
-        boolean attack = isAttack(row, true);
-        return new AttackObservation(prefix + ":" + id, request.scope(), occurredAt, attack,
-                text(row, "battle_type", "battleType", "type"),
-                text(row, "opponent_tag", "opponentTag", "defenderTag"),
-                positive(integer(row, "player_townhall", "player_town_hall", "playerTownHall", "attackerTownHall")),
-                positive(integer(row, "opponent_townhall", "opponent_town_hall", "opponentTownHall", "defenderTownHall")),
-                integer(row, "stars"), decimal(row, "destruction_percentage", "destructionPercentage", "destruction"),
+        String key = stableKey(prefix, id, occurredAt, row, index);
+        return new AttackObservation(key, request.scope(), occurredAt, attack,
+                text(row, "battle_type", "battleType", "type"), opponentTag(row),
+                positive(integer(row, "player_townhall", "player_town_hall", "playerTownHall",
+                        "townHallLevel", "townhallLevel")), opponentTownHall(row), integer(row, "stars"),
+                percentage(row, "destruction_percentage", "destructionPercentage", "destruction"),
                 units(row), loot(row, "gold", "gold_looted", "goldLooted"),
                 loot(row, "elixir", "elixir_looted", "elixirLooted"),
                 loot(row, "dark_elixir", "darkElixir", "dark_elixir_looted", "darkElixirLooted"));
     }
 
-    private static AttackObservation warObservation(JsonElement value, HistoryRequest request, int index) {
-        JsonObject row = object(value);
+    private static AttackObservation leagueObservation(JsonObject row, String type, String season, String day,
+                                                       HistoryRequest request, int index) {
+        Instant occurredAt = instant(row, request.requestedAt(), "time", "battleTime", "timestamp", "date");
+        JsonObject opponent = object(row.get("opponent"));
+        String opponentTag = firstText(text(opponent, "tag", "playerTag", "player_tag"),
+                text(row, "opponentTag", "opponent_tag", "defenderTag"));
+        Integer opponentTownHall = positive(integer(opponent, "townHallLevel", "townhallLevel", "town_hall_level"));
+        if (opponentTownHall == null) opponentTownHall = positive(integer(row, "opponentTownHall", "opponent_townhall"));
+        Integer playerTownHall = positive(integer(row, "townHallLevel", "townhallLevel", "town_hall_level"));
+        String id = text(row, "battle_id", "battleId", "id", "battleKey", "key");
+        String eventKey = leagueKey(type, season, day, id, occurredAt, opponentTag, row, index);
+        return new AttackObservation(eventKey, request.scope(), occurredAt, true, type, opponentTag,
+                playerTownHall, opponentTownHall, integer(row, "stars"),
+                percentage(row, "destructionPercentage", "destruction_percentage", "destruction"),
+                units(row), loot(row, "gold", "gold_looted", "goldLooted"),
+                loot(row, "elixir", "elixir_looted", "elixirLooted"),
+                loot(row, "darkElixir", "dark_elixir", "dark_elixir_looted", "darkElixirLooted"));
+    }
+
+    private static AttackObservation warObservation(JsonObject row, HistoryRequest request, int index) {
         boolean attack = isAttack(row, false);
         String side = text(row, "side", "battle_side");
         String warId = text(row, "war_id", "warId", "warTag");
         String order = text(row, "attackOrder", "attack_order", "order");
         if (order.isBlank()) order = text(row, "battle_id", "battleId", "id");
         if (order.isBlank()) order = Integer.toString(index);
-        String eventKey = "war:" + (warId.isBlank() ? "unknown" : warId)
-                + ":" + (side.isBlank() ? (attack ? "attack" : "defense") : side) + ":" + order;
+        String eventKey = "war:" + (warId.isBlank() ? "unknown" : warId) + ":"
+                + (side.isBlank() ? (attack ? "attack" : "defense") : side) + ":" + order;
         Instant occurredAt = instant(row, request.requestedAt(), "warEndTime", "war_end_time", "timestamp");
-        Integer playerTh = townHall(row, true);
-        Integer opponentTh = townHall(row, false);
         return new AttackObservation(eventKey, AdvancedStatsScope.WAR, occurredAt, attack,
                 text(row, "warType", "war_type", "type"),
                 text(row, "defenderTag", "defender_tag", "opponentTag", "opponent_tag"),
-                playerTh, opponentTh, integer(row, "stars"),
-                decimal(row, "destructionPercentage", "destruction_percentage", "destruction"),
+                townHall(row, true), townHall(row, false), integer(row, "stars"),
+                percentage(row, "destructionPercentage", "destruction_percentage", "destruction"),
                 units(row), loot(row, "gold", "gold_looted", "goldLooted"),
                 loot(row, "elixir", "elixir_looted", "elixirLooted"),
                 loot(row, "dark_elixir", "darkElixir", "dark_elixir_looted", "darkElixirLooted"));
     }
 
     private static Integer townHall(JsonObject row, boolean attacker) {
-        String[] direct = attacker
+        String[] names = attacker
                 ? new String[]{"attackerTownHall", "attackerTownhall", "attacker_th", "playerTownHall"}
                 : new String[]{"defenderTownHall", "defenderTownhall", "defender_th", "opponentTownHall"};
-        Integer value = integer(row, direct);
+        Integer value = integer(row, names);
         if (value != null) return positive(value);
-        JsonObject ths = object(row.get("THs"));
-        if (ths == null) ths = object(row.get("ths"));
-        if (ths == null) return null;
-        return positive(integer(ths, attacker ? "attacker" : "defender",
+        JsonObject ths = object(row == null ? null : row.get("THs"));
+        if (ths == null) ths = object(row == null ? null : row.get("ths"));
+        return ths == null ? null : positive(integer(ths, attacker ? "attacker" : "defender",
                 attacker ? "player" : "opponent"));
     }
 
+    private static String opponentTag(JsonObject row) {
+        JsonObject opponent = object(row == null ? null : row.get("opponent"));
+        return firstText(text(opponent, "tag", "playerTag", "player_tag"),
+                text(row, "opponent_tag", "opponentTag", "defenderTag"));
+    }
+
+    private static Integer opponentTownHall(JsonObject row) {
+        JsonObject opponent = object(row == null ? null : row.get("opponent"));
+        Integer value = positive(integer(opponent, "townHallLevel", "townhallLevel", "town_hall_level"));
+        if (value != null) return value;
+        return positive(integer(row, "opponent_townhall", "opponentTownHall", "defenderTownHall"));
+    }
+
     private static List<UnitObservation> units(JsonObject row) {
-        if (row == null) return List.of();
-        String shareCode = text(row, "army_share_code", "armyShareCode");
+        String shareCode = text(row, "shareCode", "share_code", "army_share_code", "armyShareCode");
         if (!shareCode.isBlank()) {
             try {
                 return ARMY_PARSER.parse(shareCode).units().stream()
                         .map(unit -> new UnitObservation(unit.unitKey(), unit.unitName(), unit.category(),
                                 unit.quantity(), unit.unitLevel())).toList();
-            } catch (Exception ignored) {
-                // Fall through to the normalized item/count arrays when available.
-            }
+            } catch (Exception ignored) { /* Fall through to normalized arrays. */ }
         }
-        return arrayUnits(row.get("army_items"), row.get("army_counts"));
+        return arrayUnits(row == null ? null : row.get("army_items"), row == null ? null : row.get("army_counts"));
     }
 
     private static List<UnitObservation> arrayUnits(JsonElement items, JsonElement counts) {
@@ -152,17 +204,18 @@ final class ClashKingV2AdvancedStatsParser {
         JsonObject countObject = counts != null && counts.isJsonObject() ? counts.getAsJsonObject() : null;
         for (int index = 0; index < itemArray.size(); index++) {
             JsonElement item = itemArray.get(index);
-            String key = item.isJsonObject() ? text(item.getAsJsonObject(), "id", "key", "unit_key", "name")
-                    : item.isJsonPrimitive() ? item.getAsString() : "";
-            int quantity = item.isJsonObject()
-                    ? number(item.getAsJsonObject().get("count"),
-                    number(item.getAsJsonObject().get("quantity"), 0))
-                    : countObject != null ? number(countObject.get(key), 0)
-                    : countArray == null || index >= countArray.size() ? 0
-                    : number(countArray.get(index), 0);
+            JsonObject itemObject = object(item);
+            String key = itemObject == null ? textPrimitive(item) : text(itemObject, "id", "key", "unit_key", "name");
+            int quantity = itemObject == null ? count(countObject, countArray, key, index)
+                    : number(itemObject.get("count"), number(itemObject.get("quantity"), 0));
             if (!key.isBlank() && quantity > 0) result.add(unit(key, key, quantity));
         }
         return List.copyOf(result);
+    }
+
+    private static int count(JsonObject object, JsonArray array, String key, int index) {
+        if (object != null) return number(object.get(key), 0);
+        return array == null || index >= array.size() ? 0 : number(array.get(index), 0);
     }
 
     private static UnitObservation unit(String key, String name, int quantity) {
@@ -170,33 +223,30 @@ final class ClashKingV2AdvancedStatsParser {
     }
 
     private static long loot(JsonObject row, String... names) {
-        if (row == null) return 0;
-        JsonObject loot = object(row.get("loot"));
-        Long direct = longValue(row, names);
-        if (direct != null) return Math.max(0, direct);
-        if (loot == null) return 0;
-        for (String name : names) {
-            Long nested = longValue(loot, name);
-            if (nested != null) return Math.max(0, nested);
+        for (JsonObject source : new JsonObject[]{row, object(row == null ? null : row.get("loot")),
+                object(row == null ? null : row.get("lootedResources"))}) {
+            Long value = longValue(source, names);
+            if (value != null) return Math.max(0, value);
         }
         return 0;
     }
 
     private static HistoryPage page(List<AttackObservation> observations, HistoryRequest request,
-                                    String version, String note) {
-        return page(observations, request, version, note, "");
-    }
-
-    private static HistoryPage page(List<AttackObservation> observations, HistoryRequest request,
                                     String version, String note, String rankedSeasonKey) {
-        List<AttackObservation> filtered = observations.stream()
-                .filter(item -> after(item, request.checkpoint())).toList();
+        List<AttackObservation> filtered = observations.stream().filter(item -> after(item, request.checkpoint()))
+                .sorted(Comparator.comparing(AttackObservation::occurredAt).thenComparing(AttackObservation::eventKey))
+                .toList();
         Checkpoint next = filtered.stream()
                 .max(Comparator.comparing(AttackObservation::occurredAt).thenComparing(AttackObservation::eventKey))
                 .map(item -> new Checkpoint("", item.occurredAt(), item.eventKey()))
                 .orElse(request.checkpoint());
         return new HistoryPage(filtered, next, false, Coverage.PARTIAL,
                 new Provenance("clashking-v2", version, request.requestedAt(), note, rankedSeasonKey));
+    }
+
+    private static HistoryPage page(List<AttackObservation> observations, HistoryRequest request,
+                                    String version, String note) {
+        return page(observations, request, version, note, "");
     }
 
     private static boolean after(AttackObservation observation, Checkpoint checkpoint) {
@@ -206,105 +256,40 @@ final class ClashKingV2AdvancedStatsParser {
     }
 
     private static boolean isAttack(JsonObject row, boolean defaultValue) {
-        if (row == null) return defaultValue;
-        JsonElement value = row.get("attack");
-        if (value != null && !value.isJsonNull()) return value.getAsBoolean();
+        JsonElement value = row == null ? null : row.get("attack");
+        if (value != null && !value.isJsonNull()) {
+            try { return value.getAsBoolean(); } catch (RuntimeException ignored) { }
+        }
         String side = text(row, "side", "battle_side").toLowerCase();
         if (side.contains("defen")) return false;
         if (side.contains("attack") || side.contains("offen")) return true;
         return defaultValue;
     }
 
-    private static JsonArray array(JsonObject row, String name) {
-        JsonElement value = row == null ? null : row.get(name);
-        return value != null && value.isJsonArray() ? value.getAsJsonArray() : new JsonArray();
+    private static String stableKey(String prefix, String id, Instant time, JsonObject row, int index) {
+        if (!id.isBlank()) return prefix + ":" + id;
+        String basis = time + "|" + text(row, "shareCode", "share_code", "armyHash", "army_hash") + "|"
+                + opponentTag(row) + "|" + row;
+        return prefix + ":" + BattleFingerprint.sha256(basis) + ":" + index;
     }
 
-    private static JsonObject object(JsonElement value) {
-        return value != null && value.isJsonObject() ? value.getAsJsonObject() : null;
+    private static String firstText(String first, String fallback) {
+        return first.isBlank() ? fallback : first;
     }
 
-    private static String text(JsonObject row, String... names) {
-        if (row == null) return "";
-        for (String name : names) {
-            JsonElement value = row.get(name);
-            if (value != null && !value.isJsonNull() && value.isJsonPrimitive()) return value.getAsString().trim();
-        }
-        return "";
+    private static String leagueKey(String type, String season, String day, String id, Instant time,
+                                    String opponentTag, JsonObject row, int index) {
+        String key = id.isBlank() ? BattleFingerprint.sha256(time + "|" + day + "|" + opponentTag + "|" + row)
+                : id;
+        String seasonKey = numericSeason(season);
+        String prefix = "ranked-season:" + (seasonKey.isBlank() ? "unknown" : seasonKey);
+        return prefix + ":" + type + ":" + key + (id.isBlank() ? ":" + index : "");
     }
 
-    private static Integer integer(JsonObject row, String... names) {
-        if (row == null) return null;
-        for (String name : names) {
-            JsonElement value = row.get(name);
-            if (value == null || value.isJsonNull()) continue;
-            try { return value.getAsInt(); } catch (RuntimeException ignored) { }
-        }
-        return null;
+    private static String numericSeason(String value) {
+        if (value == null || !value.trim().matches("[1-9][0-9]{0,18}")) return "";
+        return value.trim();
     }
 
-    private static Double decimal(JsonObject row, String... names) {
-        if (row == null) return null;
-        for (String name : names) {
-            JsonElement value = row.get(name);
-            if (value == null || value.isJsonNull()) continue;
-            try { return value.getAsDouble(); } catch (RuntimeException ignored) { }
-        }
-        return null;
-    }
-
-    private static int number(JsonElement value, int fallback) {
-        if (value == null || value.isJsonNull()) return fallback;
-        try { return value.getAsInt(); } catch (RuntimeException ignored) { return fallback; }
-    }
-
-    private static Long longValue(JsonObject row, String... names) {
-        if (row == null) return null;
-        for (String name : names) {
-            JsonElement value = row.get(name);
-            if (value == null || value.isJsonNull()) continue;
-            try { return value.getAsLong(); } catch (RuntimeException ignored) { }
-        }
-        return null;
-    }
-
-    private static Instant instant(JsonObject row, Instant fallback, String... names) {
-        String value = text(row, names);
-        if (value.isBlank()) return fallback;
-
-        if (value.chars().allMatch(Character::isDigit)) {
-            try {
-                long timestamp = Long.parseLong(value);
-                return Instant.ofEpochSecond(timestamp > 10_000_000_000L ? timestamp / 1000 : timestamp);
-            } catch (NumberFormatException ignored) {
-                // Continue with textual timestamp formats.
-            }
-        }
-
-        try {
-            return Instant.parse(value);
-        } catch (DateTimeParseException ignored) {
-            // Continue with other documented/upstream timestamp formats.
-        }
-
-        try {
-            return OffsetDateTime.parse(value).toInstant();
-        } catch (DateTimeParseException ignored) {
-            // Clash war history also returns compact timestamps such as 20260809T200137.000Z.
-        }
-
-        for (DateTimeFormatter formatter : CLASH_TIME_FORMATS) {
-            try {
-                return Instant.from(formatter.parse(value));
-            } catch (DateTimeParseException ignored) {
-                // Try the next known Clash timestamp format.
-            }
-        }
-
-        throw new IllegalArgumentException("Unsupported ClashKing timestamp: " + value);
-    }
-
-    private static Integer positive(Integer value) {
-        return value == null || value <= 0 ? null : value;
-    }
+    private static Integer positive(Integer value) { return value == null || value <= 0 ? null : value; }
 }

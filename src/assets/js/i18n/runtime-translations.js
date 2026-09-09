@@ -22,7 +22,7 @@ import { publicResourceLocales } from './public-resource-locales.js?v=20260821-p
 import { achievementLocales } from './achievement-locales.js?v=20260823-achievement-card-assets-1';
 import { advancedStatsLocales } from './advanced-stats-locales.js?v=20260830-monthly-trends-v1';
 import { advancedStatsExtraLocales } from './advanced-stats-extra-locales.js?v=20260830-monthly-trends-v1';
-import { advancedStatsUiLocales } from './advanced-stats-ui-locales.js?v=20260814-advanced-stats-v4';
+import { advancedStatsUiLocales } from './advanced-stats-ui-locales.js?v=20260909-battledata-v1';
 import { profilePageLocales } from './profile-page-locales.js';
 import { navigationV2Locales } from './navigation-v2-locales.js';
 

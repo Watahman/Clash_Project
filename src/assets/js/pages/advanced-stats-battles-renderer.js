@@ -63,8 +63,15 @@ function battleElement(battle) {
 
 export function renderBattles(elements, state) {
     const battles = Array.isArray(state.battles) ? state.battles.filter(Boolean) : [];
+    const unsupported = state.battleHistoryUnsupported === true;
     elements.battles.replaceChildren();
     battles.forEach(battle => elements.battles.append(battleElement(battle)));
     setVisibility(elements.battlesEmpty, battles.length === 0);
-    setVisibility(elements.loadMore, battles.length > 0 && state.hasMore);
+    if (elements.battlesEmpty && battles.length === 0) {
+        elements.battlesEmpty.textContent = t(unsupported
+            ? 'advancedStats.battlesUnavailable'
+            : 'advancedStats.noBattles');
+        elements.battlesEmpty.dataset.state = unsupported ? 'unavailable' : 'empty';
+    }
+    setVisibility(elements.loadMore, !unsupported && battles.length > 0 && state.hasMore);
 }

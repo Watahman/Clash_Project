@@ -4,6 +4,7 @@ import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260811
 
 const BATTLE_PAGE_SIZE = 20;
 const SECTION_NAMES = ['summary', 'units', 'armies', 'trends', 'battles'];
+const RAW_HISTORY_NOT_RETAINED = 'raw_attack_history_not_retained';
 
 function filteredUnits(state) {
     return state.unitCatalog.filter(unit => (state.category === 'ALL' || String(unit?.category || '').toUpperCase() === state.category)
@@ -24,6 +25,25 @@ function markSectionErrors(failures) {
         document.getElementById(`advanced-stats-${name}-section`)
             ?.setAttribute('data-load-error', String(failures.includes(name)));
     });
+}
+
+function applyBattleResult(state, value) {
+    const unsupported = value?.unsupported === true;
+    state.battles = arrayValue(value?.items);
+    state.battleHistoryUnsupported = unsupported;
+    state.battleHistoryUnsupportedReason = unsupported
+        ? value?.reason || RAW_HISTORY_NOT_RETAINED
+        : null;
+    state.nextCursor = unsupported ? null : value?.nextCursor || null;
+    state.hasMore = !unsupported && Boolean(value?.hasMore && state.nextCursor);
+}
+
+export function resetBattleHistoryState(state) {
+    state.battles = [];
+    state.nextCursor = null;
+    state.hasMore = false;
+    state.battleHistoryUnsupported = false;
+    state.battleHistoryUnsupportedReason = null;
 }
 
 export async function loadStatistics({
@@ -53,11 +73,7 @@ export async function loadStatistics({
     });
     applySectionResult(state, armies, 'armies', value => { state.armies = arrayValue(value?.items); });
     applySectionResult(state, trends, 'trends', value => { state.trends = arrayValue(value?.points); });
-    applySectionResult(state, battles, 'battles', value => {
-        state.battles = arrayValue(value?.items);
-        state.nextCursor = value?.nextCursor || null;
-        state.hasMore = Boolean(value?.hasMore && state.nextCursor);
-    });
+    applySectionResult(state, battles, 'battles', value => applyBattleResult(state, value));
     renderPage();
     const failed = requests.map((request, index) => request.status === 'rejected' ? SECTION_NAMES[index] : null).filter(Boolean);
     markSectionErrors(failed);
@@ -68,7 +84,7 @@ export async function loadStatistics({
 }
 
 export async function loadMoreBattles({ state, setBusy, setDataStatus, renderPage }) {
-    if (!state.nextCursor || state.busy) return;
+    if (!state.nextCursor || state.busy || state.battleHistoryUnsupported) return;
     const version = state.requestVersion;
     setBusy(true);
     try {
@@ -77,9 +93,16 @@ export async function loadMoreBattles({ state, setBusy, setDataStatus, renderPag
             cursor: state.nextCursor
         });
         if (version !== state.requestVersion) return;
-        state.battles.push(...arrayValue(response?.items));
-        state.nextCursor = response?.nextCursor || null;
-        state.hasMore = Boolean(response?.hasMore && state.nextCursor);
+        if (response?.unsupported === true) {
+            state.battleHistoryUnsupported = true;
+            state.battleHistoryUnsupportedReason = response.reason || RAW_HISTORY_NOT_RETAINED;
+            state.nextCursor = null;
+            state.hasMore = false;
+        } else {
+            state.battles.push(...arrayValue(response?.items));
+            state.nextCursor = response?.nextCursor || null;
+            state.hasMore = Boolean(response?.hasMore && state.nextCursor);
+        }
         renderPage();
     } catch (error) {
         if (version !== state.requestVersion) return;
@@ -89,4 +112,3 @@ export async function loadMoreBattles({ state, setBusy, setDataStatus, renderPag
         if (version === state.requestVersion) setBusy(false);
     }
 }
-

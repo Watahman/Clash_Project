@@ -1,4 +1,4 @@
-import { t } from '../i18n/i18n.js?v=20260830-monthly-trends-v1';
+import { t } from '../i18n/i18n.js?v=20260909-battledata-v1';
 import { displayArmyUnits, isPlayerFacingUnitName, presentArmy } from './advanced-stats-army-view.js?v=20260811-2';
 import { entityImage } from './progress-asset-view.js?v=20260811-2';
 import {
@@ -9,7 +9,7 @@ import {
     formatPercent
 } from './advanced-stats-formatters.js?v=20260829-public-auth-v1';
 import { renderArmies } from './advanced-stats-armies-renderer.js?v=20260829-public-auth-v1';
-import { renderBattles } from './advanced-stats-battles-renderer.js?v=20260829-public-auth-v1';
+import { renderBattles } from './advanced-stats-battles-renderer.js?v=20260909-battledata-v1';
 import { renderTrends } from './advanced-stats-trends-renderer.js?v=20260830-monthly-trends-v1';
 import { renderUnits } from './advanced-stats-units-renderer.js?v=20260829-public-auth-v1';
 import { renderDashboardCoverage, renderHistoryAnalysis } from './advanced-stats-analysis-renderer.js?v=20260829-public-auth-v1';

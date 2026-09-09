@@ -278,4 +278,27 @@ describe('Advanced Stats extracted renderers', () => {
         expect(battleRefs.battles.textContent).toContain('Healer');
         expect(battleRefs.battles.textContent).not.toContain('Unknown troop');
     });
+
+    it('distinguishes retained empty history from unsupported battle history', () => {
+        const unsupportedRefs = { battles: element(), battlesEmpty: element(), loadMore: element() };
+
+        renderBattles(unsupportedRefs, {
+            battles: [],
+            hasMore: true,
+            battleHistoryUnsupported: true
+        });
+
+        expect(unsupportedRefs.battlesEmpty.hidden).toBe(false);
+        expect(unsupportedRefs.battlesEmpty.dataset.state).toBe('unavailable');
+        expect(unsupportedRefs.battlesEmpty.textContent).toContain('Individual attack details are unavailable');
+        expect(unsupportedRefs.loadMore.hidden).toBe(true);
+
+        const emptyRefs = { battles: element(), battlesEmpty: element(), loadMore: element() };
+        renderBattles(emptyRefs, { battles: [], hasMore: true });
+
+        expect(emptyRefs.battlesEmpty.hidden).toBe(false);
+        expect(emptyRefs.battlesEmpty.dataset.state).toBe('empty');
+        expect(emptyRefs.battlesEmpty.textContent).toContain('No tracked attacks');
+        expect(emptyRefs.loadMore.hidden).toBe(true);
+    });
 });

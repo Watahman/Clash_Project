@@ -6,6 +6,7 @@ import Java.advancedstats.AdvancedStatsHistoryModels.HistoryRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.time.Instant;
 
 /** Selects the first declared source that can serve each capability. */
 public final class AdvancedStatsCapabilityBasedSource implements AdvancedStatsHistorySource {
@@ -32,6 +33,15 @@ public final class AdvancedStatsCapabilityBasedSource implements AdvancedStatsHi
     public String seasonKey(AdvancedStatsScope scope) {
         for (AdvancedStatsHistorySource source : sources) {
             String season = source.seasonKey(scope);
+            if (season != null && !season.isBlank()) return season.trim();
+        }
+        return "";
+    }
+
+    @Override
+    public String seasonKey(AdvancedStatsScope scope, String playerTag, Instant requestedAt) {
+        for (AdvancedStatsHistorySource source : sources) {
+            String season = source.seasonKey(scope, playerTag, requestedAt);
             if (season != null && !season.isBlank()) return season.trim();
         }
         return "";

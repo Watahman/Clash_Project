@@ -134,7 +134,7 @@ public final class AdvancedStatsCompactScheduledCollector {
                                      AdvancedStatsCollectionStore store,
                                      AdvancedStatsModels.TrackingState tracker,
                                      String workerId) throws Exception {
-        String season = source.seasonKey(AdvancedStatsScope.RANKED);
+        String season = source.seasonKey(AdvancedStatsScope.RANKED, tracker.playerTag(), clock.instant());
         if (season == null || season.isBlank()) return;
         AdvancedStatsCollectionModels.ScopeState state = store.load(tracker.id(), AdvancedStatsScope.RANKED);
         String current = state == null ? "" : state.sourceSeasonKey();
