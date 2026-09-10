@@ -31,13 +31,6 @@ final class CwlHistoryWarNormalizer {
             Instant endTime = CwlHistoryJson.instant(war, "endTime", "warEndTime");
             if (!belongsToSeason(endTime, season)) continue;
             TimedWar candidate = normalizeWar(war, selectedTag, endTime);
-            if (candidate == null) {
-                HistoricalCwlSeason.War placeholder =
-                        CwlHistoryWarPlaceholder.normalize(war, selectedTag);
-                if (placeholder != null) {
-                    candidate = new TimedWar(endTime, placeholder);
-                }
-            }
             if (candidate != null) normalized.add(candidate);
         }
         normalized.sort(Comparator
@@ -64,18 +57,14 @@ final class CwlHistoryWarNormalizer {
         JsonArray rounds = CwlHistoryJson.array(source, "rounds");
         if (rounds == null) return null;
         JsonArray wars = new JsonArray();
-        for (int roundIndex = 0; roundIndex < rounds.size(); roundIndex++) {
-            JsonElement roundItem = rounds.get(roundIndex);
+        for (JsonElement roundItem : rounds) {
             if (!roundItem.isJsonObject()) continue;
             JsonArray warTags = CwlHistoryJson.array(
                     roundItem.getAsJsonObject(), "warTags", "wars"
             );
             if (warTags == null) continue;
             for (JsonElement war : warTags) {
-                JsonObject normalized = CwlHistoryWarPlaceholder.taggedWar(
-                        war, roundIndex + 1
-                );
-                if (normalized != null) wars.add(normalized);
+                if (war.isJsonObject()) wars.add(war);
             }
         }
         return wars;

@@ -40,7 +40,7 @@ public final class ClashKingV2CwlProvider implements HistoricalCwlDataProvider {
             throws Exception {
         YearMonth.parse(season);
         String upstreamSeason = upstreamSeason(clanTag, season);
-        JsonObject group = client.get(groupPath(clanTag, upstreamSeason));
+        JsonObject group = client.get(seasonPath(clanTag, upstreamSeason));
         String responseSeason = CwlHistoryJson.string(group, "season");
         String normalizedResponse = CwlHistoryIndexNormalizer.normalizedSeason(
                 responseSeason
@@ -88,9 +88,8 @@ public final class ClashKingV2CwlProvider implements HistoricalCwlDataProvider {
         return CwlHistoryJson.tag(clanTag) + ":" + season;
     }
 
-    private static String groupPath(String clanTag, String season) {
-        return "/v2/cwl/" + encoded(clanTag)
-                + "/group?season=" + encoded(season);
+    private static String seasonPath(String clanTag, String season) {
+        return "/cwl/" + encoded(clanTag) + "/" + encoded(season);
     }
 
     private static String encoded(String value) {
