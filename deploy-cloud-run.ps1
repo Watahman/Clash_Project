@@ -4,7 +4,6 @@ param(
 
     [string]$Region = "europe-west1",
     [string]$ServiceName = "clashpanel-api",
-    [string]$ClashApiKeyPoolSecret = "clashpanel-coc-api-key-pool",
     [switch]$AllowAdvancedStatsCollectionDisabled
 )
 
@@ -39,14 +38,6 @@ if ($rankedSeasonConfigured) {
 gcloud config set project $ProjectId
 gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com secretmanager.googleapis.com
 
-$poolSecret = @(& gcloud secrets describe $ClashApiKeyPoolSecret `
-    --project $ProjectId `
-    --format="value(name)" 2>$null) -join ""
-$poolSecret = $poolSecret.Trim()
-if ($LASTEXITCODE -ne 0 -or -not $poolSecret) {
-    throw "Secret Manager-secret '$ClashApiKeyPoolSecret' ontbreekt. Voer eerst migrate-clash-api-key-pool.ps1 uit."
-}
-
 gcloud run deploy $ServiceName `
     --source . `
     --region $Region `
@@ -59,15 +50,14 @@ gcloud run deploy $ServiceName `
     --timeout 120s `
     --cpu-boost `
     --env-vars-file ./cloudrun-env.yaml `
-    --update-secrets="CLASH_API_KEY_POOL=${ClashApiKeyPoolSecret}:latest" `
-    --remove-secrets="_API_KEY_ALL,_API_KEY_ALL2,_API_KEY_ALL3"
+    --remove-secrets="CLASH_API_KEY_POOL,_API_KEY_ALL,_API_KEY_ALL2,_API_KEY_ALL3"
 
 if ($LASTEXITCODE -ne 0) {
     throw "Cloud Run deploy is mislukt."
 }
 
 Write-Host "Deploy klaar. Controleer daarna de Advanced Stats scheduler met configure-advanced-stats-production.ps1." -ForegroundColor Green
-Write-Host "  CLASH_API_KEY_POOL -> $ClashApiKeyPoolSecret"
+Write-Host "Configureer de overige secrets in Cloud Run / Secret Manager:"
 Write-Host "  _API_KEY_SUPABASE"
 Write-Host "  SUPABASE_SERVICE_ROLE_KEY"
 Write-Host "  API_PROXY_SECRET (dezelfde waarde als de Cloudflare Worker secret)"

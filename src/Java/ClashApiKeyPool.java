@@ -143,7 +143,7 @@ final class ClashApiKeyPool {
 
     private static IllegalStateException invalidConfiguration(String reason) {
         return new IllegalStateException(
-                "Ongeldige CLASH_API_KEY_POOL-configuratie: " + reason
+                "Ongeldige Clash API key-configuratie: " + reason
         );
     }
 

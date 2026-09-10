@@ -12,10 +12,6 @@ public class Config {
             env("_API_KEY_SECR_SUPABASE"),
             env("SUPABASE_SERVICE_ROLE_KEY")
     );
-    String _API_KEY_ALL = env("_API_KEY_ALL");
-    String _API_KEY_ALL2 = env("_API_KEY_ALL2");
-    String _API_KEY_ALL3 = env("_API_KEY_ALL3");
-    String _CLASH_API_KEY_POOL = env("CLASH_API_KEY_POOL");
     String _CLASH_API_RATE_LIMIT_COOLDOWN_SECONDS = firstNonBlank(
             env("CLASH_API_RATE_LIMIT_COOLDOWN_SECONDS"),
             "60"
@@ -24,7 +20,16 @@ public class Config {
             env("CLASH_API_MAX_COOLDOWN_SECONDS"),
             "300"
     );
+    private final List<String> clashApiKeys;
     private volatile ClashApiKeyPool clashApiKeyPool;
+
+    public Config() {
+        this(ClashApiCredentials.keys());
+    }
+
+    Config(List<String> clashApiKeys) {
+        this.clashApiKeys = List.copyOf(clashApiKeys);
+    }
 
     String _BASE_URL_SUPABASE = firstNonBlank(env("_BASE_URL_SUPABASE"), env("SUPABASE_URL"));
     String _BASE_URL_CLASH = firstNonBlank(env("_BASE_URL_CLASH"), "https://cocproxy.royaleapi.dev/v1");
@@ -233,12 +238,8 @@ public class Config {
         synchronized (this) {
             if (clashApiKeyPool == null) {
                 clashApiKeyPool = ClashApiKeyPool.fromConfiguration(
-                        _CLASH_API_KEY_POOL,
-                        List.of(
-                                firstNonBlank(_API_KEY_ALL),
-                                firstNonBlank(_API_KEY_ALL2),
-                                firstNonBlank(_API_KEY_ALL3)
-                        )
+                        null,
+                        clashApiKeys
                 );
             }
             return clashApiKeyPool;
@@ -440,7 +441,7 @@ public class Config {
         if (_BASE_URL_SUPABASE == null || _BASE_URL_SUPABASE.isBlank()) missing.add("SUPABASE_URL");
         if (_API_KEY_SUPABASE == null || _API_KEY_SUPABASE.isBlank()) missing.add("SUPABASE_PUBLISHABLE_KEY");
         if (_API_KEY_SECR_SUPABASE == null || _API_KEY_SECR_SUPABASE.isBlank()) missing.add("SUPABASE_SERVICE_ROLE_KEY");
-        if (getClashApiKeyPool().size() == 0) missing.add("CLASH_API_KEY_POOL");
+        if (getClashApiKeyPool().size() == 0) missing.add("CLASH_API_CREDENTIALS");
         if (trustsProxyHeaders() && !hasApiProxySecret()) missing.add("API_PROXY_SECRET");
         return List.copyOf(missing);
     }
