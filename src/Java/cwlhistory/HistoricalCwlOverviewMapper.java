@@ -43,7 +43,9 @@ final class HistoricalCwlOverviewMapper {
                 summary.state(),
                 summary.source(),
                 quality(summary),
-                false
+                false,
+                summary.stars(),
+                summary.destruction()
         );
     }
 

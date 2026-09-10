@@ -32,6 +32,8 @@ class HistoricalCwlServiceProgressiveTest {
         assertEquals("2026-12", result.getFirst().season());
         assertEquals("Master League II", result.getFirst().league().name());
         assertEquals(4, result.getFirst().record().wins());
+        assertEquals(40, result.getFirst().stars());
+        assertEquals(90.0, result.getFirst().destruction());
         assertTrue(result.getFirst().wars().isEmpty());
         assertEquals(0, detailCalls.get());
     }

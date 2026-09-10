@@ -28,10 +28,12 @@ export function buildHistoricalOverviewFromSummaries(summaries, league) {
 }
 
 export function createHistoricalSeasonDetail(data, indexed, seasonIndex) {
+    const indexedRecord = historicalRecord(indexed);
     const detail = buildHistoricalSeasonModel({
         ...data,
         league: data.league?.name ? data.league : indexed?.league,
-        position: data.position ?? indexed?.position ?? null
+        position: indexed?.position ?? data.position ?? null,
+        record: indexedRecord || data.record
     });
     detail.summary = {
         ...detail.summary,
@@ -46,6 +48,18 @@ export function createHistoricalSeasonDetail(data, indexed, seasonIndex) {
         )
     };
     return detail;
+}
+
+function historicalRecord(indexed) {
+    if (!indexed) return null;
+    const source = indexed.record || indexed;
+    const values = [source.wins, source.losses, source.draws];
+    if (!values.some(value => Number.isFinite(Number(value)))) return null;
+    return {
+        wins: Math.max(0, Number(source.wins) || 0),
+        losses: Math.max(0, Number(source.losses) || 0),
+        draws: Math.max(0, Number(source.draws) || 0)
+    };
 }
 
 export function setHistoricalDetailBusy(refs, tab, busy) {

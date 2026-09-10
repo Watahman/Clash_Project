@@ -17,6 +17,8 @@ describe('Historical CWL overview', () => {
             wins: 4,
             losses: 2,
             draws: 1,
+            stars: 54,
+            destruction: 93.4,
             dataQuality: 'Partial history'
         }]).seasons;
 
@@ -24,6 +26,7 @@ describe('Historical CWL overview', () => {
         expect(item.summary.league.name).toBe('Master League II');
         expect(item.summary.position).toBe(3);
         expect(item.summary.offense.avgStars).toBeNull();
+        expect(item.summary.offense.starsPerWar).toBe(2);
         expect(item.summary.dataQuality).toBe('Partial history');
     });
 

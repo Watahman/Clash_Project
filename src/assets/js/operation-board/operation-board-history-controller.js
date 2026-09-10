@@ -43,6 +43,7 @@ export function createOperationBoardHistoryController({
     let detailRequestedTab = null;
     let detailSeason = '';
     let detailReport = null;
+    let detailPromise = null;
     const isDetailCurrent = (token, currentDetailToken) =>
         isCurrentHistoricalDetail(
             token, currentDetailToken, requestToken, detailToken,
@@ -58,6 +59,7 @@ export function createOperationBoardHistoryController({
         detailRequestedTab = null;
         detailSeason = '';
         detailReport = null;
+        detailPromise = null;
     }
     function resetForClan() {
         requestToken += 1;
@@ -199,20 +201,9 @@ export function createOperationBoardHistoryController({
             );
             mode = 'historical';
             onHistorical(report, { preview: true });
+            void ensureDetailForTab('summary');
         } catch (error) {
             if (error?.name === 'AbortError' || token !== requestToken) return;
-            if (targetMode === 'historical' && Number(error?.status) === 404) {
-                seasonIndex = seasonIndex.filter(
-                    item => item.season !== value
-                );
-                renderHistoricalSeasonOptions(refs, seasonIndex, {
-                    hasCurrent: Boolean(getCurrentReport()),
-                    currentSeason,
-                    selectedSeason,
-                    getClan,
-                    resetForClan
-                });
-            }
             if (getCurrentReport()) {
                 selectedSeason = 'current';
                 mode = 'current';
@@ -222,24 +213,25 @@ export function createOperationBoardHistoryController({
         }
     }
     async function ensureDetailForTab(tab, { forceRefresh = false } = {}) {
-        if (!['league', 'roster'].includes(tab)) return;
+        if (!['summary', 'league', 'roster'].includes(tab)) return;
         if (mode !== 'historical' || !selectedSeason || selectedSeason === 'current') {
             return;
         }
         const clan = getClan();
         if (!clan?.tag) return;
         if (!forceRefresh && detailReport?.season === selectedSeason) return;
-        if (!forceRefresh && detailSeason === selectedSeason) return;
-        detailRequestedTab = tab;
+        if (!forceRefresh && detailSeason === selectedSeason && detailPromise) {
+            setRequestedDetailTab(tab);
+            return detailPromise.then(() => detailReport, () => undefined);
+        }
         detailSeason = selectedSeason;
         const token = requestToken;
         const currentDetailToken = ++detailToken;
         detailController?.abort();
         detailController = new AbortController();
-        setHistoricalDetailBusy(refs, tab, true);
-        onDetailLoading?.(tab);
+        setRequestedDetailTab(tab);
         try {
-            const data = await loadHistoricalCwlSeason(
+            detailPromise = loadHistoricalCwlSeason(
                 clan.tag,
                 selectedSeason,
                 {
@@ -247,6 +239,7 @@ export function createOperationBoardHistoryController({
                     forceRefresh
                 }
             );
+            const data = await detailPromise;
             if (!isDetailCurrent(token, currentDetailToken)) return;
             if (!data) {
                 const missing = new Error('Historical season details unavailable');
@@ -260,17 +253,29 @@ export function createOperationBoardHistoryController({
                 seasonIndex
             );
             detailReport = detail;
-            onHistoricalDetail?.(detail, tab);
+            onHistoricalDetail?.(detail, detailRequestedTab || tab);
         } catch (error) {
             if (!isDetailCurrent(token, currentDetailToken)) return;
-            if (error?.name !== 'AbortError') onDetailError?.(error, tab);
+            detailSeason = '';
+            detailReport = null;
+            if (error?.name !== 'AbortError') {
+                onDetailError?.(error, detailRequestedTab || tab);
+            }
         } finally {
             if (isDetailCurrent(token, currentDetailToken)) {
-                setHistoricalDetailBusy(refs, tab, false);
+                setHistoricalDetailBusy(refs, detailRequestedTab || tab, false);
+                detailPromise = null;
             }
         }
     }
-
+    function setRequestedDetailTab(tab) {
+        if (detailRequestedTab && detailRequestedTab !== tab) {
+            setHistoricalDetailBusy(refs, detailRequestedTab, false);
+        }
+        detailRequestedTab = tab;
+        setHistoricalDetailBusy(refs, tab, true);
+        onDetailLoading?.(tab);
+    }
     return {
         resetForClan,
         syncForCurrentReport,

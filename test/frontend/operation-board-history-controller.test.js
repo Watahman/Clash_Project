@@ -1,4 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+    historicalDetail,
+    historicalFullDetail
+} from './fixtures/historical-cwl.js';
 
 const client = vi.hoisted(() => ({
     loadHistoricalCwlSeasons: vi.fn(),
@@ -30,7 +34,11 @@ describe('Operation Board history controller', () => {
         client.loadHistoricalCwlSeasons.mockResolvedValue([
             {
                 season: '2026-06',
-                league: { name: 'Master League II' }
+                league: { name: 'Master League II' },
+                wins: 6,
+                losses: 1,
+                draws: 0,
+                stars: 81
             }
         ]);
         client.loadHistoricalCwlSeason.mockResolvedValue({
@@ -46,7 +54,7 @@ describe('Operation Board history controller', () => {
         client.loadHistoricalCwlOverview.mockResolvedValue([]);
     });
 
-    it('renders a season preview before requesting historical details', async () => {
+    it('renders a preview and then loads real Summary data immediately', async () => {
         const { createOperationBoardHistoryController } = await import(
             '../../src/assets/js/operation-board/operation-board-history-controller.js?v=20260910-cwl-history-progressive'
         );
@@ -56,6 +64,8 @@ describe('Operation Board history controller', () => {
         };
         const onHistorical = vi.fn();
         const onHistoricalDetail = vi.fn();
+        const pending = deferred();
+        client.loadHistoricalCwlSeason.mockReturnValueOnce(pending.promise);
         const controller = createOperationBoardHistoryController({
             refs: { seasonSelect: document.querySelector('select') },
             getClan: () => ({ tag: '#PQL', name: 'ClashPanel' }),
@@ -79,20 +89,29 @@ describe('Operation Board history controller', () => {
 
         await controller.selectSeason('2026-06');
 
-        expect(client.loadHistoricalCwlSeason).not.toHaveBeenCalled();
-        expect(onHistorical).toHaveBeenCalledTimes(1);
-        expect(onHistorical.mock.calls[0][0].league.name)
-            .toBe('Master League II');
-        expect(onHistorical.mock.calls[0][0].historyPreview).toBe(true);
-        expect(controller.getMode()).toBe('historical');
-
-        await controller.ensureDetailForTab('league');
         expect(client.loadHistoricalCwlSeason).toHaveBeenCalledWith(
             '#PQL',
             '2026-06',
             expect.objectContaining({ forceRefresh: false })
         );
-        expect(onHistoricalDetail).toHaveBeenCalledTimes(1);
+        expect(onHistorical).toHaveBeenCalledTimes(1);
+        expect(onHistorical.mock.calls[0][0].league.name)
+            .toBe('Master League II');
+        expect(onHistorical.mock.calls[0][0].historyPreview).toBe(true);
+        expect(onHistorical.mock.calls[0][0].summary.offense.starsPerWar)
+            .toBe(3);
+        expect(onHistoricalDetail).not.toHaveBeenCalled();
+        expect(controller.getMode()).toBe('historical');
+
+        pending.resolve(historicalFullDetail('2026-06'));
+        await vi.waitFor(() => expect(onHistoricalDetail).toHaveBeenCalled());
+        const [report, tab] = onHistoricalDetail.mock.calls[0];
+        expect(tab).toBe('summary');
+        expect(report.summary.offense.avgStars).toBe(3);
+        expect(report.summary.offense.avgDestruction).toBe(100);
+        expect(report.summary.roster).toHaveLength(1);
+
+        await controller.ensureDetailForTab('league');
         await controller.ensureDetailForTab('roster');
         expect(client.loadHistoricalCwlSeason).toHaveBeenCalledTimes(1);
     });
@@ -202,34 +221,41 @@ describe('Operation Board history controller', () => {
         await controller.selectSeason('2026-05');
         expect(document.querySelector('[data-op-tab="league"]')
             .getAttribute('aria-busy')).toBe('false');
-        first.resolve(detail('2026-06'));
+        first.resolve(historicalDetail('2026-06'));
         await staleLoad;
 
         expect(signals[0].aborted).toBe(true);
         expect(onHistoricalDetail).not.toHaveBeenCalled();
 
         const currentLoad = controller.ensureDetailForTab('roster');
-        second.resolve(detail('2026-05'));
+        expect(client.loadHistoricalCwlSeason).toHaveBeenCalledTimes(2);
+        second.resolve(historicalFullDetail('2026-05'));
         await currentLoad;
         expect(onHistoricalDetail).toHaveBeenCalledTimes(1);
-        expect(onHistoricalDetail.mock.calls[0][0].season).toBe('2026-05');
+        const [report, tab] = onHistoricalDetail.mock.calls[0];
+        expect(report.season).toBe('2026-05');
+        expect(report.standings.rows).toHaveLength(2);
+        expect(report.roster).toHaveLength(1);
+        expect(tab).toBe('roster');
     });
 
-    it('keeps the summary preview visible when detail loading fails', async () => {
+    it('keeps the preview visible and allows a normal retry after failure', async () => {
         const { createOperationBoardHistoryController } = await import(
             '../../src/assets/js/operation-board/operation-board-history-controller.js?v=20260910-cwl-history-progressive'
         );
         const onHistorical = vi.fn();
+        const onHistoricalDetail = vi.fn();
         const onDetailError = vi.fn();
         client.loadHistoricalCwlSeason.mockRejectedValueOnce(
             Object.assign(new Error('gateway timeout'), { status: 504 })
-        );
+        ).mockResolvedValueOnce(historicalFullDetail('2026-06'));
         const controller = createOperationBoardHistoryController({
             refs: { seasonSelect: document.querySelector('select') },
             getClan: () => ({ tag: '#PQL' }),
             getCurrentReport: () => null,
             onCurrent: vi.fn(),
             onHistorical,
+            onHistoricalDetail,
             onOverview: vi.fn(),
             onLoading: vi.fn(),
             onDetailError,
@@ -238,14 +264,18 @@ describe('Operation Board history controller', () => {
 
         await controller.syncForCurrentReport(null);
         await controller.selectSeason('2026-06');
-        await controller.ensureDetailForTab('league');
+        await vi.waitFor(() => expect(onDetailError).toHaveBeenCalled());
 
         expect(onHistorical).toHaveBeenCalledTimes(1);
         expect(onHistorical.mock.calls[0][0].historyPreview).toBe(true);
         expect(onDetailError).toHaveBeenCalledWith(
             expect.objectContaining({ status: 504 }),
-            'league'
+            'summary'
         );
+
+        await controller.ensureDetailForTab('summary');
+        expect(client.loadHistoricalCwlSeason).toHaveBeenCalledTimes(2);
+        expect(onHistoricalDetail).toHaveBeenCalledTimes(1);
     });
 });
 
@@ -257,17 +287,4 @@ function deferred() {
         reject = nextReject;
     });
     return { promise, resolve, reject };
-}
-
-function detail(season) {
-    return {
-        season,
-        clan: { tag: '#PQL', name: 'ClashPanel' },
-        league: { name: 'Master League II' },
-        record: { wins: 1, losses: 0, draws: 0 },
-        roster: [],
-        standings: [],
-        wars: [],
-        dataQuality: 'Partial history'
-    };
 }

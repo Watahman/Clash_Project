@@ -14,8 +14,31 @@ public record HistoricalCwlSeason(
         String state,
         String source,
         String dataQuality,
-        boolean warDetailsComplete
+        boolean warDetailsComplete,
+        Integer stars,
+        Double destruction
 ) {
+    public HistoricalCwlSeason(
+            String season,
+            Clan clan,
+            League league,
+            Integer position,
+            Record record,
+            List<Standing> standings,
+            List<War> wars,
+            List<Player> roster,
+            String state,
+            String source,
+            String dataQuality,
+            boolean warDetailsComplete
+    ) {
+        this(
+                season, clan, league, position, record, standings, wars,
+                roster, state, source, dataQuality, warDetailsComplete,
+                null, null
+        );
+    }
+
     public HistoricalCwlSeason {
         standings = standings == null ? List.of() : List.copyOf(standings);
         wars = wars == null ? List.of() : List.copyOf(wars);

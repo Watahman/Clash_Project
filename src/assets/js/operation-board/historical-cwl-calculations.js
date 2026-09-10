@@ -2,6 +2,7 @@ import { normalizeTag, number } from './operation-board-utils.js';
 
 export function calculateHistoricalSeason(data) {
     const wars = (data?.wars || []).filter(war => war.state === 'completed');
+    const seasonRecord = record(data, wars);
     const ownAttacks = attacksFrom(wars, 'clan');
     const defenseWars = wars.filter(war => war.detailsComplete);
     const enemyAttacks = attacksFrom(defenseWars, 'opponent');
@@ -23,9 +24,11 @@ export function calculateHistoricalSeason(data) {
         season: data?.season || '',
         league: data?.league || { id: null, name: '' },
         position: finiteOrNull(data?.position),
-        record: record(data, wars),
+        record: seasonRecord,
         offense: attackMetrics(ownAttacks, {
-            starsPerWar: average(wars.map(war => number(war.clan?.stars, 0))),
+            starsPerWar: wars.length
+                ? average(wars.map(war => number(war.clan?.stars, 0)))
+                : historicalStarsPerWar(data, seasonRecord),
             attacksUsed,
             availableAttacks
         }),
@@ -55,6 +58,19 @@ export function calculateHistoricalSeason(data) {
         dataQuality: data?.dataQuality || 'Insufficient data',
         warDetailsComplete: reliabilityKnown
     };
+}
+
+export function historicalStarsPerWar(data, seasonRecord) {
+    const played = ['wins', 'losses', 'draws'].reduce(
+        (total, key) => total + number(seasonRecord?.[key], 0),
+        0
+    );
+    const leaguePoints = Number(data?.stars);
+    const winBonus = number(seasonRecord?.wins, 0) * 10;
+    if (!played || !Number.isFinite(leaguePoints) || leaguePoints < winBonus) {
+        return null;
+    }
+    return (leaguePoints - winBonus) / played;
 }
 
 export function calculateHistoricalRoster(data, completedWars = null) {

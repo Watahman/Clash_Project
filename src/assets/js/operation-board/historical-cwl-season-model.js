@@ -1,4 +1,7 @@
-import { calculateHistoricalSeason } from './historical-cwl-calculations.js?v=20260910-cwl-history-progressive';
+import {
+    calculateHistoricalSeason,
+    historicalStarsPerWar
+} from './historical-cwl-calculations.js?v=20260910-cwl-history-progressive';
 import { normalizeTag, number } from './operation-board-utils.js';
 
 export function buildHistoricalSeasonModel(data) {
@@ -64,7 +67,10 @@ export function buildHistoricalSeasonPreview(data, fallbackClan = null) {
         league: data?.league || { id: null, name: '' },
         position: positiveNumber(data?.position),
         record,
-        offense: emptyAttackMetrics(),
+        offense: {
+            ...emptyAttackMetrics(),
+            starsPerWar: historicalStarsPerWar(data, record)
+        },
         defense: null,
         starDifferential: null,
         destructionDifferential: null,

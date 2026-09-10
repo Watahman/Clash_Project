@@ -31,6 +31,43 @@ describe('historical CWL live refresh', () => {
         );
     });
 
+    it('requests selected-season detail from CWLHistory', async () => {
+        requestJson.mockResolvedValue({
+            season: { season: '2026-06', wars: [] }
+        });
+        const { loadHistoricalCwlSeason } = await import(
+            '../../src/assets/js/operation-board/historical-cwl-client.js?v=20260910-cwl-history-progressive'
+        );
+
+        await loadHistoricalCwlSeason('#PQL', '2026-06');
+
+        expect(requestJson).toHaveBeenCalledWith(
+            expect.stringContaining(
+                '/api/CWLHistory?clanTag=%23PQL&season=2026-06'
+            ),
+            expect.objectContaining({ method: 'GET' })
+        );
+    });
+
+    it('retries season detail after a failed request', async () => {
+        requestJson
+            .mockRejectedValueOnce(
+                Object.assign(new Error('timeout'), { status: 504 })
+            )
+            .mockResolvedValueOnce({
+                season: { season: '2026-06', wars: [{ id: '#WAR' }] }
+            });
+        const { loadHistoricalCwlSeason } = await import(
+            '../../src/assets/js/operation-board/historical-cwl-client.js?v=20260910-cwl-history-progressive'
+        );
+
+        await expect(loadHistoricalCwlSeason('#PQL', '2026-06'))
+            .rejects.toMatchObject({ status: 504 });
+        await expect(loadHistoricalCwlSeason('#PQL', '2026-06'))
+            .resolves.toMatchObject({ wars: [{ id: '#WAR' }] });
+        expect(requestJson).toHaveBeenCalledTimes(2);
+    });
+
     it('deduplicates identical simultaneous overview requests', async () => {
         const pending = deferred();
         requestJson.mockReturnValue(pending.promise);
