@@ -151,14 +151,14 @@
 
 .achievement-chronicle-node[data-state="unlocked"] .achievement-chronicle-emblem,
 .achievement-chronicle-node[data-state="complete"] .achievement-chronicle-emblem {
-    background: var(--cp-brand-soft);
+    background: color-mix(in srgb, var(--cp-brand) 14%, var(--cp-surface-2));
     border-color: var(--cp-brand);
 }
 
 .achievement-chronicle-node[data-state="unknown"] .achievement-chronicle-emblem {
     border-style: dashed;
-    opacity: .72;
 }
+.achievement-chronicle-node[data-state="unknown"] :is(.achievement-family-image, .achievement-family-icon) { opacity: .72; }
 
 .achievement-chronicle-node[data-state="in_progress"] .achievement-chronicle-emblem { border-color: color-mix(in srgb, var(--cp-brand) 46%, var(--cp-text-3)); }
 

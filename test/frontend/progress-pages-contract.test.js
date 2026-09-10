@@ -55,6 +55,9 @@ describe('Progress workspace page contracts', () => {
         expect(advancedStats).toContain('.advanced-stats__trend-tooltip');
         expect(achievements).toContain('.achievement-filter-dialog { border-top:');
         expect(chronicle).toContain('background: var(--cp-bg-elevated);');
+        expect(chronicle).toContain('background: color-mix(in srgb, var(--cp-brand) 14%, var(--cp-surface-2));');
+        expect(chronicle).not.toContain('background: var(--cp-brand-soft);');
+        expect(chronicle).toContain('[data-state="unknown"] :is(.achievement-family-image, .achievement-family-icon) { opacity: .72; }');
         expect(chronicle).toContain(':root:not([data-theme="light"]) .achievement-chronicle .achievement-family-image.achievement-vector-image');
         expect(chronicle).toContain(':root:not([data-theme="light"]) :is(.achievement-chronicle-legend, .achievement-chronicle, .achievement-chronicle-scroll)');
         expect(chronicle).toContain('.achievement-chronicle-map { background-size: 20px 20px; display: grid;');
