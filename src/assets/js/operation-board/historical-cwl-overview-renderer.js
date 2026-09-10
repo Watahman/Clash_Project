@@ -7,6 +7,8 @@ export function renderHistoricalOverview(
     overview,
     { selectSeason } = {}
 ) {
+    const activeTrend = selectedTrend(container);
+    const comparedSeasons = selectedComparison(container);
     if (!overview?.seasons?.length) {
         container.innerHTML = `
             <section class="op-flat-section op-history-empty-state">
@@ -84,11 +86,24 @@ export function renderHistoricalOverview(
     trendButtons.forEach(button => {
         button.onclick = () => renderTrend(button.dataset.trend);
     });
-    renderTrend('stars');
+    renderTrend(activeTrend);
     renderHistoricalComparison(
         container.querySelector('.op-history-compare-content'),
-        overview.seasons
+        overview.seasons,
+        comparedSeasons
     );
+}
+
+function selectedTrend(container) {
+    return container.querySelector('[data-trend][aria-pressed="true"]')
+        ?.dataset.trend || 'stars';
+}
+
+function selectedComparison(container) {
+    return {
+        leftSeason: container.querySelector('#op-compare-left')?.value,
+        rightSeason: container.querySelector('#op-compare-right')?.value
+    };
 }
 
 export function clearHistoricalOverview(container) {

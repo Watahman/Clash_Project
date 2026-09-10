@@ -1,13 +1,17 @@
 import { compareHistoricalSeasons } from './historical-cwl-comparison.js';
 import { escapeHtml } from './operation-board-utils.js';
 
-export function renderHistoricalComparison(container, seasons) {
+export function renderHistoricalComparison(
+    container,
+    seasons,
+    { leftSeason, rightSeason } = {}
+) {
     if (seasons.length < 2) {
         container.innerHTML = '<p class="op-history-empty">At least two complete seasons are needed for comparison.</p>';
         return;
     }
-    const left = seasons[1];
-    const right = seasons[0];
+    const left = selectedSeason(seasons, leftSeason, seasons[1]);
+    const right = selectedSeason(seasons, rightSeason, seasons[0]);
     container.innerHTML = `
         <div class="op-history-compare-controls">
             ${seasonSelect('op-compare-left', seasons, left.data.season)}
@@ -47,6 +51,10 @@ export function renderHistoricalComparison(container, seasons) {
     leftSelect.onchange = render;
     rightSelect.onchange = render;
     render();
+}
+
+function selectedSeason(seasons, season, fallback) {
+    return seasons.find(item => item.data.season === season) || fallback;
 }
 
 function seasonSelect(id, seasons, selected) {

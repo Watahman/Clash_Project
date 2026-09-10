@@ -9,6 +9,7 @@ import {
 import { reconstructHistoricalLeagues } from './historical-cwl-league-reconstructor.js?v=20260827-cwl-league-history';
 import {
     buildHistoricalOverviewFromSummaries,
+    createHistoricalOverviewHydrator,
     createHistoricalSeasonDetail,
     createHistoricalSeasonOption,
     createHistoricalSeasonPreview,
@@ -44,6 +45,26 @@ export function createOperationBoardHistoryController({
     let detailSeason = '';
     let detailReport = null;
     let detailPromise = null;
+    let overviewSummaries = [];
+    const overviewHydrator = createHistoricalOverviewHydrator({
+        getClan,
+        onSeason: (detail, summary) => {
+            if (mode !== 'overview' || selectedSeason !== 'overview') return;
+            const current = overviewSummaries.find(
+                item => item.season === summary.season
+            );
+            if (!current) return;
+            overviewSummaries = overviewSummaries.map(item =>
+                item.season === summary.season ? detail : item
+            );
+            const next = buildHistoricalOverviewFromSummaries(
+                overviewSummaries,
+                currentLeague
+            );
+            seasonIndex = next.seasons;
+            onOverview(next.overview);
+        }
+    });
     const isDetailCurrent = (token, currentDetailToken) =>
         isCurrentHistoricalDetail(
             token, currentDetailToken, requestToken, detailToken,
@@ -64,9 +85,11 @@ export function createOperationBoardHistoryController({
     function resetForClan() {
         requestToken += 1;
         controller?.abort();
+        overviewHydrator.cancel();
         resetDetailState();
         mode = 'current';
         seasonIndex = [];
+        overviewSummaries = [];
         selectedSeason = 'current';
         currentSeason = '';
         currentLeague = null;
@@ -82,6 +105,7 @@ export function createOperationBoardHistoryController({
         { defaultToOverview = false } = {}
     ) {
         currentSeason = report?.leagueGroup?.season || report?.season || '';
+        overviewHydrator.cancel();
         const clan = getClan();
         if (!clan?.tag || !refs.seasonSelect) return;
         const token = ++requestToken;
@@ -145,16 +169,19 @@ export function createOperationBoardHistoryController({
             currentLeague
         );
         seasonIndex = seasons;
+        overviewSummaries = seasons;
         selectedSeason = 'overview';
         mode = 'overview';
         refs.seasonSelect.value = 'overview';
         onOverview(overview);
+        void overviewHydrator.start(overviewSummaries);
     }
     async function selectSeason(value, { forceRefresh = false } = {}) {
         const clan = getClan();
         if (!clan?.tag) return;
         selectedSeason = value;
         if (refs.seasonSelect) refs.seasonSelect.value = value;
+        overviewHydrator.cancel();
         if (value === 'current') {
             requestToken += 1;
             controller?.abort();
@@ -171,6 +198,10 @@ export function createOperationBoardHistoryController({
         resetDetailState();
         controller = new AbortController();
         const targetMode = value === 'overview' ? 'overview' : 'historical';
+        if (targetMode === 'overview' && !forceRefresh && seasonIndex.length) {
+            renderOverviewFromSummaries(seasonIndex, token);
+            return;
+        }
         if (targetMode === 'overview') onLoading(targetMode);
         try {
             if (targetMode === 'overview') {
@@ -188,8 +219,10 @@ export function createOperationBoardHistoryController({
                     currentLeague
                 );
                 seasonIndex = seasons;
+                overviewSummaries = seasons;
                 mode = 'overview';
                 onOverview(buildHistoricalCwlOverview(seasons));
+                void overviewHydrator.start(overviewSummaries);
                 return;
             }
             const indexed = seasonIndex.find(item => item.season === value);
