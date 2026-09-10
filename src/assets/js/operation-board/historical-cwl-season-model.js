@@ -1,4 +1,4 @@
-import { calculateHistoricalSeason } from './historical-cwl-calculations.js';
+import { calculateHistoricalSeason } from './historical-cwl-calculations.js?v=20260910-cwl-history-progressive';
 import { normalizeTag, number } from './operation-board-utils.js';
 
 export function buildHistoricalSeasonModel(data) {
@@ -55,6 +55,48 @@ export function buildHistoricalSeasonModel(data) {
     };
 }
 
+export function buildHistoricalSeasonPreview(data, fallbackClan = null) {
+    const season = data?.season || '';
+    const clan = data?.clan || fallbackClan || { tag: '', name: '' };
+    const record = normalizeRecord(data?.record, data);
+    const summary = {
+        season,
+        league: data?.league || { id: null, name: '' },
+        position: positiveNumber(data?.position),
+        record,
+        offense: emptyAttackMetrics(),
+        defense: null,
+        starDifferential: null,
+        destructionDifferential: null,
+        missedAttacks: null,
+        attackUsage: null,
+        closeWars: null,
+        roster: [],
+        wars: [],
+        dataQuality: data?.dataQuality || 'Partial history',
+        warDetailsComplete: false
+    };
+    return {
+        mode: 'historical',
+        phase: 'completed',
+        predictionState: 'historical',
+        season,
+        clan,
+        leagueGroup: { season, state: 'ended' },
+        league: summary.league,
+        position: summary.position,
+        record,
+        wars: [],
+        rounds: [],
+        roster: [],
+        standings: { completedWars: 0, selectedIndex: -1, rows: [] },
+        rankingHistory: [],
+        summary,
+        dataQuality: summary.dataQuality,
+        historyPreview: true
+    };
+}
+
 export function getHistoricalCwlPlayerContext(report, playerTag) {
     const tag = normalizeTag(playerTag);
     const player = (report?.roster || []).find(item =>
@@ -85,4 +127,33 @@ export function formatSeason(season, locale = document.documentElement.lang) {
         year: 'numeric',
         timeZone: 'UTC'
     }).format(new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, 1)));
+}
+
+function normalizeRecord(record, data) {
+    return {
+        wins: nonNegative(record?.wins ?? data?.wins),
+        losses: nonNegative(record?.losses ?? data?.losses),
+        draws: nonNegative(record?.draws ?? data?.draws)
+    };
+}
+
+function nonNegative(input) {
+    const parsed = Number(input);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+}
+
+function positiveNumber(input) {
+    const parsed = Number(input);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function emptyAttackMetrics() {
+    return {
+        attacks: null,
+        avgStars: null,
+        avgDestruction: null,
+        tripleRate: null,
+        lowStarRate: null,
+        starsPerWar: null
+    };
 }

@@ -1,4 +1,4 @@
-import { createOperationBoardHistoryPage } from './operation-board-history-page.js?v=20260829-public-auth-v1';
+import { createOperationBoardHistoryPage } from './operation-board-history-page.js?v=20260910-cwl-history-progressive';
 import { createOperationBoardImportController } from './operation-board-import-controller.js?v=20260829-public-auth-v1';
 
 export function createCwlOperationBoardControllers({
@@ -12,6 +12,7 @@ export function createCwlOperationBoardControllers({
     setSelectedClan,
     setCurrentReport,
     setActiveTab,
+    selectBoardTab,
     setState,
     setHelp,
     renderLatestReport,
@@ -29,6 +30,7 @@ export function createCwlOperationBoardControllers({
         setLatestReport,
         renderLatestReport,
         setActiveTab,
+        selectBoardTab,
         setState,
         setHelp,
         clearBoard

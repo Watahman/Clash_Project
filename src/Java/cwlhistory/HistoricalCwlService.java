@@ -1,43 +1,71 @@
 package Java.cwlhistory;
 
+import Java.HttpException;
 import Java.cache.CacheKeys;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
 import java.time.Duration;
 import java.time.YearMonth;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 
 public final class HistoricalCwlService {
     public static final int DEFAULT_SEASON_LIMIT = 12;
     public static final int MAX_SEASON_LIMIT = 24;
+    static final Duration OVERVIEW_TIMEOUT = Duration.ofSeconds(8);
+    static final Duration DETAIL_CACHE_TTL = Duration.ofDays(30);
+    static final Duration LIVE_DETAIL_CACHE_TTL = Duration.ofMinutes(10);
+
+    private static final Duration INDEX_CACHE_TTL = Duration.ofMinutes(15);
+    private static final Duration OVERVIEW_CACHE_TTL = Duration.ofMinutes(5);
+    private static final int INDEX_CONCURRENCY = 2;
 
     private final HistoricalCwlDataProvider provider;
     private final Cache<String, List<HistoricalCwlSeasonSummary>> seasonCache;
     private final Cache<String, HistoricalCwlSeason> detailCache;
     private final Cache<String, List<HistoricalCwlSeason>> overviewCache;
-    private final ExecutorService overviewPool;
+    private final Map<String, CompletableFuture<List<HistoricalCwlSeasonSummary>>>
+            seasonInFlight = new ConcurrentHashMap<>();
+    private final Map<String, CompletableFuture<HistoricalCwlSeason>> detailInFlight =
+            new ConcurrentHashMap<>();
+    private final AtomicLong cacheGeneration = new AtomicLong();
+    private final ExecutorService indexPool;
+    private final Duration overviewTimeout;
 
     public HistoricalCwlService(HistoricalCwlDataProvider provider) {
+        this(provider, OVERVIEW_TIMEOUT);
+    }
+
+    HistoricalCwlService(
+            HistoricalCwlDataProvider provider,
+            Duration overviewTimeout
+    ) {
         this.provider = provider;
+        this.overviewTimeout = validTimeout(overviewTimeout);
         seasonCache = Caffeine.newBuilder()
                 .maximumSize(500)
-                .expireAfterWrite(Duration.ofMinutes(15))
+                .expireAfterWrite(INDEX_CACHE_TTL)
                 .build();
         detailCache = Caffeine.newBuilder()
                 .maximumSize(2_000)
-                .expireAfterWrite(Duration.ofMinutes(30))
+                .expireAfter(new HistoricalCwlDetailCachePolicy())
                 .build();
         overviewCache = Caffeine.newBuilder()
                 .maximumSize(500)
-                .expireAfterWrite(Duration.ofMinutes(15))
+                .expireAfterWrite(OVERVIEW_CACHE_TTL)
                 .build();
-        overviewPool = Executors.newFixedThreadPool(3, runnable -> {
-            Thread thread = new Thread(runnable, "cwl-history-overview");
+        indexPool = Executors.newFixedThreadPool(INDEX_CONCURRENCY, runnable -> {
+            Thread thread = new Thread(runnable, "cwl-history-index");
             thread.setDaemon(true);
             return thread;
         });
@@ -49,14 +77,12 @@ public final class HistoricalCwlService {
     ) throws Exception {
         String clanTag = CacheKeys.requireValidTag(requestedClanTag);
         int limit = validatedLimit(requestedLimit);
-        String key = clanTag + ":" + limit;
+        String key = cacheKey(clanTag, MAX_SEASON_LIMIT);
         List<HistoricalCwlSeasonSummary> cached = seasonCache.getIfPresent(key);
-        if (cached != null) return cached;
-        List<HistoricalCwlSeasonSummary> result = List.copyOf(
-                provider.getAvailableSeasons(clanTag, limit)
-        );
-        seasonCache.put(key, result);
-        return result;
+        List<HistoricalCwlSeasonSummary> summaries = cached == null
+                ? await(indexFuture(clanTag, MAX_SEASON_LIMIT, key))
+                : cached;
+        return limitedSummaries(summaries, limit);
     }
 
     public HistoricalCwlSeason getSeason(
@@ -65,19 +91,9 @@ public final class HistoricalCwlService {
     ) throws Exception {
         String clanTag = CacheKeys.requireValidTag(requestedClanTag);
         String season = validatedSeason(requestedSeason);
-        String key = clanTag + ":" + season;
+        String key = cacheKey(clanTag, season);
         HistoricalCwlSeason cached = detailCache.getIfPresent(key);
-        if (cached != null) return cached;
-        HistoricalCwlSeason result = provider.getSeason(clanTag, season);
-        detailCache.put(key, result);
-        return result;
-    }
-
-    public void clearCaches() {
-        seasonCache.invalidateAll();
-        detailCache.invalidateAll();
-        overviewCache.invalidateAll();
-        provider.clearCaches();
+        return cached == null ? await(detailFuture(clanTag, season, key)) : cached;
     }
 
     public List<HistoricalCwlSeason> getOverview(
@@ -86,108 +102,164 @@ public final class HistoricalCwlService {
     ) throws Exception {
         String clanTag = CacheKeys.requireValidTag(requestedClanTag);
         int limit = validatedLimit(requestedLimit);
-        String key = clanTag + ":" + limit;
+        String key = cacheKey(clanTag, limit);
         List<HistoricalCwlSeason> cached = overviewCache.getIfPresent(key);
         if (cached != null) return cached;
-        BatchAttempt attempt = loadOverviewBatch(clanTag, limit);
-        List<HistoricalCwlSeason> result = attempt.seasons();
-        result.forEach(season -> detailCache.put(
-                clanTag + ":" + season.season(),
-                season
-        ));
+
+        long deadline = System.nanoTime() + overviewTimeout.toNanos();
+        List<HistoricalCwlSeasonSummary> summaries = loadIndexForOverview(
+                clanTag, deadline
+        );
+        List<HistoricalCwlSeason> result = HistoricalCwlOverviewMapper.fromSummaries(
+                clanTag, limit, summaries
+        );
         List<HistoricalCwlSeason> immutable = List.copyOf(result);
-        overviewCache.put(key, immutable);
+        if (!immutable.isEmpty()) overviewCache.put(key, immutable);
         return immutable;
     }
 
-    private BatchAttempt loadOverviewBatch(String clanTag, int limit)
-            throws Exception {
-        return loadBatch(provider, clanTag, limit);
+    public void clearCaches() {
+        cacheGeneration.incrementAndGet();
+        seasonCache.invalidateAll();
+        detailCache.invalidateAll();
+        overviewCache.invalidateAll();
+        seasonInFlight.clear();
+        detailInFlight.clear();
+        provider.clearCaches();
     }
 
-    private BatchAttempt loadBatch(
-            HistoricalCwlDataProvider source,
+    private List<HistoricalCwlSeasonSummary> loadIndexForOverview(
             String clanTag,
-            int limit
+            long deadline
     ) throws Exception {
-        List<HistoricalCwlSeasonSummary> summaries =
-                source.getAvailableSeasons(clanTag, MAX_SEASON_LIMIT);
-        List<HistoricalCwlSeason> seasons = new ArrayList<>();
-        int failures = 0;
-        final int batchSize = 3;
-
-        for (int start = 0; start < summaries.size() && seasons.size() < limit;
-             start += batchSize) {
-            int end = Math.min(start + batchSize, summaries.size());
-            List<CompletableFuture<SeasonAttempt>> pending = summaries
-                    .subList(start, end)
-                    .stream()
-                    .map(summary -> CompletableFuture.supplyAsync(
-                            () -> loadSeason(source, clanTag, summary),
-                            overviewPool
-                    ))
-                    .toList();
-            for (CompletableFuture<SeasonAttempt> future : pending) {
-                SeasonAttempt attempt = future.join();
-                if (attempt.season() == null) {
-                    failures += 1;
-                    continue;
-                }
-                if (seasons.size() < limit) seasons.add(attempt.season());
-            }
+        String key = cacheKey(clanTag, MAX_SEASON_LIMIT);
+        CompletableFuture<List<HistoricalCwlSeasonSummary>> future = indexFuture(
+                clanTag, MAX_SEASON_LIMIT, key
+        );
+        long remaining = deadline - System.nanoTime();
+        if (remaining <= 0) {
+            logIndexFailure(new TimeoutException("overall overview timeout"));
+            return List.of();
         }
-        List<HistoricalCwlSeason> enriched = source.enrichOverview(
-                clanTag,
-                List.copyOf(seasons)
-        );
-        return new BatchAttempt(
-                List.copyOf(enriched),
-                enriched.size() >= limit || failures == 0
-        );
+        try {
+            return future.get(remaining, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            logIndexFailure(interrupted);
+        } catch (TimeoutException timeout) {
+            logIndexFailure(timeout);
+        } catch (ExecutionException failure) {
+            Throwable cause = unwrap(failure);
+            if (cause instanceof HttpException httpFailure) throw httpFailure;
+            logIndexFailure(cause);
+        }
+        return List.of();
     }
 
-    private static SeasonAttempt loadSeason(
-            HistoricalCwlDataProvider source,
+    private CompletableFuture<List<HistoricalCwlSeasonSummary>> indexFuture(
             String clanTag,
-            HistoricalCwlSeasonSummary summary
+            int limit,
+            String key
+    ) {
+        long generation = cacheGeneration.get();
+        CompletableFuture<List<HistoricalCwlSeasonSummary>> candidate =
+                new CompletableFuture<>();
+        CompletableFuture<List<HistoricalCwlSeasonSummary>> existing =
+                seasonInFlight.putIfAbsent(key, candidate);
+        if (existing != null) return existing;
+        try {
+            indexPool.execute(() -> completeIndex(
+                    candidate, clanTag, limit, key, generation
+            ));
+        } catch (RuntimeException rejected) {
+            seasonInFlight.remove(key, candidate);
+            candidate.completeExceptionally(rejected);
+        }
+        return candidate;
+    }
+
+    private void completeIndex(
+            CompletableFuture<List<HistoricalCwlSeasonSummary>> future,
+            String clanTag,
+            int limit,
+            String key,
+            long generation
     ) {
         try {
-            HistoricalCwlSeason season = source.getSeason(
-                    clanTag,
-                    summary.season()
+            List<HistoricalCwlSeasonSummary> loaded = provider.getAvailableSeasons(
+                    clanTag, limit
             );
-            return new SeasonAttempt(withIndexMetadata(season, summary));
-        } catch (Exception ignored) {
-            return new SeasonAttempt(null);
+            List<HistoricalCwlSeasonSummary> result = List.copyOf(
+                    loaded == null ? List.of() : loaded
+            );
+            if (cacheGeneration.get() == generation) seasonCache.put(key, result);
+            future.complete(result);
+        } catch (Exception failure) {
+            future.completeExceptionally(failure);
+        } finally {
+            seasonInFlight.remove(key, future);
         }
     }
 
-    private static HistoricalCwlSeason withIndexMetadata(
-            HistoricalCwlSeason season,
-            HistoricalCwlSeasonSummary summary
+    private CompletableFuture<HistoricalCwlSeason> detailFuture(
+            String clanTag,
+            String season,
+            String key
     ) {
-        HistoricalCwlSeason.League league = season.league();
-        if ((league == null || league.name() == null || league.name().isBlank())
-                && summary.league() != null) {
-            league = summary.league();
-        }
-        Integer position = season.position() == null
-                ? summary.position()
-                : season.position();
-        return new HistoricalCwlSeason(
-                season.season(),
-                season.clan(),
-                league,
-                position,
-                season.record(),
-                season.standings(),
-                season.wars(),
-                season.roster(),
-                season.state(),
-                season.source(),
-                season.dataQuality(),
-                season.warDetailsComplete()
+        long generation = cacheGeneration.get();
+        CompletableFuture<HistoricalCwlSeason> candidate = new CompletableFuture<>();
+        CompletableFuture<HistoricalCwlSeason> existing = detailInFlight.putIfAbsent(
+                key, candidate
         );
+        if (existing != null) return existing;
+        try {
+            HistoricalCwlSeason result = provider.getSeason(clanTag, season);
+            if (result == null) throw new IllegalStateException(
+                    "CWL season detail was empty"
+            );
+            if (cacheGeneration.get() == generation) detailCache.put(key, result);
+            candidate.complete(result);
+        } catch (Exception failure) {
+            candidate.completeExceptionally(failure);
+        } finally {
+            detailInFlight.remove(key, candidate);
+        }
+        return candidate;
+    }
+
+    private static <T> T await(CompletableFuture<T> future) throws Exception {
+        try {
+            return future.join();
+        } catch (CompletionException wrapped) {
+            Throwable cause = unwrap(wrapped);
+            if (cause instanceof Exception exception) throw exception;
+            throw wrapped;
+        }
+    }
+
+    private static Throwable unwrap(Throwable failure) {
+        Throwable cause = failure;
+        while ((cause instanceof CompletionException
+                || cause instanceof ExecutionException)
+                && cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        return cause;
+    }
+
+    private static List<HistoricalCwlSeasonSummary> limitedSummaries(
+            List<HistoricalCwlSeasonSummary> summaries,
+            int limit
+    ) {
+        return summaries.stream().limit(limit).toList();
+    }
+
+    private static String cacheKey(String clanTag, int limit) {
+        return clanTag + ":" + limit;
+    }
+
+    private static String cacheKey(String clanTag, String season) {
+        return clanTag + ":" + season;
     }
 
     private static int validatedLimit(int requested) {
@@ -203,10 +275,15 @@ public final class HistoricalCwlService {
         }
     }
 
-    private record BatchAttempt(
-            List<HistoricalCwlSeason> seasons,
-            boolean complete
-    ) {}
+    private static Duration validTimeout(Duration requested) {
+        if (requested == null || requested.isZero() || requested.isNegative()) {
+            return OVERVIEW_TIMEOUT;
+        }
+        return requested.compareTo(Duration.ofSeconds(30)) > 0
+                ? Duration.ofSeconds(30) : requested;
+    }
 
-    private record SeasonAttempt(HistoricalCwlSeason season) {}
+    private static void logIndexFailure(Throwable failure) {
+        System.err.printf("[CWL history] season index unavailable: %s%n", failure);
+    }
 }

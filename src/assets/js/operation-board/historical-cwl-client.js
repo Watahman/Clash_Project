@@ -1,11 +1,15 @@
 import * as config from '../Data/config.js';
-import { requestJson } from '../utils/request-json.js?v=20260829-public-auth-v1';
+import { requestJson } from '../utils/request-json.js?v=20260910-cwl-history-progressive';
 import { normalizeTag } from './operation-board-utils.js';
 import { loadCwlFixture } from './operation-board-fixtures.js';
 
 const seasonIndexCache = new Map();
 const seasonDetailCache = new Map();
 const overviewCache = new Map();
+const inFlight = new Map();
+const latestCacheWrites = new Map();
+let cacheGeneration = 0;
+let writeSequence = 0;
 
 export async function loadHistoricalCwlSeasons(
     clanTag,
@@ -19,12 +23,16 @@ export async function loadHistoricalCwlSeasons(
     if (!forceRefresh && seasonIndexCache.has(key)) {
         return seasonIndexCache.get(key);
     }
+    const generation = cacheGeneration;
+    const writeToken = beginCacheWrite(`index:${key}`);
     const response = await get(config._EXT_CWL_HISTORY_SEASONS, {
         clanTag: tag,
         limit
     }, signal, forceRefresh);
     const seasons = Array.isArray(response?.seasons) ? response.seasons : [];
-    seasonIndexCache.set(key, seasons);
+    if (canWrite(`index:${key}`, writeToken, generation, signal)) {
+        seasonIndexCache.set(key, seasons);
+    }
     return seasons;
 }
 
@@ -44,12 +52,16 @@ export async function loadHistoricalCwlSeason(
     if (!forceRefresh && seasonDetailCache.has(key)) {
         return seasonDetailCache.get(key);
     }
+    const generation = cacheGeneration;
+    const writeToken = beginCacheWrite(`detail:${key}`);
     const response = await get(config._EXT_CWL_HISTORY, {
         clanTag: tag,
         season
     }, signal, forceRefresh);
     const detail = response?.season || null;
-    if (detail) seasonDetailCache.set(key, detail);
+    if (detail && canWrite(`detail:${key}`, writeToken, generation, signal)) {
+        seasonDetailCache.set(key, detail);
+    }
     return detail;
 }
 
@@ -65,36 +77,75 @@ export async function loadHistoricalCwlOverview(
     if (!forceRefresh && overviewCache.has(key)) {
         return overviewCache.get(key);
     }
+    const generation = cacheGeneration;
+    const writeToken = beginCacheWrite(`overview:${key}`);
     const response = await get(config._EXT_CWL_HISTORY_OVERVIEW, {
         clanTag: tag,
         limit
     }, signal, forceRefresh);
     const seasons = Array.isArray(response?.seasons) ? response.seasons : [];
-    overviewCache.set(key, seasons);
-    seasons.forEach(detail => {
-        if (detail?.season) {
-            seasonDetailCache.set(`${tag}:${detail.season}`, detail);
-        }
-    });
+    if (canWrite(`overview:${key}`, writeToken, generation, signal)) {
+        overviewCache.set(key, seasons);
+    }
     return seasons;
 }
 
 export function clearHistoricalCwlSessionCache() {
+    cacheGeneration += 1;
     seasonIndexCache.clear();
     seasonDetailCache.clear();
     overviewCache.clear();
+    inFlight.clear();
+    latestCacheWrites.clear();
+}
+
+function beginCacheWrite(key) {
+    const token = ++writeSequence;
+    latestCacheWrites.set(key, token);
+    return token;
+}
+
+function canWrite(key, token, generation, signal) {
+    return generation === cacheGeneration
+        && latestCacheWrites.get(key) === token
+        && !signal?.aborted;
 }
 
 async function get(path, params, signal, forceRefresh = false) {
     const query = new URLSearchParams(params);
-    return requestJson(
-        `${config._BASE_URL}${path}?${query}`,
-        {
+    const url = `${config._BASE_URL}${path}?${query}`;
+    const key = `${forceRefresh ? 'fresh:' : 'cached:'}${url}`;
+    let pending = inFlight.get(key);
+    if (!pending) {
+        pending = requestJson(url, {
             method: 'GET',
             headers: forceRefresh ? { 'Cache-Control': 'no-cache' } : undefined,
-            signal,
             loading: 'background',
             timeoutMs: 45_000
-        }
-    );
+        });
+        inFlight.set(key, pending);
+        const clearPending = () => {
+            if (inFlight.get(key) === pending) inFlight.delete(key);
+        };
+        pending.then(clearPending, clearPending);
+    }
+    return waitForRequest(pending, signal);
+}
+
+function waitForRequest(promise, signal) {
+    if (!signal) return promise;
+    if (signal.aborted) return Promise.reject(abortError());
+    return new Promise((resolve, reject) => {
+        const abort = () => reject(abortError());
+        signal.addEventListener('abort', abort, { once: true });
+        const cleanup = () => signal.removeEventListener('abort', abort);
+        promise.then(resolve, reject);
+        promise.then(cleanup, cleanup);
+    });
+}
+
+function abortError() {
+    const error = new Error('Request aborted');
+    error.name = 'AbortError';
+    return error;
 }

@@ -234,6 +234,14 @@ function playerDayStat(war, attacks, defenses = []) {
 
 function record(data, wars) {
     if (data?.record) return data.record;
+    if ([data?.wins, data?.losses, data?.draws]
+        .some(value => Number.isFinite(Number(value)))) {
+        return {
+            wins: number(data.wins, 0),
+            losses: number(data.losses, 0),
+            draws: number(data.draws, 0)
+        };
+    }
     return {
         wins: wars.filter(war => war.result === 'win').length,
         losses: wars.filter(war => war.result === 'loss').length,

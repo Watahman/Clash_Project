@@ -118,6 +118,24 @@ describe('Pre-launch static contract', () => {
         expect(headers).toContain('X-Robots-Tag: noindex');
     });
 
+    it('revalidates script and stylesheet graphs without overlapping asset rules', () => {
+        const headers = readFileSync('src/_headers', 'utf8');
+
+        expect(headers).toContain('/assets/*.js');
+        expect(headers).toContain('/assets/*.css');
+        expect(headers).not.toMatch(/^\/assets\/\*\s*$/m);
+        expect(headers).toContain(
+            'Cache-Control: public, max-age=0, must-revalidate, stale-while-revalidate=0'
+        );
+        for (const extension of ['webp', 'svg', 'png', 'jpg']) {
+            expect(headers).toContain(`/assets/*.${extension}`);
+        }
+        expect(headers).toContain('/assets/css/pictures/*.avif');
+        expect(headers).toContain(
+            'Cache-Control: public, max-age=31536000, immutable'
+        );
+    });
+
     it('keeps Adsterra policy links and origins constrained to the report-only ad script policy', () => {
         const headers = readFileSync('src/_headers', 'utf8');
         const scriptPolicy = headers.match(/Content-Security-Policy-Report-Only:[^\r\n]+/)?.[0] || '';

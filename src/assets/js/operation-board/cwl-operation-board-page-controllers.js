@@ -1,6 +1,6 @@
-import { createCwlOperationBoardControllers } from './cwl-operation-board-controllers.js?v=20260829-public-auth-v1';
+import { createCwlOperationBoardControllers } from './cwl-operation-board-controllers.js?v=20260910-cwl-history-progressive';
 import { createCwlOperationBoardReportLoader } from './cwl-operation-board-report-loader.js?v=20260829-public-auth-v1';
-import { renderPhase } from './operation-board-renderer.js?v=20260829-public-auth-v1';
+import { renderPhase } from './operation-board-renderer.js?v=20260910-cwl-history-progressive';
 
 export function createCwlOperationBoardPageControllers({
     refs,
@@ -21,6 +21,7 @@ export function createCwlOperationBoardPageControllers({
         setSelectedClan: pageState.setSelectedClan,
         setCurrentReport: pageState.setCurrentReport,
         setActiveTab: pageState.setActiveTab,
+        selectBoardTab: pageState.selectBoardTab,
         setState: pageState.setState,
         setHelp,
         renderLatestReport: pageState.renderLatestReport,

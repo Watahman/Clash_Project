@@ -60,6 +60,16 @@ describe('Compete fixture adapter', () => {
         expect(fixture).toBeNull();
         expect(globalThis.fetch).not.toHaveBeenCalled();
     });
+
+    it('uses the normalized backend war state in historical details', () => {
+        const details = cwlPayload['cwl-history'].history.details;
+        const states = Object.values(details)
+            .flatMap(season => season.wars)
+            .map(war => war.state);
+
+        expect(states.length).toBeGreaterThan(0);
+        expect(new Set(states)).toEqual(new Set(['completed']));
+    });
 });
 
 function jsonResponse(value) {
