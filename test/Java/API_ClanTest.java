@@ -13,6 +13,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -94,12 +95,8 @@ class API_ClanTest {
     }
 
     private Config testConfig() {
-        Config config = new Config();
+        Config config = new Config(List.of("test-key"));
         config._BASE_URL_CLASH = "http://127.0.0.1:" + clashServer.getAddress().getPort();
-        config._API_KEY_ALL = "test-key";
-        config._API_KEY_ALL2 = "";
-        config._API_KEY_ALL3 = "";
-        config._CLASH_API_KEY_POOL = "";
         config._CACHE_ENABLED = "true";
         config._CACHE_MODE = "memory";
         return config;
