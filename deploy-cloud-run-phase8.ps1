@@ -20,6 +20,14 @@ function Run-Gcloud {
     }
 }
 
+function Run-GcloudQuiet {
+    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Args)
+    $null = & gcloud @Args
+    if ($LASTEXITCODE -ne 0) {
+        throw "gcloud command failed while updating the isolated Phase 8 runtime."
+    }
+}
+
 function Get-HttpStatus {
     param(
         [Parameter(Mandatory = $true)] [string]$Url,
@@ -167,7 +175,7 @@ if ($unauthorizedPoll -ne 405) {
 
 # Keep the existing secret header untouched; only point the isolated preview job
 # at the newly tagged revision and keep its one-minute test cadence.
-Run-Gcloud scheduler jobs update http $SchedulerJobName `
+Run-GcloudQuiet scheduler jobs update http $SchedulerJobName `
     --project $ProjectId `
     --location $Region `
     --schedule="* * * * *" `
@@ -178,12 +186,12 @@ Run-Gcloud scheduler jobs update http $SchedulerJobName `
     --max-retry-attempts=0
 
 if ((Get-SchedulerState) -eq "PAUSED") {
-    Run-Gcloud scheduler jobs resume $SchedulerJobName --project $ProjectId --location $Region
+    Run-GcloudQuiet scheduler jobs resume $SchedulerJobName --project $ProjectId --location $Region
 }
 
 # Trigger one pass immediately. A healthy tracker may still be scheduled for a
 # later poll; failed trackers become immediately due through the retry RPC.
-Run-Gcloud scheduler jobs run $SchedulerJobName --project $ProjectId --location $Region
+Run-GcloudQuiet scheduler jobs run $SchedulerJobName --project $ProjectId --location $Region
 
 Write-Host "Phase 8 update deployed." -ForegroundColor Green
 Write-Host "  Cloud Run revisions created by this update: 1"
