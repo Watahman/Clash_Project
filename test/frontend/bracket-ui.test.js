@@ -90,7 +90,11 @@ describe('bracket public release surface', () => {
             .toMatch(/\bindex\b/i);
         expect(document.querySelectorAll('h1')).toHaveLength(1);
         expect(document.querySelector('a[href="/app/brackets"]')).not.toBeNull();
-        expect(document.querySelector('.bracket-public-preview')).not.toBeNull();
+        expect(document.querySelector('.cp-feature-hero.cp-hero-background--bracket')).not.toBeNull();
+        expect(document.querySelector('.bracket-public-preview')).toBeNull();
+        expect(document.querySelectorAll('.cp-product-preview, .sample-panel, table')).toHaveLength(0);
+        expect(document.querySelector('.home-v2-workflow')).not.toBeNull();
+        expect(document.querySelector('.home-v2-products')).not.toBeNull();
         expect(document.querySelector('.home-v2-bottom-cta')).not.toBeNull();
     });
 });

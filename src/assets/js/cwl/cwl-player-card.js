@@ -17,7 +17,8 @@ import {
     attachMoveControl,
     syncPlayerRosterStatus
 } from './cwl-player-controls.js?v=20260829-public-auth-v1';
-import { makePlayerDraggable } from './cwl-player-drag.js?v=20260829-public-auth-v1';
+import { makePlayerDraggable } from './cwl-player-drag.js?v=20260830-player-drag-v5';
+import { attachPlayerCardSettings } from './cwl-card-settings.js?v=20260830-player-drag-v3';
 import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js?v=20260829-public-auth-v1';
 import { getTownHallAsset, installImageFallback } from '../assets/entity-assets.js';
 import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
@@ -54,6 +55,7 @@ export function createPlayerCard(playerInfo, clanUuid, options = {}) {
             autoReserve: !preferredStatus
         });
         applyAvailabilityToCard(element);
+        attachPlayerCardSettings(element);
         plannerChanged = true;
     });
 

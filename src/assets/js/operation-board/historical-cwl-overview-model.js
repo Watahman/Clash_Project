@@ -1,5 +1,5 @@
-import { calculateHistoricalSeason } from './historical-cwl-calculations.js';
-import { formatSeason } from './historical-cwl-season-model.js';
+import { calculateHistoricalSeason } from './historical-cwl-calculations.js?v=20260910-cwl-history-progressive';
+import { formatSeason } from './historical-cwl-season-model.js?v=20260910-cwl-history-progressive';
 
 const LEAGUE_ORDER = [
     'Unranked',

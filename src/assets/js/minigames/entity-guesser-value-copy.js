@@ -40,6 +40,7 @@ const VALUE_ENTRIES = [
     ['Common', 'Common', 'Gewoon', 'Commune', 'Gewöhnlich', 'Común'],
     ['Construction', 'Construction', 'Bouw', 'Construction', 'Bau', 'Construcción'],
     ['Control', 'Control', 'Controle', 'Contrôle', 'Kontrolle', 'Control'],
+    ['Counter Damage', 'Counter Damage', 'Tegenschade', 'Dégâts de riposte', 'Konterschaden', 'Daño de contraataque'],
     ['Damage', 'Damage', 'Schade', 'Dégâts', 'Schaden', 'Daño'],
     ['Damage and pushback', 'Damage and pushback', 'Schade en terugduwen', 'Dégâts et repoussement', 'Schaden und Rückstoß', 'Daño y empuje'],
     ['Dark Elixir', 'Dark Elixir', 'Donker elixir', 'Élixir noir', 'Dunkles Elixier', 'Elixir oscuro'],

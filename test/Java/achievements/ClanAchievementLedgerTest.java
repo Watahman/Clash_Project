@@ -36,11 +36,11 @@ class ClanAchievementLedgerTest {
     @Test
     void readsOnlyTheRequestedCurrentClanTag() throws Exception {
         ClanAchievementLedger ledger = new ClanAchievementLedger((table, query) -> {
-            assertEquals("clan_achievement_progress", table);
-            assertTrue(query.contains("clan_tag=eq.%23P0Y8LQ2"));
+            assertEquals("read_clan_achievement_progress_v2", table);
+            assertTrue(query.contains("\"p_clan_tag\":\"#P0Y8LQ2\""));
             return "[{\"achievement_key\":\"CL_LEVEL_1\"}]";
         });
 
-        assertTrue(ledger.readCurrent("#P0Y8LQ2").contains("CL_LEVEL_1"));
+        assertEquals("[{\"achievement_key\":\"CL_LEVEL_1\"}]", ledger.readCurrent("#P0Y8LQ2"));
     }
 }

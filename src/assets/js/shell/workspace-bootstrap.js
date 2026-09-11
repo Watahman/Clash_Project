@@ -86,13 +86,20 @@
                 delay(INITIAL_VISUAL_TIMEOUT_MS)
             ]),
             Promise.race([
-                Promise.allSettled(initialLoadTasks),
+                initialContentLoad(),
                 delay(INITIAL_CONTENT_TIMEOUT_MS)
             ])
         ]);
 
         await nextPaint();
         revealPage();
+    }
+
+    function initialContentLoad() {
+        if (document.body?.dataset.workspaceAccess === 'public') {
+            return Promise.resolve();
+        }
+        return Promise.allSettled(initialLoadTasks);
     }
 
     function domReady() {

@@ -7,7 +7,7 @@ import {
     STRUCTURE_ENTITIES
 } from './entity-guesser-structures-data.js';
 
-export const ENTITY_GUESSER_DATA_VERSION = '2026-08-phase-2d';
+export const ENTITY_GUESSER_DATA_VERSION = '2026-09-01-equipment-fix-1';
 
 const SOURCE_CATEGORIES = Object.freeze([
     ...CORE_CATEGORIES,

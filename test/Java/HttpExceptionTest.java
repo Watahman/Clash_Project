@@ -32,4 +32,18 @@ class HttpExceptionTest {
         assertEquals(409, API_Utils.publicStatus(error));
         assertEquals(error.getResponseBody(), API_Utils.publicErrorBody(error));
     }
+
+    @Test
+    void upstreamTimeoutKeepsItsRetryableGatewayStatus() {
+        HttpException error = HttpException.upstream(
+                504,
+                "{\"error\":\"private provider timeout details\"}",
+                "ClashKing"
+        );
+
+        String publicBody = API_Utils.publicErrorBody(error);
+        assertEquals(504, API_Utils.publicStatus(error));
+        assertTrue(publicBody.contains("UPSTREAM_TIMEOUT"));
+        assertFalse(publicBody.contains("private provider timeout details"));
+    }
 }

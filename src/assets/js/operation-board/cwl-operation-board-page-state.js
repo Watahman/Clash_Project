@@ -10,7 +10,7 @@ import {
     renderBoard,
     renderSyncState,
     setHelp
-} from './operation-board-renderer.js?v=20260829-public-auth-v1';
+} from './operation-board-renderer.js?v=20260910-cwl-history-progressive';
 import {
     applyOperationTabState,
     getBoardIdentity,

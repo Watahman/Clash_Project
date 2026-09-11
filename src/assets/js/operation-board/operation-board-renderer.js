@@ -3,7 +3,7 @@ import {
     clearHistoricalBoard,
     renderHistoricalBoard,
     renderOverviewBoard
-} from './historical-cwl-board-renderer.js?v=20260829-public-auth-v1';
+} from './historical-cwl-board-renderer.js?v=20260910-cwl-history-progressive';
 import {
     clearBonusCalculator,
     renderBonusCalculator

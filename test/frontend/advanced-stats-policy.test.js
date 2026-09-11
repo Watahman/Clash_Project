@@ -50,4 +50,16 @@ describe('Advanced Stats policy disclosures', () => {
         expect(terms).toContain('historical battle-log, war-attack and ranked battle-log information used by Advanced Stats may come from ClashKing V2');
         expect(terms).toContain('It does not delete records already retained by an external provider');
     });
+
+    it('keeps the initial cookie policy aligned with its dynamic English copy', () => {
+        const cookies = readFileSync('src/subpages/cookies.html', 'utf8');
+        expect(cookies).toContain('Functional storage');
+        expect(cookies).toContain('Analytics storage');
+        expect(cookies).toContain('Advertising storage');
+        expect(generatedPolicies).toContain('Functional storage');
+        expect(generatedPolicies).toContain('Analytics storage');
+        expect(generatedPolicies).toContain('Advertising storage');
+        expect(cookies).toContain('guest CWL Planner drafts, bracket state and minigame progress');
+        expect(generatedPolicies).toContain('guest CWL Planner drafts, bracket state and minigame progress');
+    });
 });

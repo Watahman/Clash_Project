@@ -9,18 +9,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AchievementProgressPersistenceContractTest {
     @Test
-    void playerProgressBulkUpsertAlwaysIncludesUnlockedAtKey() throws Exception {
+    void usesCompactReadAndAtomicReconcileRpcsWithoutLegacyProgressTableAccess() throws Exception {
         String source = Files.readString(Path.of("src/Java/SUPABASE_Achievements.java"));
         int start = source.indexOf("private boolean persistObservedProgress(");
-        int end = source.indexOf("private Map<String, JsonObject> storedRowsByKey", start);
+        int end = source.indexOf("private JsonArray observedProgressRows", start);
         assertTrue(start >= 0 && end > start, "achievement persistence method must remain discoverable");
         String persistence = source.substring(start, end);
 
-        // PostgREST JSON bulk inserts require uniform object keys. All three states
-        // (existing unlock, new unlock, still locked) must therefore write unlocked_at.
-        assertTrue(persistence.contains("db.add(\"unlocked_at\", existingUnlockedAt.deepCopy())"));
-        assertTrue(persistence.contains("db.addProperty(\"unlocked_at\", unlockedNow)"));
-        assertTrue(persistence.contains("db.add(\"unlocked_at\", com.google.gson.JsonNull.INSTANCE)"));
-        assertTrue(persistence.contains("SUPABASE_Client.upsert(\"achievement_progress\""));
+        assertTrue(source.contains("read_achievement_progress_v2"));
+        assertTrue(source.contains("save_achievement_import"));
+        assertTrue(persistence.contains("reconcile_achievement_progress_v2"));
+        assertTrue(persistence.contains("p_source_timestamp"));
+        assertTrue(persistence.contains("p_progress"));
+        assertTrue(!persistence.contains("SUPABASE_Client.upsert"));
+        assertTrue(!source.contains("SUPABASE_Client.upsert(\"achievement_progress\""));
     }
 }

@@ -247,6 +247,7 @@ body.public-feature-v2 .feature-v2-workflow .home-v2-workflow-list li > span { c
 .cp-detail-copy .eyebrow { color: var(--feature-accent); }
 .cp-detail-list { display: grid; gap: 12px; margin: 1.5rem 0 0; padding: 0; list-style: none; }
 .cp-detail-list li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; border-top: 1px solid var(--cp-border-1, var(--border)); padding-top: 12px; }
+.cp-detail-list li > div { display: grid; min-width: 0; gap: .35rem; }
 .cp-detail-list strong { color: var(--cp-text-1, var(--text)); font-size: .8rem; }
 .cp-detail-list span { color: var(--cp-text-2, var(--text-muted)); font-size: .78rem; line-height: 1.55; }
 .cp-detail-list b { min-width: 1.55rem; color: var(--feature-accent); font: 700 .63rem/1.5 var(--cp-font-mono, monospace); }

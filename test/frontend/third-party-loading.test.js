@@ -1,38 +1,15 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const htmlFiles = [
-    'src/index.html',
-    'src/about.html',
-    'src/advanced-stats.html',
-    'src/achievements.html',
-    'src/cwl-planner.html',
-    'src/cwl-tracker.html',
-    'src/clan-management.html',
-    'src/bracket-generator.html',
-    'src/404.html',
-    'src/subpages/contact.html',
-    'src/subpages/cookies.html',
-    'src/subpages/privacy.html',
-    'src/subpages/terms.html',
-    'src/subpages/login.html',
-    'src/subpages/register.html',
-    'src/subpages/dashboard.html',
-    'src/subpages/groups.html',
-    'src/subpages/advanced-stats.html',
-    'src/subpages/achievements.html',
-    'src/subpages/cwl-planner.html',
-    'src/subpages/cwl-planner-drafts.html',
-    'src/subpages/cwl-operation-board.html',
-    'src/subpages/war-operation-board.html',
-    'src/subpages/bracket-generator.html'
-];
+const htmlFiles = listHtmlFiles('src');
+const directNetworkScript = /https:\/\/(?:www\.googletagmanager\.com|pagead2\.googlesyndication\.com|pl31261194\.profitableratecpmnetwork\.com|www\.highrevenueformat\.com)/i;
 
 describe('Privacy-aware third-party loading', () => {
-    it.each(htmlFiles)('%s does not start Google network scripts directly from HTML', path => {
+    it.each(htmlFiles)('%s does not start an advertising network directly from HTML', path => {
         const source = readFileSync(path, 'utf8');
-        expect(source).not.toContain('https://www.googletagmanager.com/gtag/js');
-        expect(source).not.toContain('https://pagead2.googlesyndication.com/pagead/js');
+
+        expect(source).not.toMatch(directNetworkScript);
     });
 
     it('sets denied consent defaults before configuring analytics', () => {
@@ -46,18 +23,29 @@ describe('Privacy-aware third-party loading', () => {
         expect(source).toContain("ad_storage: 'denied'");
     });
 
-    it('loads analytics after interaction and the Google CMP after load or idle time', () => {
-        const analytics = readFileSync('src/assets/js/Data/analytics.js', 'utf8');
-        const ads = readFileSync('src/assets/js/Data/ads.js', 'utf8');
+    it('keeps ad loading behind the central consent and route manager', () => {
+        const adsSource = readFileSync('src/assets/js/Data/ads.js', 'utf8');
+        const source = [
+            adsSource,
+            existsSync('src/assets/js/Data/adsterra-manager.js')
+                ? readFileSync('src/assets/js/Data/adsterra-manager.js', 'utf8')
+                : ''
+        ].join('\n');
 
-        expect(analytics).toContain("window.addEventListener('load'");
-        expect(analytics).toContain('requestIdleCallback');
-        expect(analytics).toContain("'pointerdown'");
-        expect(analytics).toContain('12000');
-        expect(ads).toContain("window.addEventListener('load'");
-        expect(ads).toContain('requestIdleCallback');
-        expect(ads).toContain('installGoogleCmpBridge()');
-        expect(ads).toContain('loadGoogleCmpWhenIdle()');
+        expect(source).toMatch(/(?:eligible|allowlist)/i);
+        expect(source).toMatch(/(?:consent|adStorage|advertisingConsent)/i);
+        expect(source).toMatch(/(?:hasAdvertisingConsent|ad-consent-changed)/i);
+        expect(adsSource).not.toMatch(/googlefc|CONSENT_MODE_DATA_READY|googletagmanager|pagead\.googlesyndication/i);
+        expect(adsSource).not.toMatch(/ca-pub-|publisher(?:-|\s)?tag|CLIENT_ID/i);
+        expect(adsSource).toContain("fetch('/api/ads-context'");
+        expect(adsSource).toContain('localStorage');
+        expect(adsSource).toContain('STORAGE_KEY');
+        expect(adsSource).toContain('DECISIONS');
+        expect(adsSource).toMatch(/protected/);
+        expect(adsSource).toMatch(/non-eea|non-protected/);
+        expect(adsSource).toContain('advertisingConsent');
+        expect(adsSource).toMatch(/!state\.advertisingConsent[\s\S]*import\(AD_MANAGER_URL\)/);
+        expect(adsSource).toContain('window.ClashToolsCMP');
     });
 
     it('reveals public content without waiting for registered application tasks', () => {
@@ -68,6 +56,8 @@ describe('Privacy-aware third-party loading', () => {
 
         expect(bootstrap).toContain("document.body?.classList.contains('public-site')");
         expect(bootstrap).toContain("html.classList.contains('public-page')");
+        expect(bootstrap).toContain("document.body?.dataset.workspaceAccess === 'public'");
+        expect(bootstrap).toContain('function initialContentLoad()');
         expect(publicSite).toContain('onAuthStateChange');
         expect(publicSite).not.toContain('redirectReturningUser');
         expect(publicSite).not.toContain('location.replace(\'/dashboard\')');
@@ -79,7 +69,16 @@ describe('Privacy-aware third-party loading', () => {
 
     it('does not preload the removed battle artwork on the product-led homepage', () => {
         const homepage = readFileSync('src/index.html', 'utf8');
+
         expect(homepage).not.toContain('class="home3-product-stage"');
         expect(homepage).not.toMatch(/rel="preload"[^>]+\/assets\/css\/pictures\/hero\./);
     });
 });
+
+function listHtmlFiles(directory) {
+    return readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
+        const file = join(directory, entry.name);
+        if (entry.isDirectory()) return listHtmlFiles(file);
+        return file.endsWith('.html') ? [file.replaceAll('\\', '/')] : [];
+    }).sort();
+}

@@ -179,7 +179,9 @@ final class CwlLeagueHistoryReconstructor {
                 season.state(),
                 season.source(),
                 season.dataQuality(),
-                season.warDetailsComplete()
+                season.warDetailsComplete(),
+                season.stars(),
+                season.destruction()
         );
     }
 

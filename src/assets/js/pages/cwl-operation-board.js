@@ -2,13 +2,13 @@ import { initPlayerPerformancePopover } from '../cwl/cwl-player-performance-popo
 import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { exportOperationReport } from '../operation-board/operation-board-import-export.js?v=20260829-public-auth-v1';
 import { createCwlOperationBoardBootstrap } from '../operation-board/cwl-operation-board-bootstrap.js?v=20260829-public-auth-v1';
-import { createCwlOperationBoardPageControllers } from '../operation-board/cwl-operation-board-page-controllers.js?v=20260829-public-auth-v1';
+import { createCwlOperationBoardPageControllers } from '../operation-board/cwl-operation-board-page-controllers.js?v=20260910-cwl-history-progressive';
 import { bindOperationBoardEvents } from '../operation-board/operation-board-page-events.js';
 import { initOperationBoardRefs } from '../operation-board/operation-board-page-refs.js';
 import { createOperationBoardAutoRefresh } from '../operation-board/operation-board-auto-refresh.js?v=20260829-public-auth-v1';
 import { createOperationBoardAccess } from '../operation-board/operation-board-access.js?v=20260829-public-auth-v1';
 import { createOperationPlanStore } from '../operation-board/operation-board-plan-store.js?v=20260829-public-auth-v1';
-import { createCwlOperationBoardPageState } from '../operation-board/cwl-operation-board-page-state.js?v=20260829-public-auth-v1';
+import { createCwlOperationBoardPageState } from '../operation-board/cwl-operation-board-page-state.js?v=20260910-cwl-history-progressive';
 import { initCompeteI18n } from '../operation-board/compete-locales.js?v=20260829-public-auth-v1';
 import { getPlanClans, normalizePlan } from '../operation-board/operation-board-plan-model.js?v=20260829-public-auth-v1';
 import {
@@ -19,7 +19,7 @@ import {
     renderPlanRequired,
     renderStandaloneMode
 } from '../operation-board/operation-board-source-controls.js?v=20260829-public-auth-v1';
-import { renderFilteredRoster, renderPhase, setHelp } from '../operation-board/operation-board-renderer.js?v=20260829-public-auth-v1';
+import { renderFilteredRoster, renderPhase, setHelp } from '../operation-board/operation-board-renderer.js?v=20260910-cwl-history-progressive';
 import { looksLikeClashTag, normalizeTag } from '../operation-board/operation-board-utils.js';
 import { getCurrentUserId } from '../utils/user.js';
 
@@ -224,7 +224,11 @@ async function init() {
         exportReport: () => exportOperationReport(pageState.getLatestReport()),
         importFile: file => importController.importJsonFile(file),
         loadStandalone: loadStandaloneClan,
-        selectTab: pageState.selectBoardTab,
+        selectTab: (tab, focus = false) => {
+            pageState.selectBoardTab(tab, focus);
+            void pageState.getRuntime('historyController')
+                ?.ensureDetailForTab(tab);
+        },
         refreshLabels: pageState.refreshLabels
     });
     sourceBootstrap.bindSourceMode();

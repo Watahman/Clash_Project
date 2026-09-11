@@ -1,7 +1,7 @@
 const SUPPORT_EMAIL = 'support.clashpanel@gmail.com';
 
 export default Object.freeze({
-    lastUpdated: '27 août 2026',
+    lastUpdated: '9 septembre 2026',
     tocLabel: 'Sommaire',
     tocTitle: 'Sur cette page',
     privacy: Object.freeze({
@@ -35,14 +35,15 @@ export default Object.freeze({
             ]],
             ['Fournisseurs et partage des données', [
                 'ClashPanel ne vend pas les données personnelles. Les informations ne sont partagées que lorsque cela est nécessaire pour fournir le service, respecter la loi, protéger le service ou lorsque vous nous le demandez.',
-                'Les fournisseurs d’infrastructure et d’application peuvent inclure Supabase pour l’authentification et les données d’application, Google Cloud pour l’hébergement du backend, Cloudflare pour la livraison et la sécurité du site, Google pour la connexion ou les polices, les services Supercell pour les données actuelles de l’API Clash of Clans et ClashKing V2 pour les demandes Advanced Stats historiques.',
+                'Les fournisseurs d’infrastructure et d’application peuvent inclure Supabase pour l’authentification et les données d’application, Google Cloud pour l’hébergement du backend, Cloudflare pour la livraison et la sécurité du site, Google pour la connexion, les polices ou la publicité, Adsterra pour la publicité sur certaines pages publiques éligibles, les services Supercell pour les données actuelles de l’API Clash of Clans et ClashKing V2 pour les demandes Advanced Stats historiques.',
                 'Lorsqu’un historique Advanced Stats est demandé, le tag du joueur associé et la portée historique demandée peuvent être envoyés à ClashKing V2. Ce fournisseur externe peut conserver ou renvoyer des enregistrements historiques selon ses propres conditions de service ; ClashPanel ne contrôle pas sa conservation, sa disponibilité ou son exhaustivité.',
-                'ClashPanel utilise ou peut utiliser Google AdSense sur certaines pages. Google et ses partenaires publicitaires peuvent recevoir des informations telles que l’adresse IP, l’URL de la page, les informations de navigateur ou d’appareil, les cookies, les identifiants de stockage local et les données d’interaction avec les annonces.'
+                'ClashPanel utilise ou peut utiliser Google AdSense et Adsterra sur certaines pages publiques éligibles. Lorsque la publicité est chargée après le consentement publicitaire requis, le fournisseur concerné et ses partenaires peuvent traiter des informations techniques telles que l’adresse IP, l’URL de la page, les informations de navigateur ou d’appareil, les cookies, les identifiants de stockage local et les données d’interaction avec les annonces. Consultez les politiques des fournisseurs pour plus de détails.'
             ]],
-            ['Publicité Google', [
+            ['Publicité Google et Adsterra', [
                 'Des fournisseurs tiers, dont Google, peuvent utiliser des cookies ou technologies similaires pour diffuser, limiter, mesurer et protéger les annonces. Lorsque la publicité personnalisée est autorisée, les cookies publicitaires Google peuvent également servir à afficher des annonces en fonction de visites sur ClashPanel et/ou d’autres sites.',
+                'Adsterra peut traiter des données techniques et des cookies en lien avec ses services publicitaires. Consultez sa politique de confidentialité et sa politique relative aux cookies, accessibles dans les liens ci-dessous.',
                 'Google explique comment il utilise les informations provenant de sites utilisant ses services dans sa documentation relative aux sites partenaires. Vous pouvez aussi contrôler la publicité personnalisée dans les paramètres des annonces Google.',
-                'Pour les visiteurs de l’EEE, du Royaume-Uni et de la Suisse, le consentement publicitaire est géré selon les choix présentés par la solution de gestion du consentement configurée et les exigences Google applicables.'
+                'Pour les visiteurs de l’EEE, du Royaume-Uni et de la Suisse, le consentement publicitaire est géré selon les choix présentés par la solution de gestion du consentement configurée et les exigences applicables au fournisseur concerné. Adsterra n’est pas chargé lorsque le consentement publicitaire requis est indisponible ou refusé.'
             ]],
             ['Traitement international', [
                 'Certains fournisseurs peuvent traiter des informations en dehors de la Belgique ou de l’Espace économique européen. Lorsque cela est requis, ces traitements et transferts sont soumis aux mécanismes et garanties applicables décrits dans les conditions et documents de confidentialité des fournisseurs.',
@@ -68,13 +69,15 @@ export default Object.freeze({
         links: Object.freeze([
             ['Contacter pour la confidentialité', `mailto:${SUPPORT_EMAIL}?subject=Demande%20de%20confidentialite%20ClashPanel`],
             ['Utilisation des données des sites partenaires par Google', 'https://policies.google.com/technologies/partner-sites'],
-            ['Paramètres des annonces Google', 'https://adssettings.google.com/']
+            ['Paramètres des annonces Google', 'https://adssettings.google.com/'],
+            ['Politique de confidentialité Adsterra', 'https://adsterra.com/privacy-policy-managed'],
+            ['Politique relative aux cookies Adsterra', 'https://adsterra.com/cookies/']
         ])
     }),
     cookies: Object.freeze({
         title: 'Politique relative aux cookies',
         description: 'Cookies, stockage local, technologies publicitaires et choix de consentement utilisés par ClashPanel.',
-        summary: 'ClashPanel utilise des technologies de navigateur essentielles au service et peut utiliser des technologies publicitaires Google sur les pages où les annonces sont activées.',
+        summary: 'ClashPanel utilise des technologies de navigateur essentielles au service et peut utiliser des technologies publicitaires Google et Adsterra sur les pages où les annonces sont activées.',
         sections: Object.freeze([
             ['Champ d’application', [
                 'Cette politique couvre les cookies, le stockage local, IndexedDB et les technologies similaires utilisés directement par ClashPanel ou par des services tiers chargés via ClashPanel.',
@@ -88,17 +91,17 @@ export default Object.freeze({
                 'Le stockage local peut mémoriser des préférences d’interface comme la langue, le thème et le contexte ClashPanel sélectionné. IndexedDB peut mettre en cache des réponses récentes pour accélérer le chargement et réduire les requêtes répétées.',
                 'Vous pouvez effacer le stockage du navigateur dans ses paramètres. Cela peut réinitialiser les préférences ou les données en cache, mais ne supprime pas à lui seul les données de compte conservées sur le serveur.'
             ]],
-            ['Google AdSense et technologies publicitaires', [
-                'Certaines pages ClashPanel incluent ou peuvent inclure Google AdSense. Des fournisseurs tiers, dont Google, peuvent placer ou lire des cookies, ou utiliser des technologies similaires, des adresses IP et d’autres identifiants pour diffuser des annonces, limiter leur fréquence, mesurer les performances et détecter la fraude ou les abus.',
+            ['Google, Adsterra et technologies publicitaires', [
+                'Certaines pages publiques éligibles de ClashPanel incluent ou peuvent inclure Google AdSense ou Adsterra. Après le consentement publicitaire requis, des fournisseurs tiers peuvent placer ou lire des cookies, ou utiliser des technologies similaires, des adresses IP et d’autres identifiants techniques pour diffuser des annonces, limiter leur fréquence, mesurer les performances et détecter la fraude ou les abus.',
                 'Lorsque la publicité personnalisée est autorisée, des cookies publicitaires peuvent sélectionner des annonces en fonction de visites antérieures sur ClashPanel et/ou d’autres sites. Lorsque cette personnalisation n’est pas autorisée, des annonces contextuelles ou non personnalisées peuvent encore être affichées, avec un stockage ou des identifiants limités lorsque cela est permis.',
-                'Google fournit des informations sur l’utilisation des données provenant de sites partenaires et des paramètres permettant de contrôler la publicité personnalisée.'
+                'Google fournit des informations sur l’utilisation des données provenant de sites partenaires et des paramètres permettant de contrôler la publicité personnalisée. Adsterra fournit ses propres politiques de confidentialité et relative aux cookies pour ses services publicitaires.'
             ]],
             ['Consentement et modification de votre choix', [
                 'Lorsque la loi applicable exige un consentement, l’interface de consentement publicitaire ou la plateforme de gestion du consentement détermine si le stockage et les finalités publicitaires facultatives sont autorisés.',
                 'Vous pouvez refuser ou retirer un consentement facultatif sans perdre l’accès au service principal de ClashPanel. Vous pouvez également supprimer ou bloquer les cookies dans votre navigateur, mais le blocage du stockage essentiel peut empêcher certaines fonctions de compte.'
             ]],
             ['Autres ressources tierces', [
-                'ClashPanel peut charger des services tels que Google Fonts ou la connexion Google. Les requêtes adressées à des tiers peuvent leur communiquer des informations techniques comme l’adresse IP, les informations de navigateur et la ressource demandée.',
+                'ClashPanel peut charger des services tels que Google Fonts, la connexion Google ou la publicité Adsterra sur certaines pages publiques éligibles. Les requêtes adressées à des tiers peuvent leur communiquer des informations techniques comme l’adresse IP, les informations de navigateur et la ressource demandée.',
                 'Les fournisseurs tiers traitent les informations conformément à leurs propres conditions de confidentialité, en plus des choix et protections décrits ici.'
             ]],
             ['Modifications', [
@@ -108,6 +111,8 @@ export default Object.freeze({
         links: Object.freeze([
             ['Utilisation des données des sites partenaires par Google', 'https://policies.google.com/technologies/partner-sites'],
             ['Paramètres des annonces Google', 'https://adssettings.google.com/'],
+            ['Politique de confidentialité Adsterra', 'https://adsterra.com/privacy-policy-managed'],
+            ['Politique relative aux cookies Adsterra', 'https://adsterra.com/cookies/'],
             ['Contacter pour la confidentialité', `mailto:${SUPPORT_EMAIL}?subject=Question%20cookies%20ou%20confidentialite%20ClashPanel`]
         ])
     }),
@@ -140,7 +145,7 @@ export default Object.freeze({
                 'Les suggestions du Planner, prédictions, informations de statut ou données importées doivent être vérifiées avant de servir à une décision de clan.'
             ]],
             ['Publicité et services externes', [
-                'ClashPanel peut afficher des publicités tierces, dont Google AdSense. Une publicité ne signifie pas que ClashPanel approuve l’annonceur, le produit ou le site externe.',
+                'ClashPanel peut afficher des publicités tierces, dont Google AdSense ou Adsterra, uniquement sur certaines pages publiques éligibles et après le consentement publicitaire requis lorsque celui-ci s’applique. Une publicité ne signifie pas que ClashPanel approuve l’annonceur, le produit ou le site externe.',
                 'Les services et liens externes sont régis par leurs propres conditions et pratiques de confidentialité. ClashPanel n’est pas responsable des contenus ou transactions fournis uniquement par un tiers indépendant.'
             ]],
             ['Disponibilité et modifications', [
@@ -173,7 +178,7 @@ export default Object.freeze({
         summary: `La méthode de contact officielle de ClashPanel est l’e-mail : ${SUPPORT_EMAIL}.`,
         sections: Object.freeze([
             ['Assistance par e-mail', [
-                `Pour les bugs, demandes de fonctions, questions de compte, demandes de confidentialité, questions AdSense ou publicitaires et demandes générales, écrivez à ${SUPPORT_EMAIL}.`,
+                `Pour les bugs, demandes de fonctions, questions de compte, demandes de confidentialité, questions AdSense, Adsterra ou publicitaires et demandes générales, écrivez à ${SUPPORT_EMAIL}.`,
                 'Pour signaler un bug, indiquez la page concernée, ce que vous attendiez, ce qui s’est produit et tout message d’erreur utile du navigateur. Supprimez les informations privées des captures d’écran avant de les envoyer.'
             ]],
             ['Demandes relatives à la confidentialité et au compte', [

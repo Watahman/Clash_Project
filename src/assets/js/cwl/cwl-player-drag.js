@@ -3,131 +3,243 @@ import { normalizeRosterStatus } from './cwl-plan-schema.js';
 import { syncPlayerRosterStatus } from './cwl-player-controls.js?v=20260829-public-auth-v1';
 import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js?v=20260829-public-auth-v1';
 
-const CONTROL_SELECTOR = '.cwl-delete-player, .cwl-move-player, .cwl-roster-status';
+const CONTROL_SELECTOR = 'button, select, input, textarea, a, [contenteditable="true"]';
+const DROP_TARGET_SELECTOR = '.cwl-clan-player-list, #cwl-available-players';
+const DRAG_THRESHOLD = 7;
+const CLICK_SUPPRESSION_MS = 300;
 
 export function makePlayerDraggable(element) {
-    if (!element) return;
+    if (!element || element.dataset.cwlDragBound === 'true') return;
+    element.dataset.cwlDragBound = 'true';
     element.originalContainer = element.parentElement;
     element.classList.add('draggable');
-    element.addEventListener('mousedown', event => startDrag(element, event));
+    element.addEventListener('pointerdown', event => startPendingDrag(element, event));
+    element.addEventListener('click', event => suppressClickAfterDrag(element, event), true);
 }
 
-function startDrag(element, event) {
-    if (event.target.closest(CONTROL_SELECTOR) || element._cwlDragState?.dragging) return;
-    event.preventDefault();
-    event.stopPropagation();
-    const document = element.ownerDocument || globalThis.document;
+function startPendingDrag(element, event) {
+    if (event.button !== 0 || event.isPrimary === false) return;
+    if (event.target.closest?.(CONTROL_SELECTOR)) return;
+    if (element._cwlDragState) return;
+    const document = element.ownerDocument;
     const state = createDragState(element, event);
     element._cwlDragState = state;
-    document.defaultView?.dispatchEvent(new CustomEvent('clashtools:cwl-player-drag-start'));
-    prepareDraggedElement(element, state, document);
-    state.onMouseMove = moveEvent => updateDrag(element, state, moveEvent, document);
-    state.onMouseUp = upEvent => finishDrag(element, state, upEvent, document);
-    document.addEventListener('mousemove', state.onMouseMove);
-    document.addEventListener('mouseup', state.onMouseUp);
+    bindDragListeners(element, state, document);
 }
 
 function createDragState(element, event) {
     const rect = element.getBoundingClientRect();
     return {
-        dragging: true,
+        activeTarget: null,
+        captureTarget: element,
+        dragging: false,
         offsetX: event.clientX - rect.left,
         offsetY: event.clientY - rect.top,
+        pointerId: event.pointerId,
+        preview: null,
         previousContainer: element.parentElement,
-        activeTarget: null
+        startX: event.clientX,
+        startY: event.clientY
     };
 }
 
-function prepareDraggedElement(element, state, document) {
-    const rect = element.getBoundingClientRect();
-    const dragLayer = element.closest('.workspace-planner') || document.body;
-    element.originalContainer = state.previousContainer;
-    element.classList.add('cwl-player-dragging');
-    Object.assign(element.style, {
-        position: 'fixed',
-        left: `${rect.left}px`,
-        top: `${rect.top}px`,
-        zIndex: '1000',
-        pointerEvents: 'none'
-    });
-    element.style.setProperty('width', `${rect.width}px`, 'important');
-    element.style.setProperty('height', `${rect.height}px`, 'important');
-    dragLayer.appendChild(element);
+function bindDragListeners(element, state, document) {
+    state.onPointerMove = event => updateDrag(element, state, event, document);
+    state.onPointerUp = event => finishDrag(element, state, event, document);
+    state.onPointerCancel = event => cancelPointerDrag(element, state, event, document);
+    state.onLostPointerCapture = event => {
+        if (element._cwlDragState === state && isActivePointer(state, event)) {
+            cancelDrag(element, state, document);
+        }
+    };
+    state.onKeyDown = event => {
+        if (event.key === 'Escape') cancelDrag(element, state, document);
+    };
+    state.onBlur = () => cancelDrag(element, state, document);
+    document.addEventListener('pointermove', state.onPointerMove, { passive: false, capture: true });
+    document.addEventListener('pointerup', state.onPointerUp, true);
+    document.addEventListener('pointercancel', state.onPointerCancel, true);
+    state.captureTarget?.addEventListener('lostpointercapture', state.onLostPointerCapture);
+    document.addEventListener('keydown', state.onKeyDown);
+    document.defaultView?.addEventListener('blur', state.onBlur);
 }
 
 function updateDrag(element, state, event, document) {
-    element.style.left = `${event.clientX - state.offsetX}px`;
-    element.style.top = `${event.clientY - state.offsetY}px`;
+    if (!isActivePointer(state, event)) return;
+    if (!state.dragging && !passedDragThreshold(state, event)) return;
+    event.preventDefault();
+    if (!state.dragging) activateDrag(element, state, document);
+    moveDragPreview(state, event.clientX, event.clientY);
     state.activeTarget = findDropTarget(document, event.clientX, event.clientY);
-    updateDropFeedback(element, state.activeTarget, document);
+    updateDropFeedback(state.activeTarget, document);
+}
+
+function passedDragThreshold(state, event) {
+    return Math.hypot(event.clientX - state.startX, event.clientY - state.startY) >= DRAG_THRESHOLD;
+}
+
+function activateDrag(element, state, document) {
+    state.dragging = true;
+    capturePointer(state);
+    dispatchWindowEvent(document, 'clashtools:cwl-player-drag-start');
+    const rect = element.getBoundingClientRect();
+    element.classList.add('cwl-player-drag-source');
+    state.preview = createDragPreview(element, state.previousContainer, rect);
+}
+
+function createDragPreview(element, container, rect) {
+    const preview = element.cloneNode(true);
+    preview.classList.remove('cwl-player-drag-source');
+    preview.classList.add('cwl-player-dragging', 'cwl-player-drag-preview');
+    preview.removeAttribute('id');
+    preview.removeAttribute('data-cwl-drag-bound');
+    preview.setAttribute('aria-hidden', 'true');
+    preview.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
+    preview.querySelectorAll(CONTROL_SELECTOR).forEach(control => control.setAttribute('tabindex', '-1'));
+    container.appendChild(preview);
+    applyDraggedStyles(preview, rect);
+    return preview;
+}
+
+function applyDraggedStyles(preview, rect) {
+    Object.assign(preview.style, {
+        left: `${rect.left}px`,
+        pointerEvents: 'none',
+        position: 'fixed',
+        top: `${rect.top}px`,
+        zIndex: '1000'
+    });
+    preview.style.setProperty('width', `${rect.width}px`, 'important');
+    preview.style.setProperty('height', `${rect.height}px`, 'important');
+}
+
+function moveDragPreview(state, clientX, clientY) {
+    if (!state.preview) return;
+    state.preview.style.left = `${clientX - state.offsetX}px`;
+    state.preview.style.top = `${clientY - state.offsetY}px`;
 }
 
 function finishDrag(element, state, event, document) {
-    const result = resolveDrop(element, state, event, document);
-    commitDrop(element, state, result, document);
-    cleanupDrag(element, state, document);
-}
-
-function resolveDrop(element, state, event, document) {
+    if (!isActivePointer(state, event)) return;
+    if (!state.dragging) {
+        cleanupDrag(element, state, document);
+        return;
+    }
+    event.preventDefault();
     const target = state.activeTarget || findDropTarget(document, event.clientX, event.clientY);
-    return {
-        dropAllowed: Boolean(target),
-        finalContainer: target || state.previousContainer
-    };
+    const moved = Boolean(target && target !== state.previousContainer);
+
+    try {
+        if (moved) {
+            target.appendChild(element);
+            element.originalContainer = target;
+            commitRosterDrop(element, state, target);
+        } else {
+            element.originalContainer = state.previousContainer;
+        }
+    } finally {
+        element.dataset.cwlSuppressClickUntil = String(Date.now() + CLICK_SUPPRESSION_MS);
+        cleanupDrag(element, state, document);
+    }
 }
 
-function commitDrop(element, state, result, document) {
-    const { finalContainer, dropAllowed } = result;
+function commitRosterDrop(element, state, finalContainer) {
     const previousStatus = normalizeRosterStatus(element.dataset.rosterStatus);
-    if (finalContainer) finalContainer.appendChild(element);
-    element.originalContainer = finalContainer;
-    if (dropAllowed) commitRosterDrop(element, state, finalContainer, previousStatus);
-}
-
-function commitRosterDrop(element, state, finalContainer, previousStatus) {
     syncPlayerRosterStatus(element, {
         preferredStatus: previousStatus,
-        autoReserve: Boolean(
-            finalContainer
+        autoReserve: finalContainer.matches('.cwl-clan-player-list')
             && finalContainer !== state.previousContainer
-            && finalContainer.matches('.cwl-clan-player-list')
-        )
     });
     updateAllPlayerCounters();
     rememberPlannerPlayers();
-    element.ownerDocument.defaultView.dispatchEvent(new CustomEvent('clashtools:cwl-player-added'));
+    dispatchWindowEvent(element.ownerDocument, 'clashtools:cwl-player-added');
     savePlan();
 }
 
+function cancelPointerDrag(element, state, event, document) {
+    if (isActivePointer(state, event)) cancelDrag(element, state, document);
+}
+
+function cancelDrag(element, state, document) {
+    if (element._cwlDragState !== state) return;
+    cleanupDrag(element, state, document);
+}
+
 function cleanupDrag(element, state, document) {
-    state.dragging = false;
+    if (element._cwlDragState !== state && !state.preview) return;
     element._cwlDragState = null;
-    element.classList.remove('cwl-player-dragging');
+    element.classList.remove('cwl-player-drag-source');
+    state.preview?.remove();
+    state.preview = null;
     clearDropFeedback(document);
-    for (const property of ['position', 'left', 'top', 'width', 'height', 'z-index', 'pointer-events']) {
-        element.style.removeProperty(property);
+    releasePointer(state);
+    document.removeEventListener('pointermove', state.onPointerMove, true);
+    document.removeEventListener('pointerup', state.onPointerUp, true);
+    document.removeEventListener('pointercancel', state.onPointerCancel, true);
+    state.captureTarget?.removeEventListener('lostpointercapture', state.onLostPointerCapture);
+    document.removeEventListener('keydown', state.onKeyDown);
+    document.defaultView?.removeEventListener('blur', state.onBlur);
+}
+
+function isActivePointer(state, event) {
+    return state.pointerId == null || event.pointerId === state.pointerId;
+}
+
+function capturePointer(state) {
+    try {
+        state.captureTarget?.setPointerCapture?.(state.pointerId);
+    } catch {
+        // The capture-phase document listeners still provide a safe fallback.
     }
-    document.removeEventListener('mousemove', state.onMouseMove);
-    document.removeEventListener('mouseup', state.onMouseUp);
+}
+
+function releasePointer(state) {
+    try {
+        if (state.captureTarget?.hasPointerCapture?.(state.pointerId)) {
+            state.captureTarget.releasePointerCapture(state.pointerId);
+        }
+    } catch {
+        // Capture can already be released automatically after pointerup.
+    }
+}
+
+function dispatchWindowEvent(document, eventName) {
+    const EventConstructor = document.defaultView?.CustomEvent || CustomEvent;
+    document.defaultView?.dispatchEvent(new EventConstructor(eventName));
+}
+
+function suppressClickAfterDrag(element, event) {
+    const suppressUntil = Number(element.dataset.cwlSuppressClickUntil || 0);
+    if (Date.now() >= suppressUntil) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
 }
 
 function findDropTarget(document, x, y) {
-    const lists = document.querySelectorAll(
-        '.cwl-clan-player-list, #cwl-available-players'
-    );
-    for (const list of lists) {
-        const rect = list.getBoundingClientRect();
-        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-            return list;
-        }
+    const directTarget = document.elementFromPoint?.(x, y)?.closest?.(DROP_TARGET_SELECTOR);
+    if (directTarget) return directTarget;
+
+    for (const list of document.querySelectorAll(DROP_TARGET_SELECTOR)) {
+        const hitArea = list.matches('.cwl-clan-player-list')
+            ? list.closest('.cwl-clan-article') || list
+            : list;
+        if (pointIsInside(hitArea.getBoundingClientRect(), x, y)) return list;
     }
     return null;
 }
 
-function updateDropFeedback(card, target, document) {
+function pointIsInside(rect, x, y) {
+    return rect.width > 0
+        && rect.height > 0
+        && x >= rect.left
+        && x <= rect.right
+        && y >= rect.top
+        && y <= rect.bottom;
+}
+
+function updateDropFeedback(target, document) {
     clearDropFeedback(document);
-    if (!target) return;
-    target.classList.add('cwl-drop-valid');
+    target?.classList.add('cwl-drop-valid');
 }
 
 function clearDropFeedback(document) {

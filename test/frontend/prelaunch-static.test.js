@@ -41,12 +41,8 @@ describe('Pre-launch static contract', () => {
         expect(document.title.trim()).not.toBe('');
         expect(document.querySelector('meta[name="description"]')?.content.trim()).not.toBe('');
         const robots = document.querySelector('meta[name="robots"]')?.content || '';
-        if (['src/advanced-stats.html', 'src/achievements.html'].includes(path)) {
-            expect(robots).toMatch(/\bnoindex\b/i);
-            expect(robots).toMatch(/\bfollow\b/i);
-        } else {
-            expect(robots).toMatch(/\bindex\b/i);
-        }
+        expect(robots).toMatch(/\bindex\b/i);
+        expect(robots).not.toMatch(/\bnoindex\b/i);
         expect(document.querySelector('link[rel="canonical"]')?.href).toBe(canonical);
         expect(document.querySelectorAll('h1')).toHaveLength(1);
         expect(document.querySelector('meta[property="og:title"]')?.content.trim()).not.toBe('');
@@ -68,8 +64,8 @@ describe('Pre-launch static contract', () => {
         expect(robots).toContain('Disallow: /subpages/popup_htmls/');
         expect(robots).toContain('https://clashpanel.com/sitemap.xml');
         expect(sitemap).not.toContain('replace-with-production-domain.invalid');
-        expect(sitemap).not.toContain('/advanced-stats');
-        expect(sitemap).not.toContain('/achievements');
+        expect(sitemap).toContain('<loc>https://clashpanel.com/advanced-stats</loc><lastmod>2026-08-31</lastmod>');
+        expect(sitemap).toContain('<loc>https://clashpanel.com/achievements</loc><lastmod>2026-08-31</lastmod>');
         expect(sitemap).toContain('/minigames');
         for (const name of ['privacy', 'cookies', 'terms', 'contact']) {
             expect(sitemap).toContain(`https://clashpanel.com/${name}`);
@@ -79,20 +75,20 @@ describe('Pre-launch static contract', () => {
             '<loc>https://clashpanel.com/changelog</loc><lastmod>2026-08-14</lastmod>'
         );
         expect(sitemap).toContain('https://clashpanel.com/bracket-generator');
-        expect(sitemap.match(/https:\/\/clashpanel\.com/g)).toHaveLength(22);
-        expect(sitemap.match(/<url>/g)).toHaveLength(22);
+        expect(sitemap.match(/https:\/\/clashpanel\.com/g)).toHaveLength(24);
+        expect(sitemap.match(/<url>/g)).toHaveLength(24);
     });
 
-    it('defines permanent static fallbacks for legacy legal URLs', () => {
+    it('keeps Worker-owned legal aliases out of the static asset redirect table', () => {
         const redirects = readFileSync('src/_redirects', 'utf8');
+        const publicRoutes = readFileSync('worker/public-routes.js', 'utf8');
 
         for (const name of ['privacy', 'cookies', 'terms', 'contact']) {
-            expect(redirects).toContain(
-                `/subpages/${name} /${name} 301`
-            );
-            expect(redirects).toContain(
-                `/subpages/${name}.html /${name} 301`
-            );
+            expect(redirects).not.toContain(`/subpages/${name} /${name} 301`);
+            expect(redirects).not.toContain(`/subpages/${name}.html /${name} 301`);
+            expect(publicRoutes).toContain(`['/subpages/${name}', '/${name}']`);
+            expect(publicRoutes).toContain(`['/subpages/${name}.html', '/${name}']`);
+            expect(redirects).toContain(`/${name}.html /${name} 301`);
         }
         expect(redirects).toContain('/about.html /about 301');
     });
@@ -120,6 +116,42 @@ describe('Pre-launch static contract', () => {
         expect(headers).toContain('Permissions-Policy:');
         expect(headers).toContain('workers.dev/*');
         expect(headers).toContain('X-Robots-Tag: noindex');
+    });
+
+    it('revalidates script and stylesheet graphs without overlapping asset rules', () => {
+        const headers = readFileSync('src/_headers', 'utf8');
+
+        expect(headers).toContain('/assets/*.js');
+        expect(headers).toContain('/assets/*.css');
+        expect(headers).not.toMatch(/^\/assets\/\*\s*$/m);
+        expect(headers).toContain(
+            'Cache-Control: public, max-age=0, must-revalidate, stale-while-revalidate=0'
+        );
+        for (const extension of ['webp', 'svg', 'png', 'jpg']) {
+            expect(headers).toContain(`/assets/*.${extension}`);
+        }
+        expect(headers).toContain('/assets/css/pictures/*.avif');
+        expect(headers).toContain(
+            'Cache-Control: public, max-age=31536000, immutable'
+        );
+    });
+
+    it('keeps Adsterra policy links and origins constrained to the report-only ad script policy', () => {
+        const headers = readFileSync('src/_headers', 'utf8');
+        const scriptPolicy = headers.match(/Content-Security-Policy-Report-Only:[^\r\n]+/)?.[0] || '';
+        const privacy = readFileSync('src/subpages/privacy.html', 'utf8');
+        const cookies = readFileSync('src/subpages/cookies.html', 'utf8');
+
+        expect(scriptPolicy).toContain('https://pl31261194.profitableratecpmnetwork.com');
+        expect(scriptPolicy).toContain('https://www.highrevenueformat.com');
+        expect(scriptPolicy).toContain('script-src');
+        expect(scriptPolicy).toMatch(/script-src[^;]+https:\/\/fundingchoicesmessages\.google\.com/);
+        expect(scriptPolicy).toMatch(/connect-src[^;]+https:\/\/fundingchoicesmessages\.google\.com/);
+        expect(scriptPolicy).not.toMatch(/script-src[^;]*\*/);
+        for (const document of [privacy, cookies]) {
+            expect(document).toContain('https://adsterra.com/privacy-policy-managed');
+            expect(document).toContain('https://adsterra.com/cookies/');
+        }
     });
 
     it('uses explicit button types in every HTML source', () => {

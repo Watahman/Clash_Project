@@ -39,7 +39,9 @@ export function renderHistoricalBoard(
     syncRosterMode(refs, report, selectedClan);
     refs.phase.textContent = 'Historical';
     refs.phase.dataset.state = 'completed';
-    refs.help.textContent = 'Completed CWL season loaded from ClashKing history.';
+    refs.help.textContent = report.historyPreview
+        ? 'Season summary loaded. Full season details are loading…'
+        : 'Completed CWL season loaded from ClashKing history.';
     refs.help.dataset.state = 'info';
     renderHistoricalSummary(refs.historySummary, report);
     clearLiveTab(refs);

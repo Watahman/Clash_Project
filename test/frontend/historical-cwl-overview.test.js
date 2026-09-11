@@ -9,6 +9,27 @@ import {
 } from '../../src/assets/js/operation-board/historical-cwl-overview-model.js';
 
 describe('Historical CWL overview', () => {
+    it('keeps lightweight index summaries useful without war payloads', () => {
+        const [item] = buildHistoricalCwlOverview([{
+            season: '2026-06',
+            league: { name: 'Master League II' },
+            position: 3,
+            wins: 4,
+            losses: 2,
+            draws: 1,
+            stars: 54,
+            destruction: 93.4,
+            dataQuality: 'Partial history'
+        }]).seasons;
+
+        expect(item.summary.record).toEqual({ wins: 4, losses: 2, draws: 1 });
+        expect(item.summary.league.name).toBe('Master League II');
+        expect(item.summary.position).toBe(3);
+        expect(item.summary.offense.avgStars).toBeNull();
+        expect(item.summary.offense.starsPerWar).toBe(2);
+        expect(item.summary.dataQuality).toBe('Partial history');
+    });
+
     it('derives league progression from consecutive real seasons', () => {
         const overview = buildHistoricalCwlOverview([
             season('2026-05', 'Master League II', 2.2, 2.1, 0.95, 3),

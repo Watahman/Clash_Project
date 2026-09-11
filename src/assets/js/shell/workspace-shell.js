@@ -1,7 +1,7 @@
 import { AUTH_STATES, onAuthStateChange, resolveAuthState } from '../auth/auth-client.js?v=20260829-public-auth-v1';
 import { buildLoginUrl, getCurrentReturnPath, redirectToLogin } from '../auth/auth-navigation.js?v=20260829-public-auth-v1';
 import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
-import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { initI18n, t } from '../i18n/i18n.js?v=20260831-master-live-v1';
 import { toggleTheme as toggleThemePreference } from '../theme/theme-manager.js?v=20260829-public-auth-v1';
 import { initWorkspaceGuidance } from './workspace-guidance.js?v=20260829-public-auth-v1';
 import {
@@ -61,6 +61,7 @@ function setAuthPresentation(body, state, access, onRetry) {
     body.classList.toggle('workspace-auth-loading', state.status === AUTH_STATES.LOADING);
     const authenticated = state.status === AUTH_STATES.AUTHENTICATED;
     const guest = state.status === AUTH_STATES.GUEST;
+    const waitingForAuth = state.status === AUTH_STATES.LOADING && access === ACCESS.AUTH;
     body.querySelectorAll('[data-auth-only]').forEach(element => setHidden(element, !authenticated));
     body.querySelectorAll('[data-guest-only]').forEach(element => setHidden(element, !guest));
     body.querySelectorAll('[data-workspace-auth-lock]').forEach(element => setHidden(element, authenticated));
@@ -76,7 +77,7 @@ function setAuthPresentation(body, state, access, onRetry) {
     setHidden(retry, state.status !== AUTH_STATES.UNAVAILABLE);
     if (retry) retry.onclick = onRetry;
     body.querySelector(':scope > .workspace-area > main')?.setAttribute(
-        'aria-busy', String(state.status === AUTH_STATES.LOADING)
+        'aria-busy', String(waitingForAuth)
     );
     window.dispatchEvent(new CustomEvent('clashtools:auth-state-changed', { detail: state }));
 }
@@ -110,9 +111,15 @@ function retryWorkspaceAuth(body, currentPage) {
         .finally(() => { body.dataset.authInitialReady = 'true'; });
 }
 
-function handleAuthTransition(body, currentPage, state) {
-    if (body.dataset.authInitialReady !== 'true') return;
+function hasPresentedAuthState(body, state) {
+    if (body.dataset.authState !== state.status) return false;
+    if (state.status !== AUTH_STATES.AUTHENTICATED) return true;
+    return workspaceAuthUserId === String(state.session?.user?.id || '').trim();
+}
+
+function applyResolvedAuthState(body, currentPage, state) {
     const access = getWorkspaceModule(currentPage).access;
+    if (hasPresentedAuthState(body, state)) return;
     const retry = () => retryWorkspaceAuth(body, currentPage);
     applyAuthState(body, state, access, retry);
     if (access === ACCESS.AUTH && state.status === AUTH_STATES.GUEST) {
@@ -120,6 +127,11 @@ function handleAuthTransition(body, currentPage, state) {
         return;
     }
     if (state.status === AUTH_STATES.AUTHENTICATED) void loadAuthenticatedWorkspaceData(state);
+}
+
+function handleAuthTransition(body, currentPage, state) {
+    if (body.dataset.authInitialReady !== 'true') return;
+    applyResolvedAuthState(body, currentPage, state);
 }
 
 function subscribeWorkspaceAuth(body, currentPage) {
@@ -140,14 +152,17 @@ async function loadInitialWorkspaceData(body, currentPage, force = false) {
         access,
         () => retryWorkspaceAuth(body, currentPage)
     );
-    const state = await resolveAuthState({ force });
-    applyAuthState(body, state, access, () => retryWorkspaceAuth(body, currentPage));
-    if (access === ACCESS.AUTH && state.status === AUTH_STATES.GUEST) {
-        redirectToLogin(getCurrentReturnPath());
+    const authRequest = resolveAuthState({ force }).catch(error => ({
+        status: AUTH_STATES.UNAVAILABLE,
+        session: null,
+        error
+    }));
+    if (access === ACCESS.PUBLIC) {
+        void authRequest.then(state => applyResolvedAuthState(body, currentPage, state));
         return;
     }
-    if (state.status !== AUTH_STATES.AUTHENTICATED) return;
-    await loadAuthenticatedWorkspaceData(state);
+    const state = await authRequest;
+    applyResolvedAuthState(body, currentPage, state);
 }
 
 function ensureGuidanceStyles() {

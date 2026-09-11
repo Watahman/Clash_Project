@@ -52,6 +52,7 @@ public final class DynamicOfficialAchievementProgress {
             row.addProperty("source", AchievementSources.LIVE_PROFILE);
             row.addProperty("category_label", "Dynamic official achievements");
             row.addProperty("spec_metric", "achievement.value >= achievement.target");
+            row.addProperty("comparison", "GTE");
             row.addProperty("evaluation_mode", "DIRECT");
             row.addProperty("priority", "P0");
             row.addProperty("tier_label", "Unlocked");

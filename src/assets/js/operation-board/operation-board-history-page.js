@@ -1,7 +1,7 @@
 import { getCurrentCwlPlayerContext } from './operation-board-player-context.js';
-import { createOperationBoardHistoryController } from './operation-board-history-controller.js?v=20260829-public-auth-v1';
-import { getHistoricalCwlPlayerContext } from './historical-cwl-season-model.js';
-import { renderHistoryOverview } from './operation-board-renderer.js?v=20260829-public-auth-v1';
+import { createOperationBoardHistoryController } from './operation-board-history-controller.js?v=20260910-cwl-history-progressive';
+import { getHistoricalCwlPlayerContext } from './historical-cwl-season-model.js?v=20260910-cwl-history-progressive';
+import { renderHistoryOverview } from './operation-board-renderer.js?v=20260910-cwl-history-progressive';
 
 export function createOperationBoardHistoryPage({
                                                     refs,
@@ -11,6 +11,7 @@ export function createOperationBoardHistoryPage({
                                                     setLatestReport,
                                                     renderLatestReport,
                                                     setActiveTab,
+                                                    selectBoardTab,
                                                     setState,
                                                     setHelp,
                                                     clearBoard
@@ -39,6 +40,13 @@ export function createOperationBoardHistoryPage({
             renderLatestReport();
             setState('ready');
         },
+        onHistoricalDetail: (report, tab) => {
+            setLatestReport(report);
+            latestOverview = null;
+            renderLatestReport();
+            selectBoardTab(tab);
+            setState('ready');
+        },
         onOverview: overview => {
             setLatestReport(null);
             latestOverview = overview;
@@ -54,7 +62,24 @@ export function createOperationBoardHistoryPage({
             setHelp(
                 mode === 'overview'
                     ? 'Loading multi-season CWL history…'
-                    : 'Loading the selected CWL season…'
+                : 'Loading the selected CWL season…'
+            );
+        },
+        onDetailLoading: tab => {
+            setHelp(
+                tab === 'roster'
+                    ? 'Loading historical player details…'
+                    : 'Loading historical wars and standings…'
+            );
+        },
+        onDetailError: (error, tab) => {
+            console.error(error);
+            setState('error', true);
+            setHelp(
+                tab === 'roster'
+                    ? 'Player details are unavailable. Refresh to retry.'
+                    : 'War details are unavailable. Refresh to retry.',
+                true
             );
         },
         onError: (error, mode) => {

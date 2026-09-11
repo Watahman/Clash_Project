@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ClashKingCwlProviderTest {
@@ -116,6 +117,28 @@ class ClashKingCwlProviderTest {
         ), requests);
     }
 
+    @Test
+    void preservesMissingArchivedWarPlaceholdersWithoutFailingTheSeason()
+            throws Exception {
+        respond(
+                "/v2/cwl/%23PQL/group?season=2026-06",
+                200,
+                seasonWithPlaceholder()
+        );
+
+        HistoricalCwlSeason result = provider.getSeason("#PQL", "2026-06");
+
+        assertEquals(2, result.wars().size());
+        assertEquals("#HYDRATED", result.wars().getFirst().id());
+        assertEquals("#MISSING", result.wars().get(1).id());
+        assertEquals(1, result.wars().get(1).day());
+        assertEquals("unknown", result.wars().get(1).state());
+        assertEquals("#PQL", result.wars().get(1).clan().tag());
+        assertFalse(result.wars().get(1).detailsComplete());
+        assertEquals(1, result.roster().size());
+        assertEquals("Partial history", result.dataQuality());
+    }
+
     private void respond(String target, int status, String body) {
         responses.put(target, new Response(status, body));
     }
@@ -146,6 +169,34 @@ class ClashKingCwlProviderTest {
                  "rounds":[]
                }
                """.formatted(season);
+    }
+
+    private static String seasonWithPlaceholder() {
+        return """
+               {
+                 "season":"2026-06",
+                 "state":"ended",
+                 "warLeague":{"id":48000017,"name":"Champion League II"},
+                 "clans":[
+                   {"tag":"#PQL","name":"ClashPanel","members":[
+                     {"tag":"#P0L","name":"Alex","townHallLevel":17}
+                   ]},
+                   {"tag":"#ENEMY","name":"Opponent","members":[]}
+                 ],
+                 "rounds":[{"warTags":[
+                   {
+                     "tag":"#HYDRATED","state":"warEnded",
+                     "endTime":"2026-06-08T12:00:00Z",
+                     "teamSize":1,"attacksPerMember":1,
+                     "clan":{"tag":"#PQL","stars":3,
+                       "destructionPercentage":100,"members":[]},
+                     "opponent":{"tag":"#ENEMY","stars":2,
+                       "destructionPercentage":90,"members":[]}
+                   },
+                   {"tag":"#MISSING"}
+                 ]}]
+               }
+               """;
     }
 
     private record Response(int status, String body) {}

@@ -498,7 +498,7 @@ public class API_Utils {
     static int publicStatus(HttpException error) {
         if (error.isSafeToExpose()) return error.getStatusCode();
         return switch (error.getStatusCode()) {
-            case 400, 401, 403, 404, 409, 422, 429 -> error.getStatusCode();
+            case 400, 401, 403, 404, 409, 422, 429, 504 -> error.getStatusCode();
             default -> 502;
         };
     }
@@ -512,11 +512,13 @@ public class API_Utils {
             case 404 -> "De gevraagde gegevens zijn niet gevonden.";
             case 409 -> "De aanvraag botst met de huidige gegevens.";
             case 429 -> provider + " ontvangt te veel aanvragen. Probeer later opnieuw.";
+            case 504 -> provider + " reageerde niet op tijd. Probeer opnieuw.";
             default -> provider + " is tijdelijk niet beschikbaar.";
         };
         String code = switch (error.getStatusCode()) {
             case 429 -> "UPSTREAM_RATE_LIMITED";
             case 404 -> "UPSTREAM_NOT_FOUND";
+            case 504 -> "UPSTREAM_TIMEOUT";
             default -> "UPSTREAM_ERROR";
         };
         return "{\"error\":\"" + escapeJson(message) + "\",\"code\":\"" + code + "\"}";

@@ -18,18 +18,18 @@ import {
 
 describe('Entity Guesser phase 2D broad categories', () => {
     it('combines the complete catalog into four broad, valid categories', () => {
-        expect(ENTITY_GUESSER_DATA_VERSION).toContain('phase-2d');
+        expect(ENTITY_GUESSER_DATA_VERSION).toBe('2026-09-01-equipment-fix-1');
         expect(ENTITY_CATEGORIES.map(category => category.id)).toEqual([
             'defenses',
             'otherBuildings',
             'troopsHeroes',
             'spellsEquipment'
         ]);
-        expect(ENTITIES).toHaveLength(163);
+        expect(ENTITIES).toHaveLength(164);
         expect(getEntities('defenses')).toHaveLength(29);
         expect(getEntities('otherBuildings')).toHaveLength(25);
         expect(getEntities('troopsHeroes')).toHaveLength(50);
-        expect(getEntities('spellsEquipment')).toHaveLength(59);
+        expect(getEntities('spellsEquipment')).toHaveLength(60);
         expect(validateCatalog()).toEqual([]);
         ENTITY_CATEGORIES.forEach(category => {
             expect(category.columns.some(column => column.key === 'unlockTh')).toBe(false);

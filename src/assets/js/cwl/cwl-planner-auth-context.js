@@ -68,7 +68,7 @@ export function isCurrentPlannerGeneration(generation) {
 
 export function bindPlannerAuthTransitions(initialState, onTransition) {
     authIdentity = getPlannerAuthIdentity(initialState);
-    if (initialState?.status !== 'authenticated') return;
+    if (initialState === undefined) return;
     const subscribe = getAuthStateListener();
     if (typeof subscribe !== 'function') return;
     authUnsubscribe?.();

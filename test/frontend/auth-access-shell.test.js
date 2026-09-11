@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 
 describe('auth state and action access contracts', () => {
     beforeEach(() => {
@@ -163,6 +165,18 @@ describe('auth state and action access contracts', () => {
 });
 
 describe('workspace access registry and guest shell markup', () => {
+    it('cache-busts the public-auth shell across every workspace entry', async () => {
+        const pages = [
+            'achievements', 'advanced-stats', 'bracket-generator', 'cwl-operation-board',
+            'cwl-planner-drafts', 'cwl-planner', 'dashboard', 'explore', 'groups',
+            'minigames', 'profile', 'war-operation-board'
+        ];
+        for (const page of pages) {
+            const html = await readFile(resolve(process.cwd(), `src/subpages/${page}.html`), 'utf8');
+            expect(html, page).toContain('workspace-shell.js?v=20260831-master-live-v1');
+        }
+    });
+
     it('exposes the definitive public and auth route matrix', async () => {
         const { ACCESS, WORKSPACE_MODULES, getWorkspaceAccessForPath } = await import('../../src/assets/js/shell/module-registry.js?v=20260829-public-dashboard-v1');
         const access = Object.fromEntries(WORKSPACE_MODULES.map(module => [module.id, module.access]));
@@ -193,9 +207,24 @@ describe('workspace access registry and guest shell markup', () => {
         expect(sidebar).toContain('workspace-nav-lock');
         expect(sidebar).toContain('data-auth-only');
         expect(sidebar).toContain('data-guest-only');
-        expect(sidebar).toContain('shell.publicWebsite');
+        expect(sidebar).toContain('href="/"');
         expect(topbar).toContain('workspace-auth-status');
         expect(topbar).toContain('data-auth-only');
         expect(topbar).toContain('data-guest-only');
+    });
+
+    it('marks planner private-source locks for authenticated shell presentation', async () => {
+        const planner = await readFile(
+            resolve(process.cwd(), 'src/subpages/cwl-planner.html'),
+            'utf8'
+        );
+        const markup = document.createElement('template');
+        markup.innerHTML = planner;
+        const privateSourceTabs = markup.content.querySelectorAll('[data-auth-required]');
+
+        expect(privateSourceTabs).toHaveLength(2);
+        privateSourceTabs.forEach(tab => {
+            expect(tab.querySelector('[data-workspace-auth-lock]')).not.toBeNull();
+        });
     });
 });

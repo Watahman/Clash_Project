@@ -110,7 +110,7 @@ describe('Advanced Stats workspace page', () => {
 
         expect(html).toContain(`advanced-stats-bootstrap.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(html).toContain(`advanced-stats.css?v=${ADVANCED_STATS_CACHE_VERSION}`);
-        expect(html).toContain('workspace-shell.js?v=20260829-public-dashboard-v1');
+        expect(html).toContain('workspace-shell.js?v=20260831-master-live-v1');
         expect(bootstrap).toContain(`advanced-stats.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(page).toContain(`advanced-stats-renderer.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(page).toContain(`advanced-stats-data-loader.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
@@ -128,8 +128,8 @@ describe('Advanced Stats workspace page', () => {
         expect(page).toContain("advanced-stats-army-view.js?v=20260809-4");
         expect(page).toContain('applyI18n(document)');
         expect(i18n).toContain("runtime-translations.js?v=20260909-battledata-v1");
-        expect(runtime).toContain("runtime-locales/workspace-en.js?v=20260829-public-auth-v1");
-        expect(runtime).toContain("runtime-locales/workspace-nl.js?v=20260829-public-auth-v1");
+        expect(runtime).toContain("runtime-locales/workspace-en.js?v=20260831-master-live-v1");
+        expect(runtime).toContain("runtime-locales/workspace-nl.js?v=20260831-master-live-v1");
         expect(runtime).toContain("advanced-stats-locales.js?v=20260830-monthly-trends-v1");
         expect(runtime).toContain("advanced-stats-extra-locales.js?v=20260830-monthly-trends-v1");
         expect(runtime).toContain("advanced-stats-ui-locales.js?v=20260909-battledata-v1");

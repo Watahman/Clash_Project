@@ -26,7 +26,7 @@ import {
 
 describe('Entity Guesser core categories', () => {
     it('ships the five core categories with a versioned catalog', () => {
-        expect(ENTITY_GUESSER_DATA_VERSION).toContain('phase-2');
+        expect(ENTITY_GUESSER_DATA_VERSION).toBe('2026-09-01-equipment-fix-1');
         expect(ENTITY_CATEGORIES.map(category => category.id)).toEqual([
             'troops', 'spells', 'heroes', 'pets', 'equipment'
         ]);
@@ -34,7 +34,7 @@ describe('Entity Guesser core categories', () => {
         expect(getEntities('spells')).toHaveLength(18);
         expect(getEntities('heroes')).toHaveLength(6);
         expect(getEntities('pets')).toHaveLength(12);
-        expect(getEntities('equipment')).toHaveLength(41);
+        expect(getEntities('equipment')).toHaveLength(42);
         expect(validateCatalog()).toEqual([]);
     });
 
@@ -51,7 +51,7 @@ describe('Entity Guesser core categories', () => {
         const spellsEquipment = getCatalogEntities('spellsEquipment');
 
         expect(searchEntities('', defenses, defenses.length)).toHaveLength(29);
-        expect(searchEntities('', spellsEquipment, spellsEquipment.length)).toHaveLength(59);
+        expect(searchEntities('', spellsEquipment, spellsEquipment.length)).toHaveLength(60);
         expect(searchEntities('tower', defenses, defenses.length).map(item => item.name))
             .toContain('Super Wizard Tower');
     });

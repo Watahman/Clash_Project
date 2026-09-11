@@ -1,14 +1,14 @@
-import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { initI18n, t } from '../i18n/i18n.js?v=20260831-master-live-v1';
 import {
     getAuthState,
     syncAuthSession
 } from "../auth/auth-client.js?v=20260829-public-auth-v1";
-import { initOverlayHide, initAddPlayersOverlay, initAddClanButton, applyCwlSizeRestriction } from "../cwl/cwl-overlay.js?v=20260829-public-auth-v1";
-import { initPlanIO, savePlan, loadAllPlans, loadPlanListener, startNewPlan, undoLastPlanChange } from "../cwl/cwl-plan-io.js?v=20260829-public-auth-v1";
+import { initOverlayHide, initAddPlayersOverlay, initAddClanButton, applyCwlSizeRestriction } from "../cwl/cwl-overlay.js?v=20260830-player-drag-v3";
+import { initPlanIO, savePlan, loadAllPlans, loadPlanListener, startNewPlan, undoLastPlanChange } from "../cwl/cwl-plan-io.js?v=20260830-player-drag-v3";
 import { initFreeRosterFilter } from "../cwl/cwl-roster-filter.js?v=20260829-public-auth-v1";
 import { initClanVisibilityFilter } from "../cwl/cwl-clan-visibility-filter.js?v=20260829-public-auth-v1";
 import { refreshPlannerPriorityLabels } from "../cwl/cwl-priority-labels.js?v=20260829-public-auth-v1";
-import { initSpreadsheetImport } from "../cwl/cwl-spreadsheet-import.js?v=20260829-public-auth-v1";
+import { initSpreadsheetImport } from "../cwl/cwl-spreadsheet-import.js?v=20260830-player-drag-v3";
 import { getClanInfoRequest } from "../API/API-Clan.js?v=20260829-public-auth-v1";
 import * as conf from "../Data/config.js";
 import { initPlayerPerformanceClient } from "../cwl/player-performance-client.js?v=20260829-public-auth-v1";
@@ -18,10 +18,11 @@ import { initOptimizePlan } from "../cwl/optimize-plan/cwl-optimize-plan-ui.js?v
 import { initCwlPlanExport } from "../cwl/export/cwl-export-ui.js?v=20260829-public-auth-v1";
 import { initPlannerSurface } from "../cwl/cwl-planner-ui.js?v=20260829-public-auth-v1";
 import { initPlannerSaveAction } from "../cwl/cwl-planner-save-action.js?v=20260829-public-auth-v1";
+import * as plannerStorage from "../cwl/cwl-planner-guest-storage.js?v=20260829-public-auth-v1";
 import {
     applyPlannerFixture,
     getRequestedPlannerFixture
-} from '../fixtures/planner-fixtures.js?v=20260829-public-auth-v1';
+} from '../fixtures/planner-fixtures.js?v=20260830-player-drag-v3';
 import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 
 export { savePlan };
@@ -71,10 +72,14 @@ function labelInit() {
 async function init() {
     initI18n();
     const fixture = isRedesignFixtureRequested() ? await getRequestedPlannerFixture() : null;
-    if (!fixture) await syncAuthSession().catch(() => null);
     plannerAuthState = fixture
         ? { status: 'guest', session: null }
         : getAuthState();
+    const authSync = fixture ? Promise.resolve(null) : syncAuthSession().catch(() => null);
+    window.addEventListener('clashtools:planner-auth-state-changed', event => {
+        plannerAuthState = event.detail || { status: 'guest', session: null };
+        updateSaveButtonState();
+    });
     const restoreFixtureStorage = fixture ? preservePlannerStorage() : null;
     if (fixture) {
         conf.setCanAutosave(false);
@@ -128,6 +133,7 @@ async function init() {
     } else {
         await loadAllPlans();
     }
+    await authSync;
     loadPlanListener();
 }
 
@@ -227,7 +233,11 @@ function updateSaveButtonState() {
     const hasClans = Boolean(allClans?.querySelector('.cwl-clan-article'));
     const canSave = hasPlayers || hasClans;
     savePlanBtn.disabled = !canSave;
-    savePlanBtn.title = canSave ? t('cwl.save') : t('cwl.saveDisabledReason');
+    const saveKey = plannerStorage.hasCloudPlannerAccess()
+        ? 'cwl.save'
+        : 'planner.saveToAccount';
+    savePlanBtn.textContent = t(saveKey);
+    savePlanBtn.title = canSave ? t(saveKey) : t('cwl.saveDisabledReason');
 }
 
 function guessCwlSize(fixture = null) {

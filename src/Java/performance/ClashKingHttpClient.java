@@ -10,28 +10,40 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
 import java.time.Duration;
 
 public final class ClashKingHttpClient {
     private static final ClashKingRequestCounter REQUEST_COUNTER = ClashKingRequestCounter.shared();
-    private static final HttpClient CLIENT = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(8))
-            .followRedirects(HttpClient.Redirect.NORMAL)
-            .version(HttpClient.Version.HTTP_2)
-            .build();
-
     private final String baseUrl;
     private final String upstreamName;
     private final String bearerToken;
+    private final Duration requestTimeout;
+    private final HttpClient client;
 
     public ClashKingHttpClient(String baseUrl, String upstreamName) {
         this(baseUrl, upstreamName, "");
     }
 
     public ClashKingHttpClient(String baseUrl, String upstreamName, String bearerToken) {
+        this(baseUrl, upstreamName, bearerToken, Duration.ofSeconds(20));
+    }
+
+    ClashKingHttpClient(
+            String baseUrl,
+            String upstreamName,
+            String bearerToken,
+            Duration requestTimeout
+    ) {
         this.baseUrl = String.valueOf(baseUrl).replaceAll("/+$", "");
         this.upstreamName = upstreamName;
         this.bearerToken = normalizeBearerToken(bearerToken);
+        this.requestTimeout = validRequestTimeout(requestTimeout);
+        this.client = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(8))
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .version(HttpClient.Version.HTTP_2)
+                .build();
     }
 
     public JsonObject get(String path) throws Exception {
@@ -65,7 +77,7 @@ public final class ClashKingHttpClient {
 
     private HttpRequest.Builder request(String path) {
         HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(baseUrl + path))
-                .timeout(Duration.ofSeconds(20))
+                .timeout(requestTimeout)
                 .header("Accept", "application/json")
                 .header("User-Agent", "ClashPanel/1.0");
         if (!bearerToken.isBlank()) builder.header("Authorization", bearerToken);
@@ -81,7 +93,16 @@ public final class ClashKingHttpClient {
 
     private JsonElement send(HttpRequest request) throws Exception {
         REQUEST_COUNTER.record(request.method());
-        HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response;
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (HttpTimeoutException timeout) {
+            throw HttpException.upstream(
+                    504,
+                    "{\"error\":\"Upstream request timed out\"}",
+                    upstreamName
+            );
+        }
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw HttpException.upstream(response.statusCode(), response.body(), upstreamName);
         }
@@ -103,5 +124,12 @@ public final class ClashKingHttpClient {
                 "{\"error\":\"Invalid upstream JSON\"}",
                 upstreamName
         );
+    }
+
+    private static Duration validRequestTimeout(Duration requested) {
+        if (requested == null || requested.isZero() || requested.isNegative()) {
+            return Duration.ofSeconds(20);
+        }
+        return requested;
     }
 }

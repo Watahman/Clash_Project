@@ -11,8 +11,8 @@ describe('workspace Minigames navigation', () => {
         expect(dashboard).toContain('data-pillar="play" href="/app/minigames"');
         expect(registry).toContain("['advancedStats', 'nav.advancedStats'");
         expect(registry).toContain("['achievements', 'nav.achievements'");
-        expect(registry).toContain("['advancedStats', 'nav.advancedStats', 'Advanced Stats', 'progress', '/app/advanced-stats', true, true]");
-        expect(registry).toContain("['achievements', 'nav.achievements', 'Achievements', 'progress', '/app/achievements', true, true]");
+        expect(registry).toContain("['advancedStats', 'nav.advancedStats', 'Advanced Stats', 'progress', '/app/advanced-stats', true]");
+        expect(registry).toContain("['achievements', 'nav.achievements', 'Achievements', 'progress', '/app/achievements', true]");
     });
 
     it.each(['en', 'nl', 'fr', 'de', 'es'])(
@@ -56,7 +56,7 @@ describe('workspace Minigames navigation', () => {
             expect(privatePage).toContain(attribute);
             expect(publicPage).toContain(attribute);
         });
-        expect(privatePage).toContain('/assets/js/pages/minigames-hub.js?v=20260828-seo-links');
+        expect(privatePage).toContain('/assets/js/pages/minigames-hub.js?v=20260831-guest-local-v1');
         expect(privatePage).toContain('/assets/js/pages/minigames-phase2b.js?v=20260814-entity-mode-fix');
         expect(privatePage).toContain('/assets/js/pages/higher-lower.js?v=20260814-metric-card-labels');
         expect(privatePage).toContain('minigames-entity-guesser.css?v=20260814-practice-picker');

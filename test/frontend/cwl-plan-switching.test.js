@@ -14,7 +14,7 @@ vi.mock('../../src/assets/js/Data/config.js', () => ({
     setCanAutosave: mocks.setCanAutosave,
     setLoading: mocks.setLoading
 }));
-vi.mock('../../src/assets/js/templates/CWLTemplates.js?v=20260829-public-auth-v1', () => ({
+vi.mock('../../src/assets/js/templates/CWLTemplates.js?v=20260830-player-drag-v3', () => ({
     createPlayerCard: mocks.createPlayerCard,
     createClanCard: mocks.createClanCard
 }));

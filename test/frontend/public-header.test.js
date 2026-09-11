@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
     normalizePublicFooter,
@@ -5,6 +8,43 @@ import {
     normalizePublicShell,
     updatePublicHeaderAuth
 } from '../../src/assets/js/shell/public-header.js?v=20260829-public-header-cta-v2';
+
+const PUBLIC_NAV = [
+    ['Tools', '/#features'],
+    ['Games', '/minigames'],
+    ['Guides', '/guides'],
+    ['Methodology', '/methodology'],
+    ['About', '/about'],
+    ['Changelog', '/changelog']
+];
+
+const PUBLIC_STATIC_PAGES = [
+    ['src/index.html', 'tools'], ['src/about.html', 'about'],
+    ['src/achievements.html', null], ['src/advanced-stats.html', null],
+    ['src/bracket-generator.html', null], ['src/changelog.html', 'changelog'],
+    ['src/clan-management.html', null], ['src/cwl-planner.html', null],
+    ['src/cwl-tracker.html', null], ['src/guides.html', 'guides'],
+    ['src/methodology.html', 'methodology'], ['src/minigames.html', 'games'],
+    ['src/subpages/contact.html', null], ['src/subpages/cookies.html', null],
+    ['src/subpages/privacy.html', null], ['src/subpages/terms.html', null],
+    ['src/guides/cwl-attack-defense.html', 'guides'],
+    ['src/guides/cwl-availability.html', 'guides'],
+    ['src/guides/cwl-bonus-medals.html', 'guides'],
+    ['src/guides/cwl-rotation.html', 'guides'],
+    ['src/guides/cwl-season-history.html', 'guides'],
+    ['src/guides/fair-cwl-roster.html', 'guides'],
+    ['src/guides/missed-attacks.html', 'guides'],
+    ['src/guides/spreadsheet-vs-cwl-planner.html', 'guides']
+];
+
+const STATIC_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+
+function readStaticPage(relativePath) {
+    return new DOMParser().parseFromString(
+        readFileSync(resolve(STATIC_ROOT, relativePath), 'utf8'),
+        'text/html'
+    );
+}
 
 function mountShell(pathname) {
     window.history.replaceState({}, '', pathname);
@@ -89,5 +129,28 @@ describe('public shell normalization', () => {
         normalizePublicFooter(document);
         expect(header.innerHTML).toBe(firstHeader);
         expect(footer.innerHTML).toBe(firstFooter);
+    });
+});
+
+describe('public shell static fallbacks', () => {
+    it('keeps every public fallback aligned with the shared nav and CTA contract', () => {
+        PUBLIC_STATIC_PAGES.forEach(([relativePath, activeSection]) => {
+            const page = readStaticPage(relativePath);
+            const links = Array.from(page.querySelectorAll('header.public-header nav.public-nav > a'));
+            expect(links.map(link => [link.textContent.trim(), link.getAttribute('href')]), relativePath)
+                .toEqual(PUBLIC_NAV);
+
+            const current = links.filter(link => link.getAttribute('aria-current') === 'page');
+            expect(current, relativePath).toHaveLength(activeSection ? 1 : 0);
+            if (activeSection) expect(current[0].getAttribute('href'), relativePath)
+                .toBe(PUBLIC_NAV.find(([, href]) => href.includes(activeSection === 'tools' ? '#features' : activeSection))[1]);
+
+            const legalHrefs = Array.from(page.querySelectorAll('footer.public-footer nav a'))
+                .map(link => link.getAttribute('href'));
+            expect(legalHrefs, relativePath).toEqual(expect.arrayContaining(['/privacy', '/cookies', '/terms', '/contact']));
+
+            const startLinks = Array.from(page.querySelectorAll('a')).filter(link => /Start(?: for)? free/i.test(link.textContent));
+            expect(startLinks.every(link => link.getAttribute('href') === '/dashboard'), relativePath).toBe(true);
+        });
     });
 });

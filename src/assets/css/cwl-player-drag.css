@@ -1,0 +1,25 @@
+.workspace-planner .cwl-player-article.draggable {
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.workspace-planner .cwl-player-article.cwl-player-drag-source {
+    opacity: .28;
+    pointer-events: none;
+}
+
+.workspace-planner .cwl-player-article.cwl-player-dragging {
+    margin: 0 !important;
+    cursor: grabbing !important;
+    transform: none !important;
+    transition: none !important;
+}
+
+.workspace-planner .cwl-player-article.cwl-player-drag-preview {
+    user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .workspace-planner .cwl-player-article.cwl-player-drag-source { transition: none; }
+}

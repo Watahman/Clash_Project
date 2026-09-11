@@ -56,12 +56,18 @@ vi.mock('../../src/assets/js/shell/workspace-sidebar.js?v=20260829-public-auth-v
     initDesktopSidebar: vi.fn(),
     initMobileSidebar: vi.fn()
 }));
-vi.mock('../../src/assets/js/shell/workspace-shell-markup.js?v=20260829-public-auth-v1', () => ({
+vi.mock('../../src/assets/js/shell/workspace-shell-markup.js?v=20260829-public-dashboard-v1', () => ({
     buildWorkspaceShellMarkup: () => ({
         sidebar: '<aside><nav><a data-workspace-nav="dashboard"></a></nav></aside>',
         topbar: '<header><div id="workspace-auth-status"><span data-workspace-auth-message></span><button data-workspace-auth-retry></button></div></header>'
     })
 }));
+
+function deferred() {
+    let resolve;
+    const promise = new Promise(release => { resolve = release; });
+    return { promise, resolve };
+}
 vi.mock('../../src/assets/js/shell/workspace-user.js?v=20260829-public-auth-v1', () => ({
     clearWorkspaceUserIdentity: mocks.clearWorkspaceUserIdentity,
     loadWorkspaceUserIdentity: mocks.loadWorkspaceUserIdentity,
@@ -113,6 +119,56 @@ describe('workspace auth transitions', () => {
         expect(redirectToLogin).toHaveBeenCalledWith('/dashboard');
         expect(mocks.loadWorkspaceUserIdentity).toHaveBeenCalledTimes(1);
         expect(mocks.loadWorkspaceNotifications).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps a public route ready while the initial auth request is still pending', async () => {
+        document.body.dataset.workspacePage = 'explore';
+        const authRequest = deferred();
+        mocks.resolveAuthState.mockReturnValue(authRequest.promise);
+
+        await import('../../src/assets/js/shell/workspace-shell.js?v=20260829-public-dashboard-v1');
+        await vi.waitFor(() => expect(document.body.dataset.authInitialReady).toBe('true'));
+
+        expect(document.body.dataset.authState).toBe('loading');
+        expect(document.querySelector('main')).not.toBeNull();
+        expect(document.querySelector('main')?.getAttribute('aria-busy')).toBe('false');
+
+        authRequest.resolve({ status: 'guest', session: null, error: null });
+        await vi.waitFor(() => expect(document.body.dataset.authState).toBe('guest'));
+    });
+
+    it('shows a limited unavailable state without blocking public content', async () => {
+        document.body.dataset.workspacePage = 'explore';
+        mocks.resolveAuthState.mockResolvedValue({
+            status: 'auth-unavailable',
+            session: null,
+            error: new Error('offline')
+        });
+
+        await import('../../src/assets/js/shell/workspace-shell.js?v=20260829-public-dashboard-v1');
+        await vi.waitFor(() => expect(document.body.dataset.authState).toBe('auth-unavailable'));
+
+        expect(document.querySelector('main')).not.toBeNull();
+        expect(document.querySelector('#workspace-auth-status')).toHaveProperty('hidden', false);
+        expect(document.querySelector('[data-workspace-auth-retry]')).toHaveProperty('hidden', false);
+        expect(document.querySelector('main')?.getAttribute('aria-busy')).toBe('false');
+    });
+
+    it('keeps private content behind the auth gate until a guest is redirected', async () => {
+        const authRequest = deferred();
+        mocks.resolveAuthState.mockReturnValue(authRequest.promise);
+
+        await import('../../src/assets/js/shell/workspace-shell.js?v=20260829-public-dashboard-v1');
+        await vi.waitFor(() => expect(document.body.dataset.authState).toBe('loading'));
+
+        expect(document.body.dataset.authInitialReady).toBe('false');
+        expect(document.querySelector('main')?.getAttribute('aria-busy')).toBe('true');
+
+        authRequest.resolve({ status: 'guest', session: null, error: null });
+        await vi.waitFor(() => expect(document.body.dataset.authInitialReady).toBe('true'));
+
+        const { redirectToLogin } = await import('../../src/assets/js/auth/auth-navigation.js?v=20260829-public-auth-v1');
+        expect(redirectToLogin).toHaveBeenCalledWith('/dashboard');
     });
 
     it('keeps a public route usable when a later transition becomes guest', async () => {
