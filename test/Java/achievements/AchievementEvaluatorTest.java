@@ -1,6 +1,7 @@
 package Java.achievements;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.junit.jupiter.api.Test;
 
@@ -136,6 +137,19 @@ class AchievementEvaluatorTest {
     }
 
     @Test
+    void serializesStableComparisonModeForFixedAchievements() {
+        AchievementEvaluator evaluator = new AchievementEvaluator();
+        var rows = evaluator.toJson(evaluator.evaluate(Map.of(
+                "ranking_best_global_rank", 999L,
+                "profile_war_ready", 1L
+        )));
+
+        assertEquals("LTE", rowFor(rows, "TR_GLOBAL_RANK").get("comparison").getAsString());
+        assertEquals("BOOLEAN", rowFor(rows, "PLY_WAR_READY").get("comparison").getAsString());
+        assertEquals("UNSUPPORTED", rowFor(rows, "WAR_ATTACKS").get("comparison").getAsString());
+    }
+
+    @Test
     void secretCombinationFamiliesStayRoutedToMixedEvidence() {
         AchievementDefinition secret = family("SEC_LUCKY_SEVEN").getFirst();
         assertEquals(AchievementSources.MIXED, AchievementSources.forDefinition(secret));
@@ -207,6 +221,7 @@ class AchievementEvaluatorTest {
         assertEquals(100, badge.get("xp").getAsInt());
         assertEquals(1000, badge.get("progress").getAsLong());
         assertEquals(1000, badge.get("target").getAsLong());
+        assertEquals("GTE", badge.get("comparison").getAsString());
         assertTrue(badge.get("unlocked").getAsBoolean());
     }
 
@@ -228,5 +243,13 @@ class AchievementEvaluatorTest {
                 .filter(item -> item.definition().familyKey().equals(familyKey))
                 .filter(AchievementProgress::unlocked)
                 .count();
+    }
+
+    private static JsonObject rowFor(JsonArray rows, String familyKey) {
+        for (JsonElement element : rows) {
+            JsonObject row = element.getAsJsonObject();
+            if (familyKey.equals(row.get("family_key").getAsString())) return row;
+        }
+        throw new AssertionError("Missing family " + familyKey);
     }
 }

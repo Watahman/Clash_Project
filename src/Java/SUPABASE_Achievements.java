@@ -124,10 +124,12 @@ public class SUPABASE_Achievements {
         String userFilter = "user_id=" + SUPABASE_Client.eq(userId);
         String tagFilter = "player_tag=" + SUPABASE_Client.eq(playerTag);
 
-        String progress = SUPABASE_Client.getWithBody(
-                "achievement_progress",
-                "select=achievement_key,family_key,title,description,category,rarity,tier,xp,metric,progress,target,unlocked,unlocked_at,updated_at"
-                        + "&" + userFilter + "&" + tagFilter + "&order=category.asc,family_key.asc,tier.asc"
+        JsonObject progressRequest = new JsonObject();
+        progressRequest.addProperty("p_user_id", userId);
+        progressRequest.addProperty("p_player_tag", playerTag);
+        String progress = SUPABASE_Client.rpc(
+                "read_achievement_progress_v2",
+                progressRequest.toString()
         );
         String snapshots = SUPABASE_Client.getWithBody(
                 "achievement_base_snapshots",
@@ -165,7 +167,7 @@ public class SUPABASE_Achievements {
 
         JsonArray achievements = fixedAchievements.deepCopy();
         officialAchievements.forEach(achievements::add);
-        boolean persisted = persistObservedProgress(userId, playerTag, progress, achievements);
+        boolean persisted = persistObservedProgress(userId, playerTag, achievements);
         boolean clanPersisted = persistObservedClanProgress(
                 collected.clanTag(), clanProgress, achievements,
                 sourceAvailable(collected.sources(), AchievementSources.CLAN_PROFILE)
@@ -260,75 +262,36 @@ public class SUPABASE_Achievements {
     private boolean persistObservedProgress(
             String userId,
             String playerTag,
-            String storedProgressJson,
             JsonArray completeRows
     ) {
         try {
-            Map<String, JsonObject> storedByKey = storedRowsByKey(JsonParser.parseString(storedProgressJson).getAsJsonArray());
-            JsonArray changed = new JsonArray();
-            long now = Instant.now().getEpochSecond();
-            String unlockedNow = Instant.now().toString();
+            JsonArray observed = observedProgressRows(completeRows);
+            if (observed.isEmpty()) return true;
 
-            for (JsonElement element : completeRows) {
-                if (!element.isJsonObject()) continue;
-                JsonObject row = element.getAsJsonObject();
-                if (!booleanValue(row, "progress_known")) continue;
-                if (booleanValue(row, "catalog_template")) continue;
-                // Shared clan badges have their own clan-tag ledger. Never let
-                // them enter the player-owned XP/unlock table.
-                if ("clan".equalsIgnoreCase(stringValue(row, "scope"))) continue;
-
-                String key = stringValue(row, "achievement_key");
-                JsonObject stored = storedByKey.get(key);
-                long progress = longValue(row, "progress");
-                long target = longValue(row, "target");
-                boolean unlocked = booleanValue(row, "unlocked");
-
-                // The catalog itself is virtual/read-only. Do not create a DB row
-                // merely because a measurable achievement currently has zero progress.
-                if (stored == null && progress == 0 && !unlocked) continue;
-
-                boolean changedProgress = stored == null
-                        ? progress > 0
-                        : AchievementProgressMerge.improved(key, progress, longValue(stored, "progress"));
-                boolean changedUnlock = stored == null
-                        ? unlocked
-                        : unlocked && !booleanValue(stored, "unlocked");
-                boolean changedTarget = stored != null && target != longValue(stored, "target");
-                if (!changedProgress && !changedUnlock && !changedTarget) continue;
-
-                JsonObject db = new JsonObject();
-                db.addProperty("user_id", userId);
-                db.addProperty("player_tag", playerTag);
-                copyRequired(row, db, "achievement_key");
-                copyRequired(row, db, "family_key");
-                copyRequired(row, db, "title");
-                copyRequired(row, db, "description");
-                copyRequired(row, db, "category");
-                copyRequired(row, db, "rarity");
-                copyRequired(row, db, "tier");
-                copyRequired(row, db, "xp");
-                copyRequired(row, db, "metric");
-                db.addProperty("progress", progress);
-                db.addProperty("target", target);
-                db.addProperty("unlocked", unlocked);
-                JsonElement existingUnlockedAt = stored == null ? null : stored.get("unlocked_at");
-                if (existingUnlockedAt != null && !existingUnlockedAt.isJsonNull()) {
-                    db.add("unlocked_at", existingUnlockedAt.deepCopy());
-                } else if (unlocked) {
-                    db.addProperty("unlocked_at", unlockedNow);
-                }
-                db.addProperty("source_timestamp", now);
-                changed.add(db);
-            }
-
-            if (changed.isEmpty()) return true;
-            SUPABASE_Client.upsert("achievement_progress", "user_id,player_tag,achievement_key,tier", changed.toString());
+            JsonObject body = new JsonObject();
+            body.addProperty("p_user_id", userId);
+            body.addProperty("p_player_tag", playerTag);
+            body.addProperty("p_source_timestamp", Instant.now().getEpochSecond());
+            body.add("p_progress", observed);
+            SUPABASE_Client.rpc("reconcile_achievement_progress_v2", body.toString());
             return true;
         } catch (Exception persistenceFailure) {
             System.err.println("[Achievements] Could not persist observed progress: " + persistenceFailure.getMessage());
             return false;
         }
+    }
+
+    private JsonArray observedProgressRows(JsonArray completeRows) {
+        JsonArray observed = new JsonArray();
+        for (JsonElement element : completeRows) {
+            if (!element.isJsonObject()) continue;
+            JsonObject row = element.getAsJsonObject();
+            if (!booleanValue(row, "progress_known")
+                    || booleanValue(row, "catalog_template")
+                    || "clan".equalsIgnoreCase(stringValue(row, "scope"))) continue;
+            observed.add(row.deepCopy());
+        }
+        return observed;
     }
 
     private Map<String, JsonObject> storedRowsByKey(JsonArray storedRows) {
@@ -340,12 +303,6 @@ public class SUPABASE_Achievements {
             if (!key.isBlank()) storedByKey.put(key, row);
         }
         return storedByKey;
-    }
-
-    private void copyRequired(JsonObject source, JsonObject target, String field) {
-        JsonElement value = source.get(field);
-        if (value == null || value.isJsonNull()) throw new IllegalArgumentException("Missing achievement field: " + field);
-        target.add(field, value.deepCopy());
     }
 
     private void copyOptional(JsonObject source, JsonObject target, String field) {

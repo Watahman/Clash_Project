@@ -52,6 +52,7 @@ public final class AchievementEvaluator {
             item.addProperty("source", AchievementSources.forDefinition(definition));
             item.addProperty("progress", value.progress());
             item.addProperty("target", definition.target());
+            item.addProperty("comparison", comparisonName(metadata));
             item.addProperty("unlocked", value.unlocked());
             item.addProperty("progress_known", value.measurable());
             item.addProperty("catalog_template", AchievementSpecV2Catalog.isDynamicTemplate(definition));
@@ -107,6 +108,7 @@ public final class AchievementEvaluator {
             item.addProperty("source", AchievementSources.LIVE_PROFILE);
             item.addProperty("progress", progress);
             item.addProperty("target", Math.max(1L, target));
+            item.addProperty("comparison", "GTE");
             item.addProperty("unlocked", sourceAvailable && target > 0 && progress >= target);
             item.addProperty("progress_known", sourceAvailable);
             item.addProperty("source_available", sourceAvailable);
@@ -153,5 +155,11 @@ public final class AchievementEvaluator {
 
     private static String firstNonBlank(String first, String second) {
         return first != null && !first.isBlank() ? first : second == null ? "" : second;
+    }
+
+    private static String comparisonName(AchievementSpecV2Catalog.Metadata metadata) {
+        return metadata == null
+                ? AchievementSpecV2Bindings.Comparison.UNSUPPORTED.name()
+                : metadata.comparison().name();
     }
 }
