@@ -1,5 +1,6 @@
 package Java.advancedstats;
 
+import Java.HttpException;
 import Java.SUPABASE_Client;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -13,15 +14,26 @@ import java.util.UUID;
 /** Backend-only read repository for graph/UI-ready Advanced Stats data. */
 public final class AdvancedStatsReadRepository
         implements AdvancedStatsReadService.ScopedStore, AdvancedStatsCompactReadAggregator.ScopeReader {
+    @FunctionalInterface
+    interface RpcClient {
+        String call(String function, String body) throws Exception;
+    }
+
     private final AdvancedStatsRepository trackingRepository;
     private final AdvancedStatsCompactReadAggregator compactAggregator;
+    private final RpcClient rpcClient;
 
     public AdvancedStatsReadRepository() {
         this(new AdvancedStatsRepository());
     }
 
     AdvancedStatsReadRepository(AdvancedStatsRepository trackingRepository) {
+        this(trackingRepository, SUPABASE_Client::rpc);
+    }
+
+    AdvancedStatsReadRepository(AdvancedStatsRepository trackingRepository, RpcClient rpcClient) {
         this.trackingRepository = trackingRepository;
+        this.rpcClient = rpcClient;
         this.compactAggregator = new AdvancedStatsCompactReadAggregator(this);
     }
 
@@ -41,9 +53,9 @@ public final class AdvancedStatsReadRepository
         JsonObject body = scopedTrackingBody(trackingId, scope);
         addInstant(body, "p_from", from);
         body.add("p_season_key", JsonNull.INSTANCE);
-        return AdvancedStatsPublicSourceMetadata.sanitizeOverview(
-                objectRpcWithFallback("read_advanced_stats_compact_overview_v2",
-                        "read_advanced_stats_compact_overview_v1", body));
+        JsonObject value = objectRpcWithFallback("read_advanced_stats_compact_overview_v2",
+                "read_advanced_stats_compact_overview_v1", body);
+        return AdvancedStatsPublicSourceMetadata.sanitizeOverview(normalizeOverview(value));
     }
 
     @Override
@@ -164,6 +176,7 @@ public final class AdvancedStatsReadRepository
         try {
             return elementRpc(primary, body);
         } catch (Exception primaryFailure) {
+            if (!isUnavailableFunction(primaryFailure)) throw primaryFailure;
             try {
                 return elementRpc(fallback, legacyScopedBody(body));
             } catch (Exception fallbackFailure) {
@@ -173,6 +186,17 @@ public final class AdvancedStatsReadRepository
         }
     }
 
+    private boolean isUnavailableFunction(Exception failure) {
+        if (!(failure instanceof HttpException http)
+                || (http.getStatusCode() != 400 && http.getStatusCode() != 404)) return false;
+        String body = http.getResponseBody() == null
+                ? "" : http.getResponseBody().toLowerCase(java.util.Locale.ROOT);
+        return body.contains("pgrst202")
+                || (body.contains("function")
+                && (body.contains("does not exist") || body.contains("not found")
+                || body.contains("could not find")));
+    }
+
     private JsonObject legacyScopedBody(JsonObject body) {
         JsonObject legacy = body.deepCopy();
         legacy.remove("p_season_key");
@@ -180,10 +204,73 @@ public final class AdvancedStatsReadRepository
     }
 
     private JsonElement elementRpc(String function, JsonObject body) throws Exception {
-        String raw = SUPABASE_Client.rpc(function, body.toString());
+        String raw = rpcClient.call(function, body.toString());
         JsonElement parsed = JsonParser.parseString(raw == null || raw.isBlank() ? "null" : raw);
         if (parsed == null || parsed.isJsonNull()) return JsonNull.INSTANCE;
         return parsed;
+    }
+
+    private JsonObject normalizeOverview(JsonObject source) {
+        JsonObject result = source == null ? new JsonObject() : source.deepCopy();
+        JsonObject summary = result.has("summary") && result.get("summary").isJsonObject()
+                ? result.getAsJsonObject("summary") : null;
+        if (summary == null) return result;
+        copyAliasWhenMissing(summary, "lootAttackCount", "lootKnownAttackCount");
+        copyAliasWhenMissing(summary, "averageGoldLooted", "goldLootAverage");
+        copyAliasWhenMissing(summary, "averageElixirLooted", "elixirLootAverage");
+        copyAliasWhenMissing(summary, "averageDarkElixirLooted", "darkElixirLootAverage");
+        copyAliasWhenMissing(summary, "bestGoldLooted", "goldLootBest");
+        copyAliasWhenMissing(summary, "bestElixirLooted", "elixirLootBest");
+        copyAliasWhenMissing(summary, "bestDarkElixirLooted", "darkElixirLootBest");
+        Long lootCount = optionalLong(summary, "lootAttackCount");
+        if (lootCount == null || lootCount < 0) {
+            unknownLoot(summary, true);
+            return result;
+        }
+        if (lootCount == 0) {
+            unknownLoot(summary, false);
+            return result;
+        }
+        addCanonicalLootFields(summary);
+        return result;
+    }
+
+    private void unknownLoot(JsonObject summary, boolean unknownCount) {
+        if (unknownCount) addNull(summary, "lootAttackCount");
+        for (String field : lootFields()) addNull(summary, field);
+    }
+
+    private void addCanonicalLootFields(JsonObject summary) {
+        for (String field : lootFields()) addNullWhenMissing(summary, field);
+    }
+
+    private String[] lootFields() {
+        return new String[]{
+                "goldLooted", "elixirLooted", "darkElixirLooted",
+                "averageGoldLooted", "averageElixirLooted", "averageDarkElixirLooted",
+                "bestGoldLooted", "bestElixirLooted", "bestDarkElixirLooted"
+        };
+    }
+
+    private Long optionalLong(JsonObject source, String field) {
+        if (!source.has(field) || source.get(field).isJsonNull()) return null;
+        try {
+            return source.get(field).getAsLong();
+        } catch (RuntimeException ignored) {
+            return null;
+        }
+    }
+
+    private void addNullWhenMissing(JsonObject target, String field) {
+        if (!target.has(field)) addNull(target, field);
+    }
+
+    private void copyAliasWhenMissing(JsonObject target, String canonical, String alias) {
+        if (!target.has(canonical) && target.has(alias)) target.add(canonical, target.get(alias).deepCopy());
+    }
+
+    private void addNull(JsonObject target, String field) {
+        target.add(field, JsonNull.INSTANCE);
     }
 
     private void addInstant(JsonObject target, String field, Instant value) {

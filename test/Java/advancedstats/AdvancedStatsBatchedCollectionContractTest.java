@@ -20,6 +20,7 @@ class AdvancedStatsBatchedCollectionContractTest {
 
         assertTrue(collector.contains("new AdvancedStatsBatchedCompactRepository(workerId)"));
         assertTrue(repository.contains("save_advanced_stats_compact_page_v1"));
+        assertTrue(repository.contains("lootAvailable"));
         assertFalse(repository.contains("save_advanced_stats_compact_event_v1"));
         assertFalse(repository.contains("save_advanced_stats_compact_event_v2"));
     }

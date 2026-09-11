@@ -13,6 +13,10 @@ import java.util.Map;
 
 /** Combines scope aggregates without reintroducing raw attack history into the read path. */
 final class AdvancedStatsCompactReadMerger {
+    private record GeneralTotals(long attacks, double stars, double destruction, double threeStars) {}
+    private final AdvancedStatsCompactReadTrendMerger trendMerger =
+            new AdvancedStatsCompactReadTrendMerger();
+
     JsonObject overview(List<AdvancedStatsCompactReadAggregator.ScopeSnapshot> snapshots) {
         List<JsonObject> units = mergeUnits(snapshots);
         List<JsonObject> armies = mergeArmies(snapshots);
@@ -22,6 +26,9 @@ final class AdvancedStatsCompactReadMerger {
         result.add("tracking", mergedTracking(snapshots));
         result.add("summary", mergedSummary(snapshots));
         result.add("favorites", favorites(units, armies));
+        JsonArray failures = AdvancedStatsCompactReadAggregator.failures(snapshots);
+        result.addProperty("partial", !failures.isEmpty());
+        result.add("failures", failures);
         return result;
     }
 
@@ -43,7 +50,7 @@ final class AdvancedStatsCompactReadMerger {
         Map<String, JsonObject> merged = new LinkedHashMap<>();
         for (AdvancedStatsCompactReadAggregator.ScopeSnapshot snapshot : snapshots) {
             if (snapshot.trends() == null) continue;
-            for (JsonElement value : snapshot.trends()) mergeTrend(merged, value);
+            for (JsonElement value : snapshot.trends()) trendMerger.merge(merged, value);
         }
         List<JsonObject> items = new ArrayList<>(merged.values());
         items.sort(Comparator.comparing(item -> text(item, "date")));
@@ -71,10 +78,29 @@ final class AdvancedStatsCompactReadMerger {
     }
 
     private JsonObject mergedSummary(List<AdvancedStatsCompactReadAggregator.ScopeSnapshot> snapshots) {
+        GeneralTotals totals = generalTotals(snapshots);
+        AdvancedStatsCompactReadAggregator.LootTotals loot =
+                AdvancedStatsCompactReadAggregator.lootTotals(snapshots);
+        JsonObject result = new JsonObject();
+        result.addProperty("attacks", totals.attacks());
+        result.addProperty("averageStars", rounded(totals.attacks() == 0 ? 0 : totals.stars() / totals.attacks()));
+        result.addProperty("averageDestruction", rounded(totals.attacks() == 0 ? 0 : totals.destruction() / totals.attacks()));
+        result.addProperty("threeStarRate", rounded(totals.attacks() == 0 ? 0 : totals.threeStars() / totals.attacks()));
+        AdvancedStatsCompactReadAggregator.addNullableLong(result, "lootAttackCount", loot.attackCount());
+        AdvancedStatsCompactReadAggregator.addNullableLong(result, "goldLooted", loot.gold());
+        AdvancedStatsCompactReadAggregator.addNullableLong(result, "elixirLooted", loot.elixir());
+        AdvancedStatsCompactReadAggregator.addNullableLong(result, "darkElixirLooted", loot.darkElixir());
+        AdvancedStatsCompactReadAggregator.addNullableDecimal(result, "averageGoldLooted", loot.averageGold());
+        AdvancedStatsCompactReadAggregator.addNullableDecimal(result, "averageElixirLooted", loot.averageElixir());
+        AdvancedStatsCompactReadAggregator.addNullableDecimal(result, "averageDarkElixirLooted", loot.averageDarkElixir());
+        AdvancedStatsCompactReadAggregator.addNullableLong(result, "bestGoldLooted", loot.bestGold());
+        AdvancedStatsCompactReadAggregator.addNullableLong(result, "bestElixirLooted", loot.bestElixir());
+        AdvancedStatsCompactReadAggregator.addNullableLong(result, "bestDarkElixirLooted", loot.bestDarkElixir());
+        return result;
+    }
+
+    private GeneralTotals generalTotals(List<AdvancedStatsCompactReadAggregator.ScopeSnapshot> snapshots) {
         long attacks = 0;
-        long gold = 0;
-        long elixir = 0;
-        long darkElixir = 0;
         double stars = 0;
         double destruction = 0;
         double threeStars = 0;
@@ -86,19 +112,8 @@ final class AdvancedStatsCompactReadMerger {
             stars += decimal(summary, "averageStars") * count;
             destruction += decimal(summary, "averageDestruction") * count;
             threeStars += decimal(summary, "threeStarRate") * count;
-            gold += number(summary, "goldLooted");
-            elixir += number(summary, "elixirLooted");
-            darkElixir += number(summary, "darkElixirLooted");
         }
-        JsonObject result = new JsonObject();
-        result.addProperty("attacks", attacks);
-        result.addProperty("averageStars", rounded(attacks == 0 ? 0 : stars / attacks));
-        result.addProperty("averageDestruction", rounded(attacks == 0 ? 0 : destruction / attacks));
-        result.addProperty("threeStarRate", rounded(attacks == 0 ? 0 : threeStars / attacks));
-        result.addProperty("goldLooted", gold);
-        result.addProperty("elixirLooted", elixir);
-        result.addProperty("darkElixirLooted", darkElixir);
-        return result;
+        return new GeneralTotals(attacks, stars, destruction, threeStars);
     }
 
     private JsonObject favorites(List<JsonObject> units, List<JsonObject> armies) {
@@ -188,28 +203,6 @@ final class AdvancedStatsCompactReadMerger {
         return result;
     }
 
-    private void mergeTrend(Map<String, JsonObject> merged, JsonElement value) {
-        if (!value.isJsonObject()) return;
-        JsonObject incoming = value.getAsJsonObject();
-        String date = text(incoming, "date");
-        if (date.isBlank()) return;
-        JsonObject item = merged.get(date);
-        if (item == null) {
-            merged.put(date, incoming.deepCopy());
-            return;
-        }
-        long oldCount = number(item, "attacks");
-        long newCount = number(incoming, "attacks");
-        item.addProperty("attacks", oldCount + newCount);
-        item.addProperty("averageStars", weighted(item, incoming, "averageStars", oldCount, newCount));
-        item.addProperty("averageDestruction",
-                weighted(item, incoming, "averageDestruction", oldCount, newCount));
-        item.addProperty("threeStarRate", weighted(item, incoming, "threeStarRate", oldCount, newCount));
-        item.addProperty("goldLooted", number(item, "goldLooted") + number(incoming, "goldLooted"));
-        item.addProperty("elixirLooted", number(item, "elixirLooted") + number(incoming, "elixirLooted"));
-        item.addProperty("darkElixirLooted", number(item, "darkElixirLooted") + number(incoming, "darkElixirLooted"));
-    }
-
     private long totalAttacks(List<AdvancedStatsCompactReadAggregator.ScopeSnapshot> snapshots) {
         long total = 0;
         for (AdvancedStatsCompactReadAggregator.ScopeSnapshot snapshot : snapshots) {
@@ -272,4 +265,5 @@ final class AdvancedStatsCompactReadMerger {
     private double rounded(double value) {
         return Math.round(value * 100d) / 100d;
     }
+
 }

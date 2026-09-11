@@ -7,6 +7,7 @@ do $$
 declare
     v_user uuid := gen_random_uuid();
     v_tracking uuid;
+    v_historical_tracking uuid;
     v_now timestamptz := date_trunc('second', now());
     v_result jsonb;
     v_overview jsonb;
@@ -14,21 +15,37 @@ declare
     v_armies jsonb;
     v_trends jsonb;
     v_count integer;
+    v_known bigint;
+    v_gold bigint;
+    v_elixir bigint;
+    v_dark_elixir bigint;
+    v_best_gold bigint;
+    v_best_elixir bigint;
+    v_best_dark_elixir bigint;
+    v_receipt_available boolean;
+    v_receipt_gold bigint;
+    v_legacy_gold bigint;
+    v_legacy_elixir bigint;
+    v_legacy_dark_elixir bigint;
     v_status text;
 begin
-    insert into public.users (id, name, email, accounts, code)
+    insert into public.users (id, name, email, code)
     values (
         v_user,
         'Advanced Stats compact smoke test',
         'advanced-stats-compact-' || v_user || '@example.invalid',
-        '[]'::jsonb,
         'ASC' || replace(v_user::text, '-', '')
     );
+
+    insert into public.user_accounts (user_id, player_tag, player_name)
+    values
+        (v_user, '#P0Y2', 'Compact smoke player'),
+        (v_user, '#P0Y8', 'Historical smoke player');
 
     insert into public.advanced_stats_tracking (
         user_id, player_tag, status, tracking_started_at, next_poll_at
     ) values (
-        v_user, '#P0Y2', 'ACTIVE', v_now - interval '1 day', v_now
+        v_user, '#P0Y2', 'ACTIVE', v_now - interval '1 day', '1900-01-01 UTC'
     ) returning id into v_tracking;
 
     select count(*) into v_count
@@ -40,10 +57,10 @@ begin
     v_result := public.save_advanced_stats_compact_event_v1(
         v_tracking, '#P0Y2', 'NORMAL', repeat('a', 64),
         v_now - interval '2 days', v_now - interval '2 days',
-        3, 100, 1000, 2000, 30,
+        3::smallint, 100::numeric, 1000, 2000, 30,
         '[{"unit_key":"troop-4000000","unit_name":"Barbarian","category":"TROOP","quantity":20}]'::jsonb,
         repeat('b', 64), '{"units":[{"key":"troop-4000000","quantity":20}]}'::jsonb,
-        '', null, null,
+        null, null, null,
         'normal-cursor-1', v_now - interval '2 days', 'normal-watermark-1',
         '{"endpoint":"/players/%23P0Y2/battlelog","revision":"synthetic-1"}'::jsonb,
         true, 'compact-worker'
@@ -55,8 +72,8 @@ begin
     v_result := public.save_advanced_stats_compact_event_v1(
         v_tracking, '#P0Y2', 'NORMAL', repeat('a', 64),
         v_now - interval '2 days', v_now - interval '2 days',
-        0, 0, 0, 0, 0, '[]'::jsonb, null, null,
-        '', null, null,
+        0::smallint, 0::numeric, 0, 0, 0, '[]'::jsonb, null, null,
+        null, null, null,
         'normal-cursor-duplicate', v_now, 'duplicate-watermark', '{}'::jsonb,
         false, 'compact-worker'
     );
@@ -67,27 +84,181 @@ begin
     v_result := public.save_advanced_stats_compact_event_v1(
         v_tracking, '#P0Y2', 'WAR', repeat('c', 64),
         v_now - interval '1 day', v_now - interval '1 day',
-        2, 80, 500, 600, 7, '[]'::jsonb, null, null,
-        '', null, null,
+        2::smallint, 80::numeric, 500, 600, 7, '[]'::jsonb, null, null,
+        null, null, null,
         'war-cursor-1', v_now - interval '1 day', 'war-watermark-1',
         '{"endpoint":"/clans/%23CLAN/warlog","revision":"synthetic-1"}'::jsonb,
         false, 'compact-worker'
     );
+    v_result := public.save_advanced_stats_compact_event_v3(
+        v_tracking, '#P0Y2', 'WAR', repeat('f', 64),
+        v_now - interval '1 day', v_now - interval '1 day',
+        2::smallint, 80::numeric, true, 900, 0, 30, '[]'::jsonb, null, null,
+        null, null, null, 'war-cursor-1', v_now - interval '1 day', 'war-watermark-1',
+        '{"endpoint":"/clans/%23CLAN/warlog","revision":"synthetic-2"}'::jsonb,
+        false, '', 'compact-worker'
+    );
+    v_result := public.save_advanced_stats_compact_event_v3(
+        v_tracking, '#P0Y2', 'WAR', repeat('0', 64),
+        v_now - interval '1 day', v_now - interval '1 day',
+        1::smallint, 40::numeric, false, null, null, null, '[]'::jsonb, null, null,
+        null, null, null, 'war-cursor-1', v_now - interval '1 day', 'war-watermark-1',
+        '{"endpoint":"/clans/%23CLAN/warlog","revision":"synthetic-3"}'::jsonb,
+        false, '', 'compact-worker'
+    );
+    v_result := public.save_advanced_stats_compact_event_v3(
+        v_tracking, '#P0Y2', 'WAR', repeat('1', 64),
+        v_now - interval '1 day', v_now - interval '1 day',
+        1::smallint, 40::numeric, false, null, null, null, '[]'::jsonb, null, null,
+        null, null, null, 'war-cursor-1', v_now - interval '1 day', 'war-watermark-1',
+        '{"endpoint":"/clans/%23CLAN/warlog","revision":"synthetic-4"}'::jsonb,
+        false, '', 'compact-worker'
+    );
+    v_result := public.save_advanced_stats_compact_event_v3(
+        v_tracking, '#P0Y2', 'WAR', repeat('1', 64),
+        v_now - interval '1 day', v_now - interval '1 day',
+        1::smallint, 40::numeric, true, 77, 88, 9, '[]'::jsonb, null, null,
+        null, null, null, 'war-cursor-1', v_now - interval '1 day', 'war-watermark-1',
+        '{"endpoint":"/clans/%23CLAN/warlog","revision":"synthetic-5"}'::jsonb,
+        false, '', 'compact-worker'
+    );
+    if coalesce((v_result->>'duplicate')::boolean, false) is not true
+       or coalesce((v_result->>'lootEnriched')::boolean, false) is not true then
+        raise exception 'Reliable loot did not enrich an earlier duplicate: %', v_result;
+    end if;
+    v_result := public.save_advanced_stats_compact_event_v3(
+        v_tracking, '#P0Y2', 'WAR', repeat('1', 64),
+        v_now - interval '1 day', v_now - interval '1 day',
+        1::smallint, 40::numeric, true, 77, 88, 9, '[]'::jsonb, null, null,
+        null, null, null, 'war-cursor-1', v_now - interval '1 day', 'war-watermark-1',
+        '{"endpoint":"/clans/%23CLAN/warlog","revision":"synthetic-6"}'::jsonb,
+        false, '', 'compact-worker'
+    );
+    if coalesce((v_result->>'duplicate')::boolean, false) is not true
+       or coalesce((v_result->>'lootEnriched')::boolean, false) then
+        raise exception 'Repeated reliable loot enrichment was not idempotent: %', v_result;
+    end if;
+
+    -- Simulate a historical WAR/missing-loot receipt.  Its legacy totals are
+    -- intentionally not reliable, so even an explicit duplicate cannot opt it
+    -- into the new reliable rollup.  This protects old normalized rows.
+    insert into public.advanced_stats_tracking (
+        user_id, player_tag, status, tracking_started_at, next_poll_at
+    ) values (
+        v_user, '#P0Y8', 'ACTIVE', v_now - interval '1 day', '1900-01-01 UTC'
+    ) returning id into v_historical_tracking;
+    select count(*) into v_count
+      from public.claim_advanced_stats_trackers_v1('historical-worker', v_now, 1, 120);
+    if v_count <> 1 then raise exception 'Historical smoke tracker was not claimed: %', v_count; end if;
+    v_result := public.save_advanced_stats_compact_event_v3(
+        v_historical_tracking, '#P0Y8', 'WAR', repeat('2', 64),
+        v_now - interval '4 days', v_now - interval '4 days',
+        1::smallint, 40::numeric, false, null, null, null, '[]'::jsonb, null, null,
+        null, null, null, 'historical-cursor', v_now - interval '4 days', 'historical-watermark',
+        '{"endpoint":"/clans/%23CLAN/warlog","revision":"historical"}'::jsonb,
+        false, '', 'historical-worker'
+    );
+    select loot_known_attacks into v_known
+      from public.advanced_stats_scope_daily
+     where tracking_id = v_historical_tracking and scope = 'WAR';
+    if v_known <> 0 then
+        raise exception 'Missing-loot WAR event was marked reliable before enrichment: %', v_known;
+    end if;
+    update public.advanced_stats_event_receipts
+       set loot_enrichment_eligible = false
+     where tracking_id = v_historical_tracking and event_fingerprint = repeat('2', 64);
+    if not exists (
+        select 1 from public.advanced_stats_event_receipts
+         where tracking_id = v_historical_tracking and event_fingerprint = repeat('2', 64)
+           and loot_available = false and loot_totals_applied = false
+           and loot_enrichment_eligible = false
+    ) then
+        raise exception 'Historical receipt was incorrectly marked enrichment-eligible';
+    end if;
+    update public.advanced_stats_scope_daily
+       set gold_looted = 123, elixir_looted = 456, dark_elixir_looted = 7
+     where tracking_id = v_historical_tracking and scope = 'WAR';
+    v_result := public.save_advanced_stats_compact_event_v3(
+        v_historical_tracking, '#P0Y8', 'WAR', repeat('2', 64),
+        v_now - interval '4 days', v_now - interval '4 days',
+        1::smallint, 40::numeric, true, 900, 0, 4, '[]'::jsonb, null, null,
+        null, null, null, 'historical-cursor', v_now - interval '4 days', 'historical-watermark',
+        '{"endpoint":"/clans/%23CLAN/warlog","revision":"historical-enriched"}'::jsonb,
+        false, '', 'historical-worker'
+    );
+    if coalesce((v_result->>'duplicate')::boolean, false) is not true
+       or coalesce((v_result->>'lootEnriched')::boolean, false) then
+        raise exception 'Historical loot unexpectedly enriched: %', v_result;
+    end if;
+    select loot_known_attacks, reliable_gold_looted, reliable_elixir_looted,
+           reliable_dark_elixir_looted, gold_looted, elixir_looted, dark_elixir_looted,
+           best_gold_looted, best_elixir_looted, best_dark_elixir_looted
+      into v_known, v_gold, v_elixir, v_dark_elixir, v_legacy_gold,
+           v_legacy_elixir, v_legacy_dark_elixir,
+           v_best_gold, v_best_elixir, v_best_dark_elixir
+      from public.advanced_stats_scope_daily
+     where tracking_id = v_historical_tracking and scope = 'WAR';
+    if v_known <> 0 or v_gold <> 0 or v_elixir <> 0 or v_dark_elixir <> 0
+       or v_legacy_gold <> 123 or v_legacy_elixir <> 456 or v_legacy_dark_elixir <> 7
+       or v_best_gold is not null or v_best_elixir is not null or v_best_dark_elixir is not null then
+        raise exception 'Historical enrichment changed reliable or legacy values: %',
+            jsonb_build_object('known', v_known, 'gold', v_gold, 'elixir', v_elixir,
+                'darkElixir', v_dark_elixir, 'legacyGold', v_legacy_gold,
+                'bestElixir', v_best_elixir, 'bestDarkElixir', v_best_dark_elixir);
+    end if;
+    v_overview := public.read_advanced_stats_compact_overview_v1(v_historical_tracking, 'WAR', null);
+    if (v_overview#>>'{summary,lootAttackCount}')::bigint <> 0
+       or v_overview#>>'{summary,goldLooted}' is not null
+       or v_overview#>>'{summary,elixirLooted}' is not null
+       or v_overview#>>'{summary,darkElixirLooted}' is not null then
+        raise exception 'Historical legacy loot leaked into reliable read projection: %', v_overview;
+    end if;
     v_result := public.save_advanced_stats_compact_event_v2(
         v_tracking, '#P0Y2', 'RANKED', repeat('d', 64),
-        v_now, v_now, 1, 50, 200, 300, 4, '[]'::jsonb, null, null,
-        '', null, null,
+        v_now, v_now, 1::smallint, 50::numeric, 200, 300, 4, '[]'::jsonb, null, null,
+        null, null, null,
         'ranked-cursor-1', v_now, 'ranked-watermark-1',
         '{"endpoint":"/players/%23P0Y2/ranked","revision":"synthetic-1","rankedSeasonKey":"1700000000"}'::jsonb,
         false, '1700000000', 'compact-worker'
     );
 
     select count(*) into v_count
-      from public.advanced_stats_battles where tracking_id = v_tracking;
-    if v_count <> 0 then raise exception 'Compact ingestion wrote raw battle rows'; end if;
+      from public.advanced_stats_army_dictionary where army_hash = repeat('b', 64);
+    if v_count <> 1 then raise exception 'Expected one normalized army dictionary row'; end if;
     select count(*) into v_count
       from public.advanced_stats_event_receipts where tracking_id = v_tracking;
-    if v_count <> 3 then raise exception 'Expected three compact receipts, got %', v_count; end if;
+    if v_count <> 6 then raise exception 'Expected six compact receipts, got %', v_count; end if;
+    select loot_available, loot_gold into v_receipt_available, v_receipt_gold
+      from public.advanced_stats_event_receipts
+     where tracking_id = v_tracking and scope = 'WAR' and event_fingerprint = repeat('1', 64);
+    if v_receipt_available is not true or v_receipt_gold <> 77 then
+        raise exception 'Enriched receipt state mismatch: available=%, gold=%', v_receipt_available, v_receipt_gold;
+    end if;
+    select loot_known_attacks, reliable_gold_looted, reliable_elixir_looted,
+           reliable_dark_elixir_looted, gold_looted, elixir_looted, dark_elixir_looted,
+           best_gold_looted, best_elixir_looted, best_dark_elixir_looted
+      into v_known, v_gold, v_elixir, v_dark_elixir, v_legacy_gold,
+           v_legacy_elixir, v_legacy_dark_elixir,
+           v_best_gold, v_best_elixir, v_best_dark_elixir
+      from public.advanced_stats_scope_daily
+     where tracking_id = v_tracking and scope = 'WAR';
+    if v_known <> 3 or v_gold <> 1477 or v_elixir <> 688
+       or v_dark_elixir <> 46 or v_legacy_gold <> 0
+       or v_legacy_elixir <> 0 or v_legacy_dark_elixir <> 0
+       or v_best_gold <> 900
+       or v_best_elixir <> 600 or v_best_dark_elixir <> 30 then
+        raise exception 'Loot rollup mismatch: known=%, gold=%, elixir=%, dark=%, best=(%,%,%)',
+            v_known, v_gold, v_elixir, v_dark_elixir,
+            v_best_gold, v_best_elixir, v_best_dark_elixir;
+    end if;
+    v_overview := public.read_advanced_stats_compact_overview_v1(v_tracking, 'WAR', null);
+    if (v_overview#>>'{summary,lootAttackCount}')::bigint <> 3
+       or (v_overview#>>'{summary,goldLooted}')::bigint <> 1477
+       or (v_overview#>>'{summary,averageElixirLooted}')::numeric <> 229.33
+       or (v_overview#>>'{summary,bestDarkElixirLooted}')::bigint <> 30
+       or v_overview#>'{summary,loot}' is null then
+        raise exception 'Loot read projection mismatch: %', v_overview;
+    end if;
     select count(*) into v_count
       from public.advanced_stats_scope_unit_daily
      where tracking_id = v_tracking and scope = 'NORMAL';
@@ -95,14 +266,14 @@ begin
 
     v_result := public.update_advanced_stats_scope_poll_v1(
         v_tracking, '#P0Y2', 'NORMAL', 'compact-worker', v_now + interval '1 minute', true,
-        '', null, null,
+        null, null, null,
         'normal-cursor-2', v_now, 'normal-watermark-2', '{"revision":"synthetic-2"}'::jsonb,
         null, null
     );
     begin
         v_result := public.update_advanced_stats_scope_poll_v1(
             v_tracking, '#P0Y2', 'NORMAL', 'compact-worker', v_now + interval '70 seconds', true,
-            '', null, null,
+            null, null, null,
             'stale-cursor', v_now + interval '2 minutes', 'stale-watermark', '{}'::jsonb,
             null, null
         );
@@ -132,7 +303,7 @@ begin
         'CLASHKING', 'legacy-v2', '{"route":"ranked"}'::jsonb, v_now + interval '90 seconds'
     );
     v_result := public.update_advanced_stats_bootstrap_v1(
-        v_tracking, '#P0Y2', 'NORMAL', 'compact-worker', 'RUNNING', 0, 1, null,
+        v_tracking, '#P0Y2', 'NORMAL', 'compact-worker', 'RUNNING', 0::smallint, 1::bigint, null,
         null, null, v_now + interval '90 seconds'
     );
     select bootstrap_status into v_status
@@ -141,15 +312,15 @@ begin
         raise exception 'Compact bootstrap running priority mismatch: %', v_status;
     end if;
     v_result := public.update_advanced_stats_bootstrap_v1(
-        v_tracking, '#P0Y2', 'NORMAL', 'compact-worker', 'COMPLETE', 100, 1, 1,
+        v_tracking, '#P0Y2', 'NORMAL', 'compact-worker', 'COMPLETE', 100::smallint, 1::bigint, 1::bigint,
         null, null, v_now + interval '90 seconds'
     );
     v_result := public.update_advanced_stats_bootstrap_v1(
-        v_tracking, '#P0Y2', 'WAR', 'compact-worker', 'COMPLETE', 100, 0, 0,
+        v_tracking, '#P0Y2', 'WAR', 'compact-worker', 'COMPLETE', 100::smallint, 0::bigint, 0::bigint,
         null, null, v_now + interval '90 seconds'
     );
     v_result := public.update_advanced_stats_bootstrap_v1(
-        v_tracking, '#P0Y2', 'RANKED', 'compact-worker', 'UNSUPPORTED', 0, 0, 0,
+        v_tracking, '#P0Y2', 'RANKED', 'compact-worker', 'UNSUPPORTED', 0::smallint, 0::bigint, 0::bigint,
         null, null, v_now + interval '90 seconds'
     );
 
@@ -197,8 +368,8 @@ begin
     end if;
     v_result := public.save_advanced_stats_compact_event_v2(
         v_tracking, '#P0Y2', 'RANKED', repeat('e', 64),
-        v_now + interval '1 minute', v_now + interval '1 minute', 3, 100, 0, 0, 0,
-        '[]'::jsonb, null, null, '', null, null,
+        v_now + interval '1 minute', v_now + interval '1 minute', 3::smallint, 100::numeric, 0, 0, 0,
+        '[]'::jsonb, null, null, null, null, null,
         'ranked-cursor-new', v_now + interval '1 minute', 'ranked-watermark-new',
         '{"rankedSeasonKey":"1800000000"}'::jsonb, false, '1800000000', 'compact-worker'
     );
@@ -230,6 +401,8 @@ select jsonb_build_object(
     'verified', jsonb_build_array(
         'source-scoped normal/war/ranked receipts',
         'duplicate fingerprint idempotency',
+        'historical missing-loot WAR enrichment without double-counting',
+        'known zero-resource loot and best-value aggregation',
         'no raw battle row required',
         'compact unit/army/daily aggregates',
         'cursor/watermark/provenance updates',

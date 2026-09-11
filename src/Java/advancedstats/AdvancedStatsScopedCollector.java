@@ -103,7 +103,8 @@ public final class AdvancedStatsScopedCollector {
 
     private static CollectionResult failed(HistoryRequest request, AdvancedStatsCapability capability, Exception failure) {
         return new CollectionResult(request.trackingId(), request.scope(), capability.status(), BootstrapStatus.FAILED,
-                0, 0, request.checkpoint(), capability.sourceId(), normalizeFailure(failure));
+                0, 0, 0, 0, 0, request.checkpoint(), capability.sourceId(),
+                normalizeFailure(failure), failure);
     }
 
     private static String normalizeFailure(Exception failure) {

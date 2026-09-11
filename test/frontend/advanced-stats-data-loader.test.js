@@ -23,7 +23,7 @@ function createState(battlesResponse) {
         hasMore: false,
         busy: false,
         requestVersion: 1,
-        sectionStates: { summary: 'idle', units: 'idle', armies: 'idle', trends: 'idle', battles: 'idle' }
+        sectionStates: { overview: 'idle', units: 'idle', armies: 'idle', trends: 'idle', battles: 'idle' }
     };
 }
 
@@ -98,5 +98,47 @@ describe('Advanced Stats battle history loader', () => {
         expect(state.battleHistoryUnsupportedReason).toBe('raw_attack_history_not_retained');
         expect(state.nextCursor).toBeNull();
         expect(state.hasMore).toBe(false);
+    });
+
+    it('keeps the last good section data and marks a failed refresh stale', async () => {
+        const state = createState({ items: [] });
+        state.overview = { data: { summary: { attacks: 3 } } };
+        state.armies = [{ armyHash: 'kept' }];
+        state.sectionStates.overview = 'ready';
+        state.sectionStates.armies = 'ready';
+        state.api.getOverview.mockRejectedValue(new Error('temporary overview failure'));
+        state.api.getArmies.mockRejectedValue(new Error('temporary armies failure'));
+
+        await loadStatistics({ state, requestVersion: 1, ...callbacks() });
+
+        expect(state.overview.data.summary.attacks).toBe(3);
+        expect(state.armies).toEqual([{ armyHash: 'kept' }]);
+        expect(state.sectionStates.overview).toBe('stale');
+        expect(state.sectionStates.armies).toBe('stale');
+    });
+
+    it('does not replace retained data with a null partial response', async () => {
+        const state = createState({ items: [] });
+        state.overview = { data: { summary: { attacks: 7 } } };
+        state.sectionStates.overview = 'ready';
+        state.api.getOverview.mockResolvedValue(null);
+
+        await loadStatistics({ state, requestVersion: 1, ...callbacks() });
+
+        expect(state.overview.data.summary.attacks).toBe(7);
+        expect(state.sectionStates.overview).toBe('stale');
+    });
+
+    it('merges partial overview fields without dropping previously available loot', async () => {
+        const state = createState({ items: [] });
+        state.overview = { data: { summary: { attacks: 7, goldLooted: 900 }, favorites: { troop: { name: 'Root Rider' } } } };
+        state.sectionStates.overview = 'ready';
+        state.api.getOverview.mockResolvedValue({ data: { partial: true, summary: { attacks: 8 } } });
+
+        await loadStatistics({ state, requestVersion: 1, ...callbacks() });
+
+        expect(state.overview.data.summary).toMatchObject({ attacks: 8, goldLooted: 900 });
+        expect(state.overview.data.favorites.troop.name).toBe('Root Rider');
+        expect(state.sectionStates.overview).toBe('partial');
     });
 });

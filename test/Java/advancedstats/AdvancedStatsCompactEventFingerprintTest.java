@@ -40,7 +40,7 @@ class AdvancedStatsCompactEventFingerprintTest {
     }
 
     @Test
-    void fingerprintIgnoresProviderEventKeysAndDisplayNames() {
+    void unknownProviderKeysRemainPartOfTheBattleIdentity() {
         AttackObservation first = new AttackObservation("v2:provider-id", AdvancedStatsScope.NORMAL, EVENT_AT,
                 true, "normal", "#9GCUV", 16, 16, 3, 100d,
                 List.of(new UnitObservation("unit-1", "V2 display", AdvancedStatsUnitCategory.TROOP, 5, 10)),
@@ -50,16 +50,16 @@ class AdvancedStatsCompactEventFingerprintTest {
                 List.of(new UnitObservation("unit-1", "Official display", AdvancedStatsUnitCategory.TROOP, 5, 12)),
                 1, 2, 3);
 
-        assertEquals(AdvancedStatsCompactEventFingerprint.forObservation(first),
+        assertNotEquals(AdvancedStatsCompactEventFingerprint.forObservation(first),
                 AdvancedStatsCompactEventFingerprint.forObservation(fallback));
     }
 
     @Test
-    void normalFingerprintIgnoresRollingObservationTime() {
+    void unknownProviderKeysSeparateRepeatedBattlesAgainstTheSameOpponent() {
         AttackObservation firstPoll = observationAt(EVENT_AT, "official:first");
         AttackObservation laterPoll = observationAt(EVENT_AT.plusSeconds(900), "official:second");
 
-        assertEquals(AdvancedStatsCompactEventFingerprint.forObservation(firstPoll),
+        assertNotEquals(AdvancedStatsCompactEventFingerprint.forObservation(firstPoll),
                 AdvancedStatsCompactEventFingerprint.forObservation(laterPoll));
     }
 
@@ -88,6 +88,24 @@ class AdvancedStatsCompactEventFingerprintTest {
         assertNotEquals(
                 AdvancedStatsCompactEventFingerprint.forObservation(v2),
                 AdvancedStatsCompactEventFingerprint.forObservation(nextOrder));
+    }
+
+    @Test
+    void rankedAndLegendOverlapUsesTheSameSeasonEventIdentity() {
+        AttackObservation ranked = new AttackObservation("ranked-season:1755000000:ranked:battle-1",
+                AdvancedStatsScope.RANKED, EVENT_AT, true, "ranked", "#OPP", 17, 16, 3, 100d,
+                List.of(), 0, 0, 0, false);
+        AttackObservation legend = new AttackObservation("ranked-season:1755000000:legend:battle-1",
+                AdvancedStatsScope.RANKED, EVENT_AT.plusSeconds(60), true, "legend", "#OPP", 17, 16, 3, 100d,
+                List.of(), 10, 20, 0, true);
+        AttackObservation nextSeason = new AttackObservation("ranked-season:1756000000:ranked:battle-1",
+                AdvancedStatsScope.RANKED, EVENT_AT, true, "ranked", "#OPP", 17, 16, 3, 100d,
+                List.of(), 0, 0, 0, false);
+
+        assertEquals(AdvancedStatsCompactEventFingerprint.forObservation(ranked),
+                AdvancedStatsCompactEventFingerprint.forObservation(legend));
+        assertNotEquals(AdvancedStatsCompactEventFingerprint.forObservation(ranked),
+                AdvancedStatsCompactEventFingerprint.forObservation(nextSeason));
     }
 
     private static AttackObservation observation(List<UnitObservation> units) {

@@ -114,7 +114,8 @@ public final class AdvancedStatsCollectionModels {
             int skipped,
             Checkpoint checkpoint,
             String sourceId,
-            String message
+            String message,
+            Exception failure
     ) {
         public CollectionResult {
             Objects.requireNonNull(trackingId, "trackingId");
@@ -138,10 +139,18 @@ public final class AdvancedStatsCollectionModels {
 
         public CollectionResult(UUID trackingId, AdvancedStatsScope scope,
                                 AdvancedStatsCapabilityStatus capabilityStatus, BootstrapStatus status,
+                                int observationsSeen, long observationsProcessed, int inserted, int duplicates,
+                                int skipped, Checkpoint checkpoint, String sourceId, String message) {
+            this(trackingId, scope, capabilityStatus, status, observationsSeen, observationsProcessed,
+                    inserted, duplicates, skipped, checkpoint, sourceId, message, null);
+        }
+
+        public CollectionResult(UUID trackingId, AdvancedStatsScope scope,
+                                AdvancedStatsCapabilityStatus capabilityStatus, BootstrapStatus status,
                                 int observationsSeen, long observationsProcessed, Checkpoint checkpoint,
                                 String sourceId, String message) {
             this(trackingId, scope, capabilityStatus, status, observationsSeen, observationsProcessed,
-                    0, 0, 0, checkpoint, sourceId, message);
+                    0, 0, 0, checkpoint, sourceId, message, null);
         }
     }
 

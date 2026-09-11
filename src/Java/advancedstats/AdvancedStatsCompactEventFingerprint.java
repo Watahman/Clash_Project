@@ -5,7 +5,6 @@ import Java.advancedstats.AdvancedStatsHistoryModels.UnitObservation;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -24,36 +23,25 @@ public final class AdvancedStatsCompactEventFingerprint {
 
     public static String forObservation(AttackObservation observation) {
         if (observation == null) throw new IllegalArgumentException("observation is required");
-        NormalizedArmy army = normalizedArmy(observation);
-        if (observation.scope() == AdvancedStatsScope.NORMAL) {
-            return normalFingerprint(observation, army);
+        String eventIdentity = switch (observation.scope()) {
+            case NORMAL -> canonicalNormalIdentity(observation.eventKey());
+            case RANKED -> canonicalRankedIdentity(observation.eventKey());
+            case WAR -> canonicalWarIdentity(observation.eventKey());
+        };
+        if (!eventIdentity.isBlank()) {
+            // Stable upstream identities are the complete battle identity. Do
+            // not include outcome, loot, army or timestamps: those fields can
+            // be enriched by a later overlapping poll.
+            return sha256(String.join("\u001f", observation.scope().apiValue(), eventIdentity,
+                    Boolean.toString(observation.attack())));
         }
 
-        String opponent = observation.scope() == AdvancedStatsScope.WAR ? "" : canonicalTag(observation.opponentTag());
-        String eventIdentity = observation.scope() == AdvancedStatsScope.WAR
-                ? canonicalWarIdentity(observation.eventKey()) : "";
-        String value = String.join("\u001f", observation.scope().apiValue(), observation.occurredAt().toString(),
-                Boolean.toString(observation.attack()), opponent, eventIdentity, canonicalInteger(observation.stars()),
-                canonicalNumber(observation.destructionPercentage()), Long.toString(observation.goldLooted()),
-                Long.toString(observation.elixirLooted()), Long.toString(observation.darkElixirLooted()), army.hash());
-        return sha256(value);
-    }
-
-    /**
-     * The official CoC rolling battle log has no stable battle timestamp. The
-     * same entry therefore receives a new observedAt on every poll. NORMAL
-     * receipts intentionally use the stable battle payload rather than time so
-     * a rolling entry is not counted again every 15 minutes and the same fight
-     * can also dedupe when ClashKing later exposes it with a real timestamp.
-     */
-    private static String normalFingerprint(AttackObservation observation, NormalizedArmy army) {
-        String opponent = canonicalTag(observation.opponentTag());
-        String fallbackIdentity = opponent.isBlank() ? normalizeEventKey(observation.eventKey()) : "";
+        // Unknown provider keys still carry more identity than mutable battle
+        // fields. In particular, the legacy adapter supplies an unprefixed
+        // BattleFingerprint; ignoring it would collapse repeated battles
+        // against the same opponent into one receipt.
         String value = String.join("\u001f", observation.scope().apiValue(),
-                Boolean.toString(observation.attack()), opponent, fallbackIdentity,
-                canonicalInteger(observation.stars()), canonicalNumber(observation.destructionPercentage()),
-                Long.toString(observation.goldLooted()), Long.toString(observation.elixirLooted()),
-                Long.toString(observation.darkElixirLooted()), army.hash());
+                normalizeEventKey(observation.eventKey()), Boolean.toString(observation.attack()));
         return sha256(value);
     }
 
@@ -104,6 +92,25 @@ public final class AdvancedStatsCompactEventFingerprint {
         return value == null ? "" : value.trim();
     }
 
+    private static String canonicalNormalIdentity(String eventKey) {
+        String normalized = normalizeEventKey(eventKey);
+        if (normalized.length() <= "normal:".length()
+                || !normalized.regionMatches(true, 0, "normal:", 0, "normal:".length())) return "";
+        return normalized.substring("normal:".length()).trim();
+    }
+
+    private static String canonicalRankedIdentity(String eventKey) {
+        String normalized = normalizeEventKey(eventKey);
+        String[] parts = normalized.split(":", 4);
+        if (parts.length != 4 || !"ranked-season".equalsIgnoreCase(parts[0])) return "";
+        String season = parts[1].trim();
+        String id = parts[3].trim();
+        if (!season.matches("[1-9][0-9]{0,18}") || id.isBlank()) return "";
+        // Ranked and Legend endpoints can overlap while a season is being
+        // finalized. The upstream id is stronger than the route label.
+        return season + "\u001f" + id;
+    }
+
     private static String canonicalWarIdentity(String eventKey) {
         if (eventKey == null || eventKey.isBlank()) return "";
         String[] parts = eventKey.trim().split(":", 4);
@@ -121,14 +128,6 @@ public final class AdvancedStatsCompactEventFingerprint {
         String normalized = value == null ? "" : value.trim();
         if (!normalized.matches("[0-9]+")) return normalized;
         return normalized.replaceFirst("^0+(?!$)", "");
-    }
-
-    private static String canonicalInteger(Integer value) {
-        return value == null ? "" : Integer.toString(value);
-    }
-
-    private static String canonicalNumber(Double value) {
-        return value == null ? "" : BigDecimal.valueOf(value).stripTrailingZeros().toPlainString();
     }
 
     public record NormalizedArmy(String hash, String json, boolean available) {

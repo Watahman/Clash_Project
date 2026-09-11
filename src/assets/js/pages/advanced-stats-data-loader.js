@@ -1,29 +1,75 @@
-import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { t } from '../i18n/i18n.js?v=20260911-loot-v1';
 import { arrayValue } from './advanced-stats-formatters.js?v=20260829-public-auth-v1';
 import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260811-2';
 
 const BATTLE_PAGE_SIZE = 20;
-const SECTION_NAMES = ['summary', 'units', 'armies', 'trends', 'battles'];
+const SECTION_NAMES = ['overview', 'units', 'armies', 'trends', 'battles'];
+const SECTION_ELEMENT_IDS = Object.freeze({ overview: 'advanced-stats-summary-section', units: 'advanced-stats-units-section', armies: 'advanced-stats-armies-section', trends: 'advanced-stats-trends-section', battles: 'advanced-stats-battles-section' });
 const RAW_HISTORY_NOT_RETAINED = 'raw_attack_history_not_retained';
+const COLLECTION_FIELDS = Object.freeze({ units: 'items', armies: 'items', trends: 'points', battles: 'items' });
 
 function filteredUnits(state) {
     return state.unitCatalog.filter(unit => (state.category === 'ALL' || String(unit?.category || '').toUpperCase() === state.category)
         && isPlayerFacingUnitName(unit?.name || unit?.unitName));
 }
 
-function applySectionResult(state, result, key, map = value => value) {
-    if (result.status !== 'fulfilled') {
-        state.sectionStates[key] = 'error';
-        return;
-    }
-    map(result.value);
-    state.sectionStates[key] = 'ready';
+function sectionHasData(state, key) {
+    if (key === 'overview') return state.overview != null;
+    if (key === 'units') return (state.unitCatalog?.length || 0) > 0 || (state.units?.length || 0) > 0;
+    return Array.isArray(state[key]) && state[key].length > 0;
 }
 
-function markSectionErrors(failures) {
+function mergeOverviewValue(previous, incoming) {
+    if (!previous || typeof previous !== 'object' || !incoming || typeof incoming !== 'object') return incoming;
+    const merged = { ...previous, ...incoming };
+    if (previous.data && incoming.data && typeof previous.data === 'object' && typeof incoming.data === 'object') {
+        merged.data = { ...previous.data, ...incoming.data };
+        ['summary', 'favorites'].forEach(field => {
+            if (previous.data[field] && incoming.data[field] && typeof incoming.data[field] === 'object') {
+                merged.data[field] = { ...previous.data[field], ...incoming.data[field] };
+            }
+        });
+    }
+    return merged;
+}
+
+function retainedSectionValue(state, key, value) {
+    if (key === 'overview') return mergeOverviewValue(state.overview, value);
+    const field = COLLECTION_FIELDS[key];
+    if (field && sectionHasData(state, key) && !Object.prototype.hasOwnProperty.call(value, field)) return null;
+    return value;
+}
+
+function isPartialResponse(value) {
+    return value?.partial === true || value?.data?.partial === true;
+}
+
+function applySectionResult(state, result, key, map = value => value) {
+    if (result.status !== 'fulfilled') {
+        const hasPrevious = sectionHasData(state, key);
+        state.sectionStates[key] = hasPrevious ? 'stale' : 'error';
+        return state.sectionStates[key];
+    }
+    if (result.value === null || result.value === undefined) {
+        state.sectionStates[key] = sectionHasData(state, key) ? 'stale' : 'error';
+        return state.sectionStates[key];
+    }
+    const value = retainedSectionValue(state, key, result.value);
+    if (value === null && sectionHasData(state, key)) {
+        state.sectionStates[key] = 'stale';
+        return 'stale';
+    }
+    map(value);
+    state.sectionStates[key] = isPartialResponse(result.value) ? 'partial' : 'ready';
+    return state.sectionStates[key];
+}
+
+function markSectionErrors(failures, state) {
     SECTION_NAMES.forEach(name => {
-        document.getElementById(`advanced-stats-${name}-section`)
-            ?.setAttribute('data-load-error', String(failures.includes(name)));
+        const section = document.getElementById(SECTION_ELEMENT_IDS[name]);
+        if (!section) return;
+        section.setAttribute('data-load-error', String(failures.includes(name)));
+        section.dataset.loadState = state.sectionStates[name] || 'idle';
     });
 }
 
@@ -66,17 +112,18 @@ export async function loadStatistics({
     ]);
     if (requestVersion !== state.requestVersion) return;
     const [overview, units, armies, trends, battles] = requests;
-    applySectionResult(state, overview, 'overview', value => { state.overview = value; });
-    applySectionResult(state, units, 'units', value => {
+    const results = [];
+    results.push(applySectionResult(state, overview, 'overview', value => { state.overview = value; }));
+    results.push(applySectionResult(state, units, 'units', value => {
         state.unitCatalog = arrayValue(value?.items);
         state.units = filteredUnits(state);
-    });
-    applySectionResult(state, armies, 'armies', value => { state.armies = arrayValue(value?.items); });
-    applySectionResult(state, trends, 'trends', value => { state.trends = arrayValue(value?.points); });
-    applySectionResult(state, battles, 'battles', value => applyBattleResult(state, value));
+    }));
+    results.push(applySectionResult(state, armies, 'armies', value => { state.armies = arrayValue(value?.items); }));
+    results.push(applySectionResult(state, trends, 'trends', value => { state.trends = arrayValue(value?.points); }));
+    results.push(applySectionResult(state, battles, 'battles', value => applyBattleResult(state, value)));
     renderPage();
-    const failed = requests.map((request, index) => request.status === 'rejected' ? SECTION_NAMES[index] : null).filter(Boolean);
-    markSectionErrors(failed);
+    const failed = results.map((result, index) => result === 'ready' ? null : SECTION_NAMES[index]).filter(Boolean);
+    markSectionErrors(failed, state);
     setDataStatus(failed.length
         ? t('advancedStats.partialLoadFailed', { sections: failed.map(name => t(`advancedStats.section.${name}`)).join(', ') })
         : t('advancedStats.updatedNow'), failed.length ? 'warning' : 'success');

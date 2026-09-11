@@ -1,5 +1,6 @@
 package Java.advancedstats;
 
+import Java.HttpException;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -8,10 +9,12 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AdvancedStatsCompactReadAggregatorTest {
@@ -64,12 +67,126 @@ class AdvancedStatsCompactReadAggregatorTest {
         assertTrue(reader.calls > 0);
     }
 
+    @Test
+    void failedScopeKeepsOtherDataAndReportsFailureContext() throws Exception {
+        FakeReader reader = new FakeReader();
+        reader.failRankedOverview = true;
+
+        JsonObject result = new AdvancedStatsCompactReadAggregator(reader).overview(TRACKING_ID, FROM);
+
+        assertTrue(result.get("partial").getAsBoolean());
+        assertEquals(12, result.getAsJsonObject("summary").get("attacks").getAsInt());
+        assertTrue(result.getAsJsonObject("summary").get("goldLooted").isJsonNull());
+        JsonObject failure = result.getAsJsonArray("failures").get(0).getAsJsonObject();
+        assertEquals("ranked", failure.get("scope").getAsString());
+        assertEquals("overview", failure.get("operation").getAsString());
+    }
+
+    @Test
+    void lootMetricsUseOnlyReliableLootAttacksAndKeepZeroDarkElixir() {
+        JsonObject overview = JsonParser.parseString(
+                "{\"summary\":{\"attacks\":3,\"averageStars\":2,"
+                        + "\"averageDestruction\":50,\"threeStarRate\":33.33,"
+                        + "\"lootAttackCount\":2,\"goldLooted\":100,\"elixirLooted\":60,"
+                        + "\"darkElixirLooted\":0,\"bestGoldLooted\":70,"
+                        + "\"bestElixirLooted\":40,\"bestDarkElixirLooted\":0}}")
+                .getAsJsonObject();
+
+        JsonObject result = new AdvancedStatsCompactReadMerger().overview(List.of(
+                new AdvancedStatsCompactReadAggregator.ScopeSnapshot(
+                        AdvancedStatsScope.NORMAL, overview, null, null, null)));
+        JsonObject summary = result.getAsJsonObject("summary");
+
+        assertEquals(2, summary.get("lootAttackCount").getAsInt());
+        assertEquals(100, summary.get("goldLooted").getAsInt());
+        assertEquals(50, summary.get("averageGoldLooted").getAsInt());
+        assertEquals(0, summary.get("darkElixirLooted").getAsInt());
+        assertEquals(0, summary.get("bestDarkElixirLooted").getAsInt());
+    }
+
+    @Test
+    void trendMergeRecomputesLootMetricsAcrossScopesAndKeepsTrueZero() {
+        JsonArray normal = array("{\"date\":\"2026-08-01\",\"attacks\":2,"
+                + "\"averageStars\":2,\"averageDestruction\":40,\"threeStarRate\":50,"
+                + "\"lootAttackCount\":2,\"goldLooted\":100,\"elixirLooted\":0,"
+                + "\"darkElixirLooted\":0,\"bestGoldLooted\":70,\"bestElixirLooted\":0,"
+                + "\"bestDarkElixirLooted\":0}");
+        JsonArray ranked = array("{\"date\":\"2026-08-01\",\"attacks\":1,"
+                + "\"averageStars\":3,\"averageDestruction\":60,\"threeStarRate\":100,"
+                + "\"lootAttackCount\":1,\"goldLooted\":50,\"elixirLooted\":20,"
+                + "\"darkElixirLooted\":0,\"bestGoldLooted\":50,\"bestElixirLooted\":20,"
+                + "\"bestDarkElixirLooted\":0}");
+
+        JsonObject day = new AdvancedStatsCompactReadMerger().trends(List.of(
+                trendSnapshot(AdvancedStatsScope.NORMAL, normal),
+                trendSnapshot(AdvancedStatsScope.RANKED, ranked))).get(0).getAsJsonObject();
+
+        assertEquals(3, day.get("attacks").getAsInt());
+        assertEquals(3, day.get("lootAttackCount").getAsInt());
+        assertEquals(150, day.get("goldLooted").getAsInt());
+        assertEquals(50, day.get("averageGoldLooted").getAsInt());
+        assertEquals(20, day.get("bestElixirLooted").getAsInt());
+        assertEquals(20, day.get("elixirLooted").getAsInt());
+        assertEquals(0, day.get("darkElixirLooted").getAsInt());
+        assertEquals(0, day.get("bestDarkElixirLooted").getAsInt());
+    }
+
+    @Test
+    void trendMergeDoesNotTurnUnknownScopeLootIntoZero() {
+        JsonArray known = array("{\"date\":\"2026-08-01\",\"attacks\":1,"
+                + "\"lootAttackCount\":1,\"goldLooted\":100,\"elixirLooted\":20,"
+                + "\"darkElixirLooted\":3,\"bestGoldLooted\":100,\"bestElixirLooted\":20,"
+                + "\"bestDarkElixirLooted\":3}");
+        JsonArray unknown = array("{\"date\":\"2026-08-01\",\"attacks\":1,"
+                + "\"lootAttackCount\":null}");
+
+        JsonObject day = new AdvancedStatsCompactReadMerger().trends(List.of(
+                trendSnapshot(AdvancedStatsScope.NORMAL, known),
+                trendSnapshot(AdvancedStatsScope.RANKED, unknown))).get(0).getAsJsonObject();
+
+        assertTrue(day.get("lootAttackCount").isJsonNull());
+        assertTrue(day.get("goldLooted").isJsonNull());
+        assertTrue(day.get("averageGoldLooted").isJsonNull());
+        assertTrue(day.get("bestGoldLooted").isJsonNull());
+    }
+
+    @Test
+    void listScopeFailuresArePropagated() {
+        FakeReader unitsReader = new FakeReader();
+        unitsReader.failRankedUnits = true;
+        assertThrows(HttpException.class,
+                () -> new AdvancedStatsCompactReadAggregator(unitsReader).units(TRACKING_ID, FROM, null));
+
+        FakeReader armiesReader = new FakeReader();
+        armiesReader.failRankedArmies = true;
+        assertThrows(HttpException.class,
+                () -> new AdvancedStatsCompactReadAggregator(armiesReader).armies(TRACKING_ID, FROM, 20));
+
+        FakeReader trendsReader = new FakeReader();
+        trendsReader.failRankedTrends = true;
+        assertThrows(HttpException.class,
+                () -> new AdvancedStatsCompactReadAggregator(trendsReader).trends(TRACKING_ID, FROM));
+    }
+
+    private static AdvancedStatsCompactReadAggregator.ScopeSnapshot trendSnapshot(
+            AdvancedStatsScope scope, JsonArray trends) {
+        return new AdvancedStatsCompactReadAggregator.ScopeSnapshot(scope, null, null, null, trends);
+    }
+
+    private static JsonArray array(String value) {
+        return JsonParser.parseString("[" + value + "]").getAsJsonArray();
+    }
+
     private static final class FakeReader implements AdvancedStatsCompactReadAggregator.ScopeReader {
         private final Map<AdvancedStatsScope, JsonObject> overviews = new EnumMap<>(AdvancedStatsScope.class);
         private final Map<AdvancedStatsScope, JsonArray> units = new EnumMap<>(AdvancedStatsScope.class);
         private final Map<AdvancedStatsScope, JsonArray> armies = new EnumMap<>(AdvancedStatsScope.class);
         private final Map<AdvancedStatsScope, JsonArray> trends = new EnumMap<>(AdvancedStatsScope.class);
         private int calls;
+        private boolean failRankedOverview;
+        private boolean failRankedUnits;
+        private boolean failRankedArmies;
+        private boolean failRankedTrends;
 
         private FakeReader() {
             add(AdvancedStatsScope.NORMAL, 10, 2, 40, 1_000,
@@ -83,25 +200,32 @@ class AdvancedStatsCompactReadAggregatorTest {
         @Override
         public JsonObject overview(UUID trackingId, AdvancedStatsScope scope, Instant from) {
             calls++;
+            if (failRankedOverview && scope == AdvancedStatsScope.RANKED) {
+                throw new IllegalStateException("ranked read failed");
+            }
             return overviews.get(scope);
         }
 
         @Override
         public JsonElement units(UUID trackingId, AdvancedStatsScope scope, Instant from,
-                                 AdvancedStatsUnitCategory category) {
+                                 AdvancedStatsUnitCategory category) throws Exception {
             calls++;
+            if (failRankedUnits && scope == AdvancedStatsScope.RANKED) throw new HttpException(503, "temporary");
             return units.get(scope);
         }
 
         @Override
-        public JsonElement armies(UUID trackingId, AdvancedStatsScope scope, Instant from, int limit) {
+        public JsonElement armies(UUID trackingId, AdvancedStatsScope scope, Instant from, int limit)
+                throws Exception {
             calls++;
+            if (failRankedArmies && scope == AdvancedStatsScope.RANKED) throw new HttpException(503, "temporary");
             return armies.get(scope);
         }
 
         @Override
-        public JsonElement trends(UUID trackingId, AdvancedStatsScope scope, Instant from) {
+        public JsonElement trends(UUID trackingId, AdvancedStatsScope scope, Instant from) throws Exception {
             calls++;
+            if (failRankedTrends && scope == AdvancedStatsScope.RANKED) throw new HttpException(503, "temporary");
             return trends.get(scope);
         }
 
@@ -112,8 +236,12 @@ class AdvancedStatsCompactReadAggregatorTest {
             overview.add("tracking", JsonParser.parseString("{\"status\":\"ACTIVE\"}"));
             overview.add("summary", JsonParser.parseString("{\"attacks\":" + attacks
                     + ",\"averageStars\":" + stars + ",\"averageDestruction\":50"
-                    + ",\"threeStarRate\":" + threeRate + ",\"goldLooted\":" + gold
-                    + ",\"elixirLooted\":10,\"darkElixirLooted\":1}"));
+                    + ",\"threeStarRate\":" + threeRate + ",\"lootAttackCount\":" + attacks
+                    + ",\"goldLooted\":" + gold + ",\"elixirLooted\":10,\"darkElixirLooted\":1"
+                    + ",\"averageGoldLooted\":" + ((double) gold / attacks)
+                    + ",\"averageElixirLooted\":1,\"averageDarkElixirLooted\":0.1"
+                    + ",\"bestGoldLooted\":" + gold + ",\"bestElixirLooted\":10"
+                    + ",\"bestDarkElixirLooted\":1}"));
             overviews.put(scope, overview);
             units.put(scope, array("{\"key\":\"" + unitKey + "\",\"name\":\""
                     + unitKey + "\",\"category\":\"TROOP\",\"totalQuantity\":" + quantity
@@ -125,8 +253,10 @@ class AdvancedStatsCompactReadAggregatorTest {
                     + "\"lastSeenAt\":\"2026-08-02\"}"));
             trends.put(scope, array("{\"date\":\"" + date + "\",\"attacks\":" + trendAttacks
                     + ",\"averageStars\":" + trendStars + ",\"averageDestruction\":50"
-                    + ",\"threeStarRate\":50,\"goldLooted\":" + trendGold
-                    + ",\"elixirLooted\":10,\"darkElixirLooted\":1}"));
+                    + ",\"threeStarRate\":50,\"lootAttackCount\":" + trendAttacks
+                    + ",\"goldLooted\":" + trendGold + ",\"elixirLooted\":10"
+                    + ",\"darkElixirLooted\":1,\"bestGoldLooted\":" + trendGold
+                    + ",\"bestElixirLooted\":10,\"bestDarkElixirLooted\":1}"));
         }
 
         private JsonArray array(String value) {

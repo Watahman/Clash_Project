@@ -123,6 +123,20 @@ class AdvancedStatsScheduledCollectorTest {
     }
 
     @Test
+    void clashKingV2HttpFailuresUseTheSameRetryClassification() {
+        assertEquals(
+                AdvancedStatsScheduledCollector.FailureReason.RATE_LIMIT,
+                AdvancedStatsScheduledCollector.classifyFailure(
+                        HttpException.upstream(429, "{}", "ClashKing V2"))
+        );
+        assertEquals(
+                AdvancedStatsScheduledCollector.FailureReason.API_OUTAGE,
+                AdvancedStatsScheduledCollector.classifyFailure(
+                        HttpException.upstream(503, "{}", "ClashKing V2"))
+        );
+    }
+
+    @Test
     void failureFinalizationErrorLeavesLeaseForExpiryAndIsObservable() throws Exception {
         FakeStore store = new FakeStore(List.of(state(0, NOW.minus(Duration.ofDays(1)))));
         store.failFinalization = true;

@@ -48,15 +48,30 @@ function trend(days) {
         attacks: 1 + (index % 3),
         averageStars: Number((2.2 + ((index * 7) % 8) / 10).toFixed(2)),
         averageDestruction: 78 + ((index * 11) % 18),
-        threeStarRate: 42 + ((index * 13) % 50)
+        threeStarRate: 42 + ((index * 13) % 50),
+        goldLooted: 100000 + (index * 1250),
+        elixirLooted: 80000 + (index * 900),
+        darkElixirLooted: index % 4 === 0 ? 0 : 400 + (index * 12)
     }));
 }
 
 function overview(attacks) {
-    if (!attacks) return { data: { summary: { attacks: 0, averageStars: 0, threeStarRate: 0, averageDestruction: 0 }, favorites: {} } };
+    if (!attacks) return { data: { summary: {
+        attacks: 0, averageStars: 0, threeStarRate: 0, averageDestruction: 0,
+        goldLooted: 0, elixirLooted: 0, darkElixirLooted: 0,
+        averageGoldLooted: 0, averageElixirLooted: 0, averageDarkElixirLooted: 0,
+        bestGoldLooted: 0, bestElixirLooted: 0, bestDarkElixirLooted: 0
+    }, favorites: {} } };
     return {
         data: {
-            summary: { attacks, averageStars: 2.72, threeStarRate: 72.2, averageDestruction: 88.4 },
+            summary: {
+                attacks, averageStars: 2.72, threeStarRate: 72.2, averageDestruction: 88.4,
+                goldLooted: 2450000, elixirLooted: 1980000, darkElixirLooted: 46000,
+                averageGoldLooted: 122500, averageElixirLooted: 99000, averageDarkElixirLooted: 2300,
+                bestGoldLooted: { amount: 188000, battleAt: FIXTURE_UPDATE, opponentName: 'Practice Base 8' },
+                bestElixirLooted: { amount: 166000, battleAt: FIXTURE_UPDATE, opponentName: 'Practice Base 8' },
+                bestDarkElixirLooted: { amount: 5400, battleAt: FIXTURE_UPDATE, opponentName: 'Practice Base 8' }
+            },
             favorites: {
                 troop: { key: 'root-rider', name: 'Root Rider', battlesPresent: 18 },
                 spell: { key: 'freeze-spell', name: 'Freeze Spell', battlesPresent: 17 },

@@ -18,6 +18,11 @@ describe('Advanced Stats compact database contract', () => {
     const seasonUnits = migration('20260815090400_advanced_stats_ranked_season_units_read.sql');
     const seasonArmies = migration('20260815090500_advanced_stats_ranked_season_armies_read.sql');
     const seasonTrends = migration('20260815090600_advanced_stats_ranked_season_trends_read.sql');
+    const compactionFoundation = migration('20260911000307_advanced_stats_loot_and_army_compaction_foundation.sql');
+    const compactionWrites = migration('20260911000309_advanced_stats_loot_and_army_compaction_writes.sql');
+    const compactionReads = migration('20260911000311_advanced_stats_loot_and_army_compaction_reads.sql');
+    const compactionIndex = migration('20260911000312_advanced_stats_army_dictionary_fk_index.sql');
+    const compaction = [compactionFoundation, compactionWrites, compactionReads, compactionIndex].join('\n');
 
     it('defines scope-aware compact state and daily aggregates with RLS', () => {
         for (const table of [
@@ -103,5 +108,78 @@ describe('Advanced Stats compact database contract', () => {
         expect(bootstrap).toContain("when bool_or(bootstrap_status in ('PENDING', 'NOT_STARTED')) then 'PENDING'");
         expect(bootstrap.indexOf("when bool_or(bootstrap_status = 'RUNNING')")).toBeLessThan(
             bootstrap.indexOf("when bool_or(bootstrap_status = 'PARTIAL')"));
+    });
+
+    it('compacts armies and aggregates only explicitly known loot server-side', () => {
+        expect(compaction).toContain('create table if not exists public.advanced_stats_army_dictionary');
+        expect(compaction).toContain('insert into public.advanced_stats_army_dictionary');
+        expect(compaction).toContain('validate constraint advanced_stats_scope_army_daily_army_dictionary_fkey');
+        expect(compaction).toContain('advanced_stats_scope_army_daily_army_hash_idx');
+        expect(compaction).toContain('drop column if exists normalized_army_json');
+        expect(compaction).toContain('loot_known_attacks bigint not null default 0');
+        expect(compaction).toContain('reliable_gold_looted bigint not null default 0');
+        expect(compaction).toContain('reliable_elixir_looted bigint not null default 0');
+        expect(compaction).toContain('reliable_dark_elixir_looted bigint not null default 0');
+        expect(compaction).toContain('best_gold_looted bigint');
+        expect(compaction).toContain('best_elixir_looted bigint');
+        expect(compaction).toContain('best_dark_elixir_looted bigint');
+        expect(compaction).toContain('p_loot_available boolean');
+        expect(compactionWrites).toContain('v_state.source_cursor is distinct from p_expected_cursor');
+        expect(compactionWrites).toContain('v_state.source_watermark_at is distinct from p_expected_watermark_at');
+        expect(compactionWrites).toContain('v_state.source_watermark_key is distinct from p_expected_watermark_key');
+        expect(compactionWrites).toContain('source checkpoint changed during collection');
+        expect(compaction).toContain('loot_enrichment_eligible boolean not null default false');
+        expect(compaction).toContain('loot_totals_applied boolean not null default false');
+        expect(compactionFoundation).toContain('set loot_enrichment_eligible = false');
+        expect(compactionFoundation).not.toContain('set loot_totals_applied = true');
+        expect(compactionFoundation).toContain('advanced_stats_event_receipts_loot_enrichment_state_check');
+        expect(compactionFoundation).not.toContain('set loot_known_attacks = attacks');
+        expect(compaction).toContain("'lootEnriched', v_loot_enriched");
+        expect(compaction).toContain("jsonb_typeof(v_event->'lootAvailable')");
+        expect(compaction).toContain("case when v_loot_available then v_loot_gold else 0 end");
+        expect(compaction).toContain('goldLootAverage');
+        expect(compaction).toContain('elixirLootAverage');
+        expect(compaction).toContain('darkElixirLootAverage');
+        expect(compaction).toContain('averageGoldLooted');
+        expect(compaction).toContain('averageElixirLooted');
+        expect(compaction).toContain('averageDarkElixirLooted');
+        expect(compaction).toContain('goldLootBest');
+        expect(compaction).toContain('elixirLootBest');
+        expect(compaction).toContain('darkElixirLootBest');
+        expect(compaction).toContain('bestGoldLooted');
+        expect(compaction).toContain('bestElixirLooted');
+        expect(compaction).toContain('bestDarkElixirLooted');
+        expect(compaction).toContain('lootAttackCount');
+        expect(compaction).not.toMatch(/combined|combinedScore|lootScore|economicScore/i);
+        expect(compaction).not.toMatch(/security\s+definer/i);
+        expect(compaction).toContain('grant execute on function');
+        expect(compaction).toContain('to service_role');
+        expect(compactionWrites).toContain('reliable_gold_looted = reliable_gold_looted + v_loot_gold');
+        expect(compactionWrites).toContain('and loot_enrichment_eligible = true');
+        expect(compactionWrites).toContain('loot_known_attacks = loot_known_attacks + 1');
+        expect(compactionReads).toContain('sum(reliable_gold_looted)');
+        expect(compactionReads).not.toContain('sum(gold_looted)');
+        expect(compactionReads).toContain("'averageGoldLooted'");
+    });
+
+    it('keeps schema verification and smoke coverage compact-only after raw cutover', () => {
+        const schemaCheck = readFileSync('scripts/check-advanced-stats-schema.sql', 'utf8');
+        const compactSmoke = readFileSync('scripts/smoke-test-advanced-stats-compact.sql', 'utf8');
+        const smokeRunner = readFileSync('scripts/smoke-test-advanced-stats-db.mjs', 'utf8');
+        expect(schemaCheck).toContain("'advanced_stats_army_dictionary'");
+        expect(schemaCheck).toContain("'public.save_advanced_stats_compact_event_v3");
+        expect(schemaCheck).toContain("'advanced_stats_loot_and_army_compaction_foundation'");
+        expect(schemaCheck).toContain("'advanced_stats_loot_and_army_compaction_writes'");
+        expect(schemaCheck).toContain("'advanced_stats_loot_and_army_compaction_reads'");
+        expect(schemaCheck).toContain("'advanced_stats_army_dictionary_fk_index'");
+        expect(schemaCheck).toContain("'reliable_gold_looted'");
+        expect(schemaCheck).toContain("'loot_totals_applied'");
+        expect(schemaCheck).not.toContain("'advanced_stats_battles'");
+        expect(schemaCheck).not.toContain("'public.save_advanced_stats_battle_v");
+        expect(compactSmoke).toContain('save_advanced_stats_compact_event_v3');
+        expect(compactSmoke).toContain('loot_known_attacks');
+        expect(compactSmoke).not.toContain('advanced_stats_battles');
+        expect(smokeRunner).toContain("'smoke-test-advanced-stats-compact.sql'");
+        expect(smokeRunner).not.toContain("'smoke-test-advanced-stats-read-models.sql'");
     });
 });

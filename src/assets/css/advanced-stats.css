@@ -122,6 +122,25 @@
 .advanced-stats__favorites :is(span, strong, small) { min-width: 0; overflow-wrap: anywhere; }
 .advanced-stats__favorites strong { line-height: 1.35; white-space: normal; }
 .advanced-stats__favorites small { color: var(--cp-text-2); min-height: 18px; }
+.advanced-stats__subheading { display: grid; gap: 4px; margin-bottom: 12px; }
+.advanced-stats__subheading h3 { font-size: 1rem; margin: 0; }
+.advanced-stats__subheading p { color: var(--cp-text-2); font-size: .8rem; margin: 0; }
+.advanced-stats__loot-meta { color: var(--cp-text-3); font-size: .74rem; }
+.advanced-stats__loot { border-top: 1px solid var(--cp-border-1); margin-top: 20px; padding-top: 20px; }
+.advanced-stats__loot-cards { display: grid; gap: 8px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.advanced-stats__loot-card { background: var(--cp-surface-2); border-radius: 8px; display: grid; gap: 6px; min-width: 0; padding: 14px; animation: advanced-stats-loot-enter 360ms var(--cp-ease-emphasized, ease-out) both; }
+.advanced-stats__loot-card:nth-child(2) { animation-delay: 45ms; }
+.advanced-stats__loot-card:nth-child(3) { animation-delay: 90ms; }
+.advanced-stats__loot-resource { align-items: center; display: flex; gap: 8px; min-width: 0; }
+.advanced-stats__loot-resource img { flex: 0 0 32px; height: 32px; object-fit: contain; width: 32px; }
+.advanced-stats__loot-resource h4 { font-size: .9rem; margin: 0; overflow-wrap: anywhere; }
+.advanced-stats__loot-card > strong { font-size: 1.55rem; letter-spacing: -.03em; line-height: 1.1; }
+.advanced-stats__loot-card > span { color: var(--cp-text-2); font-size: .75rem; }
+.advanced-stats__loot-card dl { display: grid; gap: 8px; margin: 6px 0 0; }
+.advanced-stats__loot-card dl div { display: grid; gap: 2px; min-width: 0; }
+.advanced-stats__loot-card dt { color: var(--cp-text-2); font-size: .72rem; }
+.advanced-stats__loot-card dd { font-variant-numeric: tabular-nums; margin: 0; overflow-wrap: anywhere; }
+.advanced-stats__loot-card[data-known="false"] { opacity: .78; }
 .advanced-stats__two-column { align-items: stretch; display: grid; gap: 24px; grid-template-columns: 1fr; }
 
 .advanced-stats__trend-chart { min-height: 240px; overflow-x: auto; padding: 4px 0 0; }
@@ -136,7 +155,21 @@
 .advanced-stats__trend-gap { opacity: .75; stroke: var(--cp-border-2); stroke-dasharray: 3 4; stroke-width: 1; vector-effect: non-scaling-stroke; }
 .advanced-stats__trend-tooltip { font-size: .72rem; }
 .advanced-stats__trend-day-label { fill: var(--cp-text-3); font-size: 10px; }
+.advanced-stats__loot-trend { border-top: 1px solid var(--cp-border-1); margin-top: 18px; overflow-x: auto; padding-top: 18px; }
+.advanced-stats__loot-trend-table { border-collapse: collapse; min-width: 520px; width: 100%; }
+.advanced-stats__loot-trend-table th,
+.advanced-stats__loot-trend-table td { border-bottom: 1px solid var(--cp-border-1); padding: 8px; text-align: right; }
+.advanced-stats__loot-trend-table th:first-child,
+.advanced-stats__loot-trend-table td:first-child { text-align: left; }
+.advanced-stats__loot-trend-table thead th { color: var(--cp-text-2); font-size: .72rem; }
+.advanced-stats__loot-trend-table tbody th { font-size: .78rem; font-weight: 600; }
+.advanced-stats__loot-trend-table td { font-variant-numeric: tabular-nums; }
 .advanced-stats__empty-copy { color: var(--cp-text-2); margin: 8px 0 0; }
+
+@keyframes advanced-stats-loot-enter {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
 @keyframes advanced-stats-trend-draw {
     from { stroke-dasharray: 1200; stroke-dashoffset: 1200; }
@@ -200,6 +233,7 @@
     .advanced-stats__tracking-menu { grid-column: 1 / -1; justify-self: start; }
     .advanced-stats__kpis,
     .advanced-stats__favorites,
+    .advanced-stats__loot-cards,
     .advanced-stats__army-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 899px) {
@@ -217,7 +251,8 @@
     .advanced-stats .cp-button { min-height: 44px; }
     .advanced-stats__account-row,
     .advanced-stats__kpis,
-    .advanced-stats__favorites { grid-template-columns: 1fr 1fr; }
+    .advanced-stats__favorites,
+    .advanced-stats__loot-cards { grid-template-columns: 1fr 1fr; }
     .advanced-stats__account-row .cp-button { min-height: 44px; padding-inline: 10px; }
     .advanced-stats__empty-state { align-items: start; flex-wrap: wrap; }
     .advanced-stats__empty-state .cp-button { margin-inline-start: 56px; }
@@ -238,5 +273,6 @@
     .advanced-stats__tracking-actions { min-width: min(240px, calc(100vw - 48px)); }
 }
 @media (prefers-reduced-motion: reduce) {
-    .advanced-stats__trend-line { animation: none; }
+    .advanced-stats__trend-line,
+    .advanced-stats__loot-card { animation: none; }
 }

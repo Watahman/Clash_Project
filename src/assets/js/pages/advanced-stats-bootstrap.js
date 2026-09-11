@@ -9,5 +9,5 @@ async function canInitialize() {
 }
 
 if (await canInitialize()) {
-    await import('./advanced-stats.js?v=20260909-battledata-v1');
+    await import('./advanced-stats.js?v=20260911-loot-v1');
 }

@@ -1,4 +1,4 @@
-import { t } from '../i18n/i18n.js?v=20260830-monthly-trends-v1';
+import { t } from '../i18n/i18n.js?v=20260911-loot-v1';
 import {
     arrayValue,
     formatDecimal,
@@ -10,6 +10,7 @@ import {
     calendarMonthGap,
     formatMonthLabel
 } from './advanced-stats-trends.js?v=20260830-monthly-trends-v1';
+import { renderLootTrend } from './advanced-stats-loot.js?v=20260911-loot-v1';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const CHART_WIDTH = 720;
@@ -157,6 +158,7 @@ export function renderTrends(elements, state) {
     const root = elements.trendChart;
     const points = aggregateMonthlyTrends(arrayValue(state.trends));
     root.replaceChildren();
+    renderLootTrend(elements.lootTrend, points, formatMonthLabel);
     setVisibility(root, points.length > 0);
     setVisibility(elements.trendEmpty, points.length === 0);
     if (!points.length) return;

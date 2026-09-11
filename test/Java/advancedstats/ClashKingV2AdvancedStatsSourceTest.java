@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ClashKingV2AdvancedStatsSourceTest {
@@ -132,6 +133,73 @@ class ClashKingV2AdvancedStatsSourceTest {
         assertEquals(0, transport.leagueCalls);
     }
 
+    @Test
+    void temporarySeasonDiscoveryFailureIsRetriedAndOriginalHttpFailureIsPreserved() {
+        FakeTransport transport = new FakeTransport();
+        transport.leagueFailure = HttpException.upstream(429, "{}", "ClashKing V2");
+        ClashKingV2AdvancedStatsSource source = new ClashKingV2AdvancedStatsSource(transport, null);
+
+        assertThrows(ClashKingV2AdvancedStatsSource.SeasonDiscoveryException.class,
+                () -> source.seasonKey(AdvancedStatsScope.RANKED, "#P0Y8LQ", NOW));
+
+        transport.leagueFailure = null;
+        transport.league = json("{\"items\":[{\"mode\":\"ranked\",\"seasonId\":\"1755000000\"}]}" );
+        assertEquals("1755000000", source.seasonKey(AdvancedStatsScope.RANKED, "#P0Y8LQ", NOW));
+        assertEquals(2, transport.leagueCalls);
+    }
+
+    @Test
+    void seasonDiscoveryRefreshesAfterUtcSeasonRollover() {
+        FakeTransport transport = new FakeTransport();
+        transport.league = json("{\"items\":[{\"mode\":\"ranked\",\"seasonId\":\"1755000000\"}]}" );
+        ClashKingV2AdvancedStatsSource source = new ClashKingV2AdvancedStatsSource(transport, null);
+
+        assertEquals("1755000000", source.seasonKey(AdvancedStatsScope.RANKED, "#P0Y8LQ", NOW));
+        transport.league = json("{\"items\":[{\"mode\":\"ranked\",\"seasonId\":\"1756000000\"}]}" );
+        assertEquals("1756000000", source.seasonKey(AdvancedStatsScope.RANKED, "#P0Y8LQ",
+                NOW.plusSeconds(24 * 60 * 60L)));
+        assertEquals(2, transport.leagueCalls);
+    }
+
+    @Test
+    void emptySeasonDiscoveryIsNotNegativeCached() {
+        FakeTransport transport = new FakeTransport();
+        transport.league = json("{\"items\":[]}" );
+        ClashKingV2AdvancedStatsSource source = new ClashKingV2AdvancedStatsSource(transport, null);
+
+        assertEquals("", source.seasonKey(AdvancedStatsScope.RANKED, "#P0Y8LQ", NOW));
+        transport.league = json("{\"items\":[{\"mode\":\"ranked\",\"seasonId\":\"1755000000\"}]}" );
+        assertEquals("1755000000", source.seasonKey(AdvancedStatsScope.RANKED, "#P0Y8LQ", NOW));
+        assertEquals(2, transport.leagueCalls);
+    }
+
+    @Test
+    void currentDatesAndSeasonDiscoveryAreCachedWithinUtcPollDay() throws Exception {
+        FakeTransport transport = new FakeTransport();
+        transport.league = json("{\"items\":[{\"mode\":\"ranked\",\"seasonId\":\"1755000000\"}]}" );
+        transport.current = json("{\"legend\":\"2026-08-14\"}" );
+        ClashKingV2AdvancedStatsSource source = new ClashKingV2AdvancedStatsSource(transport, null);
+
+        source.fetch(request(AdvancedStatsScope.RANKED));
+        source.fetch(request(AdvancedStatsScope.RANKED));
+
+        assertEquals(1, transport.leagueCalls);
+        assertEquals(1, transport.currentCalls);
+    }
+
+    @Test
+    void rankedHttpFailureIsNotConvertedToUnsupportedRoute() {
+        FakeTransport transport = new FakeTransport();
+        transport.current = json("{\"legend\":\"2026-08-14\"}" );
+        transport.league = json("{\"items\":[{\"mode\":\"ranked\",\"seasonId\":\"1755000000\"}]}" );
+        transport.rankedFailure = HttpException.upstream(503, "{}", "ClashKing V2");
+        ClashKingV2AdvancedStatsSource source = new ClashKingV2AdvancedStatsSource(transport, null);
+
+        Exception failure = assertThrows(HttpException.class,
+                () -> source.fetch(request(AdvancedStatsScope.RANKED)));
+        assertEquals(503, ((HttpException) failure).getStatusCode());
+    }
+
     private static HistoryRequest request(AdvancedStatsScope scope) {
         return new HistoryRequest(TRACKING_ID, "#P0Y8LQ", scope,
                 AdvancedStatsCapabilityOperation.BOOTSTRAP,
@@ -155,6 +223,7 @@ class ClashKingV2AdvancedStatsSourceTest {
         private String rankedSeason;
         private String legendDay;
         private int leagueCalls;
+        private int currentCalls;
         private boolean legacyNormalCalled;
         private boolean rankedCalled;
         private HttpException rankedFailure;
@@ -210,6 +279,7 @@ class ClashKingV2AdvancedStatsSourceTest {
 
         @Override
         public JsonObject currentDates() {
+            currentCalls++;
             return current;
         }
     }

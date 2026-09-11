@@ -1,4 +1,4 @@
-import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { t } from '../i18n/i18n.js?v=20260911-loot-v1';
 import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260811-2';
 import { entityImage } from './progress-asset-view.js?v=20260811-2';
 import { formatNumber, formatPercent } from './advanced-stats-formatters.js?v=20260829-public-auth-v1';
@@ -84,12 +84,17 @@ function ensureUnitUsageScopeStyles() {
 function ensureUnitUsageScopeNote() {
     const title = document.getElementById('advanced-stats-units-title');
     const headingCopy = title?.parentElement;
-    if (!headingCopy || headingCopy.querySelector('[data-unit-usage-scope-note]')) return;
+    if (!headingCopy) return;
+    if (headingCopy.querySelector('[data-unit-usage-scope-note]')) {
+        ensureUnitUsageScopeStyles();
+        return;
+    }
     ensureUnitUsageScopeStyles();
     const note = document.createElement('p');
     note.dataset.unitUsageScopeNote = '';
     note.className = 'advanced-stats__unit-scope-note';
-    note.textContent = 'Multiplayer only — War & CWL unit data unavailable.';
+    note.textContent = t('advancedStats.unitScopeNote');
+    note.dataset.i18n = 'advancedStats.unitScopeNote';
     note.setAttribute('role', 'note');
     headingCopy.append(note);
 }

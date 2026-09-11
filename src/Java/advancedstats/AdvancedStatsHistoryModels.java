@@ -84,8 +84,25 @@ public final class AdvancedStatsHistoryModels {
             List<UnitObservation> units,
             long goldLooted,
             long elixirLooted,
-            long darkElixirLooted
+            long darkElixirLooted,
+            boolean lootAvailable
     ) {
+        /**
+         * Compatibility constructor for non-ClashKing adapters. Older adapters
+         * already normalized their loot fields before creating this model, so
+         * retain their historical meaning while new parsers pass availability
+         * explicitly.
+         */
+        public AttackObservation(String eventKey, AdvancedStatsScope scope, Instant occurredAt, boolean attack,
+                                 String battleType, String opponentTag, Integer playerTownHall,
+                                 Integer opponentTownHall, Integer stars, Double destructionPercentage,
+                                 List<UnitObservation> units, long goldLooted, long elixirLooted,
+                                 long darkElixirLooted) {
+            this(eventKey, scope, occurredAt, attack, battleType, opponentTag, playerTownHall,
+                    opponentTownHall, stars, destructionPercentage, units, goldLooted, elixirLooted,
+                    darkElixirLooted, true);
+        }
+
         public AttackObservation {
             eventKey = requireText(eventKey, "eventKey");
             if (eventKey.length() > 256) throw new IllegalArgumentException("eventKey is too long");

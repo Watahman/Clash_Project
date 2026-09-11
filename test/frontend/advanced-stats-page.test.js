@@ -3,6 +3,8 @@ import { JSDOM } from 'jsdom';
 import { describe, expect, it, vi } from 'vitest';
 import worker from '../../worker/index.js';
 
+const ADVANCED_STATS_CACHE_VERSION = '20260911-loot-v1';
+
 const documentFor = path => new JSDOM(readFileSync(path, 'utf8')).window.document;
 
 describe('Advanced Stats workspace page', () => {
@@ -27,6 +29,9 @@ describe('Advanced Stats workspace page', () => {
         expect(document.querySelector('#advanced-stats-armies')).not.toBeNull();
         expect(document.querySelector('#advanced-stats-trend-chart')).not.toBeNull();
         expect(document.querySelector('#advanced-stats-battles')).not.toBeNull();
+        expect(document.querySelector('#advanced-stats-loot-cards [data-loot-resource="gold"] img')?.getAttribute('src')).toContain('/assets/game/buildings/gold-storage.webp');
+        expect(document.querySelector('#advanced-stats-loot-cards [data-loot-resource="elixir"] img')?.getAttribute('src')).toContain('/assets/game/buildings/elixir-storage.webp');
+        expect(document.querySelector('#advanced-stats-loot-cards [data-loot-resource="darkElixir"] img')?.getAttribute('src')).toContain('/assets/game/buildings/dark-elixir-storage.webp');
         expect(document.querySelector('#advanced-stats-profile-error')?.hidden).toBe(true);
         expect(document.querySelector('#advanced-stats-profile-retry')?.getAttribute('type')).toBe('button');
         expect([...document.querySelectorAll('button:not([type])')]).toHaveLength(0);
@@ -49,6 +54,7 @@ describe('Advanced Stats workspace page', () => {
         expect(renderer).toContain('setVisibility(elements.profileError, state.profileError === true)');
         expect(source).toContain('elements.profileRetry?.addEventListener');
         expect(loader).toContain("applySectionResult(state, overview, 'overview'");
+        expect(loader).toContain("const SECTION_NAMES = ['overview'");
         expect(loader).toContain("applySectionResult(state, units, 'units'");
         expect(loader).toContain('state.unitCatalog = arrayValue(value?.items)');
         expect(source).not.toContain("state.overview = overview.status === 'fulfilled' ? overview.value : null");
@@ -69,6 +75,7 @@ describe('Advanced Stats workspace page', () => {
         expect(document.querySelector('#advanced-stats-page-status')?.getAttribute('aria-live')).toBe('polite');
         expect(document.querySelector('#advanced-stats-data-status')?.getAttribute('aria-live')).toBe('polite');
         expect(document.querySelectorAll('#advanced-stats-analysis-scopes [data-scope-progress][data-i18n-aria-label]')).toHaveLength(4);
+        expect(document.querySelector('[data-i18n="advancedStats.unitScopeNote"]')).not.toBeNull();
     });
 
     it('shows meaningful army names without developer metadata', () => {
@@ -94,21 +101,30 @@ describe('Advanced Stats workspace page', () => {
         const bootstrap = readFileSync('src/assets/js/pages/advanced-stats-bootstrap.js', 'utf8');
         const page = readFileSync('src/assets/js/pages/advanced-stats.js', 'utf8');
         const renderer = readFileSync('src/assets/js/pages/advanced-stats-renderer.js', 'utf8');
+        const loader = readFileSync('src/assets/js/pages/advanced-stats-data-loader.js', 'utf8');
         const trendRenderer = readFileSync('src/assets/js/pages/advanced-stats-trends-renderer.js', 'utf8');
+        const unitRenderer = readFileSync('src/assets/js/pages/advanced-stats-units-renderer.js', 'utf8');
+        const lootRenderer = readFileSync('src/assets/js/pages/advanced-stats-loot.js', 'utf8');
         const i18n = readFileSync('src/assets/js/i18n/i18n.js', 'utf8');
         const runtime = readFileSync('src/assets/js/i18n/runtime-translations.js', 'utf8');
 
-        expect(html).toContain('advanced-stats-bootstrap.js?v=20260909-battledata-v1');
-        expect(html).toContain('advanced-stats.css?v=20260814-advanced-stats-v4');
+        expect(html).toContain(`advanced-stats-bootstrap.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
+        expect(html).toContain(`advanced-stats.css?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(html).toContain('workspace-shell.js?v=20260829-public-dashboard-v1');
-        expect(bootstrap).toContain("advanced-stats.js?v=20260909-battledata-v1");
-        expect(page).toContain("advanced-stats-renderer.js?v=20260909-battledata-v1");
-        expect(page).toContain("advanced-stats-data-loader.js?v=20260909-battledata-v1");
-        expect(renderer).toContain("advanced-stats-battles-renderer.js?v=20260909-battledata-v1");
-        expect(renderer).toContain("advanced-stats-trends-renderer.js?v=20260830-monthly-trends-v1");
+        expect(bootstrap).toContain(`advanced-stats.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
+        expect(page).toContain(`advanced-stats-renderer.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
+        expect(page).toContain(`advanced-stats-data-loader.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
+        expect(page).toContain(`advanced-stats-fixtures.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
+        expect(renderer).toContain(`advanced-stats-trends-renderer.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
+        expect(renderer).toContain(`advanced-stats-units-renderer.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
+        expect(renderer).toContain(`advanced-stats-loot.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
+        expect(loader).toContain(`i18n/i18n.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
+        expect(trendRenderer).toContain(`i18n/i18n.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
+        expect(unitRenderer).toContain(`i18n/i18n.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
+        expect(lootRenderer).toContain(`i18n/i18n.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(trendRenderer).toContain("advanced-stats-trends.js?v=20260830-monthly-trends-v1");
-        expect(page).toContain("i18n/i18n.js?v=20260909-battledata-v1");
-        expect(renderer).toContain("i18n/i18n.js?v=20260909-battledata-v1");
+        expect(page).toContain(`i18n/i18n.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
+        expect(renderer).toContain(`i18n/i18n.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(page).toContain("advanced-stats-army-view.js?v=20260809-4");
         expect(page).toContain('applyI18n(document)');
         expect(i18n).toContain("runtime-translations.js?v=20260909-battledata-v1");

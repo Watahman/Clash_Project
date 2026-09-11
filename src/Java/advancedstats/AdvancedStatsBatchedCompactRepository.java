@@ -128,6 +128,7 @@ public final class AdvancedStatsBatchedCompactRepository implements AdvancedStat
         event.addProperty("lootGold", observation.goldLooted());
         event.addProperty("lootElixir", observation.elixirLooted());
         event.addProperty("lootDarkElixir", observation.darkElixirLooted());
+        event.addProperty("lootAvailable", observation.lootAvailable());
         event.add("units", unitsJson(observation));
         if (army.available()) {
             event.addProperty("armyHash", army.hash());

@@ -2,6 +2,7 @@ package Java.advancedstats;
 
 import Java.advancedstats.AdvancedStatsCollectionCoordinator.RunResult;
 import Java.advancedstats.AdvancedStatsCollectionModels.BootstrapStatus;
+import Java.advancedstats.AdvancedStatsCollectionModels.CollectionResult;
 import Java.advancedstats.AdvancedStatsCollectionModels.ScopeState;
 
 import java.time.Clock;
@@ -17,6 +18,11 @@ public final class AdvancedStatsCompactScheduledCollector {
     @FunctionalInterface
     public interface SourceFactory {
         AdvancedStatsHistorySource create(String workerId) throws Exception;
+    }
+
+    @FunctionalInterface
+    public interface CompactStoreFactory {
+        AdvancedStatsCollectionStore create(String workerId) throws Exception;
     }
 
     public record Settings(int batchSize, int pageSize, int maxBootstrapPages, int leaseSeconds,
@@ -59,13 +65,23 @@ public final class AdvancedStatsCompactScheduledCollector {
 
     private final AdvancedStatsScheduledCollector.Store leaseStore;
     private final SourceFactory sourceFactory;
+    private final CompactStoreFactory compactStoreFactory;
     private final Clock clock;
     private final Settings settings;
 
     public AdvancedStatsCompactScheduledCollector(AdvancedStatsScheduledCollector.Store leaseStore,
                                                    SourceFactory sourceFactory, Clock clock, Settings settings) {
+        this(leaseStore, sourceFactory, workerId -> new AdvancedStatsBatchedCompactRepository(workerId),
+                clock, settings);
+    }
+
+    public AdvancedStatsCompactScheduledCollector(AdvancedStatsScheduledCollector.Store leaseStore,
+                                                   SourceFactory sourceFactory,
+                                                   CompactStoreFactory compactStoreFactory,
+                                                   Clock clock, Settings settings) {
         this.leaseStore = Objects.requireNonNull(leaseStore, "leaseStore");
         this.sourceFactory = Objects.requireNonNull(sourceFactory, "sourceFactory");
+        this.compactStoreFactory = Objects.requireNonNull(compactStoreFactory, "compactStoreFactory");
         this.clock = Objects.requireNonNull(clock, "clock");
         this.settings = Objects.requireNonNull(settings, "settings");
     }
@@ -112,15 +128,17 @@ public final class AdvancedStatsCompactScheduledCollector {
         return new Summary(trackers.size(), succeeded, failed, processed, inserted, duplicates, skipped, partial);
     }
 
-    private void ensureNoFailedScopes(RunResult result) {
-        boolean failedScope = result.scopes().values().stream()
-                .anyMatch(item -> item.status() == BootstrapStatus.FAILED);
-        if (failedScope) throw new IllegalStateException("one or more compact scopes failed");
+    private void ensureNoFailedScopes(RunResult result) throws Exception {
+        for (CollectionResult item : result.scopes().values()) {
+            if (item.status() != BootstrapStatus.FAILED) continue;
+            if (item.failure() != null) throw item.failure();
+            throw new IllegalStateException("compact scope failed: " + item.scope().apiValue());
+        }
     }
 
     private RunResult collect(AdvancedStatsModels.TrackingState tracker, String workerId) throws Exception {
         AdvancedStatsHistorySource source = sourceFactory.create(workerId);
-        AdvancedStatsCollectionStore compactStore = new AdvancedStatsBatchedCompactRepository(workerId);
+        AdvancedStatsCollectionStore compactStore = compactStoreFactory.create(workerId);
         prepareRankedSeason(source, compactStore, tracker, workerId);
         AdvancedStatsCollectionCoordinator coordinator = new AdvancedStatsCollectionCoordinator(source, compactStore);
         if (needsBootstrap(compactStore, tracker.id())) {

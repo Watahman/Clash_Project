@@ -1,4 +1,4 @@
-import { applyI18n, t } from '../i18n/i18n.js?v=20260909-battledata-v1';
+import { applyI18n, t } from '../i18n/i18n.js?v=20260911-loot-v1';
 import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260829-public-auth-v1';
 import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
 import { getCurrentUserId } from '../utils/user.js';
@@ -16,13 +16,13 @@ import {
     startAdvancedStatsTracking,
     stopAdvancedStatsTracking
 } from '../Supabase/Supabase-AdvancedStats.js?v=20260829-public-auth-v1';
-import { getAdvancedStatsFixture } from './advanced-stats-fixtures.js?v=20260811-1';
+import { getAdvancedStatsFixture } from './advanced-stats-fixtures.js?v=20260911-loot-v1';
 import {
     renderAccountSelector,
     renderStatistics,
     renderTracking,
     syncPeriodButtons
-} from './advanced-stats-renderer.js?v=20260909-battledata-v1';
+} from './advanced-stats-renderer.js?v=20260911-loot-v1';
 import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260809-4';
 import { accountsFromProfile, normalizeTag, selectInitialAccount } from './advanced-stats-account.js?v=20260811-2';
 import { createTrackingActions } from './advanced-stats-actions.js?v=20260829-public-auth-v1';
@@ -34,7 +34,7 @@ import {
     loadMoreBattles as loadMoreBattlesFromApi,
     loadStatistics as loadStatisticsFromApi,
     resetBattleHistoryState
-} from './advanced-stats-data-loader.js?v=20260909-battledata-v1';
+} from './advanced-stats-data-loader.js?v=20260911-loot-v1';
 import { waitForHistoricalAnalysis } from './advanced-stats-analysis-controller.js?v=20260814-advanced-stats-v4';
 
 const PERIOD_DEFAULT = '30d';
@@ -105,7 +105,7 @@ function cacheElements() {
         favoriteTroopMeta: 'advanced-stats-favorite-troop-meta', favoriteTroopImage: 'advanced-stats-favorite-troop-image', favoriteSpell: 'advanced-stats-favorite-spell',
         favoriteSpellMeta: 'advanced-stats-favorite-spell-meta', favoriteSpellImage: 'advanced-stats-favorite-spell-image', favoriteSiege: 'advanced-stats-favorite-siege',
         favoriteSiegeMeta: 'advanced-stats-favorite-siege-meta', favoriteSiegeImage: 'advanced-stats-favorite-siege-image', favoriteArmy: 'advanced-stats-favorite-army',
-        favoriteArmyMeta: 'advanced-stats-favorite-army-meta', favoriteArmyImage: 'advanced-stats-favorite-army-image', trendChart: 'advanced-stats-trend-chart',
+        favoriteArmyMeta: 'advanced-stats-favorite-army-meta', favoriteArmyImage: 'advanced-stats-favorite-army-image', lootCards: 'advanced-stats-loot-cards', lootAttackCount: 'advanced-stats-loot-attack-count', lootTrend: 'advanced-stats-loot-trend', trendChart: 'advanced-stats-trend-chart',
         trendEmpty: 'advanced-stats-trend-empty', armies: 'advanced-stats-armies', armiesEmpty: 'advanced-stats-armies-empty', unitCategory: 'advanced-stats-unit-category',
         units: 'advanced-stats-units', unitsMobile: 'advanced-stats-units-mobile', unitsTableWrap: 'advanced-stats-units-table-wrap', unitsEmpty: 'advanced-stats-units-empty',
         battles: 'advanced-stats-battles', battlesEmpty: 'advanced-stats-battles-empty', loadMore: 'advanced-stats-load-more', dialog: 'advanced-stats-confirm-dialog',

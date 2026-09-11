@@ -64,9 +64,32 @@ Summary fields:
 - averageStars
 - averageDestruction
 - threeStarRate
+- lootAttackCount (the exact number of attacks with a complete, reliable loot observation)
 - goldLooted
 - elixirLooted
 - darkElixirLooted
+- averageGoldLooted
+- averageElixirLooted
+- averageDarkElixirLooted
+- bestGoldLooted
+- bestElixirLooted
+- bestDarkElixirLooted
+
+Loot totals and derived values are calculated only from attacks counted by
+`lootAttackCount`. A value is `null` when the source cannot establish it
+exactly; `0` remains a real observed amount (for example, an attack with zero
+Dark Elixir). The three `best*` fields are independent per-resource maxima;
+the API does not invent a combined economic score.
+
+An unscoped overview may combine the `normal`, `ranked`, and `war` scopes. If a
+scope read fails, available scopes remain in `data`, `data.partial` is `true`,
+and `data.failures` contains only the affected scope, operation, and a safe
+failure code. A failed scope is not represented as zero loot.
+
+The units, armies, and trends list endpoints propagate a scope read failure as
+an HTTP error because their array contracts have no backwards-compatible place
+for failure context. Clients can therefore retain their previous list data
+instead of replacing it with an apparently complete empty array.
 
 Favorite sections:
 

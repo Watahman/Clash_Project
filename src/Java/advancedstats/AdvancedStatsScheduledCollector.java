@@ -259,7 +259,7 @@ public final class AdvancedStatsScheduledCollector {
         Throwable current = failure;
         while (current != null) {
             if (current instanceof HttpException http) {
-                boolean clash = "Clash API".equalsIgnoreCase(http.getUpstream());
+                boolean clash = isClashKingOrOfficialApi(http.getUpstream());
                 if (clash && http.getStatusCode() == 429) return FailureReason.RATE_LIMIT;
                 if (clash && http.getStatusCode() >= 500) return FailureReason.API_OUTAGE;
                 if (clash && (http.getStatusCode() == 401 || http.getStatusCode() == 403)) {
@@ -272,6 +272,13 @@ public final class AdvancedStatsScheduledCollector {
             current = current.getCause();
         }
         return FailureReason.UNKNOWN;
+    }
+
+    private static boolean isClashKingOrOfficialApi(String upstream) {
+        if (upstream == null || upstream.isBlank()) return false;
+        return "Clash API".equalsIgnoreCase(upstream)
+                || "ClashKing V2".equalsIgnoreCase(upstream)
+                || upstream.toLowerCase(java.util.Locale.ROOT).contains("clashking");
     }
 
     static Duration failureBackoff(FailureReason reason, int failureNumber, Settings settings) {
