@@ -254,12 +254,20 @@ if (-not (Test-Path "./dist")) {
 }
 
 $templateConfig = Get-Content "./wrangler.phase8-preview.jsonc" -Raw
-if ($templateConfig -notmatch "__PHASE8_CANDIDATE_URL__") {
-    throw "wrangler.phase8-preview.jsonc is missing the Phase 8 candidate URL placeholder."
+$configuredOriginMatch = [regex]::Match(
+    $templateConfig,
+    '"CLOUD_RUN_ORIGIN"\s*:\s*"([^"]+)"'
+)
+if (-not $configuredOriginMatch.Success) {
+    throw "wrangler.phase8-preview.jsonc is missing CLOUD_RUN_ORIGIN."
+}
+$configuredOrigin = $configuredOriginMatch.Groups[1].Value.TrimEnd('/')
+if ($configuredOrigin -ne $candidateUrl.TrimEnd('/')) {
+    throw "wrangler.phase8-preview.jsonc CLOUD_RUN_ORIGIN does not match the tagged Phase 8 candidate."
 }
 
 $generatedConfigPath = Join-Path (Get-Location) ".wrangler.phase8-preview.generated.jsonc"
-$generatedConfig = $templateConfig.Replace("__PHASE8_CANDIDATE_URL__", $candidateUrl)
+$generatedConfig = $templateConfig
 [System.IO.File]::WriteAllText($generatedConfigPath, $generatedConfig, (New-Object System.Text.UTF8Encoding($false)))
 
 $tempSecretsFile = Join-Path ([System.IO.Path]::GetTempPath()) ("clashpanel-phase8-secrets-" + [Guid]::NewGuid().ToString("N") + ".json")
