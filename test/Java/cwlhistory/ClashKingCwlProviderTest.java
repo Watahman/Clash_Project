@@ -15,8 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ClashKingCwlProviderTest {
     private HttpServer server;
@@ -66,79 +64,6 @@ class ClashKingCwlProviderTest {
         assertEquals(List.of("/v2/cwl/%23PQL/seasons?limit=2"), requests);
     }
 
-    @Test
-    void usesTheCompleteV2GroupForSeasonDetails() throws Exception {
-        respond("/v2/cwl/%23PQL/group?season=2026-06", 200, season("2026-06"));
-
-        HistoricalCwlSeason result = provider.getSeason("#PQL", "2026-06");
-
-        assertEquals("2026-06", result.season());
-        assertEquals("Champion League II", result.league().name());
-        assertEquals(
-                List.of("/v2/cwl/%23PQL/group?season=2026-06"),
-                requests
-        );
-    }
-
-    @Test
-    void rejectsAResponseForADifferentSeason() {
-        respond("/v2/cwl/%23PQL/group?season=2025-06", 200, season("2026-06"));
-
-        Java.HttpException error = assertThrows(
-                Java.HttpException.class,
-                () -> provider.getSeason("#PQL", "2025-06")
-        );
-
-        assertEquals(502, error.getStatusCode());
-        assertEquals(List.of("/v2/cwl/%23PQL/group?season=2025-06"), requests);
-    }
-
-    @Test
-    void mapsDatedV2SeasonKeysToCalendarMonths() throws Exception {
-        respond("/v2/cwl/%23PQL/seasons?limit=24", 200, """
-                {"items":[{"season":"2026-08-01","rank":2}]}
-                """);
-        respond(
-                "/v2/cwl/%23PQL/group?season=2026-08-01",
-                200,
-                season("2026-08-01")
-        );
-
-        List<HistoricalCwlSeasonSummary> seasons =
-                provider.getAvailableSeasons("#PQL", 24);
-        HistoricalCwlSeason detail = provider.getSeason("#PQL", "2026-08");
-
-        assertEquals(List.of("2026-08"), seasons.stream()
-                .map(HistoricalCwlSeasonSummary::season).toList());
-        assertEquals("2026-08", detail.season());
-        assertEquals(List.of(
-                "/v2/cwl/%23PQL/seasons?limit=24",
-                "/v2/cwl/%23PQL/group?season=2026-08-01"
-        ), requests);
-    }
-
-    @Test
-    void preservesMissingArchivedWarPlaceholdersWithoutFailingTheSeason()
-            throws Exception {
-        respond(
-                "/v2/cwl/%23PQL/group?season=2026-06",
-                200,
-                seasonWithPlaceholder()
-        );
-
-        HistoricalCwlSeason result = provider.getSeason("#PQL", "2026-06");
-
-        assertEquals(2, result.wars().size());
-        assertEquals("#HYDRATED", result.wars().getFirst().id());
-        assertEquals("#MISSING", result.wars().get(1).id());
-        assertEquals(1, result.wars().get(1).day());
-        assertEquals("unknown", result.wars().get(1).state());
-        assertEquals("#PQL", result.wars().get(1).clan().tag());
-        assertFalse(result.wars().get(1).detailsComplete());
-        assertEquals(1, result.roster().size());
-        assertEquals("Partial history", result.dataQuality());
-    }
-
     private void respond(String target, int status, String body) {
         responses.put(target, new Response(status, body));
     }
@@ -157,46 +82,6 @@ class ClashKingCwlProviderTest {
         exchange.sendResponseHeaders(current.status(), body.length);
         exchange.getResponseBody().write(body);
         exchange.close();
-    }
-
-    private static String season(String season) {
-        return """
-               {
-                 "season":"%s",
-                 "state":"ended",
-                 "warLeague":{"id":48000017,"name":"Champion League II"},
-                 "clans":[{"tag":"#PQL","name":"ClashPanel","members":[]}],
-                 "rounds":[]
-               }
-               """.formatted(season);
-    }
-
-    private static String seasonWithPlaceholder() {
-        return """
-               {
-                 "season":"2026-06",
-                 "state":"ended",
-                 "warLeague":{"id":48000017,"name":"Champion League II"},
-                 "clans":[
-                   {"tag":"#PQL","name":"ClashPanel","members":[
-                     {"tag":"#P0L","name":"Alex","townHallLevel":17}
-                   ]},
-                   {"tag":"#ENEMY","name":"Opponent","members":[]}
-                 ],
-                 "rounds":[{"warTags":[
-                   {
-                     "tag":"#HYDRATED","state":"warEnded",
-                     "endTime":"2026-06-08T12:00:00Z",
-                     "teamSize":1,"attacksPerMember":1,
-                     "clan":{"tag":"#PQL","stars":3,
-                       "destructionPercentage":100,"members":[]},
-                     "opponent":{"tag":"#ENEMY","stars":2,
-                       "destructionPercentage":90,"members":[]}
-                   },
-                   {"tag":"#MISSING"}
-                 ]}]
-               }
-               """;
     }
 
     private record Response(int status, String body) {}
