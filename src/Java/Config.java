@@ -71,6 +71,12 @@ public class Config {
     String _TRUST_PROXY_HEADERS = firstNonBlank(env("TRUST_PROXY_HEADERS"), "false");
     String _API_PROXY_SECRET = env("API_PROXY_SECRET");
 
+    String _POSTHOG_ENABLED = firstNonBlank(env("POSTHOG_ENABLED"), "false");
+    String _POSTHOG_PROJECT_API_KEY = env("POSTHOG_PROJECT_API_KEY");
+    String _POSTHOG_HOST = firstNonBlank(env("POSTHOG_HOST"), "https://us.i.posthog.com");
+    String _POSTHOG_INTERNAL_USER_IDS = env("POSTHOG_INTERNAL_USER_IDS");
+    String _CLASHPANEL_ENVIRONMENT = firstNonBlank(env("CLASHPANEL_ENVIRONMENT"), "development");
+
     String _AUTH_COOKIE_SECURE = firstNonBlank(env("AUTH_COOKIE_SECURE"), "false");
     String _AUTH_COOKIE_SAME_SITE = firstNonBlank(env("AUTH_COOKIE_SAME_SITE"), "Lax");
     String _AUTH_REFRESH_COOKIE_MAX_AGE_SECONDS = firstNonBlank(
@@ -368,6 +374,9 @@ public class Config {
     }
 
     int getRateLimitForPath(String path) {
+        if ("/ProductAnalytics".equals(path)) {
+            return positiveInt(_PUBLIC_RATE_LIMIT, 90);
+        }
         if (_AUTH_LOGIN.equals(path)
                 || _AUTH_SIGNUP.equals(path)
                 || _AUTH_RECOVER.equals(path)
@@ -395,6 +404,31 @@ public class Config {
 
     boolean trustsProxyHeaders() {
         return "true".equalsIgnoreCase(_TRUST_PROXY_HEADERS);
+    }
+
+    public boolean isPosthogEnabled() {
+        return "true".equalsIgnoreCase(_POSTHOG_ENABLED)
+                && _POSTHOG_PROJECT_API_KEY != null
+                && !_POSTHOG_PROJECT_API_KEY.isBlank();
+    }
+
+    public String getPosthogProjectApiKey() {
+        return _POSTHOG_PROJECT_API_KEY == null ? "" : _POSTHOG_PROJECT_API_KEY.trim();
+    }
+
+    public String getPosthogHost() {
+        return _POSTHOG_HOST == null || _POSTHOG_HOST.isBlank()
+                ? "https://us.i.posthog.com"
+                : _POSTHOG_HOST.trim();
+    }
+
+    public String getPosthogInternalUserIds() {
+        return _POSTHOG_INTERNAL_USER_IDS == null ? "" : _POSTHOG_INTERNAL_USER_IDS;
+    }
+
+    public String getClashPanelEnvironment() {
+        String value = _CLASHPANEL_ENVIRONMENT == null ? "" : _CLASHPANEL_ENVIRONMENT.trim();
+        return value.isBlank() ? "development" : value;
     }
 
     boolean hasApiProxySecret() {

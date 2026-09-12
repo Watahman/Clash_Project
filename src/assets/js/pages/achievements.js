@@ -16,6 +16,7 @@ import {
     renderSources,
     renderAchievements
 } from './achievements-renderer.js?v=20260831-achievement-chronicle-v1';
+import { trackLoadFailed, trackLoadSucceeded } from '../analytics/product-analytics.js?v=20260912-product-analytics-v1';
 
 const PAGE_SIZE = 48;
 const ACCOUNT_STORAGE_KEY = 'clashpanel_achievements_account';
@@ -35,6 +36,18 @@ const state = {
     filters: { search: '', category: 'all', rarity: 'all', status: 'all', source: 'all' }
 };
 const refs = {};
+
+function trackAchievementLoad({ action = 'load', resultStatus, failed = false } = {}) {
+    const properties = {
+        tool: 'achievements',
+        action,
+        entity_type: action === 'deep_history' ? 'achievement_history' : 'achievements',
+        mode: action === 'deep_history' ? 'background' : 'summary',
+        result_status: resultStatus,
+        source: 'frontend'
+    };
+    (failed ? trackLoadFailed : trackLoadSucceeded)(properties);
+}
 
 function captureRefs() {
     const selectors = {
@@ -117,10 +130,12 @@ async function loadSelectedAccount({ quiet = false, loadHistory = true } = {}) {
         const response = await state.api.getAchievements(tag, { deepHistory: false });
         if (requestId !== state.requestId) return;
         applyResponse(response); setStatus(); renderAll(refs, state, PAGE_SIZE);
+        trackAchievementLoad({ resultStatus: 'complete' });
         if (loadHistory) void loadDeepHistory(tag, requestId);
     } catch (error) {
         if (requestId !== state.requestId) return;
         resetAccountData(); setStatus(error?.message || t('achievements.loadError'), 'error'); renderAll(refs, state, PAGE_SIZE);
+        trackAchievementLoad({ resultStatus: 'failed', failed: true });
     } finally {
         if (requestId === state.requestId) { state.loading = false; renderAll(refs, state, PAGE_SIZE); }
     }

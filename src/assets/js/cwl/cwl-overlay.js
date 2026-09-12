@@ -5,6 +5,7 @@ import { initOverlayDismissal } from "./cwl-overlay-interactions.js";
 import { t } from "../i18n/i18n.js?v=20260829-public-auth-v1";
 import { allowsThirtyPlayerCwl } from "./cwl-league-rules.js";
 import { isRedesignFixtureRequested } from "../fixtures/redesign-fixture-mode.js";
+import { trackTagSubmitted } from "../analytics/product-analytics.js?v=20260912-product-analytics-v1";
 
 export function initOverlayHide() {
     initOverlayDismissal(resetCwlOverlayState);
@@ -83,6 +84,13 @@ function addClanFromResponse(data, input, select) {
     document.querySelector("#cwl-overlay-add-clan")?.classList.add("hidden");
     input.value = "";
     applyCwlSizeRestriction(select, true);
+    void trackTagSubmitted({
+        tool: 'cwl_planner',
+        action: 'add',
+        entity_type: 'clan',
+        source: 'tag',
+        result_status: 'success'
+    });
 }
 
 function setClanMessage(message, state = '') {

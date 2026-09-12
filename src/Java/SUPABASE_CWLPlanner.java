@@ -1,5 +1,7 @@
 package Java;
 
+import Java.analytics.AnalyticsEvent;
+import Java.analytics.ProductAnalytics;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -9,6 +11,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SUPABASE_CWLPlanner {
     private static final int MAX_OWNED_PLANS = 3;
@@ -16,11 +19,17 @@ public class SUPABASE_CWLPlanner {
     private final HttpServer server;
     private final Config conf;
     private final API_Utils utils;
+    private final ProductAnalytics analytics;
 
     public SUPABASE_CWLPlanner(HttpServer server, Config conf){
+        this(server, conf, ProductAnalytics.noop());
+    }
+
+    public SUPABASE_CWLPlanner(HttpServer server, Config conf, ProductAnalytics analytics){
         this.server = server;
         this.conf = conf;
         utils = new API_Utils(conf);
+        this.analytics = analytics == null ? ProductAnalytics.noop() : analytics;
     }
 
     public void saveCWLPlanner() {
@@ -82,6 +91,7 @@ public class SUPABASE_CWLPlanner {
 
                 planId = planArray.get(0).getAsJsonObject().get("id").getAsString();
                 long savedRevision = planArray.get(0).getAsJsonObject().get("revision").getAsLong();
+                capturePlanSaved(userId, "plan_updated");
                 utils.sendJsonResponse(ex,
                         "{\"success\":true,\"uuid\":\"" + planId + "\",\"revision\":" + savedRevision + "}",
                         200);
@@ -110,8 +120,21 @@ public class SUPABASE_CWLPlanner {
                 SUPABASE_Client.post("plan_users", link.toString());
             }
 
+            capturePlanSaved(userId, "plan_created");
             utils.sendJsonResponse(ex, "{\"success\":true,\"uuid\":\"" + planId + "\",\"revision\":1}", 200);
         }));
+    }
+
+    private void capturePlanSaved(String userId, String action) {
+        Map<String, String> properties = Map.of(
+                "tool", "cwl_planner",
+                "action", action,
+                "entity_type", "plan"
+        );
+        analytics.captureAuthenticated(AnalyticsEvent.DATA_SAVED, properties, userId);
+        if ("plan_created".equals(action)) {
+            analytics.captureAuthenticated(AnalyticsEvent.CORE_ACTION_COMPLETED, properties, userId);
+        }
     }
 
     public void getAllPlanners() {

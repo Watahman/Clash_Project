@@ -2,6 +2,7 @@ import { competeT as t } from './compete-locales.js?v=20260829-public-auth-v1';
 import { enrichWithHistoricalPerformance } from './operation-board-performance.js?v=20260829-public-auth-v1';
 import { buildReport } from './operation-board-report-model.js?v=20260829-public-auth-v1';
 import { loadOperationSource, NoActiveCwlError } from './operation-board-source.js?v=20260829-public-auth-v1';
+import { trackLoadFailed, trackLoadSucceeded } from '../analytics/product-analytics.js?v=20260912-product-analytics-v1';
 
 export function createCwlOperationBoardReportLoader({
     getSelectedPlan,
@@ -45,8 +46,16 @@ export function createCwlOperationBoardReportLoader({
             setLatestReport(report);
             renderLatestReport();
             setState('ready');
+            void trackLoadSucceeded({
+                tool: 'cwl_tracker',
+                action: 'load',
+                entity_type: 'cwl_report',
+                source: raw.fixture ? 'fixture' : 'live',
+                result_status: 'success'
+            });
             void getHistoryController()?.syncForCurrentReport(report);
             if (!raw.fixture) void enrichPredictions(report, token, signal);
+            return report;
         } catch (error) {
             await handleLoadError(error, token);
         }
@@ -92,6 +101,13 @@ export function createCwlOperationBoardReportLoader({
         console.error(error);
         setState('error', true);
         setHelp(t('op.loadError'), true);
+        void trackLoadFailed({
+            tool: 'cwl_tracker',
+            action: 'load',
+            entity_type: 'cwl_report',
+            source: 'live',
+            result_status: 'failure'
+        });
     }
 
     async function openHistoryOverview() {

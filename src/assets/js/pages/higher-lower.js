@@ -36,6 +36,7 @@ import {
     writeJson,
     writeString
 } from '../minigames/minigames-storage.js?v=20260811-1';
+import { trackCoreAction } from '../analytics/product-analytics.js?v=20260912-product-analytics-v1';
 
 const root = document.querySelector('[data-higher-lower-game]');
 if (!root) throw new Error('Higher or Lower root is missing.');
@@ -95,6 +96,34 @@ let run;
 let dailyQuestions = [];
 let practiceQuestion = null;
 let fixtureActive = isRedesignFixtureRequested();
+let startedRun;
+let completedRun;
+
+function trackGameStarted() {
+    if (!run || run.completed || run === startedRun) return;
+    startedRun = run;
+    trackCoreAction({
+        tool: 'minigames',
+        action: 'game_started',
+        entity_type: 'minigame',
+        mode: 'higher_lower',
+        source: 'frontend'
+    });
+}
+
+function trackGameCompleted() {
+    if (!run?.completed || run === completedRun) return;
+    completedRun = run;
+    trackCoreAction({
+        tool: 'minigames',
+        action: 'game_completed',
+        entity_type: 'minigame',
+        mode: 'higher_lower',
+        outcome: 'completed',
+        result_status: 'complete',
+        source: 'frontend'
+    });
+}
 
 function announce() {
     window.dispatchEvent(new CustomEvent('clashpanel:minigame-state-changed', {
@@ -159,6 +188,7 @@ function choose(choice, button) {
     }
     announce();
     render();
+    trackGameCompleted();
 }
 
 function nextQuestion() {
@@ -182,12 +212,14 @@ function setMode(mode) {
     if (mode === 'practice') loadPracticeRun();
     else loadDailyRun();
     render();
+    trackGameStarted();
 }
 
 function resetPractice() {
     loadPracticeRun(elements.filter.value);
     elements.choices.forEach(item => delete item.dataset.selected);
     render();
+    trackGameStarted();
 }
 
 async function shareResult() {
@@ -258,3 +290,4 @@ window.addEventListener('classtools:language-changed', render);
 getRedesignFixture().then(handleFixture).catch(() => {});
 loadDailyRun();
 render();
+trackGameStarted();

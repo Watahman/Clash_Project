@@ -1,5 +1,7 @@
 package Java;
 
+import Java.analytics.AnalyticsEvent;
+import Java.analytics.ProductAnalytics;
 import Java.achievements.AchievementBaseSnapshotMetrics;
 import Java.achievements.AchievementEvaluator;
 import Java.achievements.AchievementMetricCollector;
@@ -39,11 +41,13 @@ public class SUPABASE_Achievements {
     private final AchievementMetricCollector metricCollector;
     private final ClanAchievementLedger clanLedger = new ClanAchievementLedger();
     private final LinkedAccountRepository accounts = new LinkedAccountRepository();
+    private final ProductAnalytics analytics;
 
     public SUPABASE_Achievements(HttpServer server, Config conf) {
         this.server = server;
         this.utils = new API_Utils(conf);
         this.metricCollector = new AchievementMetricCollector(conf);
+        this.analytics = ProductAnalytics.noop();
     }
 
     SUPABASE_Achievements(
@@ -51,9 +55,19 @@ public class SUPABASE_Achievements {
             Config conf,
             HistoricalCwlService cwlService
     ) {
+        this(server, conf, cwlService, ProductAnalytics.noop());
+    }
+
+    public SUPABASE_Achievements(
+            HttpServer server,
+            Config conf,
+            HistoricalCwlService cwlService,
+            ProductAnalytics analytics
+    ) {
         this.server = server;
         this.utils = new API_Utils(conf);
         this.metricCollector = new AchievementMetricCollector(conf, cwlService);
+        this.analytics = analytics == null ? ProductAnalytics.noop() : analytics;
     }
 
     public void registerRoutes() {
@@ -98,6 +112,7 @@ public class SUPABASE_Achievements {
         rpcBody.add("p_progress", progressJson);
 
         String persistenceResult = SUPABASE_Client.rpc("save_achievement_import", rpcBody.toString());
+        captureAchievementImport(userId);
 
         JsonObject response = new JsonObject();
         response.addProperty("success", true);
@@ -111,6 +126,24 @@ public class SUPABASE_Achievements {
         response.add("achievements", progressJson);
         response.add("persistence", parseAnyJson(persistenceResult));
         utils.sendJsonResponse(exchange, response.toString(), 200);
+    }
+
+    private void captureAchievementImport(String userId) {
+        Map<String, String> savedProperties = Map.of(
+                "tool", "achievements",
+                "action", "achievement_imported",
+                "entity_type", "achievements"
+        );
+        analytics.captureAuthenticated(AnalyticsEvent.DATA_SAVED, savedProperties, userId);
+        analytics.captureAuthenticated(
+                AnalyticsEvent.CORE_ACTION_COMPLETED,
+                Map.of(
+                        "tool", "achievements",
+                        "action", "achievements_calculated",
+                        "entity_type", "achievements"
+                ),
+                userId
+        );
     }
 
     private void getAchievements(HttpExchange exchange) throws Exception {

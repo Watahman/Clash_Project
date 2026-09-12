@@ -2,8 +2,8 @@ import { getLanguage, initI18n } from '../i18n/i18n.js?v=20260831-master-live-v1
 import { _BASE_URL } from '../Data/config.js';
 
 const SUPPORT_EMAIL = 'support.clashpanel@gmail.com';
-const LAST_UPDATED_EN = '9 September 2026';
-const LAST_UPDATED_NL = '9 september 2026';
+const LAST_UPDATED_EN = '12 September 2026';
+const LAST_UPDATED_NL = '12 september 2026';
 const ADSTERRA_PRIVACY_URL = 'https://adsterra.com/privacy-policy-managed';
 const ADSTERRA_COOKIES_URL = 'https://adsterra.com/cookies/';
 
@@ -25,6 +25,7 @@ const content = {
                     'Content and settings you create in ClashPanel, such as CWL plans, Clan Families, memberships, polls, reminders, planner drafts and related configuration.',
                     'Device and technical information generated when you use the service, such as IP address, browser or device information, request metadata, security events and diagnostic logs produced by hosting or infrastructure providers.',
                     'Analytics data, such as aggregate page-use, reliability or error measurements, when Google Analytics is enabled under the applicable consent settings.',
+                    'When product analytics is enabled and applicable requirements or settings allow it, limited product events may be sent to PostHog through ClashPanel\'s own backend. Anonymous events use a generated browser identifier; authenticated events use only the internal ClashPanel user ID as their user identifier. This analytics stream does not include email addresses, raw player or clan tags/names, authentication tokens or API responses.',
                     'Cookie, local-storage and similar-technology data used for authentication, functional preferences, caching, consent choices and, where analytics or advertising is enabled, aggregate measurement or ad delivery.'
                 ]],
                 ['How we obtain data', [
@@ -36,14 +37,16 @@ const content = {
                 ['Why we use data and legal bases', [
                     'We process account, planner and Clan Family data to provide the functions you request, maintain your account and deliver the ClashPanel service.',
                     'When you enable Advanced Stats, its tracking data is processed to provide the requested long-term attack history, statistics, trends and Advanced Achievements that rely on those tracked statistics. ClashPanel does not start this personal tracking automatically for every player you search.',
+                    'When enabled and permitted by applicable requirements or settings, limited product analytics helps us understand which tools complete successfully and where reliability work is needed. It is designed to measure product events rather than identify or profile players or clans.',
                     'We may process limited technical and security data where necessary for legitimate interests such as protecting accounts, preventing abuse, troubleshooting failures and maintaining service reliability, while considering the rights and interests of users.',
                     'Where consent is legally required, consent is used for optional analytics or advertising cookies, local storage or related purposes. You may withdraw consent through the available consent controls without affecting processing that occurred before withdrawal.',
                     'We may also process information where necessary to comply with applicable legal obligations or to establish, exercise or defend legal claims.'
                 ]],
                 ['Service providers and data sharing', [
                     'ClashPanel does not sell personal data. Information is shared only when needed to provide the service, comply with law, protect the service or when you direct us to do so.',
-                    'Infrastructure and application providers may include Supabase for authentication and application data, Google Cloud for backend hosting, Cloudflare for website delivery and security, Google Analytics for aggregate measurement, Google for sign-in, fonts or advertising, Adsterra for advertising on selected eligible public pages, Supercell services for current Clash of Clans API data and ClashKing V2 for historical Advanced Stats requests.',
+                    'Infrastructure and application providers may include Supabase for authentication and application data, Google Cloud for backend hosting, Cloudflare for website delivery and security, PostHog for optional product analytics, Google Analytics for aggregate measurement, Google for sign-in, fonts or advertising, Adsterra for advertising on selected eligible public pages, Supercell services for current Clash of Clans API data and ClashKing V2 for historical Advanced Stats requests.',
                     'When historical Advanced Stats is requested, the linked player tag and requested history scope may be sent to ClashKing V2. That external provider may retain or return historical records under its own service terms; ClashPanel does not control the provider\'s retention, availability or completeness.',
+                    'For product analytics, ClashPanel sends an allowlisted event payload to its own backend, which may forward the limited payload to PostHog. PostHog receives the internal ClashPanel user ID for authenticated events or a generated anonymous identifier for anonymous events, together with product-event properties and environment/traffic classification. It does not receive the excluded raw tags, names, emails, tokens or API responses for this purpose.',
                     'ClashPanel uses or may use Google AdSense and Adsterra on selected eligible public pages. When advertising is loaded after the required advertising consent, the relevant provider and its partners may process technical information such as IP address, page URL, browser or device information, cookies, local-storage identifiers and ad interaction data. See the providers’ own privacy policies for details.'
                 ]],
                 ['Google and Adsterra advertising', [
@@ -97,6 +100,7 @@ const content = {
                     'Inhoud en instellingen die je in ClashPanel maakt, zoals CWL-plannen, Clan Families, lidmaatschappen, polls, reminders, planner-drafts en bijhorende configuratie.',
                     'Apparaat- en technische gegevens die bij gebruik van de dienst ontstaan, zoals IP-adres, browser- of apparaatinformatie, requestmetadata, beveiligingsgebeurtenissen en diagnostische logs van hosting- of infrastructuurproviders.',
                     'Analyticsgegevens, zoals geaggregeerde metingen van paginagebruik, betrouwbaarheid of fouten, wanneer Google Analytics volgens de toepasselijke toestemmingsinstellingen actief is.',
+                    'Wanneer productanalytics actief is en toepasselijke vereisten of instellingen dit toelaten, kunnen beperkte productevents via de eigen backend van ClashPanel naar PostHog worden gestuurd. Anonieme events gebruiken een gegenereerde browseridentificator; aangemelde events gebruiken alleen de interne ClashPanel-gebruikers-ID als gebruikersidentificator. Deze analyticsstroom bevat geen e-mailadressen, ruwe speler- of clantags/namen, authenticatietokens of API-antwoorden.',
                     'Cookie-, local-storage- en vergelijkbare gegevens voor authenticatie, functionele voorkeuren, caching, toestemmingskeuzes en, waar analytics of advertenties actief zijn, geaggregeerde meting of advertentieweergave.'
                 ]],
                 ['Hoe we gegevens verkrijgen', [
@@ -108,14 +112,16 @@ const content = {
                 ['Waarom we gegevens gebruiken en rechtsgronden', [
                     'We verwerken account-, planner- en Clan Family-gegevens om de functies te leveren die je vraagt, je account te beheren en de ClashPanel-dienst uit te voeren.',
                     'Wanneer je Advanced Stats activeert, verwerken we de trackinggegevens om de gevraagde langdurige aanvalsgeschiedenis, statistieken, trends en Advanced Achievements te leveren die op die tracking gebaseerd zijn. ClashPanel start deze persoonlijke tracking niet automatisch voor elke speler die je opzoekt.',
+                    'Wanneer dit actief is en door toepasselijke vereisten of instellingen wordt toegestaan, helpt beperkte productanalytics ons begrijpen welke tools succesvol worden afgerond en waar betrouwbaarheidswerk nodig is. De meting is gericht op productevents en niet op het identificeren of profileren van spelers of clans.',
                     'Beperkte technische en beveiligingsgegevens kunnen worden verwerkt op basis van gerechtvaardigde belangen, bijvoorbeeld om accounts te beschermen, misbruik te voorkomen, fouten te onderzoeken en de betrouwbaarheid van de dienst te behouden, met aandacht voor de rechten en belangen van gebruikers.',
                     'Waar toestemming wettelijk vereist is, gebruiken we toestemming voor optionele analytics- of advertentiecookies, lokale opslag of bijhorende doeleinden. Je kunt toestemming via de beschikbare toestemmingsinstellingen intrekken zonder dat dit eerdere rechtmatige verwerking ongeldig maakt.',
                     'Gegevens kunnen ook worden verwerkt wanneer dit nodig is om aan wettelijke verplichtingen te voldoen of om rechtsvorderingen vast te stellen, uit te oefenen of te verdedigen.'
                 ]],
                 ['Dienstverleners en delen van gegevens', [
                     'ClashPanel verkoopt geen persoonsgegevens. Gegevens worden alleen gedeeld wanneer dit nodig is om de dienst te leveren, aan de wet te voldoen, de dienst te beschermen of wanneer jij daar opdracht toe geeft.',
-                    'Infrastructuur- en applicatieproviders kunnen onder meer Supabase omvatten voor authenticatie en applicatiegegevens, Google Cloud voor backendhosting, Cloudflare voor levering en beveiliging van de website, Google Analytics voor geaggregeerde meting, Google voor login, lettertypes of advertenties, Adsterra voor advertenties op geselecteerde geschikte publieke pagina’s, Supercell-diensten voor actuele Clash of Clans API-gegevens en ClashKing V2 voor historische Advanced Stats-verzoeken.',
+                    'Infrastructuur- en applicatieproviders kunnen onder meer Supabase omvatten voor authenticatie en applicatiegegevens, Google Cloud voor backendhosting, Cloudflare voor levering en beveiliging van de website, PostHog voor optionele productanalytics, Google Analytics voor geaggregeerde meting, Google voor login, lettertypes of advertenties, Adsterra voor advertenties op geselecteerde geschikte publieke pagina’s, Supercell-diensten voor actuele Clash of Clans API-gegevens en ClashKing V2 voor historische Advanced Stats-verzoeken.',
                     'Wanneer historische Advanced Stats wordt opgevraagd, kunnen de gekoppelde spelerstag en de gevraagde historische scope naar ClashKing V2 worden gestuurd. Die externe provider kan historische gegevens bewaren of teruggeven volgens de eigen dienstvoorwaarden; ClashPanel beheert de bewaartermijnen, beschikbaarheid of volledigheid bij die provider niet.',
+                    'Voor productanalytics stuurt ClashPanel een allowlisted eventpayload naar de eigen backend, die deze beperkte payload kan doorsturen naar PostHog. PostHog ontvangt voor aangemelde events de interne ClashPanel-gebruikers-ID of voor anonieme events een gegenereerde anonieme identificator, samen met producteventeigenschappen en een omgevings-/trafficclassificatie. De uitgesloten ruwe tags, namen, e-mails, tokens en API-antwoorden worden hiervoor niet doorgestuurd.',
                     'ClashPanel gebruikt of kan Google AdSense en Adsterra gebruiken op geselecteerde geschikte publieke pagina’s. Wanneer advertenties na de vereiste advertentietoestemming worden geladen, kunnen de relevante provider en diens partners technische informatie verwerken zoals IP-adres, pagina-URL, browser- of apparaatinformatie, cookies, lokale identificatoren en informatie over interacties met advertenties. Raadpleeg de privacyvoorwaarden van de providers voor details.'
                 ]],
                 ['Google- en Adsterra-advertenties', [
@@ -174,7 +180,8 @@ const content = {
                 ]],
                 ['Analytics storage', [
                     'ClashPanel may load Google Analytics after the page is idle or after an interaction to understand aggregate usage, reliability and errors. It is not used to provide a personal player or clan profile.',
-                    'Analytics storage is initialized as denied by default. Optional analytics cookies or similar storage are used only when enabled by the applicable consent settings.'
+                    'Analytics storage is initialized as denied by default. Optional Google Analytics cookies or similar storage are used only when enabled by the applicable consent settings.',
+                    'Separately, when product analytics is enabled in ClashPanel\'s server configuration and applicable requirements or settings allow it, limited product events may be sent to PostHog through ClashPanel\'s own backend. Anonymous events use a generated browser identifier; authenticated events use only the internal ClashPanel user ID as their user identifier. This product-analytics transport does not set a PostHog browser cookie and does not send email addresses, raw player or clan tags/names, authentication tokens or API responses.'
                 ]],
                 ['Advertising storage', [
                     'Selected eligible public ClashPanel pages include or may include Google AdSense or Adsterra. After required advertising consent, third-party vendors may place or read cookies or use similar technologies, IP addresses and other technical identifiers to deliver ads, control ad frequency, measure performance and help detect fraud or abuse.',
@@ -221,7 +228,8 @@ const content = {
                 ]],
                 ['Analyticsopslag', [
                     'ClashPanel kan Google Analytics laden nadat de pagina inactief is geworden of na een interactie, om geaggregeerd gebruik, betrouwbaarheid en fouten te begrijpen. Het wordt niet gebruikt om een persoonlijk spelers- of clanprofiel te maken.',
-                    'Analyticsopslag wordt standaard als geweigerd geïnitialiseerd. Optionele analytics-cookies of vergelijkbare opslag worden alleen gebruikt wanneer de toepasselijke toestemmingsinstellingen dit inschakelen.'
+                    'Analyticsopslag wordt standaard als geweigerd geïnitialiseerd. Optionele Google Analytics-cookies of vergelijkbare opslag worden alleen gebruikt wanneer de toepasselijke toestemmingsinstellingen dit inschakelen.',
+                    'Afzonderlijk daarvan kunnen, wanneer productanalytics in de serverconfiguratie van ClashPanel actief is en toepasselijke vereisten of instellingen dit toelaten, beperkte productevents via de eigen backend van ClashPanel naar PostHog worden gestuurd. Anonieme events gebruiken een gegenereerde browseridentificator; aangemelde events gebruiken alleen de interne ClashPanel-gebruikers-ID als gebruikersidentificator. Dit transport voor productanalytics plaatst geen PostHog-browsercookie en stuurt geen e-mailadressen, ruwe speler- of clantags/namen, authenticatietokens of API-antwoorden.'
                 ]],
                 ['Advertentieopslag', [
                     'Geselecteerde geschikte publieke ClashPanel-pagina’s bevatten of kunnen Google AdSense of Adsterra bevatten. Na de vereiste advertentietoestemming kunnen externe leveranciers cookies plaatsen of lezen of vergelijkbare technologie, IP-adressen en andere technische identificatoren gebruiken om advertenties te leveren, frequentie te beperken, prestaties te meten en fraude of misbruik tegen te gaan.',

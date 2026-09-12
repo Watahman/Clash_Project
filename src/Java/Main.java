@@ -4,6 +4,7 @@ import Java.achievements.AchievementCatalog;
 import Java.cwlhistory.HistoricalCwlProviderFactory;
 import Java.cwlhistory.HistoricalCwlService;
 import Java.performance.ClashKingRequestCounter;
+import Java.analytics.ProductAnalytics;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
@@ -38,6 +39,7 @@ public class Main {
         API_Clan apiClan;
         Config conf;
         HttpServer server;
+        ProductAnalytics productAnalytics;
         conf = new Config(); // config initialiseren
         conf.validateClashApiKeyConfiguration();
         ClashKingRequestCounter.configure(conf.getClashKingCounterIntervalSeconds());
@@ -46,6 +48,8 @@ public class Main {
         int workerCount = Math.max(4, Math.min(32, Runtime.getRuntime().availableProcessors() * 2));
         ExecutorService executor = Executors.newFixedThreadPool(workerCount);
         server.setExecutor(executor);
+        productAnalytics = new ProductAnalytics(conf);
+        productAnalytics.registerRoute(server);
 
         apiClan = new API_Clan(server, conf);
         apiGoldpass = new API_Goldpass(server, conf);
@@ -62,18 +66,19 @@ public class Main {
         );
         apiCwlHistory = new API_CWLHistory(server, conf, cwlHistoryService);
         supaUser = new SUPABASE_User(server, conf);
-        supaAuth = new SUPABASE_Auth(server, conf);
+        supaAuth = new SUPABASE_Auth(server, conf, productAnalytics);
         supaAchievements = new SUPABASE_Achievements(
                 server,
                 conf,
-                achievementCwlHistoryService
+                achievementCwlHistoryService,
+                productAnalytics
         );
-        supaAdvancedStats = new SUPABASE_AdvancedStats(server, conf);
+        supaAdvancedStats = new SUPABASE_AdvancedStats(server, conf, productAnalytics);
         advancedStatsInternalPoll = new AdvancedStatsInternalPoll(server, conf);
         publicIntake = new PublicIntake(server, conf);
-        supaCWLPlanner = new SUPABASE_CWLPlanner(server, conf);
+        supaCWLPlanner = new SUPABASE_CWLPlanner(server, conf, productAnalytics);
         supaFriend = new SUPABASE_Friend(server, conf);
-        supaGroup = new SUPABASE_Group(server, conf);
+        supaGroup = new SUPABASE_Group(server, conf, productAnalytics);
         supaGroupActivity = new SUPABASE_GroupActivity(server, conf);
         supaGroupPolls = new SUPABASE_GroupPolls(server, conf);
         supaNotifications = new SUPABASE_Notifications(server, conf);
@@ -194,6 +199,7 @@ public class Main {
         });
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            productAnalytics.close();
             server.stop(2);
             executor.shutdown();
             try {

@@ -1,23 +1,37 @@
 package Java;
 
+import Java.analytics.AnalyticsEvent;
+import Java.analytics.ProductAnalytics;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public final class SUPABASE_Auth {
     private final HttpServer server;
     private final Config conf;
     private final API_Utils utils;
     private final AuthService authService;
+    private final ProductAnalytics analytics;
 
     public SUPABASE_Auth(HttpServer server, Config conf) {
+        this(server, conf, ProductAnalytics.noop());
+    }
+
+    public SUPABASE_Auth(HttpServer server, Config conf, ProductAnalytics analytics) {
         this.server = server;
         this.conf = conf;
         this.utils = new API_Utils(conf);
         this.authService = new AuthService(conf);
+        this.analytics = analytics == null ? ProductAnalytics.noop() : analytics;
     }
 
     public void registerRoutes() {
@@ -54,7 +68,9 @@ public final class SUPABASE_Auth {
             }
             validateNewPassword(password);
 
-            utils.sendJsonResponse(ex, authService.signUp(ex, name, email, password).toString(), 200);
+            JsonObject response = authService.signUp(ex, name, email, password);
+            captureSignupAnalytics(response);
+            utils.sendJsonResponse(ex, response.toString(), 200);
         }));
     }
 
@@ -105,6 +121,42 @@ public final class SUPABASE_Auth {
             throw new IllegalArgumentException("Ongeldig e-mailadres.");
         }
         return email;
+    }
+
+    private String signupProfileId(JsonObject response) {
+        String authId = signupAuthId(response);
+        if (authId.isBlank()) return "";
+        try {
+            JsonArray profiles = JsonParser.parseString(SUPABASE_Client.getWithBody(
+                    "users", "select=id&auth_user_id=" + SUPABASE_Client.eq(authId) + "&limit=1"
+            )).getAsJsonArray();
+            if (!profiles.isEmpty()) return profiles.get(0).getAsJsonObject().get("id").getAsString();
+            JsonArray sameId = JsonParser.parseString(SUPABASE_Client.getWithBody(
+                    "users", "select=id&id=" + SUPABASE_Client.eq(authId) + "&limit=1"
+            )).getAsJsonArray();
+            return sameId.isEmpty() ? "" : authId;
+        } catch (Exception ignored) {
+            return "";
+        }
+    }
+
+    private void captureSignupAnalytics(JsonObject response) {
+        if (!analytics.isEnabled()) return;
+        CompletableFuture.supplyAsync(() -> signupProfileId(response))
+                .orTimeout(1, TimeUnit.SECONDS)
+                .thenAccept(userId -> analytics.captureAuthenticated(
+                        AnalyticsEvent.ACCOUNT_CREATED,
+                        Map.of("tool", "auth", "action", "signup"),
+                        userId
+                ))
+                .exceptionally(ignored -> null);
+    }
+
+    private String signupAuthId(JsonObject response) {
+        JsonElement user = response.get("user");
+        if (user == null || !user.isJsonObject()) return "";
+        JsonElement id = user.getAsJsonObject().get("id");
+        return id != null && id.isJsonPrimitive() ? id.getAsString() : "";
     }
 
     private void validateExistingPassword(String password) {

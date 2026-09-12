@@ -10,6 +10,7 @@ import { enrichPlanSnapshot as enrichPlanData } from './cwl-plan-enrichment.js?v
 import { installPlannerLifecycle } from './cwl-planner-lifecycle.js?v=20260829-public-auth-v1';
 import { mergePlanRecovery } from './cwl-planner-recovery.js?v=20260829-public-auth-v1';
 import { createPlannerSaveController } from './cwl-planner-save-controller.js?v=20260829-public-auth-v1';
+import { trackLoadFailed, trackLoadSucceeded } from '../analytics/product-analytics.js?v=20260912-product-analytics-v1';
 import {
     cleanPlanId,
     createCurrentPlanSnapshot,
@@ -332,6 +333,13 @@ export async function loadPlanById(planId) {
         renderPlanSnapshot(normalized, token);
         resetUndoHistory({ name: normalized.name, info: normalizePlanDocument(normalized.info) });
         loadSucceeded = true;
+        void trackLoadSucceeded({
+            tool: 'cwl_planner',
+            action: 'load',
+            entity_type: 'plan',
+            source: 'saved',
+            result_status: 'success'
+        });
         void enrichPlanData(normalized.info, {
             token,
             signal: activeLoadController.signal,
@@ -342,6 +350,13 @@ export async function loadPlanById(planId) {
             setActivePlan(previousPlanId);
             if (loadPlan) loadPlan.value = previousPlanId || '';
             setSaveStatus('error');
+            void trackLoadFailed({
+                tool: 'cwl_planner',
+                action: 'load',
+                entity_type: 'plan',
+                source: 'saved',
+                result_status: 'failure'
+            });
         }
     } finally {
         if (token === activeLoadToken) {

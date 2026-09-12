@@ -1,6 +1,7 @@
 import { t } from '../i18n/i18n.js?v=20260912-advanced-dashboard-v1';
 import { arrayValue } from './advanced-stats-formatters.js?v=20260912-advanced-dashboard-v1';
 import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260912-advanced-dashboard-v1';
+import { trackLoadFailed, trackLoadSucceeded } from '../analytics/product-analytics.js?v=20260912-product-analytics-v1';
 
 const BATTLE_PAGE_SIZE = 20;
 const SECTION_NAMES = ['overview', 'units', 'armies', 'trends', 'battles'];
@@ -84,6 +85,31 @@ function applyBattleResult(state, value) {
     state.hasMore = !unsupported && Boolean(value?.hasMore && state.nextCursor);
 }
 
+function hasUsableStatistics(state) {
+    return state.overview != null
+        || (state.unitCatalog?.length || 0) > 0
+        || (state.units?.length || 0) > 0
+        || (state.armies?.length || 0) > 0
+        || (state.trends?.length || 0) > 0
+        || (state.battles?.length || 0) > 0;
+}
+
+function trackStatisticsLoad(state, failedSections) {
+    const hasUsableData = hasUsableStatistics(state);
+    const properties = {
+        tool: 'advanced_stats',
+        action: 'load',
+        entity_type: 'stats',
+        mode: state.period,
+        result_status: hasUsableData
+            ? (failedSections.length ? 'partial' : 'complete')
+            : 'failed',
+        source: 'frontend'
+    };
+    const tracker = hasUsableData ? trackLoadSucceeded : trackLoadFailed;
+    tracker(properties);
+}
+
 export function resetBattleHistoryState(state) {
     state.battles = [];
     state.nextCursor = null;
@@ -127,6 +153,7 @@ export async function loadStatistics({
     setDataStatus(failed.length
         ? t('advancedStats.partialLoadFailed', { sections: failed.map(name => t(`advancedStats.section.${name}`)).join(', ') })
         : t('advancedStats.updatedNow'), failed.length ? 'warning' : 'success');
+    trackStatisticsLoad(state, failed);
     if (manageBusy) setBusy(false);
 }
 
@@ -160,6 +187,7 @@ export async function loadCategoryStatistics({
     setDataStatus(failed.length
         ? t('advancedStats.partialLoadFailed', { sections: failed.map(name => t(`advancedStats.section.${name}`)).join(', ') })
         : t('advancedStats.updatedNow'), failed.length ? 'warning' : 'success');
+    trackStatisticsLoad(state, failed);
     if (manageBusy) setBusy(false);
 }
 

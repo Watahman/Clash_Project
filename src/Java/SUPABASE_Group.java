@@ -1,5 +1,7 @@
 package Java;
 
+import Java.analytics.AnalyticsEvent;
+import Java.analytics.ProductAnalytics;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -19,11 +21,17 @@ public class SUPABASE_Group {
     private final Config conf;
     private final API_Utils utils;
     private final LinkedAccountRepository accounts = new LinkedAccountRepository();
+    private final ProductAnalytics analytics;
 
     public SUPABASE_Group(HttpServer server, Config conf){
+        this(server, conf, ProductAnalytics.noop());
+    }
+
+    public SUPABASE_Group(HttpServer server, Config conf, ProductAnalytics analytics){
         this.server = server;
         this.conf = conf;
         utils = new API_Utils(conf);
+        this.analytics = analytics == null ? ProductAnalytics.noop() : analytics;
     }
 
     public void createGroup() {
@@ -44,6 +52,7 @@ public class SUPABASE_Group {
             rpcBody.addProperty("p_badge", "banner");
             rpcBody.add("p_badge_url", JsonNull.INSTANCE);
             String result = SUPABASE_Client.rpc("create_group_with_owner", rpcBody.toString());
+            captureFamilyAction(ownerId, "family_created");
             utils.sendJsonResponse(ex, result, 201);
         }));
     }
@@ -107,8 +116,17 @@ public class SUPABASE_Group {
             String result = SUPABASE_Client.rpc("join_group_with_notifications", rpcBody.toString());
             JsonObject response = JsonParser.parseString(result).getAsJsonObject();
             boolean joined = response.has("joined") && response.get("joined").getAsBoolean();
+            if (joined) captureFamilyAction(userId, "family_joined");
             utils.sendJsonResponse(ex, response.toString(), joined ? 201 : 200);
         }));
+    }
+
+    private void captureFamilyAction(String userId, String action) {
+        analytics.captureAuthenticated(
+                AnalyticsEvent.CORE_ACTION_COMPLETED,
+                Map.of("tool", "clan_family", "action", action, "entity_type", "family"),
+                userId
+        );
     }
 
     public void leaveGroup() {

@@ -106,8 +106,9 @@ if (-not $configured) {
         --source . `
         --project $ProjectId `
         --region $Region `
-        --update-env-vars="ADVANCED_STATS_COLLECTION_ENABLED=false,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false" `
+        --update-env-vars="ADVANCED_STATS_COLLECTION_ENABLED=false,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false,POSTHOG_ENABLED=true,POSTHOG_HOST=https://eu.i.posthog.com,CLASHPANEL_ENVIRONMENT=development" `
         --remove-env-vars="ADVANCED_STATS_ROLLOUT_USER_IDS" `
+        --update-secrets="POSTHOG_PROJECT_API_KEY=POSTHOG_PROJECT_API_KEY:latest" `
         --remove-secrets="ADVANCED_STATS_SCHEDULER_SECRET" `
         --no-traffic `
         --tag $TagName
@@ -145,8 +146,8 @@ Run-Gcloud run deploy $ServiceName `
     --source . `
     --project $ProjectId `
     --region $Region `
-    --update-env-vars="ADVANCED_STATS_COLLECTION_ENABLED=true,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false,ADVANCED_STATS_ROLLOUT_USER_IDS=$rolloutUserIds" `
-    --update-secrets="ADVANCED_STATS_SCHEDULER_SECRET=${SecretName}:latest" `
+    --update-env-vars="ADVANCED_STATS_COLLECTION_ENABLED=true,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false,ADVANCED_STATS_ROLLOUT_USER_IDS=$rolloutUserIds,POSTHOG_ENABLED=true,POSTHOG_HOST=https://eu.i.posthog.com,CLASHPANEL_ENVIRONMENT=development,POSTHOG_INTERNAL_USER_IDS=$rolloutUserIds" `
+    --update-secrets="ADVANCED_STATS_SCHEDULER_SECRET=${SecretName}:latest,POSTHOG_PROJECT_API_KEY=POSTHOG_PROJECT_API_KEY:latest" `
     --no-traffic `
     --tag $TagName
 

@@ -48,6 +48,7 @@ import {
     writeJson,
     writeString
 } from '../minigames/minigames-storage.js?v=20260811-1';
+import { createMinigameLifecycleTracker } from '../minigames/minigame-analytics.js?v=20260912-product-analytics-v1';
 const result = document.querySelector('[data-result]');
 const elements = {
     root: document.querySelector('.game-shell[data-minigame-view="entity"]'),
@@ -79,12 +80,12 @@ const elements = {
     categoryPicker: document.querySelector('[data-category-picker]'),
     gameTitle: document.querySelector('[data-game-title]')
 };
-
 let state;
 let category;
 let entities;
 let answer;
 let fixtureActive = isRedesignFixtureRequested();
+const lifecycleAnalytics = createMinigameLifecycleTracker('entity_guesser');
 function language() {
     const code = document.documentElement.lang?.slice(0, 2).toLowerCase();
     return ENTITY_GUESSER_COPY[code] ? code : 'en';
@@ -109,13 +110,11 @@ function saveDailyState() {
     if (!shouldPersistDailyState(state.mode, fixtureActive)) return;
     writeJson(DAILY_STORAGE_KEY, state);
 }
-
 function announce() {
     window.dispatchEvent(new CustomEvent('clashpanel:minigame-state-changed', {
         detail: { game: 'entity' }
     }));
 }
-
 const stateManager = createEntityGuesserStateManager({
     entityCategories: ENTITY_CATEGORIES,
     dataVersion: ENTITY_GUESSER_DATA_VERSION,
@@ -131,12 +130,10 @@ const stateManager = createEntityGuesserStateManager({
     writeString,
     isFixtureActive: () => fixtureActive
 });
-
 const { appendImage, setImage } = createEntityImageRenderer({
     getEntityAsset,
     installImageFallback
 });
-
 const picker = createEntityAnswerPicker({
     elements,
     getEntities: () => entities,
@@ -238,6 +235,7 @@ function submit(event) {
     else if (state.guesses.length >= category.maxAttempts) actions.complete(false);
     saveDailyState();
     render();
+    lifecycleAnalytics.trackCompleted(state, state.won ? 'won' : 'lost');
 }
 
 function setMode(mode, categoryId = state?.categoryId) {
@@ -246,6 +244,7 @@ function setMode(mode, categoryId = state?.categoryId) {
     });
     hydrate(createState(mode, categoryId));
     render();
+    lifecycleAnalytics.trackStarted(state);
 }
 
 async function share() {
@@ -297,3 +296,4 @@ window.addEventListener('clashtools:language-changed', render);
 getRedesignFixture().then(handleFixture).catch(() => {});
 hydrate(new URLSearchParams(location.search).get('mode') === 'practice' ? 'practice' : 'daily');
 render();
+lifecycleAnalytics.trackStarted(state);

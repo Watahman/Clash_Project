@@ -22,6 +22,7 @@ import {
 import { renderFilteredRoster, renderPhase, setHelp } from '../operation-board/operation-board-renderer.js?v=20260910-cwl-history-progressive';
 import { looksLikeClashTag, normalizeTag } from '../operation-board/operation-board-utils.js';
 import { getCurrentUserId } from '../utils/user.js';
+import { trackTagSubmitted } from '../analytics/product-analytics.js?v=20260912-product-analytics-v1';
 
 let refs;
 const planStore = createOperationPlanStore();
@@ -106,7 +107,17 @@ function loadStandaloneClan() {
     pageState.getRuntime('historyController')?.resetForClan();
     renderStandaloneMode(refs);
     sourceBootstrap?.setMode('direct');
-    void refreshClanReport(pageState.getSelectedClan());
+    void Promise.resolve(refreshClanReport(pageState.getSelectedClan()))
+        .then(report => {
+            if (!report) return;
+            void trackTagSubmitted({
+                tool: 'cwl_tracker',
+                action: 'load',
+                entity_type: 'clan',
+                source: 'tag',
+                result_status: 'success'
+            });
+        });
 }
 
 function changeSourceMode(mode) {

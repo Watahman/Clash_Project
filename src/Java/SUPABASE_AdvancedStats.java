@@ -1,5 +1,7 @@
 package Java;
 
+import Java.analytics.AnalyticsEvent;
+import Java.analytics.ProductAnalytics;
 import Java.advancedstats.AdvancedStatsLifecycleService;
 import Java.advancedstats.AdvancedStatsCompactStatusRepository;
 import Java.advancedstats.AdvancedStatsSourcePresentation;
@@ -14,6 +16,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Map;
 
 /** Authenticated lifecycle and read routes for opt-in Advanced Stats tracking. */
 public final class SUPABASE_AdvancedStats {
@@ -36,13 +39,18 @@ public final class SUPABASE_AdvancedStats {
     private final AdvancedStatsLifecycleService lifecycle;
     private final AdvancedStatsReadService reads;
     private final AdvancedStatsCompactStatusRepository compactStatus;
+    private final ProductAnalytics analytics;
 
     public SUPABASE_AdvancedStats(HttpServer server, Config conf) {
-        this(server, conf, new AdvancedStatsLifecycleService(), new AdvancedStatsReadService());
+        this(server, conf, new AdvancedStatsLifecycleService(), new AdvancedStatsReadService(), ProductAnalytics.noop());
+    }
+
+    public SUPABASE_AdvancedStats(HttpServer server, Config conf, ProductAnalytics analytics) {
+        this(server, conf, new AdvancedStatsLifecycleService(), new AdvancedStatsReadService(), analytics);
     }
 
     SUPABASE_AdvancedStats(HttpServer server, Config conf, AdvancedStatsLifecycleService lifecycle) {
-        this(server, conf, lifecycle, new AdvancedStatsReadService());
+        this(server, conf, lifecycle, new AdvancedStatsReadService(), ProductAnalytics.noop());
     }
 
     SUPABASE_AdvancedStats(
@@ -51,12 +59,23 @@ public final class SUPABASE_AdvancedStats {
             AdvancedStatsLifecycleService lifecycle,
             AdvancedStatsReadService reads
     ) {
+        this(server, conf, lifecycle, reads, ProductAnalytics.noop());
+    }
+
+    SUPABASE_AdvancedStats(
+            HttpServer server,
+            Config conf,
+            AdvancedStatsLifecycleService lifecycle,
+            AdvancedStatsReadService reads,
+            ProductAnalytics analytics
+    ) {
         this.server = server;
         this.conf = conf;
         this.utils = new API_Utils(conf);
         this.lifecycle = lifecycle;
         this.reads = reads;
         this.compactStatus = new AdvancedStatsCompactStatusRepository();
+        this.analytics = analytics == null ? ProductAnalytics.noop() : analytics;
     }
 
     public void registerRoutes() {
@@ -79,6 +98,11 @@ public final class SUPABASE_AdvancedStats {
             JsonObject body = utils.parseBody(ex);
             UUID userId = authenticatedUserId(ex);
             AdvancedStatsModels.TrackingState state = lifecycle.start(userId, requirePlayerTag(body));
+            analytics.captureAuthenticated(
+                    AnalyticsEvent.TRACKING_ENABLED,
+                    Map.of("tool", "advanced_stats", "action", "enable", "entity_type", "player"),
+                    userId.toString()
+            );
             utils.sendJsonResponse(ex, trackingResponseWithCompactStatus(Optional.of(state)).toString(), 200);
         }));
     }

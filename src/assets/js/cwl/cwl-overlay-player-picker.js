@@ -9,6 +9,7 @@ import { t } from "../i18n/i18n.js?v=20260829-public-auth-v1";
 import { isRedesignFixtureRequested } from "../fixtures/redesign-fixture-mode.js";
 import { getCurrentReturnPath, requireAuthForAction } from "../auth/auth-client.js?v=20260829-public-auth-v1";
 import { createPrivateSourceAuth } from "./cwl-private-source-auth.js?v=20260829-public-auth-v1";
+import { trackTagSubmitted } from "../analytics/product-analytics.js?v=20260912-product-analytics-v1";
 
 let activeAccountSource = 'user';
 let refsCache = {};
@@ -116,11 +117,17 @@ function addPlayersByTag(input, button, onReset) {
     }
     setButtonBusy(button, true);
     getPlayerBasicData(tag)
-        .then(data => handlePlayerAddResult(createPlayerCard({ ...data, source: 'tag' }), onReset))
+        .then(data => handlePlayerAddResult(
+            createPlayerCard({ ...data, source: 'tag' }),
+            onReset,
+            'tag'
+        ))
         .catch(() => getClanMembersBasicData(tag)
-            .then(players => handlePlayerAddResult(createPlayerCard(
-                players.map(player => ({ ...player, source: 'tag' }))
-            ), onReset))
+            .then(players => handlePlayerAddResult(
+                createPlayerCard(players.map(player => ({ ...player, source: 'tag' }))),
+                onReset,
+                'tag'
+            ))
             .catch(error => {
                 console.error(error);
                 setOverlayMessage(t('cwl.playerAddError'), 'error');
@@ -144,8 +151,17 @@ function addSelectedAccounts(button, onReset) {
     handlePlayerAddResult(result, onReset);
 }
 
-function handlePlayerAddResult(result = {}, onReset = resetPlayerOverlayState) {
+function handlePlayerAddResult(result = {}, onReset = resetPlayerOverlayState, source = '') {
     if (result.added > 0) {
+        if (source === 'tag') {
+            void trackTagSubmitted({
+                tool: 'cwl_planner',
+                action: 'add',
+                entity_type: 'player',
+                source: 'tag',
+                result_status: 'success'
+            });
+        }
         closeAndResetAddPlayersOverlay(onReset);
         return;
     }

@@ -2,6 +2,7 @@ import { getCurrentCwlPlayerContext } from './operation-board-player-context.js'
 import { createOperationBoardHistoryController } from './operation-board-history-controller.js?v=20260910-cwl-history-progressive';
 import { getHistoricalCwlPlayerContext } from './historical-cwl-season-model.js?v=20260910-cwl-history-progressive';
 import { renderHistoryOverview } from './operation-board-renderer.js?v=20260910-cwl-history-progressive';
+import { trackLoadFailed, trackLoadSucceeded } from '../analytics/product-analytics.js?v=20260912-product-analytics-v1';
 
 export function createOperationBoardHistoryPage({
                                                     refs,
@@ -32,6 +33,7 @@ export function createOperationBoardHistoryPage({
             latestOverview = null;
             renderLatestReport();
             setState('ready');
+            trackHistoryLoad(true, 'live');
         },
         onHistorical: report => {
             setLatestReport(report);
@@ -39,6 +41,7 @@ export function createOperationBoardHistoryPage({
             setActiveTab('summary');
             renderLatestReport();
             setState('ready');
+            trackHistoryLoad(true, 'historical');
         },
         onHistoricalDetail: (report, tab) => {
             setLatestReport(report);
@@ -46,6 +49,7 @@ export function createOperationBoardHistoryPage({
             renderLatestReport();
             selectBoardTab(tab);
             setState('ready');
+            trackHistoryLoad(true, 'historical');
         },
         onOverview: overview => {
             setLatestReport(null);
@@ -53,6 +57,7 @@ export function createOperationBoardHistoryPage({
             setActiveTab(null);
             renderOverview(overview);
             setState('ready');
+            trackHistoryLoad(true, 'historical');
         },
         onLoading: mode => {
             setLatestReport(null);
@@ -74,6 +79,7 @@ export function createOperationBoardHistoryPage({
         },
         onDetailError: (error, tab) => {
             console.error(error);
+            trackHistoryLoad(false, 'historical');
             setState('error', true);
             setHelp(
                 tab === 'roster'
@@ -84,6 +90,7 @@ export function createOperationBoardHistoryPage({
         },
         onError: (error, mode) => {
             console.error(error);
+            trackHistoryLoad(false, 'historical');
             const current = getCurrentReport();
             if (current) {
                 setLatestReport(current);
@@ -98,6 +105,18 @@ export function createOperationBoardHistoryPage({
             );
         }
     });
+
+    function trackHistoryLoad(success, source) {
+        const track = success ? trackLoadSucceeded : trackLoadFailed;
+        void track({
+            tool: 'cwl_tracker',
+            action: 'load',
+            entity_type: 'cwl_history',
+            source,
+            result_status: success ? 'success' : 'failure'
+        });
+    }
+
     return {
         ...controller,
         refreshLabels() {

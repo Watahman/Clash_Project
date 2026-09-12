@@ -1,9 +1,4 @@
-import {
-    bracketChampion,
-    createBracket,
-    importBracket,
-    setMatchWinner
-} from './bracket-engine.js';
+import { bracketChampion, createBracket, importBracket, setMatchWinner } from './bracket-engine.js';
 import { participantDisplayName } from './bracket-model.js';
 import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { bracketText } from './bracket-copy.js?v=20260829-public-auth-v1';
@@ -29,6 +24,7 @@ import {
     updateRoundControls,
     updateSetupSummary
 } from './bracket-page-view.js?v=20260829-public-auth-v1';
+import { trackCoreAction } from '../analytics/product-analytics.js?v=20260912-product-analytics-v1';
 
 class BracketController {
     constructor({
@@ -110,7 +106,6 @@ class BracketController {
             })
             : bracketText('championHelp');
     }
-
     generate(shuffle) {
         try {
             this.state.bracket = createBracket(participantEntries(this.refs), {
@@ -123,6 +118,14 @@ class BracketController {
             this.save();
             this.render();
             setStatus(this.refs, bracketText('generated'), 'success');
+            trackCoreAction({
+                tool: 'bracket_generator',
+                action: 'bracket_generated',
+                mode: shuffle ? 'shuffled' : 'seeded',
+                outcome: 'success',
+                result_status: 'complete',
+                source: 'frontend'
+            });
         } catch (error) {
             setStatus(this.refs, bracketErrorCopy(error), 'error');
         }
@@ -140,7 +143,6 @@ class BracketController {
             setStatus(this.refs, bracketText('changeWinner'), 'error');
         }
     }
-
     displayName(player) {
         return participantDisplayName(
             this.state.bracket,
@@ -160,7 +162,6 @@ class BracketController {
         setStatus(this.refs, message, 'success');
         announce(this.refs, message, this.windowRef.setTimeout.bind(this.windowRef));
     }
-
     setRound(roundIndex, focus = false) {
         if (!this.state.bracket) return;
         this.state.activeRound = Math.max(
@@ -184,7 +185,6 @@ class BracketController {
         this.render();
         this.refs.participants.focus();
     }
-
     changeRound(delta) {
         this.setRound(this.state.activeRound + delta, true);
     }

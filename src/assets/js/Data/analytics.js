@@ -2,6 +2,7 @@
     'use strict';
 
     void import('/assets/js/monitoring/error-monitor.js').catch(() => {});
+    void import('/assets/js/analytics/product-analytics.js?v=20260912-product-analytics-v1').catch(() => {});
 
     const MEASUREMENT_ID = 'G-78TY2WB7CS';
     const SCRIPT_ID = 'clashtools-google-analytics';

@@ -5,7 +5,9 @@ const mocks = vi.hoisted(() => ({
     createPlayerCard: vi.fn(),
     createClanCard: vi.fn(),
     setCanAutosave: vi.fn(),
-    setLoading: vi.fn()
+    setLoading: vi.fn(),
+    trackLoadSucceeded: vi.fn(() => false),
+    trackLoadFailed: vi.fn(() => false)
 }));
 
 vi.mock('../../src/assets/js/Data/config.js', () => ({
@@ -32,6 +34,10 @@ vi.mock('../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1', () => ({ t
 vi.mock('../../src/assets/js/cwl/cwl-availability.js?v=20260829-public-auth-v1', () => ({
     getActiveCwlPollMeta: () => ({ groupId: '', pollId: '' })
 }));
+vi.mock('../../src/assets/js/analytics/product-analytics.js?v=20260912-product-analytics-v1', () => ({
+    trackLoadSucceeded: mocks.trackLoadSucceeded,
+    trackLoadFailed: mocks.trackLoadFailed
+}));
 
 describe('CWL plan switching', () => {
     beforeEach(() => {
@@ -41,6 +47,8 @@ describe('CWL plan switching', () => {
         mocks.createClanCard.mockClear();
         mocks.setCanAutosave.mockClear();
         mocks.setLoading.mockClear();
+        mocks.trackLoadSucceeded.mockClear();
+        mocks.trackLoadFailed.mockClear();
         localStorage.clear();
         document.body.innerHTML = `
             <div id="available"></div>
@@ -83,6 +91,14 @@ describe('CWL plan switching', () => {
         expect(mocks.createPlayerCard).toHaveBeenCalledOnce();
         expect(mocks.createPlayerCard).toHaveBeenCalledWith(expect.objectContaining({ tag: '#BBB' }), null);
         expect(localStorage.getItem('planner_id')).toBe('plan-b');
+        expect(mocks.trackLoadSucceeded).toHaveBeenCalledWith({
+            tool: 'cwl_planner',
+            action: 'load',
+            entity_type: 'plan',
+            source: 'saved',
+            result_status: 'success'
+        });
+        expect(mocks.trackLoadFailed).not.toHaveBeenCalled();
     });
 
     it('restores the previous plan id when the next plan fails to load', async () => {
@@ -116,6 +132,14 @@ describe('CWL plan switching', () => {
         expect(refs.planName.value).toBe('Plan A');
         expect(refs.loadPlan.value).toBe('plan-a');
         expect(localStorage.getItem('planner_id')).toBe('plan-a');
+        expect(mocks.trackLoadSucceeded).toHaveBeenCalledTimes(1);
+        expect(mocks.trackLoadFailed).toHaveBeenCalledWith({
+            tool: 'cwl_planner',
+            action: 'load',
+            entity_type: 'plan',
+            source: 'saved',
+            result_status: 'failure'
+        });
     });
 
     it('round-trips clan and player priorities through plan save/load data', async () => {

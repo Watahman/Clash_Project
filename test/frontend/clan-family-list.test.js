@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createClanFamilyListController } from '../../src/assets/js/groups/clan-family-list.js?v=20260829-public-auth-v1';
 import { buildClanFamilyFixture } from '../../src/assets/js/groups/clan-family-fixtures.js';
+import * as productAnalytics from '../../src/assets/js/analytics/product-analytics.js?v=20260912-product-analytics-v1';
 
 describe('Clan Family list controller', () => {
     it('renders fixture entries through the same list seam without fetching production memberships', async () => {
@@ -12,6 +13,8 @@ describe('Clan Family list controller', () => {
         const fetchGroups = vi.fn();
         const createCards = vi.fn().mockResolvedValue(true);
         const resetGroupDetail = vi.fn();
+        const loadSucceeded = vi.spyOn(productAnalytics, 'trackLoadSucceeded')
+            .mockReturnValue(false);
         const controller = createClanFamilyListController({
             refs,
             state,
@@ -31,5 +34,12 @@ describe('Clan Family list controller', () => {
             [fixture.entries[0].membership],
             expect.objectContaining({ entries: fixture.entries, fixture })
         );
+        expect(loadSucceeded).toHaveBeenCalledWith({
+            tool: 'clan_family',
+            action: 'load',
+            entity_type: 'clan_family',
+            source: 'fixture',
+            result_status: 'success'
+        });
     });
 });

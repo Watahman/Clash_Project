@@ -2,6 +2,7 @@ import { buildGameQuestions, scoreAnswer, utcDateKey, validateManifest } from '.
 import { getScoutCopy } from '../minigames/scenery-scout-copy.js';
 import { loadScoutStats, recordCompletedRun, saveScoutStats } from '../minigames/scenery-scout-state.js';
 import { createScoutView } from '../minigames/scenery-scout-renderer.js';
+import { trackCoreAction, trackLoadFailed } from '../analytics/product-analytics.js?v=20260912-product-analytics-v1';
 
 const MANIFEST_URL = '/assets/scenery-scout/scenery-manifest.json';
 
@@ -18,6 +19,7 @@ export function initSceneryScout(root, dependencies = {}) {
     let stats = loadScoutStats(dependencies.storage);
     let run = null;
     let lastResult = null;
+    let completedRun = null;
     let timerId = null;
     let roundStartedAt = 0;
 
@@ -29,7 +31,18 @@ export function initSceneryScout(root, dependencies = {}) {
         if (!validateManifest(value) || !value.sceneries.some(scenery => scenery.active)) throw new Error(copy.empty);
         manifest = value;
         view.showScreen('landing');
-    }).catch(error => view.showError(error.message || copy.loadError));
+    }).catch(error => {
+        view.showError(error.message || copy.loadError);
+        trackLoadFailed({
+            tool: 'minigames',
+            action: 'manifest_load',
+            entity_type: 'scenery_manifest',
+            mode: 'scenery_scout',
+            outcome: 'unavailable',
+            result_status: 'failed',
+            source: 'frontend'
+        });
+    });
 
     function bindActions() {
         root.addEventListener('click', event => {
@@ -77,7 +90,15 @@ export function initSceneryScout(root, dependencies = {}) {
         lastResult = null;
         const questions = buildGameQuestions(manifest, { mode, dateKey: utcDateKey(new Date(now())) });
         run = { mode, questions, index: 0, score: 0, streak: 0, bestStreak: 0, answers: [], revealed: false };
+        completedRun = null;
         renderCurrentRound();
+        trackCoreAction({
+            tool: 'minigames',
+            action: 'game_started',
+            entity_type: 'minigame',
+            mode: 'scenery_scout',
+            source: 'frontend'
+        });
     }
 
     function renderCurrentRound() {
@@ -136,6 +157,18 @@ export function initSceneryScout(root, dependencies = {}) {
         saveScoutStats(stats, dependencies.storage);
         view.renderLifetime(stats);
         view.renderResult(run, lastResult);
+        if (completedRun !== run) {
+            completedRun = run;
+            trackCoreAction({
+                tool: 'minigames',
+                action: 'game_completed',
+                entity_type: 'minigame',
+                mode: 'scenery_scout',
+                outcome: 'completed',
+                result_status: 'complete',
+                source: 'frontend'
+            });
+        }
     }
 
     function returnToModes() {

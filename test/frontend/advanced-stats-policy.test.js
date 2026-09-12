@@ -62,4 +62,18 @@ describe('Advanced Stats policy disclosures', () => {
         expect(cookies).toContain('guest CWL Planner drafts, bracket state and minigame progress');
         expect(generatedPolicies).toContain('guest CWL Planner drafts, bracket state and minigame progress');
     });
+
+    it('discloses optional PostHog product analytics and the internal-user boundary', () => {
+        const cookies = readFileSync('src/subpages/cookies.html', 'utf8');
+        expect(privacy).toContain('limited product events may be sent to PostHog');
+        expect(privacy).toContain('internal ClashPanel user ID');
+        expect(cookies).toContain('PostHog browser cookie');
+        expect(cookies).toContain('internal ClashPanel user ID');
+        expect(generatedPolicies).toContain('PostHog for optional product analytics');
+        expect(generatedPolicies).toContain('interne ClashPanel-gebruikers-ID');
+        expect(privacy).toContain('Last updated: 12 September 2026');
+        expect(cookies).toContain('Last updated: 12 September 2026');
+        expect(generatedPolicies).toContain("12 September 2026");
+        expect(generatedPolicies).toContain("12 september 2026");
+    });
 });
