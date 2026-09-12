@@ -1,5 +1,5 @@
 import * as config from '../Data/config.js';
-import { databaseRequestWithBody } from './Supabase-Client.js?v=20260829-public-auth-v1';
+import { databaseRequestWithBody } from './Supabase-Client.js?v=20260912-advanced-dashboard-v1';
 
 function request(endpoint, body = {}) {
     return databaseRequestWithBody(config._BASE_URL + endpoint, body, null, {
@@ -31,8 +31,21 @@ export function deleteAdvancedStatsData(playerTag) {
     return request(config._EXT_ADVANCED_STATS_DATA_DELETE, { playerTag });
 }
 
-export function getAdvancedStatsOverview(playerTag, period = '30d') {
-    return request(config._EXT_ADVANCED_STATS_OVERVIEW, { playerTag, period });
+export function attackCategoryScope(category = 'ALL') {
+    const normalized = String(category || 'ALL').trim().toUpperCase();
+    return normalized === 'REGULAR' ? 'regular'
+        : normalized === 'COMPETITIVE' ? 'competitive' : null;
+}
+
+function periodBody(playerTag, period, category) {
+    const body = { playerTag, period };
+    const scope = attackCategoryScope(category);
+    if (scope) body.scope = scope;
+    return body;
+}
+
+export function getAdvancedStatsOverview(playerTag, period = '30d', category = 'ALL') {
+    return request(config._EXT_ADVANCED_STATS_OVERVIEW, periodBody(playerTag, period, category));
 }
 
 export function getAdvancedStatsUnits(playerTag, period = '30d', category = 'ALL') {
@@ -49,6 +62,10 @@ export function getAdvancedStatsBattles(playerTag, period = '30d', { limit = 20,
     return request(config._EXT_ADVANCED_STATS_BATTLES, body);
 }
 
-export function getAdvancedStatsTrends(playerTag, period = '30d') {
-    return request(config._EXT_ADVANCED_STATS_TRENDS, { playerTag, period });
+export function getAdvancedStatsTrends(playerTag, period = '30d', category = 'ALL') {
+    return request(config._EXT_ADVANCED_STATS_TRENDS, periodBody(playerTag, period, category));
+}
+
+export function getAdvancedStatsLifetime(playerTag) {
+    return request(config._EXT_ADVANCED_STATS_LIFETIME, { playerTag });
 }

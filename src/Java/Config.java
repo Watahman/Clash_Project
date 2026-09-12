@@ -131,6 +131,7 @@ public class Config {
     String _EXT_ADVANCED_STATS_ARMIES = "/AdvancedStatsArmies";
     String _EXT_ADVANCED_STATS_BATTLES = "/AdvancedStatsBattles";
     String _EXT_ADVANCED_STATS_TRENDS = "/AdvancedStatsTrends";
+    String _EXT_ADVANCED_STATS_LIFETIME = "/AdvancedStatsLifetime";
 
     String _EXT_LEAGUE_LEAGUETIERS_INFO = "/LeagueTierInfo";
     String _EXT_LEAGUE_CAPITAL_LEAGUES = "/LeagueCapitalLeagues";

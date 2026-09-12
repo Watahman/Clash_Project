@@ -90,6 +90,19 @@ class AdvancedStatsReadServiceTest {
     }
 
     @Test
+    void lifetimeUsesOwnedTrackingContextAndKeepsRpcShape() throws Exception {
+        FakeStore store = new FakeStore(state(AdvancedStatsTrackingStatus.ACTIVE));
+        JsonObject response = service(store).lifetime(USER_ID, "#2PYLQ");
+
+        assertEquals(1, store.lifetimeCalls);
+        assertEquals(TRACKING_ID, store.lifetimeTrackingId);
+        assertEquals("all", response.get("period").getAsString());
+        assertTrue(response.get("from").isJsonNull());
+        assertEquals(7, response.getAsJsonObject("data").getAsJsonObject("summary")
+                .get("totalStars").getAsInt());
+    }
+
+    @Test
     void opaqueBattleCursorRoundTripsAndIsReturnedFromDatabaseBoundary() throws Exception {
         FakeStore store = new FakeStore(state(AdvancedStatsTrackingStatus.ACTIVE));
         store.nextCursorAt = NOW.minus(Duration.ofHours(2));
@@ -188,6 +201,8 @@ class AdvancedStatsReadServiceTest {
         private int compactUnitsCalls;
         private int compactArmiesCalls;
         private int compactTrendsCalls;
+        private int lifetimeCalls;
+        private UUID lifetimeTrackingId;
 
         private FakeStore(AdvancedStatsModels.TrackingState state) {
             this.state = state;
@@ -270,6 +285,17 @@ class AdvancedStatsReadServiceTest {
         public JsonElement compactTrends(UUID trackingId, Instant from) throws Exception {
             compactTrendsCalls++;
             return trends(trackingId, from);
+        }
+
+        @Override
+        public JsonObject lifetime(UUID trackingId) {
+            lifetimeCalls++;
+            lifetimeTrackingId = trackingId;
+            JsonObject result = new JsonObject();
+            JsonObject summary = new JsonObject();
+            summary.addProperty("totalStars", 7);
+            result.add("summary", summary);
+            return result;
         }
 
         private void capture(UUID trackingId, Instant from) {

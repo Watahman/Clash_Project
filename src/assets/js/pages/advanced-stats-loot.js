@@ -1,5 +1,5 @@
-import { t } from '../i18n/i18n.js?v=20260911-loot-v1';
-import { formatDateTime, formatNumber } from './advanced-stats-formatters.js?v=20260829-public-auth-v1';
+import { t } from '../i18n/i18n.js?v=20260912-advanced-dashboard-v1';
+import { formatDateTime, formatNumber } from './advanced-stats-formatters.js?v=20260912-advanced-dashboard-v1';
 
 const RESOURCE_DEFINITIONS = Object.freeze([
     { key: 'gold', field: 'goldLooted', averageField: 'averageGoldLooted', bestField: 'bestGoldLooted' },

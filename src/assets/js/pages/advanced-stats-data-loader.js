@@ -1,6 +1,6 @@
-import { t } from '../i18n/i18n.js?v=20260911-loot-v1';
-import { arrayValue } from './advanced-stats-formatters.js?v=20260829-public-auth-v1';
-import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260811-2';
+import { t } from '../i18n/i18n.js?v=20260912-advanced-dashboard-v1';
+import { arrayValue } from './advanced-stats-formatters.js?v=20260912-advanced-dashboard-v1';
+import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260912-advanced-dashboard-v1';
 
 const BATTLE_PAGE_SIZE = 20;
 const SECTION_NAMES = ['overview', 'units', 'armies', 'trends', 'battles'];
@@ -104,10 +104,10 @@ export async function loadStatistics({
     if (manageBusy) setBusy(true);
     setDataStatus(t('advancedStats.loadingData'));
     const requests = await Promise.allSettled([
-        state.api.getOverview(state.playerTag, state.period),
+        state.api.getOverview(state.playerTag, state.period, state.attackCategory),
         state.api.getUnits(state.playerTag, state.period),
         state.api.getArmies(state.playerTag, state.period),
-        state.api.getTrends(state.playerTag, state.period),
+        state.api.getTrends(state.playerTag, state.period, state.attackCategory),
         state.api.getBattles(state.playerTag, state.period, { limit: BATTLE_PAGE_SIZE })
     ]);
     if (requestVersion !== state.requestVersion) return;
@@ -123,6 +123,39 @@ export async function loadStatistics({
     results.push(applySectionResult(state, battles, 'battles', value => applyBattleResult(state, value)));
     renderPage();
     const failed = results.map((result, index) => result === 'ready' ? null : SECTION_NAMES[index]).filter(Boolean);
+    markSectionErrors(failed, state);
+    setDataStatus(failed.length
+        ? t('advancedStats.partialLoadFailed', { sections: failed.map(name => t(`advancedStats.section.${name}`)).join(', ') })
+        : t('advancedStats.updatedNow'), failed.length ? 'warning' : 'success');
+    if (manageBusy) setBusy(false);
+}
+
+export async function loadCategoryStatistics({
+    state,
+    requestVersion,
+    manageBusy = true,
+    setBusy,
+    setDataStatus,
+    renderPage
+}) {
+    if (!state.playerTag) return;
+    if (manageBusy) setBusy(true);
+    setDataStatus(t('advancedStats.loadingData'));
+    const requests = await Promise.allSettled([
+        state.api.getOverview(state.playerTag, state.period, state.attackCategory),
+        state.api.getTrends(state.playerTag, state.period, state.attackCategory)
+    ]);
+    if (requestVersion !== state.requestVersion) {
+        if (manageBusy) setBusy(false);
+        return;
+    }
+
+    const results = [
+        applySectionResult(state, requests[0], 'overview', value => { state.overview = value; }),
+        applySectionResult(state, requests[1], 'trends', value => { state.trends = arrayValue(value?.points); })
+    ];
+    renderPage();
+    const failed = results.map((result, index) => result === 'ready' ? null : ['overview', 'trends'][index]).filter(Boolean);
     markSectionErrors(failed, state);
     setDataStatus(failed.length
         ? t('advancedStats.partialLoadFailed', { sections: failed.map(name => t(`advancedStats.section.${name}`)).join(', ') })

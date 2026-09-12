@@ -231,6 +231,34 @@ describe('Advanced Stats extracted renderers', () => {
         });
     });
 
+    it('weights star metrics by known samples and destruction by its own sample', () => {
+        const points = aggregateMonthlyTrends([
+            {
+                date: '2026-05-01', attacks: 100, averageStars: 3, threeStarRate: 100,
+                averageDestruction: 90, sampleSize: 1, destructionSampleSize: 1
+            },
+            {
+                date: '2026-05-15', attacks: 1, averageStars: 1, threeStarRate: 0,
+                averageDestruction: 10, starKnownAttacks: 9, destructionSampleSize: 9
+            }
+        ]);
+
+        expect(points[0]).toMatchObject({
+            attacks: 101, averageStars: 1.2, threeStarRate: 10, averageDestruction: 18
+        });
+    });
+
+    it('does not fall back to attacks when an explicit sample is unknown', () => {
+        const points = aggregateMonthlyTrends([{
+            date: '2026-06-01', attacks: 5, averageStars: 3, threeStarRate: 100,
+            averageDestruction: 80, sampleSize: null, destructionSampleSize: null
+        }]);
+
+        expect(points[0]).toMatchObject({
+            attacks: 5, averageStars: null, threeStarRate: null, averageDestruction: null
+        });
+    });
+
     it('formats month labels in UTC and identifies missing calendar months', () => {
         const label = formatMonthLabel('2026-03-01');
         expect(label).toContain('Mar');

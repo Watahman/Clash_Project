@@ -1,6 +1,5 @@
 package Java.advancedstats;
 
-import Java.HttpException;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -9,6 +8,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static Java.advancedstats.AdvancedStatsCompactReadFailureSupport.read;
 
 /** Reads each compact scope and delegates shape-preserving aggregation to the merger. */
 final class AdvancedStatsCompactReadAggregator {
@@ -56,33 +57,50 @@ final class AdvancedStatsCompactReadAggregator {
             Long bestDarkElixir
     ) {}
 
-    @FunctionalInterface
-    private interface ReadCall<T> {
-        T execute() throws Exception;
-    }
-
     private final ScopeReader reader;
     private final AdvancedStatsCompactReadMerger merger;
+    private final AdvancedStatsCompactReadSelection selectionReader;
 
     AdvancedStatsCompactReadAggregator(ScopeReader reader) {
         this.reader = reader;
         this.merger = new AdvancedStatsCompactReadMerger();
+        this.selectionReader = new AdvancedStatsCompactReadSelection(reader, merger);
     }
 
     JsonObject overview(UUID trackingId, Instant from) throws Exception {
         return merger.overview(readOverviewSnapshots(trackingId, from));
     }
 
+    JsonObject overview(UUID trackingId, Instant from, AdvancedStatsScopeSelection selection)
+            throws Exception {
+        return selectionReader.overview(trackingId, from, selection);
+    }
+
     JsonElement units(UUID trackingId, Instant from, AdvancedStatsUnitCategory category) throws Exception {
         return merger.units(readUnitSnapshots(trackingId, from, category));
+    }
+
+    JsonElement units(UUID trackingId, Instant from, AdvancedStatsUnitCategory category,
+                      AdvancedStatsScopeSelection selection) throws Exception {
+        return selectionReader.units(trackingId, from, category, selection);
     }
 
     JsonElement armies(UUID trackingId, Instant from, int limit) throws Exception {
         return merger.armies(readArmySnapshots(trackingId, from), limit);
     }
 
+    JsonElement armies(UUID trackingId, Instant from, int limit,
+                       AdvancedStatsScopeSelection selection) throws Exception {
+        return selectionReader.armies(trackingId, from, limit, selection);
+    }
+
     JsonElement trends(UUID trackingId, Instant from) throws Exception {
         return merger.trends(readTrendSnapshots(trackingId, from));
+    }
+
+    JsonElement trends(UUID trackingId, Instant from, AdvancedStatsScopeSelection selection)
+            throws Exception {
+        return selectionReader.trends(trackingId, from, selection);
     }
 
     private List<ScopeSnapshot> readOverviewSnapshots(UUID trackingId, Instant from) {
@@ -136,28 +154,6 @@ final class AdvancedStatsCompactReadAggregator {
             snapshots.add(new ScopeSnapshot(scope, null, null, null, trends));
         }
         return snapshots;
-    }
-
-    private <T> T read(ReadCall<T> call, AdvancedStatsScope scope, String operation,
-                       T fallback, List<ReadFailure> failures) {
-        try {
-            return call.execute();
-        } catch (Exception failure) {
-            failures.add(new ReadFailure(scope, operation, failureCode(failure)));
-            return fallback;
-        }
-    }
-
-    private String failureCode(Exception failure) {
-        if (failure instanceof HttpException http) {
-            return switch (http.getStatusCode()) {
-                case 408, 429, 500, 502, 503, 504 -> "UPSTREAM_UNAVAILABLE";
-                case 404 -> "READ_FUNCTION_UNAVAILABLE";
-                default -> "READ_FAILED";
-            };
-        }
-        if (failure instanceof IllegalStateException) return "MALFORMED_RESPONSE";
-        return "READ_FAILED";
     }
 
     static LootTotals lootTotals(List<ScopeSnapshot> snapshots) {

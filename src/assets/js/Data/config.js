@@ -40,6 +40,7 @@ export const _EXT_ADVANCED_STATS_UNITS = "/AdvancedStatsUnits";
 export const _EXT_ADVANCED_STATS_ARMIES = "/AdvancedStatsArmies";
 export const _EXT_ADVANCED_STATS_BATTLES = "/AdvancedStatsBattles";
 export const _EXT_ADVANCED_STATS_TRENDS = "/AdvancedStatsTrends";
+export const _EXT_ADVANCED_STATS_LIFETIME = "/AdvancedStatsLifetime";
 
 export const _EXT_LEAGUE_LEAGUETIERS_INFO = "/LeagueTierInfo"
 export const _EXT_LEAGUE_CAPITAL_LEAGUES = "/LeagueCapitalLeagues"

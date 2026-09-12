@@ -40,7 +40,8 @@ declare
         'public.read_advanced_stats_compact_overview_v2(uuid,text,timestamptz,text)',
         'public.read_advanced_stats_compact_units_v2(uuid,text,timestamptz,text,text)',
         'public.read_advanced_stats_compact_armies_v2(uuid,text,timestamptz,integer,text)',
-        'public.read_advanced_stats_compact_trends_v2(uuid,text,timestamptz,text)'
+        'public.read_advanced_stats_compact_trends_v2(uuid,text,timestamptz,text)',
+        'public.read_advanced_stats_lifetime_v1(uuid)'
     ];
     v_invoker_functions text[] := array[
         'public.save_advanced_stats_compact_event_v1(uuid,text,text,text,timestamptz,timestamptz,smallint,numeric,bigint,bigint,bigint,jsonb,text,jsonb,text,timestamptz,text,text,timestamptz,text,jsonb,boolean,text)',
@@ -63,7 +64,8 @@ declare
         'public.read_advanced_stats_compact_overview_v2(uuid,text,timestamptz,text)',
         'public.read_advanced_stats_compact_units_v2(uuid,text,timestamptz,text,text)',
         'public.read_advanced_stats_compact_armies_v2(uuid,text,timestamptz,integer,text)',
-        'public.read_advanced_stats_compact_trends_v2(uuid,text,timestamptz,text)'
+        'public.read_advanced_stats_compact_trends_v2(uuid,text,timestamptz,text)',
+        'public.read_advanced_stats_lifetime_v1(uuid)'
     ];
     v_required_migrations text[] := array[
         'advanced_stats_compact_source_of_truth', 'advanced_stats_compact_backfill',
@@ -77,7 +79,8 @@ declare
         'advanced_stats_loot_and_army_compaction_foundation',
         'advanced_stats_loot_and_army_compaction_writes',
         'advanced_stats_loot_and_army_compaction_reads',
-        'advanced_stats_army_dictionary_fk_index'
+        'advanced_stats_army_dictionary_fk_index',
+        'advanced_stats_lifetime_dashboard'
     ];
 begin
     if has_schema_privilege('anon', 'public', 'CREATE')
@@ -183,8 +186,8 @@ begin
 end $$;
 
 select jsonb_build_object(
-    'status', 'PASS', 'tablesChecked', 7, 'functionsChecked', 26,
-    'migrationsChecked', 19, 'browserSchemaCreate', 'DENIED',
+    'status', 'PASS', 'tablesChecked', 7, 'functionsChecked', 27,
+    'migrationsChecked', 20, 'browserSchemaCreate', 'DENIED',
     'browserTableAccess', 'DENIED', 'browserRpcExecute', 'DENIED',
     'serviceRoleAccess', 'REQUIRED'
 ) as advanced_stats_schema_verification;

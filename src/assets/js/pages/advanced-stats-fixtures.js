@@ -82,6 +82,33 @@ function overview(attacks) {
     };
 }
 
+function lifetime(attacks) {
+    if (!attacks) return { data: { summary: {}, starDistribution: {}, categories: {}, favorites: {} } };
+    return { data: {
+        availability: {
+            perfectAttacks: { available: false, code: 'raw_attack_sequence_unavailable' },
+            threeStarStreaks: { available: false, code: 'raw_attack_sequence_unavailable' }
+        },
+        summary: {
+            totalStars: Math.round(attacks * 2.72), totalDestruction: Math.round(attacks * 88.4),
+            perfectAttacks: null, bestThreeStarStreak: null,
+            threeStarCount: Math.max(0, Math.round(attacks * 0.72)), currentThreeStarStreak: null,
+            trackedDays: Math.min(attacks, 20)
+        },
+        starDistribution: { zero: 0, one: 1, two: 4, three: Math.max(0, Math.round(attacks * 0.72)), unknown: 0 },
+        categories: {
+            regular: { attacks, averageStars: 2.72, threeStarRate: 72.2 },
+            competitive: { attacks: 0, averageStars: null, threeStarRate: null },
+            unknown: { attacks: 0, averageStars: null, threeStarRate: null }
+        },
+        mostActiveMonth: { month: '2026-06', attacks },
+        bestPerformanceMonth: { month: '2026-06', attacks: Math.max(5, attacks), averageStars: 2.72 },
+        favorites: { troop: { name: 'Root Rider', battlesPresent: attacks }, spell: { name: 'Freeze Spell', battlesPresent: attacks } },
+        mostSuccessfulArmy: { army: army(), battleCount: Math.min(attacks, 13), averageStars: 2.85 },
+        minimumPerformanceSample: 5
+    } };
+}
+
 function armies(attacks) {
     if (!attacks) return { items: [] };
     return {
@@ -155,6 +182,7 @@ function makeClient(id) {
         getUnits: async () => response(data.units, 'units'),
         getArmies: async () => response(data.armies, 'armies'),
         getTrends: async () => response(data.trends, 'trends'),
+        getLifetime: async () => response(lifetime(data.attacks), 'lifetime'),
         getBattles: async (_, __, options = {}) => {
             if (options.cursor) return response({ items: [], hasMore: false, nextCursor: null }, 'battles');
             return response(data.battles, 'battles');

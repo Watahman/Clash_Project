@@ -49,6 +49,15 @@ public final class AdvancedStatsReadRepository
     }
 
     @Override
+    public JsonObject overview(UUID trackingId, AdvancedStatsScopeSelection selection, Instant from)
+            throws Exception {
+        if (selection == null || selection.isAll()) return overview(trackingId, from);
+        if (selection.isSingleScope()) return overview(trackingId, selection.singleScope(), from);
+        return AdvancedStatsPublicSourceMetadata.sanitizeOverview(
+                compactAggregator.overview(trackingId, from, selection));
+    }
+
+    @Override
     public JsonObject overview(UUID trackingId, AdvancedStatsScope scope, Instant from) throws Exception {
         JsonObject body = scopedTrackingBody(trackingId, scope);
         addInstant(body, "p_from", from);
@@ -66,6 +75,14 @@ public final class AdvancedStatsReadRepository
     @Override
     public JsonElement units(UUID trackingId, Instant from, AdvancedStatsUnitCategory category) throws Exception {
         return compactAggregator.units(trackingId, from, category);
+    }
+
+    @Override
+    public JsonElement units(UUID trackingId, AdvancedStatsScopeSelection selection, Instant from,
+                             AdvancedStatsUnitCategory category) throws Exception {
+        if (selection == null || selection.isAll()) return units(trackingId, from, category);
+        if (selection.isSingleScope()) return units(trackingId, selection.singleScope(), from, category);
+        return compactAggregator.units(trackingId, from, category, selection);
     }
 
     @Override
@@ -89,6 +106,14 @@ public final class AdvancedStatsReadRepository
     @Override
     public JsonElement armies(UUID trackingId, Instant from, int limit) throws Exception {
         return compactAggregator.armies(trackingId, from, limit);
+    }
+
+    @Override
+    public JsonElement armies(UUID trackingId, AdvancedStatsScopeSelection selection, Instant from, int limit)
+            throws Exception {
+        if (selection == null || selection.isAll()) return armies(trackingId, from, limit);
+        if (selection.isSingleScope()) return armies(trackingId, selection.singleScope(), from, limit);
+        return compactAggregator.armies(trackingId, from, limit, selection);
     }
 
     @Override
@@ -137,6 +162,14 @@ public final class AdvancedStatsReadRepository
     }
 
     @Override
+    public JsonElement trends(UUID trackingId, AdvancedStatsScopeSelection selection, Instant from)
+            throws Exception {
+        if (selection == null || selection.isAll()) return trends(trackingId, from);
+        if (selection.isSingleScope()) return trends(trackingId, selection.singleScope(), from);
+        return compactAggregator.trends(trackingId, from, selection);
+    }
+
+    @Override
     public JsonElement trends(UUID trackingId, AdvancedStatsScope scope, Instant from) throws Exception {
         JsonObject body = scopedTrackingBody(trackingId, scope);
         addInstant(body, "p_from", from);
@@ -148,6 +181,11 @@ public final class AdvancedStatsReadRepository
     @Override
     public JsonElement compactTrends(UUID trackingId, Instant from) throws Exception {
         return trends(trackingId, from);
+    }
+
+    @Override
+    public JsonObject lifetime(UUID trackingId) throws Exception {
+        return objectRpc("read_advanced_stats_lifetime_v1", trackingBody(trackingId));
     }
 
     private JsonObject trackingBody(UUID trackingId) {
@@ -168,6 +206,14 @@ public final class AdvancedStatsReadRepository
         JsonElement value = elementRpcWithFallback(primary, fallback, body);
         if (!value.isJsonObject()) {
             throw new IllegalStateException("Advanced Stats read RPC must return an object: " + primary);
+        }
+        return value.getAsJsonObject();
+    }
+
+    private JsonObject objectRpc(String function, JsonObject body) throws Exception {
+        JsonElement value = elementRpc(function, body);
+        if (!value.isJsonObject()) {
+            throw new IllegalStateException("Advanced Stats read RPC must return an object: " + function);
         }
         return value.getAsJsonObject();
     }

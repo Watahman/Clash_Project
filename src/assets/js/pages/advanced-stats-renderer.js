@@ -1,20 +1,21 @@
-import { t } from '../i18n/i18n.js?v=20260911-loot-v1';
-import { displayArmyUnits, isPlayerFacingUnitName, presentArmy } from './advanced-stats-army-view.js?v=20260811-2';
-import { entityImage } from './progress-asset-view.js?v=20260811-2';
+import { t } from '../i18n/i18n.js?v=20260912-advanced-dashboard-v1';
+import { displayArmyUnits, isPlayerFacingUnitName, presentArmy } from './advanced-stats-army-view.js?v=20260912-advanced-dashboard-v1';
+import { entityImage } from './progress-asset-view.js?v=20260912-advanced-dashboard-v1';
 import {
     formatDate,
     formatDateTime,
     formatDecimal,
     formatNumber,
     formatPercent
-} from './advanced-stats-formatters.js?v=20260829-public-auth-v1';
-import { renderArmies } from './advanced-stats-armies-renderer.js?v=20260829-public-auth-v1';
-import { renderBattles } from './advanced-stats-battles-renderer.js?v=20260909-battledata-v1';
-import { renderTrends } from './advanced-stats-trends-renderer.js?v=20260911-loot-v1';
-import { renderUnits } from './advanced-stats-units-renderer.js?v=20260911-loot-v1';
-import { renderDashboardCoverage, renderHistoryAnalysis } from './advanced-stats-analysis-renderer.js?v=20260829-public-auth-v1';
-import { normalizeAnalysis } from './advanced-stats-analysis.js?v=20260814-advanced-stats-v4';
-import { renderLootSummary } from './advanced-stats-loot.js?v=20260911-loot-v1';
+} from './advanced-stats-formatters.js?v=20260912-advanced-dashboard-v1';
+import { renderArmies } from './advanced-stats-armies-renderer.js?v=20260912-advanced-dashboard-v1';
+import { renderBattles } from './advanced-stats-battles-renderer.js?v=20260912-advanced-dashboard-v1';
+import { renderTrends } from './advanced-stats-trends-renderer.js?v=20260912-advanced-dashboard-v1';
+import { renderUnits } from './advanced-stats-units-renderer.js?v=20260912-advanced-dashboard-v1';
+import { renderDashboardCoverage, renderHistoryAnalysis } from './advanced-stats-analysis-renderer.js?v=20260912-advanced-dashboard-v1';
+import { normalizeAnalysis } from './advanced-stats-analysis.js?v=20260912-advanced-dashboard-v1';
+import { renderLifetime } from './advanced-stats-lifetime-renderer.js?v=20260912-advanced-dashboard-v1';
+import { renderLootSummary } from './advanced-stats-loot.js?v=20260912-advanced-dashboard-v1';
 
 const STATUS_KEYS = Object.freeze({
     ACTIVE: 'advancedStats.active',
@@ -123,13 +124,21 @@ export function renderOverview(elements, state) {
     renderLootSummary(elements, state);
 
     const favorites = data?.favorites || {};
-    renderFavorite(elements, 'troop', favorites.troop);
-    renderFavorite(elements, 'spell', favorites.spell);
-    renderFavorite(elements, 'siege', favorites.siege);
-    renderFavoriteArmy(elements, favorites.army, state);
+    renderFavorite(elements, 'troop', favorites.troop, attacks);
+    renderFavorite(elements, 'spell', favorites.spell, attacks);
+    renderFavorite(elements, 'siege', favorites.siege, attacks);
+    renderFavoriteArmy(elements, favorites.army, state, attacks);
 }
 
-function renderFavorite(elements, kind, favorite) {
+function favoriteUsage(favorite, attacks) {
+    const count = Number(favorite?.battlesPresent ?? favorite?.battleCount);
+    if (!Number.isFinite(count)) return '';
+    const usage = t('advancedStats.usedInAttacks', { count: formatNumber(count) });
+    if (!Number.isFinite(attacks) || attacks <= 0) return usage;
+    return `${usage} · ${formatPercent((count / attacks) * 100)}`;
+}
+
+function renderFavorite(elements, kind, favorite, attacks) {
     const title = kind[0].toUpperCase() + kind.slice(1);
     const name = elements[`favorite${title}`];
     const meta = elements[`favorite${title}Meta`];
@@ -142,11 +151,11 @@ function renderFavorite(elements, kind, favorite) {
         return;
     }
     name.textContent = unitName;
-    meta.textContent = t('advancedStats.usedInAttacks', { count: formatNumber(favorite.battlesPresent) });
+    meta.textContent = favoriteUsage(favorite, attacks);
     imageRoot?.replaceChildren(entityImage(unitName, { alt: '' }));
 }
 
-function renderFavoriteArmy(elements, favorite, state) {
+function renderFavoriteArmy(elements, favorite, state, attacks) {
     const presentation = favorite
         ? presentArmy(favorite.army, state.unitCatalog, t('advancedStats.armyComposition'))
         : null;
@@ -157,7 +166,8 @@ function renderFavoriteArmy(elements, favorite, state) {
         return;
     }
     elements.favoriteArmy.textContent = presentation.label;
-    elements.favoriteArmyMeta.textContent = `${formatNumber(favorite.battleCount)} ${t('advancedStats.attacks').toLowerCase()} · ${formatDecimal(favorite.averageStars)}`;
+    const usage = favoriteUsage(favorite, attacks);
+    elements.favoriteArmyMeta.textContent = `${usage || `${formatNumber(favorite.battleCount)} ${t('advancedStats.attacks').toLowerCase()}`} · ${formatDecimal(favorite.averageStars)}`;
     const imageRoot = elements.favoriteArmyImage;
     if (!imageRoot) return;
     imageRoot.replaceChildren();
@@ -170,6 +180,7 @@ export function renderStatistics(elements, state) {
     renderUnits(elements, state);
     renderArmies(elements, state);
     renderTrends(elements, state);
+    renderLifetime(elements, state);
     syncTrendValueSemantics(elements);
     renderBattles(elements, state);
 }
@@ -184,6 +195,23 @@ function syncTrendValueSemantics(elements) {
 export function syncPeriodButtons(elements, period) {
     elements.periods?.querySelectorAll('[data-period]').forEach(button => {
         const active = button.dataset.period === period;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-pressed', String(active));
+    });
+}
+
+export function syncAttackCategoryButtons(elements, category) {
+    const selected = String(category || 'ALL').toLowerCase();
+    elements.attackCategories?.querySelectorAll('[data-attack-category]').forEach(button => {
+        const active = button.dataset.attackCategory === selected;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-pressed', String(active));
+    });
+}
+
+export function syncTrendMetricButtons(elements, metric) {
+    elements.trendMetrics?.querySelectorAll('[data-trend-metric]').forEach(button => {
+        const active = button.dataset.trendMetric === metric;
         button.classList.toggle('is-active', active);
         button.setAttribute('aria-pressed', String(active));
     });

@@ -22,6 +22,7 @@ describe('Advanced Stats compact database contract', () => {
     const compactionWrites = migration('20260911000309_advanced_stats_loot_and_army_compaction_writes.sql');
     const compactionReads = migration('20260911000311_advanced_stats_loot_and_army_compaction_reads.sql');
     const compactionIndex = migration('20260911000312_advanced_stats_army_dictionary_fk_index.sql');
+    const lifetime = migration('20260912103406_advanced_stats_lifetime_dashboard.sql');
     const compaction = [compactionFoundation, compactionWrites, compactionReads, compactionIndex].join('\n');
 
     it('defines scope-aware compact state and daily aggregates with RLS', () => {
@@ -177,9 +178,60 @@ describe('Advanced Stats compact database contract', () => {
         expect(schemaCheck).not.toContain("'advanced_stats_battles'");
         expect(schemaCheck).not.toContain("'public.save_advanced_stats_battle_v");
         expect(compactSmoke).toContain('save_advanced_stats_compact_event_v3');
+        expect(compactSmoke).toContain('read_advanced_stats_lifetime_v1');
         expect(compactSmoke).toContain('loot_known_attacks');
         expect(compactSmoke).not.toContain('advanced_stats_battles');
         expect(smokeRunner).toContain("'smoke-test-advanced-stats-compact.sql'");
         expect(smokeRunner).not.toContain("'smoke-test-advanced-stats-read-models.sql'");
+    });
+
+    it('defines a backend-only all-time lifetime read model from compact aggregates', () => {
+        expect(lifetime).toContain('read_advanced_stats_lifetime_v1(uuid)');
+        expect(lifetime).toContain('language sql');
+        expect(lifetime).toContain('stable');
+        expect(lifetime).toContain('security invoker');
+        expect(lifetime).not.toMatch(/security\s+definer/i);
+        expect(lifetime).toContain('set search_path = public, pg_temp');
+        for (const table of [
+            'advanced_stats_scope_daily',
+            'advanced_stats_scope_unit_daily',
+            'advanced_stats_scope_army_daily',
+            'advanced_stats_army_dictionary'
+        ]) {
+            expect(lifetime).toContain(`public.${table}`);
+        }
+        expect(lifetime).toContain('count(distinct stat_date)');
+        expect(lifetime).toContain("date_trunc('month', stat_date)::date");
+        expect(lifetime).not.toContain('dictionary.normalized_army_json');
+        expect(lifetime).toContain("('regular'::text, 'NORMAL'::text)");
+        expect(lifetime).toContain("('competitive'::text, 'WAR'::text)");
+        expect(lifetime).toContain("('competitive'::text, 'RANKED'::text)");
+        expect(lifetime).toContain("'minimumSample', 5");
+        expect(lifetime).toContain("'sampleSize', star_known_attacks");
+        expect(lifetime).toContain('where star_known_attacks >= 5');
+        expect(lifetime).toContain("'minimumPerformanceSample', 5");
+        expect(lifetime).toContain('raw_attack_sequence_unavailable');
+        expect(lifetime).toContain("'stars', case when totals.star_known_attacks < totals.attacks");
+        expect(lifetime).toContain("'code', 'star_coverage_partial'");
+        expect(lifetime).toContain("'perfectAttacks', null::jsonb");
+        expect(lifetime).toContain("'bestThreeStarStreak', null::jsonb");
+        expect(lifetime).toContain("'currentThreeStarStreak', null::jsonb");
+        expect(lifetime).toContain("'totalStars', case when totals.star_known_attacks = 0 then null::bigint else totals.total_stars end");
+        expect(lifetime).toContain("'totalDestruction', null::numeric");
+        expect(lifetime).not.toContain('total_destruction');
+        expect(lifetime).toContain("'averageDestruction', null::numeric");
+        expect(lifetime).not.toMatch(/order by total_stars::numeric \/ nullif\(star_known_attacks, 0\) desc nulls last,[\s\S]*total_destruction/);
+        expect(lifetime).not.toMatch(/order by total_stars::numeric \/ nullif\(battle_count, 0\) desc nulls last,[\s\S]*total_destruction/);
+        expect(lifetime).toContain('create or replace function public.read_advanced_stats_compact_trends_v1');
+        expect(lifetime).toContain('create or replace function public.read_advanced_stats_compact_trends_v2');
+        expect(lifetime).toContain("'sampleSize', p.sample_size");
+        expect(lifetime).toContain("'averageStars', round(p.total_stars::numeric / nullif(p.sample_size, 0), 2)");
+        expect(lifetime).toContain("'threeStarRate', round(100.0 * p.three_star_attacks");
+        expect(lifetime).toContain("'averageDestruction', null::numeric");
+        expect(lifetime).toContain('destruction_coverage_unavailable');
+        expect(lifetime).not.toContain('advanced_stats_battles');
+        expect(lifetime).toContain('revoke all on function public.read_advanced_stats_lifetime_v1(uuid)');
+        expect(lifetime).toContain('grant execute on function public.read_advanced_stats_lifetime_v1(uuid)');
+        expect(lifetime).toContain('to service_role');
     });
 });

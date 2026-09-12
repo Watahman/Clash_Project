@@ -1,7 +1,30 @@
-import { getLanguage } from '../i18n/i18n.js?v=20260830-monthly-trends-v1';
+import { getLanguage } from '../i18n/i18n.js?v=20260912-advanced-dashboard-v1';
 
 const LOOT_FIELDS = Object.freeze(['goldLooted', 'elixirLooted', 'darkElixirLooted']);
 const WEIGHTED_FIELDS = Object.freeze(['averageStars', 'averageDestruction']);
+const STAR_SAMPLE_FIELDS = Object.freeze(['sampleSize', 'starKnownAttacks']);
+const DESTRUCTION_SAMPLE_FIELDS = Object.freeze(['destructionSampleSize']);
+
+export const TREND_METRICS = Object.freeze({
+    attacks: Object.freeze({ field: 'attacks', labelKey: 'advancedStats.attacks', format: 'number', maximum: null }),
+    averageStars: Object.freeze({ field: 'averageStars', labelKey: 'advancedStats.avgStars', format: 'decimal', maximum: 3 }),
+    threeStarRate: Object.freeze({ field: 'threeStarRate', labelKey: 'advancedStats.threeStarRate', format: 'percent', maximum: 100 }),
+    averageDestruction: Object.freeze({ field: 'averageDestruction', labelKey: 'advancedStats.avgDestruction', format: 'percent', maximum: 100 })
+});
+
+export function normalizeTrendMetric(value) {
+    const key = String(value || '').trim();
+    return Object.prototype.hasOwnProperty.call(TREND_METRICS, key) ? key : 'attacks';
+}
+
+export function trendMetricConfig(value) {
+    return TREND_METRICS[normalizeTrendMetric(value)];
+}
+
+export function trendMetricValue(point, metric = 'attacks') {
+    const raw = point?.[trendMetricConfig(metric).field];
+    return finiteNumber(raw);
+}
 
 function finiteNumber(value) {
     if (value === null || value === undefined || typeof value === 'boolean') return null;
@@ -77,6 +100,22 @@ function addWeightedMetric(bucket, field, value, weight) {
     bucket.metrics[field].weight += weight;
 }
 
+function explicitSampleWeight(point, fields) {
+    let hasExplicitSample = false;
+    for (const field of fields) {
+        if (!Object.prototype.hasOwnProperty.call(point || {}, field)) continue;
+        hasExplicitSample = true;
+        const sample = finiteNumber(point[field]);
+        if (sample !== null) return Math.max(0, sample);
+    }
+    return hasExplicitSample ? 0 : null;
+}
+
+function metricWeight(point, sampleFields, fallback) {
+    const explicit = explicitSampleWeight(point, sampleFields);
+    return explicit === null ? fallback : explicit;
+}
+
 function addPoint(bucket, point) {
     const rawAttacks = finiteNumber(point?.attacks);
     const attacks = rawAttacks === null ? null : Math.max(0, rawAttacks);
@@ -85,9 +124,13 @@ function addPoint(bucket, point) {
         bucket.attacksKnown = true;
     }
 
-    WEIGHTED_FIELDS.forEach(field => addWeightedMetric(bucket, field, point?.[field], attacks));
+    addWeightedMetric(bucket, 'averageStars', point?.averageStars,
+        metricWeight(point, STAR_SAMPLE_FIELDS, attacks));
+    addWeightedMetric(bucket, 'averageDestruction', point?.averageDestruction,
+        metricWeight(point, DESTRUCTION_SAMPLE_FIELDS, attacks));
     const rate = finiteNumber(point?.threeStarRate);
-    if (rate !== null) addWeightedMetric(bucket, 'threeStarRate', rate, attacks);
+    if (rate !== null) addWeightedMetric(bucket, 'threeStarRate', rate,
+        metricWeight(point, STAR_SAMPLE_FIELDS, attacks));
 
     LOOT_FIELDS.forEach(field => {
         const value = finiteNumber(point?.[field]);

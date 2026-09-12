@@ -18,12 +18,17 @@ final class AdvancedStatsCompactReadMerger {
             new AdvancedStatsCompactReadTrendMerger();
 
     JsonObject overview(List<AdvancedStatsCompactReadAggregator.ScopeSnapshot> snapshots) {
+        return overview(snapshots, "ALL");
+    }
+
+    JsonObject overview(List<AdvancedStatsCompactReadAggregator.ScopeSnapshot> snapshots,
+                        String scopeValue) {
         List<JsonObject> units = mergeUnits(snapshots);
         List<JsonObject> armies = mergeArmies(snapshots);
         JsonObject result = new JsonObject();
-        result.addProperty("scope", "ALL");
+        result.addProperty("scope", scopeValue == null || scopeValue.isBlank() ? "ALL" : scopeValue);
         result.addProperty("granularity", "UTC_DAY");
-        result.add("tracking", mergedTracking(snapshots));
+        result.add("tracking", mergedTracking(snapshots, scopeValue));
         result.add("summary", mergedSummary(snapshots));
         result.add("favorites", favorites(units, armies));
         JsonArray failures = AdvancedStatsCompactReadAggregator.failures(snapshots);
@@ -59,7 +64,8 @@ final class AdvancedStatsCompactReadMerger {
         return result;
     }
 
-    private JsonObject mergedTracking(List<AdvancedStatsCompactReadAggregator.ScopeSnapshot> snapshots) {
+    private JsonObject mergedTracking(List<AdvancedStatsCompactReadAggregator.ScopeSnapshot> snapshots,
+                                      String scopeValue) {
         JsonObject tracking = new JsonObject();
         JsonArray scopes = new JsonArray();
         for (AdvancedStatsCompactReadAggregator.ScopeSnapshot snapshot : snapshots) {
@@ -72,7 +78,7 @@ final class AdvancedStatsCompactReadMerger {
             scope.add("summary", summary == null ? JsonNull.INSTANCE : summary.deepCopy());
             scopes.add(scope);
         }
-        tracking.addProperty("scope", "ALL");
+        tracking.addProperty("scope", scopeValue == null || scopeValue.isBlank() ? "ALL" : scopeValue);
         tracking.add("scopes", scopes);
         return tracking;
     }

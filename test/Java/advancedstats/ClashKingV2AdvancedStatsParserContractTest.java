@@ -155,6 +155,20 @@ class ClashKingV2AdvancedStatsParserContractTest {
     }
 
     @Test
+    void cwlWarObservationRemainsInTheCompetitiveWarScope() {
+        HistoryPage page = ClashKingV2AdvancedStatsParser.war(json("{\"items\":["
+                + "{\"war_id\":\"cwl-1\",\"warType\":\"cwl\",\"side\":\"attack\","
+                + "\"attackerTag\":\"#P0Y8LQ\",\"defenderTag\":\"#OPP\",\"stars\":3}]}"),
+                request(AdvancedStatsScope.WAR));
+
+        AttackObservation observation = page.observations().getFirst();
+
+        assertEquals("cwl", observation.battleType());
+        assertEquals(AdvancedStatsScope.WAR, observation.scope());
+        assertTrue(AdvancedStatsScopeSelection.parse("competitive").scopes().contains(observation.scope()));
+    }
+
+    @Test
     void normalEventKeysDoNotDependOnJsonPropertyOrder() {
         HistoryRequest request = request(AdvancedStatsScope.NORMAL);
         String first = ClashKingV2AdvancedStatsParser.normal(json(

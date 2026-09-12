@@ -28,6 +28,7 @@ public final class SUPABASE_AdvancedStats {
     public static final String ROUTE_ARMIES = "/AdvancedStatsArmies";
     public static final String ROUTE_BATTLES = "/AdvancedStatsBattles";
     public static final String ROUTE_TRENDS = "/AdvancedStatsTrends";
+    public static final String ROUTE_LIFETIME = "/AdvancedStatsLifetime";
 
     private final HttpServer server;
     private final Config conf;
@@ -70,6 +71,7 @@ public final class SUPABASE_AdvancedStats {
         registerArmies();
         registerBattles();
         registerTrends();
+        registerLifetime();
     }
 
     private void registerStart() {
@@ -197,6 +199,17 @@ public final class SUPABASE_AdvancedStats {
                     requirePlayerTag(body),
                     optionalString(body, "period"),
                     optionalString(body, "scope")
+            );
+            utils.sendJsonResponse(ex, response.toString(), 200);
+        }));
+    }
+
+    private void registerLifetime() {
+        server.createContext(conf._EXT_ADVANCED_STATS_LIFETIME, exchange -> utils.handlePost(exchange, ex -> {
+            JsonObject body = utils.parseBody(ex);
+            JsonObject response = reads.lifetime(
+                    authenticatedUserId(ex),
+                    requirePlayerTag(body)
             );
             utils.sendJsonResponse(ex, response.toString(), 200);
         }));

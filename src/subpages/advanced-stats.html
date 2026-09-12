@@ -12,11 +12,13 @@
     <title>Advanced Stats (Coming soon) · ClashPanel</title>
     <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="../assets/css/workspace-system.css?v=20260829-public-auth-v1">
-    <link rel="stylesheet" href="../assets/css/advanced-stats.css?v=20260911-loot-v1">
+    <link rel="stylesheet" href="../assets/css/advanced-stats.css?v=20260912-advanced-dashboard-v1">
+    <link rel="stylesheet" href="../assets/css/advanced-stats-dashboard.css?v=20260912-advanced-dashboard-v1">
+    <link rel="stylesheet" href="../assets/css/advanced-stats-lifetime.css?v=20260912-advanced-dashboard-v1">
     <link rel="stylesheet" href="../assets/css/advanced-stats-analysis.css?v=20260814-advanced-stats-v4">
     <script src="../assets/js/Data/runtime-config.js"></script>
     <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260831-master-live-v1"></script>
-    <script type="module" src="../assets/js/pages/advanced-stats-bootstrap.js?v=20260911-loot-v1"></script>
+    <script type="module" src="../assets/js/pages/advanced-stats-bootstrap.js?v=20260912-advanced-dashboard-v1"></script>
     <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="../assets/css/workspace-polish-batch2.css">
@@ -157,7 +159,7 @@
         </section>
 
         <div class="advanced-stats__toolbar">
-            <div>
+            <div class="advanced-stats__toolbar-group advanced-stats__toolbar-group--primary">
                 <strong data-i18n="advancedStats.periodLabel">Time range</strong>
                 <div class="advanced-stats__segmented" id="advanced-stats-periods" role="group" aria-label="Time range" data-i18n-aria-label="advancedStats.periodLabel">
                     <button class="cp-button cp-button--secondary" type="button" data-period="7d" aria-pressed="false" data-i18n="advancedStats.period7d">7 days</button>
@@ -166,39 +168,47 @@
                     <button class="cp-button cp-button--secondary" type="button" data-period="all" aria-pressed="false" data-i18n="advancedStats.periodAll">All tracked time</button>
                 </div>
             </div>
+            <div class="advanced-stats__toolbar-group advanced-stats__toolbar-group--secondary">
+                <strong data-i18n="advancedStats.attackCategoryLabel">Attack type</strong>
+                <div class="advanced-stats__segmented advanced-stats__segmented--compact" id="advanced-stats-categories" role="group" aria-label="Attack type" data-i18n-aria-label="advancedStats.attackCategoryLabel">
+                    <button class="cp-button cp-button--ghost is-active" type="button" data-attack-category="all" aria-pressed="true" data-i18n="advancedStats.attackCategoryAll">All</button>
+                    <button class="cp-button cp-button--ghost" type="button" data-attack-category="regular" aria-pressed="false" data-i18n="advancedStats.attackCategoryRegular">Regular</button>
+                    <button class="cp-button cp-button--ghost" type="button" data-attack-category="competitive" aria-pressed="false" data-i18n="advancedStats.attackCategoryCompetitive">Competitive</button>
+                </div>
+            </div>
             <span id="advanced-stats-data-status" class="advanced-stats__data-status" role="status" aria-live="polite"></span>
         </div>
 
         <section id="advanced-stats-summary-section" class="advanced-stats__section" aria-labelledby="advanced-stats-summary-title">
             <div class="advanced-stats__section-heading"><div><h2 id="advanced-stats-summary-title" data-i18n="advancedStats.summaryTitle">Attack overview</h2><p data-i18n="advancedStats.summaryText">Performance across the selected tracked period.</p></div></div>
             <div class="advanced-stats__kpis">
-                <article><span data-i18n="advancedStats.attacks">Attacks</span><strong id="advanced-stats-kpi-attacks">—</strong></article>
-                <article><span data-i18n="advancedStats.avgStars">Average stars</span><strong id="advanced-stats-kpi-stars">—</strong></article>
-                <article><span data-i18n="advancedStats.threeStarRate">3-star rate</span><strong id="advanced-stats-kpi-three-star">—</strong></article>
-                <article><span data-i18n="advancedStats.avgDestruction">Average destruction</span><strong id="advanced-stats-kpi-destruction">—</strong></article>
+                <article><span data-i18n="advancedStats.attacks">Attacks</span><strong id="advanced-stats-kpi-attacks">—</strong><small id="advanced-stats-kpi-attacks-meta"></small></article>
+                <article><span data-i18n="advancedStats.avgStars">Average stars</span><strong id="advanced-stats-kpi-stars">—</strong><small id="advanced-stats-kpi-stars-meta"></small></article>
+                <article><span data-i18n="advancedStats.threeStarRate">3-star rate</span><strong id="advanced-stats-kpi-three-star">—</strong><small id="advanced-stats-kpi-three-star-meta"></small></article>
+                <article><span data-i18n="advancedStats.avgDestruction">Average destruction</span><strong id="advanced-stats-kpi-destruction">—</strong><small id="advanced-stats-kpi-destruction-meta"></small></article>
             </div>
             <div class="advanced-stats__favorites">
-                <article><div class="advanced-stats__favorite-image" id="advanced-stats-favorite-troop-image"></div><span data-i18n="advancedStats.favoriteTroop">Favorite troop</span><strong id="advanced-stats-favorite-troop">—</strong><small id="advanced-stats-favorite-troop-meta"></small></article>
-                <article><div class="advanced-stats__favorite-image" id="advanced-stats-favorite-spell-image"></div><span data-i18n="advancedStats.favoriteSpell">Favorite spell</span><strong id="advanced-stats-favorite-spell">—</strong><small id="advanced-stats-favorite-spell-meta"></small></article>
-                <article><div class="advanced-stats__favorite-image" id="advanced-stats-favorite-siege-image"></div><span data-i18n="advancedStats.favoriteSiege">Favorite siege</span><strong id="advanced-stats-favorite-siege">—</strong><small id="advanced-stats-favorite-siege-meta"></small></article>
-                <article><div class="advanced-stats__favorite-image advanced-stats__favorite-image--army" id="advanced-stats-favorite-army-image"></div><span data-i18n="advancedStats.favoriteArmy">Favorite army</span><strong id="advanced-stats-favorite-army">—</strong><small id="advanced-stats-favorite-army-meta"></small></article>
+                <article><div class="advanced-stats__favorite-image" id="advanced-stats-favorite-troop-image"></div><div class="advanced-stats__favorite-copy"><span data-i18n="advancedStats.favoriteTroop">Favorite troop</span><strong id="advanced-stats-favorite-troop">—</strong><small id="advanced-stats-favorite-troop-meta"></small></div></article>
+                <article><div class="advanced-stats__favorite-image" id="advanced-stats-favorite-spell-image"></div><div class="advanced-stats__favorite-copy"><span data-i18n="advancedStats.favoriteSpell">Favorite spell</span><strong id="advanced-stats-favorite-spell">—</strong><small id="advanced-stats-favorite-spell-meta"></small></div></article>
+                <article><div class="advanced-stats__favorite-image" id="advanced-stats-favorite-siege-image"></div><div class="advanced-stats__favorite-copy"><span data-i18n="advancedStats.favoriteSiege">Favorite siege</span><strong id="advanced-stats-favorite-siege">—</strong><small id="advanced-stats-favorite-siege-meta"></small></div></article>
+                <article><div class="advanced-stats__favorite-image advanced-stats__favorite-image--army" id="advanced-stats-favorite-army-image"></div><div class="advanced-stats__favorite-copy"><span data-i18n="advancedStats.favoriteArmy">Favorite army</span><strong id="advanced-stats-favorite-army">—</strong><small id="advanced-stats-favorite-army-meta"></small></div></article>
             </div>
             <div class="advanced-stats__loot" aria-labelledby="advanced-stats-loot-title">
                 <div class="advanced-stats__subheading"><h3 id="advanced-stats-loot-title" data-i18n="advancedStats.lootTitle">Total loot farmed</h3><p data-i18n="advancedStats.lootText">Reliable loot recorded during the selected tracked period.</p><small id="advanced-stats-loot-attack-count" class="advanced-stats__loot-meta" data-i18n="advancedStats.lootAttackCountUnknown">Reliable loot attack count not reported.</small></div>
                 <div id="advanced-stats-loot-cards" class="advanced-stats__loot-cards">
                     <article class="advanced-stats__loot-card" data-loot-resource="gold">
                         <div class="advanced-stats__loot-resource"><img src="/assets/game/buildings/gold-storage.webp" alt="" aria-hidden="true" width="32" height="32"><h4 data-i18n="advancedStats.resourceGold">Gold</h4></div>
-                        <strong data-loot-total>—</strong><span data-i18n="advancedStats.lootTotal">Total</span>
+                        <div class="advanced-stats__loot-total"><strong data-loot-total>—</strong><span data-i18n="advancedStats.lootTotal">Total</span></div>
                         <dl><div><dt data-i18n="advancedStats.lootAverage">Average / attack</dt><dd data-loot-average>—</dd></div><div><dt data-i18n="advancedStats.lootBest">Best attack</dt><dd data-loot-best>—</dd></div></dl>
                     </article>
                     <article class="advanced-stats__loot-card" data-loot-resource="elixir">
                         <div class="advanced-stats__loot-resource"><img src="/assets/game/buildings/elixir-storage.webp" alt="" aria-hidden="true" width="32" height="32"><h4 data-i18n="advancedStats.resourceElixir">Elixir</h4></div>
-                        <strong data-loot-total>—</strong><span data-i18n="advancedStats.lootTotal">Total</span>
+                        <div class="advanced-stats__loot-total"><strong data-loot-total>—</strong><span data-i18n="advancedStats.lootTotal">Total</span></div>
                         <dl><div><dt data-i18n="advancedStats.lootAverage">Average / attack</dt><dd data-loot-average>—</dd></div><div><dt data-i18n="advancedStats.lootBest">Best attack</dt><dd data-loot-best>—</dd></div></dl>
                     </article>
                     <article class="advanced-stats__loot-card" data-loot-resource="darkElixir">
                         <div class="advanced-stats__loot-resource"><img src="/assets/game/buildings/dark-elixir-storage.webp" alt="" aria-hidden="true" width="32" height="32"><h4 data-i18n="advancedStats.resourceDarkElixir">Dark Elixir</h4></div>
-                        <strong data-loot-total>—</strong><span data-i18n="advancedStats.lootTotal">Total</span>
+                        <div class="advanced-stats__loot-total"><strong data-loot-total>—</strong><span data-i18n="advancedStats.lootTotal">Total</span></div>
                         <dl><div><dt data-i18n="advancedStats.lootAverage">Average / attack</dt><dd data-loot-average>—</dd></div><div><dt data-i18n="advancedStats.lootBest">Best attack</dt><dd data-loot-best>—</dd></div></dl>
                     </article>
                 </div>
@@ -206,9 +216,53 @@
             </div>
         </section>
 
+        <section id="advanced-stats-lifetime-section" class="advanced-stats__section advanced-stats__lifetime" aria-labelledby="advanced-stats-lifetime-title">
+            <div class="advanced-stats__section-heading">
+                <div><p class="advanced-stats__section-kicker" data-i18n="advancedStats.lifetimeKicker">All tracked history</p><h2 id="advanced-stats-lifetime-title" data-i18n="advancedStats.lifetimeTitle">Lifetime performance</h2><p data-i18n="advancedStats.lifetimeText">A complete view of the attacks ClashPanel has reliably tracked.</p></div>
+                <small id="advanced-stats-lifetime-availability" class="advanced-stats__availability" data-i18n="advancedStats.lifetimeAvailability">Based on available tracked history.</small>
+            </div>
+            <div class="advanced-stats__lifetime-primary">
+                <article><span data-i18n="advancedStats.lifetimeTotalStars">Total stars</span><strong id="advanced-stats-lifetime-total-stars">—</strong><small id="advanced-stats-lifetime-total-stars-availability"></small></article>
+                <article><span data-i18n="advancedStats.lifetimeTotalDestruction">Total destruction</span><strong id="advanced-stats-lifetime-total-destruction">—</strong><small id="advanced-stats-lifetime-total-destruction-availability"></small></article>
+                <article><span data-i18n="advancedStats.lifetimePerfectAttacks">Perfect attacks</span><strong id="advanced-stats-lifetime-perfect-attacks">—</strong><small id="advanced-stats-lifetime-perfect-attacks-availability"></small></article>
+                <article><span data-i18n="advancedStats.lifetimeBestStreak">Best streak</span><strong id="advanced-stats-lifetime-best-streak">—</strong><small id="advanced-stats-lifetime-best-streak-availability"></small></article>
+            </div>
+            <div class="advanced-stats__lifetime-secondary">
+                <dl class="advanced-stats__lifetime-facts">
+                    <div><dt data-i18n="advancedStats.lifetimeTripleCount">Three-star attacks</dt><dd id="advanced-stats-lifetime-triple-count">—</dd></div>
+                    <div><dt data-i18n="advancedStats.lifetimeTrackedDays">Tracked days</dt><dd id="advanced-stats-lifetime-tracked-days">—</dd></div>
+                    <div><dt data-i18n="advancedStats.lifetimeCurrentStreak">Current streak</dt><dd id="advanced-stats-lifetime-current-streak">—</dd></div>
+                    <div><dt data-i18n="advancedStats.lifetimeMostActiveMonth">Most active month</dt><dd id="advanced-stats-lifetime-most-active-month">—</dd></div>
+                    <div><dt data-i18n="advancedStats.lifetimeBestPerformanceMonth">Best performance month</dt><dd id="advanced-stats-lifetime-best-performance-month">—</dd></div>
+                </dl>
+                <div class="advanced-stats__lifetime-distribution" aria-labelledby="advanced-stats-lifetime-distribution-title">
+                    <h3 id="advanced-stats-lifetime-distribution-title" data-i18n="advancedStats.lifetimeStarDistribution">Star distribution</h3>
+                    <ul>
+                        <li data-star-count="zero"><span data-i18n="advancedStats.starsZero">0 stars</span><strong id="advanced-stats-lifetime-star-zero">—</strong></li>
+                        <li data-star-count="one"><span data-i18n="advancedStats.starsOne">1 star</span><strong id="advanced-stats-lifetime-star-one">—</strong></li>
+                        <li data-star-count="two"><span data-i18n="advancedStats.starsTwo">2 stars</span><strong id="advanced-stats-lifetime-star-two">—</strong></li>
+                        <li data-star-count="three"><span data-i18n="advancedStats.starsThree">3 stars</span><strong id="advanced-stats-lifetime-star-three">—</strong></li>
+                        <li data-star-count="unknown"><span data-i18n="advancedStats.starsUnknown">Unknown</span><strong id="advanced-stats-lifetime-star-unknown">—</strong></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="advanced-stats__lifetime-comparison" id="advanced-stats-lifetime-category-comparison" data-category-comparison>
+                <div class="advanced-stats__subheading"><h3 data-i18n="advancedStats.lifetimeCategoryTitle">Performance by attack type</h3><p data-i18n="advancedStats.lifetimeCategoryText">Unknown types stay separate from Regular and Competitive.</p></div>
+                <div class="advanced-stats__category-grid">
+                    <article id="advanced-stats-lifetime-category-regular" data-category="regular"><span data-i18n="advancedStats.attackCategoryRegular">Regular</span><strong data-category-value>—</strong><small data-category-meta></small></article>
+                    <article id="advanced-stats-lifetime-category-competitive" data-category="competitive"><span data-i18n="advancedStats.attackCategoryCompetitive">Competitive</span><strong data-category-value>—</strong><small data-category-meta></small></article>
+                    <article id="advanced-stats-lifetime-category-unknown" data-category="unknown"><span data-i18n="advancedStats.attackCategoryUnknown">Unknown</span><strong data-category-value>—</strong><small data-category-meta></small></article>
+                </div>
+            </div>
+            <div class="advanced-stats__lifetime-summaries">
+                <article id="advanced-stats-lifetime-favorites" data-lifetime-favorites><div><p class="advanced-stats__section-kicker" data-i18n="advancedStats.lifetimeFavoritesKicker">Across all tracked time</p><h3 data-i18n="advancedStats.lifetimeFavoritesTitle">All-time favorites</h3></div><div data-lifetime-favorites-content><span data-i18n="advancedStats.noFavorite">Not enough tracked data</span></div></article>
+                <article id="advanced-stats-lifetime-successful-army" data-lifetime-successful-army><div><p class="advanced-stats__section-kicker" data-i18n="advancedStats.lifetimeArmyKicker">Strongest results</p><h3 data-i18n="advancedStats.lifetimeArmyTitle">Most successful army</h3></div><div data-lifetime-successful-army-content><span data-i18n="advancedStats.noFavorite">Not enough tracked data</span></div></article>
+            </div>
+        </section>
+
         <div class="advanced-stats__two-column">
             <section id="advanced-stats-trends-section" class="advanced-stats__section" aria-labelledby="advanced-stats-trends-title">
-                <div class="advanced-stats__section-heading"><div><h2 id="advanced-stats-trends-title" data-i18n="advancedStats.trendsTitle">Performance trend</h2><p data-i18n="advancedStats.trendsText">See how many attacks you make each month.</p></div></div>
+                <div class="advanced-stats__section-heading advanced-stats__section-heading--trend"><div><h2 id="advanced-stats-trends-title" data-i18n="advancedStats.trendsTitle">Performance trend</h2><p data-i18n="advancedStats.trendsText">See how many attacks you make each month.</p></div><div class="advanced-stats__trend-selector"><span class="sr-only" data-i18n="advancedStats.trendMetricLabel">Trend metric</span><div id="advanced-stats-trend-metrics" class="advanced-stats__segmented advanced-stats__segmented--compact" role="group" aria-label="Trend metric" data-i18n-aria-label="advancedStats.trendMetricLabel"><button class="cp-button cp-button--ghost is-active" type="button" data-trend-metric="attacks" aria-pressed="true" data-i18n="advancedStats.attacks">Attacks</button><button class="cp-button cp-button--ghost" type="button" data-trend-metric="averageStars" aria-pressed="false" data-i18n="advancedStats.avgStars">Average stars</button><button class="cp-button cp-button--ghost" type="button" data-trend-metric="threeStarRate" aria-pressed="false" data-i18n="advancedStats.threeStarRate">3-star rate</button><button class="cp-button cp-button--ghost" type="button" data-trend-metric="averageDestruction" aria-pressed="false" data-i18n="advancedStats.avgDestruction">Average destruction</button></div></div></div>
                 <div id="advanced-stats-trend-chart" class="advanced-stats__trend-chart" role="group" aria-label="Performance trend" data-i18n-aria-label="advancedStats.trendsTitle"></div>
                 <div id="advanced-stats-loot-trend" class="advanced-stats__loot-trend" aria-labelledby="advanced-stats-loot-trend-title" hidden>
                     <div class="advanced-stats__subheading"><h3 id="advanced-stats-loot-trend-title" data-i18n="advancedStats.lootTrendTitle">Loot trend</h3><p data-i18n="advancedStats.lootTrendText">Loot totals by month from reliable records.</p></div>

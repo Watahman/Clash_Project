@@ -2,6 +2,7 @@ package Java.advancedstats;
 
 import Java.HttpException;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -78,6 +79,24 @@ class AdvancedStatsReadRepositoryTest {
         assertEquals(0, summary.get("lootAttackCount").getAsInt());
         assertTrue(summary.get("goldLooted").isJsonNull());
         assertTrue(summary.get("averageGoldLooted").isJsonNull());
+    }
+
+    @Test
+    void lifetimeUsesTheDedicatedRpcWithoutInventingMissingFields() throws Exception {
+        List<String> calls = new ArrayList<>();
+        List<JsonObject> bodies = new ArrayList<>();
+        AdvancedStatsReadRepository repository = repository((function, body) -> {
+            calls.add(function);
+            bodies.add(JsonParser.parseString(body).getAsJsonObject());
+            return "{\"summary\":{\"totalStars\":7}}";
+        });
+
+        JsonObject result = repository.lifetime(TRACKING_ID);
+
+        assertEquals(List.of("read_advanced_stats_lifetime_v1"), calls);
+        assertEquals(TRACKING_ID.toString(), bodies.getFirst().get("p_tracking_id").getAsString());
+        assertEquals(7, result.getAsJsonObject("summary").get("totalStars").getAsInt());
+        assertTrue(!result.has("starDistribution"));
     }
 
     private AdvancedStatsReadRepository repository(AdvancedStatsReadRepository.RpcClient rpc) {

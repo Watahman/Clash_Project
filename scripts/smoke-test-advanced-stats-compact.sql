@@ -14,6 +14,7 @@ declare
     v_units jsonb;
     v_armies jsonb;
     v_trends jsonb;
+    v_lifetime jsonb;
     v_count integer;
     v_known bigint;
     v_gold bigint;
@@ -344,7 +345,12 @@ begin
     v_armies := public.read_advanced_stats_compact_armies_v1(v_tracking, 'NORMAL', null, 20);
     if jsonb_array_length(v_armies) <> 1 then raise exception 'Compact armies mismatch: %', v_armies; end if;
     v_trends := public.read_advanced_stats_compact_trends_v1(v_tracking, 'NORMAL', null);
-    if jsonb_array_length(v_trends) <> 1 then raise exception 'Compact trends mismatch: %', v_trends; end if;
+    if jsonb_array_length(v_trends) <> 1
+       or (v_trends#>>'{0,sampleSize}')::bigint <> 1
+       or jsonb_typeof(v_trends#>'{0,averageDestruction}') <> 'null'
+       or v_trends#>>'{0,destructionAvailability,code}' <> 'destruction_coverage_unavailable' then
+        raise exception 'Compact trends mismatch: %', v_trends;
+    end if;
 
     select bootstrap_status into v_status
       from public.advanced_stats_tracking where id = v_tracking;
@@ -391,6 +397,40 @@ begin
         raise exception 'Ranked historical-season aggregate mismatch: %', v_overview;
     end if;
 
+    v_lifetime := public.read_advanced_stats_lifetime_v1(v_tracking);
+    if (v_lifetime#>>'{summary,attacks}')::bigint <> 7
+       or (v_lifetime#>>'{summary,totalStars}')::bigint <> 13
+       or jsonb_typeof(v_lifetime#>'{summary,totalDestruction}') <> 'null'
+       or (v_lifetime#>>'{summary,threeStarCount}')::bigint <> 2
+       or (v_lifetime#>>'{summary,starKnownAttacks}')::bigint <> 7
+       or (v_lifetime#>>'{summary,unknownStarAttacks}')::bigint <> 0
+       or (v_lifetime#>>'{summary,trackedAttackDays}')::bigint <> 3
+       or (v_lifetime#>>'{categories,regular,attacks}')::bigint <> 1
+       or (v_lifetime#>>'{categories,regular,sampleSize}')::bigint <> 1
+       or (v_lifetime#>>'{categories,competitive,attacks}')::bigint <> 6
+       or (v_lifetime#>>'{categories,competitive,sampleSize}')::bigint <> 6
+       or (v_lifetime#>>'{mostActiveMonth,attacks}')::bigint <> 7
+       or (v_lifetime#>>'{bestPerformanceMonth,sampleSize}')::bigint <> 7
+       or (v_lifetime#>>'{bestPerformanceMonth,minimumSample}')::integer <> 5
+       or (v_lifetime#>>'{minimumPerformanceSample}')::integer <> 5
+       or (v_lifetime#>>'{favorites,troop,name}') <> 'Barbarian'
+       or (v_lifetime#>>'{mostUsedArmy,battleCount}')::bigint <> 1
+       or (v_lifetime#>>'{availability,perfectAttacks,code}') <> 'raw_attack_sequence_unavailable'
+       or (v_lifetime#>>'{availability,streaks,code}') <> 'raw_attack_sequence_unavailable'
+       or jsonb_typeof(v_lifetime#>'{summary,perfectAttacks}') <> 'null'
+       or jsonb_typeof(v_lifetime#>'{summary,bestThreeStarStreak}') <> 'null'
+       or jsonb_typeof(v_lifetime#>'{summary,currentThreeStarStreak}') <> 'null'
+       or jsonb_typeof(v_lifetime#>'{mostSuccessfulArmy}') <> 'null' then
+        raise exception 'Lifetime compact read mismatch: %', v_lifetime;
+    end if;
+
+    v_lifetime := public.read_advanced_stats_lifetime_v1(gen_random_uuid());
+    if (v_lifetime#>>'{summary,attacks}')::bigint <> 0
+       or jsonb_typeof(v_lifetime#>'{summary,totalStars}') <> 'null'
+       or jsonb_typeof(v_lifetime#>'{summary,totalDestruction}') <> 'null' then
+        raise exception 'Empty lifetime compact read mismatch: %', v_lifetime;
+    end if;
+
 end $$;
 
 rollback;
@@ -408,6 +448,7 @@ select jsonb_build_object(
         'cursor/watermark/provenance updates',
         'ranked season-isolated receipts and aggregates',
         'bootstrap progress and completion',
-        'compact read RPCs'
+        'compact read RPCs',
+        'all-time lifetime summary, categories, months, favorites and army selection'
     )
 ) as advanced_stats_compact_smoke_test;

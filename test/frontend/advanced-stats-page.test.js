@@ -3,7 +3,7 @@ import { JSDOM } from 'jsdom';
 import { describe, expect, it, vi } from 'vitest';
 import worker from '../../worker/index.js';
 
-const ADVANCED_STATS_CACHE_VERSION = '20260911-loot-v1';
+const ADVANCED_STATS_CACHE_VERSION = '20260912-advanced-dashboard-v1';
 
 const documentFor = path => new JSDOM(readFileSync(path, 'utf8')).window.document;
 
@@ -25,9 +25,31 @@ describe('Advanced Stats workspace page', () => {
         expect(document.querySelector('#advanced-stats-periods [data-period="30d"]')).not.toBeNull();
         expect(document.querySelector('#advanced-stats-periods [data-period="90d"]')).not.toBeNull();
         expect(document.querySelector('#advanced-stats-periods [data-period="all"]')).not.toBeNull();
+        expect(document.querySelector('#advanced-stats-categories')).not.toBeNull();
+        expect(document.querySelectorAll('#advanced-stats-categories [data-attack-category]')).toHaveLength(3);
+        expect(document.querySelector('#advanced-stats-categories [data-attack-category="competitive"]')?.getAttribute('aria-pressed')).toBe('false');
         expect(document.querySelector('#advanced-stats-units')).not.toBeNull();
         expect(document.querySelector('#advanced-stats-armies')).not.toBeNull();
         expect(document.querySelector('#advanced-stats-trend-chart')).not.toBeNull();
+        expect(document.querySelector('#advanced-stats-trend-metrics')).not.toBeNull();
+        expect(document.querySelectorAll('#advanced-stats-trend-metrics [data-trend-metric]')).toHaveLength(4);
+        expect(document.querySelector('#advanced-stats-lifetime-section')).not.toBeNull();
+        for (const id of [
+            'advanced-stats-lifetime-total-stars',
+            'advanced-stats-lifetime-total-destruction',
+            'advanced-stats-lifetime-perfect-attacks',
+            'advanced-stats-lifetime-best-streak',
+            'advanced-stats-lifetime-triple-count',
+            'advanced-stats-lifetime-tracked-days',
+            'advanced-stats-lifetime-current-streak',
+            'advanced-stats-lifetime-most-active-month',
+            'advanced-stats-lifetime-best-performance-month',
+            'advanced-stats-lifetime-star-zero',
+            'advanced-stats-lifetime-star-one',
+            'advanced-stats-lifetime-star-two',
+            'advanced-stats-lifetime-star-three',
+            'advanced-stats-lifetime-star-unknown'
+        ]) expect(document.querySelector(`#${id}`), id).not.toBeNull();
         expect(document.querySelector('#advanced-stats-battles')).not.toBeNull();
         expect(document.querySelector('#advanced-stats-loot-cards [data-loot-resource="gold"] img')?.getAttribute('src')).toContain('/assets/game/buildings/gold-storage.webp');
         expect(document.querySelector('#advanced-stats-loot-cards [data-loot-resource="elixir"] img')?.getAttribute('src')).toContain('/assets/game/buildings/elixir-storage.webp');
@@ -110,6 +132,8 @@ describe('Advanced Stats workspace page', () => {
 
         expect(html).toContain(`advanced-stats-bootstrap.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(html).toContain(`advanced-stats.css?v=${ADVANCED_STATS_CACHE_VERSION}`);
+        expect(html).toContain(`advanced-stats-dashboard.css?v=${ADVANCED_STATS_CACHE_VERSION}`);
+        expect(html).toContain(`advanced-stats-lifetime.css?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(html).toContain('workspace-shell.js?v=20260831-master-live-v1');
         expect(bootstrap).toContain(`advanced-stats.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(page).toContain(`advanced-stats-renderer.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
@@ -122,7 +146,7 @@ describe('Advanced Stats workspace page', () => {
         expect(trendRenderer).toContain(`i18n/i18n.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(unitRenderer).toContain(`i18n/i18n.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(lootRenderer).toContain(`i18n/i18n.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
-        expect(trendRenderer).toContain("advanced-stats-trends.js?v=20260830-monthly-trends-v1");
+        expect(trendRenderer).toContain("advanced-stats-trends.js?v=20260912-advanced-dashboard-v1");
         expect(page).toContain(`i18n/i18n.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(renderer).toContain(`i18n/i18n.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(page).toContain("advanced-stats-army-view.js?v=20260809-4");

@@ -1,8 +1,8 @@
-import { applyI18n, t } from '../i18n/i18n.js?v=20260911-loot-v1';
-import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260829-public-auth-v1';
+import { applyI18n, t } from '../i18n/i18n.js?v=20260912-advanced-dashboard-v1';
+import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260912-advanced-dashboard-v1';
 import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
 import { getCurrentUserId } from '../utils/user.js';
-import { checkUserId } from '../Supabase/Supabase-User.js?v=20260829-public-auth-v1';
+import { checkUserId } from '../Supabase/Supabase-User.js?v=20260912-advanced-dashboard-v1';
 import {
     deleteAdvancedStatsData,
     getAdvancedStatsArmies,
@@ -11,31 +11,43 @@ import {
     getAdvancedStatsTracking,
     getAdvancedStatsTrends,
     getAdvancedStatsUnits,
+    getAdvancedStatsLifetime,
     pauseAdvancedStatsTracking,
     resumeAdvancedStatsTracking,
     startAdvancedStatsTracking,
     stopAdvancedStatsTracking
-} from '../Supabase/Supabase-AdvancedStats.js?v=20260829-public-auth-v1';
-import { getAdvancedStatsFixture } from './advanced-stats-fixtures.js?v=20260911-loot-v1';
+} from '../Supabase/Supabase-AdvancedStats.js?v=20260912-advanced-dashboard-v1';
+import { getAdvancedStatsFixture } from './advanced-stats-fixtures.js?v=20260912-advanced-dashboard-v1';
 import {
     renderAccountSelector,
     renderStatistics,
     renderTracking,
-    syncPeriodButtons
-} from './advanced-stats-renderer.js?v=20260911-loot-v1';
+    syncPeriodButtons,
+    syncAttackCategoryButtons,
+    syncTrendMetricButtons
+} from './advanced-stats-renderer.js?v=20260912-advanced-dashboard-v1';
 import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260809-4';
-import { accountsFromProfile, normalizeTag, selectInitialAccount } from './advanced-stats-account.js?v=20260811-2';
-import { createTrackingActions } from './advanced-stats-actions.js?v=20260829-public-auth-v1';
+import { accountsFromProfile, normalizeTag, selectInitialAccount } from './advanced-stats-account.js?v=20260912-advanced-dashboard-v1';
+import { createTrackingActions } from './advanced-stats-actions.js?v=20260912-advanced-dashboard-v1';
 import {
     normalizeAnalysis,
     queuedAnalysis
-} from './advanced-stats-analysis.js?v=20260814-advanced-stats-v4';
+} from './advanced-stats-analysis.js?v=20260912-advanced-dashboard-v1';
 import {
     loadMoreBattles as loadMoreBattlesFromApi,
+    loadCategoryStatistics as loadCategoryStatisticsFromApi,
     loadStatistics as loadStatisticsFromApi,
     resetBattleHistoryState
-} from './advanced-stats-data-loader.js?v=20260911-loot-v1';
-import { waitForHistoricalAnalysis } from './advanced-stats-analysis-controller.js?v=20260814-advanced-stats-v4';
+} from './advanced-stats-data-loader.js?v=20260912-advanced-dashboard-v1';
+import { waitForHistoricalAnalysis } from './advanced-stats-analysis-controller.js?v=20260912-advanced-dashboard-v1';
+import {
+    cacheAdvancedStatsElements,
+    emptyAdvancedStatsSectionStates,
+    readAdvancedStatsPreference,
+    writeAdvancedStatsPreference
+} from './advanced-stats-dom.js?v=20260912-advanced-dashboard-v1';
+import { createAdvancedStatsPageUi } from './advanced-stats-page-ui.js?v=20260912-advanced-dashboard-v1';
+import { createLifetimeLoader } from './advanced-stats-lifetime-state.js?v=20260912-advanced-dashboard-v1';
 
 const PERIOD_DEFAULT = '30d';
 const ACCOUNT_STORAGE_KEY = 'clashpanel_advanced_stats_account';
@@ -53,6 +65,7 @@ const realApi = {
     getUnits: (tag, period) => getAdvancedStatsUnits(tag, period, 'ALL'),
     getArmies: (tag, period) => getAdvancedStatsArmies(tag, period, FAVORITE_ARMY_LIMIT),
     getTrends: getAdvancedStatsTrends,
+    getLifetime: getAdvancedStatsLifetime,
     getBattles: getAdvancedStatsBattles
 };
 
@@ -60,12 +73,19 @@ const state = {
     api: realApi,
     accounts: [],
     playerTag: '',
-    period: readPreference(PERIOD_STORAGE_KEY) || PERIOD_DEFAULT,
+    period: readAdvancedStatsPreference(PERIOD_STORAGE_KEY) || PERIOD_DEFAULT,
     category: 'ALL',
+    attackCategory: 'ALL',
+    trendMetric: 'attacks',
     tracking: null,
     analysis: null,
     analysisRequested: false,
     overview: null,
+    lifetime: null,
+    lifetimeState: 'idle',
+    lifetimePlayerTag: '',
+    lifetimeLoadAttempted: false,
+    lifetimeGeneration: 0,
     unitCatalog: [],
     units: [],
     armies: [],
@@ -73,7 +93,7 @@ const state = {
     battles: [],
     nextCursor: null,
     hasMore: false,
-    sectionStates: emptySectionStates(),
+    sectionStates: emptyAdvancedStatsSectionStates(),
     requestVersion: 0,
     busy: false,
     profileError: false,
@@ -83,74 +103,10 @@ const state = {
 const elements = {};
 let trackingActions;
 
-function emptySectionStates() {
-    return { overview: 'idle', units: 'idle', armies: 'idle', trends: 'idle', battles: 'idle' };
-}
-
-function cacheElements() {
-    const ids = {
-        account: 'advanced-stats-account', noAccounts: 'advanced-stats-no-accounts', openProfile: 'advanced-stats-open-profile',
-        profileError: 'advanced-stats-profile-error', profileRetry: 'advanced-stats-profile-retry', trackingError: 'advanced-stats-tracking-error', trackingRetry: 'advanced-stats-tracking-retry', pageStatus: 'advanced-stats-page-status',
-        notTracking: 'advanced-stats-not-tracking', start: 'advanced-stats-start', initializing: 'advanced-stats-initializing', content: 'advanced-stats-content',
-        analysisLoading: 'advanced-stats-initializing', analysisTitle: 'advanced-stats-analysis-title', analysisText: 'advanced-stats-analysis-text', analysisStatus: 'advanced-stats-analysis-status',
-        analysisProgress: 'advanced-stats-analysis-progress', analysisProcessed: 'advanced-stats-analysis-processed', analysisAvailable: 'advanced-stats-analysis-available', analysisError: 'advanced-stats-analysis-error', analysisRetry: 'advanced-stats-analysis-retry',
-        analysisCoverageNormal: 'advanced-stats-analysis-coverage-normal', analysisCoverageNormalMeta: 'advanced-stats-analysis-coverage-normal-meta', analysisCoverageWar: 'advanced-stats-analysis-coverage-war', analysisCoverageWarMeta: 'advanced-stats-analysis-coverage-war-meta', analysisCoverageRanked: 'advanced-stats-analysis-coverage-ranked', analysisCoverageRankedMeta: 'advanced-stats-analysis-coverage-ranked-meta',
-        dashboardCoverageNormal: 'advanced-stats-dashboard-coverage-normal', dashboardCoverageNormalMeta: 'advanced-stats-dashboard-coverage-normal-meta', dashboardCoverageWar: 'advanced-stats-dashboard-coverage-war', dashboardCoverageWarMeta: 'advanced-stats-dashboard-coverage-war-meta', dashboardCoverageRanked: 'advanced-stats-dashboard-coverage-ranked', dashboardCoverageRankedMeta: 'advanced-stats-dashboard-coverage-ranked-meta',
-        trackingBar: document.querySelector('.advanced-stats__tracking-bar'), trackingTitle: 'advanced-stats-tracking-title', playerLine: 'advanced-stats-player-line',
-        startedAt: 'advanced-stats-started-at', updatedAt: 'advanced-stats-updated-at', battlesProcessed: 'advanced-stats-battles-processed',
-        refresh: 'advanced-stats-refresh', pause: 'advanced-stats-pause', resume: 'advanced-stats-resume', stop: 'advanced-stats-stop', delete: 'advanced-stats-delete',
-        warning: 'advanced-stats-warning', warningTitle: 'advanced-stats-warning-title', warningText: 'advanced-stats-warning-text', completeSince: 'advanced-stats-complete-since',
-        periods: 'advanced-stats-periods', dataStatus: 'advanced-stats-data-status', kpiAttacks: 'advanced-stats-kpi-attacks', kpiStars: 'advanced-stats-kpi-stars',
-        kpiThreeStar: 'advanced-stats-kpi-three-star', kpiDestruction: 'advanced-stats-kpi-destruction', favoriteTroop: 'advanced-stats-favorite-troop',
-        favoriteTroopMeta: 'advanced-stats-favorite-troop-meta', favoriteTroopImage: 'advanced-stats-favorite-troop-image', favoriteSpell: 'advanced-stats-favorite-spell',
-        favoriteSpellMeta: 'advanced-stats-favorite-spell-meta', favoriteSpellImage: 'advanced-stats-favorite-spell-image', favoriteSiege: 'advanced-stats-favorite-siege',
-        favoriteSiegeMeta: 'advanced-stats-favorite-siege-meta', favoriteSiegeImage: 'advanced-stats-favorite-siege-image', favoriteArmy: 'advanced-stats-favorite-army',
-        favoriteArmyMeta: 'advanced-stats-favorite-army-meta', favoriteArmyImage: 'advanced-stats-favorite-army-image', lootCards: 'advanced-stats-loot-cards', lootAttackCount: 'advanced-stats-loot-attack-count', lootTrend: 'advanced-stats-loot-trend', trendChart: 'advanced-stats-trend-chart',
-        trendEmpty: 'advanced-stats-trend-empty', armies: 'advanced-stats-armies', armiesEmpty: 'advanced-stats-armies-empty', unitCategory: 'advanced-stats-unit-category',
-        units: 'advanced-stats-units', unitsMobile: 'advanced-stats-units-mobile', unitsTableWrap: 'advanced-stats-units-table-wrap', unitsEmpty: 'advanced-stats-units-empty',
-        battles: 'advanced-stats-battles', battlesEmpty: 'advanced-stats-battles-empty', loadMore: 'advanced-stats-load-more', dialog: 'advanced-stats-confirm-dialog',
-        dialogForm: 'advanced-stats-confirm-form', dialogTitle: 'advanced-stats-dialog-title', dialogCopy: 'advanced-stats-dialog-copy', dialogCancel: 'advanced-stats-dialog-cancel',
-        dialogConfirm: 'advanced-stats-dialog-confirm', dialogError: 'advanced-stats-dialog-error', deleteField: 'advanced-stats-delete-field', deleteInput: 'advanced-stats-delete-input'
-    };
-    Object.entries(ids).forEach(([key, id]) => { elements[key] = typeof id === 'string' ? document.getElementById(id) : id; });
-}
-
-function readPreference(key) {
-    try {
-        return localStorage.getItem(key) || '';
-    } catch {
-        return '';
-    }
-}
-
-function writePreference(key, value) {
-    try {
-        localStorage.setItem(key, value);
-    } catch {
-        // Preferences are optional when storage is unavailable.
-    }
-}
-
-function setPageStatus(message = '', type = '') {
-    if (!elements.pageStatus) return;
-    elements.pageStatus.textContent = message;
-    elements.pageStatus.dataset.state = type;
-    elements.pageStatus.hidden = !message;
-}
-
-function setDataStatus(message = '', type = '') {
-    if (!elements.dataStatus) return;
-    elements.dataStatus.textContent = message;
-    elements.dataStatus.dataset.state = type;
-}
-
-function setBusy(busy) {
-    state.busy = busy;
-    document.querySelectorAll('.advanced-stats button, .advanced-stats select').forEach(control => {
-        control.disabled = busy || (control === elements.account && state.accounts.length < 2);
-    });
-    renderAccountSelector(elements, state);
-}
+const pageUi = createAdvancedStatsPageUi({ elements, state, renderAccountSelector });
+const { setDataStatus, setBusy, setPageStatus } = pageUi;
+const lifetimeLoader = createLifetimeLoader({ state, renderPage });
+const { loadLifetime, resetLifetimeState } = lifetimeLoader;
 
 function renderPage() {
     applyI18n(document);
@@ -158,12 +114,14 @@ function renderPage() {
     renderTracking(elements, state);
     renderStatistics(elements, state);
     syncPeriodButtons(elements, state.period);
+    syncAttackCategoryButtons(elements, state.attackCategory);
+    syncTrendMetricButtons(elements, state.trendMetric);
 }
 
 function clearStatisticsState() {
     state.overview = null; state.unitCatalog = []; state.units = []; state.armies = []; state.trends = [];
     resetBattleHistoryState(state);
-    state.sectionStates = emptySectionStates();
+    state.sectionStates = emptyAdvancedStatsSectionStates();
 }
 
 function resetRangeData({ clearTracking = false } = {}) {
@@ -200,7 +158,7 @@ async function initialize() {
         const authState = await resolveAuthState().catch(() => null);
         if (authState?.status !== AUTH_STATES.AUTHENTICATED) return;
     }
-    cacheElements();
+    Object.assign(elements, cacheAdvancedStatsElements());
     trackingActions = createTrackingActions({
         state, elements, setBusy, setDataStatus, refreshTrackingAndData,
         onStartRequested: beginHistoricalAnalysis,
@@ -220,8 +178,8 @@ async function initialize() {
         console.error('advanced_stats_profile_load_failed', error); state.profileError = true; state.accounts = []; setPageStatus(''); renderPage(); return;
     }
     if (!state.accounts.length) { setPageStatus(''); renderPage(); return; }
-    state.playerTag = selectInitialAccount(state.accounts, readPreference(ACCOUNT_STORAGE_KEY));
-    writePreference(ACCOUNT_STORAGE_KEY, state.playerTag);
+    state.playerTag = selectInitialAccount(state.accounts, readAdvancedStatsPreference(ACCOUNT_STORAGE_KEY));
+    writeAdvancedStatsPreference(ACCOUNT_STORAGE_KEY, state.playerTag);
     renderPage();
     await refreshTrackingAndData();
 }
@@ -231,8 +189,8 @@ async function retryProfileLoad() {
     setBusy(true); state.profileError = false; setPageStatus(t('advancedStats.loadingTracking'));
     try {
         state.accounts = accountsFromProfile(await checkUserId(getCurrentUserId()));
-        state.playerTag = selectInitialAccount(state.accounts, readPreference(ACCOUNT_STORAGE_KEY));
-        writePreference(ACCOUNT_STORAGE_KEY, state.playerTag);
+        state.playerTag = selectInitialAccount(state.accounts, readAdvancedStatsPreference(ACCOUNT_STORAGE_KEY));
+        writeAdvancedStatsPreference(ACCOUNT_STORAGE_KEY, state.playerTag);
         renderPage();
         if (state.playerTag) await refreshTrackingAndData({ preserveBusy: true }); else setPageStatus('');
     } catch (error) { console.error('advanced_stats_profile_load_failed', error); state.profileError = true; setPageStatus(''); renderPage(); }
@@ -248,11 +206,13 @@ async function refreshTrackingAndData({ preserveBusy = false } = {}) {
         const tracking = await state.api.getTracking(state.playerTag);
         if (version !== state.requestVersion) return;
         state.tracking = tracking;
+        if (!tracking?.trackingExists) resetLifetimeState();
         state.analysis = normalizeAnalysis(tracking);
         state.analysisRequested = state.analysis.active
             || (state.analysis.error && Number(tracking?.battlesProcessed || 0) === 0);
         state.trackingError = false;
         renderPage();
+        void loadLifetime();
         setPageStatus('');
         const status = String(state.tracking?.status || 'DISABLED').toUpperCase();
         const hasHistory = Number(state.tracking?.battlesProcessed || 0) > 0;
@@ -274,12 +234,27 @@ function loadStatistics(options = {}) {
     return loadStatisticsFromApi({ state, setBusy, setDataStatus, renderPage, ...options, requestVersion });
 }
 
+function loadCategoryStatistics({ requestVersion }) {
+    setBusy(true);
+    return loadCategoryStatisticsFromApi({
+        state, requestVersion, manageBusy: false, setBusy, setDataStatus, renderPage
+    }).finally(() => {
+        if (requestVersion === state.requestVersion) setBusy(false);
+    });
+}
+
 function loadMoreBattles() {
     return loadMoreBattlesFromApi({ state, setBusy, setDataStatus, renderPage });
 }
 
 function bindEvents() {
-    elements.account.addEventListener('change', () => { state.playerTag = normalizeTag(elements.account.value); writePreference(ACCOUNT_STORAGE_KEY, state.playerTag); resetRangeData({ clearTracking: true }); void refreshTrackingAndData(); });
+    elements.account.addEventListener('change', () => {
+        state.playerTag = normalizeTag(elements.account.value);
+        writeAdvancedStatsPreference(ACCOUNT_STORAGE_KEY, state.playerTag);
+        resetLifetimeState();
+        resetRangeData({ clearTracking: true });
+        void refreshTrackingAndData();
+    });
     elements.openProfile?.addEventListener('click', () => document.querySelector('#profile-btn')?.click());
     elements.profileRetry?.addEventListener('click', retryProfileLoad);
     elements.trackingRetry?.addEventListener('click', () => void refreshTrackingAndData());
@@ -294,7 +269,22 @@ function bindEvents() {
     elements.periods?.addEventListener('click', event => {
         const period = event.target.closest('[data-period]')?.dataset.period;
         if (!period || period === state.period) return;
-        state.period = period; writePreference(PERIOD_STORAGE_KEY, period); resetRangeData(); void loadStatistics();
+        state.period = period; writeAdvancedStatsPreference(PERIOD_STORAGE_KEY, period); resetRangeData(); void loadStatistics();
+    });
+    elements.attackCategories?.addEventListener('click', event => {
+        const value = event.target.closest('[data-attack-category]')?.dataset.attackCategory;
+        const attackCategory = String(value || '').trim().toUpperCase();
+        if (!['ALL', 'REGULAR', 'COMPETITIVE'].includes(attackCategory) || attackCategory === state.attackCategory) return;
+        state.attackCategory = attackCategory;
+        const version = ++state.requestVersion;
+        renderPage();
+        void loadCategoryStatistics({ requestVersion: version });
+    });
+    elements.trendMetrics?.addEventListener('click', event => {
+        const metric = event.target.closest('[data-trend-metric]')?.dataset.trendMetric;
+        if (!metric || metric === state.trendMetric) return;
+        state.trendMetric = metric;
+        renderPage();
     });
     elements.unitCategory?.addEventListener('change', () => {
         state.category = elements.unitCategory.value || 'ALL';

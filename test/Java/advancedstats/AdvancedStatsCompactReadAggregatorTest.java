@@ -42,6 +42,35 @@ class AdvancedStatsCompactReadAggregatorTest {
     }
 
     @Test
+    void competitiveOverviewMergesWarAndRankedWithWeightedMetrics() throws Exception {
+        JsonObject result = new AdvancedStatsCompactReadAggregator(new FakeReader())
+                .overview(TRACKING_ID, FROM, AdvancedStatsScopeSelection.parse("competitive"));
+
+        JsonObject summary = result.getAsJsonObject("summary");
+        assertEquals("competitive", result.get("scope").getAsString());
+        assertEquals(7, summary.get("attacks").getAsInt());
+        assertEquals(2.43, summary.get("averageStars").getAsDouble(), 0.001);
+        assertEquals(700, summary.get("goldLooted").getAsInt());
+        assertEquals("cannon", result.getAsJsonObject("favorites")
+                .getAsJsonObject("troop").get("key").getAsString());
+        assertEquals(2, result.getAsJsonObject("tracking").getAsJsonArray("scopes").size());
+    }
+
+    @Test
+    void competitiveOverviewKeepsSuccessfulScopeWhenAnotherScopeFails() throws Exception {
+        FakeReader reader = new FakeReader();
+        reader.failRankedOverview = true;
+
+        JsonObject result = new AdvancedStatsCompactReadAggregator(reader)
+                .overview(TRACKING_ID, FROM, AdvancedStatsScopeSelection.parse("competitive"));
+
+        assertTrue(result.get("partial").getAsBoolean());
+        assertEquals(2, result.getAsJsonObject("summary").get("attacks").getAsInt());
+        assertEquals("ranked", result.getAsJsonArray("failures")
+                .get(0).getAsJsonObject().get("scope").getAsString());
+    }
+
+    @Test
     void unitsUseMultiplayerScopesWhileArmiesAndTrendsStillMergeAllScopes() throws Exception {
         FakeReader reader = new FakeReader();
         AdvancedStatsCompactReadAggregator aggregator = new AdvancedStatsCompactReadAggregator(reader);
@@ -166,6 +195,16 @@ class AdvancedStatsCompactReadAggregatorTest {
         trendsReader.failRankedTrends = true;
         assertThrows(HttpException.class,
                 () -> new AdvancedStatsCompactReadAggregator(trendsReader).trends(TRACKING_ID, FROM));
+    }
+
+    @Test
+    void selectedTrendFailureDoesNotLookLikeACompleteArray() {
+        FakeReader reader = new FakeReader();
+        reader.failRankedTrends = true;
+
+        assertThrows(HttpException.class,
+                () -> new AdvancedStatsCompactReadAggregator(reader).trends(
+                        TRACKING_ID, FROM, AdvancedStatsScopeSelection.parse("competitive")));
     }
 
     private static AdvancedStatsCompactReadAggregator.ScopeSnapshot trendSnapshot(

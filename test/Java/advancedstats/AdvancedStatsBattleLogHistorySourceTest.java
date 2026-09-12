@@ -68,6 +68,17 @@ class AdvancedStatsBattleLogHistorySourceTest {
                         AdvancedStatsCapabilityOperation.BOOTSTRAP, Checkpoint.initial(), 50, NOW)));
     }
 
+    @Test
+    void normalClassificationUsesAnExplicitAllowlist() {
+        assertEquals(true, AdvancedStatsBattleLogHistorySource.belongsToNormalScope("normal"));
+        assertEquals(true, AdvancedStatsBattleLogHistorySource.belongsToNormalScope("MULTI_PLAYER"));
+        assertEquals(true, AdvancedStatsBattleLogHistorySource.belongsToNormalScope("homeVillage"));
+        assertEquals(false, AdvancedStatsBattleLogHistorySource.belongsToNormalScope(null));
+        assertEquals(false, AdvancedStatsBattleLogHistorySource.belongsToNormalScope(""));
+        assertEquals(false, AdvancedStatsBattleLogHistorySource.belongsToNormalScope("friendly"));
+        assertEquals(false, AdvancedStatsBattleLogHistorySource.belongsToNormalScope("futureMode"));
+    }
+
     private HistoryRequest request(AdvancedStatsCapabilityOperation operation, Checkpoint checkpoint) {
         return new HistoryRequest(UUID.randomUUID(), "#P0Y8LQ", AdvancedStatsScope.NORMAL, operation,
                 checkpoint, 50, NOW);
