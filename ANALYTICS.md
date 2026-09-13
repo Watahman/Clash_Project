@@ -110,12 +110,13 @@ The flag affects only anonymous requests from that browser. It does not add a
 user identity and cannot override the server-side classification of an
 authenticated account.
 
-Development and Production must use separate PostHog projects and project API
-keys. Set `CLASHPANEL_ENVIRONMENT=development` for Development and
-`CLASHPANEL_ENVIRONMENT=production` for Production. Recommended production
-reports and funnels use both `environment=production` and
-`traffic_type=external`; internal traffic remains available by changing the
-filter to `traffic_type=internal`.
+Development and Production may use the same PostHog project and project API
+key. Set `CLASHPANEL_ENVIRONMENT=development` for Development/preview and
+`CLASHPANEL_ENVIRONMENT=production` for Production. The backend adds this
+environment property to every event, so shared-project reports remain
+separable. Recommended production reports and funnels use both
+`environment=production` and `traffic_type=external`; internal traffic remains
+available by changing the filter to `traffic_type=internal`.
 
 ## Configuration still required
 
@@ -125,10 +126,10 @@ profile IDs:
 | Value | Required setting |
 | --- | --- |
 | `POSTHOG_ENABLED` | `true` only when the deployment should capture product analytics; leave `false` to disable it. |
-| `POSTHOG_HOST` | The PostHog region host, for example `https://us.i.posthog.com`, without a capture-path suffix. |
-| `POSTHOG_PROJECT_API_KEY` | The project API key for the matching Development or Production PostHog project. ClashPanel keeps it server-side even though PostHog project API keys are designed for event ingestion. |
+| `POSTHOG_HOST` | The PostHog region host, currently `https://eu.i.posthog.com` for the ClashPanel project, without a capture-path suffix. |
+| `POSTHOG_PROJECT_API_KEY` | The PostHog project API key. The same key may be used by Development and Production; `CLASHPANEL_ENVIRONMENT` separates their events. ClashPanel keeps it server-side even though PostHog project API keys are designed for event ingestion. |
 | `CLASHPANEL_ENVIRONMENT` | `development` or `production` (or another deliberate bounded environment label for a non-production deployment). |
-| `POSTHOG_INTERNAL_USER_IDS` | Optional comma-separated internal ClashPanel profile IDs for the deployment's own testing accounts. |
+| `POSTHOG_INTERNAL_USER_IDS` | Comma-separated internal ClashPanel profile IDs for the deployment's own testing accounts. Populate the production value with the internal account ID; leave blank only when no internal account should be classified. |
 | `APP_CONFIG.API_BASE_URL` | The browser's own ClashPanel API base, normally `/api`; it must expose `/ProductAnalytics` and must not be a PostHog URL. |
 
 After deployment, verify that the backend route is reachable through the same
@@ -137,8 +138,9 @@ additional PostHog environment variable is required.
 
 ## PostHog setup after deployment
 
-1. Create one PostHog project for Development and a separate one for
-   Production. Put only the matching project key in each backend environment.
+1. Use the configured PostHog project for both Development and Production.
+   Keep the same project key in Secret Manager, and set only the backend
+   environment label differently (`development` versus `production`).
 2. Add descriptions for the eight events and the properties listed above.
    Use `environment=production` and `traffic_type=external` as the default
    filters for production views. Keep a separate internal-debug view with

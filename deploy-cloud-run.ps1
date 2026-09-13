@@ -38,6 +38,8 @@ if ($rankedSeasonConfigured) {
 gcloud config set project $ProjectId
 gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com secretmanager.googleapis.com
 
+# The same project key is used by Development and Production; the
+# environment label in cloudrun-env.yaml keeps their events separate.
 gcloud run deploy $ServiceName `
     --source . `
     --region $Region `
@@ -50,6 +52,7 @@ gcloud run deploy $ServiceName `
     --timeout 120s `
     --cpu-boost `
     --env-vars-file ./cloudrun-env.yaml `
+    --update-secrets="POSTHOG_PROJECT_API_KEY=POSTHOG_PROJECT_API_KEY:latest" `
     --remove-secrets="CLASH_API_KEY_POOL,_API_KEY_ALL,_API_KEY_ALL2,_API_KEY_ALL3"
 
 if ($LASTEXITCODE -ne 0) {
@@ -62,3 +65,4 @@ Write-Host "  _API_KEY_SUPABASE"
 Write-Host "  SUPABASE_SERVICE_ROLE_KEY"
 Write-Host "  API_PROXY_SECRET (dezelfde waarde als de Cloudflare Worker secret)"
 Write-Host "  ADVANCED_STATS_SCHEDULER_SECRET"
+Write-Host "  POSTHOG_PROJECT_API_KEY (shared PostHog project key)"
