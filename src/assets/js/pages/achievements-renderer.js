@@ -1,13 +1,13 @@
-import { applyI18n, getLanguage, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { applyI18n, getLanguage, t } from '../i18n/i18n.js?v=20260913-achievement-hub-v1';
 import {
     buildAchievementSummary,
     filterAchievementFamilies
 } from '../achievements/achievement-view-model.js';
+import { buildAchievementCategories, categoryByKey } from './achievement-category-model.js';
 import { achievementFamilyImage } from './achievement-asset-view.js?v=20260824-achievement-raster-color-1';
-import {
-    applyAchievementChronicleI18n,
-    renderAchievementChronicle
-} from './achievement-chronicle-renderer.js?v=20260831-achievement-chronicle-v1';
+import { achievementChronicleLocales } from '../i18n/achievement-chronicle-locales.js?v=20260913-achievement-hub-v1';
+import { renderAchievementHub } from './achievement-hub-renderer.js?v=20260913-achievement-hub-v1';
+import { renderAchievementCategory } from './achievement-category-renderer.js?v=20260913-achievement-hub-v1';
 
 const SOURCE_ORDER = Object.freeze([
     'live_profile', 'base_data', 'base_history', 'advanced_stats', 'war', 'cwl_history', 'raid_history',
@@ -69,6 +69,44 @@ function localizeFamilies(state) {
         const description = translated(`achievements.family.${family.familyKey}.description`, family.description);
         return { ...family, title, description, tiers: family.tiers.map(tier => ({ ...tier, title })) };
     });
+}
+
+function applyAchievementHubI18n(root = document) {
+    root.querySelectorAll('[data-chronicle-i18n]').forEach(element => {
+        const key = element.dataset.chronicleI18n;
+        const value = achievementChronicleLocales[getLanguage()]?.[key] || achievementChronicleLocales.en?.[key];
+        if (value) element.textContent = value;
+    });
+    root.querySelectorAll('[data-chronicle-i18n-aria-label]').forEach(element => {
+        const key = element.dataset.chronicleI18nAriaLabel;
+        const value = achievementChronicleLocales[getLanguage()]?.[key] || achievementChronicleLocales.en?.[key];
+        if (value) element.setAttribute('aria-label', value);
+    });
+}
+
+function categoryFallback(key) {
+    return String(key || 'other').replaceAll('_', ' ').replace(/\b\w/g, letter => letter.toUpperCase());
+}
+
+function localizeCategory(category) {
+    const key = category?.key || category?.category;
+    const title = translated(`achievements.category.${key}`, category?.categoryLabel || categoryFallback(key));
+    return { ...category, title, label: title, categoryLabel: title };
+}
+
+function localizeCategories(families) {
+    return buildAchievementCategories(families).map(localizeCategory);
+}
+
+function categoryForFilters(category, filters) {
+    const matches = filterAchievementFamilies(category.families, { ...filters, category: 'all' });
+    const matched = new Set(matches);
+    return {
+        ...category,
+        families: matches,
+        progressionFamilies: category.progressionFamilies.filter(family => matched.has(family)),
+        standaloneFamilies: category.standaloneFamilies.filter(family => matched.has(family))
+    };
 }
 
 export function renderSummary(refs, state) {
@@ -169,36 +207,70 @@ export function renderFilterOptions(refs, state) {
     state.filters.source = refs.source.value;
 }
 
-export function renderAchievements(refs, state, pageSize) {
+function showHub(refs, categories, state) {
+    refs.filterDialog.hidden = true;
+    refs.hubSummary.textContent = translated('achievements.hub.summary', 'Choose a category to explore its progression.');
+    renderAchievementHub(refs.grid, categories, {
+        emptyMessage: translated('achievements.hub.noCategories', 'No achievement categories are available yet.')
+    });
+    if (state.focusTarget === 'overview') refs.libraryTitle.focus({ preventScroll: true });
+    state.focusTarget = '';
+}
+
+function showCategory(refs, category, state) {
+    refs.filterDialog.hidden = false;
+    refs.hubSummary.textContent = translated('achievements.hub.detailIntro', 'Follow real progression chains and independent challenges in this category.');
+    const filtered = categoryForFilters(category, state.filters);
+    renderAchievementCategory(refs.grid, filtered, {
+        backLabel: translated('achievements.hub.backToHub', 'Back to Achievement Hub')
+    });
+    if (state.focusTarget === 'detail') {
+        const heading = refs.grid.querySelector('.achievement-category-title h1');
+        heading?.setAttribute('tabindex', '-1'); heading?.focus({ preventScroll: true });
+    }
+    state.focusTarget = '';
+}
+
+export function renderAchievements(refs, state) {
     refs.grid.replaceChildren();
     const families = localizeFamilies(state);
     const filtered = filterAchievementFamilies(families, state.filters);
-    refs.resultsCount.textContent = translated('achievements.resultsCountExpanded', `${filtered.length} matching · ${families.length} total achievements`, { visible: filtered.length, total: families.length });
-    refs.loadMore.hidden = true;
+    const categories = localizeCategories(families);
+    const selected = categoryByKey(categories, state.selectedCategory);
+    refs.resultsCount.textContent = translated(
+        'achievements.resultsCountExpanded',
+        `${filtered.length} matching · ${families.length} total achievements`,
+        { visible: filtered.length, total: families.length }
+    );
     if (!state.accounts.length) return showEmpty(refs, 'accounts', t('achievements.linkAccountTitle'), t('achievements.linkAccountText'));
     if (state.loading) return showEmpty(refs, 'loading', translated('achievements.waitingForData', 'Waiting for data'), translated('achievements.loading', 'Loading achievement progress...'));
     if (!families.length) return showEmpty(refs, 'catalog', translated('achievements.catalogEmptyTitle', 'Achievements could not be loaded'), translated('achievements.catalogEmptyText', 'Refresh the page.'));
-    if (!filtered.length) return showEmpty(refs, 'filters', t('achievements.noMatchTitle'), t('achievements.noMatchText'));
+    if (!filtered.length || selected && !categoryForFilters(selected, state.filters).families.length) {
+        return showEmpty(refs, 'filters', t('achievements.noMatchTitle'), t('achievements.noMatchText'));
+    }
     refs.emptyState.hidden = true; refs.grid.hidden = false;
-    renderAchievementChronicle(refs.grid, filtered.slice(0, state.visibleLimit));
-    const remaining = filtered.length - Math.min(filtered.length, state.visibleLimit);
-    refs.loadMore.hidden = remaining <= 0;
-    refs.loadMore.textContent = translated('achievements.showMore', `Show more (${remaining} remaining)`, { count: remaining });
+    if (state.selectedCategory && !selected) {
+        state.selectedCategory = '';
+        return showHub(refs, categories, state);
+    }
+    if (selected) showCategory(refs, selected, state);
+    else showHub(refs, categories, state);
 }
 
 function showEmpty(refs, reason, title, copy) {
     refs.emptyState.dataset.reason = reason; refs.emptyState.hidden = false; refs.grid.hidden = true;
+    refs.filterDialog.hidden = true;
     refs.emptyState.querySelector('h2').textContent = title; refs.emptyState.querySelector('p').textContent = copy;
 }
 
-export function renderAll(refs, state, pageSize) {
+export function renderAll(refs, state) {
     applyI18n(document);
-    applyAchievementChronicleI18n(document);
+    applyAchievementHubI18n(document);
     renderAccountSelector(refs, state);
     renderSummary(refs, state);
     renderSources(refs, state);
     renderFilterOptions(refs, state);
-    renderAchievements(refs, state, pageSize);
+    renderAchievements(refs, state);
 }
 
 export { SOURCE_ORDER };

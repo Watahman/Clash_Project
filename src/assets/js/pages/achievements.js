@@ -3,7 +3,7 @@ import { checkUserId } from '../Supabase/Supabase-User.js?v=20260829-public-auth
 import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260829-public-auth-v1';
 import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
 import { getCurrentUserId } from '../utils/user.js';
-import { applyI18n, getLanguage, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
+import { applyI18n, getLanguage, t } from '../i18n/i18n.js?v=20260913-achievement-hub-v1';
 import {
     collectLinkedAccounts,
     normalizePlayerTag,
@@ -15,10 +15,9 @@ import {
     renderAll,
     renderSources,
     renderAchievements
-} from './achievements-renderer.js?v=20260831-achievement-chronicle-v1';
+} from './achievements-renderer.js?v=20260913-achievement-hub-v1';
 import { trackLoadFailed, trackLoadSucceeded } from '../analytics/product-analytics.js?v=20260912-product-analytics-v1';
 
-const PAGE_SIZE = 48;
 const ACCOUNT_STORAGE_KEY = 'clashpanel_achievements_account';
 const PARSE_ERROR_KEYS = new Map([
     ['Paste the copied JSON first.', 'achievements.pasteFirst'],
@@ -32,11 +31,10 @@ const PARSE_ERROR_KEYS = new Map([
 const state = {
     api: { getAchievements, importAchievementBaseData },
     accounts: [], selectedTag: '', families: [], latestSnapshot: null, history: {}, sources: {},
-    parsedImport: null, loading: false, deepLoading: false, requestId: 0, visibleLimit: PAGE_SIZE,
+    parsedImport: null, loading: false, deepLoading: false, requestId: 0, selectedCategory: '',
     filters: { search: '', category: 'all', rarity: 'all', status: 'all', source: 'all' }
 };
 const refs = {};
-
 function trackAchievementLoad({ action = 'load', resultStatus, failed = false } = {}) {
     const properties = {
         tool: 'achievements',
@@ -48,7 +46,6 @@ function trackAchievementLoad({ action = 'load', resultStatus, failed = false } 
     };
     (failed ? trackLoadFailed : trackLoadSucceeded)(properties);
 }
-
 function captureRefs() {
     const selectors = {
         accountSelect: '#achievement-account', refreshButton: '#achievement-refresh', pageStatus: '#achievement-page-status',
@@ -56,14 +53,13 @@ function captureRefs() {
         importText: '#achievement-json', importFile: '#achievement-json-file', pasteButton: '#achievement-paste', clearButton: '#achievement-clear',
         importButton: '#achievement-import-submit', importFeedback: '#achievement-import-feedback', importPreview: '#achievement-import-preview',
         sourceList: '#achievement-source-list', sourceSummary: '#achievement-source-summary', grid: '#achievement-grid', emptyState: '#achievement-empty-state',
-        resultsCount: '#achievement-results-count', loadMore: '#achievement-load-more', search: '#achievement-search', category: '#achievement-category',
+        resultsCount: '#achievement-results-count', hubSummary: '#achievement-hub-summary', libraryTitle: '#achievement-library-title', filterDialog: '#achievement-filter-dialog', search: '#achievement-search', category: '#achievement-category',
         rarity: '#achievement-rarity', status: '#achievement-status', source: '#achievement-source', progressPanel: '.achievement-progress-panel', summaryLevel: '#achievement-level',
         summaryLevelProgress: '#achievement-level-progress', summaryLevelCopy: '#achievement-level-copy', summaryXp: '#achievement-total-xp', summaryUnlocked: '#achievement-unlocked',
         summaryCompleted: '#achievement-completed', summaryImported: '#achievement-last-import', featured: '#achievement-featured'
     };
     Object.entries(selectors).forEach(([key, selector]) => { refs[key] = document.querySelector(selector); });
 }
-
 function readStorage(key) { try { return localStorage.getItem(key) || ''; } catch { return ''; } }
 function writeStorage(key, value) { try { localStorage.setItem(key, value); } catch { /* preference only */ } }
 function translated(key, fallback = key, params = {}) { const value = t(key, params); return value === key ? fallback : value; }
@@ -76,29 +72,33 @@ function setImportPanelOpen(open, { focus = false } = {}) {
     refs.importToggle.setAttribute('aria-expanded', String(visible));
     if (visible && focus) refs.importText.focus();
 }
-
 function updateMetadata() {
     document.title = t('achievements.metaTitle');
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.content = translated('achievements.metaDescriptionExpanded', meta.content);
 }
-
 function selectInitialAccount(accounts) {
     const queryTag = new URLSearchParams(window.location.search).get('playerTag');
     const preferred = [queryTag, readStorage(ACCOUNT_STORAGE_KEY)].map(normalizePlayerTag).filter(Boolean);
     return preferred.find(tag => accounts.some(account => account.tag === tag)) || accounts[0]?.tag || '';
 }
-
+function categoryFromLocation() {
+    return new URLSearchParams(window.location.search).get('category') || '';
+}
 function applyResponse(response) {
     state.families = groupAchievementFamilies(response?.achievements);
     state.latestSnapshot = response?.latestSnapshot || null;
     state.history = response?.history || {};
     state.sources = response?.sources || {};
+    if (state.selectedCategory) {
+        const resolved = resolveCategoryKey(state.selectedCategory);
+        state.selectedCategory = resolved;
+        if (!resolved) setCategoryUrl('', true);
+    }
 }
-
 function resetAccountData() {
     state.families = []; state.latestSnapshot = null; state.history = {}; state.sources = {};
-    state.parsedImport = null; state.visibleLimit = PAGE_SIZE; state.deepLoading = false;
+    state.parsedImport = null; state.deepLoading = false;
 }
 
 async function loadDeepHistory(tag, requestId) {
@@ -107,7 +107,7 @@ async function loadDeepHistory(tag, requestId) {
     try {
         const response = await state.api.getAchievements(tag, { deepHistory: true, loading: 'background' });
         if (requestId !== state.requestId || tag !== state.selectedTag) return;
-        applyResponse(response); renderAll(refs, state, PAGE_SIZE);
+        applyResponse(response); renderAll(refs, state);
     } catch {
         if (requestId === state.requestId) {
             state.sources = { ...state.sources, cwl_history: { available: false, detail: translated('achievements.cwlHistoryUnavailable', 'CWL history is temporarily unavailable.') } };
@@ -121,23 +121,23 @@ async function loadDeepHistory(tag, requestId) {
 async function loadSelectedAccount({ quiet = false, loadHistory = true } = {}) {
     const requestId = ++state.requestId;
     const tag = state.selectedTag;
-    state.visibleLimit = PAGE_SIZE; state.deepLoading = false;
-    if (!tag) { resetAccountData(); renderAll(refs, state, PAGE_SIZE); return; }
+    state.deepLoading = false;
+    if (!tag) { resetAccountData(); renderAll(refs, state); return; }
     state.loading = true;
     if (!quiet) setStatus(t('achievements.loading'));
-    renderAll(refs, state, PAGE_SIZE);
+    renderAll(refs, state);
     try {
         const response = await state.api.getAchievements(tag, { deepHistory: false });
         if (requestId !== state.requestId) return;
-        applyResponse(response); setStatus(); renderAll(refs, state, PAGE_SIZE);
+        applyResponse(response); setStatus(); renderAll(refs, state);
         trackAchievementLoad({ resultStatus: 'complete' });
         if (loadHistory) void loadDeepHistory(tag, requestId);
     } catch (error) {
         if (requestId !== state.requestId) return;
-        resetAccountData(); setStatus(error?.message || t('achievements.loadError'), 'error'); renderAll(refs, state, PAGE_SIZE);
+        resetAccountData(); setStatus(error?.message || t('achievements.loadError'), 'error'); renderAll(refs, state);
         trackAchievementLoad({ resultStatus: 'failed', failed: true });
     } finally {
-        if (requestId === state.requestId) { state.loading = false; renderAll(refs, state, PAGE_SIZE); }
+        if (requestId === state.requestId) { state.loading = false; renderAll(refs, state); }
     }
 }
 
@@ -195,7 +195,52 @@ async function pasteFromClipboard() {
     catch { setImportFeedback(t('achievements.clipboardBlocked'), 'error'); }
 }
 
-function resetVisibleAndRender() { state.visibleLimit = PAGE_SIZE; renderAchievements(refs, state, PAGE_SIZE); }
+function normalizeCategoryKey(value) {
+    return String(value || '').trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-');
+}
+
+function resolveCategoryKey(value) {
+    const requested = String(value || '');
+    const exact = state.families.find(family => family.category === requested)?.category;
+    if (exact) return exact;
+    const normalized = normalizeCategoryKey(requested);
+    return state.families.find(family => normalizeCategoryKey(family.category) === normalized)?.category || '';
+}
+
+function setCategoryUrl(category, replace = false) {
+    const url = new URL(window.location.href);
+    if (category) url.searchParams.set('category', category);
+    else url.searchParams.delete('category');
+    window.history[replace ? 'replaceState' : 'pushState']({ achievementCategory: category || null }, '', url);
+}
+
+function renderCategory(category, { replace = false, focus = '' } = {}) {
+    const resolved = resolveCategoryKey(category);
+    state.selectedCategory = resolved;
+    setCategoryUrl(resolved, replace);
+    state.focusTarget = focus;
+    renderAchievements(refs, state);
+}
+
+function handleGridClick(event) {
+    const back = event.target.closest('[data-achievement-back]');
+    if (back?.matches('button')) {
+        if (state.selectedCategory && window.history.state?.achievementCategory) {
+            state.focusTarget = 'overview'; window.history.back(); return;
+        }
+        return renderCategory('', { replace: true, focus: 'overview' });
+    }
+    const category = event.target.closest('[data-achievement-category]');
+    if (category && (category.matches('button') || category.matches('article'))) {
+        renderCategory(category.dataset.achievementCategory, { focus: 'detail' });
+    }
+}
+
+function handlePopState() {
+    state.selectedCategory = categoryFromLocation();
+    state.focusTarget = state.selectedCategory ? 'detail' : 'overview';
+    renderAchievements(refs, state);
+}
 
 function bindEvents() {
     refs.accountSelect.addEventListener('change', () => {
@@ -210,14 +255,18 @@ function bindEvents() {
     refs.pasteButton.addEventListener('click', () => void pasteFromClipboard());
     refs.clearButton.addEventListener('click', clearImport);
     refs.importForm.addEventListener('submit', submitImport);
-    refs.search.addEventListener('input', () => { state.filters.search = refs.search.value; resetVisibleAndRender(); });
+    refs.search.addEventListener('input', () => { state.filters.search = refs.search.value; renderAchievements(refs, state); });
     for (const [ref, key] of [[refs.category, 'category'], [refs.rarity, 'rarity'], [refs.status, 'status'], [refs.source, 'source']]) {
-        ref.addEventListener('change', () => { state.filters[key] = ref.value; resetVisibleAndRender(); });
+        ref.addEventListener('change', () => {
+            if (key === 'category' && ref.value !== 'all') return renderCategory(ref.value, { focus: 'detail' });
+            state.filters[key] = ref.value; renderAchievements(refs, state);
+        });
     }
-    refs.loadMore.addEventListener('click', () => { state.visibleLimit += PAGE_SIZE; renderAchievements(refs, state, PAGE_SIZE); });
+    refs.grid.addEventListener('click', handleGridClick);
+    window.addEventListener('popstate', handlePopState);
     refs.emptyState.querySelector('[data-empty-import]')?.addEventListener('click', () => setImportPanelOpen(true, { focus: true }));
     refs.emptyState.querySelector('[data-empty-profile]')?.addEventListener('click', () => document.querySelector('#workspace-profile-shortcut, #profile-btn')?.click());
-    window.addEventListener('clashtools:language-changed', () => { applyI18n(document); renderAll(refs, state, PAGE_SIZE); updateImportPreview(); });
+    window.addEventListener('clashtools:language-changed', () => { applyI18n(document); renderAll(refs, state); updateImportPreview(); });
 }
 
 async function initialize() {
@@ -227,11 +276,11 @@ async function initialize() {
         const authState = await resolveAuthState().catch(() => null);
         if (authState?.status !== AUTH_STATES.AUTHENTICATED) return;
     }
-    captureRefs(); bindEvents(); applyI18n(document); updateMetadata();
+    captureRefs(); state.selectedCategory = categoryFromLocation(); bindEvents(); applyI18n(document); updateMetadata();
     const fixture = await getAchievementsFixture().catch(error => { console.error('[achievements-fixture]', error); return null; });
     if (fixture) {
         state.api = fixture; state.accounts = fixture.accounts || []; state.selectedTag = state.accounts[0]?.tag || '';
-        renderAll(refs, state, PAGE_SIZE);
+        renderAll(refs, state);
         if (fixture.fixtureImportText) { setImportPanelOpen(true); refs.importText.value = fixture.fixtureImportText; updateImportPreview(); }
         if (state.selectedTag) await loadSelectedAccount({ quiet: true });
         return;
@@ -240,10 +289,10 @@ async function initialize() {
     if (!userId) return;
     try {
         state.accounts = collectLinkedAccounts(await checkUserId(userId)); state.selectedTag = selectInitialAccount(state.accounts);
-        writeStorage(ACCOUNT_STORAGE_KEY, state.selectedTag); renderAll(refs, state, PAGE_SIZE);
+        writeStorage(ACCOUNT_STORAGE_KEY, state.selectedTag); renderAll(refs, state);
         if (state.selectedTag) await loadSelectedAccount({ quiet: true });
     } catch (error) {
-        state.accounts = []; resetAccountData(); setStatus(error?.message || t('achievements.accountsLoadError'), 'error'); renderAll(refs, state, PAGE_SIZE);
+        state.accounts = []; resetAccountData(); setStatus(error?.message || t('achievements.accountsLoadError'), 'error'); renderAll(refs, state);
     }
 }
 
