@@ -224,20 +224,18 @@
                 <div><p class="advanced-stats__section-kicker" data-i18n="advancedStats.lifetimeKicker">All tracked history</p><h2 id="advanced-stats-lifetime-title" data-i18n="advancedStats.lifetimeTitle">Lifetime performance</h2><p data-i18n="advancedStats.lifetimeText">A complete view of the attacks ClashPanel has reliably tracked.</p></div>
                 <small id="advanced-stats-lifetime-availability" class="advanced-stats__availability" data-i18n="advancedStats.lifetimeAvailability">Based on available tracked history.</small>
             </div>
-            <div class="advanced-stats__lifetime-primary">
-                <article><span data-i18n="advancedStats.lifetimeTotalStars">Total stars</span><strong id="advanced-stats-lifetime-total-stars">—</strong><small id="advanced-stats-lifetime-total-stars-availability"></small></article>
-                <article><span data-i18n="advancedStats.lifetimeTotalDestruction">Total destruction</span><strong id="advanced-stats-lifetime-total-destruction">—</strong><small id="advanced-stats-lifetime-total-destruction-availability"></small></article>
-                <article><span data-i18n="advancedStats.lifetimePerfectAttacks">Perfect attacks</span><strong id="advanced-stats-lifetime-perfect-attacks">—</strong><small id="advanced-stats-lifetime-perfect-attacks-availability"></small></article>
-                <article><span data-i18n="advancedStats.lifetimeBestStreak">Best streak</span><strong id="advanced-stats-lifetime-best-streak">—</strong><small id="advanced-stats-lifetime-best-streak-availability"></small></article>
+            <div class="advanced-stats__lifetime-metrics">
+                <article class="advanced-stats__lifetime-metric advanced-stats__lifetime-metric--emphasis"><span data-i18n="advancedStats.lifetimeTotalStars">Total stars</span><strong id="advanced-stats-lifetime-total-stars">—</strong><small id="advanced-stats-lifetime-total-stars-availability"></small></article>
+                <article class="advanced-stats__lifetime-metric"><span data-i18n="advancedStats.lifetimeTotalDestruction">Total destruction</span><strong id="advanced-stats-lifetime-total-destruction">—</strong><small id="advanced-stats-lifetime-total-destruction-availability"></small></article>
+                <article class="advanced-stats__lifetime-metric"><span data-i18n="advancedStats.lifetimePerfectAttacks">Perfect attacks</span><strong id="advanced-stats-lifetime-perfect-attacks">—</strong><small id="advanced-stats-lifetime-perfect-attacks-availability"></small></article>
+                <article class="advanced-stats__lifetime-metric"><span data-i18n="advancedStats.lifetimeBestStreak">Best streak</span><strong id="advanced-stats-lifetime-best-streak">—</strong><small id="advanced-stats-lifetime-best-streak-availability"></small></article>
+                <article class="advanced-stats__lifetime-metric"><span data-i18n="advancedStats.lifetimeTripleCount">Three-star attacks</span><strong id="advanced-stats-lifetime-triple-count">—</strong></article>
+                <article class="advanced-stats__lifetime-metric"><span data-i18n="advancedStats.lifetimeTrackedDays">Tracked days</span><strong id="advanced-stats-lifetime-tracked-days">—</strong></article>
+                <article class="advanced-stats__lifetime-metric"><span data-i18n="advancedStats.lifetimeCurrentStreak">Current streak</span><strong id="advanced-stats-lifetime-current-streak">—</strong></article>
+                <article class="advanced-stats__lifetime-metric"><span data-i18n="advancedStats.lifetimeMostActiveMonth">Most active month</span><strong id="advanced-stats-lifetime-most-active-month">—</strong></article>
+                <article class="advanced-stats__lifetime-metric"><span data-i18n="advancedStats.lifetimeBestPerformanceMonth">Best performance month</span><strong id="advanced-stats-lifetime-best-performance-month">—</strong></article>
             </div>
-            <div class="advanced-stats__lifetime-secondary">
-                <dl class="advanced-stats__lifetime-facts">
-                    <div><dt data-i18n="advancedStats.lifetimeTripleCount">Three-star attacks</dt><dd id="advanced-stats-lifetime-triple-count">—</dd></div>
-                    <div><dt data-i18n="advancedStats.lifetimeTrackedDays">Tracked days</dt><dd id="advanced-stats-lifetime-tracked-days">—</dd></div>
-                    <div><dt data-i18n="advancedStats.lifetimeCurrentStreak">Current streak</dt><dd id="advanced-stats-lifetime-current-streak">—</dd></div>
-                    <div><dt data-i18n="advancedStats.lifetimeMostActiveMonth">Most active month</dt><dd id="advanced-stats-lifetime-most-active-month">—</dd></div>
-                    <div><dt data-i18n="advancedStats.lifetimeBestPerformanceMonth">Best performance month</dt><dd id="advanced-stats-lifetime-best-performance-month">—</dd></div>
-                </dl>
+            <div class="advanced-stats__lifetime-insights">
                 <div class="advanced-stats__lifetime-distribution" aria-labelledby="advanced-stats-lifetime-distribution-title">
                     <h3 id="advanced-stats-lifetime-distribution-title" data-i18n="advancedStats.lifetimeStarDistribution">Star distribution</h3>
                     <ul>
@@ -248,6 +246,10 @@
                         <li data-star-count="unknown"><span data-i18n="advancedStats.starsUnknown">Unknown</span><strong id="advanced-stats-lifetime-star-unknown">—</strong></li>
                     </ul>
                 </div>
+                <div class="advanced-stats__lifetime-summaries">
+                    <article id="advanced-stats-lifetime-favorites" data-lifetime-favorites><div><p class="advanced-stats__section-kicker" data-i18n="advancedStats.lifetimeFavoritesKicker">Across all tracked time</p><h3 data-i18n="advancedStats.lifetimeFavoritesTitle">All-time favorites</h3></div><div data-lifetime-favorites-content><span data-i18n="advancedStats.noFavorite">Not enough tracked data</span></div></article>
+                    <article id="advanced-stats-lifetime-successful-army" data-lifetime-successful-army><div><p class="advanced-stats__section-kicker" data-i18n="advancedStats.lifetimeArmyKicker">Strongest results</p><h3 data-i18n="advancedStats.lifetimeArmyTitle">Most successful army</h3></div><div data-lifetime-successful-army-content><span data-i18n="advancedStats.noFavorite">Not enough tracked data</span></div></article>
+                </div>
             </div>
             <div class="advanced-stats__lifetime-comparison" id="advanced-stats-lifetime-category-comparison" data-category-comparison>
                 <div class="advanced-stats__subheading"><h3 data-i18n="advancedStats.lifetimeCategoryTitle">Performance by attack type</h3><p data-i18n="advancedStats.lifetimeCategoryText">Unknown types stay separate from Regular and Competitive.</p></div>
@@ -256,10 +258,6 @@
                     <article id="advanced-stats-lifetime-category-competitive" data-category="competitive"><span data-i18n="advancedStats.attackCategoryCompetitive">Competitive</span><strong data-category-value>—</strong><small data-category-meta></small></article>
                     <article id="advanced-stats-lifetime-category-unknown" data-category="unknown"><span data-i18n="advancedStats.attackCategoryUnknown">Unknown</span><strong data-category-value>—</strong><small data-category-meta></small></article>
                 </div>
-            </div>
-            <div class="advanced-stats__lifetime-summaries">
-                <article id="advanced-stats-lifetime-favorites" data-lifetime-favorites><div><p class="advanced-stats__section-kicker" data-i18n="advancedStats.lifetimeFavoritesKicker">Across all tracked time</p><h3 data-i18n="advancedStats.lifetimeFavoritesTitle">All-time favorites</h3></div><div data-lifetime-favorites-content><span data-i18n="advancedStats.noFavorite">Not enough tracked data</span></div></article>
-                <article id="advanced-stats-lifetime-successful-army" data-lifetime-successful-army><div><p class="advanced-stats__section-kicker" data-i18n="advancedStats.lifetimeArmyKicker">Strongest results</p><h3 data-i18n="advancedStats.lifetimeArmyTitle">Most successful army</h3></div><div data-lifetime-successful-army-content><span data-i18n="advancedStats.noFavorite">Not enough tracked data</span></div></article>
             </div>
         </section>
 
