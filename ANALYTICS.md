@@ -46,6 +46,12 @@ PostHog's capture endpoint documentation is available at
    drops failed or full-queue events. PostHog failures therefore cannot block
    or slow normal requests.
 
+The production Cloud Run deploy uses `--no-cpu-throttling` so an active
+instance keeps CPU available for this non-blocking queue drain after the
+request returns. `min-instances=0` remains enabled, so idle instances can
+still scale to zero; instance-based CPU/billing applies only while an instance
+is active.
+
 The allowlisted caller property keys are `tool`, `action`, `entity_type`,
 `mode`, `outcome`, `result_status`, and `source`. Values are scalar, bounded,
 and sanitized. The central module may omit a value that is empty, too long, or

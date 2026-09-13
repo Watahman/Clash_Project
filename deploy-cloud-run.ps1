@@ -51,6 +51,7 @@ gcloud run deploy $ServiceName `
     --concurrency 40 `
     --timeout 120s `
     --cpu-boost `
+    --no-cpu-throttling `
     --env-vars-file ./cloudrun-env.yaml `
     --update-secrets="POSTHOG_PROJECT_API_KEY=POSTHOG_PROJECT_API_KEY:latest" `
     --remove-secrets="CLASH_API_KEY_POOL,_API_KEY_ALL,_API_KEY_ALL2,_API_KEY_ALL3"
