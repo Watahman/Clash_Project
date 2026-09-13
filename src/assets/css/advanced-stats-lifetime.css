@@ -1,41 +1,40 @@
-.advanced-stats__lifetime { animation: advanced-stats-panel-reveal 320ms var(--cp-ease-emphasized, ease-out) both; }
+.advanced-stats__lifetime { animation: advanced-stats-panel-reveal 320ms var(--cp-ease-emphasized, ease-out) both; display: grid; gap: 16px; grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.advanced-stats__lifetime > .advanced-stats__section-heading { grid-column: 1 / -1; margin-bottom: 0; }
 .advanced-stats__lifetime .advanced-stats__section-heading { align-items: end; }
 .advanced-stats__lifetime .advanced-stats__section-kicker { color: var(--cp-progress); margin: 0 0 5px; }
 .advanced-stats__availability { color: var(--cp-text-3); max-width: 28ch; text-align: end; }
-.advanced-stats__lifetime-primary { display: grid; gap: 12px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.advanced-stats__lifetime-primary article { border-block-start: 2px solid var(--cp-progress); display: grid; gap: 5px; min-width: 0; padding: 10px 2px 0; }
+.advanced-stats__lifetime-primary { align-content: start; display: grid; gap: 8px; grid-column: 1 / span 6; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.advanced-stats__lifetime-primary article { background: var(--cp-surface-2); border: 1px solid var(--cp-border-1); border-radius: 8px; display: grid; gap: 4px; min-height: 74px; min-width: 0; padding: 10px 12px; }
 .advanced-stats__lifetime-primary span,
 .advanced-stats__lifetime-facts dt,
 .advanced-stats__lifetime-distribution li span,
 .advanced-stats__category-grid span { color: var(--cp-text-2); font-size: .76rem; }
-.advanced-stats__lifetime-primary strong { font-size: clamp(1.35rem, 2.6vw, 1.9rem); font-variant-numeric: tabular-nums; letter-spacing: -.04em; line-height: 1.05; }
+.advanced-stats__lifetime-primary strong { font-size: clamp(1.2rem, 2.1vw, 1.65rem); font-variant-numeric: tabular-nums; letter-spacing: -.04em; line-height: 1.05; }
 .advanced-stats__lifetime-primary strong[data-state="unavailable"],
 .advanced-stats__lifetime-facts dd[data-state="unavailable"],
 .advanced-stats__lifetime-distribution strong[data-state="unavailable"] { color: var(--cp-text-3); font-size: .9rem; font-weight: 600; letter-spacing: 0; }
 .advanced-stats__lifetime-primary small { color: var(--cp-text-3); font-size: .68rem; line-height: 1.35; min-height: 1em; }
-.advanced-stats__lifetime-secondary { border-block-start: 1px solid var(--cp-border-1); display: grid; gap: 20px; grid-template-columns: minmax(0, 1.35fr) minmax(230px, .65fr); margin-top: 20px; padding-top: 16px; }
-.advanced-stats__lifetime-facts { display: grid; gap: 12px 16px; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 0; }
+.advanced-stats__lifetime-secondary { align-items: start; display: grid; gap: 12px; grid-column: 7 / -1; grid-template-columns: 1fr; margin: 0; padding: 0; }
+.advanced-stats__lifetime-facts { display: grid; gap: 10px 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; }
 .advanced-stats__lifetime-facts div { display: grid; gap: 4px; min-width: 0; }
 .advanced-stats__lifetime-facts dd { font-size: .9rem; font-variant-numeric: tabular-nums; font-weight: 700; margin: 0; overflow-wrap: anywhere; }
-.advanced-stats__lifetime-distribution { background: var(--cp-surface-2); border-radius: 8px; min-width: 0; padding: 12px 14px; }
+.advanced-stats__lifetime-distribution { background: var(--cp-surface-2); border: 1px solid var(--cp-border-1); border-radius: 8px; min-width: 0; padding: 10px 12px; }
 .advanced-stats__lifetime-distribution h3,
 .advanced-stats__lifetime-comparison h3,
 .advanced-stats__lifetime-summaries h3 { font-size: .95rem; margin: 0; }
-.advanced-stats__lifetime-distribution ul { display: grid; gap: 5px; list-style: none; margin: 9px 0 0; padding: 0; }
-.advanced-stats__lifetime-distribution li { align-items: center; display: grid; gap: 8px; grid-template-columns: minmax(0, 1fr) auto; }
+.advanced-stats__lifetime-distribution ul { display: grid; gap: 8px; grid-template-columns: repeat(5, minmax(0, 1fr)); list-style: none; margin: 9px 0 0; padding: 0; }
+.advanced-stats__lifetime-distribution li { display: grid; gap: 3px; min-width: 0; }
 .advanced-stats__lifetime-distribution li strong { font-size: .84rem; font-variant-numeric: tabular-nums; }
-.advanced-stats__lifetime-comparison { border-block-start: 1px solid var(--cp-border-1); margin-top: 20px; padding-top: 16px; }
-.advanced-stats__lifetime-comparison .advanced-stats__subheading { margin-bottom: 10px; }
+.advanced-stats__lifetime-comparison { border-block-start: 1px solid var(--cp-border-1); grid-column: 1 / span 7; margin: 0; padding-top: 12px; }
+.advanced-stats__lifetime-comparison .advanced-stats__subheading { margin-bottom: 8px; }
 .advanced-stats__category-grid { display: grid; gap: 8px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.advanced-stats__category-grid article { background: var(--cp-surface-2); border-inline-start: 2px solid var(--cp-progress); display: grid; gap: 4px; min-width: 0; padding: 10px 12px; }
-.advanced-stats__category-grid article[data-category="competitive"] { border-inline-start-color: var(--cp-compete); }
-.advanced-stats__category-grid article[data-category="unknown"] { border-inline-start-color: var(--cp-text-3); }
+.advanced-stats__category-grid article { background: var(--cp-surface-2); border: 1px solid var(--cp-border-1); border-radius: 8px; display: grid; gap: 4px; min-width: 0; padding: 9px 10px; }
 .advanced-stats__category-grid article[data-state="unavailable"] { opacity: .58; }
 .advanced-stats__category-grid strong { font-size: .98rem; font-variant-numeric: tabular-nums; line-height: 1.25; }
 .advanced-stats__category-grid article[data-state="unavailable"] strong { color: var(--cp-text-3); font-size: .86rem; font-weight: 600; }
 .advanced-stats__category-grid small { color: var(--cp-text-3); font-size: .7rem; }
-.advanced-stats__lifetime-summaries { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 20px; }
-.advanced-stats__lifetime-summaries article { background: var(--cp-surface-2); border-radius: 8px; display: grid; gap: 10px; min-width: 0; padding: 14px; }
+.advanced-stats__lifetime-summaries { align-self: start; display: grid; gap: 8px; grid-column: 8 / -1; grid-template-columns: 1fr; margin: 0; }
+.advanced-stats__lifetime-summaries article { background: var(--cp-surface-2); border: 1px solid var(--cp-border-1); border-radius: 8px; display: grid; gap: 7px; min-width: 0; padding: 10px 12px; }
 .advanced-stats__lifetime-summaries article > div:first-child { display: grid; gap: 2px; }
 .advanced-stats__lifetime-summaries article > div:last-child { align-items: center; color: var(--cp-text-2); display: flex; flex-wrap: wrap; gap: 6px 12px; min-height: 24px; }
 .advanced-stats__lifetime-summaries article > div:last-child span { font-size: .78rem; }
@@ -46,17 +45,25 @@
 
 @keyframes advanced-stats-panel-reveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 1100px) {
-    .advanced-stats__lifetime-primary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .advanced-stats__lifetime-primary { grid-column: 1 / span 6; }
+    .advanced-stats__lifetime-secondary { grid-column: 7 / -1; }
     .advanced-stats__lifetime-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 899px) {
-    .advanced-stats__lifetime-secondary { grid-template-columns: 1fr; }
+    .advanced-stats__lifetime-primary,
+    .advanced-stats__lifetime-secondary,
+    .advanced-stats__lifetime-comparison,
+    .advanced-stats__lifetime-summaries { grid-column: 1 / -1; }
+    .advanced-stats__lifetime-summaries { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .advanced-stats__section-heading--trend { align-items: stretch; }
     .advanced-stats__trend-selector .advanced-stats__segmented { justify-content: start; }
 }
 @media (max-width: 599px) {
     .advanced-stats__lifetime-primary,
     .advanced-stats__lifetime-summaries { grid-template-columns: 1fr; }
+    .advanced-stats__lifetime-secondary { grid-template-columns: 1fr; }
+    .advanced-stats__lifetime-distribution ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .advanced-stats__lifetime-distribution li:last-child { grid-column: 1 / -1; }
     .advanced-stats__lifetime .advanced-stats__section-heading { align-items: stretch; }
     .advanced-stats__availability { max-width: none; text-align: start; }
     .advanced-stats__lifetime-facts,

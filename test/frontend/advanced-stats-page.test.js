@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import worker from '../../worker/index.js';
 
 const ADVANCED_STATS_CACHE_VERSION = '20260913-advanced-dashboard-v2';
+const ADVANCED_STATS_CSS_CACHE_VERSION = '20260913-advanced-dashboard-v3';
 
 const documentFor = path => new JSDOM(readFileSync(path, 'utf8')).window.document;
 
@@ -131,9 +132,9 @@ describe('Advanced Stats workspace page', () => {
         const runtime = readFileSync('src/assets/js/i18n/runtime-translations.js', 'utf8');
 
         expect(html).toContain(`advanced-stats-bootstrap.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
-        expect(html).toContain(`advanced-stats.css?v=${ADVANCED_STATS_CACHE_VERSION}`);
-        expect(html).toContain(`advanced-stats-dashboard.css?v=${ADVANCED_STATS_CACHE_VERSION}`);
-        expect(html).toContain(`advanced-stats-lifetime.css?v=${ADVANCED_STATS_CACHE_VERSION}`);
+        expect(html).toContain(`advanced-stats.css?v=${ADVANCED_STATS_CSS_CACHE_VERSION}`);
+        expect(html).toContain(`advanced-stats-dashboard.css?v=${ADVANCED_STATS_CSS_CACHE_VERSION}`);
+        expect(html).toContain(`advanced-stats-lifetime.css?v=${ADVANCED_STATS_CSS_CACHE_VERSION}`);
         expect(html).toContain('workspace-shell.js?v=20260831-master-live-v1');
         expect(bootstrap).toContain(`advanced-stats.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(page).toContain(`advanced-stats-renderer.js?v=${ADVANCED_STATS_CACHE_VERSION}`);

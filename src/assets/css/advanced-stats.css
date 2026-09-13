@@ -101,6 +101,10 @@ body.workspace-app .workspace-content.advanced-stats .advanced-stats__hero h1 {
 .advanced-stats__warning img { flex: 0 0 20px; margin-top: 2px; }
 .advanced-stats__warning p { color: var(--cp-text-2); margin: 4px 0; }
 .advanced-stats__warning span { color: var(--cp-text-2); font-size: .8rem; }
+.advanced-stats .advanced-stats__section-heading .advanced-stats__unit-scope-note {
+    border-inline-start: 0;
+    border-left: 0;
+}
 
 .advanced-stats__section { background: var(--cp-surface-1); border: 1px solid var(--cp-border-1); border-radius: 12px; min-width: 0; padding: 20px; }
 .advanced-stats__section[data-load-error="true"] { border-color: color-mix(in srgb, var(--cp-warning) 55%, var(--cp-border-1)); }
@@ -115,8 +119,9 @@ body.workspace-app .workspace-content.advanced-stats .advanced-stats__hero h1 {
 .advanced-stats__footnote { font-size: .78rem; margin: 16px 0 0; }
 
 .advanced-stats__two-column { align-items: stretch; display: grid; gap: 24px; grid-template-columns: 1fr; }
-.advanced-stats__trend-chart { min-height: 224px; overflow-x: auto; padding: 2px 0 0; }
-.advanced-stats__trend-svg { display: block; height: 220px; min-width: 520px; overflow: visible; width: 100%; }
+.advanced-stats__two-column { align-items: start; }
+.advanced-stats__trend-chart { min-height: 194px; overflow-x: auto; padding: 0; }
+.advanced-stats__trend-svg { display: block; height: 190px; min-width: 520px; overflow: visible; width: 100%; }
 .advanced-stats__trend-grid-line { stroke: var(--cp-border-1); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .advanced-stats__trend-grid-label { fill: var(--cp-text-3); font-size: 10px; }
 .advanced-stats__trend-line { animation: advanced-stats-trend-draw 520ms var(--cp-ease-emphasized, ease-out) both; fill: none; stroke: var(--cp-progress); stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; vector-effect: non-scaling-stroke; }
@@ -127,7 +132,7 @@ body.workspace-app .workspace-content.advanced-stats .advanced-stats__hero h1 {
 .advanced-stats__trend-gap { opacity: .75; stroke: var(--cp-border-2); stroke-dasharray: 3 4; stroke-width: 1; vector-effect: non-scaling-stroke; }
 .advanced-stats__trend-tooltip { font-size: .72rem; }
 .advanced-stats__trend-day-label { fill: var(--cp-text-3); font-size: 10px; }
-.advanced-stats__loot-trend { border-top: 1px solid var(--cp-border-1); margin-top: 18px; overflow-x: auto; padding-top: 18px; }
+.advanced-stats__loot-trend { border-top: 1px solid var(--cp-border-1); margin-top: 12px; overflow-x: auto; padding-top: 12px; }
 .advanced-stats__loot-trend-table { border-collapse: collapse; min-width: 520px; width: 100%; }
 .advanced-stats__loot-trend-table th,
 .advanced-stats__loot-trend-table td { border-bottom: 1px solid var(--cp-border-1); padding: 8px; text-align: right; }
@@ -193,10 +198,10 @@ body.workspace-app .workspace-content.advanced-stats .advanced-stats__hero h1 {
 [hidden] { display: none !important; }
 @media (min-width: 700px) {
     .advanced-stats__two-column { grid-template-columns: minmax(0, 1.55fr) minmax(260px, 1fr); }
+    .advanced-stats__army-list { grid-template-columns: 1fr; }
 }
 @media (min-width: 1100px) {
     .advanced-stats__two-column { grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); }
-    .advanced-stats__army-list { grid-template-columns: 1fr; }
 }
 @media (max-width: 1100px) {
     .advanced-stats__tracking-bar { grid-template-columns: 1fr 1.35fr; }
