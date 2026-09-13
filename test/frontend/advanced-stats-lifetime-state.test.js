@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createLifetimeLoader } from '../../src/assets/js/pages/advanced-stats-lifetime-state.js?v=20260912-advanced-dashboard-v1';
+import { createLifetimeLoader } from '../../src/assets/js/pages/advanced-stats-lifetime-state.js?v=20260913-advanced-dashboard-v2';
 
 describe('Advanced Stats lifetime loading', () => {
     it('starts loading without blocking the caller and caches the response', async () => {

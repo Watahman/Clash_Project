@@ -55,6 +55,10 @@ describe('Advanced Stats extracted renderers', () => {
         expect(refs.kpiStars.textContent).toBe('—');
         expect(refs.kpiThreeStar.textContent).toBe('—');
         expect(refs.kpiDestruction.textContent).toBe('—');
+        expect(refs.kpiAttacks.dataset.state).toBe('unavailable');
+        expect(refs.kpiStars.dataset.state).toBe('unavailable');
+        expect(refs.kpiThreeStar.dataset.state).toBe('unavailable');
+        expect(refs.kpiDestruction.dataset.state).toBe('unavailable');
     });
 
     it('shows honest coverage source labels without exposing source identifiers', () => {

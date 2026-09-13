@@ -1,8 +1,8 @@
-import { applyI18n, t } from '../i18n/i18n.js?v=20260912-advanced-dashboard-v1';
-import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260912-advanced-dashboard-v1';
+import { applyI18n, t } from '../i18n/i18n.js?v=20260913-advanced-dashboard-v2';
+import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260913-advanced-dashboard-v2';
 import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
 import { getCurrentUserId } from '../utils/user.js';
-import { checkUserId } from '../Supabase/Supabase-User.js?v=20260912-advanced-dashboard-v1';
+import { checkUserId } from '../Supabase/Supabase-User.js?v=20260913-advanced-dashboard-v2';
 import {
     deleteAdvancedStatsData,
     getAdvancedStatsArmies,
@@ -16,8 +16,8 @@ import {
     resumeAdvancedStatsTracking,
     startAdvancedStatsTracking,
     stopAdvancedStatsTracking
-} from '../Supabase/Supabase-AdvancedStats.js?v=20260912-advanced-dashboard-v1';
-import { getAdvancedStatsFixture } from './advanced-stats-fixtures.js?v=20260912-advanced-dashboard-v1';
+} from '../Supabase/Supabase-AdvancedStats.js?v=20260913-advanced-dashboard-v2';
+import { getAdvancedStatsFixture } from './advanced-stats-fixtures.js?v=20260913-advanced-dashboard-v2';
 import {
     renderAccountSelector,
     renderStatistics,
@@ -25,29 +25,29 @@ import {
     syncPeriodButtons,
     syncAttackCategoryButtons,
     syncTrendMetricButtons
-} from './advanced-stats-renderer.js?v=20260912-advanced-dashboard-v1';
+} from './advanced-stats-renderer.js?v=20260913-advanced-dashboard-v2';
 import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260809-4';
-import { accountsFromProfile, normalizeTag, selectInitialAccount } from './advanced-stats-account.js?v=20260912-advanced-dashboard-v1';
-import { createTrackingActions } from './advanced-stats-actions.js?v=20260912-advanced-dashboard-v1';
+import { accountsFromProfile, normalizeTag, selectInitialAccount } from './advanced-stats-account.js?v=20260913-advanced-dashboard-v2';
+import { createTrackingActions } from './advanced-stats-actions.js?v=20260913-advanced-dashboard-v2';
 import {
     normalizeAnalysis,
     queuedAnalysis
-} from './advanced-stats-analysis.js?v=20260912-advanced-dashboard-v1';
+} from './advanced-stats-analysis.js?v=20260913-advanced-dashboard-v2';
 import {
     loadMoreBattles as loadMoreBattlesFromApi,
     loadCategoryStatistics as loadCategoryStatisticsFromApi,
     loadStatistics as loadStatisticsFromApi,
     resetBattleHistoryState
-} from './advanced-stats-data-loader.js?v=20260912-advanced-dashboard-v1';
-import { waitForHistoricalAnalysis } from './advanced-stats-analysis-controller.js?v=20260912-advanced-dashboard-v1';
+} from './advanced-stats-data-loader.js?v=20260913-advanced-dashboard-v2';
+import { waitForHistoricalAnalysis } from './advanced-stats-analysis-controller.js?v=20260913-advanced-dashboard-v2';
 import {
     cacheAdvancedStatsElements,
     emptyAdvancedStatsSectionStates,
     readAdvancedStatsPreference,
     writeAdvancedStatsPreference
-} from './advanced-stats-dom.js?v=20260912-advanced-dashboard-v1';
-import { createAdvancedStatsPageUi } from './advanced-stats-page-ui.js?v=20260912-advanced-dashboard-v1';
-import { createLifetimeLoader } from './advanced-stats-lifetime-state.js?v=20260912-advanced-dashboard-v1';
+} from './advanced-stats-dom.js?v=20260913-advanced-dashboard-v2';
+import { createAdvancedStatsPageUi } from './advanced-stats-page-ui.js?v=20260913-advanced-dashboard-v2';
+import { createLifetimeLoader } from './advanced-stats-lifetime-state.js?v=20260913-advanced-dashboard-v2';
 
 const PERIOD_DEFAULT = '30d';
 const ACCOUNT_STORAGE_KEY = 'clashpanel_advanced_stats_account';

@@ -3,13 +3,13 @@ import {
     normalizeLifetime,
     presentLifetime,
     renderLifetime
-} from '../../src/assets/js/pages/advanced-stats-lifetime-renderer.js?v=20260912-advanced-dashboard-v1';
+} from '../../src/assets/js/pages/advanced-stats-lifetime-renderer.js?v=20260913-advanced-dashboard-v2';
 import {
     createTrendValue,
     renderTrends,
     trendLineSegments,
     trendScale
-} from '../../src/assets/js/pages/advanced-stats-trends-renderer.js?v=20260912-advanced-dashboard-v1';
+} from '../../src/assets/js/pages/advanced-stats-trends-renderer.js?v=20260913-advanced-dashboard-v2';
 
 beforeEach(() => document.body.replaceChildren());
 
@@ -57,8 +57,11 @@ describe('Advanced Stats lifetime and metric renderers', () => {
         expect(refs.lifetimeTotalDestruction.textContent).toBe('259%');
         expect(refs.lifetimePerfectAttacks.textContent).not.toBe('0');
         expect(refs.lifetimeBestStreak.textContent).not.toBe('0');
+        expect(refs.lifetimePerfectAttacks.dataset.state).toBe('unavailable');
+        expect(refs.lifetimeBestStreak.dataset.state).toBe('unavailable');
         expect(refs.lifetimeStarZero.textContent).toBe('0');
         expect(refs.lifetimeCurrentStreak.textContent).not.toBe('0');
+        expect(refs.lifetimeCurrentStreak.dataset.state).toBe('unavailable');
     });
 
     it('renders category metrics and sample size independently', () => {
@@ -72,6 +75,7 @@ describe('Advanced Stats lifetime and metric renderers', () => {
         expect(refs.lifetimeCategory.querySelector('[data-category="regular"] [data-category-meta]').textContent).toContain('Sample size');
         expect(refs.lifetimeCategory.querySelector('[data-category="regular"] [data-category-meta]').textContent).not.toContain('Minimum sample');
         expect(refs.lifetimeCategory.querySelector('[data-category="competitive"] [data-category-value]').textContent).toContain('60%');
+        expect(refs.lifetimeCategory.querySelector('[data-category="unknown"]').dataset.state).toBe('unavailable');
     });
 
     it('renders the reliable all-time favorite army in the lifetime summary', () => {

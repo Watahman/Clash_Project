@@ -1,4 +1,4 @@
-import { getLanguage } from '../i18n/i18n.js?v=20260912-advanced-dashboard-v1';
+import { getLanguage } from '../i18n/i18n.js?v=20260913-advanced-dashboard-v2';
 
 const LOOT_FIELDS = Object.freeze(['goldLooted', 'elixirLooted', 'darkElixirLooted']);
 const WEIGHTED_FIELDS = Object.freeze(['averageStars', 'averageDestruction']);

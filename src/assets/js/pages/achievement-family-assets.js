@@ -1,7 +1,7 @@
 // Stable family-ID art for milestones whose copy contains broad words such as
 // "record", "war" or "raid". All paths point to the local asset pack.
 export const FAMILY_IMAGE_OVERRIDES = Object.freeze({
-    BB_HALL: '/assets/icons/pillars/progress.svg',
+    BB_HALL: '/assets/game/builder-base/builder-halls/builder-hall-level-10.webp',
     BB_TROPHIES: '/assets/icons/stats/trend-up.svg',
     BB_BEST: '/assets/icons/war/trophy.svg',
     BB_HERO_SUM: '/assets/game/builder-base/heroes/battle-machine-icon.webp',

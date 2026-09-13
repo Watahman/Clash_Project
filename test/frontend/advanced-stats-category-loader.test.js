@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { loadCategoryStatistics } from '../../src/assets/js/pages/advanced-stats-data-loader.js?v=20260912-advanced-dashboard-v1';
+import { loadCategoryStatistics } from '../../src/assets/js/pages/advanced-stats-data-loader.js?v=20260913-advanced-dashboard-v2';
 
 function callbacks() {
     return { setBusy: vi.fn(), setDataStatus: vi.fn(), renderPage: vi.fn() };

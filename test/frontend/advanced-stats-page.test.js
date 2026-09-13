@@ -3,7 +3,7 @@ import { JSDOM } from 'jsdom';
 import { describe, expect, it, vi } from 'vitest';
 import worker from '../../worker/index.js';
 
-const ADVANCED_STATS_CACHE_VERSION = '20260912-advanced-dashboard-v1';
+const ADVANCED_STATS_CACHE_VERSION = '20260913-advanced-dashboard-v2';
 
 const documentFor = path => new JSDOM(readFileSync(path, 'utf8')).window.document;
 
@@ -146,7 +146,7 @@ describe('Advanced Stats workspace page', () => {
         expect(trendRenderer).toContain(`i18n/i18n.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(unitRenderer).toContain(`i18n/i18n.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(lootRenderer).toContain(`i18n/i18n.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
-        expect(trendRenderer).toContain("advanced-stats-trends.js?v=20260912-advanced-dashboard-v1");
+        expect(trendRenderer).toContain("advanced-stats-trends.js?v=20260913-advanced-dashboard-v2");
         expect(page).toContain(`i18n/i18n.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(renderer).toContain(`i18n/i18n.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(page).toContain("advanced-stats-army-view.js?v=20260809-4");

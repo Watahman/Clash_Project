@@ -1,6 +1,6 @@
-import { t } from '../i18n/i18n.js?v=20260912-advanced-dashboard-v1';
-import { arrayValue } from './advanced-stats-formatters.js?v=20260912-advanced-dashboard-v1';
-import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260912-advanced-dashboard-v1';
+import { t } from '../i18n/i18n.js?v=20260913-advanced-dashboard-v2';
+import { arrayValue } from './advanced-stats-formatters.js?v=20260913-advanced-dashboard-v2';
+import { isPlayerFacingUnitName } from './advanced-stats-army-view.js?v=20260913-advanced-dashboard-v2';
 import { trackLoadFailed, trackLoadSucceeded } from '../analytics/product-analytics.js?v=20260912-product-analytics-v1';
 
 const BATTLE_PAGE_SIZE = 20;

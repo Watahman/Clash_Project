@@ -1,7 +1,7 @@
-import { t } from '../i18n/i18n.js?v=20260912-advanced-dashboard-v1';
-import { formatDecimal, formatNumber, formatPercent } from './advanced-stats-formatters.js?v=20260912-advanced-dashboard-v1';
-import { formatMonthLabel } from './advanced-stats-trends.js?v=20260912-advanced-dashboard-v1';
-import { presentArmy } from './advanced-stats-army-view.js?v=20260912-advanced-dashboard-v1';
+import { t } from '../i18n/i18n.js?v=20260913-advanced-dashboard-v2';
+import { formatDecimal, formatNumber, formatPercent } from './advanced-stats-formatters.js?v=20260913-advanced-dashboard-v2';
+import { formatMonthLabel } from './advanced-stats-trends.js?v=20260913-advanced-dashboard-v2';
+import { presentArmy } from './advanced-stats-army-view.js?v=20260913-advanced-dashboard-v2';
 
 const UNKNOWN = '—';
 const CATEGORY_KEYS = Object.freeze(['regular', 'competitive', 'unknown']);
@@ -72,6 +72,10 @@ function setVisibility(element, visible) {
     if (element) element.hidden = !visible;
 }
 
+function setPresentationState(element, available) {
+    if (element) element.dataset.state = available ? 'available' : 'unavailable';
+}
+
 function availableOrUnknown(value) {
     return value === null ? UNKNOWN : formatNumber(value);
 }
@@ -131,6 +135,10 @@ function renderCategories(elements, categories) {
             || document.getElementById(`advanced-stats-lifetime-category-${key}`);
         if (!root) return;
         const entry = categoryEntry(categories, key);
+        const average = finite(entry?.averageStars ?? entry?.avgStars);
+        const rate = finite(entry?.threeStarRate ?? entry?.tripleRate);
+        const attacks = finite(entry?.attacks ?? entry?.attackCount ?? entry?.count);
+        setPresentationState(root, Boolean(entry && (attacks > 0 || average !== null || rate !== null)));
         setText(root.querySelector('[data-category-value]'), entry ? categoryText(entry) : UNKNOWN);
         const meta = root.querySelector('[data-category-meta]');
         const minimumSample = finite(entry?.minimumSample);
@@ -175,9 +183,11 @@ function renderFavorites(elements, favorites, mostUsedArmy, state) {
         values.push(['army', `${t('advancedStats.favoriteArmy')}: ${army.presentation.label}${suffix}`]);
     }
     if (!values.length) {
+        content.dataset.state = 'unavailable';
         content.append(document.createTextNode(t('advancedStats.noFavorite')));
         return;
     }
+    content.dataset.state = 'available';
     values.forEach(([key, value]) => {
         const item = document.createElement('span');
         item.dataset.favoriteType = key;
@@ -194,9 +204,11 @@ function renderSuccessfulArmy(elements, army, state) {
     const sourceArmy = source?.army || (Array.isArray(source?.units) ? source : null);
     const presentation = source ? presentArmy(sourceArmy, state.unitCatalog || [], t('advancedStats.armyComposition')) : null;
     if (!presentation?.units?.length) {
+        content.dataset.state = 'unavailable';
         content.append(document.createTextNode(t('advancedStats.noFavorite')));
         return;
     }
+    content.dataset.state = 'available';
     const label = document.createElement('strong');
     label.textContent = presentation.label;
     const meta = document.createElement('small');
@@ -214,18 +226,28 @@ export function renderLifetime(elements, state) {
     root.dataset.state = state.lifetimeState || (state.lifetime ? 'ready' : 'empty');
     setText(elements.lifetimeAvailability, availabilityText(data.availability));
     setText(elements.lifetimeTotalStars, availableOrUnknown(presentation.totalStars));
+    setPresentationState(elements.lifetimeTotalStars, presentation.totalStars !== null);
     setText(elements.lifetimeTotalDestruction, presentation.totalDestruction === null ? UNKNOWN : `${formatExact(presentation.totalDestruction)}%`);
+    setPresentationState(elements.lifetimeTotalDestruction, presentation.totalDestruction !== null);
     const unavailable = translated('advancedStats.lifetimeUnavailable', t('advancedStats.coverageUnavailable'));
     setText(elements.lifetimePerfectAttacks, unavailableValue(presentation.perfectAttacks, unavailable));
+    setPresentationState(elements.lifetimePerfectAttacks, presentation.perfectAttacks !== null);
     setText(elements.lifetimeBestStreak, unavailableValue(presentation.bestStreak, unavailable));
+    setPresentationState(elements.lifetimeBestStreak, presentation.bestStreak !== null);
     setText(elements.lifetimeTripleCount, availableOrUnknown(presentation.tripleCount));
+    setPresentationState(elements.lifetimeTripleCount, presentation.tripleCount !== null);
     setText(elements.lifetimeTrackedDays, availableOrUnknown(presentation.trackedDays));
+    setPresentationState(elements.lifetimeTrackedDays, presentation.trackedDays !== null);
     setText(elements.lifetimeCurrentStreak, unavailableValue(presentation.currentStreak, unavailable));
+    setPresentationState(elements.lifetimeCurrentStreak, presentation.currentStreak !== null);
     setText(elements.lifetimeMostActiveMonth, monthText(presentation.mostActiveMonth));
+    setPresentationState(elements.lifetimeMostActiveMonth, presentation.mostActiveMonth !== null);
     setText(elements.lifetimeBestPerformanceMonth, monthText(presentation.bestPerformanceMonth));
+    setPresentationState(elements.lifetimeBestPerformanceMonth, presentation.bestPerformanceMonth !== null);
     ['zero', 'one', 'two', 'three', 'unknown'].forEach(key => {
         const value = data.starDistribution?.[key] ?? data.starDistribution?.[Number({ zero: 0, one: 1, two: 2, three: 3 }[key])];
         setText(elements[`lifetimeStar${key[0].toUpperCase()}${key.slice(1)}`], availableOrUnknown(finite(value)));
+        setPresentationState(elements[`lifetimeStar${key[0].toUpperCase()}${key.slice(1)}`], finite(value) !== null);
     });
     renderCategories(elements, data.categories);
     renderFavorites(elements, data.favorites, data.mostUsedArmy, state);

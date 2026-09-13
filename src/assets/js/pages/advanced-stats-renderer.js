@@ -1,21 +1,21 @@
-import { t } from '../i18n/i18n.js?v=20260912-advanced-dashboard-v1';
-import { displayArmyUnits, isPlayerFacingUnitName, presentArmy } from './advanced-stats-army-view.js?v=20260912-advanced-dashboard-v1';
-import { entityImage } from './progress-asset-view.js?v=20260912-advanced-dashboard-v1';
+import { t } from '../i18n/i18n.js?v=20260913-advanced-dashboard-v2';
+import { displayArmyUnits, isPlayerFacingUnitName, presentArmy } from './advanced-stats-army-view.js?v=20260913-advanced-dashboard-v2';
+import { entityImage } from './progress-asset-view.js?v=20260913-advanced-dashboard-v2';
 import {
     formatDate,
     formatDateTime,
     formatDecimal,
     formatNumber,
     formatPercent
-} from './advanced-stats-formatters.js?v=20260912-advanced-dashboard-v1';
-import { renderArmies } from './advanced-stats-armies-renderer.js?v=20260912-advanced-dashboard-v1';
-import { renderBattles } from './advanced-stats-battles-renderer.js?v=20260912-advanced-dashboard-v1';
-import { renderTrends } from './advanced-stats-trends-renderer.js?v=20260912-advanced-dashboard-v1';
-import { renderUnits } from './advanced-stats-units-renderer.js?v=20260912-advanced-dashboard-v1';
-import { renderDashboardCoverage, renderHistoryAnalysis } from './advanced-stats-analysis-renderer.js?v=20260912-advanced-dashboard-v1';
-import { normalizeAnalysis } from './advanced-stats-analysis.js?v=20260912-advanced-dashboard-v1';
-import { renderLifetime } from './advanced-stats-lifetime-renderer.js?v=20260912-advanced-dashboard-v1';
-import { renderLootSummary } from './advanced-stats-loot.js?v=20260912-advanced-dashboard-v1';
+} from './advanced-stats-formatters.js?v=20260913-advanced-dashboard-v2';
+import { renderArmies } from './advanced-stats-armies-renderer.js?v=20260913-advanced-dashboard-v2';
+import { renderBattles } from './advanced-stats-battles-renderer.js?v=20260913-advanced-dashboard-v2';
+import { renderTrends } from './advanced-stats-trends-renderer.js?v=20260913-advanced-dashboard-v2';
+import { renderUnits } from './advanced-stats-units-renderer.js?v=20260913-advanced-dashboard-v2';
+import { renderDashboardCoverage, renderHistoryAnalysis } from './advanced-stats-analysis-renderer.js?v=20260913-advanced-dashboard-v2';
+import { normalizeAnalysis } from './advanced-stats-analysis.js?v=20260913-advanced-dashboard-v2';
+import { renderLifetime } from './advanced-stats-lifetime-renderer.js?v=20260913-advanced-dashboard-v2';
+import { renderLootSummary } from './advanced-stats-loot.js?v=20260913-advanced-dashboard-v2';
 
 const STATUS_KEYS = Object.freeze({
     ACTIVE: 'advancedStats.active',
@@ -32,6 +32,10 @@ function setVisibility(element, visible) {
 
 function setElementText(elements, id, value) {
     if (elements[id]) elements[id].textContent = value;
+}
+
+function setPresentationState(element, available) {
+    if (element) element.dataset.state = available ? 'available' : 'unavailable';
 }
 
 function safeStatus(tracking) {
@@ -121,6 +125,10 @@ export function renderOverview(elements, state) {
     setElementText(elements, 'kpiStars', attacks > 0 ? formatDecimal(summary.averageStars) : unknown);
     setElementText(elements, 'kpiThreeStar', attacks > 0 ? formatPercent(summary.threeStarRate) : unknown);
     setElementText(elements, 'kpiDestruction', attacks > 0 ? formatPercent(summary.averageDestruction) : unknown);
+    setPresentationState(elements.kpiAttacks, attacksKnown);
+    setPresentationState(elements.kpiStars, attacks > 0 && Number.isFinite(Number(summary?.averageStars)));
+    setPresentationState(elements.kpiThreeStar, attacks > 0 && Number.isFinite(Number(summary?.threeStarRate)));
+    setPresentationState(elements.kpiDestruction, attacks > 0 && Number.isFinite(Number(summary?.averageDestruction)));
     renderLootSummary(elements, state);
 
     const favorites = data?.favorites || {};
@@ -147,10 +155,12 @@ function renderFavorite(elements, kind, favorite, attacks) {
     if (!favorite || !isPlayerFacingUnitName(unitName)) {
         setElementText(elements, `favorite${title}`, t('advancedStats.noFavorite'));
         setElementText(elements, `favorite${title}Meta`, '');
+        setPresentationState(name, false);
         imageRoot?.replaceChildren();
         return;
     }
     name.textContent = unitName;
+    setPresentationState(name, true);
     meta.textContent = favoriteUsage(favorite, attacks);
     imageRoot?.replaceChildren(entityImage(unitName, { alt: '' }));
 }
@@ -162,10 +172,12 @@ function renderFavoriteArmy(elements, favorite, state, attacks) {
     if (!favorite || !presentation?.units.length) {
         setElementText(elements, 'favoriteArmy', t('advancedStats.noFavorite'));
         setElementText(elements, 'favoriteArmyMeta', '');
+        setPresentationState(elements.favoriteArmy, false);
         elements.favoriteArmyImage?.replaceChildren();
         return;
     }
     elements.favoriteArmy.textContent = presentation.label;
+    setPresentationState(elements.favoriteArmy, true);
     const usage = favoriteUsage(favorite, attacks);
     elements.favoriteArmyMeta.textContent = `${usage || `${formatNumber(favorite.battleCount)} ${t('advancedStats.attacks').toLowerCase()}`} · ${formatDecimal(favorite.averageStars)}`;
     const imageRoot = elements.favoriteArmyImage;

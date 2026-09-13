@@ -1,5 +1,5 @@
 import * as config from '../Data/config.js';
-import { databaseRequestWithBody } from './Supabase-Client.js?v=20260912-advanced-dashboard-v1';
+import { databaseRequestWithBody } from './Supabase-Client.js?v=20260913-advanced-dashboard-v2';
 
 function request(endpoint, body = {}) {
     return databaseRequestWithBody(config._BASE_URL + endpoint, body, null, {

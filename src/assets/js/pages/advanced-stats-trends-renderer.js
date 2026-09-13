@@ -1,10 +1,10 @@
-import { t } from '../i18n/i18n.js?v=20260912-advanced-dashboard-v1';
+import { t } from '../i18n/i18n.js?v=20260913-advanced-dashboard-v2';
 import {
     arrayValue,
     formatDecimal,
     formatNumber,
     formatPercent
-} from './advanced-stats-formatters.js?v=20260912-advanced-dashboard-v1';
+} from './advanced-stats-formatters.js?v=20260913-advanced-dashboard-v2';
 import {
     aggregateMonthlyTrends,
     calendarMonthGap,
@@ -12,8 +12,8 @@ import {
     normalizeTrendMetric,
     trendMetricConfig,
     trendMetricValue
-} from './advanced-stats-trends.js?v=20260912-advanced-dashboard-v1';
-import { renderLootTrend } from './advanced-stats-loot.js?v=20260912-advanced-dashboard-v1';
+} from './advanced-stats-trends.js?v=20260913-advanced-dashboard-v2';
+import { renderLootTrend } from './advanced-stats-loot.js?v=20260913-advanced-dashboard-v2';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const CHART_WIDTH = 720;

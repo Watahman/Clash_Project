@@ -1,4 +1,4 @@
-import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260912-advanced-dashboard-v1';
+import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260913-advanced-dashboard-v2';
 import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
 
 async function canInitialize() {
@@ -9,5 +9,5 @@ async function canInitialize() {
 }
 
 if (await canInitialize()) {
-    await import('./advanced-stats.js?v=20260912-advanced-dashboard-v1');
+    await import('./advanced-stats.js?v=20260913-advanced-dashboard-v2');
 }

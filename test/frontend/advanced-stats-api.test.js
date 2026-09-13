@@ -2,14 +2,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const databaseRequestWithBody = vi.hoisted(() => vi.fn());
 
-vi.mock('../../src/assets/js/Supabase/Supabase-Client.js?v=20260912-advanced-dashboard-v1', () => ({ databaseRequestWithBody }));
+vi.mock('../../src/assets/js/Supabase/Supabase-Client.js?v=20260913-advanced-dashboard-v2', () => ({ databaseRequestWithBody }));
 
 import {
     attackCategoryScope,
     getAdvancedStatsLifetime,
     getAdvancedStatsOverview,
     getAdvancedStatsTrends
-} from '../../src/assets/js/Supabase/Supabase-AdvancedStats.js?v=20260912-advanced-dashboard-v1';
+} from '../../src/assets/js/Supabase/Supabase-AdvancedStats.js?v=20260913-advanced-dashboard-v2';
 
 beforeEach(() => {
     databaseRequestWithBody.mockReset().mockResolvedValue({});
