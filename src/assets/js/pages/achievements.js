@@ -3,20 +3,20 @@ import { checkUserId } from '../Supabase/Supabase-User.js?v=20260829-public-auth
 import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260829-public-auth-v1';
 import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
 import { getCurrentUserId } from '../utils/user.js';
-import { applyI18n, getLanguage, t } from '../i18n/i18n.js?v=20260914-achievement-collection-v2';
+import { applyI18n, getLanguage, t } from '../i18n/i18n.js?v=20260914-achievement-polish-v1';
 import {
     collectLinkedAccounts,
     normalizePlayerTag,
     parseBaseDataText,
     groupAchievementFamilies
-} from '../achievements/achievement-view-model.js';
+} from '../achievements/achievement-view-model.js?v=20260914-achievement-polish-v1';
 import { getAchievementsFixture } from './achievements-fixtures.js?v=20260811-1';
-import { resolveAchievementCollectionKey } from './achievement-collection-navigation.js?v=20260914-achievement-collection-v2';
+import { resolveAchievementCollectionKey } from './achievement-collection-navigation.js?v=20260914-achievement-polish-v1';
 import {
     renderAll,
     renderSources,
     renderAchievements
-} from './achievements-renderer.js?v=20260914-achievement-collection-v2';
+} from './achievements-renderer.js?v=20260914-achievement-polish-v1';
 import { trackLoadFailed, trackLoadSucceeded } from '../analytics/product-analytics.js?v=20260912-product-analytics-v1';
 
 const ACCOUNT_STORAGE_KEY = 'clashpanel_achievements_account';

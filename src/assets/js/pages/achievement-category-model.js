@@ -2,7 +2,17 @@ import {
     ACHIEVEMENT_COLLECTION_DEFINITIONS,
     collectionDefinition,
     collectionKeyForSourceCategory
-} from './achievement-collection-definitions.js?v=20260914-achievement-collection-v2';
+} from './achievement-collection-definitions.js?v=20260914-achievement-polish-v1';
+import {
+    comparisonOf,
+    dedupeAchievementTiers,
+    evaluateThreshold,
+    isFamilyComplete,
+    isTierUnlocked,
+    progressIsUnknown,
+    stateForValue,
+    targetValueOf
+} from '../achievements/achievement-progress-semantics.js?v=20260914-achievement-polish-v1';
 
 const list = value => Array.isArray(value) ? value : [];
 
@@ -27,26 +37,8 @@ function tierNumber(value) {
     return Number.isInteger(candidate) && candidate > 0 ? candidate : null;
 }
 
-function tierIdentity(value, index) {
-    const achievementKey = achievementKeyOf(value);
-    const tier = tierNumber(value);
-    return {
-        keys: [
-            achievementKey ? `achievement:${achievementKey}` : '',
-            tier === null ? '' : `tier:${tier}`
-        ].filter(Boolean),
-        fallback: `row:${index}`
-    };
-}
-
 function dedupeTiers(tiers) {
-    const seen = new Set();
-    return list(tiers).filter((tier, index) => {
-        const identity = tierIdentity(tier, index);
-        if (identity.keys.some(key => seen.has(key))) return false;
-        identity.keys.forEach(key => seen.add(key));
-        return true;
-    });
+    return dedupeAchievementTiers(tiers);
 }
 
 function provenFamilyKey(candidate, tiers) {
@@ -60,13 +52,43 @@ function provenFamilyKey(candidate, tiers) {
 function isConsecutiveChain(familyKey, tiers) {
     if (!familyKey || tiers.length < 2) return false;
     const ordered = tiers
-        .map((tier, index) => ({ tier, index, number: tierNumber(tier) }))
+        .map(tier => ({ tier, number: tierNumber(tier) }))
         .sort((left, right) => (left.number ?? Infinity) - (right.number ?? Infinity));
     if (ordered.some(item => item.number === null)) return false;
-    return ordered.every((item, index) => {
+    if (!ordered.every((item, index) => {
         if (familyKeyOf(item.tier) && familyKeyOf(item.tier) !== familyKey) return false;
         return index === 0 || item.number === ordered[index - 1].number + 1;
-    });
+    })) return false;
+    return validThresholdSequence(ordered.map(item => item.tier));
+}
+
+function specialThreshold(tier) {
+    const display = text(tier?.thresholdText || tier?.threshold_text);
+    const label = text(tier?.tierLabel || tier?.tier_label).toLowerCase();
+    return (display !== '' && targetValueOf({ thresholdText: display }) === null)
+        || label === 'all';
+}
+
+function metricOf(tier) {
+    return text(tier?.metric || tier?.specMetric || tier?.spec_metric);
+}
+
+function validThresholdSequence(tiers) {
+    for (let index = 1; index < tiers.length; index += 1) {
+        const previousComparison = comparisonOf(tiers[index - 1]);
+        const currentComparison = comparisonOf(tiers[index]);
+        if (previousComparison !== currentComparison || !['GTE', 'LTE'].includes(currentComparison)) continue;
+        const previousMetric = metricOf(tiers[index - 1]);
+        const currentMetric = metricOf(tiers[index]);
+        if (previousMetric && currentMetric && previousMetric !== currentMetric) continue;
+        const previous = evaluateThreshold(tiers[index - 1]);
+        const current = evaluateThreshold(tiers[index]);
+        if (specialThreshold(tiers[index - 1]) || specialThreshold(tiers[index])) continue;
+        if (previous.target === null || current.target === null) continue;
+        if (currentComparison === 'GTE' && current.target <= previous.target) return false;
+        if (currentComparison === 'LTE' && current.target >= previous.target) return false;
+    }
+    return true;
 }
 
 export function achievementStructure(family) {
@@ -80,49 +102,71 @@ function familyHasStoredProgress(family) {
     return list(family?.tiers).some(tier => (
         tier?.hasStoredProgress === true
         || tier?.has_stored_progress === true
-        || tier?.unlocked === true
+        || isTierUnlocked(tier)
         || Number(tier?.progress) > 0
     ));
 }
 
 function familyIsUnknown(family) {
-    return family?.state === 'unknown'
+    return progressIsUnknown(family)
+        || family?.state === 'unknown'
         || family?.progressKnown === false
         || (family?.sourceAvailable === false && !familyHasStoredProgress(family));
 }
 
 function familyIsComplete(family) {
-    if (family?.complete !== undefined) return family.complete === true;
-    if (family?.state === 'complete') return true;
-    const tiers = list(family?.tiers);
-    return tiers.length > 0 && tiers.every(tier => tier?.unlocked === true);
+    return isFamilyComplete(family);
+}
+
+function normalizeTier(tier) {
+    const normalized = { ...tier };
+    const evaluation = evaluateThreshold(normalized);
+    if (evaluation.meets === true) normalized.unlocked = true;
+    if (evaluation.meets === false) {
+        normalized.unlocked = false;
+        normalized.complete = false;
+    }
+    normalized.state = stateForValue(normalized);
+    return normalized;
 }
 
 function normalizeCandidate(candidate) {
     const sourceCategory = sourceCategoryOf(candidate) || 'other';
     const rawTiers = Array.isArray(candidate?.tiers) ? candidate.tiers : [candidate];
-    const tiers = dedupeTiers(rawTiers);
+    const tiers = dedupeTiers(rawTiers).map(normalizeTier);
     const familyKey = provenFamilyKey(candidate, tiers);
+    const normalized = { ...candidate, category: sourceCategory, sourceCategory, familyKey, tiers };
+    const complete = familyIsComplete(normalized);
     return {
-        ...candidate,
-        category: sourceCategory,
-        sourceCategory,
-        familyKey,
+        ...normalized,
         sourceFamilyKey: familyKey || null,
-        tiers,
+        complete,
+        state: complete ? 'complete' : familyIsUnknown(normalized) ? 'unknown' : stateForValue(normalized),
         structure: isConsecutiveChain(familyKey, tiers) ? 'progression' : 'standalone'
     };
 }
 
 function mergeCandidates(items) {
     const grouped = new Map();
-    const standalone = [];
+    const standalone = new Map();
     items.forEach((candidate, index) => {
         const sourceCategory = sourceCategoryOf(candidate) || 'other';
         const rawTiers = Array.isArray(candidate?.tiers) ? candidate.tiers : [candidate];
         const familyKey = provenFamilyKey(candidate, rawTiers);
         if (!familyKey) {
-            standalone.push(normalizeCandidate({ ...candidate, sourceCategory }));
+            const achievementKey = achievementKeyOf(candidate) || achievementKeyOf(rawTiers[0]);
+            if (!achievementKey) {
+                standalone.set(`row:${index}`, { ...candidate, sourceCategory });
+                return;
+            }
+            const groupKey = `${sourceCategory}\u0000achievement\u0000${achievementKey}`;
+            const current = standalone.get(groupKey);
+            if (current) current.tiers.push(...rawTiers);
+            else standalone.set(groupKey, {
+                ...candidate,
+                sourceCategory,
+                tiers: [...rawTiers]
+            });
             return;
         }
         const groupKey = `${sourceCategory}\u0000${familyKey}`;
@@ -139,13 +183,13 @@ function mergeCandidates(items) {
             sourceIndex: index
         });
     });
-    return [...grouped.values(), ...standalone].map(normalizeCandidate);
+    return [...grouped.values(), ...standalone.values()].map(normalizeCandidate);
 }
 
 function collectionProgress(families) {
     const tiers = families.flatMap(family => list(family.tiers));
     const completedFamilies = families.filter(familyIsComplete).length;
-    const unlockedTiers = tiers.filter(tier => tier?.unlocked === true).length;
+    const unlockedTiers = tiers.filter(isTierUnlocked).length;
     const unknownFamilyCount = families.filter(familyIsUnknown).length;
     const progressKnown = families.length > 0 && unknownFamilyCount === 0;
     const completion = progressKnown ? completedFamilies / families.length : null;

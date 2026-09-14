@@ -3,6 +3,8 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 let renderAchievementHub;
 let renderAchievementCategory;
+let badgeInfo;
+let stateOf;
 
 function tier(number, overrides = {}) {
     return {
@@ -33,7 +35,7 @@ beforeAll(async () => {
     vi.stubGlobal('window', dom.window);
     vi.stubGlobal('document', dom.window.document);
     vi.stubGlobal('localStorage', dom.window.localStorage);
-    ({ renderAchievementHub } = await import('../../src/assets/js/pages/achievement-hub-renderer.js'));
+    ({ renderAchievementHub, badgeInfo, stateOf } = await import('../../src/assets/js/pages/achievement-hub-renderer.js'));
     ({ renderAchievementCategory } = await import('../../src/assets/js/pages/achievement-category-renderer.js'));
 });
 
@@ -94,6 +96,7 @@ describe('Achievement hub and category renderers', () => {
         expect(container.querySelectorAll('.achievement-standalone-challenge')).toHaveLength(1);
         expect(container.querySelector('.achievement-standalone-challenge')?.dataset.state).toBe('unknown');
         expect(container.textContent).toContain('Progress unavailable');
+        expect(container.textContent).not.toContain('Progress unavailable · Progress unavailable');
     });
 
     it('localizes the collection panel, completion badge and detail section in Dutch', () => {
@@ -106,7 +109,14 @@ describe('Achievement hub and category renderers', () => {
             totalCount: 1,
             completedCount: 1,
             completionPercent: 100,
-            progressionFamilies: [family('plan', { complete: true })],
+            progressionFamilies: [family('plan', {
+                complete: true,
+                tiers: [
+                    tier(1, { unlocked: true, progress: 100 }),
+                    tier(2, { unlocked: true, progress: 100 }),
+                    tier(3, { unlocked: true, progress: 100 })
+                ]
+            })],
             standaloneFamilies: [],
             badgeDefinition: { state: 'unlocked', label: 'Completion badge' }
         };
@@ -122,5 +132,41 @@ describe('Achievement hub and category renderers', () => {
         expect(detail.querySelector('[data-achievement-back="true"]')?.getAttribute('aria-label')).toBe('Terug naar Achievement Hub');
 
         localStorage.setItem('clashtools_language', 'en');
+    });
+
+    it('never renders a tier or collection badge as unlocked below its comparator threshold', () => {
+        const container = document.createElement('div');
+        const invalid = family('regressive', {
+            complete: true,
+            state: 'complete',
+            tiers: [tier(1, {
+                progress: 49, target: 100, comparison: 'GTE', unlocked: true, state: 'complete'
+            })]
+        });
+        const category = {
+            key: 'combat',
+            totalCount: 1,
+            completedCount: 1,
+            completionPercent: 100,
+            progressionFamilies: [invalid],
+            badgeDefinition: { state: 'unlocked', unlocked: true, label: 'Completion badge' }
+        };
+
+        renderAchievementHub(container, [category]);
+
+        expect(stateOf(invalid.tiers[0])).toBe('in_progress');
+        expect(container.querySelector('.achievement-hub-journey-node')?.dataset.state).toBe('in_progress');
+        expect(container.querySelector('.achievement-hub-badge')?.dataset.state).toBe('locked');
+        expect(badgeInfo(category).state).toBe('locked');
+        expect(container.textContent).toContain('0 / 1');
+    });
+
+    it('requires 100 percent evidence even when a stale badge says unlocked', () => {
+        expect(badgeInfo({
+            totalCount: 2,
+            completedCount: 1,
+            completionPercent: 50,
+            badgeDefinition: { state: 'unlocked', unlocked: true }
+        }).state).toBe('locked');
     });
 });

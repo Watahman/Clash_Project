@@ -1,3 +1,12 @@
+import {
+    dedupeAchievementTiers,
+    evaluateThreshold,
+    isFamilyComplete,
+    isTierUnlocked,
+    progressIsUnknown,
+    progressRatioOf,
+    stateForValue
+} from './achievement-progress-semantics.js?v=20260914-achievement-polish-v1';
 export function normalizePlayerTag(value) {
     const compact = String(value || '')
         .trim()
@@ -11,15 +20,12 @@ export function normalizePlayerTag(value) {
 export function parseBaseDataText(text) {
     const source = String(text || '').trim();
     if (!source) return { valid: false, error: 'Paste the copied JSON first.' };
-
     let parsed;
     try { parsed = JSON.parse(source); }
     catch { return { valid: false, error: 'This is not valid JSON.' }; }
-
     if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') {
         return { valid: false, error: 'The copied data must be one JSON object.' };
     }
-
     const data = parsed.baseData && typeof parsed.baseData === 'object' && !Array.isArray(parsed.baseData)
         ? parsed.baseData : parsed;
     const tag = normalizePlayerTag(data.tag);
@@ -28,7 +34,6 @@ export function parseBaseDataText(text) {
     if (!Number.isFinite(timestamp) || timestamp <= 0) {
         return { valid: false, error: 'The JSON does not contain a valid timestamp.' };
     }
-
     const recognizedSections = [
         'helpers', 'buildings', 'traps', 'decos', 'obstacles', 'units',
         'siege_machines', 'heroes', 'spells', 'pets', 'equipment',
@@ -54,7 +59,6 @@ export function parseBaseDataText(text) {
 export function collectLinkedAccounts(input) {
     const accounts = new Map();
     const visited = new Set();
-
     const visit = value => {
         if (value === null || value === undefined) return;
         if (typeof value === 'string') {
@@ -99,10 +103,12 @@ export function collectLinkedAccounts(input) {
 }
 
 function normalizedRow(row) {
-    const target = Math.max(0, Number(row?.target) || 0);
-    const progress = Math.max(0, Number(row?.progress) || 0);
-    const progressKnown = row?.progress_known !== false;
-    return {
+    const numericTarget = Number(row?.target);
+    const numericProgress = Number(row?.progress);
+    const target = row?.target != null && Number.isFinite(numericTarget) ? Math.max(0, numericTarget) : null;
+    const progress = row?.progress != null && Number.isFinite(numericProgress) ? Math.max(0, numericProgress) : null;
+    const progressKnown = row?.progress_known !== false && progress !== null;
+    const normalized = {
         ...row,
         family_key: String(row?.family_key || row?.familyKey || ''),
         achievement_key: String(row?.achievement_key || row?.achievementKey || ''),
@@ -112,6 +118,7 @@ function normalizedRow(row) {
         categoryLabel: String(row?.category_label || ''),
         scope: String(row?.scope || 'player').toLowerCase(),
         rarity: String(row?.rarity || 'common').toLowerCase(),
+        comparison: String(row?.comparison || '').trim().toUpperCase(),
         metric: String(row?.metric || ''),
         specMetric: String(row?.spec_metric || ''),
         source: String(row?.source || 'base_data'),
@@ -133,8 +140,11 @@ function normalizedRow(row) {
         unlocked: row?.unlocked === true,
         unlocked_at: row?.unlocked_at || row?.unlockedAt || null
     };
+    const evaluation = evaluateThreshold(normalized);
+    if (evaluation.meets === true) normalized.unlocked = true;
+    if (evaluation.meets === false || (evaluation.supported && !evaluation.known)) normalized.unlocked = false;
+    return normalized;
 }
-
 function sharedFamilyLabel(tiers, field, stripSuffix) {
     const values = tiers.map(tier => String(tier?.[field] || '').trim());
     const stripped = values.map(stripSuffix);
@@ -170,33 +180,32 @@ export function groupAchievementFamilies(rows) {
     }
 
     return [...groups.entries()].map(([familyKey, tiers]) => {
-        tiers.sort((left, right) => left.tier - right.tier);
-        const unlockedTiers = tiers.filter(tier => tier.unlocked);
-        const currentTier = tiers.find(tier => !tier.unlocked) || tiers.at(-1);
+        const uniqueTiers = dedupeAchievementTiers(tiers)
+            .sort((left, right) => left.tier - right.tier);
+        const family = { familyKey, tiers: uniqueTiers };
+        const unlockedTiers = uniqueTiers.filter(isTierUnlocked);
+        const currentTier = uniqueTiers.find(tier => !isTierUnlocked(tier)) || uniqueTiers.at(-1);
         const highestUnlocked = unlockedTiers.at(-1) || null;
-        const complete = unlockedTiers.length === tiers.length && tiers.length > 0;
-        const hasStoredProgress = tiers.some(tier => tier.hasStoredProgress || tier.unlocked || tier.progress > 0);
+        const complete = isFamilyComplete(family) && uniqueTiers.length > 0;
+        const hasStoredProgress = uniqueTiers.some(tier => tier.hasStoredProgress || tier.unlocked || tier.progress > 0);
         const sourceAvailable = complete || currentTier?.sourceAvailable === true;
-        const progressRatio = complete
-            ? 1
-            : sourceAvailable && currentTier?.target > 0
-                ? Math.min(1, currentTier.progress / currentTier.target)
-                : 0;
-        const state = complete
-            ? 'complete'
-            : !sourceAvailable
-                ? 'unknown'
-                : unlockedTiers.length > 0
-                    ? 'unlocked'
-                    : currentTier?.progress > 0
-                        ? 'in_progress'
-                        : 'locked';
-        const first = tiers[0];
+        const familyStatus = {
+            ...family,
+            complete,
+            sourceAvailable,
+            progressKnown: currentTier?.progressKnown !== false,
+            unlockedTiers,
+            currentTier,
+            state: unlockedTiers.length ? 'unlocked' : currentTier?.progress > 0 ? 'in_progress' : 'locked'
+        };
+        const progressRatio = complete ? 1 : progressRatioOf(currentTier) ?? 0;
+        const state = progressIsUnknown(familyStatus) ? 'unknown' : stateForValue(familyStatus);
+        const first = uniqueTiers[0];
 
         return {
             familyKey,
-            title: familyTitle(tiers),
-            description: familyDescription(tiers),
+            title: familyTitle(uniqueTiers),
+            description: familyDescription(uniqueTiers),
             category: first.category,
             categoryLabel: first.categoryLabel,
             entity: currentTier?.entity || first.entity || null,
@@ -208,7 +217,7 @@ export function groupAchievementFamilies(rows) {
             notes: currentTier?.notes || first.notes,
             sourceAvailable,
             hasStoredProgress,
-            tiers,
+            tiers: uniqueTiers,
             unlockedTiers,
             highestUnlocked,
             currentTier,
@@ -239,12 +248,12 @@ export function achievementLevelFromXp(totalXp) {
 export function buildAchievementSummary(families) {
     const list = Array.isArray(families) ? families : [];
     const allTiers = list.flatMap(family => family.tiers || []);
-    const unlockedTiers = allTiers.filter(tier => tier.unlocked);
+    const unlockedTiers = allTiers.filter(isTierUnlocked);
     const personalTiers = list
         .filter(family => family.scope !== 'clan')
         .flatMap(family => family.tiers || []);
     const totalXp = personalTiers
-        .filter(tier => tier.unlocked)
+        .filter(isTierUnlocked)
         .reduce((sum, tier) => sum + tier.xp, 0);
     return {
         familyCount: list.length,

@@ -171,6 +171,90 @@ describe('Achievement collection model', () => {
         expect(collection.progressionFamilies).toHaveLength(1);
     });
 
+    it('rejects an unlocked tier whose measured value is below its GTE threshold', () => {
+        const invalid = family('offensive_progression', 'OFFENSE', {
+            complete: true,
+            state: 'complete',
+            tiers: [tier(1, {
+                family_key: 'OFFENSE', progress: 4, target: 5, comparison: 'GTE',
+                unlocked: true, state: 'complete'
+            })]
+        });
+        const collection = categoryByKey(buildAchievementCollections([invalid]), 'combat');
+        const [normalized] = collection.families[0].tiers;
+
+        expect(normalized.unlocked).toBe(false);
+        expect(normalized.state).toBe('in_progress');
+        expect(collection.families[0].complete).toBe(false);
+        expect(collection.families[0].state).toBe('in_progress');
+        expect(collection.badge.unlocked).toBe(false);
+    });
+
+    it('applies the catalog comparator contract for GTE, LTE, BOOLEAN and unknown rules', () => {
+        const rows = [
+            family('trophies_and_rankings', 'GTE', {
+                tiers: [tier(1, { family_key: 'GTE', progress: 9, target: 10, comparison: 'GTE', unlocked: true })]
+            }),
+            family('trophies_and_rankings', 'LTE', {
+                tiers: [tier(1, { family_key: 'LTE', progress: 10, target: 10, comparison: 'LTE', unlocked: true })]
+            }),
+            family('trophies_and_rankings', 'LTE_LOW', {
+                tiers: [tier(1, { family_key: 'LTE_LOW', progress: 11, target: 10, comparison: 'LTE', unlocked: true })]
+            }),
+            family('profile_and_milestones', 'BOOLEAN', {
+                tiers: [tier(1, { family_key: 'BOOLEAN', progress: 0, comparison: 'BOOLEAN', unlocked: true })]
+            }),
+            family('profile_and_milestones', 'UNKNOWN', {
+                state: 'unknown', sourceAvailable: false, hasStoredProgress: false,
+                tiers: [tier(1, {
+                    family_key: 'UNKNOWN', progress: 999, target: 1, comparison: 'UNSUPPORTED',
+                    progressKnown: false, sourceAvailable: false, unlocked: true
+                })]
+            })
+        ];
+        const collections = buildAchievementCollections(rows);
+        const stats = categoryByKey(collections, 'progression-stats');
+
+        expect(stats.families.find(item => item.familyKey === 'GTE').tiers[0].unlocked).toBe(false);
+        expect(stats.families.find(item => item.familyKey === 'LTE').tiers[0].unlocked).toBe(true);
+        expect(stats.families.find(item => item.familyKey === 'LTE_LOW').tiers[0].unlocked).toBe(false);
+        expect(stats.families.find(item => item.familyKey === 'BOOLEAN').tiers[0].unlocked).toBe(false);
+        expect(stats.families.find(item => item.familyKey === 'UNKNOWN').state).toBe('unknown');
+    });
+
+    it('does not classify a gapped or numerically regressive chain as progression', () => {
+        const gapped = family('offensive_progression', 'GAP', {
+            tiers: [tier(1, { family_key: 'GAP' }), tier(3, { family_key: 'GAP' })]
+        });
+        const regressive = family('offensive_progression', 'REGRESSIVE', {
+            tiers: [
+                tier(1, { family_key: 'REGRESSIVE', target: 10, comparison: 'GTE' }),
+                tier(2, { family_key: 'REGRESSIVE', target: 5, comparison: 'GTE' })
+            ]
+        });
+        const mixedComparator = family('offensive_progression', 'MIXED', {
+            tiers: [
+                tier(1, { family_key: 'MIXED', target: 10, comparison: 'GTE' }),
+                tier(2, { family_key: 'MIXED', target: 10, comparison: 'LTE' })
+            ]
+        });
+        const terminalPredicate = family('imported_home_village_base', 'BASE_HOME_GEARUPS', {
+            tiers: [
+                tier(1, { family_key: 'BASE_HOME_GEARUPS', target: 1, comparison: 'GTE' }),
+                tier(2, { family_key: 'BASE_HOME_GEARUPS', target: 2, comparison: 'GTE' }),
+                tier(3, {
+                    family_key: 'BASE_HOME_GEARUPS', target: 1, comparison: 'GTE',
+                    tier_label: 'All', threshold_text: '{"all_available":true}'
+                })
+            ]
+        });
+
+        expect(achievementStructure(gapped)).toBe('standalone');
+        expect(achievementStructure(regressive)).toBe('standalone');
+        expect(achievementStructure(mixedComparator)).toBe('progression');
+        expect(achievementStructure(terminalPredicate)).toBe('progression');
+    });
+
     it('keeps the legacy category entry point pointed at collection output', () => {
         expect(buildAchievementCategories([]).map(collection => collection.key)).toEqual(COLLECTION_KEYS);
         expect(categoryByKey(buildAchievementCategories([]), 'missing')).toBeUndefined();

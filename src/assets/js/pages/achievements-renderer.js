@@ -1,14 +1,14 @@
-import { applyI18n, getLanguage, t } from '../i18n/i18n.js?v=20260914-achievement-collection-v2';
+import { applyI18n, getLanguage, t } from '../i18n/i18n.js?v=20260914-achievement-polish-v1';
 import {
     buildAchievementSummary,
     filterAchievementFamilies
-} from '../achievements/achievement-view-model.js';
-import { categoryByKey } from './achievement-category-model.js';
-import { hubTranslated, localizeAchievementCollections } from './achievement-collection-localizer.js?v=20260914-achievement-collection-v2';
+} from '../achievements/achievement-view-model.js?v=20260914-achievement-polish-v1';
+import { categoryByKey } from './achievement-category-model.js?v=20260914-achievement-polish-v1';
+import { hubTranslated, localizeAchievementCollections } from './achievement-collection-localizer.js?v=20260914-achievement-polish-v1';
 import { achievementFamilyImage } from './achievement-asset-view.js?v=20260824-achievement-raster-color-1';
-import { achievementChronicleLocales } from '../i18n/achievement-chronicle-locales.js?v=20260914-achievement-collection-v2';
-import { renderAchievementHub } from './achievement-hub-renderer.js?v=20260914-achievement-collection-v2';
-import { renderAchievementCategory } from './achievement-category-renderer.js?v=20260914-achievement-collection-v2';
+import { achievementChronicleLocales } from '../i18n/achievement-chronicle-locales.js?v=20260914-achievement-polish-v1';
+import { renderAchievementHub } from './achievement-hub-renderer.js?v=20260914-achievement-polish-v1';
+import { renderAchievementCategory } from './achievement-category-renderer.js?v=20260914-achievement-polish-v1';
 
 const SOURCE_ORDER = Object.freeze([
     'live_profile', 'base_data', 'base_history', 'advanced_stats', 'war', 'cwl_history', 'raid_history',

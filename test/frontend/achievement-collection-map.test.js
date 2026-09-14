@@ -50,7 +50,8 @@ describe('Achievement collection map', () => {
         renderAchievementCategory(container, {
             key: 'collection',
             categoryLabel: 'Collection',
-            progressionFamilies: [family('raids', { orientation: 'horizontal' })],
+            badgeDefinition: { label: 'Collection Master', state: 'unlocked' },
+            progressionFamilies: [family('raids', { orientation: 'vertical' })],
             standaloneFamilies: [unknown]
         });
 
@@ -60,12 +61,16 @@ describe('Achievement collection map', () => {
         expect(container.querySelector('.achievement-category-progression')).toBeNull();
         expect(container.querySelector('.achievement-category-standalone')).toBeNull();
         expect(container.querySelector('.achievement-category-crest')).toBeTruthy();
+        expect(container.querySelector('.achievement-category-badge')?.dataset.reward).toBe('final');
+        expect(container.querySelector('.achievement-category-badge')?.dataset.state).toBe('locked');
+        expect(container.querySelector('.achievement-badge-kicker')?.textContent).toMatch(/Completion reward|Voltooiingsbeloning/);
         expect(container.querySelectorAll('.achievement-map-track-shell')).toHaveLength(1);
+        expect(container.querySelector('.achievement-map-track-shell')?.dataset.layout).toBeUndefined();
         expect(container.querySelectorAll('.achievement-map-constellation')).toHaveLength(1);
         expect(container.querySelectorAll('.achievement-map-path')).toHaveLength(2);
     });
 
-    it('shows family names once while nodes expose tier, threshold and status', () => {
+    it('shows family names once while nodes expose concise tier targets', () => {
         const container = document.createElement('div');
         renderAchievementCategory(container, {
             key: 'planning',
@@ -81,7 +86,8 @@ describe('Achievement collection map', () => {
         expect(nodes).toHaveLength(3);
         expect(nodes[0].textContent).toContain('Tier 1');
         expect(nodes[0].textContent).toContain('100');
-        expect(nodes[0].textContent).toMatch(/Unlocked|Badge unlocked/);
+        expect(nodes[0].textContent).not.toMatch(/Unlocked|Badge unlocked/);
+        expect(nodes[0].querySelector('button')?.getAttribute('aria-label')).toMatch(/Unlocked|Badge unlocked/);
         expect(nodes[0].dataset.state).toBe('unlocked');
         expect(nodes.every(node => node.querySelector('button')?.type === 'button')).toBe(true);
     });

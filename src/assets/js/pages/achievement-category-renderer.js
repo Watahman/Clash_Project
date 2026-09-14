@@ -8,7 +8,7 @@ import {
     countsFor,
     hubText,
     stateOf
-} from './achievement-hub-renderer.js?v=20260914-achievement-collection-v2';
+} from './achievement-hub-renderer.js?v=20260914-achievement-polish-v1';
 
 function label(value, fallback = '') {
     const result = String(value ?? '').trim();
@@ -65,15 +65,19 @@ function makeBadge(category) {
     element.className = 'achievement-category-badge achievement-badge';
     element.dataset.state = badge.state;
     element.dataset.tier = badge.tier;
-    element.setAttribute('aria-label', `${badge.label}: ${badgeTierText(badge.tier)}`);
+    element.dataset.reward = 'final';
+    element.setAttribute('role', 'img');
+    element.setAttribute('aria-label', `${hubText('categoryReward', 'Completion reward')}: ${badge.label}. ${badgeTierText(badge.tier)}`);
     const mark = document.createElement('span');
     mark.className = 'achievement-badge-mark';
     mark.setAttribute('aria-hidden', 'true');
     mark.textContent = badge.state === 'locked' ? '◇' : '◆';
     const copy = document.createElement('span');
     copy.className = 'achievement-badge-copy';
-    copy.append(document.createElement('strong'), document.createElement('small'));
-    copy.firstChild.textContent = badge.label;
+    copy.append(document.createElement('span'), document.createElement('strong'), document.createElement('small'));
+    copy.firstChild.className = 'achievement-badge-kicker';
+    copy.firstChild.textContent = hubText('categoryReward', 'Completion reward');
+    copy.children[1].textContent = badge.label;
     copy.lastChild.textContent = badgeTierText(badge.tier);
     element.append(mark, copy);
     return element;
@@ -112,7 +116,7 @@ function makeCategoryHeader(category, options) {
     summary.className = 'achievement-category-summary';
     summary.append(document.createElement('strong'), document.createElement('span'));
     summary.firstChild.textContent = counts.percent === null
-        ? hubText('progressUnavailable', 'Progress unavailable')
+        ? achievementStateText('unknown')
         : hubText('categoryProgress', '{unlocked} / {total} complete', counts);
     summary.lastChild.textContent = counts.percent === null
         ? hubText('progressUnavailable', 'Progress unavailable')
@@ -136,10 +140,10 @@ function makeNodeButton(tier, family, state, value, tierLabel, threshold, option
     emblem.append(achievementFamilyImage(tier, familyTitle(family)));
     const copy = document.createElement('span');
     copy.className = 'achievement-progression-tier-copy';
-    copy.append(document.createElement('strong'), document.createElement('span'), document.createElement('small'));
+    copy.append(document.createElement('strong'), document.createElement('span'));
     copy.firstChild.textContent = tierLabel;
+    copy.lastChild.className = 'achievement-progression-tier-target';
     copy.children[1].textContent = threshold;
-    copy.lastChild.textContent = `${achievementStateText(state)} · ${progressCopy(value)}`;
     button.append(emblem, copy);
     bindNode(button, tier, family, options);
     return button;
@@ -173,21 +177,26 @@ function makeTierNode(tier, index, total, family, options, standalone = false) {
 function makeTrackHeader(family) {
     const heading = document.createElement('header');
     heading.className = 'achievement-map-track-heading';
-    heading.append(document.createElement('div'), document.createElement('p'));
-    heading.firstChild.append(document.createElement('h3'));
-    heading.firstChild.firstChild.textContent = familyTitle(family);
-    heading.lastChild.textContent = label(family?.description, '');
-    if (!heading.lastChild.textContent) heading.removeChild(heading.lastChild);
+    const copy = document.createElement('div');
+    copy.className = 'achievement-map-track-heading-copy';
+    copy.append(document.createElement('h3'));
+    copy.firstChild.textContent = familyTitle(family);
+    const description = label(family?.description, '');
+    if (description) {
+        const detail = document.createElement('p');
+        detail.textContent = description;
+        copy.append(detail);
+    }
+    heading.append(copy);
     return heading;
 }
 
-function makeProgressionFamily(family, index, options) {
+function makeProgressionFamily(family, options) {
     const article = document.createElement('article');
-    const layout = label(family?.orientation ?? family?.layout, index % 2 ? 'vertical' : 'horizontal');
     article.className = 'achievement-progression-path achievement-map-track-shell';
     article.setAttribute('role', 'listitem');
     article.dataset.family = label(family?.familyKey ?? family?.key ?? family?.id, 'achievement');
-    article.dataset.layout = layout === 'vertical' ? 'vertical' : 'horizontal';
+    article.dataset.structure = 'progression';
     const track = document.createElement('ol');
     track.className = 'achievement-progression-track achievement-map-track';
     track.setAttribute('role', 'list');
@@ -225,7 +234,7 @@ function makeMap(category, options) {
     map.setAttribute('aria-label', heading.firstChild.textContent);
     const progression = Array.isArray(category?.progressionFamilies) ? category.progressionFamilies : [];
     const standalone = Array.isArray(category?.standaloneFamilies) ? category.standaloneFamilies : [];
-    progression.forEach((family, index) => map.append(makeProgressionFamily(family, index, options)));
+    progression.forEach(family => map.append(makeProgressionFamily(family, options)));
     standalone.forEach((family, index) => map.append(makeStandaloneFamily(family, index, options)));
     if (!map.childElementCount) map.append(emptySection(hubText('detailEmpty', 'This category has no achievements to show yet.')));
     section.append(heading, map);

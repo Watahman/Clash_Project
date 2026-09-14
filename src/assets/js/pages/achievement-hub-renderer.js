@@ -1,6 +1,15 @@
 import { achievementFamilyImage } from './achievement-asset-view.js?v=20260824-achievement-raster-color-1';
-import { getLanguage, t } from '../i18n/i18n.js?v=20260914-achievement-collection-v2';
-import { achievementChronicleLocales } from '../i18n/achievement-chronicle-locales.js?v=20260914-achievement-collection-v2';
+import { getLanguage, t } from '../i18n/i18n.js?v=20260914-achievement-polish-v1';
+import { achievementChronicleLocales } from '../i18n/achievement-chronicle-locales.js?v=20260914-achievement-polish-v1';
+import { stateForValue } from '../achievements/achievement-progress-semantics.js?v=20260914-achievement-polish-v1';
+import {
+    badgeInfo,
+    countsFor,
+    familiesOf,
+    tiersOf
+} from './achievement-hub-state.js?v=20260914-achievement-polish-v1';
+
+export { badgeInfo, countsFor };
 
 export function hubText(key, fallback = key, params = {}) {
     const fullKey = key.startsWith('achievements.hub.') ? key : `achievements.hub.${key}`;
@@ -20,7 +29,7 @@ function generalText(key, fallback, params = {}) {
 }
 
 export function achievementStateText(state) {
-    if (state === 'unknown') return hubText('progressUnavailable', 'Progress unavailable');
+    if (state === 'unknown') return generalText('achievements.waitingForData', 'Waiting for data');
     if (state === 'locked') return hubText('badgeLocked', 'Badge locked');
     if (state === 'in_progress') return generalText('achievements.inProgress', 'In progress');
     if (state === 'complete') return generalText('achievements.completed', 'Complete');
@@ -59,84 +68,18 @@ function categoryTitle(category) {
         hubText('categoryDetails', 'Category details'));
 }
 
-function familiesOf(category) {
-    return [
-        ...(Array.isArray(category?.progressionFamilies) ? category.progressionFamilies : []),
-        ...(Array.isArray(category?.standaloneFamilies) ? category.standaloneFamilies : [])
-    ];
-}
-
 function familyTitle(family) {
     return label(family?.title ?? family?.name, achievementLabel());
 }
 
-function tiersOf(family) {
-    if (Array.isArray(family?.tiers) && family.tiers.length) return family.tiers;
-    return [family];
-}
-
 export function stateOf(value) {
-    const state = label(value?.state).toLowerCase();
-    if (state === 'complete' || value?.complete === true) return 'complete';
-    if (state === 'unknown' || value?.sourceAvailable === false || value?.progressKnown === false) return 'unknown';
-    if (state === 'unlocked' || value?.unlocked === true || (value?.unlockedTiers?.length || 0) > 0) return 'unlocked';
-    if (state === 'in_progress' || state === 'in-progress' || Number(value?.progressRatio) > 0 || Number(value?.progress) > 0) return 'in_progress';
-    return 'locked';
-}
-
-function completionFields(category) {
-    return category?.completion && typeof category.completion === 'object' ? category.completion : {};
-}
-
-export function countsFor(category) {
-    const families = familiesOf(category);
-    const tiers = families.flatMap(tiersOf);
-    const completion = completionFields(category);
-    const explicitTotal = Number(category?.totalCount ?? category?.totalAchievements ?? category?.familyCount
-        ?? category?.total ?? completion.total);
-    const explicitUnlocked = Number(category?.completedCount ?? category?.completedAchievements
-        ?? category?.completedFamilyCount ?? category?.completedFamilies ?? category?.unlockedCount
-        ?? category?.unlocked ?? completion.completed ?? completion.unlocked);
-    const total = Number.isFinite(explicitTotal) && explicitTotal >= 0 ? explicitTotal : tiers.length;
-    const unlocked = Number.isFinite(explicitUnlocked) && explicitUnlocked >= 0
-        ? Math.min(total, explicitUnlocked)
-        : tiers.filter(tier => stateOf(tier) === 'complete' || stateOf(tier) === 'unlocked').length;
-    const explicitPercent = category?.completionPercent ?? category?.completionPercentage
-        ?? category?.progressPercent ?? category?.percentage ?? completion.percent;
-    const hasUnknown = families.some(family => stateOf(family) === 'unknown'
-        || tiersOf(family).some(tier => stateOf(tier) === 'unknown'));
-    const percentValue = Number(explicitPercent);
-    const percent = Number.isFinite(percentValue)
-        ? Math.max(0, Math.min(100, percentValue <= 1 ? percentValue * 100 : percentValue))
-        : total > 0 && !hasUnknown ? (unlocked / total) * 100 : null;
-    return { total, unlocked, percent };
+    return stateForValue(value);
 }
 
 function progressText(counts) {
     return hubText('categoryProgress', '{unlocked} / {total} complete', {
         unlocked: counts.unlocked, total: counts.total
     });
-}
-
-function badgeDefinitionOf(category) {
-    const definition = category?.badgeDefinition ?? category?.badge;
-    return definition && typeof definition === 'object' ? definition : {};
-}
-
-export function badgeInfo(category) {
-    const definition = badgeDefinitionOf(category);
-    const rawState = label(definition.state ?? definition.status ?? category?.badgeState).toLowerCase();
-    const ratio = Number(definition.percentage ?? definition.progress ?? definition.ratio);
-    const unlocked = definition.unlocked === true || definition.confirmedUnlocked === true
-        || ['unlocked', 'complete', 'completed', 'earned'].includes(rawState)
-        || ratio >= 100 || countsFor(category).percent === 100;
-    const state = unlocked ? 'unlocked' : 'locked';
-    return {
-        label: label(definition.label ?? definition.displayLabel,
-            'Completion badge'),
-        state,
-        tier: state
-    };
 }
 
 function directImage(source, title) {
