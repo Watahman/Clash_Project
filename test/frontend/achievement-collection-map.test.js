@@ -68,10 +68,16 @@ describe('Achievement collection map', () => {
         expect(container.querySelectorAll('.achievement-map-track-shell')).toHaveLength(1);
         expect(container.querySelector('.achievement-map-track-shell')?.dataset.layout).toBeUndefined();
         expect(container.querySelectorAll('.achievement-map-constellation')).toHaveLength(1);
-        expect(container.querySelectorAll('.achievement-map-path')).toHaveLength(2);
+        expect(container.querySelectorAll('.achievement-map-path')).toHaveLength(1);
+        expect(container.querySelectorAll('.achievement-map-path path')).toHaveLength(2);
         expect([...container.querySelectorAll('.achievement-map-path')].every(path => path.localName === 'svg')).toBe(true);
         expect([...container.querySelectorAll('.achievement-map-path path')].every(path => path.getAttribute('d')?.includes('C'))).toBe(true);
         expect(container.querySelector('.achievement-map-constellation .achievement-map-path')).toBeNull();
+        expect([...container.querySelectorAll('.achievement-progression-tier')].slice(0, -1)
+            .map(node => node.dataset.nextState)).toEqual(['in_progress', 'in_progress']);
+        const positions = [...container.querySelectorAll('.achievement-progression-tier')]
+            .map(node => Number.parseFloat(node.style.getPropertyValue('--node-x')));
+        expect(positions.slice(1).every((position, index) => position - positions[index] >= 124)).toBe(true);
     });
 
     it('shows family names once while nodes expose concise tier targets', () => {
@@ -114,5 +120,23 @@ describe('Achievement collection map', () => {
         expect(button.tabIndex).toBe(0);
         button.click();
         expect(onAchievementSelect).toHaveBeenCalledWith(unknown.tiers[0], unknown);
+    });
+
+    it('gives every tooltip a unique family-scoped relationship', () => {
+        const container = document.createElement('div');
+        renderAchievementCategory(container, {
+            key: 'collection',
+            progressionFamilies: [family('raids'), family('wins')],
+            standaloneFamilies: []
+        });
+
+        const buttons = [...container.querySelectorAll('.achievement-map-node-button')];
+        const tooltipIds = buttons.map(button => button.getAttribute('aria-controls'));
+        expect(new Set(tooltipIds).size).toBe(buttons.length);
+        buttons.forEach(button => {
+            const tooltipId = button.getAttribute('aria-controls');
+            expect(button.getAttribute('aria-describedby')).toBe(tooltipId);
+            expect(container.querySelectorAll(`#${tooltipId}`)).toHaveLength(1);
+        });
     });
 });

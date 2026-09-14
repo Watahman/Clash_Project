@@ -73,14 +73,15 @@ function metricOf(tier) {
     return text(tier?.metric || tier?.specMetric || tier?.spec_metric);
 }
 
-function validThresholdSequence(tiers) {
+export function validThresholdSequence(tiers) {
     for (let index = 1; index < tiers.length; index += 1) {
         const previousComparison = comparisonOf(tiers[index - 1]);
         const currentComparison = comparisonOf(tiers[index]);
-        if (previousComparison !== currentComparison || !['GTE', 'LTE'].includes(currentComparison)) continue;
+        if (previousComparison !== currentComparison) return false;
+        if (!['GTE', 'LTE'].includes(currentComparison)) return false;
         const previousMetric = metricOf(tiers[index - 1]);
         const currentMetric = metricOf(tiers[index]);
-        if (previousMetric && currentMetric && previousMetric !== currentMetric) continue;
+        if (previousMetric && currentMetric && previousMetric !== currentMetric) return false;
         const previous = evaluateThreshold(tiers[index - 1]);
         const current = evaluateThreshold(tiers[index]);
         if (specialThreshold(tiers[index - 1]) || specialThreshold(tiers[index])) continue;

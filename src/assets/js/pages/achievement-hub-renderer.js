@@ -130,16 +130,21 @@ function makeJourney(family, options = {}) {
         const node = document.createElement('span');
         node.className = 'achievement-hub-journey-node';
         node.dataset.state = stateOf(tier);
+        node.dataset.tier = String(tier?.tier ?? index + 1);
         node.setAttribute('role', 'listitem');
         node.setAttribute('aria-label', `${familyTitle(tier)}: ${achievementStateText(stateOf(tier))}`);
         const emblem = document.createElement('span');
         emblem.className = 'achievement-hub-journey-emblem';
         emblem.append(familyImage(tier, familyTitle(tier)));
-        node.append(emblem);
+        const label = document.createElement('span');
+        label.className = 'achievement-hub-journey-node-label';
+        label.textContent = `T${tier?.tier ?? index + 1}`;
+        node.append(emblem, label);
         if (index < tiers.length - 1) {
             const connector = document.createElement('i');
             connector.className = 'achievement-hub-journey-connector';
             connector.setAttribute('aria-hidden', 'true');
+            connector.dataset.state = stateOf(tiers[index + 1]);
             node.append(connector);
         }
         track.append(node);
@@ -214,6 +219,7 @@ function makeModulePreview(category) {
     if (!families.length && !standalone.length) return null;
     const preview = document.createElement('div');
     preview.className = 'achievement-hub-preview';
+    preview.dataset.previewFamilies = String(families.length + standalone.length);
     preview.setAttribute('role', 'list');
     families.forEach(family => preview.append(makeJourney(family)));
     standalone.forEach(family => preview.append(makeJourney(family, { maxTiers: 1, standalone: true })));

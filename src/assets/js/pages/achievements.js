@@ -11,12 +11,12 @@ import {
     groupAchievementFamilies
 } from '../achievements/achievement-view-model.js?v=20260914-achievement-reconciled-v1';
 import { getAchievementsFixture } from './achievements-fixtures.js?v=20260811-1';
-import { resolveAchievementCollectionKey } from './achievement-collection-navigation.js?v=20260914-achievement-reconciled-v1';
+import { resolveAchievementCollectionKey } from './achievement-collection-navigation.js?v=20260914-achievement-chronicle-v2';
 import {
     renderAll,
     renderSources,
     renderAchievements
-} from './achievements-renderer.js?v=20260914-achievement-reconciled-v1';
+} from './achievements-renderer.js?v=20260914-achievement-chronicle-v2';
 import { trackLoadFailed, trackLoadSucceeded } from '../analytics/product-analytics.js?v=20260912-product-analytics-v1';
 
 const ACCOUNT_STORAGE_KEY = 'clashpanel_achievements_account';

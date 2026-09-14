@@ -238,6 +238,18 @@ describe('Achievement collection model', () => {
                 tier(2, { family_key: 'MIXED', target: 10, comparison: 'LTE' })
             ]
         });
+        const mixedMetric = family('offensive_progression', 'MIXED_METRIC', {
+            tiers: [
+                tier(1, { family_key: 'MIXED_METRIC', target: 10, comparison: 'GTE', metric: 'wins' }),
+                tier(2, { family_key: 'MIXED_METRIC', target: 20, comparison: 'GTE', metric: 'stars' })
+            ]
+        });
+        const predicateChain = family('offensive_progression', 'PREDICATE', {
+            tiers: [
+                tier(1, { family_key: 'PREDICATE', comparison: 'BOOLEAN' }),
+                tier(2, { family_key: 'PREDICATE', comparison: 'BOOLEAN' })
+            ]
+        });
         const terminalPredicate = family('imported_home_village_base', 'BASE_HOME_GEARUPS', {
             tiers: [
                 tier(1, { family_key: 'BASE_HOME_GEARUPS', target: 1, comparison: 'GTE' }),
@@ -251,7 +263,9 @@ describe('Achievement collection model', () => {
 
         expect(achievementStructure(gapped)).toBe('standalone');
         expect(achievementStructure(regressive)).toBe('standalone');
-        expect(achievementStructure(mixedComparator)).toBe('progression');
+        expect(achievementStructure(mixedComparator)).toBe('standalone');
+        expect(achievementStructure(mixedMetric)).toBe('standalone');
+        expect(achievementStructure(predicateChain)).toBe('standalone');
         expect(achievementStructure(terminalPredicate)).toBe('progression');
     });
 

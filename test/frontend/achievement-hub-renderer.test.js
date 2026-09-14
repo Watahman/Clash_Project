@@ -92,7 +92,7 @@ describe('Achievement hub and category renderers', () => {
         expect(container.querySelector('[data-achievement-back="true"]')).toBeTruthy();
         expect(container.querySelectorAll('.achievement-progression-path')).toHaveLength(1);
         expect(container.querySelectorAll('.achievement-progression-tier')).toHaveLength(3);
-        expect(container.querySelectorAll('.achievement-progression-connector')).toHaveLength(2);
+        expect(container.querySelectorAll('.achievement-map-path path')).toHaveLength(2);
         expect(container.querySelectorAll('.achievement-standalone-challenge')).toHaveLength(1);
         expect(container.querySelector('.achievement-standalone-challenge')?.dataset.state).toBe('unknown');
         expect(container.textContent).toContain('Progress unavailable');

@@ -1,4 +1,4 @@
-import { buildAchievementCategories } from './achievement-category-model.js?v=20260914-achievement-reconciled-v1';
+import { buildAchievementCategories } from './achievement-category-model.js?v=20260914-achievement-chronicle-v2';
 
 const normalizedKey = value => String(value || '').trim().toLowerCase()
     .replace(/[^a-z0-9_-]+/g, '-');

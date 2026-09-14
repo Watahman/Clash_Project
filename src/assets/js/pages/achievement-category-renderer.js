@@ -9,50 +9,39 @@ import {
     countsFor,
     hubText,
     stateOf
-} from './achievement-hub-renderer.js?v=20260914-achievement-reconciled-v1';
-
-function label(value, fallback = '') {
-    const result = String(value ?? '').trim();
-    return result || fallback;
-}
-
+} from './achievement-hub-renderer.js?v=20260914-achievement-chronicle-v2';
+import {
+    applyNodePosition,
+    bindAchievementTooltip,
+    chronicleClusterGeometry,
+    progressionSvg
+} from './achievement-map-geometry.js?v=20260914-achievement-chronicle-v2';
+import { progressRatioOf } from '../achievements/achievement-progress-semantics.js?v=20260914-achievement-reconciled-v1';
+const label = (value, fallback = '') => String(value ?? '').trim() || fallback;
 function keyOf(category) {
-    const value = category?.key ?? category?.categoryKey ?? category?.id ?? category?.category;
+    const value = category?.key ?? category?.categoryKey ?? category?.familyKey ?? category?.family_key ?? category?.id ?? category?.category;
     return label(value, 'other').toLowerCase().replace(/[^a-z0-9_-]+/g, '-');
 }
-
 function titleOf(category) {
     return label(category?.title ?? category?.name ?? category?.label ?? category?.categoryLabel,
         hubText('categoryDetails', 'Category details'));
 }
-
 function familyTitle(family) { return label(family?.title ?? family?.name, achievementLabel()); }
-
 function tiersOf(family) {
     return Array.isArray(family?.tiers) && family.tiers.length ? family.tiers : [family];
 }
-
 function progressRatio(value) {
-    if (value?.progressKnown === false || value?.progress_known === false
-        || value?.sourceAvailable === false || value?.source_available === false) return null;
-    const explicit = Number(value?.progressRatio ?? value?.ratio);
-    if (Number.isFinite(explicit)) return Math.max(0, Math.min(1, explicit <= 1 ? explicit : explicit / 100));
-    const progress = Number(value?.progress ?? value?.currentProgress);
-    const target = Number(value?.target ?? value?.threshold);
-    return Number.isFinite(progress) && Number.isFinite(target) && target > 0
-        ? Math.max(0, Math.min(1, progress / target))
-        : stateOf(value) === 'complete' || stateOf(value) === 'unlocked' ? 1 : 0;
+    const sharedRatio = progressRatioOf(value);
+    if (sharedRatio !== null) return sharedRatio;
+    const state = stateOf(value);
+    return state === 'complete' || state === 'unlocked' ? 1 : null;
 }
-
 function thresholdOf(value) {
     return label(value?.thresholdText ?? value?.threshold ?? value?.target, '—');
 }
-
 function progressCopy(value) {
-    const state = stateOf(value);
-    if (state === 'unknown') return hubText('progressUnavailable', 'Progress unavailable');
     const ratio = progressRatio(value);
-    if (ratio === null) return hubText('progressUnavailable', 'Progress unavailable');
+    if (ratio === null || stateOf(value) === 'unknown') return hubText('progressUnavailable', 'Progress unavailable');
     const progress = value?.progress ?? value?.currentProgress;
     const target = value?.target ?? value?.threshold;
     if (progress !== undefined && target !== undefined && Number.isFinite(Number(progress))) {
@@ -60,7 +49,6 @@ function progressCopy(value) {
     }
     return hubText('completion', '{percent}% complete', { percent: Math.round(ratio * 100) });
 }
-
 function makeBadge(category) {
     const badge = badgeInfo(category);
     const element = document.createElement('div');
@@ -84,7 +72,6 @@ function makeBadge(category) {
     element.append(mark, copy);
     return element;
 }
-
 function makeBackButton(category, options) {
     const button = document.createElement('button');
     button.type = 'button';
@@ -97,7 +84,6 @@ function makeBackButton(category, options) {
     if (typeof options.onBack === 'function') button.addEventListener('click', () => options.onBack(category));
     return button;
 }
-
 function makeCategoryHeader(category, options) {
     const title = titleOf(category);
     const counts = countsFor(category);
@@ -118,24 +104,48 @@ function makeCategoryHeader(category, options) {
     summary.className = 'achievement-category-summary';
     summary.append(document.createElement('strong'), document.createElement('span'));
     summary.firstChild.textContent = counts.percent === null
-        ? achievementStateText('unknown')
-        : hubText('categoryProgress', '{unlocked} / {total} complete', counts);
+        ? achievementStateText('unknown') : hubText('categoryProgress', '{unlocked} / {total} complete', counts);
     summary.lastChild.textContent = counts.percent === null
         ? hubText('progressUnavailable', 'Progress unavailable')
         : hubText('completion', '{percent}% complete', { percent: Math.round(counts.percent) });
     header.append(heading, summary, makeBadge(category));
     return header;
 }
-
-function bindNode(button, tier, family, options) {
-    if (typeof options.onAchievementSelect !== 'function') return;
-    button.addEventListener('click', () => options.onAchievementSelect(tier, family));
+function makeTooltip(tier, family, id, value) {
+    const tooltip = document.createElement('aside');
+    tooltip.className = 'achievement-map-tooltip';
+    tooltip.id = id;
+    tooltip.setAttribute('role', 'tooltip');
+    tooltip.setAttribute('aria-hidden', 'true');
+    const title = document.createElement('h4');
+    const tierTitle = label(tier?.title);
+    title.textContent = tierTitle && tierTitle !== familyTitle(family)
+        ? tierTitle : achievementTierText(tier?.tier ?? 1);
+    const description = document.createElement('p');
+    description.textContent = label(tier?.description, family?.description);
+    const details = document.createElement('dl');
+    const row = (name, detail) => {
+        const item = document.createElement('div');
+        item.append(document.createElement('dt'), document.createElement('dd'));
+        item.firstChild.textContent = name;
+        item.lastChild.textContent = detail;
+        return item;
+    };
+    details.append(row(hubText('progress', 'Progress'), progressCopy(value)));
+    tooltip.append(title, description, details);
+    return tooltip;
 }
-
+function nodeState(tier, family) {
+    const tierState = stateOf(tier);
+    return tierState === 'locked' && stateOf(family) === 'unknown' ? 'unknown' : tierState;
+}
 function makeNodeButton(tier, family, state, value, tierLabel, threshold, options) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'achievement-progression-node achievement-map-node-button';
+    button.setAttribute('aria-controls', value.tooltipId);
+    button.setAttribute('aria-describedby', value.tooltipId);
+    button.setAttribute('aria-expanded', 'false');
     button.setAttribute('aria-label', `${familyTitle(family)} — ${tierLabel}. ${achievementTierStateText(state)}. ${progressCopy(value)}.`);
     const emblem = document.createElement('span');
     emblem.className = 'achievement-map-node-emblem';
@@ -147,106 +157,110 @@ function makeNodeButton(tier, family, state, value, tierLabel, threshold, option
     copy.lastChild.className = 'achievement-progression-tier-target';
     copy.children[1].textContent = threshold;
     button.append(emblem, copy);
-    bindNode(button, tier, family, options);
+    if (typeof options.onAchievementSelect === 'function') {
+        button.addEventListener('click', () => options.onAchievementSelect(tier, family));
+    }
     return button;
 }
-
-function makeBezierConnector(state) {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.classList.add('achievement-progression-connector', 'achievement-map-path');
-    svg.setAttribute('viewBox', '0 0 100 100');
-    svg.setAttribute('focusable', 'false');
-    svg.setAttribute('aria-hidden', 'true');
-    svg.dataset.state = state;
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.classList.add('achievement-map-bezier');
-    path.setAttribute('d', 'M 50 4 C 14 28, 86 72, 50 96');
-    path.setAttribute('fill', 'none');
-    path.setAttribute('vector-effect', 'non-scaling-stroke');
-    svg.append(path);
-    return svg;
-}
-
-function makeTierNode(tier, index, total, family, options, standalone = false) {
-    const tierState = stateOf(tier);
-    const state = tierState === 'locked' && stateOf(family) === 'unknown' ? 'unknown' : tierState;
-    const value = state === 'unknown' && tierState !== 'unknown'
-        ? { ...tier, state: 'unknown', sourceAvailable: false, progressKnown: false }
-        : tier;
-    const tierLabel = label(tier?.tierLabel, achievementTierText(tier?.tier ?? index + 1));
-    const threshold = thresholdOf(tier);
+function makeTierStop(tier, index, family, options, scope, geometry, standalone = false) {
+    const state = nodeState(tier, family);
+    const value = state === 'unknown'
+        ? { ...tier, state: 'unknown', sourceAvailable: false, progressKnown: false } : tier;
     const item = document.createElement('li');
-    item.className = standalone
-        ? 'achievement-map-node achievement-map-standalone-node'
-        : 'achievement-progression-tier achievement-map-node';
+    item.className = `${standalone ? 'achievement-map-standalone-node' : 'achievement-progression-tier'} achievement-map-node achievement-map-stop`;
     item.dataset.state = state;
     item.dataset.tier = String(tier?.tier ?? index + 1);
     item.dataset.sourceAvailable = String(value?.sourceAvailable !== false
-        && value?.source_available !== false && value?.progressKnown !== false
-        && value?.progress_known !== false);
-    item.append(makeNodeButton(tier, family, state, value, tierLabel, threshold, options));
-    if (!standalone && index < total - 1) {
-        item.append(makeBezierConnector(state));
+        && value?.source_available !== false && value?.progressKnown !== false && value?.progress_known !== false);
+    if (geometry) {
+        applyNodePosition(item, geometry.positions[index], index);
+        if (index === 0) item.dataset.edge = 'start';
+        if (index === geometry.positions.length - 1) item.dataset.edge = 'end';
     }
+    const tooltipId = `achievement-map-tip-${keyOf(family)}-${index}`;
+    const button = makeNodeButton(tier, family, state, { ...value, tooltipId },
+        label(tier?.tierLabel, achievementTierText(tier?.tier ?? index + 1)), thresholdOf(tier), options);
+    item.append(button, makeTooltip(tier, family, tooltipId, value));
+    bindAchievementTooltip(item, scope);
     return item;
 }
-
-function makeTrackHeader(family) {
+function makeTrackHeading(family) {
     const heading = document.createElement('header');
     heading.className = 'achievement-map-track-heading';
-    const copy = document.createElement('div');
-    copy.className = 'achievement-map-track-heading-copy';
-    copy.append(document.createElement('h3'));
-    copy.firstChild.textContent = familyTitle(family);
-    const description = label(family?.description, '');
+    const title = document.createElement('h3');
+    title.textContent = familyTitle(family);
+    heading.append(title);
+    const description = label(family?.description);
     if (description) {
-        const detail = document.createElement('p');
-        detail.textContent = description;
-        copy.append(detail);
+        const copy = document.createElement('p');
+        copy.textContent = description;
+        heading.append(copy);
     }
-    heading.append(copy);
     return heading;
 }
-
 function makeProgressionFamily(family, index, options) {
     const article = document.createElement('article');
     article.className = 'achievement-progression-path achievement-map-track-shell';
     article.setAttribute('role', 'listitem');
     article.dataset.family = label(family?.familyKey ?? family?.key ?? family?.id, 'achievement');
     article.dataset.structure = 'progression';
+    article.dataset.arrangement = ['ribbon', 'drift', 'wave'][index % 3];
     const tiers = tiersOf(family);
-    const arrangement = tiers.length <= 3
-        ? (index % 2 ? 'offset' : 'row') : tiers.length <= 5 ? 'staggered' : 'compact';
-    article.classList.add(`achievement-progression--${arrangement}`);
-    article.dataset.arrangement = arrangement;
-    const track = document.createElement('ol');
-    track.className = 'achievement-progression-track achievement-map-track';
-    track.setAttribute('role', 'list');
-    track.dataset.tierCount = String(tiers.length);
-    track.style.setProperty('--achievement-tier-count', String(tiers.length));
-    tiers.forEach((tier, tierIndex) => track.append(makeTierNode(tier, tierIndex, tiers.length, family, options)));
-    article.append(makeTrackHeader(family), track);
-    return article;
-}
-
-function makeStandaloneFamily(family, index, options) {
-    const article = document.createElement('article');
-    const state = stateOf(family);
-    article.className = 'achievement-standalone-challenge achievement-map-constellation';
-    article.setAttribute('role', 'listitem');
-    article.dataset.state = state;
-    article.dataset.family = label(family?.familyKey ?? family?.key ?? family?.id, `achievement-${index}`);
-    article.append(makeTrackHeader(family));
-    const nodes = document.createElement('ol');
-    nodes.className = 'achievement-standalone-nodes';
-    nodes.setAttribute('role', 'list');
-    tiersOf(family).forEach((item, tierIndex, tiers) => {
-        nodes.append(makeTierNode(item, tierIndex, tiers.length, family, options, true));
+    const geometry = chronicleClusterGeometry(tiers.length, index);
+    const map = document.createElement('div');
+    map.className = 'achievement-map-scroll';
+    const canvas = document.createElement('ol');
+    canvas.className = 'achievement-map-track achievement-progression-track';
+    canvas.setAttribute('role', 'list');
+    canvas.style.setProperty('--chronicle-map-width', `${geometry.width}px`);
+    canvas.style.setProperty('--chronicle-map-height', `${geometry.height}px`);
+    canvas.append(progressionSvg(geometry, tiers, tier => nodeState(tier, family)));
+    tiers.forEach((tier, tierIndex) => {
+        const stop = makeTierStop(tier, tierIndex, family, options, canvas, geometry);
+        if (tierIndex < tiers.length - 1) stop.dataset.nextState = nodeState(tiers[tierIndex + 1], family);
+        canvas.append(stop);
     });
-    article.append(nodes);
+    map.append(canvas);
+    article.append(makeTrackHeading(family), map);
     return article;
 }
-
+function standaloneState(families) {
+    const states = families.map(stateOf);
+    if (states.includes('unknown')) return 'unknown';
+    if (states.includes('in_progress')) return 'in_progress';
+    if (states.length && states.every(state => state === 'complete' || state === 'unlocked')) return 'complete';
+    return 'locked';
+}
+function makeStandaloneConstellation(families, options) {
+    const section = document.createElement('section');
+    section.className = 'achievement-standalone-challenge achievement-map-constellation';
+    section.setAttribute('role', 'listitem');
+    section.dataset.state = standaloneState(families);
+    section.dataset.structure = 'standalone';
+    section.append(makeTrackHeading({
+        title: hubText('standaloneTitle', 'Independent challenges'),
+        description: hubText('standaloneIntro', 'Achievements without a validated progression chain.')
+    }));
+    const groups = document.createElement('ol');
+    groups.className = 'achievement-standalone-nodes';
+    groups.setAttribute('role', 'list');
+    families.forEach((family, familyIndex) => {
+        const group = document.createElement('li');
+        group.className = 'achievement-standalone-family';
+        group.dataset.family = label(family?.familyKey ?? family?.key ?? family?.id, `achievement-${familyIndex}`);
+        group.append(makeTrackHeading(family));
+        const nodes = document.createElement('ol');
+        nodes.className = 'achievement-standalone-family-nodes';
+        nodes.setAttribute('role', 'list');
+        tiersOf(family).forEach((tier, tierIndex) => nodes.append(
+            makeTierStop(tier, tierIndex, family, options, section, null, true)
+        ));
+        group.append(nodes);
+        groups.append(group);
+    });
+    section.append(groups);
+    return section;
+}
 function makeMap(category, options) {
     const section = document.createElement('section');
     section.className = 'achievement-category-section achievement-category-map';
@@ -263,19 +277,17 @@ function makeMap(category, options) {
     const progression = Array.isArray(category?.progressionFamilies) ? category.progressionFamilies : [];
     const standalone = Array.isArray(category?.standaloneFamilies) ? category.standaloneFamilies : [];
     progression.forEach((family, index) => map.append(makeProgressionFamily(family, index, options)));
-    standalone.forEach((family, index) => map.append(makeStandaloneFamily(family, index, options)));
+    if (standalone.length) map.append(makeStandaloneConstellation(standalone, options));
     if (!map.childElementCount) map.append(emptySection(hubText('detailEmpty', 'This category has no achievements to show yet.')));
     section.append(heading, map);
     return section;
 }
-
 function emptySection(message) {
     const empty = document.createElement('p');
     empty.className = 'achievement-category-empty';
     empty.textContent = message;
     return empty;
 }
-
 export function renderAchievementCategory(container, category, options = {}) {
     if (!container) return null;
     container.replaceChildren();
@@ -285,5 +297,4 @@ export function renderAchievementCategory(container, category, options = {}) {
     container.append(makeCategoryHeader(category || {}, options), makeMap(category || {}, options));
     return container;
 }
-
 export const renderAchievementCategoryDetail = renderAchievementCategory;
