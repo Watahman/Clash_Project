@@ -1,119 +1,178 @@
 import { describe, expect, it } from 'vitest';
 import {
+    ACHIEVEMENT_COLLECTION_DEFINITIONS,
+    COLLECTION_KEYS
+} from '../../src/assets/js/pages/achievement-collection-definitions.js';
+import {
     achievementStructure,
+    buildAchievementCollections,
     buildAchievementCategories,
     categoryByKey
 } from '../../src/assets/js/pages/achievement-category-model.js';
 
+function tier(number, overrides = {}) {
+    return {
+        family_key: overrides.family_key,
+        achievement_key: overrides.achievement_key || `FAMILY_${number}`,
+        tier: number,
+        unlocked: overrides.unlocked ?? false,
+        ...overrides
+    };
+}
+
 function family(category, key, overrides = {}) {
-    const tiers = overrides.tiers || [{ tier: 1, unlocked: overrides.complete === true }];
+    const tiers = overrides.tiers || [tier(1, { family_key: key })];
     return {
         familyKey: key,
         category,
-        categoryLabel: overrides.categoryLabel || category,
-        complete: overrides.complete ?? false,
         state: overrides.state || (overrides.complete ? 'complete' : 'locked'),
         sourceAvailable: overrides.sourceAvailable ?? true,
         hasStoredProgress: overrides.hasStoredProgress ?? true,
+        complete: overrides.complete ?? false,
         tiers,
         ...overrides
     };
 }
 
-describe('Achievement category model', () => {
-    it('classifies only a family with multiple existing tiers as progression', () => {
-        const one = family('planning', 'ONE');
-        const chain = family('planning', 'CHAIN', {
+describe('Achievement collection model', () => {
+    it('defines the nine user-facing collections in stable order', () => {
+        expect(COLLECTION_KEYS).toEqual([
+            'village', 'combat', 'war-cwl', 'clan', 'builder-base',
+            'clan-capital', 'progression-stats', 'clashpanel', 'special'
+        ]);
+        expect(ACHIEVEMENT_COLLECTION_DEFINITIONS).toHaveLength(9);
+        ACHIEVEMENT_COLLECTION_DEFINITIONS.forEach(definition => {
+            expect(definition.title).toBeTruthy();
+            expect(definition.description).toBeTruthy();
+            expect(definition.icon).toMatch(/^\/assets\//);
+            expect(definition.badge).toEqual(expect.objectContaining({
+                id: expect.any(String),
+                name: expect.any(String),
+                lockedCopy: expect.any(String)
+            }));
+        });
+    });
+
+    it('maps every source category to the requested collection without flattening it', () => {
+        const input = [
+            family('imported_home_village_base', 'HOME'),
+            family('imported_upgrade_activity', 'UPGRADE'),
+            family('helpers', 'HELP'),
+            family('secret_and_combination_achievements', 'SECRET'),
+            family('clan_capital_and_raids', 'CAPITAL')
+        ];
+        const collections = buildAchievementCollections(input);
+
+        expect(categoryByKey(collections, 'village').sourceCategories).toEqual([
+            'imported_home_village_base', 'imported_upgrade_activity', 'helpers'
+        ]);
+        expect(categoryByKey(collections, 'village').sourceFamiliesByCategory.helpers[0].category)
+            .toBe('helpers');
+        expect(categoryByKey(collections, 'clan-capital').families[0].familyKey).toBe('CAPITAL');
+        expect(categoryByKey(collections, 'special').families[0].category)
+            .toBe('secret_and_combination_achievements');
+    });
+
+    it('unlocks a collection badge only when every known family is complete', () => {
+        const complete = family('clan_capital_and_raids', 'CAPITAL', {
+            complete: true,
+            state: 'complete',
+            tiers: [tier(1, { family_key: 'CAPITAL', unlocked: true })]
+        });
+        const incomplete = family('clan_capital_and_raids', 'OTHER');
+        const collection = categoryByKey(buildAchievementCollections([complete]), 'clan-capital');
+        const locked = categoryByKey(buildAchievementCollections([incomplete]), 'clan-capital');
+
+        expect(collection.badge.state).toBe('unlocked');
+        expect(collection.badge.unlocked).toBe(true);
+        expect(locked.badge.state).toBe('locked');
+        expect(locked.badge.unlocked).toBe(false);
+        expect(JSON.stringify(collection.badge)).not.toMatch(/bronze|silver|gold/i);
+    });
+
+    it('preserves unknown progress instead of treating it as zero or complete', () => {
+        const waiting = family('clan_capital_and_raids', 'CAPITAL', {
+            complete: false,
+            state: 'unknown',
+            sourceAvailable: false,
+            hasStoredProgress: false
+        });
+        const collection = categoryByKey(buildAchievementCollections([waiting]), 'clan-capital');
+
+        expect(collection.progressKnown).toBe(false);
+        expect(collection.state).toBe('unknown');
+        expect(collection.completion).toBeNull();
+        expect(collection.completionPercent).toBeNull();
+        expect(collection.badge.state).toBe('locked');
+        expect(collection.badge.status).toBe('unknown');
+    });
+
+    it('classifies only proven consecutive tiers as a progression chain', () => {
+        const chain = family('offensive_progression', 'CHAIN', {
             tiers: [
-                { tier: 1, unlocked: true },
-                { tier: 2, unlocked: false }
+                tier(1, { family_key: 'CHAIN' }),
+                tier(2, { family_key: 'CHAIN' })
             ]
         });
+        const gap = family('offensive_progression', 'GAP', {
+            tiers: [tier(1, { family_key: 'GAP' }), tier(3, { family_key: 'GAP' })]
+        });
+        const guessed = {
+            category: 'offensive_progression',
+            tiers: [tier(1), tier(2)]
+        };
 
-        expect(achievementStructure(one)).toBe('standalone');
         expect(achievementStructure(chain)).toBe('progression');
+        expect(achievementStructure(gap)).toBe('standalone');
+        expect(achievementStructure(guessed)).toBe('standalone');
     });
 
-    it('keeps families independent and preserves their source tier order', () => {
-        const first = family('war', 'FIRST', { complete: true, tiers: [{ tier: 2 }, { tier: 1 }] });
-        const second = family('war', 'SECOND', { tiers: [{ tier: 1 }, { tier: 2 }, { tier: 3 }] });
-        const category = buildAchievementCategories([first, second])[0];
+    it('keeps legacy and unknown source categories inside a user-facing collection', () => {
+        const legacy = family('progression', 'LEGACY');
+        const unknown = family('future_backend_bucket', 'FUTURE');
+        const collections = buildAchievementCategories([legacy, unknown]);
 
-        expect(category.progressionFamilies).toEqual([first, second]);
-        expect(category.standaloneFamilies).toEqual([]);
-        expect(category.families[0].tiers.map(tier => tier.tier)).toEqual([2, 1]);
-        expect(category.families[1].tiers.map(tier => tier.tier)).toEqual([1, 2, 3]);
-        expect(category.families[0]).not.toHaveProperty('nextFamily');
-        expect(category.families[1]).not.toHaveProperty('previousFamily');
+        expect(collections.find(collection => collection.key === 'progression-stats').families).toContainEqual(
+            expect.objectContaining({ familyKey: 'LEGACY' })
+        );
+        expect(collections.find(collection => collection.key === 'special').families).toContainEqual(
+            expect.objectContaining({ familyKey: 'FUTURE' })
+        );
+        expect(collections.flatMap(collection => collection.families)).toHaveLength(2);
     });
 
-    it('uses real category identity and separates progression from standalone families', () => {
-        const planning = family('planning', 'PLAN', { categoryLabel: 'Planning', tiers: [{ tier: 1 }, { tier: 2 }] });
-        const war = family('war', 'WAR', { categoryLabel: 'War', tiers: [{ tier: 1 }] });
-        const categories = buildAchievementCategories([planning, war]);
-
-        expect(categories.map(category => category.key)).toEqual(['planning', 'war']);
-        expect(categories[0].categoryLabel).toBe('Planning');
-        expect(categories[0].progressionFamilies).toEqual([planning]);
-        expect(categories[0].standaloneFamilies).toEqual([]);
-        expect(categories[1].progressionFamilies).toEqual([]);
-        expect(categories[1].standaloneFamilies).toEqual([war]);
-        expect(categoryByKey(categories, 'war')).toBe(categories[1]);
-        expect(categoryByKey(categories, 'missing')).toBeUndefined();
+    it('deduplicates repeated achievement keys and tiers before classifying', () => {
+        const input = [
+            {
+                category: 'offensive_progression',
+                family_key: 'OFFENSE',
+                achievement_key: 'OFFENSE_1',
+                tier: 1,
+                unlocked: true
+            },
+            {
+                category: 'offensive_progression',
+                family_key: 'OFFENSE',
+                achievement_key: 'OFFENSE_1',
+                tier: 1,
+                unlocked: false
+            },
+            {
+                category: 'offensive_progression',
+                family_key: 'OFFENSE',
+                achievement_key: 'OFFENSE_2',
+                tier: 2,
+                unlocked: true
+            }
+        ];
+        const collection = categoryByKey(buildAchievementCollections(input), 'combat');
+        expect(collection.families).toHaveLength(1);
+        expect(collection.families[0].tiers).toHaveLength(2);
+        expect(collection.progressionFamilies).toHaveLength(1);
     });
 
-    it('calculates family completion independently from tier completion', () => {
-        const complete = family('stats', 'COMPLETE', {
-            complete: true,
-            tiers: [{ tier: 1, unlocked: true }, { tier: 2, unlocked: false }]
-        });
-        const inProgress = family('stats', 'IN_PROGRESS', {
-            complete: false,
-            tiers: [{ tier: 1, unlocked: true }, { tier: 2, unlocked: true }]
-        });
-        const category = buildAchievementCategories([complete, inProgress])[0];
-
-        expect(category.completedFamilies).toBe(1);
-        expect(category.familyCount).toBe(2);
-        expect(category.completion).toBe(0.5);
-        expect(category.completionPercent).toBe(50);
-        expect(category.tierCount).toBe(4);
-        expect(category.unlockedTierCount).toBe(3);
-        expect(category.tierCompletionPercent).toBe(75);
-    });
-
-    it.each([
-        [0, 'none'],
-        [24, 'none'],
-        [25, 'bronze'],
-        [50, 'silver'],
-        [75, 'gold'],
-        [100, 'master']
-    ])('maps %s%% family completion to the %s badge', (completedPercent, expected) => {
-        const total = 100;
-        const completed = Array.from({ length: total }, (_, index) => family('badges', `F${index}`, {
-            complete: index < completedPercent
-        }));
-        const category = buildAchievementCategories(completed)[0];
-
-        expect(category.badge.state).toBe(expected);
-        expect(category.badgeConfirmedUnlocked).toBe(expected === 'master');
-    });
-
-    it('marks a category badge unknown when an unmeasured family has no stored progress', () => {
-        const category = buildAchievementCategories([
-            family('history', 'KNOWN', { complete: true }),
-            family('history', 'WAITING', {
-                complete: false,
-                state: 'unknown',
-                sourceAvailable: false,
-                hasStoredProgress: false
-            })
-        ])[0];
-
-        expect(category.completionPercent).toBe(50);
-        expect(category.badge.state).toBe('unknown');
-        expect(category.badge.unlocked).toBe(false);
-        expect(category.badge.confirmedUnlocked).toBe(false);
+    it('keeps the legacy category entry point pointed at collection output', () => {
+        expect(buildAchievementCategories([]).map(collection => collection.key)).toEqual(COLLECTION_KEYS);
+        expect(categoryByKey(buildAchievementCategories([]), 'missing')).toBeUndefined();
     });
 });

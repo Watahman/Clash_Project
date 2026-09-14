@@ -1,13 +1,14 @@
-import { applyI18n, getLanguage, t } from '../i18n/i18n.js?v=20260913-achievement-hub-v1';
+import { applyI18n, getLanguage, t } from '../i18n/i18n.js?v=20260914-achievement-collection-v2';
 import {
     buildAchievementSummary,
     filterAchievementFamilies
 } from '../achievements/achievement-view-model.js';
-import { buildAchievementCategories, categoryByKey } from './achievement-category-model.js';
+import { categoryByKey } from './achievement-category-model.js';
+import { hubTranslated, localizeAchievementCollections } from './achievement-collection-localizer.js?v=20260914-achievement-collection-v2';
 import { achievementFamilyImage } from './achievement-asset-view.js?v=20260824-achievement-raster-color-1';
-import { achievementChronicleLocales } from '../i18n/achievement-chronicle-locales.js?v=20260913-achievement-hub-v1';
-import { renderAchievementHub } from './achievement-hub-renderer.js?v=20260913-achievement-hub-v1';
-import { renderAchievementCategory } from './achievement-category-renderer.js?v=20260913-achievement-hub-v1';
+import { achievementChronicleLocales } from '../i18n/achievement-chronicle-locales.js?v=20260914-achievement-collection-v2';
+import { renderAchievementHub } from './achievement-hub-renderer.js?v=20260914-achievement-collection-v2';
+import { renderAchievementCategory } from './achievement-category-renderer.js?v=20260914-achievement-collection-v2';
 
 const SOURCE_ORDER = Object.freeze([
     'live_profile', 'base_data', 'base_history', 'advanced_stats', 'war', 'cwl_history', 'raid_history',
@@ -84,20 +85,6 @@ function applyAchievementHubI18n(root = document) {
     });
 }
 
-function categoryFallback(key) {
-    return String(key || 'other').replaceAll('_', ' ').replace(/\b\w/g, letter => letter.toUpperCase());
-}
-
-function localizeCategory(category) {
-    const key = category?.key || category?.category;
-    const title = translated(`achievements.category.${key}`, category?.categoryLabel || categoryFallback(key));
-    return { ...category, title, label: title, categoryLabel: title };
-}
-
-function localizeCategories(families) {
-    return buildAchievementCategories(families).map(localizeCategory);
-}
-
 function categoryForFilters(category, filters) {
     const matches = filterAchievementFamilies(category.families, { ...filters, category: 'all' });
     const matched = new Set(matches);
@@ -107,6 +94,20 @@ function categoryForFilters(category, filters) {
         progressionFamilies: category.progressionFamilies.filter(family => matched.has(family)),
         standaloneFamilies: category.standaloneFamilies.filter(family => matched.has(family))
     };
+}
+
+function hasActiveFilters(filters = {}) {
+    return Boolean(String(filters.search || '').trim())
+        || String(filters.rarity || 'all') !== 'all'
+        || String(filters.status || 'all') !== 'all';
+}
+
+function renderFilterResults(refs, state, visibleCount) {
+    const active = hasActiveFilters(state.filters);
+    refs.resultsCount.hidden = !active;
+    refs.resultsCount.textContent = active
+        ? hubTranslated('achievements.hub.filterResults', '{count} matching achievements', { count: visibleCount })
+        : '';
 }
 
 export function renderSummary(refs, state) {
@@ -192,26 +193,23 @@ export function renderSources(refs, state) {
 }
 
 export function renderFilterOptions(refs, state) {
-    const families = localizeFamilies(state);
-    const availableCategories = new Set(families.map(family => family.category));
-    refs.category.replaceChildren(new Option(t('achievements.allCategories'), 'all'));
-    [...availableCategories].sort((a, b) => categoryLabel(state, a).localeCompare(categoryLabel(state, b), getLanguage()))
-        .forEach(category => refs.category.append(new Option(categoryLabel(state, category), category)));
-    refs.category.value = availableCategories.has(state.filters.category) ? state.filters.category : 'all';
-    state.filters.category = refs.category.value;
-
-    const availableSources = new Set(families.map(family => family.source));
-    refs.source.replaceChildren(new Option(translated('achievements.allSources', 'All data sources'), 'all'));
-    SOURCE_ORDER.filter(source => availableSources.has(source)).forEach(source => refs.source.append(new Option(sourceLabel(source), source)));
-    refs.source.value = availableSources.has(state.filters.source) ? state.filters.source : 'all';
-    state.filters.source = refs.source.value;
+    const rarity = ['all', 'common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic'];
+    const status = ['all', 'in_progress', 'unlocked', 'complete', 'locked', 'unknown'];
+    if (!rarity.includes(state.filters.rarity)) state.filters.rarity = 'all';
+    if (!status.includes(state.filters.status)) state.filters.status = 'all';
+    refs.rarity.value = state.filters.rarity;
+    refs.status.value = state.filters.status;
 }
 
 function showHub(refs, categories, state) {
     refs.filterDialog.hidden = true;
-    refs.hubSummary.textContent = translated('achievements.hub.summary', 'Choose a category to explore its progression.');
+    refs.filterDialog.open = false;
+    refs.hubSummary.textContent = hubTranslated('achievements.hub.summary', 'Choose a collection to explore its journey.');
     renderAchievementHub(refs.grid, categories, {
-        emptyMessage: translated('achievements.hub.noCategories', 'No achievement categories are available yet.')
+        emptyMessage: hubTranslated('achievements.hub.noCategories', 'No achievement categories are available yet.')
+    });
+    refs.grid.querySelectorAll('.achievement-hub-module[data-achievement-category]').forEach(panel => {
+        panel.tabIndex = 0;
     });
     if (state.focusTarget === 'overview') refs.libraryTitle.focus({ preventScroll: true });
     state.focusTarget = '';
@@ -219,10 +217,10 @@ function showHub(refs, categories, state) {
 
 function showCategory(refs, category, state) {
     refs.filterDialog.hidden = false;
-    refs.hubSummary.textContent = translated('achievements.hub.detailIntro', 'Follow real progression chains and independent challenges in this category.');
+    refs.hubSummary.textContent = hubTranslated('achievements.hub.detailIntro', 'Follow real paths and independent challenges in this collection.');
     const filtered = categoryForFilters(category, state.filters);
     renderAchievementCategory(refs.grid, filtered, {
-        backLabel: translated('achievements.hub.backToHub', 'Back to Achievement Hub')
+        backLabel: hubTranslated('achievements.hub.backToHub', 'Back to Achievement Hub')
     });
     if (state.focusTarget === 'detail') {
         const heading = refs.grid.querySelector('.achievement-category-title h1');
@@ -235,18 +233,19 @@ export function renderAchievements(refs, state) {
     refs.grid.replaceChildren();
     const families = localizeFamilies(state);
     const filtered = filterAchievementFamilies(families, state.filters);
-    const categories = localizeCategories(families);
+    const categories = localizeAchievementCollections(families);
     const selected = categoryByKey(categories, state.selectedCategory);
-    refs.resultsCount.textContent = translated(
-        'achievements.resultsCountExpanded',
-        `${filtered.length} matching · ${families.length} total achievements`,
-        { visible: filtered.length, total: families.length }
-    );
+    renderFilterResults(refs, state, filtered.length);
     if (!state.accounts.length) return showEmpty(refs, 'accounts', t('achievements.linkAccountTitle'), t('achievements.linkAccountText'));
     if (state.loading) return showEmpty(refs, 'loading', translated('achievements.waitingForData', 'Waiting for data'), translated('achievements.loading', 'Loading achievement progress...'));
     if (!families.length) return showEmpty(refs, 'catalog', translated('achievements.catalogEmptyTitle', 'Achievements could not be loaded'), translated('achievements.catalogEmptyText', 'Refresh the page.'));
-    if (!filtered.length || selected && !categoryForFilters(selected, state.filters).families.length) {
-        return showEmpty(refs, 'filters', t('achievements.noMatchTitle'), t('achievements.noMatchText'));
+    const selectedFamilies = selected ? categoryForFilters(selected, state.filters).families : [];
+    if (selected && !selectedFamilies.length && !hasActiveFilters(state.filters)) {
+        refs.emptyState.hidden = true; refs.grid.hidden = false;
+        return showCategory(refs, selected, state);
+    }
+    if (!filtered.length || selected && !selectedFamilies.length) {
+        return showEmpty(refs, 'filters', t('achievements.noMatchTitle'), t('achievements.noMatchText'), Boolean(selected));
     }
     refs.emptyState.hidden = true; refs.grid.hidden = false;
     if (state.selectedCategory && !selected) {
@@ -257,9 +256,9 @@ export function renderAchievements(refs, state) {
     else showHub(refs, categories, state);
 }
 
-function showEmpty(refs, reason, title, copy) {
+function showEmpty(refs, reason, title, copy, keepDetailFilters = false) {
     refs.emptyState.dataset.reason = reason; refs.emptyState.hidden = false; refs.grid.hidden = true;
-    refs.filterDialog.hidden = true;
+    refs.filterDialog.hidden = !keepDetailFilters;
     refs.emptyState.querySelector('h2').textContent = title; refs.emptyState.querySelector('p').textContent = copy;
 }
 

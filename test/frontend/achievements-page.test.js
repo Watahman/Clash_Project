@@ -6,7 +6,7 @@ import worker from '../../worker/index.js';
 const documentFor = path => new JSDOM(readFileSync(path, 'utf8')).window.document;
 
 describe('Achievements workspace page', () => {
-    it('contains an accessible optional import and v2 filter workflow', () => {
+    it('contains an accessible optional import and secondary detail filter workflow', () => {
         const document = documentFor('src/subpages/achievements.html');
 
         expect(document.title).toContain('Achievements');
@@ -15,11 +15,16 @@ describe('Achievements workspace page', () => {
         expect(document.querySelector('#achievement-json')).not.toBeNull();
         expect(document.querySelector('#achievement-import-submit')?.getAttribute('type')).toBe('submit');
         expect(document.querySelector('#achievement-search')?.getAttribute('type')).toBe('search');
-        expect(document.querySelector('#achievement-source')).not.toBeNull();
+        expect(document.querySelector('#achievement-source')).toBeNull();
+        expect(document.querySelector('#achievement-category')).toBeNull();
         expect(document.querySelector('#achievement-source-list')).not.toBeNull();
         expect(document.querySelector('#achievement-load-more')).toBeNull();
         expect(document.querySelector('#achievement-grid.achievement-hub-grid')).not.toBeNull();
         expect(document.querySelector('#achievement-filter-dialog')?.hasAttribute('hidden')).toBe(true);
+        expect(document.querySelector('#achievement-filter-dialog')?.tagName).toBe('DETAILS');
+        expect(document.querySelector('#achievement-filter-dialog')?.hasAttribute('open')).toBe(false);
+        expect(document.querySelector('#achievement-sources-panel')?.hasAttribute('open')).toBe(false);
+        expect(document.querySelector('#achievement-results-count')?.hasAttribute('hidden')).toBe(true);
         expect(document.querySelector('#achievement-import-panel')?.hasAttribute('hidden')).toBe(true);
         expect(document.querySelector('#achievement-import-toggle')?.getAttribute('aria-expanded')).toBe('false');
         expect(document.querySelector('.achievement-import-heading p:last-child')?.textContent)
@@ -59,7 +64,7 @@ describe('Achievements workspace page', () => {
         expect(document.querySelector('#achievement-grid.achievement-hub-grid')).not.toBeNull();
         expect(document.querySelector('#achievement-hub-summary')).not.toBeNull();
         expect(hubRenderer).toContain('dataset.achievementCategory');
-        expect(detailRenderer).toContain("track.className = 'achievement-progression-track'");
+        expect(detailRenderer).toContain('achievement-map-track');
         expect(detailRenderer).toContain('tiers.forEach');
         expect(detailRenderer).not.toContain('buildChronicleBranches');
     });

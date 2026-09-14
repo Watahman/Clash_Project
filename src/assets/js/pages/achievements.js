@@ -3,7 +3,7 @@ import { checkUserId } from '../Supabase/Supabase-User.js?v=20260829-public-auth
 import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260829-public-auth-v1';
 import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
 import { getCurrentUserId } from '../utils/user.js';
-import { applyI18n, getLanguage, t } from '../i18n/i18n.js?v=20260913-achievement-hub-v1';
+import { applyI18n, getLanguage, t } from '../i18n/i18n.js?v=20260914-achievement-collection-v2';
 import {
     collectLinkedAccounts,
     normalizePlayerTag,
@@ -11,11 +11,12 @@ import {
     groupAchievementFamilies
 } from '../achievements/achievement-view-model.js';
 import { getAchievementsFixture } from './achievements-fixtures.js?v=20260811-1';
+import { resolveAchievementCollectionKey } from './achievement-collection-navigation.js?v=20260914-achievement-collection-v2';
 import {
     renderAll,
     renderSources,
     renderAchievements
-} from './achievements-renderer.js?v=20260913-achievement-hub-v1';
+} from './achievements-renderer.js?v=20260914-achievement-collection-v2';
 import { trackLoadFailed, trackLoadSucceeded } from '../analytics/product-analytics.js?v=20260912-product-analytics-v1';
 
 const ACCOUNT_STORAGE_KEY = 'clashpanel_achievements_account';
@@ -32,7 +33,7 @@ const state = {
     api: { getAchievements, importAchievementBaseData },
     accounts: [], selectedTag: '', families: [], latestSnapshot: null, history: {}, sources: {},
     parsedImport: null, loading: false, deepLoading: false, requestId: 0, selectedCategory: '',
-    filters: { search: '', category: 'all', rarity: 'all', status: 'all', source: 'all' }
+    filters: { search: '', rarity: 'all', status: 'all' }
 };
 const refs = {};
 function trackAchievementLoad({ action = 'load', resultStatus, failed = false } = {}) {
@@ -53,8 +54,8 @@ function captureRefs() {
         importText: '#achievement-json', importFile: '#achievement-json-file', pasteButton: '#achievement-paste', clearButton: '#achievement-clear',
         importButton: '#achievement-import-submit', importFeedback: '#achievement-import-feedback', importPreview: '#achievement-import-preview',
         sourceList: '#achievement-source-list', sourceSummary: '#achievement-source-summary', grid: '#achievement-grid', emptyState: '#achievement-empty-state',
-        resultsCount: '#achievement-results-count', hubSummary: '#achievement-hub-summary', libraryTitle: '#achievement-library-title', filterDialog: '#achievement-filter-dialog', search: '#achievement-search', category: '#achievement-category',
-        rarity: '#achievement-rarity', status: '#achievement-status', source: '#achievement-source', progressPanel: '.achievement-progress-panel', summaryLevel: '#achievement-level',
+        resultsCount: '#achievement-results-count', hubSummary: '#achievement-hub-summary', libraryTitle: '#achievement-library-title', filterDialog: '#achievement-filter-dialog', search: '#achievement-search',
+        rarity: '#achievement-rarity', status: '#achievement-status', progressPanel: '.achievement-progress-panel', summaryLevel: '#achievement-level',
         summaryLevelProgress: '#achievement-level-progress', summaryLevelCopy: '#achievement-level-copy', summaryXp: '#achievement-total-xp', summaryUnlocked: '#achievement-unlocked',
         summaryCompleted: '#achievement-completed', summaryImported: '#achievement-last-import', featured: '#achievement-featured'
     };
@@ -91,7 +92,7 @@ function applyResponse(response) {
     state.history = response?.history || {};
     state.sources = response?.sources || {};
     if (state.selectedCategory) {
-        const resolved = resolveCategoryKey(state.selectedCategory);
+        const resolved = resolveAchievementCollectionKey(state.families, state.selectedCategory);
         state.selectedCategory = resolved;
         if (!resolved) setCategoryUrl('', true);
     }
@@ -195,18 +196,6 @@ async function pasteFromClipboard() {
     catch { setImportFeedback(t('achievements.clipboardBlocked'), 'error'); }
 }
 
-function normalizeCategoryKey(value) {
-    return String(value || '').trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-');
-}
-
-function resolveCategoryKey(value) {
-    const requested = String(value || '');
-    const exact = state.families.find(family => family.category === requested)?.category;
-    if (exact) return exact;
-    const normalized = normalizeCategoryKey(requested);
-    return state.families.find(family => normalizeCategoryKey(family.category) === normalized)?.category || '';
-}
-
 function setCategoryUrl(category, replace = false) {
     const url = new URL(window.location.href);
     if (category) url.searchParams.set('category', category);
@@ -215,7 +204,7 @@ function setCategoryUrl(category, replace = false) {
 }
 
 function renderCategory(category, { replace = false, focus = '' } = {}) {
-    const resolved = resolveCategoryKey(category);
+    const resolved = resolveAchievementCollectionKey(state.families, category);
     state.selectedCategory = resolved;
     setCategoryUrl(resolved, replace);
     state.focusTarget = focus;
@@ -242,6 +231,14 @@ function handlePopState() {
     renderAchievements(refs, state);
 }
 
+function handleGridKeydown(event) {
+    if (!['Enter', ' '].includes(event.key)) return;
+    const panel = event.target.closest('.achievement-hub-module[data-achievement-category]');
+    if (!panel || event.target !== panel) return;
+    event.preventDefault();
+    renderCategory(panel.dataset.achievementCategory, { focus: 'detail' });
+}
+
 function bindEvents() {
     refs.accountSelect.addEventListener('change', () => {
         state.selectedTag = normalizePlayerTag(refs.accountSelect.value); writeStorage(ACCOUNT_STORAGE_KEY, state.selectedTag);
@@ -256,13 +253,13 @@ function bindEvents() {
     refs.clearButton.addEventListener('click', clearImport);
     refs.importForm.addEventListener('submit', submitImport);
     refs.search.addEventListener('input', () => { state.filters.search = refs.search.value; renderAchievements(refs, state); });
-    for (const [ref, key] of [[refs.category, 'category'], [refs.rarity, 'rarity'], [refs.status, 'status'], [refs.source, 'source']]) {
+    for (const [ref, key] of [[refs.rarity, 'rarity'], [refs.status, 'status']]) {
         ref.addEventListener('change', () => {
-            if (key === 'category' && ref.value !== 'all') return renderCategory(ref.value, { focus: 'detail' });
             state.filters[key] = ref.value; renderAchievements(refs, state);
         });
     }
     refs.grid.addEventListener('click', handleGridClick);
+    refs.grid.addEventListener('keydown', handleGridKeydown);
     window.addEventListener('popstate', handlePopState);
     refs.emptyState.querySelector('[data-empty-import]')?.addEventListener('click', () => setImportPanelOpen(true, { focus: true }));
     refs.emptyState.querySelector('[data-empty-profile]')?.addEventListener('click', () => document.querySelector('#workspace-profile-shortcut, #profile-btn')?.click());
