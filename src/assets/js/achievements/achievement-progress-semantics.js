@@ -31,14 +31,6 @@ function hasStoredUnlock(value) {
         || ['unlocked', 'complete', 'completed', 'earned'].includes(explicitState(value));
 }
 
-function hasStoredEvidence(value) {
-    return value?.hasStoredProgress === true
-        || value?.has_stored_progress === true
-        || hasStoredUnlock(value)
-        || progressValueOf(value) > 0
-        || list(value?.tiers).some(tier => hasStoredEvidence(tier));
-}
-
 function hasExplicitComparison(value) {
     return [value?.comparison, value?.comparator, value?.operator]
         .some(candidate => stringValue(candidate) !== '');
@@ -75,18 +67,20 @@ export function evaluateThreshold(value) {
     const target = targetValueOf(value) ?? (comparison === 'BOOLEAN' ? 1 : null);
     const supported = ['GTE', 'LTE', 'BOOLEAN'].includes(comparison);
     const progressKnown = value?.progressKnown !== false && value?.progress_known !== false;
-    const known = supported && progressKnown && progress !== null && target !== null;
+    const sourceAvailable = progressIsAvailable(value);
+    const known = supported && progressKnown && sourceAvailable && progress !== null && target !== null;
     let meets = null;
     if (known) {
         if (comparison === 'GTE') meets = progress >= target;
         if (comparison === 'LTE') meets = progress > 0 && progress <= target;
         if (comparison === 'BOOLEAN') meets = progress > 0;
     }
-    return { comparison, progress, target, supported, known, meets };
+    return { comparison, progress, target, supported, progressKnown, sourceAvailable, known, meets };
 }
 
 export function isTierUnlocked(value) {
     const evaluation = evaluateThreshold(value);
+    if (!evaluation.sourceAvailable) return false;
     if (evaluation.meets !== null) return evaluation.meets;
     if (hasExplicitComparison(value) && evaluation.supported && !evaluation.known) return false;
     if (explicitState(value) === 'unknown' || value?.progressKnown === false || value?.progress_known === false) {
@@ -114,21 +108,19 @@ export function progressRatioOf(value) {
 
 export function progressIsUnknown(value) {
     if (explicitState(value) === 'unknown') return true;
-    if (value?.progressKnown === false || value?.progress_known === false) return true;
+    if (!progressIsAvailable(value)) return true;
     const evaluation = evaluateThreshold(value);
     if (evaluation.meets !== null) return false;
     if (!list(value?.tiers).length && hasExplicitComparison(value) && evaluation.supported && !evaluation.known) {
         return true;
     }
     if (!evaluation.supported && !hasStoredUnlock(value)) return true;
-    const sourceUnavailable = !progressIsAvailable(value);
-    if (sourceUnavailable && !hasStoredEvidence(value)) return true;
     return list(value?.tiers).some(tier => progressIsUnknown(tier));
 }
 
 export function isFamilyComplete(value) {
     const tiers = list(value?.tiers);
-    if (explicitState(value) === 'unknown' || value?.progressKnown === false || value?.progress_known === false) {
+    if (explicitState(value) === 'unknown' || !progressIsAvailable(value)) {
         return false;
     }
     if (tiers.length) return tiers.every(isTierUnlocked);
@@ -138,6 +130,7 @@ export function isFamilyComplete(value) {
 export function stateForValue(value) {
     const tiers = list(value?.tiers);
     if (tiers.length && isFamilyComplete(value)) return 'complete';
+    if (!progressIsAvailable(value)) return 'unknown';
     if (progressIsUnknown(value)) return 'unknown';
 
     if (tiers.length && explicitState(value) === 'complete') {

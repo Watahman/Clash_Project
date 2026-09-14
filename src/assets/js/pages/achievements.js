@@ -9,14 +9,14 @@ import {
     normalizePlayerTag,
     parseBaseDataText,
     groupAchievementFamilies
-} from '../achievements/achievement-view-model.js?v=20260914-achievement-polish-v1';
+} from '../achievements/achievement-view-model.js?v=20260914-achievement-reconciled-v1';
 import { getAchievementsFixture } from './achievements-fixtures.js?v=20260811-1';
-import { resolveAchievementCollectionKey } from './achievement-collection-navigation.js?v=20260914-achievement-polish-v1';
+import { resolveAchievementCollectionKey } from './achievement-collection-navigation.js?v=20260914-achievement-reconciled-v1';
 import {
     renderAll,
     renderSources,
     renderAchievements
-} from './achievements-renderer.js?v=20260914-achievement-polish-v1';
+} from './achievements-renderer.js?v=20260914-achievement-reconciled-v1';
 import { trackLoadFailed, trackLoadSucceeded } from '../analytics/product-analytics.js?v=20260912-product-analytics-v1';
 
 const ACCOUNT_STORAGE_KEY = 'clashpanel_achievements_account';
@@ -226,7 +226,9 @@ function handleGridClick(event) {
 }
 
 function handlePopState() {
-    state.selectedCategory = categoryFromLocation();
+    const requested = categoryFromLocation();
+    state.selectedCategory = resolveAchievementCollectionKey(state.families, requested);
+    if (requested && requested !== state.selectedCategory) setCategoryUrl(state.selectedCategory, true);
     state.focusTarget = state.selectedCategory ? 'detail' : 'overview';
     renderAchievements(refs, state);
 }

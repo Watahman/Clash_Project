@@ -62,12 +62,16 @@ describe('Achievement collection map', () => {
         expect(container.querySelector('.achievement-category-standalone')).toBeNull();
         expect(container.querySelector('.achievement-category-crest')).toBeTruthy();
         expect(container.querySelector('.achievement-category-badge')?.dataset.reward).toBe('final');
-        expect(container.querySelector('.achievement-category-badge')?.dataset.state).toBe('locked');
+        expect(container.querySelector('.achievement-category-badge')?.dataset.state).toBe('unknown');
+        expect(container.querySelector('.achievement-badge-mark')?.textContent).toBe('◇');
         expect(container.querySelector('.achievement-badge-kicker')?.textContent).toMatch(/Completion reward|Voltooiingsbeloning/);
         expect(container.querySelectorAll('.achievement-map-track-shell')).toHaveLength(1);
         expect(container.querySelector('.achievement-map-track-shell')?.dataset.layout).toBeUndefined();
         expect(container.querySelectorAll('.achievement-map-constellation')).toHaveLength(1);
         expect(container.querySelectorAll('.achievement-map-path')).toHaveLength(2);
+        expect([...container.querySelectorAll('.achievement-map-path')].every(path => path.localName === 'svg')).toBe(true);
+        expect([...container.querySelectorAll('.achievement-map-path path')].every(path => path.getAttribute('d')?.includes('C'))).toBe(true);
+        expect(container.querySelector('.achievement-map-constellation .achievement-map-path')).toBeNull();
     });
 
     it('shows family names once while nodes expose concise tier targets', () => {

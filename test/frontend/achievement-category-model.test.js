@@ -103,7 +103,7 @@ describe('Achievement collection model', () => {
         expect(collection.state).toBe('unknown');
         expect(collection.completion).toBeNull();
         expect(collection.completionPercent).toBeNull();
-        expect(collection.badge.state).toBe('locked');
+        expect(collection.badge.state).toBe('unknown');
         expect(collection.badge.status).toBe('unknown');
     });
 

@@ -12,7 +12,7 @@ import {
     progressIsUnknown,
     stateForValue,
     targetValueOf
-} from '../achievements/achievement-progress-semantics.js?v=20260914-achievement-polish-v1';
+} from '../achievements/achievement-progress-semantics.js?v=20260914-achievement-reconciled-v1';
 
 const list = value => Array.isArray(value) ? value : [];
 
@@ -217,11 +217,12 @@ function collectionProgress(families) {
 
 function collectionBadge(definition, progress) {
     const unlocked = progress.progressKnown && progress.completion === 1 && progress.familyCount > 0;
+    const state = unlocked ? 'unlocked' : progress.progressKnown ? 'locked' : 'unknown';
     return {
         ...definition.badge,
         label: definition.badge.name,
-        state: unlocked ? 'unlocked' : 'locked',
-        tier: unlocked ? 'unlocked' : 'locked',
+        state,
+        tier: state,
         unlocked,
         confirmedUnlocked: unlocked,
         progress: progress.completion,

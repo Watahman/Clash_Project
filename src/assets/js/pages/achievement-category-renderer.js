@@ -2,13 +2,14 @@ import { achievementFamilyImage } from './achievement-asset-view.js?v=20260824-a
 import {
     achievementLabel,
     achievementStateText,
+    achievementTierStateText,
     achievementTierText,
     badgeInfo,
     badgeTierText,
     countsFor,
     hubText,
     stateOf
-} from './achievement-hub-renderer.js?v=20260914-achievement-polish-v1';
+} from './achievement-hub-renderer.js?v=20260914-achievement-reconciled-v1';
 
 function label(value, fallback = '') {
     const result = String(value ?? '').trim();
@@ -32,7 +33,8 @@ function tiersOf(family) {
 }
 
 function progressRatio(value) {
-    if (value?.progressKnown === false || value?.sourceAvailable === false) return null;
+    if (value?.progressKnown === false || value?.progress_known === false
+        || value?.sourceAvailable === false || value?.source_available === false) return null;
     const explicit = Number(value?.progressRatio ?? value?.ratio);
     if (Number.isFinite(explicit)) return Math.max(0, Math.min(1, explicit <= 1 ? explicit : explicit / 100));
     const progress = Number(value?.progress ?? value?.currentProgress);
@@ -67,11 +69,11 @@ function makeBadge(category) {
     element.dataset.tier = badge.tier;
     element.dataset.reward = 'final';
     element.setAttribute('role', 'img');
-    element.setAttribute('aria-label', `${hubText('categoryReward', 'Completion reward')}: ${badge.label}. ${badgeTierText(badge.tier)}`);
+    element.setAttribute('aria-label', `${hubText('categoryReward', 'Completion reward')}: ${badge.label}. ${badgeTierText(badge.tier)}.`);
     const mark = document.createElement('span');
     mark.className = 'achievement-badge-mark';
     mark.setAttribute('aria-hidden', 'true');
-    mark.textContent = badge.state === 'locked' ? '◇' : '◆';
+    mark.textContent = badge.state === 'unlocked' ? '◆' : '◇';
     const copy = document.createElement('span');
     copy.className = 'achievement-badge-copy';
     copy.append(document.createElement('span'), document.createElement('strong'), document.createElement('small'));
@@ -134,7 +136,7 @@ function makeNodeButton(tier, family, state, value, tierLabel, threshold, option
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'achievement-progression-node achievement-map-node-button';
-    button.setAttribute('aria-label', `${familyTitle(family)} — ${tierLabel}. ${achievementStateText(state)}. ${progressCopy(value)}.`);
+    button.setAttribute('aria-label', `${familyTitle(family)} — ${tierLabel}. ${achievementTierStateText(state)}. ${progressCopy(value)}.`);
     const emblem = document.createElement('span');
     emblem.className = 'achievement-map-node-emblem';
     emblem.append(achievementFamilyImage(tier, familyTitle(family)));
@@ -147,6 +149,22 @@ function makeNodeButton(tier, family, state, value, tierLabel, threshold, option
     button.append(emblem, copy);
     bindNode(button, tier, family, options);
     return button;
+}
+
+function makeBezierConnector(state) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add('achievement-progression-connector', 'achievement-map-path');
+    svg.setAttribute('viewBox', '0 0 100 100');
+    svg.setAttribute('focusable', 'false');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.dataset.state = state;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.classList.add('achievement-map-bezier');
+    path.setAttribute('d', 'M 50 4 C 14 28, 86 72, 50 96');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('vector-effect', 'non-scaling-stroke');
+    svg.append(path);
+    return svg;
 }
 
 function makeTierNode(tier, index, total, family, options, standalone = false) {
@@ -163,13 +181,12 @@ function makeTierNode(tier, index, total, family, options, standalone = false) {
         : 'achievement-progression-tier achievement-map-node';
     item.dataset.state = state;
     item.dataset.tier = String(tier?.tier ?? index + 1);
-    item.dataset.sourceAvailable = String(value?.sourceAvailable !== false && value?.progressKnown !== false);
+    item.dataset.sourceAvailable = String(value?.sourceAvailable !== false
+        && value?.source_available !== false && value?.progressKnown !== false
+        && value?.progress_known !== false);
     item.append(makeNodeButton(tier, family, state, value, tierLabel, threshold, options));
-    if (index < total - 1) {
-        const connector = document.createElement('i');
-        connector.className = 'achievement-progression-connector achievement-map-path';
-        connector.setAttribute('aria-hidden', 'true');
-        item.append(connector);
+    if (!standalone && index < total - 1) {
+        item.append(makeBezierConnector(state));
     }
     return item;
 }
@@ -191,16 +208,22 @@ function makeTrackHeader(family) {
     return heading;
 }
 
-function makeProgressionFamily(family, options) {
+function makeProgressionFamily(family, index, options) {
     const article = document.createElement('article');
     article.className = 'achievement-progression-path achievement-map-track-shell';
     article.setAttribute('role', 'listitem');
     article.dataset.family = label(family?.familyKey ?? family?.key ?? family?.id, 'achievement');
     article.dataset.structure = 'progression';
+    const tiers = tiersOf(family);
+    const arrangement = tiers.length <= 3
+        ? (index % 2 ? 'offset' : 'row') : tiers.length <= 5 ? 'staggered' : 'compact';
+    article.classList.add(`achievement-progression--${arrangement}`);
+    article.dataset.arrangement = arrangement;
     const track = document.createElement('ol');
     track.className = 'achievement-progression-track achievement-map-track';
     track.setAttribute('role', 'list');
-    const tiers = tiersOf(family);
+    track.dataset.tierCount = String(tiers.length);
+    track.style.setProperty('--achievement-tier-count', String(tiers.length));
     tiers.forEach((tier, tierIndex) => track.append(makeTierNode(tier, tierIndex, tiers.length, family, options)));
     article.append(makeTrackHeader(family), track);
     return article;
@@ -209,13 +232,18 @@ function makeProgressionFamily(family, options) {
 function makeStandaloneFamily(family, index, options) {
     const article = document.createElement('article');
     const state = stateOf(family);
-    const tier = tiersOf(family)[0] || family;
     article.className = 'achievement-standalone-challenge achievement-map-constellation';
     article.setAttribute('role', 'listitem');
     article.dataset.state = state;
     article.dataset.family = label(family?.familyKey ?? family?.key ?? family?.id, `achievement-${index}`);
     article.append(makeTrackHeader(family));
-    article.append(makeTierNode(tier, 0, 1, family, options, true));
+    const nodes = document.createElement('ol');
+    nodes.className = 'achievement-standalone-nodes';
+    nodes.setAttribute('role', 'list');
+    tiersOf(family).forEach((item, tierIndex, tiers) => {
+        nodes.append(makeTierNode(item, tierIndex, tiers.length, family, options, true));
+    });
+    article.append(nodes);
     return article;
 }
 
@@ -234,7 +262,7 @@ function makeMap(category, options) {
     map.setAttribute('aria-label', heading.firstChild.textContent);
     const progression = Array.isArray(category?.progressionFamilies) ? category.progressionFamilies : [];
     const standalone = Array.isArray(category?.standaloneFamilies) ? category.standaloneFamilies : [];
-    progression.forEach(family => map.append(makeProgressionFamily(family, options)));
+    progression.forEach((family, index) => map.append(makeProgressionFamily(family, index, options)));
     standalone.forEach((family, index) => map.append(makeStandaloneFamily(family, index, options)));
     if (!map.childElementCount) map.append(emptySection(hubText('detailEmpty', 'This category has no achievements to show yet.')));
     section.append(heading, map);

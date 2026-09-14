@@ -6,7 +6,7 @@ import {
     progressIsUnknown,
     progressRatioOf,
     stateForValue
-} from './achievement-progress-semantics.js?v=20260914-achievement-polish-v1';
+} from './achievement-progress-semantics.js?v=20260914-achievement-reconciled-v1';
 export function normalizePlayerTag(value) {
     const compact = String(value || '')
         .trim()
@@ -255,6 +255,7 @@ export function buildAchievementSummary(families) {
     const totalXp = personalTiers
         .filter(isTierUnlocked)
         .reduce((sum, tier) => sum + tier.xp, 0);
+    const progressKnown = allTiers.length > 0 && allTiers.every(tier => !progressIsUnknown(tier));
     return {
         familyCount: list.length,
         completedFamilies: list.filter(family => family.complete).length,
@@ -263,7 +264,7 @@ export function buildAchievementSummary(families) {
         availableFamilies: list.filter(family => family.sourceAvailable).length,
         unknownFamilies: list.filter(family => family.state === 'unknown').length,
         totalXp,
-        completion: allTiers.length ? unlockedTiers.length / allTiers.length : 0,
+        completion: progressKnown ? unlockedTiers.length / allTiers.length : null,
         level: achievementLevelFromXp(totalXp)
     };
 }

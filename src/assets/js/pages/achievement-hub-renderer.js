@@ -1,13 +1,13 @@
 import { achievementFamilyImage } from './achievement-asset-view.js?v=20260824-achievement-raster-color-1';
 import { getLanguage, t } from '../i18n/i18n.js?v=20260914-achievement-polish-v1';
 import { achievementChronicleLocales } from '../i18n/achievement-chronicle-locales.js?v=20260914-achievement-polish-v1';
-import { stateForValue } from '../achievements/achievement-progress-semantics.js?v=20260914-achievement-polish-v1';
+import { stateForValue } from '../achievements/achievement-progress-semantics.js?v=20260914-achievement-reconciled-v1';
 import {
     badgeInfo,
     countsFor,
     familiesOf,
     tiersOf
-} from './achievement-hub-state.js?v=20260914-achievement-polish-v1';
+} from './achievement-hub-state.js?v=20260914-achievement-reconciled-v1';
 
 export { badgeInfo, countsFor };
 
@@ -38,7 +38,15 @@ export function achievementStateText(state) {
         || 'Unlocked';
 }
 
+export function achievementTierStateText(state) {
+    if (state !== 'locked') return achievementStateText(state);
+    return achievementChronicleLocales[getLanguage()]?.['achievements.chronicle.locked']
+        || achievementChronicleLocales.en?.['achievements.chronicle.locked']
+        || 'Locked';
+}
+
 export function badgeTierText(state) {
+    if (state === 'unknown') return achievementStateText('unknown');
     return state === 'unlocked' || state === 'complete'
         ? achievementStateText('unlocked')
         : hubText('badgeLocked', 'Badge locked');
@@ -104,11 +112,12 @@ function familyImage(source, title) {
     return achievementFamilyImage(source || {}, title);
 }
 
-function makeJourney(family) {
+function makeJourney(family, options = {}) {
     const journey = document.createElement('div');
     const title = familyTitle(family);
     journey.className = 'achievement-hub-journey';
     journey.dataset.family = label(family?.familyKey ?? family?.key ?? family?.id, 'achievement');
+    journey.dataset.structure = options.standalone ? 'standalone' : 'progression';
     journey.setAttribute('role', 'listitem');
     journey.setAttribute('aria-label', `${title}: ${hubText('journey', 'Journey')}`);
     const heading = document.createElement('strong');
@@ -117,7 +126,7 @@ function makeJourney(family) {
     const track = document.createElement('div');
     track.className = 'achievement-hub-journey-track';
     track.setAttribute('role', 'list');
-    tiersOf(family).slice(0, 4).forEach((tier, index, tiers) => {
+    tiersOf(family).slice(0, options.maxTiers ?? 4).forEach((tier, index, tiers) => {
         const node = document.createElement('span');
         node.className = 'achievement-hub-journey-node';
         node.dataset.state = stateOf(tier);
@@ -144,7 +153,8 @@ function makeBadge(category) {
     const element = document.createElement('span');
     element.className = 'achievement-badge achievement-hub-badge';
     element.dataset.state = badge.state;
-    element.setAttribute('aria-label', `${badge.label}: ${badgeTierText(badge.state)}`);
+    element.dataset.reward = 'final';
+    element.setAttribute('aria-label', `${hubText('categoryReward', 'Completion reward')}: ${badge.label}. ${badgeTierText(badge.state)}.`);
     const crest = document.createElement('span');
     crest.className = 'achievement-hub-badge-crest';
     crest.setAttribute('aria-hidden', 'true');
@@ -180,7 +190,7 @@ function makeModuleProgress(category, title, counts) {
     copy.className = 'achievement-hub-progress-copy';
     copy.append(document.createElement('strong'), document.createElement('span'));
     copy.firstChild.textContent = progressText(counts);
-    copy.lastChild.textContent = counts.percent === null ? '—'
+    copy.lastChild.textContent = counts.percent === null ? achievementStateText('unknown')
         : hubText('completion', '{percent}% complete', { percent: Math.round(counts.percent) });
     const track = document.createElement('div');
     track.className = 'achievement-hub-progress-track';
@@ -199,11 +209,14 @@ function makeModuleProgress(category, title, counts) {
 
 function makeModulePreview(category) {
     const families = Array.isArray(category?.progressionFamilies) ? category.progressionFamilies.slice(0, 2) : [];
-    if (!families.length) return null;
+    const standalone = Array.isArray(category?.standaloneFamilies)
+        ? category.standaloneFamilies.slice(0, 2) : [];
+    if (!families.length && !standalone.length) return null;
     const preview = document.createElement('div');
     preview.className = 'achievement-hub-preview';
     preview.setAttribute('role', 'list');
     families.forEach(family => preview.append(makeJourney(family)));
+    standalone.forEach(family => preview.append(makeJourney(family, { maxTiers: 1, standalone: true })));
     return preview;
 }
 

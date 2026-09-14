@@ -80,11 +80,11 @@ describe('Achievement v2 view model', () => {
         }]);
 
         expect(family.tiers[0].unlocked).toBe(false);
-        expect(family.state).toBe('in_progress');
+        expect(family.state).toBe('unknown');
         expect(buildAchievementSummary([family])).toMatchObject({
             unlockedTierCount: 0,
             totalXp: 0,
-            completion: 0
+            completion: null
         });
     });
 

@@ -3,7 +3,7 @@ import {
     isFamilyComplete,
     isTierUnlocked,
     stateForValue
-} from '../achievements/achievement-progress-semantics.js?v=20260914-achievement-polish-v1';
+} from '../achievements/achievement-progress-semantics.js?v=20260914-achievement-reconciled-v1';
 
 const list = value => Array.isArray(value) ? value : [];
 
@@ -75,7 +75,7 @@ export function badgeInfo(category) {
     const definition = badgeDefinitionOf(category);
     const counts = countsFor(category);
     const unlocked = counts.total > 0 && counts.percent === 100;
-    const state = unlocked ? 'unlocked' : 'locked';
+    const state = unlocked ? 'unlocked' : counts.percent === null ? 'unknown' : 'locked';
     return {
         label: label(definition.label ?? definition.displayLabel, 'Completion badge'),
         state,

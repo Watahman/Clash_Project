@@ -68,7 +68,7 @@ describe('Achievement hub and category renderers', () => {
         expect(container.textContent).toContain('1 / 2');
         expect(container.textContent).toContain('50% complete');
         expect(container.querySelectorAll('.achievement-hub-journey-connector')).toHaveLength(2);
-        expect(container.querySelectorAll('.achievement-hub-journey')).toHaveLength(1);
+        expect(container.querySelectorAll('.achievement-hub-journey')).toHaveLength(2);
         expect(container.querySelector('.achievement-hub-badge[data-state="locked"]')).toBeTruthy();
         expect(container.querySelector('.achievement-hub-badge-crest')).toBeTruthy();
         expect(container.querySelector('.achievement-hub-cta')).toBeNull();
@@ -168,5 +168,12 @@ describe('Achievement hub and category renderers', () => {
             completionPercent: 50,
             badgeDefinition: { state: 'unlocked', unlocked: true }
         }).state).toBe('locked');
+        expect(badgeInfo({
+            totalCount: 1,
+            progressionFamilies: [family('waiting', {
+                state: 'unknown', sourceAvailable: false,
+                tiers: [tier(1, { state: 'unknown', sourceAvailable: false })]
+            })]
+        }).state).toBe('unknown');
     });
 });

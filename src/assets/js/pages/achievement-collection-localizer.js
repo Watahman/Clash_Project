@@ -1,6 +1,6 @@
 import { getLanguage, t } from '../i18n/i18n.js?v=20260914-achievement-polish-v1';
 import { achievementChronicleLocales } from '../i18n/achievement-chronicle-locales.js?v=20260914-achievement-polish-v1';
-import { buildAchievementCategories } from './achievement-category-model.js?v=20260914-achievement-polish-v1';
+import { buildAchievementCategories } from './achievement-category-model.js?v=20260914-achievement-reconciled-v1';
 
 export function hubTranslated(key, fallback = key, params = {}) {
     let value = achievementChronicleLocales[getLanguage()]?.[key]
