@@ -40,7 +40,7 @@ beforeAll(async () => {
 });
 
 describe('Achievement hub and category renderers', () => {
-    it('renders collection panels with real progress and a single completion crest', () => {
+    it('renders collection trophies with real progress and one mastery reward', () => {
         const container = document.createElement('div');
         container.classList.add('achievement-category-detail');
         const chain = family('donations', { complete: false });
@@ -67,17 +67,16 @@ describe('Achievement hub and category renderers', () => {
         expect(container.querySelector('.achievement-hub-module')?.getAttribute('aria-label')).toContain('View details');
         expect(container.textContent).toContain('1 / 2');
         expect(container.textContent).toContain('50% complete');
-        expect(container.querySelectorAll('.achievement-hub-journey-connector')).toHaveLength(2);
-        expect(container.querySelectorAll('.achievement-hub-journey')).toHaveLength(2);
-        expect(container.querySelector('.achievement-hub-badge[data-state="locked"]')).toBeTruthy();
-        expect(container.querySelector('.achievement-hub-badge-crest')).toBeTruthy();
+        expect(container.querySelectorAll('.achievement-trophy-preview-medal')).toHaveLength(2);
+        expect(container.querySelector('.achievement-mastery-reward[data-state="progressing"]')).toBeTruthy();
+        expect(container.querySelector('.achievement-mastery-medal')).toBeTruthy();
         expect(container.querySelector('.achievement-hub-cta')).toBeNull();
-        expect(container.textContent).not.toMatch(/Category preview|Waiting for data|Bronze|Silver|Gold|Master/);
+        expect(container.textContent).not.toMatch(/Category preview|Waiting for data|Bronze|Silver|Gold/);
         container.querySelector('.achievement-hub-module')?.click();
         expect(onCategorySelect).toHaveBeenCalledWith(category, 'clan');
     });
 
-    it('keeps family paths separate and preserves waiting state in detail view', () => {
+    it('keeps progression families separate from standalone medals and preserves waiting state', () => {
         const container = document.createElement('div');
         const category = {
             key: 'history',
@@ -90,13 +89,13 @@ describe('Achievement hub and category renderers', () => {
         renderAchievementCategory(container, category);
 
         expect(container.querySelector('[data-achievement-back="true"]')).toBeTruthy();
-        expect(container.querySelectorAll('.achievement-progression-path')).toHaveLength(1);
-        expect(container.querySelectorAll('.achievement-progression-tier')).toHaveLength(3);
-        expect(container.querySelectorAll('.achievement-map-path path')).toHaveLength(2);
-        expect(container.querySelectorAll('.achievement-standalone-challenge')).toHaveLength(1);
-        expect(container.querySelector('.achievement-standalone-challenge')?.dataset.state).toBe('unknown');
-        expect(container.textContent).toContain('Progress unavailable');
-        expect(container.textContent).not.toContain('Progress unavailable · Progress unavailable');
+        expect(container.querySelectorAll('.achievement-family-showcase[data-structure="progression"]')).toHaveLength(1);
+        expect(container.querySelectorAll('.achievement-family-showcase[data-structure="progression"] .achievement-medal-item')).toHaveLength(3);
+        expect(container.querySelectorAll('.achievement-medal-connector')).toHaveLength(2);
+        expect(container.querySelectorAll('.achievement-standalone-showcase')).toHaveLength(1);
+        expect(container.querySelector('.achievement-family-group[data-state="unknown"], .achievement-medal-item[data-state="unknown"]')).toBeTruthy();
+        expect(container.textContent).toContain('Waiting for data');
+        expect(container.textContent).not.toContain('Waiting for data · Waiting for data');
     });
 
     it('localizes the collection panel, completion badge and detail section in Dutch', () => {
@@ -125,10 +124,10 @@ describe('Achievement hub and category renderers', () => {
         renderAchievementCategory(detail, category);
 
         expect(hub.querySelector('.achievement-hub-module')?.getAttribute('aria-label')).toBe('Planning — Details bekijken');
-        expect(hub.querySelector('.achievement-hub-badge')?.dataset.state).toBe('unlocked');
-        expect(hub.querySelector('.achievement-hub-badge')?.textContent).toContain('Ontgrendeld');
+        expect(hub.querySelector('.achievement-mastery-reward')?.dataset.state).toBe('unlocked');
+        expect(hub.querySelector('.achievement-mastery-reward')?.textContent).toContain('Ontgrendeld');
         expect(detail.querySelector('[data-achievement-back="true"]')?.textContent).toContain('Terug naar Achievement Hub');
-        expect(detail.querySelector('h2')?.textContent).toBe('Achievementkaart');
+        expect(detail.querySelector('h2')?.textContent).toBe('Achievementsets');
         expect(detail.querySelector('[data-achievement-back="true"]')?.getAttribute('aria-label')).toBe('Terug naar Achievement Hub');
 
         localStorage.setItem('clashtools_language', 'en');
@@ -155,8 +154,8 @@ describe('Achievement hub and category renderers', () => {
         renderAchievementHub(container, [category]);
 
         expect(stateOf(invalid.tiers[0])).toBe('in_progress');
-        expect(container.querySelector('.achievement-hub-journey-node')?.dataset.state).toBe('in_progress');
-        expect(container.querySelector('.achievement-hub-badge')?.dataset.state).toBe('locked');
+        expect(container.querySelector('.achievement-trophy-preview-medal')?.dataset.state).toBe('in_progress');
+        expect(container.querySelector('.achievement-mastery-reward')?.dataset.state).toBe('locked');
         expect(badgeInfo(category).state).toBe('locked');
         expect(container.textContent).toContain('0 / 1');
     });

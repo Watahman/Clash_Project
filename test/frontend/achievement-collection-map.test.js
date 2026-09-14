@@ -38,8 +38,8 @@ beforeAll(async () => {
     ({ renderAchievementCategory } = await import('../../src/assets/js/pages/achievement-category-renderer.js'));
 });
 
-describe('Achievement collection map', () => {
-    it('renders progression and standalone families in one connected map', () => {
+describe('Achievement mastery cabinet', () => {
+    it('renders progression and standalone families as separate collectible showcases', () => {
         const container = document.createElement('div');
         container.classList.add('achievement-hub');
         const unknown = family('waiting', {
@@ -56,31 +56,22 @@ describe('Achievement collection map', () => {
         });
 
         expect(container.classList.contains('achievement-hub')).toBe(false);
-        expect(container.querySelectorAll('.achievement-category-map')).toHaveLength(1);
-        expect(container.querySelectorAll('.achievement-category-section')).toHaveLength(1);
+        expect(container.querySelectorAll('.achievement-category-showcase')).toHaveLength(1);
+        expect(container.querySelectorAll('.achievement-family-showcase')).toHaveLength(1);
         expect(container.querySelector('.achievement-category-progression')).toBeNull();
         expect(container.querySelector('.achievement-category-standalone')).toBeNull();
         expect(container.querySelector('.achievement-category-crest')).toBeTruthy();
-        expect(container.querySelector('.achievement-category-badge')?.dataset.reward).toBe('final');
+        expect(container.querySelector('.achievement-category-badge')?.dataset.reward).toBe('mastery');
         expect(container.querySelector('.achievement-category-badge')?.dataset.state).toBe('unknown');
-        expect(container.querySelector('.achievement-badge-mark')?.textContent).toBe('◇');
-        expect(container.querySelector('.achievement-badge-kicker')?.textContent).toMatch(/Completion reward|Voltooiingsbeloning/);
-        expect(container.querySelectorAll('.achievement-map-track-shell')).toHaveLength(1);
-        expect(container.querySelector('.achievement-map-track-shell')?.dataset.layout).toBeUndefined();
-        expect(container.querySelectorAll('.achievement-map-constellation')).toHaveLength(1);
-        expect(container.querySelectorAll('.achievement-map-path')).toHaveLength(1);
-        expect(container.querySelectorAll('.achievement-map-path path')).toHaveLength(2);
-        expect([...container.querySelectorAll('.achievement-map-path')].every(path => path.localName === 'svg')).toBe(true);
-        expect([...container.querySelectorAll('.achievement-map-path path')].every(path => path.getAttribute('d')?.includes('C'))).toBe(true);
-        expect(container.querySelector('.achievement-map-constellation .achievement-map-path')).toBeNull();
-        expect([...container.querySelectorAll('.achievement-progression-tier')].slice(0, -1)
-            .map(node => node.dataset.nextState)).toEqual(['in_progress', 'in_progress']);
-        const positions = [...container.querySelectorAll('.achievement-progression-tier')]
-            .map(node => Number.parseFloat(node.style.getPropertyValue('--node-x')));
-        expect(positions.slice(1).every((position, index) => position - positions[index] >= 124)).toBe(true);
+        expect(container.querySelector('.achievement-mastery-mark')?.textContent).toBe('·');
+        expect(container.querySelector('.achievement-mastery-copy small')?.textContent).toMatch(/Mastery reward|Masterybeloning/);
+        expect(container.querySelectorAll('.achievement-family-showcase[data-structure="progression"]')).toHaveLength(1);
+        expect(container.querySelectorAll('.achievement-standalone-showcase')).toHaveLength(1);
+        expect(container.querySelectorAll('.achievement-medal-connector')).toHaveLength(2);
+        expect(container.querySelector('.achievement-standalone-showcase .achievement-medal-connector')).toBeNull();
     });
 
-    it('shows family names once while nodes expose concise tier targets', () => {
+    it('shows family names once while medals expose concise tier targets', () => {
         const container = document.createElement('div');
         renderAchievementCategory(container, {
             key: 'planning',
@@ -89,20 +80,20 @@ describe('Achievement collection map', () => {
             standaloneFamilies: []
         });
 
-        const track = container.querySelector('.achievement-progression-path');
+        const track = container.querySelector('.achievement-family-showcase');
         expect(track.querySelector('h3')?.textContent).toBe('Raid victories');
         expect(track.textContent.match(/Raid victories/g)).toHaveLength(1);
-        const nodes = [...container.querySelectorAll('.achievement-map-node')];
+        const nodes = [...container.querySelectorAll('.achievement-medal-item')];
         expect(nodes).toHaveLength(3);
         expect(nodes[0].textContent).toContain('Tier 1');
         expect(nodes[0].textContent).toContain('100');
         expect(nodes[0].textContent).not.toMatch(/Unlocked|Badge unlocked/);
-        expect(nodes[0].querySelector('button')?.getAttribute('aria-label')).toMatch(/Unlocked|Badge unlocked/);
+        expect(nodes[0].querySelector('button')?.getAttribute('aria-label')).toMatch(/Unlocked|Freigeschaltet/);
         expect(nodes[0].dataset.state).toBe('unlocked');
         expect(nodes.every(node => node.querySelector('button')?.type === 'button')).toBe(true);
     });
 
-    it('preserves unknown source state and invokes node selection from keyboard-capable buttons', () => {
+    it('preserves unknown source state and invokes medal selection from keyboard-capable buttons', () => {
         const container = document.createElement('div');
         const onAchievementSelect = vi.fn();
         const unknown = family('waiting', {
@@ -112,14 +103,27 @@ describe('Achievement collection map', () => {
         });
         renderAchievementCategory(container, { key: 'collection', standaloneFamilies: [unknown] }, { onAchievementSelect });
 
-        const node = container.querySelector('.achievement-map-node');
+        const node = container.querySelector('.achievement-medal-item');
         const button = node.querySelector('button');
         expect(node.dataset.state).toBe('unknown');
         expect(node.dataset.sourceAvailable).toBe('false');
-        expect(button.getAttribute('aria-label')).toContain('Progress unavailable');
+        expect(button.getAttribute('aria-label')).toContain('Waiting for data');
         expect(button.tabIndex).toBe(0);
         button.click();
         expect(onAchievementSelect).toHaveBeenCalledWith(unknown.tiers[0], unknown);
+    });
+
+    it('inherits an unknown family state when a raw tier still looks locked', () => {
+        const container = document.createElement('div');
+        const waiting = family('waiting-family', {
+            state: 'unknown', sourceAvailable: false,
+            tiers: [tier(1, { state: 'locked', sourceAvailable: false })]
+        });
+
+        renderAchievementCategory(container, { key: 'clan', standaloneFamilies: [waiting] });
+
+        expect(container.querySelector('.achievement-medal-item')?.dataset.state).toBe('unknown');
+        expect(container.querySelector('.achievement-medal')?.getAttribute('aria-label')).toContain('Waiting for data');
     });
 
     it('gives every tooltip a unique family-scoped relationship', () => {
@@ -130,7 +134,7 @@ describe('Achievement collection map', () => {
             standaloneFamilies: []
         });
 
-        const buttons = [...container.querySelectorAll('.achievement-map-node-button')];
+        const buttons = [...container.querySelectorAll('.achievement-medal')];
         const tooltipIds = buttons.map(button => button.getAttribute('aria-controls'));
         expect(new Set(tooltipIds).size).toBe(buttons.length);
         buttons.forEach(button => {

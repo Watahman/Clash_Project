@@ -16,7 +16,7 @@ import {
     renderAll,
     renderSources,
     renderAchievements
-} from './achievements-renderer.js?v=20260914-achievement-chronicle-v2';
+} from './achievements-renderer.js?v=20260914-achievement-trophy-wall-v1';
 import { trackLoadFailed, trackLoadSucceeded } from '../analytics/product-analytics.js?v=20260912-product-analytics-v1';
 
 const ACCOUNT_STORAGE_KEY = 'clashpanel_achievements_account';

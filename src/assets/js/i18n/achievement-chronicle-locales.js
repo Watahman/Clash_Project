@@ -8,7 +8,8 @@ const collectionLocaleRows = Object.freeze({
     en: Object.freeze({ village: ['Village', 'Build, improve and preserve your Home Village.', 'Village Master'], combat: ['Combat', 'Grow your offensive strength and battle activity.', 'Combat Master'], warCwl: ['War & CWL', 'Prove your impact in regular wars and Clan War League.', 'War & CWL Master'], clan: ['Clan', 'Celebrate loyalty, teamwork and your wider clan family.', 'Clan Master'], builderBase: ['Builder Base', 'Develop your Builder Base and its battle-ready army.', 'Builder Base Master'], clanCapital: ['Clan Capital', 'Build the Capital and lead successful raid weekends.', 'Clan Capital Master'], progressionStats: ['Progression & Stats', 'Track profile milestones, rankings and official achievement progress.', 'Progression & Stats Master'], clashpanel: ['ClashPanel', 'Make every import and planning workflow count.', 'ClashPanel Master'], special: ['Special', 'Discover rare collections and hidden combinations.', 'Special Master'] }),
     nl: Object.freeze({ village: ['Dorp', 'Bouw, verbeter en onderhoud je thuisdorp.', 'Dorpmeester'], combat: ['Gevecht', 'Versterk je aanvalskracht en gevechtsactiviteit.', 'Gevechtsmeester'], warCwl: ['Oorlog & CWL', 'Bewijs je impact in gewone oorlogen en Clan War League.', 'Oorlog- & CWL-meester'], clan: ['Clan', 'Vier loyaliteit, teamwork en je bredere clan family.', 'Clanmeester'], builderBase: ['Bouwersbasis', 'Ontwikkel je Bouwersbasis en het leger ervoor.', 'Bouwersbas meester'], clanCapital: ['Clanhoofdstad', 'Bouw de Hoofdstad en leid geslaagde raidweekends.', 'Clanhoofdstadmeester'], progressionStats: ['Voortgang & statistieken', 'Volg profielmijlpalen, rankings en officiële achievements.', 'Voortgangs- & statistiekmeester'], clashpanel: ['ClashPanel', 'Laat elke import- en planningsworkflow meetellen.', 'ClashPanel-meester'], special: ['Speciaal', 'Ontdek zeldzame collecties en verborgen combinaties.', 'Speciale meester'] }),
     fr: Object.freeze({ village: ['Village', 'Construisez, améliorez et préservez votre village principal.', 'Maître du village'], combat: ['Combat', 'Développez votre force offensive et votre activité de combat.', 'Maître du combat'], warCwl: ['Guerre et CWL', 'Prouvez votre impact dans les guerres et la Ligue de guerres de clans.', 'Maître guerre et CWL'], clan: ['Clan', 'Célébrez la fidélité, le travail d’équipe et votre famille de clans.', 'Maître du clan'], builderBase: ['Base des ouvriers', 'Développez votre base des ouvriers et son armée.', 'Maître de la base des ouvriers'], clanCapital: ['Capitale de clan', 'Développez la capitale et menez des week-ends de raids réussis.', 'Maître de la capitale'], progressionStats: ['Progression et statistiques', 'Suivez les étapes du profil, les classements et les succès officiels.', 'Maître progression et statistiques'], clashpanel: ['ClashPanel', 'Valorisez chaque importation et chaque workflow de planification.', 'Maître ClashPanel'], special: ['Spécial', 'Découvrez des collections rares et des combinaisons cachées.', 'Maître spécial'] }),
-    de: Object.freeze({ village: ['Dorf', 'Baue, verbessere und bewahre dein Heimatdorf.', 'Dorfmeister'], combat: ['Kampf', 'Stärke deine Angriffskraft und Kampfaktivität.', 'Kampfmeister'], warCwl: ['Krieg & CWL', 'Beweise deinen Einfluss in normalen Kriegen und der Clankriegsliga.', 'Krieg-&-CWL-Meister'], clan: ['Clan', 'Feiere Loyalität, Teamwork und deine Clan-Familie.', 'Clanmeister'], builderBase: ['Bauarbeiterbasis', 'Entwickle deine Bauarbeiterbasis und ihre Armee.', 'Bauarbeiterbasis-Meister'], clanCapital: ['Clanhauptstadt', 'Baue die Hauptstadt aus und führe erfolgreiche Raid-Wochenenden.', 'Clanhauptstadt-Meister'], progressionStats: ['Fortschritt & Statistiken', 'Verfolge Profilmeilensteine, Ranglisten und offizielle Erfolge.', 'Fortschritts- & Statistikmeister'], clashpanel: ['ClashPanel', 'Mache jeden Import und jeden Planungs-Workflow wertvoll.', 'ClashPanel-Meister'], special: ['Spezial', 'Entdecke seltene Sammlungen und verborgene Kombinationen.', 'Spezialmeister'] })
+    de: Object.freeze({ village: ['Dorf', 'Baue, verbessere und bewahre dein Heimatdorf.', 'Dorfmeister'], combat: ['Kampf', 'Stärke deine Angriffskraft und Kampfaktivität.', 'Kampfmeister'], warCwl: ['Krieg & CWL', 'Beweise deinen Einfluss in normalen Kriegen und der Clankriegsliga.', 'Krieg-&-CWL-Meister'], clan: ['Clan', 'Feiere Loyalität, Teamwork und deine Clan-Familie.', 'Clanmeister'], builderBase: ['Bauarbeiterbasis', 'Entwickle deine Bauarbeiterbasis und ihre Armee.', 'Bauarbeiterbasis-Meister'], clanCapital: ['Clanhauptstadt', 'Baue die Hauptstadt aus und führe erfolgreiche Raid-Wochenenden.', 'Clanhauptstadt-Meister'], progressionStats: ['Fortschritt & Statistiken', 'Verfolge Profilmeilensteine, Ranglisten und offizielle Erfolge.', 'Fortschritts- & Statistikmeister'], clashpanel: ['ClashPanel', 'Mache jeden Import und jeden Planungs-Workflow wertvoll.', 'ClashPanel-Meister'], special: ['Spezial', 'Entdecke seltene Sammlungen und verborgene Kombinationen.', 'Spezialmeister'] }),
+    es: Object.freeze({ village: ['Aldea', 'Construye, mejora y conserva tu aldea principal.', 'Maestro de aldea'], combat: ['Combate', 'Desarrolla tu fuerza ofensiva y tu actividad de combate.', 'Maestro del combate'], warCwl: ['Guerra y CWL', 'Demuestra tu impacto en guerras normales y en la Liga de guerras de clanes.', 'Maestro de guerra y CWL'], clan: ['Clan', 'Celebra la lealtad, el trabajo en equipo y tu familia de clanes.', 'Maestro del clan'], builderBase: ['Base del constructor', 'Desarrolla tu base del constructor y su ejército.', 'Maestro de la base del constructor'], clanCapital: ['Capital del clan', 'Construye la capital y lidera fines de semana de incursiones exitosos.', 'Maestro de la capital'], progressionStats: ['Progreso y estadísticas', 'Sigue hitos del perfil, clasificaciones y logros oficiales.', 'Maestro de progreso y estadísticas'], clashpanel: ['ClashPanel', 'Haz que cada importación y flujo de planificación cuente.', 'Maestro de ClashPanel'], special: ['Especial', 'Descubre colecciones raras y combinaciones ocultas.', 'Maestro especial'] })
 });
 
 function collectionText(rows) {
@@ -29,6 +30,91 @@ const shared = Object.freeze({
     'achievements.chronicle.notUnlocked': 'Not unlocked',
     'achievements.chronicle.branchCount': '{count} achievements',
     ...Object.fromEntries(Object.entries(branchKeys).map(([key, value]) => [`achievements.chronicle.branch.${key}`, value]))
+});
+
+const cabinetLocales = Object.freeze({
+    en: Object.freeze({
+        'achievements.hub.kicker': 'Mastery Cabinet', 'achievements.hub.title': 'Trophy Wall',
+        'achievements.hub.intro': 'Collect your milestones, display your mastery and see what is close to complete.',
+        'achievements.hub.summary': 'A collection room for every achievement you have earned.',
+        'achievements.hub.detailIntro': 'Display this collection as medal sets and celebrate each milestone.',
+        'achievements.hub.masteryCabinet': 'Mastery Cabinet', 'achievements.hub.masteryReward': 'Mastery reward',
+        'achievements.hub.masteryLocked': 'Locked', 'achievements.hub.masteryProgressing': 'In progress',
+        'achievements.hub.masteryUnlocked': 'Unlocked', 'achievements.hub.masteryUnknown': 'Waiting for data',
+        'achievements.hub.familyProgress': '{unlocked} / {total} achievements',
+        'achievements.hub.setsTitle': 'Achievement sets',
+        'achievements.hub.setsIntro': 'Collectible medals grouped by real achievement families.',
+        'achievements.hub.standaloneIntro': 'Individual collectible achievements with no validated progression chain.',
+        'achievements.hub.collectionPreview': 'Collection preview', 'achievements.hub.collectionDescription': 'A collection of earned milestones.',
+        'achievements.hub.featuredTitle': 'Featured achievements', 'achievements.hub.recentlyUnlocked': 'Recently unlocked',
+        'achievements.hub.closeToComplete': 'Close to complete', 'achievements.hub.badgeUnlocked': 'Badge unlocked',
+        'achievements.hub.progressUnavailable': 'Progress unavailable'
+    }),
+    nl: Object.freeze({
+        'achievements.hub.kicker': 'Mastery Cabinet', 'achievements.hub.title': 'Trophy Wall',
+        'achievements.hub.intro': 'Verzamel je mijlpalen, toon je meesterschap en zie wat bijna voltooid is.',
+        'achievements.hub.summary': 'Een collectiekamer voor elke achievement die je hebt verdiend.',
+        'achievements.hub.detailIntro': 'Toon deze collectie als medaljesets en vier elke mijlpaal.',
+        'achievements.hub.masteryCabinet': 'Mastery Cabinet', 'achievements.hub.masteryReward': 'Masterybeloning',
+        'achievements.hub.masteryLocked': 'Vergrendeld', 'achievements.hub.masteryProgressing': 'In uitvoering',
+        'achievements.hub.masteryUnlocked': 'Ontgrendeld', 'achievements.hub.masteryUnknown': 'Wachten op data',
+        'achievements.hub.familyProgress': '{unlocked} / {total} achievements',
+        'achievements.hub.setsTitle': 'Achievementsets', 'achievements.hub.setsIntro': 'Verzamelmedailles gegroepeerd per echte achievementfamilie.',
+        'achievements.hub.standaloneIntro': 'Losse verzamelachievements zonder gevalideerde progressieketen.',
+        'achievements.hub.collectionPreview': 'Collectievoorbeeld', 'achievements.hub.collectionDescription': 'Een collectie verdiende mijlpalen.',
+        'achievements.hub.featuredTitle': 'Uitgelichte achievements', 'achievements.hub.recentlyUnlocked': 'Recent ontgrendeld',
+        'achievements.hub.closeToComplete': 'Bijna voltooid', 'achievements.hub.badgeUnlocked': 'Badge ontgrendeld',
+        'achievements.hub.progressUnavailable': 'Voortgang niet beschikbaar'
+    }),
+    fr: Object.freeze({
+        'achievements.hub.kicker': 'Cabinet de maîtrise', 'achievements.hub.title': 'Mur des trophées',
+        'achievements.hub.intro': 'Collectionnez vos jalons, affichez votre maîtrise et voyez ce qui est presque terminé.',
+        'achievements.hub.summary': 'Une salle de collection pour chaque succès remporté.',
+        'achievements.hub.detailIntro': 'Affichez cette collection en séries de médailles et célébrez chaque jalon.',
+        'achievements.hub.masteryCabinet': 'Cabinet de maîtrise', 'achievements.hub.masteryReward': 'Récompense de maîtrise',
+        'achievements.hub.masteryLocked': 'Verrouillé', 'achievements.hub.masteryProgressing': 'En cours',
+        'achievements.hub.masteryUnlocked': 'Déverrouillé', 'achievements.hub.masteryUnknown': 'En attente de données',
+        'achievements.hub.familyProgress': '{unlocked} / {total} succès', 'achievements.hub.setsTitle': 'Séries de succès',
+        'achievements.hub.setsIntro': 'Des médailles de collection regroupées par familles réelles.',
+        'achievements.hub.standaloneIntro': 'Des succès à collectionner sans chaîne de progression validée.',
+        'achievements.hub.collectionPreview': 'Aperçu de la collection', 'achievements.hub.collectionDescription': 'Une collection de jalons remportés.',
+        'achievements.hub.featuredTitle': 'Succès à la une', 'achievements.hub.recentlyUnlocked': 'Récemment déverrouillé',
+        'achievements.hub.closeToComplete': 'Presque terminé', 'achievements.hub.badgeUnlocked': 'Badge débloqué',
+        'achievements.hub.progressUnavailable': 'Progression indisponible'
+    }),
+    de: Object.freeze({
+        'achievements.hub.kicker': 'Meisterschaftskabinett', 'achievements.hub.title': 'Trophäenwand',
+        'achievements.hub.intro': 'Sammle deine Meilensteine, zeige deine Meisterschaft und sieh, was fast abgeschlossen ist.',
+        'achievements.hub.summary': 'Ein Sammlungsraum für jeden verdienten Erfolg.',
+        'achievements.hub.detailIntro': 'Präsentiere diese Sammlung als Medaillensets und feiere jeden Meilenstein.',
+        'achievements.hub.masteryCabinet': 'Meisterschaftskabinett', 'achievements.hub.masteryReward': 'Meisterschaftsbelohnung',
+        'achievements.hub.masteryLocked': 'Gesperrt', 'achievements.hub.masteryProgressing': 'In Arbeit',
+        'achievements.hub.masteryUnlocked': 'Freigeschaltet', 'achievements.hub.masteryUnknown': 'Warten auf Daten',
+        'achievements.hub.familyProgress': '{unlocked} / {total} Erfolge', 'achievements.hub.setsTitle': 'Erfolgssets',
+        'achievements.hub.setsIntro': 'Sammelmedaillen, nach echten Erfolgsfamilien gruppiert.',
+        'achievements.hub.standaloneIntro': 'Einzelne Sammelerfolge ohne bestätigte Fortschrittskette.',
+        'achievements.hub.collectionPreview': 'Sammlungsvorschau', 'achievements.hub.collectionDescription': 'Eine Sammlung verdienter Meilensteine.',
+        'achievements.hub.featuredTitle': 'Ausgewählte Erfolge', 'achievements.hub.recentlyUnlocked': 'Kürzlich freigeschaltet',
+        'achievements.hub.closeToComplete': 'Fast abgeschlossen', 'achievements.hub.badgeUnlocked': 'Badge freigeschaltet',
+        'achievements.hub.progressUnavailable': 'Fortschritt nicht verfügbar'
+    }),
+    es: Object.freeze({
+        'achievements.hub.kicker': 'Gabinete de maestría', 'achievements.hub.title': 'Muro de trofeos',
+        'achievements.hub.intro': 'Colecciona tus hitos, muestra tu maestría y descubre lo que está por completar.',
+        'achievements.hub.summary': 'Una sala de colección para cada logro conseguido.',
+        'achievements.hub.detailIntro': 'Muestra esta colección como conjuntos de medallas y celebra cada hito.',
+        'achievements.hub.masteryCabinet': 'Gabinete de maestría', 'achievements.hub.masteryReward': 'Recompensa de maestría',
+        'achievements.hub.masteryLocked': 'Bloqueado', 'achievements.hub.masteryProgressing': 'En progreso',
+        'achievements.hub.masteryUnlocked': 'Desbloqueado', 'achievements.hub.masteryUnknown': 'Esperando datos',
+        'achievements.hub.familyProgress': '{unlocked} / {total} logros', 'achievements.hub.setsTitle': 'Conjuntos de logros',
+        'achievements.hub.setsIntro': 'Medallas coleccionables agrupadas por familias de logros reales.',
+        'achievements.hub.standaloneIntro': 'Logros coleccionables individuales sin cadena de progreso validada.',
+        'achievements.hub.journey': 'Recorrido',
+        'achievements.hub.collectionPreview': 'Vista previa de colección', 'achievements.hub.collectionDescription': 'Una colección de hitos conseguidos.',
+        'achievements.hub.featuredTitle': 'Logros destacados', 'achievements.hub.recentlyUnlocked': 'Desbloqueado recientemente',
+        'achievements.hub.closeToComplete': 'Casi completado', 'achievements.hub.badgeUnlocked': 'Insignia desbloqueada',
+        'achievements.hub.progressUnavailable': 'Progreso no disponible'
+    })
 });
 
 const hubLocales = Object.freeze({
@@ -63,7 +149,8 @@ const hubLocales = Object.freeze({
         'achievements.hub.noCategories': 'No achievement categories are available yet.',
         'achievements.hub.categoryDetails': 'Category details',
         'achievements.hub.filterResults': '{count} matching achievements',
-        'achievements.hub.nextBadge': 'Next badge: {badge}'
+        'achievements.hub.nextBadge': 'Next badge: {badge}',
+        ...cabinetLocales.en
     }),
     nl: Object.freeze({
         ...collectionText(collectionLocaleRows.nl),
@@ -96,7 +183,8 @@ const hubLocales = Object.freeze({
         'achievements.hub.noCategories': 'Er zijn nog geen achievementcategorieën beschikbaar.',
         'achievements.hub.categoryDetails': 'Categoriedetails',
         'achievements.hub.filterResults': '{count} overeenkomende achievements',
-        'achievements.hub.nextBadge': 'Volgende badge: {badge}'
+        'achievements.hub.nextBadge': 'Volgende badge: {badge}',
+        ...cabinetLocales.nl
     }),
     fr: Object.freeze({
         ...collectionText(collectionLocaleRows.fr),
@@ -129,7 +217,8 @@ const hubLocales = Object.freeze({
         'achievements.hub.noCategories': 'Aucune catégorie de succès n’est encore disponible.',
         'achievements.hub.categoryDetails': 'Détails de la catégorie',
         'achievements.hub.filterResults': '{count} succès correspondants',
-        'achievements.hub.nextBadge': 'Prochain badge : {badge}'
+        'achievements.hub.nextBadge': 'Prochain badge : {badge}',
+        ...cabinetLocales.fr
     }),
     de: Object.freeze({
         ...collectionText(collectionLocaleRows.de),
@@ -162,9 +251,11 @@ const hubLocales = Object.freeze({
         'achievements.hub.noCategories': 'Noch keine Erfolgskategorien verfügbar.',
         'achievements.hub.categoryDetails': 'Kategoriedetails',
         'achievements.hub.filterResults': '{count} passende Erfolge',
-        'achievements.hub.nextBadge': 'Nächstes Badge: {badge}'
+        'achievements.hub.nextBadge': 'Nächstes Badge: {badge}',
+        ...cabinetLocales.de
     }),
     es: Object.freeze({
+        ...collectionText(collectionLocaleRows.es),
         'achievements.hub.title': 'Centro de logros',
         'achievements.hub.intro': 'Explora tu viaje de logros por colección.',
         'achievements.hub.summary': 'Elige una colección para explorar su recorrido.',
@@ -191,7 +282,8 @@ const hubLocales = Object.freeze({
         'achievements.hub.noCategories': 'Aún no hay categorías de logros disponibles.',
         'achievements.hub.categoryDetails': 'Detalles de la categoría',
         'achievements.hub.filterResults': '{count} logros coincidentes',
-        'achievements.hub.nextBadge': 'Siguiente insignia: {badge}'
+        'achievements.hub.nextBadge': 'Siguiente insignia: {badge}',
+        ...cabinetLocales.es
     })
 });
 

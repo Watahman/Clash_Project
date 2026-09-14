@@ -56,7 +56,7 @@ describe('Achievements workspace page', () => {
         expect(source).toContain('Waiting for this data source');
     });
 
-    it('presents a category hub and keeps connectors inside real tier families', () => {
+    it('presents a trophy wall and keeps connectors inside real progression families', () => {
         const document = documentFor('src/subpages/achievements.html');
         const hubRenderer = readFileSync('src/assets/js/pages/achievement-hub-renderer.js', 'utf8');
         const detailRenderer = readFileSync('src/assets/js/pages/achievement-category-renderer.js', 'utf8');
@@ -64,8 +64,10 @@ describe('Achievements workspace page', () => {
         expect(document.querySelector('#achievement-grid.achievement-hub-grid')).not.toBeNull();
         expect(document.querySelector('#achievement-hub-summary')).not.toBeNull();
         expect(hubRenderer).toContain('dataset.achievementCategory');
-        expect(detailRenderer).toContain('achievement-map-track');
+        expect(hubRenderer).toContain('achievement-trophy-panel');
+        expect(detailRenderer).toContain('achievement-medal-rail');
         expect(detailRenderer).toContain('tiers.forEach');
+        expect(detailRenderer).not.toContain('achievement-map-track');
         expect(detailRenderer).not.toContain('buildChronicleBranches');
     });
 

@@ -4,11 +4,11 @@ import {
     filterAchievementFamilies
 } from '../achievements/achievement-view-model.js?v=20260914-achievement-reconciled-v1';
 import { categoryByKey } from './achievement-category-model.js?v=20260914-achievement-chronicle-v2';
-import { hubTranslated, localizeAchievementCollections } from './achievement-collection-localizer.js?v=20260914-achievement-chronicle-v2';
+import { hubTranslated, localizeAchievementCollections } from './achievement-collection-localizer.js?v=20260914-achievement-trophy-wall-v1';
 import { achievementFamilyImage } from './achievement-asset-view.js?v=20260824-achievement-raster-color-1';
-import { achievementChronicleLocales } from '../i18n/achievement-chronicle-locales.js?v=20260914-achievement-polish-v1';
-import { renderAchievementHub } from './achievement-hub-renderer.js?v=20260914-achievement-chronicle-v2';
-import { renderAchievementCategory } from './achievement-category-renderer.js?v=20260914-achievement-chronicle-v2';
+import { achievementChronicleLocales } from '../i18n/achievement-chronicle-locales.js?v=20260914-achievement-trophy-wall-v1';
+import { renderAchievementHub } from './achievement-hub-renderer.js?v=20260914-achievement-trophy-wall-v1';
+import { renderAchievementCategory } from './achievement-category-renderer.js?v=20260914-achievement-trophy-wall-v1';
 
 const SOURCE_ORDER = Object.freeze([
     'live_profile', 'base_data', 'base_history', 'advanced_stats', 'war', 'cwl_history', 'raid_history',
@@ -148,18 +148,32 @@ export function renderSummary(refs, state) {
 }
 
 function renderFeatured(refs, state) {
-    const candidates = localizeFamilies(state).filter(family => family.sourceAvailable && !family.complete && family.currentTier?.target > 0)
-        .sort((left, right) => right.progressRatio - left.progressRatio || left.title.localeCompare(right.title, getLanguage())).slice(0, 3);
+    const families = localizeFamilies(state).filter(family => family.sourceAvailable !== false);
+    const recent = families.filter(family => family.highestUnlocked?.unlocked_at || family.unlocked_at)
+        .sort((left, right) => String(right.highestUnlocked?.unlocked_at || right.unlocked_at || '')
+            .localeCompare(String(left.highestUnlocked?.unlocked_at || left.unlocked_at || '')));
+    const close = families.filter(family => !family.complete && Number.isFinite(Number(family.progressRatio))
+        && family.currentTier?.target > 0)
+        .sort((left, right) => Number(right.progressRatio) - Number(left.progressRatio)
+            || left.title.localeCompare(right.title, getLanguage()));
+    const candidates = [...new Map([...recent, ...close].map(family => [family.familyKey, family])).values()].slice(0, 3);
     refs.featured.replaceChildren();
     if (!candidates.length) { refs.featured.hidden = true; return; }
     refs.featured.hidden = false;
     const title = document.createElement('strong');
-    title.textContent = t('achievements.inProgress');
+    title.textContent = hubTranslated('achievements.hub.featuredTitle', 'Featured achievements');
     refs.featured.append(title);
     candidates.forEach(family => {
         const item = document.createElement('span');
-        item.append(achievementFamilyImage(family, categoryLabel(state, family.category)), document.createTextNode(family.title));
-        item.title = `${number(family.currentTier.progress)} / ${family.currentTier.thresholdText || number(family.currentTier.target)}`;
+        const latestUnlock = family.highestUnlocked?.unlocked_at || family.unlocked_at;
+        const status = document.createElement('small');
+        status.textContent = latestUnlock && (family.complete || family.state === 'unlocked' || family.state === 'complete')
+            ? hubTranslated('achievements.hub.recentlyUnlocked', 'Recently unlocked')
+            : hubTranslated('achievements.hub.closeToComplete', 'Close to complete');
+        item.append(achievementFamilyImage(family, categoryLabel(state, family.category)), document.createTextNode(family.title), status);
+        if (family.currentTier?.progress !== undefined && family.currentTier?.target !== undefined) {
+            item.title = `${number(family.currentTier.progress)} / ${number(family.currentTier.target)}`;
+        }
         refs.featured.append(item);
     });
 }
