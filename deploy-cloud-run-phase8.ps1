@@ -12,11 +12,25 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Format-GcloudArgsForError {
+    param([Parameter(Mandatory = $true)][string[]]$Args)
+
+    $safeArgs = @()
+    foreach ($arg in $Args) {
+        if ($arg -match '^--update-env-vars=') {
+            $safeArgs += ($arg -replace '(?i)(_API_KEY_SUPABASE|POSTHOG_PROJECT_API_KEY)=[^,]+', '$1=<redacted>')
+        } else {
+            $safeArgs += $arg
+        }
+    }
+    return ($safeArgs -join ' ')
+}
+
 function Run-Gcloud {
     param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Args)
     & gcloud @Args
     if ($LASTEXITCODE -ne 0) {
-        throw "gcloud command failed: gcloud $($Args -join ' ')"
+        throw "gcloud command failed: gcloud $(Format-GcloudArgsForError -Args $Args)"
     }
 }
 
@@ -26,6 +40,54 @@ function Run-GcloudQuiet {
     if ($LASTEXITCODE -ne 0) {
         throw "gcloud command failed while updating the isolated Phase 8 runtime."
     }
+}
+
+function Get-CloudRunEnvValue {
+    param(
+        [Parameter(Mandatory = $true)] [string]$Path,
+        [Parameter(Mandatory = $true)] [string]$Name
+    )
+
+    $pattern = '^\s*' + [regex]::Escape($Name) + '\s*:\s*(.+?)\s*(?:#.*)?$'
+    foreach ($line in Get-Content $Path) {
+        if ($line -match $pattern) {
+            $value = $Matches[1].Trim()
+            if ($value.Length -ge 2 -and (
+                ($value.StartsWith('"') -and $value.EndsWith('"')) -or
+                ($value.StartsWith("'") -and $value.EndsWith("'")))) {
+                $value = $value.Substring(1, $value.Length - 2)
+            }
+            return $value.Trim()
+        }
+    }
+    return $null
+}
+
+function Get-CloudRunOrdinaryEnv {
+    param([Parameter(Mandatory = $true)] [string]$Path)
+
+    $values = @{}
+    foreach ($name in @('_API_KEY_SUPABASE', 'POSTHOG_PROJECT_API_KEY')) {
+        $value = Get-CloudRunEnvValue -Path $Path -Name $name
+        if ([string]::IsNullOrWhiteSpace($value) -or $value -match '(?i)(replace|placeholder|your-project|<[^>]+>)') {
+            throw "cloudrun-env.yaml moet een echte $name bevatten; gebruik geen voorbeeld-placeholder."
+        }
+        $values[$name] = $value
+    }
+
+    $secretNames = @(
+        'SUPABASE_SERVICE_ROLE_KEY', 'API_PROXY_SECRET',
+        'ADVANCED_STATS_SCHEDULER_SECRET', '_API_KEY_SECR_SUPABASE',
+        'CLASH_API_KEY_POOL', '_API_KEY_ALL', '_API_KEY_ALL2', '_API_KEY_ALL3'
+    )
+    foreach ($line in Get-Content $Path) {
+        if ($line -match '^\s*([A-Za-z_][A-Za-z0-9_-]*)\s*:') {
+            if ($secretNames -contains $Matches[1]) {
+                throw "$($Matches[1]) hoort niet als waarde in cloudrun-env.yaml te staan; koppel deze via Secret Manager."
+            }
+        }
+    }
+    return $values
 }
 
 function Get-HttpStatus {
@@ -90,6 +152,13 @@ if (-not (Test-Path "./Dockerfile")) {
     throw "Run this script from the Clash_Project root where Dockerfile exists."
 }
 
+if (-not (Test-Path "./cloudrun-env.yaml")) {
+    throw "Create cloudrun-env.yaml from cloudrun-env.example.yaml before deploying."
+}
+
+$ordinaryEnv = Get-CloudRunOrdinaryEnv -Path "./cloudrun-env.yaml"
+$ordinaryEnvArgs = "_API_KEY_SUPABASE=$($ordinaryEnv['_API_KEY_SUPABASE']),POSTHOG_PROJECT_API_KEY=$($ordinaryEnv['POSTHOG_PROJECT_API_KEY'])"
+
 Write-Host "Preparing zero-traffic Phase 8 candidate..." -ForegroundColor Cyan
 Run-Gcloud config set project $ProjectId
 Run-Gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com secretmanager.googleapis.com cloudscheduler.googleapis.com
@@ -106,10 +175,10 @@ if (-not $configured) {
         --source . `
         --project $ProjectId `
         --region $Region `
-        --update-env-vars="ADVANCED_STATS_COLLECTION_ENABLED=false,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false,POSTHOG_ENABLED=true,POSTHOG_HOST=https://eu.i.posthog.com,CLASHPANEL_ENVIRONMENT=development" `
+        --update-env-vars="$ordinaryEnvArgs,ADVANCED_STATS_COLLECTION_ENABLED=false,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false,POSTHOG_ENABLED=true,POSTHOG_HOST=https://eu.i.posthog.com,CLASHPANEL_ENVIRONMENT=development" `
         --remove-env-vars="ADVANCED_STATS_ROLLOUT_USER_IDS" `
-        --update-secrets="POSTHOG_PROJECT_API_KEY=POSTHOG_PROJECT_API_KEY:latest" `
-        --remove-secrets="ADVANCED_STATS_SCHEDULER_SECRET" `
+        --update-secrets="SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:latest,API_PROXY_SECRET=API_PROXY_SECRET:latest" `
+        --remove-secrets="_API_KEY_SUPABASE,POSTHOG_PROJECT_API_KEY,_API_KEY_SECR_SUPABASE,CLASH_API_KEY_POOL,_API_KEY_ALL,_API_KEY_ALL2,_API_KEY_ALL3,ADVANCED_STATS_SCHEDULER_SECRET" `
         --no-traffic `
         --tag $TagName
 
@@ -146,8 +215,9 @@ Run-Gcloud run deploy $ServiceName `
     --source . `
     --project $ProjectId `
     --region $Region `
-    --update-env-vars="ADVANCED_STATS_COLLECTION_ENABLED=true,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false,ADVANCED_STATS_ROLLOUT_USER_IDS=$rolloutUserIds,POSTHOG_ENABLED=true,POSTHOG_HOST=https://eu.i.posthog.com,CLASHPANEL_ENVIRONMENT=development,POSTHOG_INTERNAL_USER_IDS=$rolloutUserIds" `
-    --update-secrets="ADVANCED_STATS_SCHEDULER_SECRET=${SecretName}:latest,POSTHOG_PROJECT_API_KEY=POSTHOG_PROJECT_API_KEY:latest" `
+    --update-env-vars="$ordinaryEnvArgs,ADVANCED_STATS_COLLECTION_ENABLED=true,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false,ADVANCED_STATS_ROLLOUT_USER_IDS=$rolloutUserIds,POSTHOG_ENABLED=true,POSTHOG_HOST=https://eu.i.posthog.com,CLASHPANEL_ENVIRONMENT=development,POSTHOG_INTERNAL_USER_IDS=$rolloutUserIds" `
+    --update-secrets="SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:latest,API_PROXY_SECRET=API_PROXY_SECRET:latest,ADVANCED_STATS_SCHEDULER_SECRET=${SecretName}:latest" `
+    --remove-secrets="_API_KEY_SUPABASE,POSTHOG_PROJECT_API_KEY,_API_KEY_SECR_SUPABASE,CLASH_API_KEY_POOL,_API_KEY_ALL,_API_KEY_ALL2,_API_KEY_ALL3" `
     --no-traffic `
     --tag $TagName
 

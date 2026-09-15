@@ -133,7 +133,7 @@ profile IDs:
 | --- | --- |
 | `POSTHOG_ENABLED` | `true` only when the deployment should capture product analytics; leave `false` to disable it. |
 | `POSTHOG_HOST` | The PostHog region host, currently `https://eu.i.posthog.com` for the ClashPanel project, without a capture-path suffix. |
-| `POSTHOG_PROJECT_API_KEY` | The PostHog project API key. The same key may be used by Development and Production; `CLASHPANEL_ENVIRONMENT` separates their events. ClashPanel keeps it server-side even though PostHog project API keys are designed for event ingestion. |
+| `POSTHOG_PROJECT_API_KEY` | The PostHog project API key, supplied as an ordinary Cloud Run environment variable (not a Secret Manager binding). The same key may be used by Development and Production; `CLASHPANEL_ENVIRONMENT` separates their events. Keep real values out of git and local command output. |
 | `CLASHPANEL_ENVIRONMENT` | `development` or `production` (or another deliberate bounded environment label for a non-production deployment). |
 | `POSTHOG_INTERNAL_USER_IDS` | Comma-separated internal ClashPanel profile IDs for the deployment's own testing accounts. Populate the production value with the internal account ID; leave blank only when no internal account should be classified. |
 | `APP_CONFIG.API_BASE_URL` | The browser's own ClashPanel API base, normally `/api`; it must expose `/ProductAnalytics` and must not be a PostHog URL. |
@@ -145,8 +145,11 @@ additional PostHog environment variable is required.
 ## PostHog setup after deployment
 
 1. Use the configured PostHog project for both Development and Production.
-   Keep the same project key in Secret Manager, and set only the backend
-   environment label differently (`development` versus `production`).
+   Set the same `POSTHOG_PROJECT_API_KEY` ordinary environment variable in each
+   ignored `cloudrun-env.yaml`, and set only the backend environment label
+   differently (`development` versus `production`). The deploy scripts keep
+   this key out of Secret Manager; server-only credentials remain Secret
+   Manager bindings.
 2. Add descriptions for the eight events and the properties listed above.
    Use `environment=production` and `traffic_type=external` as the default
    filters for production views. Keep a separate internal-debug view with

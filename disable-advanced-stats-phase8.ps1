@@ -5,7 +5,7 @@ param(
     [string]$Region = "europe-west1",
     [string]$ServiceName = "clashpanel-api",
     [string]$TagName = "phase8",
-    [string]$SchedulerJobName = "clashpanel-advanced-stats-poll"
+    [string]$SchedulerJobName = "clashpanel-advanced-stats-poll-phase8"
 )
 
 $ErrorActionPreference = "Stop"

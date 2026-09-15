@@ -3,6 +3,9 @@
 
 # Required backend URLs / production browser origin
 _BASE_URL_SUPABASE: "https://<your-project-ref>.supabase.co"
+# Publishable key and PostHog project key are ordinary env vars. Replace these
+# placeholders only in the ignored cloudrun-env.yaml used for deployment.
+_API_KEY_SUPABASE: "sb_publishable_replace_me"
 _ALLOWED_ORIGINS: "https://clashpanel.com,https://www.clashpanel.com"
 TRUST_PROXY_HEADERS: "true"
 
@@ -38,6 +41,7 @@ ADVANCED_STATS_DEGRADED_THRESHOLD: "3"
 # environment=development|production keeps their events separable in PostHog.
 POSTHOG_ENABLED: "true"
 POSTHOG_HOST: "https://eu.i.posthog.com"
+POSTHOG_PROJECT_API_KEY: "replace_with_posthog_project_api_key"
 CLASHPANEL_ENVIRONMENT: "production"
 # Populate with the internal ClashPanel profile ID(s) used for testing.
 POSTHOG_INTERNAL_USER_IDS: ""
@@ -48,10 +52,10 @@ CLASHKING_BASE_URL: "https://api.clashk.ing"
 # season automatically from ClashKing V2 /v2/dates/current.
 CLASHKING_RANKED_SEASON: ""
 
-# Secrets are intentionally NOT stored here.
-# Configure these through Cloud Run / Secret Manager:
-# _API_KEY_SUPABASE
+# Secrets are intentionally NOT stored here. Configure these through the
+# --update-secrets bindings in the deploy/configure scripts:
 # SUPABASE_SERVICE_ROLE_KEY
 # API_PROXY_SECRET
 # ADVANCED_STATS_SCHEDULER_SECRET
-# POSTHOG_PROJECT_API_KEY
+# Phase 8 only: ADVANCED_STATS_SCHEDULER_SECRET maps to
+# clashpanel-advanced-stats-scheduler-secret-phase8.

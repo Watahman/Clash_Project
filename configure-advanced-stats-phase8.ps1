@@ -9,7 +9,8 @@ param(
     [string]$ServiceName = "clashpanel-api",
     [string]$TagName = "phase8",
     [string]$SchedulerJobName = "clashpanel-advanced-stats-poll-phase8",
-    [string]$SecretName = "clashpanel-advanced-stats-scheduler-secret-phase8"
+    [string]$SecretName = "clashpanel-advanced-stats-scheduler-secret-phase8",
+    [switch]$RotateSchedulerSecret
 )
 
 $ErrorActionPreference = "Stop"
@@ -28,19 +29,36 @@ function Format-SafeGcloudArgs {
     }) -join ' '
 }
 
+function Format-SafeGcloudOutput {
+    param([object[]]$Output)
+    $text = ($Output | ForEach-Object { [string]$_ }) -join "`n"
+    $text = $text -replace '(?i)(--(?:headers|update-headers)\s*[=:]\s*)[^\s,;"]+', '$1<redacted>'
+    return $text -replace '(?i)(X-ClashPanel-Scheduler-Secret\s*[=:]\s*)[^\s,;"]+', '$1<redacted>'
+}
+
 function Run-Gcloud {
     param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Args)
-    & gcloud @Args
+    $output = @(& gcloud @Args 2>&1)
     if ($LASTEXITCODE -ne 0) {
-        throw "gcloud command failed: gcloud $(Format-SafeGcloudArgs $Args)"
+        $details = Format-SafeGcloudOutput $output
+        $message = "gcloud command failed: gcloud $(Format-SafeGcloudArgs $Args)"
+        if (-not [string]::IsNullOrWhiteSpace($details)) {
+            $message = "$message`n$details"
+        }
+        throw $message
     }
 }
 
 function Run-GcloudQuiet {
     param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Args)
-    $null = & gcloud @Args
+    $output = @(& gcloud @Args 2>&1)
     if ($LASTEXITCODE -ne 0) {
-        throw "gcloud command failed: gcloud $(Format-SafeGcloudArgs $Args)"
+        $details = Format-SafeGcloudOutput $output
+        $message = "gcloud command failed: gcloud $(Format-SafeGcloudArgs $Args)"
+        if (-not [string]::IsNullOrWhiteSpace($details)) {
+            $message = "$message`n$details"
+        }
+        throw $message
     }
 }
 
@@ -58,11 +76,67 @@ function Get-TaggedCandidateUrl {
 }
 
 function Secret-Exists {
-    $names = @(& gcloud secrets list --project $ProjectId --format="value(name)")
-    if ($LASTEXITCODE -ne 0) {
-        throw "Could not list Secret Manager secrets."
+    & gcloud secrets describe $SecretName --project $ProjectId --format="value(name)" 2>$null | Out-Null
+    return $LASTEXITCODE -eq 0
+}
+
+function Add-GeneratedSchedulerSecretVersion {
+    $bytes = New-Object byte[] 48
+    $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+    try {
+        $rng.GetBytes($bytes)
+    } finally {
+        $rng.Dispose()
     }
-    return $names -contains $SecretName
+
+    $schedulerSecret = [Convert]::ToBase64String($bytes)
+    $tempSecretFile = [System.IO.Path]::GetTempFileName()
+    try {
+        [System.IO.File]::WriteAllText($tempSecretFile, $schedulerSecret, (New-Object System.Text.UTF8Encoding($false)))
+        Run-Gcloud secrets versions add $SecretName --project $ProjectId --data-file=$tempSecretFile
+    } finally {
+        Remove-Item $tempSecretFile -Force -ErrorAction SilentlyContinue
+        $schedulerSecret = $null
+        $bytes = $null
+    }
+}
+
+function Get-LatestEnabledSecretVersion {
+    $rows = @(& gcloud secrets versions list $SecretName `
+        --project $ProjectId `
+        --filter="state=ENABLED" `
+        --sort-by="~createTime" `
+        --limit=1 `
+        --format="value(name)" 2>&1)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Could not list versions for scheduler secret '$SecretName'."
+    }
+
+    foreach ($row in $rows) {
+        $value = ([string]$row).Trim()
+        if ($value -match '/versions/([0-9]+)$') {
+            return $Matches[1]
+        }
+        if ($value -match '^([0-9]+)$') {
+            return $Matches[1]
+        }
+    }
+    return $null
+}
+
+function Get-SecretVersionValue {
+    param([Parameter(Mandatory = $true)][string]$Version)
+    $valueLines = @(& gcloud secrets versions access $Version `
+        --secret=$SecretName `
+        --project=$ProjectId 2>$null)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Could not access scheduler secret '$SecretName' version '$Version'."
+    }
+    $value = ($valueLines | ForEach-Object { [string]$_ }) -join "`n"
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        throw "Scheduler secret '$SecretName' version '$Version' is empty."
+    }
+    return $value.Trim()
 }
 
 function Get-SchedulerJobState {
@@ -101,25 +175,20 @@ if (-not $serviceAccount) {
     $serviceAccount = "$projectNumber-compute@developer.gserviceaccount.com"
 }
 
-if (-not (Secret-Exists)) {
+$secretExists = Secret-Exists
+if (-not $secretExists) {
     Run-Gcloud secrets create $SecretName --project $ProjectId --replication-policy="automatic"
+    Add-GeneratedSchedulerSecretVersion
+} elseif ($RotateSchedulerSecret) {
+    Write-Host "Rotating Phase 8 scheduler secret..." -ForegroundColor Cyan
+    Add-GeneratedSchedulerSecretVersion
 }
 
-$bytes = New-Object byte[] 48
-$rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
-try {
-    $rng.GetBytes($bytes)
-} finally {
-    $rng.Dispose()
+$schedulerVersion = Get-LatestEnabledSecretVersion
+if (-not $schedulerVersion) {
+    throw "Scheduler secret '$SecretName' has no ENABLED version. Rerun with -RotateSchedulerSecret to add one."
 }
-$schedulerSecret = [Convert]::ToBase64String($bytes)
-$tempSecretFile = [System.IO.Path]::GetTempFileName()
-try {
-    [System.IO.File]::WriteAllText($tempSecretFile, $schedulerSecret, (New-Object System.Text.UTF8Encoding($false)))
-    Run-Gcloud secrets versions add $SecretName --project $ProjectId --data-file=$tempSecretFile
-} finally {
-    Remove-Item $tempSecretFile -Force -ErrorAction SilentlyContinue
-}
+$schedulerSecret = Get-SecretVersionValue -Version $schedulerVersion
 
 Run-Gcloud secrets add-iam-policy-binding $SecretName `
     --project $ProjectId `
@@ -132,7 +201,7 @@ Run-Gcloud run services update $ServiceName `
     --project $ProjectId `
     --region $Region `
     --update-env-vars="ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false,ADVANCED_STATS_COLLECTION_ENABLED=false,ADVANCED_STATS_ROLLOUT_USER_IDS=$DeveloperUserId" `
-    --update-secrets="ADVANCED_STATS_SCHEDULER_SECRET=${SecretName}:latest" `
+    --update-secrets="ADVANCED_STATS_SCHEDULER_SECRET=${SecretName}:${schedulerVersion}" `
     --no-traffic `
     --tag $TagName
 
