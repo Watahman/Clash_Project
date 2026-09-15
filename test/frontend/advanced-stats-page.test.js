@@ -36,7 +36,7 @@ describe('Advanced Stats workspace page', () => {
         const source = readFileSync('src/subpages/advanced-stats.html', 'utf8');
         const document = documentFor('src/subpages/advanced-stats.html');
 
-        expect(source).not.toContain("window.location.replace('/dashboard')");
+        expect(source).toContain("window.location.replace('/dashboard')");
         expect(document.title).toContain('Coming soon');
         expect(document.querySelector('.workspace-coming-soon-badge')).not.toBeNull();
     });
@@ -144,7 +144,7 @@ describe('Advanced Stats workspace page', () => {
         expect(source).toContain("'progress'");
     });
 
-    it('serves the clean private route through the worker', async () => {
+    it('blocks the clean private route through the worker', async () => {
         const bindings = {
             CLOUD_RUN_ORIGIN: 'https://backend.example',
             ASSETS: {
@@ -160,7 +160,8 @@ describe('Advanced Stats workspace page', () => {
             bindings
         );
 
-        expect(await response.text()).toBe('asset:/subpages/advanced-stats');
-        expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
+        expect(response.status).toBe(301);
+        expect(response.headers.get('Location')).toBe('https://clashpanel.com/dashboard');
+        expect(bindings.ASSETS.fetch).not.toHaveBeenCalled();
     });
 });

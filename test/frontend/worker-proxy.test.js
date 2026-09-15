@@ -117,6 +117,20 @@ describe('Cloudflare API proxy', () => {
         );
     });
 
+    it('keeps unreleased workspace routes blocked in the static redirect layer', () => {
+        const redirects = readFileSync('src/_redirects', 'utf8');
+        for (const path of [
+            '/app/advanced-stats',
+            '/app/advanced-stats.html',
+            '/app/achievements',
+            '/app/achievements.html',
+            '/subpages/advanced-stats.html',
+            '/subpages/achievements.html'
+        ]) {
+            expect(redirects).toContain(`${path} /dashboard 301`);
+        }
+    });
+
     it.each([
         ['/subpages/privacy', '/privacy', '/subpages/privacy'],
         ['/subpages/privacy.html', '/privacy', '/subpages/privacy'],
@@ -173,6 +187,14 @@ describe('Cloudflare API proxy', () => {
         ['/subpages/contact.html', '/contact'],
         ['/subpages/dashboard.html', '/dashboard'],
         ['/app/dashboard', '/dashboard'],
+        ['/app/advanced-stats', '/dashboard'],
+        ['/app/advanced-stats.html', '/dashboard'],
+        ['/app/achievements', '/dashboard'],
+        ['/app/achievements.html', '/dashboard'],
+        ['/subpages/advanced-stats', '/dashboard'],
+        ['/subpages/advanced-stats.html', '/dashboard'],
+        ['/subpages/achievements', '/dashboard'],
+        ['/subpages/achievements.html', '/dashboard'],
         ['/cwl-planner.html', '/cwl-planner'],
         ['/guides.html', '/guides'],
         ['/guides/fair-cwl-roster.html', '/guides/fair-cwl-roster'],
