@@ -1,6 +1,6 @@
 import { getAchievements, importAchievementBaseData } from '../Supabase/Supabase-Achievements.js?v=20260829-public-auth-v1';
 import { checkUserId } from '../Supabase/Supabase-User.js?v=20260829-public-auth-v1';
-import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260829-public-auth-v1';
+import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260915-auth-policy-v1';
 import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
 import { getCurrentUserId } from '../utils/user.js';
 import { applyI18n, getLanguage, t } from '../i18n/i18n.js?v=20260914-achievement-polish-v1';

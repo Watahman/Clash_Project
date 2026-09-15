@@ -7,7 +7,7 @@ import { getCurrentUserId } from "../utils/user.js";
 import { uniquePlayers } from "./cwl-utils.js";
 import { t } from "../i18n/i18n.js?v=20260829-public-auth-v1";
 import { isRedesignFixtureRequested } from "../fixtures/redesign-fixture-mode.js";
-import { getCurrentReturnPath, requireAuthForAction } from "../auth/auth-client.js?v=20260829-public-auth-v1";
+import { getCurrentReturnPath, requireAuthForAction } from "../auth/auth-client.js?v=20260915-auth-policy-v1";
 import { createPrivateSourceAuth } from "./cwl-private-source-auth.js?v=20260829-public-auth-v1";
 import { trackTagSubmitted } from "../analytics/product-analytics.js?v=20260912-product-analytics-v1";
 

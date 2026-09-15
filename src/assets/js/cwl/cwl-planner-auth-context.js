@@ -1,4 +1,4 @@
-import * as authClient from '../auth/auth-client.js?v=20260829-public-auth-v1';
+import * as authClient from '../auth/auth-client.js?v=20260915-auth-policy-v1';
 
 const STORAGE_PREFIX = 'clashpanel:planner';
 const LEGACY_KEYS = Object.freeze({

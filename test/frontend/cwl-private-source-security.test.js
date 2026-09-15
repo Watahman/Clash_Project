@@ -43,7 +43,7 @@ vi.mock('../../src/assets/js/templates/CWLTemplates.js?v=20260829-public-auth-v1
 vi.mock('../../src/assets/js/utils/user.js', () => ({
     getCurrentUserId: () => localStorage.getItem('id')
 }));
-vi.mock('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1', () => ({
+vi.mock('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1', () => ({
     getCurrentReturnPath: () => '/app/cwl-planner',
     requireAuthForAction: mocks.requireAuthForAction
 }));

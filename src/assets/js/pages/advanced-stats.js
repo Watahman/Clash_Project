@@ -1,5 +1,5 @@
 import { applyI18n, t } from '../i18n/i18n.js?v=20260913-advanced-dashboard-v2';
-import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260913-advanced-dashboard-v2';
+import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260915-auth-policy-v1';
 import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
 import { getCurrentUserId } from '../utils/user.js';
 import { checkUserId } from '../Supabase/Supabase-User.js?v=20260913-advanced-dashboard-v2';

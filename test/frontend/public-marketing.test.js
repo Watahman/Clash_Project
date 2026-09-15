@@ -160,20 +160,23 @@ describe('Public marketing shell', () => {
 
     it('cache-busts the complete changed public module graph', () => {
         const productVersion = 'v=20260821-product-home';
+        const authEntryVersion = 'v=20260915-auth-policy-v1';
         const changedGraphVersion = 'v=20260831-master-live-v1';
         const publicVersion = 'v=20260829-public-auth-v1';
         const publicHeaderVersion = 'v=20260829-public-header-cta-v2';
         const entry = read('src/assets/js/pages/public-site.js');
 
-        expect(read('src/index.html')).toContain(`public-site.js?${changedGraphVersion}`);
+        expect(read('src/index.html')).toContain(`public-site.js?${authEntryVersion}`);
+        expect(read('src/index.html')).toContain(`public-marketing.css?${authEntryVersion}`);
         ['contact', 'privacy', 'cookies', 'terms'].forEach(name => {
             const policyPage = read(`src/subpages/${name}.html`);
-            expect(policyPage).toContain(`public-site.js?${changedGraphVersion}`);
+            expect(policyPage).toContain(`public-site.js?${authEntryVersion}`);
+            expect(policyPage).toContain(`public-marketing.css?${authEntryVersion}`);
             expect(policyPage).toContain(`public-policy.js?${changedGraphVersion}`);
         });
         expect(entry).toContain(`i18n.js?${changedGraphVersion}`);
-        ['theme-manager.js', 'public-header.js']
-            .forEach(file => expect(entry).toContain(`${file}?${publicHeaderVersion}`));
+        expect(entry).toContain(`theme-manager.js?${publicHeaderVersion}`);
+        expect(entry).toContain(`public-header.js?${authEntryVersion}`);
         expect(entry).toContain('public-resource-pages.js?v=20260829-public-auth-v1');
         expect(read('src/assets/js/i18n/i18n.js')).toContain('runtime-translations.js?v=20260909-battledata-v1');
         expect(read('src/assets/js/i18n/runtime-translations.js')).toContain(`public-resource-locales.js?${changedGraphVersion}`);

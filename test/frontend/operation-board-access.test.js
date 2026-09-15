@@ -4,7 +4,7 @@ const auth = vi.hoisted(() => ({
     onAuthStateChange: vi.fn()
 }));
 
-vi.mock('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1', () => auth);
+vi.mock('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1', () => auth);
 
 const state = (userId, status = 'authenticated') => ({
     status,

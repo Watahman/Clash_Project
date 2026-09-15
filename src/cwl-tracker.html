@@ -28,10 +28,10 @@
     <script src="/assets/js/shell/workspace-bootstrap.js"></script>
     <link rel="stylesheet" href="/assets/css/workspace-system.css?v=20260829-public-auth-v1">
     <script src="/assets/js/Data/runtime-config.js"></script>
-    <script type="module" src="/assets/js/pages/public-site.js?v=20260829-public-header-cta-v2" fetchpriority="low"></script>
+    <script type="module" src="/assets/js/pages/public-site.js?v=20260915-auth-policy-v1" fetchpriority="low"></script>
     <link rel="stylesheet" href="/assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="/assets/css/workspace-polish.css">
-    <link rel="stylesheet" href="/assets/css/public-marketing.css">
+    <link rel="stylesheet" href="/assets/css/public-marketing.css?v=20260915-auth-policy-v1">
     <link rel="stylesheet" href="/assets/css/public-home-v2.css">
     <link rel="stylesheet" href="/assets/css/public-feature-v2.css?v=20260812-redesign">
     <link rel="stylesheet" href="/assets/css/public-feature-previews.css?v=20260830-public-feature-cleanup">
@@ -46,7 +46,7 @@
 <header class="public-header">
     <a class="public-brand" href="/" aria-label="ClashPanel home"><img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160"><span>ClashPanel</span></a>
     <nav class="public-nav" id="public-nav" data-i18n-aria-label="public.navigation" aria-label="Public navigation"><a href="/#features" data-i18n="public.nav.tools">Tools</a><a href="/minigames">Games</a><a href="/guides" data-i18n="public.nav.guides">Guides</a><a href="/methodology" data-i18n="public.nav.methodology">Methodology</a><a href="/about" data-i18n="public.nav.about">About</a><a href="/changelog" data-i18n="public.nav.changelog">Changelog</a></nav>
-    <div class="public-actions"><button type="button" data-language-control data-i18n="header.language">Language</button><button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme"><span aria-hidden="true">◐</span></button><a class="link-button" href="/subpages/login" data-public-auth-guest data-i18n="auth.login">Log in</a><a class="button button-primary" href="/dashboard" data-public-start data-i18n="public.startFree">Start for free</a></div>
+    <div class="public-actions"><button type="button" data-language-control data-i18n="header.language">Language</button><button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme"><span aria-hidden="true">◐</span></button><a class="link-button" data-public-auth-href="/subpages/login" data-public-auth-guest hidden aria-hidden="true" inert tabindex="-1" data-public-auth-guest data-i18n="auth.login">Log in</a><a class="button button-primary" data-public-auth-href="/dashboard" data-public-auth-guest hidden aria-hidden="true" inert tabindex="-1" data-public-start data-i18n="public.startFree">Start for free</a></div>
     <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" data-i18n-aria-label="public.openMenu" aria-label="Open menu"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
 </header>
 <main id="main-content">

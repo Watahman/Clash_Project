@@ -1,4 +1,4 @@
-import * as authClient from '../auth/auth-client.js?v=20260829-public-auth-v1';
+import * as authClient from '../auth/auth-client.js?v=20260915-auth-policy-v1';
 import { initPlayerPerformancePopover } from '../cwl/cwl-player-performance-popover.js?v=20260829-public-auth-v1';
 import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { looksLikeClashTag, normalizeTag } from '../operation-board/operation-board-utils.js';
@@ -18,11 +18,12 @@ import {
     createWarAuthLifecycle,
     createWarUnavailableState,
     resolveWarAuthState
-} from '../war-operation-board/war-page-auth.js?v=20260829-public-auth-v1';
+} from '../war-operation-board/war-page-auth.js?v=20260915-auth-policy-v1';
 import {
     renderGuestWarClanOption,
+    renderUnavailableWarClanOption,
     resetWarSourceState
-} from '../war-operation-board/war-page-source-reset.js?v=20260829-public-auth-v1';
+} from '../war-operation-board/war-page-source-reset.js?v=20260915-auth-policy-v1';
 import { loadWarFixture } from '../operation-board/operation-board-fixtures.js';
 import { currentWarPlayerContext } from '../war-operation-board/war-report-model.js?v=20260829-public-auth-v1';
 import {
@@ -68,6 +69,10 @@ const warAuth = createWarAuthLifecycle({
     onAuthenticated: nextState => loadClanOptions({
         allowLinked: true,
         authState: nextState
+    }),
+    onUnavailable: () => renderUnavailableWarClanOption({
+        refs,
+        message: t('auth.sessionUnavailable')
     }),
     onGuest: () => renderGuestWarClanOption({
         refs,
@@ -158,6 +163,13 @@ async function loadClanOptions({
     loadingOption.textContent = competeT('war.selectLinkedClan');
     refs.clanSelect.appendChild(loadingOption);
     if (!allowLinked) {
+        if (sourceState?.status === authClient.AUTH_STATES.UNAVAILABLE) {
+            renderUnavailableWarClanOption({
+                refs,
+                message: t('auth.sessionUnavailable')
+            });
+            return;
+        }
         renderGuestWarClanOption({
             refs,
             competeT,

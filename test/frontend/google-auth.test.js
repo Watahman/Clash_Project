@@ -1,6 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getGoogleSignInUrl } from '../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1';
+import {
+    getGoogleSignInUrl,
+    signInWithGoogle
+} from '../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1';
 
 afterEach(() => {
     vi.unstubAllGlobals();
@@ -48,6 +51,20 @@ describe('Google authentication', () => {
         });
     });
 
+    it('replaces the auth page when leaving for Google', async () => {
+        const oauthUrl = 'https://project.supabase.co/auth/v1/authorize?provider=google';
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(
+            JSON.stringify({ url: oauthUrl }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )));
+        const replace = vi.fn();
+
+        await signInWithGoogle('/app/cwl-tracker', { replace });
+
+        expect(replace).toHaveBeenCalledTimes(1);
+        expect(replace).toHaveBeenCalledWith(oauthUrl);
+    });
+
     it('keeps Google controls on login and registration pages', () => {
         const login = readFileSync('src/subpages/login.html', 'utf8');
         const register = readFileSync('src/subpages/register.html', 'utf8');
@@ -62,6 +79,9 @@ describe('Google authentication', () => {
         expect(login).toContain('getSafeReturnPath');
         expect(register).toContain('getSafeReturnPath');
         expect(register).toContain('signInWithGoogle(destinationAfterRegistration())');
-        expect(register).toContain('window.location.href = destinationAfterRegistration()');
+        expect(login).toContain('redirectAfterLogin');
+        expect(register).toContain('redirectAfterRegistration');
+        expect(login).not.toContain('window.location.href');
+        expect(register).not.toContain('window.location.href');
     });
 });

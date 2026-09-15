@@ -7,7 +7,7 @@ import {
     normalizePublicHeader,
     normalizePublicShell,
     updatePublicHeaderAuth
-} from '../../src/assets/js/shell/public-header.js?v=20260829-public-header-cta-v2';
+} from '../../src/assets/js/shell/public-header.js?v=20260915-auth-policy-v1';
 
 const PUBLIC_NAV = [
     ['Tools', '/#features'],
@@ -69,32 +69,81 @@ describe('public shell normalization', () => {
 
         expect(navLabels).toEqual(['Tools', 'Games', 'Guides', 'Methodology', 'About', 'Changelog']);
         expect(header.querySelectorAll('.public-nav [data-i18n]').length).toBe(5);
-        expect(header.querySelector('[data-public-auth-guest][href*="/subpages/login.html"]')?.textContent.trim()).toBe('Log in');
+        expect(header.dataset.authState).toBe('loading');
+        expect(header.querySelector('[data-public-auth-guest]')?.textContent.trim()).toBe('Log in');
+        expect(header.querySelector('[data-public-auth-guest]')).toHaveProperty('hidden', true);
         const startButton = header.querySelector('[data-public-start]');
         expect(startButton?.textContent.trim()).toBe('Start for free');
-        expect(startButton?.getAttribute('href')).toBe('/dashboard');
-        expect(header.querySelector('[data-public-authenticated]')).toBeNull();
+        expect(startButton).toHaveProperty('hidden', true);
+        expect(header.querySelector('[data-public-authenticated]')).toHaveProperty('hidden', true);
         expect(header.querySelector('[href="/methodology"]')?.getAttribute('aria-current')).toBe('page');
     });
 
-    it('always routes the start button to Dashboard', () => {
+    it('switches between guest and authenticated actions without replacing shared controls', () => {
         const { header } = mountShell('/cwl-tracker');
         const languageControl = header.querySelector('[data-language-control]');
+        const themeToggle = header.querySelector('[data-theme-toggle]');
+        const login = header.querySelector('[data-public-auth-guest][data-i18n="auth.login"]');
         const startButton = header.querySelector('[data-public-start]');
+        const accountButton = header.querySelector('[data-public-authenticated]');
 
         updatePublicHeaderAuth({ status: 'authenticated' });
         expect(header.dataset.authState).toBe('authenticated');
         expect(header.querySelectorAll('[data-public-auth-guest]:not([hidden])')).toHaveLength(0);
-        expect(startButton).toHaveProperty('hidden', false);
-        expect(startButton?.textContent.trim()).toBe('Start for free');
-        expect(startButton?.getAttribute('href')).toBe('/dashboard');
+        expect(startButton).toHaveProperty('hidden', true);
+        expect(accountButton).toHaveProperty('hidden', false);
+        expect(accountButton?.textContent.trim()).toBe('Dashboard');
+        expect(accountButton?.getAttribute('href')).toBe('/dashboard');
         expect(header.querySelector('[data-language-control]')).toBe(languageControl);
+        expect(header.querySelector('[data-theme-toggle]')).toBe(themeToggle);
+
+        updatePublicHeaderAuth({ status: 'guest' });
+        expect(header.dataset.authState).toBe('guest');
+        expect(login).toHaveProperty('hidden', false);
+        expect(login?.getAttribute('href')).toBe('/subpages/login.html');
+        expect(login?.getAttribute('href')).not.toContain('next');
+        expect(login?.hasAttribute('inert')).toBe(false);
+        expect(startButton).toHaveProperty('hidden', false);
+        expect(accountButton).toHaveProperty('hidden', true);
+    });
+
+    it('keeps auth controls hidden and inert while session restore is loading', () => {
+        const { header } = mountShell('/');
+        const login = header.querySelector('[data-public-auth-guest][data-i18n="auth.login"]');
+        const authZone = header.querySelector('[data-public-auth-zone]');
+
+        expect(header.dataset.authState).toBe('loading');
+        expect(authZone).toHaveProperty('hidden', true);
+        expect(authZone?.hasAttribute('inert')).toBe(true);
+        expect(login).toHaveProperty('hidden', true);
+        expect(login?.getAttribute('href')).toBeNull();
+        expect(login?.getAttribute('tabindex')).toBe('-1');
+    });
+
+    it('keeps hidden auth controls visually absent despite public action display rules', () => {
+        const { header } = mountShell('/');
+        const style = document.createElement('style');
+        style.textContent = readFileSync(resolve(STATIC_ROOT, 'src/assets/css/public-marketing.css'), 'utf8');
+        document.head.append(style);
+
+        expect(getComputedStyle(header.querySelector('[data-public-auth-zone]')).display).toBe('none');
+    });
+
+    it('does not expose any auth action when auth resolution is unavailable', () => {
+        const { header } = mountShell('/about');
+        const login = header.querySelector('[data-public-auth-guest][data-i18n="auth.login"]');
+        const accountButton = header.querySelector('[data-public-authenticated]');
+        const authZone = header.querySelector('[data-public-auth-zone]');
 
         updatePublicHeaderAuth({ status: 'auth-unavailable' });
+
         expect(header.dataset.authState).toBe('auth-unavailable');
-        expect(header.querySelectorAll('[data-public-auth-guest]:not([hidden])')).toHaveLength(1);
-        expect(startButton?.getAttribute('href')).toBe('/dashboard');
-        expect(header.textContent).not.toContain('Log out');
+        expect(authZone).toHaveProperty('hidden', true);
+        expect(authZone?.hasAttribute('inert')).toBe(true);
+        expect(login).toHaveProperty('hidden', true);
+        expect(login?.getAttribute('href')).toBeNull();
+        expect(accountButton).toHaveProperty('hidden', true);
+        expect(accountButton?.getAttribute('href')).toBeNull();
     });
 
     it('uses one translated footer structure on every public page', () => {
@@ -149,8 +198,19 @@ describe('public shell static fallbacks', () => {
                 .map(link => link.getAttribute('href'));
             expect(legalHrefs, relativePath).toEqual(expect.arrayContaining(['/privacy', '/cookies', '/terms', '/contact']));
 
-            const startLinks = Array.from(page.querySelectorAll('a')).filter(link => /Start(?: for)? free/i.test(link.textContent));
-            expect(startLinks.every(link => link.getAttribute('href') === '/dashboard'), relativePath).toBe(true);
+            const headerLogin = page.querySelector('header.public-header [data-public-auth-guest].link-button');
+            const headerStart = page.querySelector('header.public-header [data-public-auth-href="/dashboard"]');
+            [headerLogin, headerStart].forEach(control => {
+                expect(control?.hidden, relativePath).toBe(true);
+                expect(control?.hasAttribute('inert'), relativePath).toBe(true);
+                expect(control?.getAttribute('href'), relativePath).toBeNull();
+            });
+            expect(headerLogin?.dataset.publicAuthHref, relativePath).toBe('/subpages/login');
+            expect(headerStart?.dataset.publicAuthHref, relativePath).toBe('/dashboard');
+
+            const contentStartLinks = Array.from(page.querySelectorAll('main a'))
+                .filter(link => /Start(?: for)? free/i.test(link.textContent));
+            expect(contentStartLinks.every(link => link.getAttribute('href') === '/dashboard'), relativePath).toBe(true);
         });
     });
 });

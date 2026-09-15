@@ -12,7 +12,7 @@ describe('auth state and action access contracts', () => {
     it('keeps a backend outage distinct from guest and preserves the cached identity', async () => {
         localStorage.setItem('id', 'known-user');
         vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('offline')));
-        const auth = await import('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1');
+        const auth = await import('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1');
 
         const state = await auth.resolveAuthState();
 
@@ -25,7 +25,7 @@ describe('auth state and action access contracts', () => {
     it('keeps a server failure unavailable instead of treating it as guest', async () => {
         localStorage.setItem('id', 'known-user');
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('', { status: 503 })));
-        const auth = await import('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1');
+        const auth = await import('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1');
 
         const state = await auth.resolveAuthState();
 
@@ -36,11 +36,16 @@ describe('auth state and action access contracts', () => {
 
     it('maps only a real 401 to guest', async () => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('', { status: 401 })));
-        const auth = await import('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1');
+        const auth = await import('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1');
 
         const state = await auth.resolveAuthState();
 
-        expect(state).toMatchObject({ status: auth.AUTH_STATES.GUEST, session: null });
+        expect(state).toMatchObject({
+            status: auth.AUTH_STATES.GUEST,
+            session: null,
+            reason: 'session-expired',
+            cause: 'expired-401'
+        });
     });
 
     it('propagates a private API 401 to guest and clears the remembered identity', async () => {
@@ -48,7 +53,7 @@ describe('auth state and action access contracts', () => {
             .mockResolvedValueOnce(new Response(JSON.stringify({ session: { user: { id: 'u1' } } }), { status: 200 }))
             .mockResolvedValueOnce(new Response('', { status: 401 }));
         vi.stubGlobal('fetch', fetchMock);
-        const auth = await import('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1');
+        const auth = await import('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1');
         const cache = await import('../../src/assets/js/cache/local-cache.js?v=20260829-public-auth-v1');
         const { requestJson } = await import('../../src/assets/js/utils/request-json.js?v=20260829-public-auth-v1');
         const cacheKey = `auth-expired:${crypto.randomUUID()}`;
@@ -68,7 +73,7 @@ describe('auth state and action access contracts', () => {
             .mockResolvedValueOnce(new Response(JSON.stringify({ session: { user: { id: 'u1' } } }), { status: 200 }))
             .mockResolvedValueOnce(new Response(JSON.stringify({ session: { user: { id: 'u1' } } }), { status: 200 }));
         vi.stubGlobal('fetch', fetchMock);
-        const auth = await import('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1');
+        const auth = await import('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1');
         const action = vi.fn().mockResolvedValue('saved');
 
         const result = await auth.requireAuthForAction({ action, reason: 'save-plan' });
@@ -79,7 +84,7 @@ describe('auth state and action access contracts', () => {
 
     it('creates a safe same-origin login return path for guest actions', async () => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('', { status: 401 })));
-        const auth = await import('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1');
+        const auth = await import('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1');
         const onGuest = vi.fn();
 
         const result = await auth.requireAuthForAction({
@@ -98,7 +103,7 @@ describe('auth state and action access contracts', () => {
     });
 
     it('preserves an allowed public route in a login return path', async () => {
-        const { getSafeReturnPath, buildLoginUrl } = await import('../../src/assets/js/auth/auth-navigation.js?v=20260829-public-auth-v1');
+        const { getSafeReturnPath, buildLoginUrl } = await import('../../src/assets/js/auth/auth-navigation.js?v=20260915-auth-policy-v1');
 
         expect(getSafeReturnPath('/guides/cwl-availability?from=planner#workflow'))
             .toBe('/guides/cwl-availability?from=planner#workflow');
@@ -113,7 +118,7 @@ describe('auth state and action access contracts', () => {
             .mockImplementationOnce(() => sessionResponse)
             .mockResolvedValueOnce(new Response(JSON.stringify({ success: true }), { status: 200 }));
         vi.stubGlobal('fetch', fetchMock);
-        const auth = await import('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1');
+        const auth = await import('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1');
 
         const pendingSession = auth.resolveAuthState();
         await auth.signOut();
@@ -136,7 +141,7 @@ describe('auth state and action access contracts', () => {
                 session: { user: { id: 'account-b' } }
             }), { status: 200 }));
         vi.stubGlobal('fetch', fetchMock);
-        const auth = await import('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1');
+        const auth = await import('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1');
         const { requestJson } = await import('../../src/assets/js/utils/request-json.js?v=20260829-public-auth-v1');
 
         await auth.resolveAuthState();
@@ -162,6 +167,45 @@ describe('auth state and action access contracts', () => {
             session: { user: { id: 'account-b' } }
         });
     });
+
+    it('revalidates a persisted BFCache page behind an immediate loading state', async () => {
+        let releaseInitial;
+        let releaseRevalidation;
+        const initialResponse = new Promise(resolve => { releaseInitial = resolve; });
+        const revalidationResponse = new Promise(resolve => { releaseRevalidation = resolve; });
+        const fetchMock = vi.fn()
+            .mockImplementationOnce(() => initialResponse)
+            .mockImplementationOnce(() => revalidationResponse);
+        vi.stubGlobal('fetch', fetchMock);
+        const auth = await import('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1');
+        const states = [];
+        auth.onAuthStateChange((_session, state) => states.push(state.status));
+        await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+        const pageShow = new Event('pageshow');
+        Object.defineProperty(pageShow, 'persisted', { value: true });
+        window.dispatchEvent(pageShow);
+        expect(auth.getAuthState()).toMatchObject({
+            status: auth.AUTH_STATES.LOADING,
+            session: null
+        });
+        await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+
+        releaseRevalidation(new Response(JSON.stringify({
+            session: { user: { id: 'restored-user' } }
+        }), { status: 200 }));
+        await vi.waitFor(() => expect(auth.getAuthState()).toMatchObject({
+            status: auth.AUTH_STATES.AUTHENTICATED,
+            session: { user: { id: 'restored-user' } }
+        }));
+
+        releaseInitial(new Response(JSON.stringify({
+            session: { user: { id: 'stale-user' } }
+        }), { status: 200 }));
+        await Promise.resolve();
+        expect(auth.getAuthState().session.user.id).toBe('restored-user');
+        expect(states).toContain(auth.AUTH_STATES.LOADING);
+    });
 });
 
 describe('workspace access registry and guest shell markup', () => {
@@ -173,8 +217,19 @@ describe('workspace access registry and guest shell markup', () => {
         ];
         for (const page of pages) {
             const html = await readFile(resolve(process.cwd(), `src/subpages/${page}.html`), 'utf8');
-            expect(html, page).toContain('workspace-shell.js?v=20260831-master-live-v1');
+            expect(html, page).toContain('workspace-shell.js?v=20260915-auth-policy-v1');
         }
+    });
+
+    it('uses the canonical auth-client module URL for Advanced Stats', async () => {
+        const moduleUrl = 'auth-client.js?v=20260915-auth-policy-v1';
+        const page = await readFile(resolve(process.cwd(), 'src/assets/js/pages/advanced-stats.js'), 'utf8');
+        const bootstrap = await readFile(resolve(process.cwd(), 'src/assets/js/pages/advanced-stats-bootstrap.js'), 'utf8');
+
+        expect(page).toContain(moduleUrl);
+        expect(bootstrap).toContain(moduleUrl);
+        expect(page).not.toMatch(/auth-client\.js\?v=20260913/);
+        expect(bootstrap).not.toMatch(/auth-client\.js\?v=20260913/);
     });
 
     it('exposes the definitive public and auth route matrix', async () => {

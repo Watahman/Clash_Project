@@ -1,8 +1,5 @@
 import { THEME_TOGGLE_MARKUP } from '../theme/theme-toggle-markup.js';
-import {
-    buildLoginUrl,
-    getCurrentReturnPath
-} from '../auth/auth-navigation.js?v=20260829-public-auth-v1';
+import { buildLoginUrl } from '../auth/auth-navigation.js?v=20260915-auth-policy-v1';
 
 const PUBLIC_NAV_ITEMS = Object.freeze([
     { id: 'tools', href: '/#features', key: 'public.nav.tools', label: 'Tools' },
@@ -56,6 +53,22 @@ function setAuthControlVisibility(element, visible) {
     if (!element) return;
     element.hidden = !visible;
     element.setAttribute('aria-hidden', String(!visible));
+    if (visible) {
+        element.removeAttribute('inert');
+        element.removeAttribute('tabindex');
+        if (element.dataset.publicAuthHref) {
+            element.setAttribute('href', element.dataset.publicAuthHref);
+            delete element.dataset.publicAuthHref;
+        }
+        return;
+    }
+
+    element.setAttribute('inert', '');
+    element.setAttribute('tabindex', '-1');
+    if (element.matches?.('a[href]')) {
+        element.dataset.publicAuthHref = element.getAttribute('href');
+        element.removeAttribute('href');
+    }
 }
 
 /**
@@ -66,11 +79,18 @@ export function updatePublicHeaderAuth(state = {}, root = document) {
     const header = root.querySelector('header.public-header');
     if (!header) return;
 
-    const status = state?.status || 'guest';
+    const status = state?.status || 'loading';
+    const guest = status === 'guest';
     const authenticated = status === 'authenticated';
     header.dataset.authState = status;
+    header.setAttribute('aria-busy', String(status === 'loading'));
+    const authZone = header.querySelector('[data-public-auth-zone]');
+    setAuthControlVisibility(authZone, guest || authenticated);
     header.querySelectorAll('[data-public-auth-guest]').forEach(control => {
-        setAuthControlVisibility(control, !authenticated);
+        setAuthControlVisibility(control, guest);
+    });
+    header.querySelectorAll('[data-public-authenticated]').forEach(control => {
+        setAuthControlVisibility(control, authenticated);
     });
 }
 
@@ -81,7 +101,6 @@ export function normalizePublicHeader(root = document) {
     if (!header || header.dataset.publicHeaderNormalized === 'true') return;
 
     const activeSection = currentPublicSection(window.location.pathname);
-    const returnTo = getCurrentReturnPath();
     header.innerHTML = `
         <a class="public-brand" href="/" data-i18n-aria-label="public.homeLabel" aria-label="ClashPanel home">
             <img src="/assets/css/pictures/clashtools-logo.png" alt="" width="160" height="160">
@@ -93,8 +112,11 @@ export function normalizePublicHeader(root = document) {
         <div class="public-actions">
             <button type="button" data-language-control data-i18n="header.language">Language</button>
             <button class="theme-button" type="button" data-theme-toggle data-i18n-aria-label="theme.toggle" aria-label="Switch theme">${THEME_TOGGLE_MARKUP}</button>
-            <a class="link-button" href="${buildLoginUrl(returnTo)}" data-public-auth-guest data-i18n="auth.login">Log in</a>
-            <a class="button button-primary" href="/dashboard" data-public-start data-i18n="public.startFree">Start for free</a>
+            <div class="public-auth-zone public-actions" data-public-auth-zone hidden aria-hidden="true" inert>
+                <a class="link-button" href="${buildLoginUrl()}" data-public-auth-guest data-i18n="auth.login">Log in</a>
+                <a class="button button-primary" href="/dashboard" data-public-start data-public-auth-guest data-i18n="public.startFree">Start for free</a>
+                <a class="button button-primary" href="/dashboard" data-public-authenticated data-public-account data-i18n="nav.dashboard">Dashboard</a>
+            </div>
         </div>
         <button class="public-menu" id="public-menu" type="button" aria-controls="public-nav" aria-expanded="false" data-i18n-aria-label="public.openMenu" aria-label="Open menu">
         <span aria-hidden="true"></span>
@@ -102,7 +124,7 @@ export function normalizePublicHeader(root = document) {
         <span aria-hidden="true"></span>
         </button>`;
     header.dataset.publicHeaderNormalized = 'true';
-    updatePublicHeaderAuth({ status: 'guest' }, root);
+    updatePublicHeaderAuth({ status: 'loading' }, root);
 }
 
 export function normalizePublicFooter(root = document) {

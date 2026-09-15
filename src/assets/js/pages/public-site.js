@@ -1,10 +1,10 @@
 import { initI18n, t } from '../i18n/i18n.js?v=20260831-master-live-v1';
-import { onAuthStateChange } from '../auth/auth-client.js?v=20260829-public-auth-v1';
+import { onAuthStateChange } from '../auth/auth-client.js?v=20260915-auth-policy-v1';
 import { toggleTheme as toggleThemePreference } from '../theme/theme-manager.js?v=20260829-public-header-cta-v2';
 import {
     normalizePublicShell,
     updatePublicHeaderAuth
-} from '../shell/public-header.js?v=20260829-public-header-cta-v2';
+} from '../shell/public-header.js?v=20260915-auth-policy-v1';
 import { ensureThemeToggleMarkup } from '../theme/theme-toggle-markup.js';
 import { initPublicPageBindings } from './public-page-bindings.js?v=20260829-public-auth-v1';
 import { initPublicResourcePages } from './public-resource-pages.js?v=20260829-public-auth-v1';
@@ -240,9 +240,30 @@ function initProductFlow() {
     });
 }
 
-function initPublicAuthNavigation() {
-    if (!document.body?.classList.contains('public-site')) return;
-    onAuthStateChange((_session, state) => updatePublicHeaderAuth(state));
+let publicAuthUnsubscribe = null;
+let publicAuthRoot = null;
+
+export function initPublicAuthNavigation(root = document) {
+    if (!root.body?.classList.contains('public-site')) {
+        if (publicAuthRoot === root) publicAuthUnsubscribe?.();
+        return () => {};
+    }
+    if (publicAuthRoot === root && publicAuthUnsubscribe) return publicAuthUnsubscribe;
+
+    publicAuthUnsubscribe?.();
+    publicAuthRoot = root;
+    updatePublicHeaderAuth({ status: 'loading' }, root);
+    const unsubscribe = onAuthStateChange((_session, state) => {
+        updatePublicHeaderAuth(state, root);
+    });
+    const cleanup = () => {
+        if (publicAuthUnsubscribe !== cleanup) return;
+        unsubscribe?.();
+        publicAuthUnsubscribe = null;
+        publicAuthRoot = null;
+    };
+    publicAuthUnsubscribe = cleanup;
+    return cleanup;
 }
 
 function init() {

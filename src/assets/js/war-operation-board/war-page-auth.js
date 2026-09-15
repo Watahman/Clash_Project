@@ -30,13 +30,22 @@ export function isWarAuthenticated(authClient, state) {
         || Boolean(state?.session?.user?.id);
 }
 
+export function isWarAuthUnavailable(authClient, state) {
+    return state?.status === authStatus(authClient, 'UNAVAILABLE');
+}
+
 export async function resolveWarAuthState(authClient, { fixture = false } = {}) {
     if (fixture) return createWarGuestState(authClient);
     const resolveState = authExport(authClient, 'resolveAuthState');
     if (typeof resolveState === 'function') return resolveState();
     const syncSession = authExport(authClient, 'syncAuthSession');
-    const session = await Promise.resolve(syncSession ? syncSession() : null)
-        .catch(() => null);
+    if (typeof syncSession !== 'function') return createWarUnavailableState(authClient);
+    let session;
+    try {
+        session = await syncSession();
+    } catch (error) {
+        return createWarUnavailableState(authClient, error);
+    }
     return {
         status: session
             ? authStatus(authClient, 'AUTHENTICATED')
@@ -53,6 +62,7 @@ export function createWarAuthLifecycle({
     isReady = () => true,
     onReset,
     onAuthenticated,
+    onUnavailable,
     onGuest
 }) {
     let unsubscribe;
@@ -72,6 +82,10 @@ export function createWarAuthLifecycle({
         onReset?.();
         if (isWarAuthenticated(authClient, nextState)) {
             await onAuthenticated?.(nextState);
+            return;
+        }
+        if (isWarAuthUnavailable(authClient, nextState)) {
+            await onUnavailable?.(nextState);
             return;
         }
         onGuest?.(nextState);

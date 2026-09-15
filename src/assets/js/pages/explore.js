@@ -1,5 +1,5 @@
 import { initI18n, t } from '../i18n/i18n.js?v=20260831-master-live-v1';
-import * as authClient from '../auth/auth-client.js?v=20260829-public-auth-v1';
+import * as authClient from '../auth/auth-client.js?v=20260915-auth-policy-v1';
 import {
     ACCESS,
     WORKSPACE_MODULES,
@@ -33,12 +33,25 @@ function isAuthenticated(state) {
     return state?.status === (authExport('AUTH_STATES')?.AUTHENTICATED || 'authenticated');
 }
 
+function authPresentationStatus(state) {
+    const states = authExport('AUTH_STATES') || {};
+    if (isAuthenticated(state)) return 'authenticated';
+    if (state?.status === (states.GUEST || 'guest')) return 'guest';
+    if (state?.status === (states.UNAVAILABLE || 'auth-unavailable')) return 'unavailable';
+    return 'loading';
+}
+
 function actionMarkup(module, authState) {
     if (module.comingSoon) {
         return '<strong class="explore-card-status" data-i18n="common.comingSoon">Coming soon</strong>';
     }
-    if (module.access === ACCESS.AUTH && !isAuthenticated(authState)) {
+    const authStatus = authPresentationStatus(authState);
+    if (module.access === ACCESS.AUTH && authStatus === 'guest') {
         return '<strong class="explore-card-status explore-card-status--locked"><span aria-hidden="true">🔒</span> <span data-i18n="auth.login">Sign in</span></strong>';
+    }
+    if (module.access === ACCESS.AUTH && authStatus !== 'authenticated') {
+        const key = authStatus === 'unavailable' ? 'auth.sessionUnavailable' : 'auth.checkingSession';
+        return `<strong class="explore-card-status" data-i18n="${key}">${t(key)}</strong>`;
     }
     return '<strong data-i18n="explore.open">Open →</strong>';
 }
@@ -52,18 +65,23 @@ function loginHref(module) {
 function cardMarkup(module, authState) {
     const descriptionKey = `explore.${module.id}.description`;
     const section = WORKSPACE_SECTIONS.find(candidate => candidate.id === module.section);
-    const tag = module.comingSoon ? 'div' : 'a';
-    const requiresLogin = module.access === ACCESS.AUTH && !isAuthenticated(authState);
+    const authStatus = authPresentationStatus(authState);
+    const unresolved = module.access === ACCESS.AUTH
+        && ['loading', 'unavailable'].includes(authStatus);
+    const tag = module.comingSoon || unresolved ? 'div' : 'a';
+    const requiresLogin = module.access === ACCESS.AUTH && authStatus === 'guest';
     const state = module.comingSoon
         ? 'aria-disabled="true"'
-        : `href="${requiresLogin ? loginHref(module) : module.href}"`;
+        : unresolved ? 'aria-disabled="true"'
+            : `href="${requiresLogin ? loginHref(module) : module.href}"`;
     const title = module.comingSoon
         ? `<h2><span data-i18n="${module.key}">${module.fallback}</span> <span class="workspace-coming-soon-badge" data-i18n="common.comingSoon">(Coming soon)</span></h2>`
         : `<h2 data-i18n="${module.key}">${module.fallback}</h2>`;
     const action = actionMarkup(module, authState);
     const moduleState = module.comingSoon
         ? 'coming-soon'
-        : requiresLogin ? 'auth-required' : 'available';
+        : unresolved ? `auth-${authStatus}`
+            : requiresLogin ? 'auth-required' : 'available';
     return `<${tag} class="cp-module-card explore-card explore-card--${module.id}${module.comingSoon ? ' explore-card--coming-soon' : ''}" data-module-id="${module.id}" data-module-access="${module.access}" data-module-state="${moduleState}" data-pillar="${module.section}" data-explore-card="${module.section}" ${state}>
         <span class="explore-card-heading">${module.icon}<span class="page-kicker" data-i18n="${section.key}">${section.fallback}</span></span>
         ${title}
@@ -83,14 +101,15 @@ function applyFilter(filter, cards) {
     });
 }
 
-function initFilters() {
-    const cards = [...document.querySelectorAll('[data-explore-card]')];
+function initFilters(container) {
     document.querySelectorAll('[data-explore-filter]').forEach(button => {
         button.addEventListener('click', () => {
             document.querySelectorAll('[data-explore-filter]').forEach(item => {
                 item.setAttribute('aria-selected', String(item === button));
             });
-            applyFilter(button.dataset.exploreFilter, cards);
+            applyFilter(button.dataset.exploreFilter, [
+                ...container.querySelectorAll('[data-explore-card]')
+            ]);
         });
     });
 }
@@ -100,14 +119,27 @@ async function init() {
     const container = document.querySelector('.explore-grid');
     if (!container) return;
     const initialState = { status: authExport('AUTH_STATES')?.LOADING || 'loading' };
-    renderCards(container, initialState);
+    let renderedIdentity = '';
+    const presentAuthState = state => {
+        const identity = `${state?.status || 'loading'}:${state?.session?.user?.id || ''}`;
+        if (identity === renderedIdentity) return;
+        renderedIdentity = identity;
+        renderCards(container, state || initialState);
+        initI18n(container);
+    };
+    presentAuthState(initialState);
+    initFilters(container);
+    const subscribe = authExport('onAuthStateChange');
+    if (typeof subscribe === 'function') subscribe((_session, state) => presentAuthState(state));
     const resolveState = authExport('resolveAuthState');
     const authState = typeof resolveState === 'function'
-        ? await resolveState().catch(() => initialState)
-        : { status: authExport('AUTH_STATES')?.GUEST || 'guest' };
-    renderCards(container, authState);
-    initI18n(container);
-    initFilters();
+        ? await resolveState().catch(error => ({
+            status: authExport('AUTH_STATES')?.UNAVAILABLE || 'auth-unavailable',
+            session: null,
+            error
+        }))
+        : { status: authExport('AUTH_STATES')?.UNAVAILABLE || 'auth-unavailable' };
+    presentAuthState(authState);
 }
 
 const initialPageLoad = Promise.resolve().then(init);

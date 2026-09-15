@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1', () => ({
+vi.mock('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1', () => ({
     getAccessToken: vi.fn().mockResolvedValue('test-token')
 }));
 

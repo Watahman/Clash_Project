@@ -1,5 +1,5 @@
 import { normalizePlanDocument } from '../cwl/cwl-plan-schema.js';
-import * as authClient from '../auth/auth-client.js?v=20260829-public-auth-v1';
+import * as authClient from '../auth/auth-client.js?v=20260915-auth-policy-v1';
 import {
     cleanDisplayName,
     looksLikeClashTag,

@@ -3,9 +3,16 @@ import {
     requestPasswordReset,
     signInWithGoogle,
     signInWithPassword,
-    syncAuthSession,
-    getSafeReturnPath
-} from '../auth/auth-client.js?v=20260829-public-auth-v1';
+    resolveAuthState,
+    AUTH_STATES,
+    onAuthStateChange
+} from '../auth/auth-client.js?v=20260915-auth-policy-v1';
+import {
+    buildRegisterUrl,
+    getPostLoginDestination,
+    getSafeReturnPath,
+    redirectAfterLogin
+} from '../auth/auth-navigation.js?v=20260915-auth-policy-v1';
 
 const form = document.querySelector('#auth-form');
 const emailInput = document.querySelector('#email');
@@ -14,18 +21,22 @@ const submitButton = document.querySelector('#submit-button');
 const forgotButton = document.querySelector('#forgot-password');
 const googleButton = document.querySelector('#google-login');
 const status = document.querySelector('#auth-status');
+let authNavigationClaimed = false;
+let stopAuthStateListener;
 
 function destinationAfterLogin() {
-    return getSafeReturnPath(new URLSearchParams(window.location.search).get('next'));
+    const requested = new URLSearchParams(window.location.search).get('next');
+    return getPostLoginDestination(getSafeReturnPath(requested));
 }
 
-function preserveReturnPath(link, path) {
-    if (!link || !new URLSearchParams(window.location.search).has('next')) return;
-    link.href = `${path}?next=${encodeURIComponent(destinationAfterLogin())}`;
+function preserveReturnPath(link) {
+    if (!link) return;
+    const hasNext = new URLSearchParams(window.location.search).has('next');
+    link.href = hasNext ? buildRegisterUrl(destinationAfterLogin()) : buildRegisterUrl();
 }
 
 function preserveAuthLinks() {
-    preserveReturnPath(document.querySelector('a[href="register.html"]'), 'register.html');
+    preserveReturnPath(document.querySelector('a[href="register.html"]'));
 }
 
 function clearOAuthFailureMarker() {
@@ -41,10 +52,36 @@ function setStatus(message = '', state = '') {
 }
 
 function setBusy(busy) {
-    submitButton.disabled = busy;
-    forgotButton.disabled = busy;
-    googleButton.disabled = busy;
-    form.setAttribute('aria-busy', String(busy));
+    if (form) {
+        form.querySelectorAll('button, input, select, textarea').forEach(control => {
+            control.disabled = busy;
+        });
+        form.inert = busy;
+        form.toggleAttribute('inert', busy);
+        form.setAttribute('aria-busy', String(busy));
+    }
+}
+
+function setAuthPageState(state) {
+    document.body.dataset.authState = state;
+    setBusy(state !== AUTH_STATES.GUEST);
+    if (state === AUTH_STATES.UNAVAILABLE) {
+        setStatus(t('auth.sessionUnavailable'), 'error');
+    }
+}
+
+function applyResolvedAuthState(state) {
+    if (!state?.status) return;
+    setAuthPageState(state.status);
+    if (state.status === AUTH_STATES.AUTHENTICATED && !authNavigationClaimed) {
+        authNavigationClaimed = true;
+        stopAuthStateListener?.();
+        redirectAfterLogin(destinationAfterLogin());
+        return;
+    }
+    if (state.status === AUTH_STATES.GUEST) {
+        setBusy(false);
+    }
 }
 
 async function loginWithGoogle() {
@@ -71,11 +108,14 @@ async function submitLogin(event) {
     setStatus(t('auth.signingIn'), 'loading');
     try {
         await signInWithPassword(emailInput.value, passwordInput.value);
-        window.location.href = destinationAfterLogin();
+        applyResolvedAuthState({ status: AUTH_STATES.AUTHENTICATED });
     } catch (error) {
         setStatus(authErrorMessage(error), 'error');
-    } finally {
         setBusy(false);
+    } finally {
+        if (document.body.dataset.authState !== AUTH_STATES.AUTHENTICATED) {
+            setBusy(false);
+        }
     }
 }
 
@@ -98,6 +138,7 @@ async function resetPassword() {
 }
 
 async function init() {
+    setAuthPageState(AUTH_STATES.LOADING);
     initI18n();
     form.addEventListener('submit', submitLogin);
     forgotButton.addEventListener('click', resetPassword);
@@ -107,8 +148,13 @@ async function init() {
         clearOAuthFailureMarker();
     }
     preserveAuthLinks();
-    const session = await syncAuthSession().catch(() => null);
-    if (session) window.location.href = destinationAfterLogin();
+    stopAuthStateListener = onAuthStateChange?.((_session, state) => applyResolvedAuthState(state));
+    const state = await resolveAuthState().catch(error => ({
+        status: AUTH_STATES.UNAVAILABLE,
+        session: null,
+        error
+    }));
+    applyResolvedAuthState(state);
 }
 
 const initialLoginLoad = init();

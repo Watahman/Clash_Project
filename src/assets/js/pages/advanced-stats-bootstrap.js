@@ -1,4 +1,4 @@
-import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260913-advanced-dashboard-v2';
+import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260915-auth-policy-v1';
 import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
 
 async function canInitialize() {

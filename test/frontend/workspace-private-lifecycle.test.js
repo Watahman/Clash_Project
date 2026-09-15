@@ -8,7 +8,7 @@ const authMocks = vi.hoisted(() => ({ state: null }));
 vi.mock('../../src/assets/js/Supabase/Supabase-User.js?v=20260829-public-auth-v1', () => ({
     checkUserId: userMocks.checkUserId
 }));
-vi.mock('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1', () => ({
+vi.mock('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1', () => ({
     AUTH_STATES: { AUTHENTICATED: 'authenticated' },
     getAuthState: () => authMocks.state
 }));

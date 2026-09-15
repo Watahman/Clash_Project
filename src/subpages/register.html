@@ -12,8 +12,8 @@
     <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="../assets/css/workspace-system.css?v=20260829-public-auth-v1">
     <script src="../assets/js/Data/runtime-config.js"></script>
-    <script type="module" src="../assets/js/pages/public-site.js?v=20260829-public-header-cta-v2"></script>
-    <script type="module" src="../assets/js/pages/register.js?v=20260829-public-auth-v1"></script>
+    <script type="module" src="../assets/js/pages/public-site.js?v=20260915-auth-policy-v1"></script>
+    <script type="module" src="../assets/js/pages/register.js?v=20260915-auth-policy-v1"></script>
     <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="/assets/css/public-v2.css?v=20260812-redesign">
@@ -43,17 +43,17 @@
         <div class="auth-proof"><span aria-hidden="true">02</span><p><strong data-i18n="auth.optionalAccounts">Choose what comes next</strong><small data-i18n="auth.optionalAccountsDesc">Link an account, manage a Clan Family, plan CWL or explore.</small></p></div>
     </section>
     <section class="auth-form-wrap">
-        <form class="auth-form" id="auth-form">
+        <form class="auth-form" id="auth-form" inert aria-busy="true">
             <header><p class="eyebrow" data-i18n="auth.newAccount">New account</p><h2 data-i18n="auth.registerLink">Register</h2><p><span data-i18n="auth.registerSubtitle">Already have an account?</span> <a href="login.html" data-i18n="auth.loginLink">Log in</a></p></header>
-            <label><span><span data-i18n="auth.username">Username</span></span><input type="text" id="username" data-i18n-placeholder="auth.usernamePlaceholder" placeholder="ClashLeader99" autocomplete="username" minlength="2" maxlength="24" required><small class="field-hint" id="username-hint"></small></label>
-            <label><span><span data-i18n="auth.email">Email address</span></span><input type="email" id="email" data-i18n-placeholder="auth.emailPlaceholder" placeholder="you@example.com" autocomplete="email" required><small class="field-hint" id="email-hint"></small></label>
-            <label><span><span data-i18n="auth.password">Password</span></span><input type="password" id="password" placeholder="••••••••" autocomplete="new-password" minlength="8" required><span class="strength-bar" aria-hidden="true"><i id="seg1"></i><i id="seg2"></i><i id="seg3"></i></span><small class="field-hint" id="password-hint" data-i18n="auth.passwordHelp">At least 8 characters with uppercase, lowercase, a number and a symbol.</small></label>
-            <label><span><span data-i18n="auth.confirmPassword">Confirm password</span></span><input type="password" id="password2" placeholder="••••••••" autocomplete="new-password" minlength="8" required><small class="field-hint" id="password2-hint"></small></label>
-            <button id="submit-button" class="button button-primary button-full" type="submit" data-i18n="auth.createAccount">Create account</button>
+            <label><span><span data-i18n="auth.username">Username</span></span><input type="text" id="username" data-i18n-placeholder="auth.usernamePlaceholder" placeholder="ClashLeader99" autocomplete="username" minlength="2" maxlength="24" required disabled><small class="field-hint" id="username-hint"></small></label>
+            <label><span><span data-i18n="auth.email">Email address</span></span><input type="email" id="email" data-i18n-placeholder="auth.emailPlaceholder" placeholder="you@example.com" autocomplete="email" required disabled><small class="field-hint" id="email-hint"></small></label>
+            <label><span><span data-i18n="auth.password">Password</span></span><input type="password" id="password" placeholder="••••••••" autocomplete="new-password" minlength="8" required disabled><span class="strength-bar" aria-hidden="true"><i id="seg1"></i><i id="seg2"></i><i id="seg3"></i></span><small class="field-hint" id="password-hint" data-i18n="auth.passwordHelp">At least 8 characters with uppercase, lowercase, a number and a symbol.</small></label>
+            <label><span><span data-i18n="auth.confirmPassword">Confirm password</span></span><input type="password" id="password2" placeholder="••••••••" autocomplete="new-password" minlength="8" required disabled><small class="field-hint" id="password2-hint"></small></label>
+            <button id="submit-button" class="button button-primary button-full" type="submit" data-i18n="auth.createAccount" disabled>Create account</button>
             <p class="auth-legal"><span data-i18n="auth.legalIntro">By creating an account, you confirm that you have read the</span> <a href="/terms" data-i18n="public.terms">Terms of use</a> <span data-i18n="auth.legalAnd">and</span> <a href="/privacy" data-i18n="public.privacy">Privacy</a>.</p>
-            <p id="auth-status" class="auth-status" role="status" aria-live="polite"></p>
+            <p id="auth-status" class="auth-status" role="status" aria-live="polite" data-i18n="auth.checkingSession">Checking your session...</p>
             <div class="auth-divider"><span data-i18n="auth.or">or</span></div>
-            <button id="google-login" class="button button-google button-full" type="button"><b aria-hidden="true">G</b><span data-i18n="auth.googleRegister">Register with Google</span></button>
+            <button id="google-login" class="button button-google button-full" type="button" disabled><b aria-hidden="true">G</b><span data-i18n="auth.googleRegister">Register with Google</span></button>
         </form>
     </section>
 </main>

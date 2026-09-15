@@ -44,6 +44,8 @@ class OAuthPkceTest {
         );
         assertEquals("/subpages/groups?tab=polls#active", OAuthPkce.sanitizeNext("/subpages/groups?tab=polls#active"));
         assertEquals("/contact", OAuthPkce.sanitizeNext("/contact"));
+        assertEquals("/dashboard", OAuthPkce.sanitizeNext("/login"));
+        assertEquals("/dashboard", OAuthPkce.sanitizeNext("/register"));
         assertEquals("/dashboard", OAuthPkce.sanitizeNext("/subpages/login.html"));
         assertEquals(
                 "/dashboard",

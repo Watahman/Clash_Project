@@ -12,8 +12,8 @@
     <link rel="icon" type="image/png" href="../assets/css/pictures/clashtools-logo.png">
     <link rel="stylesheet" href="../assets/css/workspace-system.css?v=20260829-public-auth-v1">
     <script src="../assets/js/Data/runtime-config.js"></script>
-    <script type="module" src="../assets/js/pages/public-site.js?v=20260829-public-header-cta-v2"></script>
-    <script type="module" src="../assets/js/pages/login.js?v=20260829-public-auth-v1"></script>
+    <script type="module" src="../assets/js/pages/public-site.js?v=20260915-auth-policy-v1"></script>
+    <script type="module" src="../assets/js/pages/login.js?v=20260915-auth-policy-v1"></script>
     <link rel="stylesheet" href="../assets/css/light-theme.css?v=20260812-redesign">
     <link rel="stylesheet" href="../assets/css/workspace-polish.css">
     <link rel="stylesheet" href="/assets/css/public-v2.css?v=20260812-redesign">
@@ -44,14 +44,14 @@
         <div class="auth-proof"><span aria-hidden="true">03</span><p><strong data-i18n="auth.continueWork">Continue where you left off</strong><small data-i18n="auth.continueWorkDesc">Return to recent plans and active clan work.</small></p></div>
     </section>
     <section class="auth-form-wrap">
-        <form class="auth-form" id="auth-form">
+        <form class="auth-form" id="auth-form" inert aria-busy="true">
             <header><p class="eyebrow" data-i18n="auth.account">Account</p><h2 data-i18n="auth.login">Log in</h2><p><span data-i18n="auth.loginSubtitle">No account yet?</span> <a href="register.html" data-i18n="auth.registerLink">Register</a></p></header>
-            <label><span><span data-i18n="auth.email">Email address</span></span><input type="email" id="email" data-i18n-placeholder="auth.emailPlaceholder" placeholder="you@example.com" autocomplete="email" required></label>
-            <div class="auth-password-field"><div class="auth-field-heading"><label for="password" data-i18n="auth.password">Password</label><button id="forgot-password" type="button" data-i18n="auth.forgot">Forgot?</button></div><input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required></div>
-            <button id="submit-button" class="button button-primary button-full" type="submit" data-i18n="auth.login">Log in</button>
-            <p id="auth-status" class="auth-status" role="status" aria-live="polite"></p>
+            <label><span><span data-i18n="auth.email">Email address</span></span><input type="email" id="email" data-i18n-placeholder="auth.emailPlaceholder" placeholder="you@example.com" autocomplete="email" required disabled></label>
+            <div class="auth-password-field"><div class="auth-field-heading"><label for="password" data-i18n="auth.password">Password</label><button id="forgot-password" type="button" data-i18n="auth.forgot" disabled>Forgot?</button></div><input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required disabled></div>
+            <button id="submit-button" class="button button-primary button-full" type="submit" data-i18n="auth.login" disabled>Log in</button>
+            <p id="auth-status" class="auth-status" role="status" aria-live="polite" data-i18n="auth.checkingSession">Checking your session...</p>
             <div class="auth-divider"><span data-i18n="auth.or">or</span></div>
-            <button id="google-login" class="button button-google button-full" type="button"><b aria-hidden="true">G</b><span data-i18n="auth.google">Continue with Google</span></button>
+            <button id="google-login" class="button button-google button-full" type="button" disabled><b aria-hidden="true">G</b><span data-i18n="auth.google">Continue with Google</span></button>
         </form>
     </section>
 </main>

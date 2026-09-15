@@ -1,4 +1,5 @@
-import { AUTH_STATES, resolveAuthState, signOut } from '../auth/auth-client.js?v=20260829-public-auth-v1';
+import { AUTH_STATES, resolveAuthState, signOut } from '../auth/auth-client.js?v=20260915-auth-policy-v1';
+import { redirectAfterLogout } from '../auth/auth-navigation.js?v=20260915-auth-policy-v1';
 import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
 import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { getGroupsOfUser } from '../Supabase/Supabase-Group.js?v=20260829-public-auth-v1';
@@ -215,9 +216,21 @@ function bindInteractions() {
             button.dataset.copyState = 'copy';
         }, 1000);
     });
-    document.querySelector('#profile-logout').addEventListener('click', async () => {
-        await signOut();
-        window.location.assign('/subpages/login.html');
+    const logoutButton = document.querySelector('#profile-logout');
+    let logoutInFlight = false;
+    logoutButton.addEventListener('click', async () => {
+        if (logoutInFlight) return;
+        logoutInFlight = true;
+        logoutButton.disabled = true;
+        // The protected shell must not race this explicit logout with a login guard.
+        document.body.dataset.authTransition = 'logout';
+        try {
+            await signOut();
+        } catch {
+            // The local auth transition still clears the UI; leave the page via the same policy.
+        } finally {
+            redirectAfterLogout();
+        }
     });
     window.addEventListener('clashtools:language-changed', renderAll);
 }

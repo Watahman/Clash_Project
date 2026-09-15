@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
     loadWorkspaceNotifications: vi.fn()
 }));
 
-vi.mock('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1', () => ({
+vi.mock('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1', () => ({
     AUTH_STATES: {
         LOADING: 'loading',
         GUEST: 'guest',
@@ -23,7 +23,7 @@ vi.mock('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1', () 
     onAuthStateChange: mocks.onAuthStateChange,
     resolveAuthState: mocks.resolveAuthState
 }));
-vi.mock('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1', () => ({
+vi.mock('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1', () => ({
     AUTH_STATES: {
         LOADING: 'loading',
         GUEST: 'guest',
@@ -73,7 +73,7 @@ vi.mock('../../src/assets/js/shell/workspace-user.js?v=20260829-public-auth-v1',
     loadWorkspaceUserIdentity: mocks.loadWorkspaceUserIdentity,
     subscribeWorkspaceUserIdentity: vi.fn()
 }));
-vi.mock('../../src/assets/js/auth/auth-navigation.js?v=20260829-public-auth-v1', () => ({
+vi.mock('../../src/assets/js/auth/auth-navigation.js?v=20260915-auth-policy-v1', () => ({
     buildLoginUrl: () => '/subpages/login.html?next=%2Fdashboard',
     getCurrentReturnPath: () => '/dashboard',
     redirectToLogin: vi.fn()
@@ -115,7 +115,7 @@ describe('workspace auth transitions', () => {
         expect(mocks.clearWorkspaceNotifications).toHaveBeenCalled();
 
         mocks.authCallback(null, { status: 'guest', session: null, error: null });
-        const { redirectToLogin } = await import('../../src/assets/js/auth/auth-navigation.js?v=20260829-public-auth-v1');
+        const { redirectToLogin } = await import('../../src/assets/js/auth/auth-navigation.js?v=20260915-auth-policy-v1');
         expect(redirectToLogin).toHaveBeenCalledWith('/dashboard');
         expect(mocks.loadWorkspaceUserIdentity).toHaveBeenCalledTimes(1);
         expect(mocks.loadWorkspaceNotifications).toHaveBeenCalledTimes(1);
@@ -167,7 +167,7 @@ describe('workspace auth transitions', () => {
         authRequest.resolve({ status: 'guest', session: null, error: null });
         await vi.waitFor(() => expect(document.body.dataset.authInitialReady).toBe('true'));
 
-        const { redirectToLogin } = await import('../../src/assets/js/auth/auth-navigation.js?v=20260829-public-auth-v1');
+        const { redirectToLogin } = await import('../../src/assets/js/auth/auth-navigation.js?v=20260915-auth-policy-v1');
         expect(redirectToLogin).toHaveBeenCalledWith('/dashboard');
     });
 

@@ -4,9 +4,10 @@ import {
     createWarAuthLifecycle,
     createWarGuestState,
     createWarUnavailableState,
+    isWarAuthUnavailable,
     isWarAuthenticated,
     resolveWarAuthState
-} from '../../src/assets/js/war-operation-board/war-page-auth.js?v=20260829-public-auth-v1';
+} from '../../src/assets/js/war-operation-board/war-page-auth.js?v=20260915-auth-policy-v1';
 import { createWarSourceGuard } from '../../src/assets/js/war-operation-board/war-clan-source.js?v=20260829-public-auth-v1';
 
 const authStates = {
@@ -54,6 +55,30 @@ describe('War Board auth lifecycle', () => {
         await expect(resolveWarAuthState(authClient)).resolves.toEqual(userState('user-a'));
         expect(isWarAuthenticated(authClient, userState('user-a'))).toBe(true);
         expect(isWarAuthenticated(authClient, createWarGuestState(authClient))).toBe(false);
+        expect(isWarAuthUnavailable(authClient, createWarUnavailableState(authClient))).toBe(true);
+    });
+
+    it('routes unavailable transitions separately from confirmed guests', async () => {
+        let state = userState('user-a');
+        const onGuest = vi.fn();
+        const onUnavailable = vi.fn();
+        const lifecycle = createWarAuthLifecycle({
+            authClient,
+            sourceGuard: createWarSourceGuard(),
+            getAuthState: () => state,
+            setAuthState: nextState => { state = nextState; },
+            onReset: vi.fn(),
+            onGuest,
+            onUnavailable
+        });
+
+        lifecycle.initialize(state);
+        lifecycle.bind();
+        const unavailable = createWarUnavailableState(authClient, new Error('offline'));
+        listener(null, unavailable);
+        await vi.waitFor(() => expect(onUnavailable).toHaveBeenCalledWith(unavailable));
+
+        expect(onGuest).not.toHaveBeenCalled();
     });
 
     it('resets source state for guest and account transitions while ignoring duplicates', async () => {

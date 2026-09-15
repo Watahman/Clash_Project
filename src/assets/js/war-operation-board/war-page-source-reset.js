@@ -55,12 +55,23 @@ export function resetWarSourceState({
 }
 
 export function renderGuestWarClanOption({ refs, competeT, loginLabel }) {
+    renderDisabledWarClanOption(
+        refs,
+        `${competeT('war.selectLinkedClan')} · ${loginLabel}`
+    );
+}
+
+export function renderUnavailableWarClanOption({ refs, message }) {
+    renderDisabledWarClanOption(refs, message);
+}
+
+function renderDisabledWarClanOption(refs, label) {
     refs.clanSelect.replaceChildren();
     const option = document.createElement('option');
     option.value = '';
     option.disabled = true;
     option.selected = true;
-    option.textContent = `${competeT('war.selectLinkedClan')} · ${loginLabel}`;
+    option.textContent = label;
     refs.clanSelect.appendChild(option);
     refs.clanSelect.disabled = true;
 }

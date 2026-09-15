@@ -51,7 +51,7 @@ vi.mock('../../src/assets/js/utils/user.js', () => ({
 }));
 vi.mock('../../src/assets/js/API/API-Clan.js?v=20260829-public-auth-v1', () => ({ getClanInfoRequest: vi.fn() }));
 vi.mock('../../src/assets/js/API/API-Functions.js?v=20260829-public-auth-v1', () => ({ getPlayerBasicData: vi.fn() }));
-vi.mock('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1', () => ({
+vi.mock('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1', () => ({
     getCurrentReturnPath: () => '/app/cwl-planner',
     requireAuthForAction: mocks.requireAuthForAction,
     onAuthStateChange: mocks.onAuthStateChange
@@ -366,7 +366,7 @@ describe('CWL Planner guest flow', () => {
 
     it('gates the visible Save action through the shared auth return flow', async () => {
         const { initPlannerSaveAction } = await import(
-            '../../src/assets/js/cwl/cwl-planner-save-action.js?v=20260829-public-auth-v1'
+            '../../src/assets/js/cwl/cwl-planner-save-action.js?v=20260915-auth-policy-v1'
         );
         const button = document.createElement('button');
         document.body.append(button);
@@ -385,7 +385,7 @@ describe('CWL Planner guest flow', () => {
     it('stores the current guest draft before showing the sign-in prompt', async () => {
         const { initPlanIO } = await import('../../src/assets/js/cwl/cwl-plan-io.js?v=20260829-public-auth-v1');
         const { initPlannerSaveAction } = await import(
-            '../../src/assets/js/cwl/cwl-planner-save-action.js?v=20260829-public-auth-v1'
+            '../../src/assets/js/cwl/cwl-planner-save-action.js?v=20260915-auth-policy-v1'
         );
         const refs = plannerRefs(guestState);
         const button = document.createElement('button');

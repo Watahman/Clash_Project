@@ -8,7 +8,7 @@ import { initClanFamilyMembers } from '../groups/clan-family-members.js?v=202608
 import { applyFamilyCopy, familyCopy } from '../groups/clan-family-copy.js?v=20260829-public-auth-v1';
 import { activateGroupTab, bindGroupTabs, normalizeGroupTab } from '../groups/groups-tabs.js';
 import { initGroupIndexSlider } from '../groups/groups-index-slider.js?v=20260829-public-auth-v1';
-import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260829-public-auth-v1';
+import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260915-auth-policy-v1';
 import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
 import { initClanFamilyActions } from '../groups/clan-family-actions.js?v=20260829-public-auth-v1';
 import { createClanFamilyListController } from '../groups/clan-family-list.js?v=20260829-public-auth-v1';

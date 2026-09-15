@@ -2,7 +2,7 @@ import { initI18n, t } from '../i18n/i18n.js?v=20260831-master-live-v1';
 import {
     getAuthState,
     syncAuthSession
-} from "../auth/auth-client.js?v=20260829-public-auth-v1";
+} from "../auth/auth-client.js?v=20260915-auth-policy-v1";
 import { initOverlayHide, initAddPlayersOverlay, initAddClanButton, applyCwlSizeRestriction } from "../cwl/cwl-overlay.js?v=20260830-player-drag-v3";
 import { initPlanIO, savePlan, loadAllPlans, loadPlanListener, startNewPlan, undoLastPlanChange } from "../cwl/cwl-plan-io.js?v=20260830-player-drag-v3";
 import { initFreeRosterFilter } from "../cwl/cwl-roster-filter.js?v=20260829-public-auth-v1";
@@ -17,7 +17,7 @@ import { initAutoPlan } from "../cwl/auto-plan/cwl-auto-plan-ui.js?v=20260829-pu
 import { initOptimizePlan } from "../cwl/optimize-plan/cwl-optimize-plan-ui.js?v=20260829-public-auth-v1";
 import { initCwlPlanExport } from "../cwl/export/cwl-export-ui.js?v=20260829-public-auth-v1";
 import { initPlannerSurface } from "../cwl/cwl-planner-ui.js?v=20260829-public-auth-v1";
-import { initPlannerSaveAction } from "../cwl/cwl-planner-save-action.js?v=20260829-public-auth-v1";
+import { initPlannerSaveAction } from "../cwl/cwl-planner-save-action.js?v=20260915-auth-policy-v1";
 import * as plannerStorage from "../cwl/cwl-planner-guest-storage.js?v=20260829-public-auth-v1";
 import {
     applyPlannerFixture,

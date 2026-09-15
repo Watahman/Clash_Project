@@ -107,6 +107,12 @@ export function renderPlans(refs, state, tools) {
         return;
     }
     tools.setStatus(refs.planStatus);
+    if (state.authState?.status === 'loading' || state.authState?.status === 'auth-unavailable') {
+        refs.planList.appendChild(tableMessage(state.authState.status === 'loading'
+            ? 'auth.checkingSession'
+            : 'auth.sessionUnavailable'));
+        return;
+    }
     if (!state.loggedIn) {
         const plannerHref = tools.moduleForId('drafts')?.href || '/app/cwl-planner-drafts';
         refs.planList.appendChild(state.guestDraft
@@ -167,6 +173,12 @@ export function renderGroups(refs, state, tools) {
         return;
     }
     tools.setStatus(refs.groupStatus);
+    if (state.authState?.status === 'loading' || state.authState?.status === 'auth-unavailable') {
+        refs.groupList.appendChild(groupMessage(state.authState.status === 'loading'
+            ? 'auth.checkingSession'
+            : 'auth.sessionUnavailable'));
+        return;
+    }
     if (!state.loggedIn) {
         const module = tools.moduleForId('groups');
         refs.groupList.appendChild(groupMessage(

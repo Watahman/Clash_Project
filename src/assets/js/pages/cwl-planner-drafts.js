@@ -1,5 +1,5 @@
 import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
-import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260829-public-auth-v1';
+import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260915-auth-policy-v1';
 import { getCurrentUserId } from '../utils/user.js';
 import { summarizePlan } from '../cwl/cwl-plan-summary.js';
 import { createSavedPlansView } from './cwl-planner-drafts-view.js?v=20260829-public-auth-v1';

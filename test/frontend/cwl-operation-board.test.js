@@ -21,8 +21,8 @@ vi.mock('../../src/assets/js/API/API-Clan.js?v=20260829-public-auth-v1', () => c
 vi.mock('../../src/assets/js/API/API-Player.js?v=20260829-public-auth-v1', () => playerApiMocks);
 vi.mock('../../src/assets/js/API/API-Player.js?v=20260829-public-auth-v1', () => playerApiMocks);
 
-vi.mock('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1', () => authMocks);
-vi.mock('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1', () => authMocks);
+vi.mock('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1', () => authMocks);
+vi.mock('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1', () => authMocks);
 vi.mock('../../src/assets/js/utils/user.js', () => ({ getCurrentUserId: () => null }));
 vi.mock('../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1', () => ({
     initI18n: vi.fn(),

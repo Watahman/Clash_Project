@@ -2,7 +2,8 @@ import * as config from '../Data/config.js';
 import {
     getCurrentReturnPath,
     requireAuthForAction
-} from '../auth/auth-client.js?v=20260829-public-auth-v1';
+} from '../auth/auth-client.js?v=20260915-auth-policy-v1';
+import { replaceAuthNavigation } from '../auth/auth-navigation.js?v=20260915-auth-policy-v1';
 import { savePlan } from './cwl-plan-io.js?v=20260829-public-auth-v1';
 
 export function initPlannerSaveAction({ button, onStateChange } = {}) {
@@ -98,8 +99,7 @@ function createGuestSaveDialog(button) {
 
 function navigateToLogin(url) {
     if (typeof window === 'undefined') return;
-    if (typeof window.location?.assign === 'function') window.location.assign(url);
-    else if (window.location) window.location.href = url;
+    replaceAuthNavigation(url);
 }
 
 function setSaveButtonFeedback(button, state) {
@@ -112,10 +112,5 @@ async function saveAuthenticatedPlan(button) {
     config.setCanAutosave(true);
     button.dataset.saveFeedback = 'saving';
     button.setAttribute('aria-busy', 'true');
-    const [result] = await Promise.all([savePlan({ immediate: true }), wait(500)]);
-    return result;
-}
-
-function wait(milliseconds) {
-    return new Promise(resolve => window.setTimeout(resolve, milliseconds));
+    return savePlan({ immediate: true });
 }

@@ -88,6 +88,9 @@ body.public-site::after {
     gap: clamp(.38rem, .45vw, .55rem);
     flex-wrap: nowrap;
 }
+.public-auth-zone[hidden],
+[data-public-auth-guest][hidden],
+[data-public-authenticated][hidden] { display: none !important; }
 .public-actions > * { flex: 0 0 auto; }
 .public-actions > [data-language-control] {
     min-width: 7.6rem;

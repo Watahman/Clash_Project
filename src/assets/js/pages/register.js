@@ -2,9 +2,16 @@ import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import {
     signInWithGoogle,
     signUpWithPassword,
-    syncAuthSession,
-    getSafeReturnPath
-} from '../auth/auth-client.js?v=20260829-public-auth-v1';
+    resolveAuthState,
+    AUTH_STATES,
+    onAuthStateChange
+} from '../auth/auth-client.js?v=20260915-auth-policy-v1';
+import {
+    buildLoginUrl,
+    getPostRegistrationDestination,
+    getSafeReturnPath,
+    redirectAfterRegistration
+} from '../auth/auth-navigation.js?v=20260915-auth-policy-v1';
 import { isStrongPassword } from '../utils/password.js';
 
 const form = document.querySelector('#auth-form');
@@ -16,18 +23,22 @@ const submitButton = document.querySelector('#submit-button');
 const googleButton = document.querySelector('#google-login');
 const status = document.querySelector('#auth-status');
 const strengthSegments = [1, 2, 3].map(index => document.querySelector(`#seg${index}`));
+let authNavigationClaimed = false;
+let stopAuthStateListener;
 
 function destinationAfterRegistration() {
-    return getSafeReturnPath(new URLSearchParams(window.location.search).get('next'));
+    const requested = new URLSearchParams(window.location.search).get('next');
+    return getPostRegistrationDestination(getSafeReturnPath(requested));
 }
 
-function preserveReturnPath(link, path) {
-    if (!link || !new URLSearchParams(window.location.search).has('next')) return;
-    link.href = `${path}?next=${encodeURIComponent(destinationAfterRegistration())}`;
+function preserveReturnPath(link) {
+    if (!link) return;
+    const hasNext = new URLSearchParams(window.location.search).has('next');
+    link.href = hasNext ? buildLoginUrl(destinationAfterRegistration()) : buildLoginUrl();
 }
 
 function preserveAuthLinks() {
-    preserveReturnPath(document.querySelector('a[href="login.html"]'), 'login.html');
+    preserveReturnPath(document.querySelector('a[href="login.html"]'));
 }
 
 function setStatus(message = '', state = '') {
@@ -36,9 +47,36 @@ function setStatus(message = '', state = '') {
 }
 
 function setBusy(busy) {
-    submitButton.disabled = busy;
-    googleButton.disabled = busy;
-    form.setAttribute('aria-busy', String(busy));
+    if (form) {
+        form.querySelectorAll('button, input, select, textarea').forEach(control => {
+            control.disabled = busy;
+        });
+        form.inert = busy;
+        form.toggleAttribute('inert', busy);
+        form.setAttribute('aria-busy', String(busy));
+    }
+}
+
+function setAuthPageState(state) {
+    document.body.dataset.authState = state;
+    setBusy(state !== AUTH_STATES.GUEST);
+    if (state === AUTH_STATES.UNAVAILABLE) {
+        setStatus(t('auth.sessionUnavailable'), 'error');
+    }
+}
+
+function applyResolvedAuthState(state) {
+    if (!state?.status) return;
+    setAuthPageState(state.status);
+    if (state.status === AUTH_STATES.AUTHENTICATED && !authNavigationClaimed) {
+        authNavigationClaimed = true;
+        stopAuthStateListener?.();
+        redirectAfterRegistration(destinationAfterRegistration());
+        return;
+    }
+    if (state.status === AUTH_STATES.GUEST) {
+        setBusy(false);
+    }
 }
 
 async function registerWithGoogle() {
@@ -85,7 +123,7 @@ async function submitRegistration(event) {
     try {
         const data = await signUpWithPassword(nameInput.value, emailInput.value, passwordInput.value);
         if (data.session) {
-            window.location.href = destinationAfterRegistration();
+            applyResolvedAuthState({ status: AUTH_STATES.AUTHENTICATED });
             return;
         }
         form.reset();
@@ -99,19 +137,27 @@ async function submitRegistration(event) {
                 : t('auth.registrationError');
         setStatus(message, 'error');
     } finally {
-        setBusy(false);
+        if (document.body.dataset.authState !== AUTH_STATES.AUTHENTICATED) {
+            setBusy(false);
+        }
     }
 }
 
 async function init() {
+    setAuthPageState(AUTH_STATES.LOADING);
     initI18n();
     form.addEventListener('submit', submitRegistration);
     passwordInput.addEventListener('input', updatePasswordHints);
     confirmationInput.addEventListener('input', updatePasswordHints);
     googleButton.addEventListener('click', registerWithGoogle);
     preserveAuthLinks();
-    const session = await syncAuthSession().catch(() => null);
-    if (session) window.location.href = destinationAfterRegistration();
+    stopAuthStateListener = onAuthStateChange?.((_session, state) => applyResolvedAuthState(state));
+    const state = await resolveAuthState().catch(error => ({
+        status: AUTH_STATES.UNAVAILABLE,
+        session: null,
+        error
+    }));
+    applyResolvedAuthState(state);
 }
 
 const initialRegisterLoad = init();

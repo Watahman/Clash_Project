@@ -1,5 +1,5 @@
-import { AUTH_STATES, onAuthStateChange, resolveAuthState } from '../auth/auth-client.js?v=20260829-public-auth-v1';
-import { buildLoginUrl, getCurrentReturnPath, redirectToLogin } from '../auth/auth-navigation.js?v=20260829-public-auth-v1';
+import { AUTH_STATES, onAuthStateChange, resolveAuthState } from '../auth/auth-client.js?v=20260915-auth-policy-v1';
+import { buildLoginUrl, getCurrentReturnPath, redirectToLogin } from '../auth/auth-navigation.js?v=20260915-auth-policy-v1';
 import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
 import { initI18n, t } from '../i18n/i18n.js?v=20260831-master-live-v1';
 import { toggleTheme as toggleThemePreference } from '../theme/theme-manager.js?v=20260829-public-auth-v1';
@@ -55,6 +55,20 @@ function authStatusMessage(state, access) {
     return '';
 }
 
+function isExplicitLogoutState(state, body) {
+    if (body?.dataset.authTransition === 'logout' || state?.logout === true) return true;
+    const reasons = [
+        state?.reason,
+        state?.cause,
+        state?.transition?.reason,
+        state?.transition?.cause
+    ].flatMap(value => typeof value === 'object'
+        ? [value?.reason, value?.cause, value?.type]
+        : [value]);
+    return reasons.some(reason => ['logout', 'log-out', 'signout', 'sign-out', 'signed-out', 'explicit-logout']
+        .includes(String(reason || '').toLowerCase()));
+}
+
 function setAuthPresentation(body, state, access, onRetry) {
     body.dataset.authState = state.status;
     body.dataset.workspaceAccess = access;
@@ -66,8 +80,13 @@ function setAuthPresentation(body, state, access, onRetry) {
     body.querySelectorAll('[data-guest-only]').forEach(element => setHidden(element, !guest));
     body.querySelectorAll('[data-workspace-auth-lock]').forEach(element => setHidden(element, authenticated));
     body.querySelectorAll('[data-auth-login]').forEach(element => {
-        element.href = buildLoginUrl(getCurrentReturnPath());
+        element.href = access === ACCESS.AUTH
+            ? buildLoginUrl(getCurrentReturnPath())
+            : buildLoginUrl();
     });
+    const workspaceMain = body.querySelector(':scope > .workspace-area > main');
+    const showWorkspaceMain = access !== ACCESS.AUTH || authenticated;
+    setHidden(workspaceMain, !showWorkspaceMain);
     const status = body.querySelector('#workspace-auth-status');
     const message = body.querySelector('[data-workspace-auth-message]');
     const retry = body.querySelector('[data-workspace-auth-retry]');
@@ -76,9 +95,7 @@ function setAuthPresentation(body, state, access, onRetry) {
     setHidden(status, !text);
     setHidden(retry, state.status !== AUTH_STATES.UNAVAILABLE);
     if (retry) retry.onclick = onRetry;
-    body.querySelector(':scope > .workspace-area > main')?.setAttribute(
-        'aria-busy', String(waitingForAuth)
-    );
+    workspaceMain?.setAttribute('aria-busy', String(waitingForAuth));
     window.dispatchEvent(new CustomEvent('clashtools:auth-state-changed', { detail: state }));
 }
 
@@ -122,7 +139,8 @@ function applyResolvedAuthState(body, currentPage, state) {
     if (hasPresentedAuthState(body, state)) return;
     const retry = () => retryWorkspaceAuth(body, currentPage);
     applyAuthState(body, state, access, retry);
-    if (access === ACCESS.AUTH && state.status === AUTH_STATES.GUEST) {
+    if (access === ACCESS.AUTH && state.status === AUTH_STATES.GUEST
+        && !isExplicitLogoutState(state, body)) {
         redirectToLogin(getCurrentReturnPath());
         return;
     }

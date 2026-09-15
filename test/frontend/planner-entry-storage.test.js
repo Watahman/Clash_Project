@@ -19,7 +19,7 @@ vi.mock('../../src/assets/js/i18n/i18n.js?v=20260831-master-live-v1', () => ({
         (result, [name, value]) => result.replaceAll(`{${name}}`, value), key
     )
 }));
-vi.mock('../../src/assets/js/auth/auth-client.js?v=20260829-public-auth-v1', () => ({
+vi.mock('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1', () => ({
     AUTH_STATES: { AUTHENTICATED: 'authenticated' },
     resolveAuthState: mocks.resolveAuthState
 }));
