@@ -11,10 +11,11 @@ import com.google.gson.JsonParser;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import static Java.achievements.AchievementFastMetricsSupport.*;
 
 /**
  * Collects fast/non-history achievement sources. Heavy war/CWL history is handled
@@ -142,7 +143,7 @@ public final class AchievementFastMetrics {
         );
     }
 
-    private Map<String, Long> profileMetrics(JsonObject profile) {
+    static Map<String, Long> profileMetrics(JsonObject profile) {
         Map<String, Long> metrics = new LinkedHashMap<>();
 
         long trophies = number(profile, "trophies");
@@ -195,20 +196,7 @@ public final class AchievementFastMetrics {
         metrics.put("profile_equipment_count", (long) equipment.size());
         metrics.put("profile_equipment_level_sum", sumLevels(equipment));
 
-        long maxEquipment = 0;
-        boolean everyReturnedEquipmentMax = !equipment.isEmpty();
-        for (JsonElement element : equipment) {
-            if (!element.isJsonObject()) continue;
-            JsonObject item = element.getAsJsonObject();
-            long level = number(item, "level");
-            long maxLevel = number(item, "maxLevel");
-            if (maxLevel > 0 && level >= maxLevel) maxEquipment++;
-            else everyReturnedEquipmentMax = false;
-        }
-        metrics.put("profile_equipment_max_count", maxEquipment);
-        metrics.put("profile_all_returned_equipment_max", everyReturnedEquipmentMax ? 1L : 0L);
-        metrics.put("profile_balanced_heroes", balancedWithin(homeHeroLevels, 5, 3) ? 1L : 0L);
-
+        AchievementDirectProgressionMetrics.mergeInto(metrics, profile, equipment);
         long activeSuperTroops = 0;
         for (JsonElement element : troops) {
             if (!element.isJsonObject()) continue;
@@ -257,119 +245,4 @@ public final class AchievementFastMetrics {
         return Map.copyOf(result);
     }
 
-    private static void mergeNumeric(Map<String, Long> target, JsonObject source) {
-        for (Map.Entry<String, JsonElement> entry : source.entrySet()) {
-            JsonElement value = entry.getValue();
-            if (value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isNumber()) {
-                target.put(entry.getKey(), Math.max(0L, value.getAsLong()));
-            }
-        }
-    }
-
-    private static long roleRank(String role) {
-        String normalized = role == null ? "" : role.replace("_", "").replace("-", "").toLowerCase();
-        return switch (normalized) {
-            case "leader" -> 4;
-            case "coleader" -> 3;
-            case "admin", "elder" -> 2;
-            case "member" -> 1;
-            default -> 0;
-        };
-    }
-
-    private static long countVillage(JsonArray values, String village) {
-        return villageLevels(values, village).size();
-    }
-
-    private static List<Long> villageLevels(JsonArray values, String... villages) {
-        List<Long> levels = new ArrayList<>();
-        for (JsonElement element : values) {
-            if (!element.isJsonObject()) continue;
-            JsonObject item = element.getAsJsonObject();
-            String itemVillage = string(item, "village");
-            boolean match = itemVillage.isBlank();
-            for (String village : villages) {
-                if (village.equalsIgnoreCase(itemVillage)) match = true;
-            }
-            if (match) levels.add(number(item, "level"));
-        }
-        return levels;
-    }
-
-    private static long sumLevels(JsonArray values) {
-        long total = 0;
-        for (JsonElement element : values) {
-            if (element.isJsonObject()) total += number(element.getAsJsonObject(), "level");
-        }
-        return total;
-    }
-
-    private static long sum(List<Long> values) {
-        long total = 0;
-        for (Long value : values) total += Math.max(0L, value == null ? 0L : value);
-        return total;
-    }
-
-    private static boolean balancedWithin(List<Long> values, long spread, int minimumCount) {
-        if (values == null || values.size() < minimumCount) return false;
-        long min = Long.MAX_VALUE;
-        long max = Long.MIN_VALUE;
-        for (Long value : values) {
-            long level = value == null ? 0L : value;
-            min = Math.min(min, level);
-            max = Math.max(max, level);
-        }
-        return max - min <= spread;
-    }
-
-    private static JsonArray firstArray(JsonObject object, String... fields) {
-        for (String field : fields) {
-            JsonArray values = array(object.get(field));
-            if (!values.isEmpty()) return values;
-        }
-        return new JsonArray();
-    }
-
-    private static long firstNumber(JsonObject object, String... fields) {
-        for (String field : fields) {
-            JsonElement value = object.get(field);
-            if (value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isNumber()) {
-                return Math.max(0L, value.getAsLong());
-            }
-        }
-        return 0;
-    }
-
-    private static long number(JsonObject object, String field) {
-        return firstNumber(object, field);
-    }
-
-    private static boolean bool(JsonObject object, String field) {
-        JsonElement value = object.get(field);
-        return value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isBoolean() && value.getAsBoolean();
-    }
-
-    private static JsonObject object(JsonElement value) {
-        return value != null && value.isJsonObject() ? value.getAsJsonObject() : new JsonObject();
-    }
-
-    private static JsonArray array(JsonElement value) {
-        return value != null && value.isJsonArray() ? value.getAsJsonArray() : new JsonArray();
-    }
-
-    private static String string(JsonObject object, String field) {
-        JsonElement value = object.get(field);
-        return value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isString()
-                ? value.getAsString().trim()
-                : "";
-    }
-
-    private static String nestedString(JsonObject object, String parent, String field) {
-        return string(AchievementFastMetrics.object(object.get(parent)), field);
-    }
-
-    private static String errorCode(Exception error) {
-        String value = error.getClass().getSimpleName();
-        return value == null || value.isBlank() ? "SOURCE_ERROR" : value.toUpperCase();
-    }
 }

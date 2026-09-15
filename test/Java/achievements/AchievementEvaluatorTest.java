@@ -146,7 +146,75 @@ class AchievementEvaluatorTest {
 
         assertEquals("LTE", rowFor(rows, "TR_GLOBAL_RANK").get("comparison").getAsString());
         assertEquals("BOOLEAN", rowFor(rows, "PLY_WAR_READY").get("comparison").getAsString());
-        assertEquals("UNSUPPORTED", rowFor(rows, "WAR_ATTACKS").get("comparison").getAsString());
+        assertEquals("GTE", rowFor(rows, "WAR_ATTACKS").get("comparison").getAsString());
+    }
+
+    @Test
+    void normalizedCompositeBindingsUseTheirCatalogThresholdFields() {
+        AchievementEvaluator evaluator = new AchievementEvaluator();
+        var progress = evaluator.evaluate(Map.of(
+                "war_improving_form", 1_500L,
+                "war_all_th_matchups", 5L,
+                "war_perfect_wars_player", 1L,
+                "def_bounce_back", 3L,
+                "cwl_comeback", 1L,
+                "raid_full_weekends", 100L
+        ));
+
+        assertTrue(unlockedInFamily(progress, "WAR_IMPROVING_FORM") > 0);
+        assertTrue(unlockedInFamily(progress, "WAR_ALL_TH_MATCHUPS") > 0);
+        assertTrue(unlockedInFamily(progress, "WAR_PERFECT_WAR_PLAYER") > 0);
+        assertTrue(unlockedInFamily(progress, "DEF_BOUNCE_BACK") > 0);
+        assertTrue(unlockedInFamily(progress, "CWL_COMEBACK") > 0);
+        assertTrue(unlockedInFamily(progress, "RAID_100_WEEKENDS_FULL") > 0);
+    }
+
+    @Test
+    void directHistoryAndImportBindingsExposeKnownProgress() {
+        AchievementEvaluator evaluator = new AchievementEvaluator();
+        var progress = evaluator.evaluate(Map.ofEntries(
+                Map.entry("tracked_days", 30L),
+                Map.entry("profile_offense_completion_pct", 90L),
+                Map.entry("profile_balanced_army", 1L),
+                Map.entry("off_upgrades_30d", 35L),
+                Map.entry("ranking_builder_global_rank", 100L),
+                Map.entry("profile_builder_offense_completion_pct", 75L),
+                Map.entry("base_import_completions", 50L),
+                Map.entry("tracked_home_building_levels", 100L),
+                Map.entry("tracked_home_trap_levels", 20L),
+                Map.entry("tracked_home_wall_levels", 250L),
+                Map.entry("base_bb_upgrades_completed", 25L),
+                Map.entry("tracked_builder_wall_levels", 100L),
+                Map.entry("tracked_helper_levels", 5L),
+                Map.entry("tracked_cosmetics_added", 25L)
+        ));
+
+        for (String family : List.of(
+                "PLY_TRACKED_AGE", "OFF_PROGRESS_PCT", "OFF_BALANCED_ARMY",
+                "OFF_UPGRADES_30D", "BB_GLOBAL_RANK", "BB_PROGRESS_PCT",
+                "BASE_IMPORT_COMPLETIONS", "BASE_BUILDING_LEVELS_GAINED",
+                "BASE_TRAP_LEVELS_GAINED", "BASE_WALL_LEVELS_GAINED",
+                "BASE_BB_UPGRADES_COMPLETED", "BASE_BB_WALL_LEVELS_GAINED",
+                "BASE_HELPER_PROGRESS", "COL_COSMETIC_GROWTH"
+        )) assertTrue(unlockedInFamily(progress, family) > 0, family);
+    }
+
+    @Test
+    void defensiveAverageBindingsUnlockOnlyAtOrBelowTheirLimits() {
+        AchievementEvaluator evaluator = new AchievementEvaluator();
+        var strongDefense = evaluator.evaluate(Map.of(
+                "def_avg_stars", 140L,
+                "def_avg_destruction", 7_000L
+        ));
+        var weakDefense = evaluator.evaluate(Map.of(
+                "def_avg_stars", 260L,
+                "def_avg_destruction", 9_100L
+        ));
+
+        assertTrue(unlockedInFamily(strongDefense, "DEF_AVG_STARS") > 0);
+        assertTrue(unlockedInFamily(strongDefense, "DEF_AVG_DESTRUCTION") > 0);
+        assertEquals(0, unlockedInFamily(weakDefense, "DEF_AVG_STARS"));
+        assertEquals(0, unlockedInFamily(weakDefense, "DEF_AVG_DESTRUCTION"));
     }
 
     @Test

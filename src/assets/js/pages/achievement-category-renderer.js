@@ -295,7 +295,7 @@ function makeShowcase(category, options) {
 export function renderAchievementCategory(container, category, options = {}) {
     if (!container) return null;
     container.replaceChildren();
-    container.classList.remove('achievement-hub');
+    container.classList.remove('achievement-hub', 'achievement-trophy-wall');
     container.classList.add('achievement-category-detail', 'achievement-mastery-cabinet');
     container.dataset.achievementCategory = keyOf(category);
     container.append(makeCategoryHeader(category || {}, options), makeShowcase(category || {}, options));

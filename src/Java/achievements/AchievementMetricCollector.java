@@ -16,15 +16,18 @@ public final class AchievementMetricCollector {
     private final AchievementFastMetrics fastMetrics;
     private final AchievementSourceCache sourceCache = new AchievementSourceCache();
     private final AchievementHistoryCollector historyCollector;
+    private final AchievementDeepHistorySources deepHistorySources;
 
     public AchievementMetricCollector(Config conf) {
         this.fastMetrics = new AchievementFastMetrics(conf);
         this.historyCollector = new AchievementHistoryCollector(conf);
+        this.deepHistorySources = new AchievementDeepHistorySources(conf);
     }
 
     public AchievementMetricCollector(Config conf, HistoricalCwlService cwlService) {
         this.fastMetrics = new AchievementFastMetrics(conf);
         this.historyCollector = new AchievementHistoryCollector(conf, cwlService);
+        this.deepHistorySources = new AchievementDeepHistorySources(conf);
     }
 
     public Result collect(
@@ -86,8 +89,7 @@ public final class AchievementMetricCollector {
                         : "Clan Family metrics could not be loaded."
         );
 
-        // Advanced Stats remains an internal feature source, but the original v2
-        // achievement spec does not invent extra Advanced-Stats-only families.
+        // Advanced Stats is an internal source; v2 adds no Advanced-Stats-only families.
         source(
                 sources,
                 AchievementSources.ADVANCED_STATS,
@@ -96,7 +98,6 @@ public final class AchievementMetricCollector {
                         ? "Advanced Stats tracking totals loaded."
                         : "Advanced Stats tracking is not active for this account."
         );
-
         CacheRead cached = readCachedHistory(userId, playerTag);
         metrics.putAll(cached.metrics());
         boolean cachedWar = hasMetricPrefix(cached.metrics(), "war_current_")
@@ -107,6 +108,7 @@ public final class AchievementMetricCollector {
                 || hasMetricPrefix(cached.metrics(), "ranking_");
         boolean clashKingEvidence = cachedLegend;
         String clanTag = fast.clanTag();
+        AchievementDeepHistorySources.Result deepSources = AchievementDeepHistorySources.Result.empty();
 
         if (includeDeepHistory) {
             AchievementHistoryCollector.RefreshResult refresh = historyCollector.refresh(userId, playerTag, clanTag);
@@ -119,15 +121,31 @@ public final class AchievementMetricCollector {
             cachedLegend = cachedLegend || hasMetricPrefix(refreshed.metrics(), "legend_")
                     || hasMetricPrefix(refreshed.metrics(), "ranking_");
 
+            deepSources = deepHistorySources.collect(
+                    playerTag, clanTag, fast.metrics().get("clan_members")
+            );
+            metrics.putAll(deepSources.metrics());
+            boolean deepWar = deepSources.warAvailable();
+            boolean deepCwl = deepSources.cwlAvailable();
+            boolean deepRaid = deepSources.raidAvailable();
+            cachedWar = cachedWar || deepWar;
+            cachedCwl = cachedCwl || deepCwl;
+            cachedRaid = cachedRaid || deepRaid;
+            cachedLegend = cachedLegend || deepSources.legendAvailable();
+            clashKingEvidence = clashKingEvidence || deepSources.clashKingAvailable();
             boolean hasClan = clanTag != null && !clanTag.isBlank();
             if (!hasClan) {
                 source(sources, AchievementSources.WAR, cachedWar,
                         cachedWar
-                                ? "Previously observed regular-war history is cached. Join a clan to add newer wars."
+                                ? deepWar
+                                        ? "ClashKing V2 regular-war history is connected; a clan is only needed for current-war refreshes."
+                                        : "Previously observed regular-war history is cached. Join a clan to add newer wars."
                                 : "Join a clan before ClashPanel can observe regular wars.");
                 source(sources, AchievementSources.CWL, cachedCwl,
                         cachedCwl
-                                ? "Previously indexed CWL history is cached. Join a clan to add newer seasons."
+                                ? deepCwl
+                                        ? "ClashKing V2 CWL history is connected; a clan is only needed for indexed seasons."
+                                        : "Previously indexed CWL history is cached. Join a clan to add newer seasons."
                                 : "Join a clan before ClashPanel can index CWL history.");
             } else {
                 boolean warAvailable = refresh.warAvailable() || cachedWar;
@@ -137,10 +155,11 @@ public final class AchievementMetricCollector {
                         AchievementSources.WAR,
                         warAvailable,
                         warAvailable
-                                ? "Regular-war cache checked. Final wars are reused and the active war may be refreshed."
+                                ? deepWar
+                                        ? "ClashKing V2 regular-war history is connected; final wars are reused and current data may be refreshed."
+                                        : "Regular-war cache checked. Final wars are reused and the active war may be refreshed."
                                 : "Regular-war data could not be refreshed; any older cached progress is preserved."
                 );
-
                 String cwlDetail;
                 if (!cwlAvailable) {
                     cwlDetail = "CWL history could not be refreshed; any older cached progress is preserved.";
@@ -149,7 +168,9 @@ public final class AchievementMetricCollector {
                             + refresh.cwlProcessed() + " season(s) processed now, "
                             + refresh.cwlRemaining() + " remaining. Cached seasons will not be downloaded again.";
                 } else {
-                    cwlDetail = "CWL history is up to date. Only a new or still-active season will be processed next time.";
+                    cwlDetail = deepCwl
+                            ? "ClashKing V2 CWL history is connected; indexed seasons and new data are available."
+                            : "CWL history is up to date. Only a new or still-active season will be processed next time.";
                 }
                 source(sources, AchievementSources.CWL, cwlAvailable, cwlDetail);
             }
@@ -160,8 +181,10 @@ public final class AchievementMetricCollector {
                     AchievementSources.RAID_HISTORY,
                     raidAvailable,
                     raidAvailable
-                            ? "Previously measured raid-weekend progress remains cached; ClashKing V2 does not add new per-player raid weekends."
-                            : "ClashKing V2 does not expose per-player raid-weekend history; no new raid-history progress can be measured."
+                            ? deepRaid
+                                    ? "Official Clan Capital raid-season history is connected; player and clan raid metrics were normalized."
+                                    : "Previously measured raid-weekend progress remains cached."
+                            : "Official Clan Capital raid-season history could not be loaded; raid progress remains unknown."
             );
             boolean legendAvailable = refresh.legendAvailable() || cachedLegend;
             clashKingEvidence = clashKingEvidence || legendAvailable;
@@ -212,7 +235,6 @@ public final class AchievementMetricCollector {
                             : "Legend season rankings are checked after the fast first render."
             );
         }
-
         // ClashKing is a provider umbrella, not a promise that every CK-* family
         // is measurable. Keep unsupported/unbound families UNKNOWN while reporting
         // the provider as partially connected when normalized CK evidence exists.
@@ -222,7 +244,7 @@ public final class AchievementMetricCollector {
                 clashKingEvidence,
                 clashKingEvidence ? "partial" : "unavailable",
                 clashKingEvidence
-                        ? "ClashKing is connected and normalized for Legend/ranking history. Other generic player-history endpoints remain unavailable or unbound, so their achievements stay UNKNOWN."
+                        ? "ClashKing V2 history is connected and normalized for every exact player, war, CWL, social, and ranking metric. Other generic player-history endpoints remain unavailable or unbound only where no exact catalog metric is produced."
                         : "No normalized ClashKing-backed history is currently available for this player."
         );
         source(sources, AchievementSources.CLAN_PROFILE, fast.clanProfileAvailable(),

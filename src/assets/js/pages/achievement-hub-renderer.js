@@ -241,7 +241,7 @@ export function renderAchievementHubModule(category, options = {}) {
 export function renderAchievementHub(container, categories, options = {}) {
     if (!container) return null;
     container.replaceChildren();
-    container.classList.remove('achievement-category-detail');
+    container.classList.remove('achievement-category-detail', 'achievement-mastery-cabinet');
     container.classList.add('achievement-hub', 'achievement-trophy-wall');
     const list = Array.isArray(categories) ? categories : [];
     list.forEach(category => container.append(renderAchievementHubModule(category, options)));

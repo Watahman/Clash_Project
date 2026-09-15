@@ -13,7 +13,8 @@ import java.util.TreeMap;
 /**
  * Derives cumulative, monotonic achievement metrics from stored base-data snapshots.
  * Progress is measured against a per-metric high-water mark so incomplete snapshots
- * cannot remove progress or make restored values count a second time.
+ * cannot remove progress or make restored values count a second time. A metric first
+ * observed after the initial snapshot seeds its baseline without reporting a gain.
  */
 public final class HistoricalAchievementMetrics {
     private static final long SECONDS_PER_DAY = 86_400L;
@@ -142,8 +143,13 @@ public final class HistoricalAchievementMetrics {
             Map<String, Long> current,
             String metric
     ) {
+        if (current == null || !current.containsKey(metric)) return 0;
         long previousMaximum = value(highWater, metric);
         long currentValue = value(current, metric);
+        if (!highWater.containsKey(metric)) {
+            highWater.put(metric, currentValue);
+            return 0;
+        }
         if (currentValue <= previousMaximum) return 0;
         highWater.put(metric, currentValue);
         return currentValue - previousMaximum;

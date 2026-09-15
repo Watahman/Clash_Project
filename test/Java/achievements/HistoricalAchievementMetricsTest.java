@@ -90,4 +90,44 @@ class HistoricalAchievementMetricsTest {
         assertEquals(2L, metrics.get("snapshot_import_count"));
         assertEquals(5L, metrics.get("tracked_home_wall_levels"));
     }
+
+    @Test
+    void exposesSafeHistoryDeltasForTrapsWallsHelpersAndCosmetics() {
+        var metrics = HistoricalAchievementMetrics.extract(List.of(
+                new HistoricalAchievementMetrics.Snapshot(1_000L, Map.of(
+                        "home_trap_level_sum", 20L,
+                        "builder_wall_level_sum", 100L,
+                        "helper_level_sum", 8L,
+                        "cosmetic_collection_count", 12L
+                )),
+                new HistoricalAchievementMetrics.Snapshot(2_000L, Map.of(
+                        "home_trap_level_sum", 23L,
+                        "builder_wall_level_sum", 104L,
+                        "helper_level_sum", 10L,
+                        "cosmetic_collection_count", 14L
+                )),
+                new HistoricalAchievementMetrics.Snapshot(3_000L, Map.of(
+                        "home_trap_level_sum", 25L,
+                        "builder_wall_level_sum", 110L,
+                        "helper_level_sum", 11L,
+                        "cosmetic_collection_count", 17L
+                ))
+        ));
+
+        assertEquals(5L, metrics.get("tracked_home_trap_levels"));
+        assertEquals(10L, metrics.get("tracked_builder_wall_levels"));
+        assertEquals(3L, metrics.get("tracked_helper_levels"));
+        assertEquals(5L, metrics.get("tracked_cosmetics_added"));
+    }
+
+    @Test
+    void doesNotTreatFirstObservedMetricAsGainFromUnknownBaseline() {
+        var metrics = HistoricalAchievementMetrics.extract(List.of(
+                new HistoricalAchievementMetrics.Snapshot(1_000L, Map.of("home_wall_level_sum", 100L)),
+                new HistoricalAchievementMetrics.Snapshot(2_000L, Map.of("home_wall_level_sum", 105L, "helper_level_sum", 7L)),
+                new HistoricalAchievementMetrics.Snapshot(3_000L, Map.of("home_wall_level_sum", 110L, "helper_level_sum", 9L))
+        ));
+
+        assertEquals(2L, metrics.get("tracked_helper_levels"));
+    }
 }

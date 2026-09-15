@@ -76,6 +76,20 @@ describe('Achievement hub and category renderers', () => {
         expect(onCategorySelect).toHaveBeenCalledWith(category, 'clan');
     });
 
+    it('cleans shared grid classes across detail and back rendering', () => {
+        const container = document.createElement('div');
+        const category = { key: 'war-cwl', title: 'War & CWL', progressionFamilies: [], standaloneFamilies: [] };
+
+        renderAchievementHub(container, [category]);
+        renderAchievementCategory(container, category);
+        expect(container.classList.contains('achievement-trophy-wall')).toBe(false);
+        expect(container.classList.contains('achievement-mastery-cabinet')).toBe(true);
+
+        renderAchievementHub(container, [category]);
+        expect(container.classList.contains('achievement-mastery-cabinet')).toBe(false);
+        expect(container.classList.contains('achievement-trophy-wall')).toBe(true);
+    });
+
     it('keeps progression families separate from standalone medals and preserves waiting state', () => {
         const container = document.createElement('div');
         const category = {

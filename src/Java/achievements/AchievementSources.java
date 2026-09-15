@@ -61,9 +61,16 @@ public final class AchievementSources {
     public static String forMetric(String metric) {
         String value = metric == null ? "" : metric;
         if (value.startsWith("profile_") || value.startsWith("native_") || value.startsWith("official:")) return LIVE_PROFILE;
-        if (value.startsWith("war_current_") || value.startsWith("war_recorded_")) return WAR;
+        if (value.startsWith("war_")) return WAR;
+        if (value.startsWith("def_")) return WAR;
         if (value.startsWith("cwl_")) return CWL;
         if (value.startsWith("raid_")) return RAID_HISTORY;
+        if (value.startsWith("sea_") || value.startsWith("social_") || value.startsWith("soc_")) {
+            return CLASHKING_HISTORY;
+        }
+        if (value.startsWith("history_") || value.startsWith("observed_")) return CLASHKING_HISTORY;
+        if (value.startsWith("clan_raid_") || value.startsWith("clan_raids_")
+                || value.startsWith("clan_districts_")) return RAID_HISTORY;
         if (value.startsWith("legend_") || value.startsWith("ranking_")) return LEGEND_HISTORY;
         if (value.startsWith("clan_")) return CLAN_PROFILE;
         if (value.startsWith("clashpanel_") || value.equals("war_assignment_count")) return CLASHPANEL;
