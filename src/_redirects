@@ -25,8 +25,12 @@
 /dashboard.html /dashboard 301
 /app/dashboard /dashboard 301
 /app/dashboard.html /dashboard 301
+/app/achievements /dashboard 301
+/app/achievements.html /dashboard 301
+/app/advanced-stats /dashboard 301
+/app/advanced-stats.html /dashboard 301
 /app/minigames.html /app/minigames 301
 /subpages/dashboard.html /dashboard 301
 /subpages/cwl-planner-drafts.html /app/cwl-planner-drafts 301
-/subpages/achievements.html /app/achievements 301
-/subpages/advanced-stats.html /app/advanced-stats 301
+/subpages/achievements.html /dashboard 301
+/subpages/advanced-stats.html /dashboard 301

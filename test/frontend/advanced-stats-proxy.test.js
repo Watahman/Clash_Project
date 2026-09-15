@@ -59,17 +59,17 @@ describe('Advanced Stats API proxy privacy', () => {
         expect(response.headers.get('Pragma')).toBeNull();
     });
 
-    it('keeps canonical redirect enabled by default', async () => {
+    it('blocks the unreleased route while canonicalizing the host', async () => {
         const response = await worker.fetch(
             new Request('https://phase8-preview.example/app/advanced-stats'),
             { ASSETS: { fetch: vi.fn() } }
         );
 
         expect(response.status).toBe(301);
-        expect(response.headers.get('Location')).toBe('https://clashpanel.com/app/advanced-stats');
+        expect(response.headers.get('Location')).toBe('https://clashpanel.com/dashboard');
     });
 
-    it('allows an explicit isolated preview environment to keep its own host', async () => {
+    it('blocks the unreleased route on an isolated preview host too', async () => {
         const assetResponse = new Response('<html>preview</html>', {
             status: 200,
             headers: { 'Content-Type': 'text/html' }
@@ -84,10 +84,10 @@ describe('Advanced Stats API proxy privacy', () => {
             }
         );
 
-        expect(response.status).toBe(200);
-        expect(response.headers.get('Location')).toBeNull();
-        expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
-        expect(assetFetch).toHaveBeenCalledTimes(1);
+        expect(response.status).toBe(301);
+        expect(response.headers.get('Location'))
+            .toBe('https://clashpanel-phase8-preview.example/dashboard');
+        expect(assetFetch).not.toHaveBeenCalled();
     });
 
     it('uses the trusted production origin upstream only when the preview override is explicit', async () => {

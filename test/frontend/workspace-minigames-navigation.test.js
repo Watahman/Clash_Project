@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { JSDOM } from 'jsdom';
 import { workspaceLocales } from '../../src/assets/js/i18n/workspace-locales.js?v=20260829-public-auth-v1';
+import { buildWorkspaceShellMarkup } from '../../src/assets/js/shell/workspace-shell-markup.js';
 
 describe('workspace Minigames navigation', () => {
     it('shows Minigames as a normal workspace link', () => {
@@ -11,8 +13,8 @@ describe('workspace Minigames navigation', () => {
         expect(dashboard).toContain('data-pillar="play" href="/app/minigames"');
         expect(registry).toContain("['advancedStats', 'nav.advancedStats'");
         expect(registry).toContain("['achievements', 'nav.achievements'");
-        expect(registry).toContain("['advancedStats', 'nav.advancedStats', 'Advanced Stats', 'progress', '/app/advanced-stats', true]");
-        expect(registry).toContain("['achievements', 'nav.achievements', 'Achievements', 'progress', '/app/achievements', true]");
+        expect(registry).toContain("['advancedStats', 'nav.advancedStats', 'Advanced Stats', 'progress', '/app/advanced-stats', true, true]");
+        expect(registry).toContain("['achievements', 'nav.achievements', 'Achievements', 'progress', '/app/achievements', true, true]");
     });
 
     it.each(['en', 'nl', 'fr', 'de', 'es'])(
@@ -34,6 +36,20 @@ describe('workspace Minigames navigation', () => {
         expect(shell).toContain('getWorkspaceSections().map');
         expect(shell).not.toContain('MutationObserver');
     });
+
+    it.each(['advancedStats', 'achievements'])(
+        'renders %s as a disabled Coming Soon navigation item',
+        moduleId => {
+            const { sidebar } = buildWorkspaceShellMarkup('dashboard');
+            const document = new JSDOM(sidebar).window.document;
+            const link = document.querySelector(`[data-workspace-nav="${moduleId}"]`);
+
+            expect(link?.hasAttribute('href')).toBe(false);
+            expect(link?.getAttribute('aria-disabled')).toBe('true');
+            expect(link?.getAttribute('tabindex')).toBe('-1');
+            expect(link?.querySelector('.workspace-coming-soon-badge')).not.toBeNull();
+        }
+    );
 
     it('keeps the public hub and exposes the same game surface in the private shell', () => {
         const publicPage = readFileSync('src/minigames.html', 'utf8');

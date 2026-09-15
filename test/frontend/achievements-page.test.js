@@ -35,13 +35,13 @@ describe('Achievements workspace page', () => {
         expect([...document.querySelectorAll('button:not([type])')]).toHaveLength(0);
     });
 
-    it('keeps the private workspace behind the central route guard without a coming-soon label', () => {
+    it('keeps the unreleased workspace behind the Coming Soon route guard', () => {
         const source = readFileSync('src/subpages/achievements.html', 'utf8');
         const document = documentFor('src/subpages/achievements.html');
 
-        expect(source).not.toContain("window.location.replace('/dashboard')");
-        expect(document.title).toContain('Achievements');
-        expect(document.querySelector('.workspace-coming-soon-badge')).toBeNull();
+        expect(source).toContain("window.location.replace('/dashboard')");
+        expect(document.title).toContain('Coming soon');
+        expect(document.querySelector('.workspace-coming-soon-badge')).not.toBeNull();
     });
 
     it('keeps unavailable sources separate from zero progress', () => {
@@ -117,7 +117,7 @@ describe('Achievements workspace page', () => {
         expect(explore).toContain("!['dashboard', 'explore'].includes(module.id)");
     });
 
-    it('serves the clean private route through the worker', async () => {
+    it('blocks the clean private route through the worker', async () => {
         const bindings = {
             CLOUD_RUN_ORIGIN: 'https://backend.example',
             ASSETS: {
@@ -133,7 +133,8 @@ describe('Achievements workspace page', () => {
             bindings
         );
 
-        expect(await response.text()).toBe('asset:/subpages/achievements');
-        expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
+        expect(response.status).toBe(301);
+        expect(response.headers.get('Location')).toBe('https://clashpanel.com/dashboard');
+        expect(bindings.ASSETS.fetch).not.toHaveBeenCalled();
     });
 });

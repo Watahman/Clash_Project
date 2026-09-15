@@ -41,10 +41,10 @@ const PUBLIC_REDIRECTS = new Map([
     ["/subpages/explore.html", "/app/explore"],
     ["/subpages/cwl-planner-drafts", "/app/cwl-planner-drafts"],
     ["/subpages/cwl-planner-drafts.html", "/app/cwl-planner-drafts"],
-    ["/subpages/achievements", "/app/achievements"],
-    ["/subpages/achievements.html", "/app/achievements"],
-    ["/subpages/advanced-stats", "/app/advanced-stats"],
-    ["/subpages/advanced-stats.html", "/app/advanced-stats"]
+    ["/subpages/achievements", "/dashboard"],
+    ["/subpages/achievements.html", "/dashboard"],
+    ["/subpages/advanced-stats", "/dashboard"],
+    ["/subpages/advanced-stats.html", "/dashboard"]
 ]);
 
 function jsonError(status, code, error) {
