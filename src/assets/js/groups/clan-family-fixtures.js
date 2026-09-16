@@ -1,4 +1,4 @@
-import { getRedesignFixture, isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
+import { getFixture, isFixtureRequested } from '../fixtures/fixture-mode.js';
 
 const FAMILY_SCENARIOS = new Set([
     'family-empty', 'family-member', 'family-admin', 'family-active-poll',
@@ -6,8 +6,8 @@ const FAMILY_SCENARIOS = new Set([
 ]);
 
 export async function loadClanFamilyFixture(location = window.location) {
-    if (!isRedesignFixtureRequested(location)) return null;
-    const fixture = await getRedesignFixture(location);
+    if (!isFixtureRequested(location)) return null;
+    const fixture = await getFixture(location);
     if (fixture?.module !== 'clan-family' || !FAMILY_SCENARIOS.has(fixture.id)) return null;
     return buildClanFamilyFixture(fixture.id);
 }

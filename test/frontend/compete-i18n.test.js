@@ -20,7 +20,7 @@ import { renderWarHistory } from '../../src/assets/js/war-operation-board/war-hi
 
 const LANGUAGES = ['nl', 'en', 'fr', 'de', 'es'];
 const WAR_FIXTURES = JSON.parse(readFileSync(
-    'src/fixtures/redesign/compete-war.json',
+    'src/fixtures/development/compete-war.json',
     'utf8'
 ));
 const LOCAL_KEYS = Object.keys(competeLocales.en);

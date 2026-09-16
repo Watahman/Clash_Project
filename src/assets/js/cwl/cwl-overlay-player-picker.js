@@ -6,7 +6,7 @@ import { initGroupOverlay } from "./cwl-group.js?v=20260830-player-drag-v3";
 import { getCurrentUserId } from "../utils/user.js";
 import { uniquePlayers } from "./cwl-utils.js";
 import { t } from "../i18n/i18n.js?v=20260829-public-auth-v1";
-import { isRedesignFixtureRequested } from "../fixtures/redesign-fixture-mode.js";
+import { isFixtureRequested } from "../fixtures/fixture-mode.js";
 import { getCurrentReturnPath, requireAuthForAction } from "../auth/auth-client.js?v=20260915-auth-policy-v1";
 import { createPrivateSourceAuth } from "./cwl-private-source-auth.js?v=20260829-public-auth-v1";
 import { trackTagSubmitted } from "../analytics/product-analytics.js?v=20260912-product-analytics-v1";
@@ -23,7 +23,7 @@ export function initAddPlayersOverlay(refs, onReset = resetPlayerOverlayState) {
     bindPlayerPickerTabs(refs.modalTabBtn, refs.segBtns, refs.addSelectedBtn);
     bindPlayerPickerActions(refs, onReset);
     loadAccountSources(refs.addSelectedBtn);
-    if (!isRedesignFixtureRequested() && privateAuth.canRead()) initGroupOverlay(refs.selectGroup, refs);
+    if (!isFixtureRequested() && privateAuth.canRead()) initGroupOverlay(refs.selectGroup, refs);
 }
 
 function bindPlayerPickerToggle({ addPlayersBtn, cwlInputTag, addSelectedBtn }) {
@@ -108,7 +108,7 @@ export function resetPlayerOverlayState() {
 }
 
 function addPlayersByTag(input, button, onReset) {
-    if (isRedesignFixtureRequested()) return;
+    if (isFixtureRequested()) return;
     const tag = input.value.trim();
     if (!tag) {
         setOverlayMessage(t('cwl.tagLabel'), 'error');
@@ -247,7 +247,7 @@ function loadAccountSources(addSelectedBtn) {
     resetAccountList();
     if (!privateAuth.canRead()) return;
     const userId = privateAuth.getUserId();
-    if (isRedesignFixtureRequested()) return;
+    if (isFixtureRequested()) return;
     if (!userId) return;
     if (!privateAuth.isCurrent(token, userId)) return;
 

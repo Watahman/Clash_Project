@@ -11,7 +11,7 @@ import {
     getDailyCategory
 } from '../minigames/entity-guesser-engine-v2.js?v=20260811-2';
 import { ENTITY_GUESSER_DATA_VERSION } from '../minigames/entity-guesser-catalog.js?v=20260809-3';
-import { getRedesignFixture, isLocalFixtureHost, isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
+import { getFixture, isLocalFixtureHost, isFixtureRequested } from '../fixtures/fixture-mode.js';
 import { readJson, removeStoredValue } from '../minigames/minigames-storage.js?v=20260811-1';
 import { ENTITY_CATEGORY_LABELS } from '../minigames/entity-guesser-copy.js';
 
@@ -189,7 +189,7 @@ function readSavedHigherLowerRun() {
 }
 
 function sanitizeSavedHigherLowerRun() {
-    if (isRedesignFixtureRequested()) return;
+    if (isFixtureRequested()) return;
     const saved = readSavedHigherLowerRun();
     if (saved && !isValidHigherLowerDailyRun(saved, utcDateKey())) {
         removeStoredValue(HIGHER_LOWER_DAILY_KEY);
@@ -293,6 +293,6 @@ window.addEventListener('clashpanel:minigame-state-changed', renderHub);
 window.addEventListener('clashpanel:fixture-ready', event => handleFixture(event.detail));
 window.addEventListener('clashtools:language-changed', renderHub);
 
-getRedesignFixture().then(handleFixture).catch(() => {});
+getFixture().then(handleFixture).catch(() => {});
 renderHub();
 selectGame(selectedFromUrl(), false);

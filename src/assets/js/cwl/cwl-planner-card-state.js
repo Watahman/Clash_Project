@@ -4,11 +4,11 @@ import {
     normalizeRosterStatus
 } from './cwl-plan-schema.js';
 import { t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
-import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
+import { isFixtureRequested } from '../fixtures/fixture-mode.js';
 import { getPlannerStorageKey } from './cwl-planner-guest-storage.js?v=20260829-public-auth-v1';
 
 export function rememberPlannerPlayers() {
-    if (isRedesignFixtureRequested()) return;
+    if (isFixtureRequested()) return;
     const players = Array.from(
         document.querySelectorAll('.cwl-player-article[data-planner-card="true"]')
     ).map(player => ({

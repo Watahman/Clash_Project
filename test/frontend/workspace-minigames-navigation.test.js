@@ -73,7 +73,7 @@ describe('workspace Minigames navigation', () => {
             expect(publicPage).toContain(attribute);
         });
         expect(privatePage).toContain('/assets/js/pages/minigames-hub.js?v=20260831-guest-local-v1');
-        expect(privatePage).toContain('/assets/js/pages/minigames-phase2b.js?v=20260814-entity-mode-fix');
+        expect(privatePage).toContain('/assets/js/pages/entity-guesser.js?v=20260814-entity-mode-fix');
         expect(privatePage).toContain('/assets/js/pages/higher-lower.js?v=20260814-metric-card-labels');
         expect(privatePage).toContain('minigames-entity-guesser.css?v=20260814-practice-picker');
         expect(privatePage).toContain('minigames.css?v=20260814-games-header-visible');

@@ -9,9 +9,9 @@ import {
 } from '../bracket/bracket-page-view.js?v=20260829-public-auth-v1';
 import { createBracketFixture } from '../bracket/bracket-fixtures.js';
 import {
-    getRedesignFixture,
-    isRedesignFixtureRequested
-} from '../fixtures/redesign-fixture-mode.js';
+    getFixture,
+    isFixtureRequested
+} from '../fixtures/fixture-mode.js';
 
 export async function initBracketGenerator({
     documentRef = globalThis.document,
@@ -25,8 +25,8 @@ export async function initBracketGenerator({
         documentRef,
         windowRef,
         fixture: {
-            isRequested: () => isRedesignFixtureRequested(windowRef.location),
-            get: () => getRedesignFixture(windowRef.location)
+            isRequested: () => isFixtureRequested(windowRef.location),
+            get: () => getFixture(windowRef.location)
         },
         fixtureFactory: createBracketFixture
     });

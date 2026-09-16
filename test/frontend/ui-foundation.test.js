@@ -11,8 +11,8 @@ import {
     WORKSPACE_MODULES
 } from '../../src/assets/js/shell/module-registry.js?v=20260829-public-dashboard-v1';
 import {
-    isRedesignFixtureRequested
-} from '../../src/assets/js/fixtures/redesign-fixture-mode.js';
+    isFixtureRequested
+} from '../../src/assets/js/fixtures/fixture-mode.js';
 import { APP_ALIASES, APP_ASSETS } from '../../worker/app-routes.js';
 
 describe('redesign shared foundation', () => {
@@ -35,9 +35,9 @@ describe('redesign shared foundation', () => {
     });
 
     it('restricts deterministic fixture mode to localhost', () => {
-        expect(isRedesignFixtureRequested(new URL('http://localhost/app?cpFixture=planner-empty'))).toBe(true);
-        expect(isRedesignFixtureRequested(new URL('https://clashpanel.com/app?cpFixture=planner-empty'))).toBe(false);
-        expect(isRedesignFixtureRequested(new URL('http://localhost/app'))).toBe(false);
+        expect(isFixtureRequested(new URL('http://localhost/app?cpFixture=planner-empty'))).toBe(true);
+        expect(isFixtureRequested(new URL('https://clashpanel.com/app?cpFixture=planner-empty'))).toBe(false);
+        expect(isFixtureRequested(new URL('http://localhost/app'))).toBe(false);
     });
 
     it('serves clean app routes and preserves old aliases', () => {

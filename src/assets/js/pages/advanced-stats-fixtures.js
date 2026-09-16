@@ -1,4 +1,4 @@
-import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
+import { getFixture } from '../fixtures/fixture-mode.js';
 
 const FIXTURE_ACCOUNT = Object.freeze({
     tag: '#CPSTAT01',
@@ -191,7 +191,7 @@ function makeClient(id) {
 }
 
 export async function getAdvancedStatsFixture() {
-    const scenario = await getRedesignFixture();
+    const scenario = await getFixture();
     if (!scenario || scenario.module !== 'advanced-stats') return null;
     return makeClient(scenario.id);
 }

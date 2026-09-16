@@ -1,4 +1,4 @@
-import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
+import { getFixture } from '../fixtures/fixture-mode.js';
 
 const ACCOUNT = Object.freeze({ tag: '#CPACHV01', name: 'Fixture Collector', townHallLevel: 17 });
 const SOURCE_ORDER = Object.freeze([
@@ -131,7 +131,7 @@ function makeClient(id) {
 }
 
 export async function getAchievementsFixture() {
-    const scenario = await getRedesignFixture();
+    const scenario = await getFixture();
     if (!scenario || scenario.module !== 'achievements') return null;
     return makeClient(scenario.id);
 }

@@ -9,7 +9,7 @@ import { applyFamilyCopy, familyCopy } from '../groups/clan-family-copy.js?v=202
 import { activateGroupTab, bindGroupTabs, normalizeGroupTab } from '../groups/groups-tabs.js';
 import { initGroupIndexSlider } from '../groups/groups-index-slider.js?v=20260829-public-auth-v1';
 import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260915-auth-policy-v1';
-import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
+import { getFixture } from '../fixtures/fixture-mode.js';
 import { initClanFamilyActions } from '../groups/clan-family-actions.js?v=20260829-public-auth-v1';
 import { createClanFamilyListController } from '../groups/clan-family-list.js?v=20260829-public-auth-v1';
 import {
@@ -23,7 +23,7 @@ const state = { group: null, members: [], entry: {}, currentRole: 'member', user
 let clanAdmin;
 
 async function init() {
-    const requestedFixture = await getRedesignFixture().catch(() => null);
+    const requestedFixture = await getFixture().catch(() => null);
     const fixtureMode = requestedFixture?.module === 'clan-family';
     if (!fixtureMode) {
         const authState = await resolveAuthState().catch(() => null);

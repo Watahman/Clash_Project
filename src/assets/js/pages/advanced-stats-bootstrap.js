@@ -1,8 +1,8 @@
 import { AUTH_STATES, resolveAuthState } from '../auth/auth-client.js?v=20260915-auth-policy-v1';
-import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
+import { getFixture } from '../fixtures/fixture-mode.js';
 
 async function canInitialize() {
-    const fixture = await getRedesignFixture().catch(() => null);
+    const fixture = await getFixture().catch(() => null);
     if (fixture?.module === 'advanced-stats') return true;
     const authState = await resolveAuthState().catch(() => null);
     return authState?.status === AUTH_STATES.AUTHENTICATED;

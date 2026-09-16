@@ -21,10 +21,10 @@ import {
 } from '../minigames/minigames-state.js?v=20260809-3';
 import { getEntityAsset, installImageFallback } from '../assets/entity-assets.js';
 import {
-    getRedesignFixture,
+    getFixture,
     isLocalFixtureHost,
-    isRedesignFixtureRequested
-} from '../fixtures/redesign-fixture-mode.js';
+    isFixtureRequested
+} from '../fixtures/fixture-mode.js';
 import { getHigherLowerGameFixture } from '../minigames/minigames-fixtures.js?v=20260811-2';
 import { HIGHER_LOWER_COPY } from '../minigames/higher-lower-copy.js?v=20260811-1';
 import { createHigherLowerRenderer } from '../minigames/higher-lower-renderer.js?v=20260814-metric-card-labels';
@@ -95,7 +95,7 @@ const renderer = createHigherLowerRenderer({
 let run;
 let dailyQuestions = [];
 let practiceQuestion = null;
-let fixtureActive = isRedesignFixtureRequested();
+let fixtureActive = isFixtureRequested();
 let startedRun;
 let completedRun;
 
@@ -287,7 +287,7 @@ window.addEventListener('clashpanel:minigame-selected', event => {
 });
 window.addEventListener('classtools:language-changed', render);
 
-getRedesignFixture().then(handleFixture).catch(() => {});
+getFixture().then(handleFixture).catch(() => {});
 loadDailyRun();
 render();
 trackGameStarted();

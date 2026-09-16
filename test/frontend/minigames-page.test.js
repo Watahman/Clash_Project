@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 describe('ClashPanel minigames public page', () => {
     const page = readFileSync('src/minigames.html', 'utf8');
-    const entityController = readFileSync('src/assets/js/pages/minigames-phase2b.js', 'utf8');
+    const entityController = readFileSync('src/assets/js/pages/entity-guesser.js', 'utf8');
     const entityCopy = readFileSync('src/assets/js/minigames/entity-guesser-copy.js', 'utf8');
     const entityPicker = readFileSync('src/assets/js/minigames/entity-guesser-picker.js', 'utf8');
     const entityImages = readFileSync('src/assets/js/minigames/entity-guesser-images.js', 'utf8');
@@ -20,7 +20,7 @@ describe('ClashPanel minigames public page', () => {
     it('loads the hub and all three game controllers', () => {
         expect(page).toContain('/assets/js/pages/minigames-hub.js?v=20260831-guest-local-v1');
         expect(hubController).toContain('Your progress stays on this device.');
-        expect(page).toContain('/assets/js/pages/minigames-phase2b.js');
+        expect(page).toContain('/assets/js/pages/entity-guesser.js');
         expect(page).toContain('/assets/js/pages/higher-lower.js');
         expect(page).toContain('/assets/js/pages/scenery-scout.js?v=20260831-v1');
         expect(page).toContain('/assets/css/minigames-entity-guesser.css');
@@ -176,7 +176,7 @@ describe('ClashPanel minigames public page', () => {
     });
 
     it('versions the changed module graph so existing browsers cannot keep the broken picker', () => {
-        expect(page).toContain('/assets/js/pages/minigames-phase2b.js?v=20260814-entity-mode-fix');
+        expect(page).toContain('/assets/js/pages/entity-guesser.js?v=20260814-entity-mode-fix');
         expect(page).toContain('/assets/js/pages/higher-lower.js?v=20260814-metric-card-labels');
         expect(page).toContain('/assets/js/pages/scenery-scout.js?v=20260831-v1');
         expect(sceneryController).toContain("scenery-scout-engine.js");

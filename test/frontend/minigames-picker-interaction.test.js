@@ -11,7 +11,7 @@ describe('Entity Guesser answer selection', () => {
     });
 
     it('lets a player replace a selected answer before submitting it', async () => {
-        await import('../../src/assets/js/pages/minigames-phase2b.js');
+        await import('../../src/assets/js/pages/entity-guesser.js');
 
         document.querySelector('[data-game-mode="practice"]').click();
         const category = document.querySelector('[data-category-select]');

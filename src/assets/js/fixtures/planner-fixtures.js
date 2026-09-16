@@ -1,8 +1,8 @@
 import {
-    getRedesignFixture,
+    getFixture,
     isLocalFixtureHost,
-    isRedesignFixtureRequested
-} from './redesign-fixture-mode.js';
+    isFixtureRequested
+} from './fixture-mode.js';
 import {
     applyAvailabilityToAllPlayerCards,
     clearActiveCwlPoll,
@@ -41,8 +41,8 @@ export const PLANNER_FIXTURE_IDS = Object.freeze([
 ]);
 
 export async function getRequestedPlannerFixture(location = window.location) {
-    if (!isRedesignFixtureRequested(location)) return null;
-    const fixture = await getRedesignFixture(location);
+    if (!isFixtureRequested(location)) return null;
+    const fixture = await getFixture(location);
     return fixture?.module === 'planner' ? fixture : null;
 }
 

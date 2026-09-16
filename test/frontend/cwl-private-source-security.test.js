@@ -52,8 +52,8 @@ vi.mock('../../src/assets/js/cwl/cwl-availability.js?v=20260829-public-auth-v1',
     getActiveCwlPollMeta: () => ({ groupId: '', pollId: '' }),
     setActiveCwlPoll: mocks.setActiveCwlPoll
 }));
-vi.mock('../../src/assets/js/fixtures/redesign-fixture-mode.js', () => ({
-    isRedesignFixtureRequested: () => false
+vi.mock('../../src/assets/js/fixtures/fixture-mode.js', () => ({
+    isFixtureRequested: () => false
 }));
 vi.mock('../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1', () => ({
     t: key => key

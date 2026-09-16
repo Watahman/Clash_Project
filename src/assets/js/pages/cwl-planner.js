@@ -23,7 +23,7 @@ import {
     applyPlannerFixture,
     getRequestedPlannerFixture
 } from '../fixtures/planner-fixtures.js?v=20260830-player-drag-v3';
-import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
+import { isFixtureRequested } from '../fixtures/fixture-mode.js';
 
 export { savePlan };
 
@@ -71,7 +71,7 @@ function labelInit() {
 
 async function init() {
     initI18n();
-    const fixture = isRedesignFixtureRequested() ? await getRequestedPlannerFixture() : null;
+    const fixture = isFixtureRequested() ? await getRequestedPlannerFixture() : null;
     plannerAuthState = fixture
         ? { status: 'guest', session: null }
         : getAuthState();

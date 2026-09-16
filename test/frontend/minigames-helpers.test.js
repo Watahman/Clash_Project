@@ -1,10 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-    getRedesignFixture,
+    getFixture,
     isLocalFixtureHost,
-    isRedesignFixtureRequested
-} from '../../src/assets/js/fixtures/redesign-fixture-mode.js';
+    isFixtureRequested
+} from '../../src/assets/js/fixtures/fixture-mode.js';
 import { createEntityAnswerPicker } from '../../src/assets/js/minigames/entity-guesser-picker.js';
 import { createEntityGuesserStateManager } from '../../src/assets/js/minigames/entity-guesser-state.js';
 import {
@@ -126,16 +126,16 @@ describe('extracted minigame helpers', () => {
         const productionLocation = { hostname: 'clashpanel.com', search: '?cpFixture=entity-won' };
 
         expect(isLocalFixtureHost(localLocation)).toBe(true);
-        expect(isRedesignFixtureRequested(localLocation)).toBe(true);
-        expect(isRedesignFixtureRequested(productionLocation)).toBe(false);
-        await expect(getRedesignFixture(productionLocation)).rejects.toThrow('localhost');
+        expect(isFixtureRequested(localLocation)).toBe(true);
+        expect(isFixtureRequested(productionLocation)).toBe(false);
+        await expect(getFixture(productionLocation)).rejects.toThrow('localhost');
 
         expect(shouldPersistDailyState('daily', true)).toBe(false);
         expect(shouldPersistDailyState('daily', false)).toBe(true);
         expect(shouldPersistDailyState('practice', true)).toBe(false);
 
-        const fixtureMode = readFileSync('src/assets/js/fixtures/redesign-fixture-mode.js', 'utf8');
-        const entityController = readFileSync('src/assets/js/pages/minigames-phase2b.js', 'utf8');
+        const fixtureMode = readFileSync('src/assets/js/fixtures/fixture-mode.js', 'utf8');
+        const entityController = readFileSync('src/assets/js/pages/entity-guesser.js', 'utf8');
         const higherLowerController = readFileSync('src/assets/js/pages/higher-lower.js', 'utf8');
         expect(fixtureMode).toContain("const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1'])");
         expect(fixtureMode).not.toContain('localStorage');

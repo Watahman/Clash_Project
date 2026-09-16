@@ -1,10 +1,10 @@
 import {
-    getRedesignFixture,
-    isRedesignFixtureRequested
-} from '../fixtures/redesign-fixture-mode.js';
+    getFixture,
+    isFixtureRequested
+} from '../fixtures/fixture-mode.js';
 
-const FIXTURE_URL = '/fixtures/redesign/compete-cwl.json';
-const WAR_FIXTURE_URL = '/fixtures/redesign/compete-war.json';
+const FIXTURE_URL = '/fixtures/development/compete-cwl.json';
+const WAR_FIXTURE_URL = '/fixtures/development/compete-war.json';
 const MODULES = new Set(['cwl-tracker', 'war-board']);
 
 let payloadPromise;
@@ -15,8 +15,8 @@ export async function loadCompeteFixture({
     signal,
     location = typeof window === 'undefined' ? null : window.location
 } = {}) {
-    if (!location || !isRedesignFixtureRequested(location)) return null;
-    const scenario = await getRedesignFixture(location);
+    if (!location || !isFixtureRequested(location)) return null;
+    const scenario = await getFixture(location);
     if (!MODULES.has(scenario.module)) return null;
     if (current?.id === scenario.id) return current;
     const payload = await loadPayload(scenario.module, signal);

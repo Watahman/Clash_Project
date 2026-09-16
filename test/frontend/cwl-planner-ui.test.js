@@ -74,7 +74,7 @@ describe('CWL planner redesign surface', () => {
     });
 
     it('keeps the compact roster and inspector as responsive contracts', () => {
-        const css = readFileSync('src/assets/css/cwl-planner-redesign.css', 'utf8');
+        const css = readFileSync('src/assets/css/cwl-planner-layout.css', 'utf8');
         const rosterCss = readFileSync('src/assets/css/cwl-planner-roster.css', 'utf8');
         const drawerCss = readFileSync('src/assets/css/cwl-planner-drawers.css', 'utf8');
         const html = readFileSync('src/subpages/cwl-planner.html', 'utf8');

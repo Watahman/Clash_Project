@@ -66,14 +66,14 @@ describe('Progress workspace page contracts', () => {
     });
 
     it('registers the requested localhost fixture boundaries', () => {
-        const catalog = JSON.parse(read('src/fixtures/redesign/scenarios.json')).scenarios;
+        const catalog = JSON.parse(read('src/fixtures/development/scenarios.json')).scenarios;
         const ids = new Set(catalog.map(scenario => scenario.id));
         const stats = ['stats-no-account', 'stats-not-tracking', 'stats-initializing', 'stats-active', 'stats-paused', 'stats-degraded', 'stats-error', 'stats-partial', 'stats-no-attacks', 'stats-rich-90d'];
         const achievements = ['achievements-no-account', 'achievements-new', 'achievements-mid', 'achievements-rich', 'achievements-missing-source', 'achievements-import-valid', 'achievements-import-invalid'];
 
         [...stats, ...achievements].forEach(id => expect(ids.has(id), id).toBe(true));
-        expect(read('src/assets/js/fixtures/redesign-fixture-mode.js')).toContain("new Set(['localhost', '127.0.0.1'");
-        expect(read('src/assets/js/pages/advanced-stats-fixtures.js')).toContain('getRedesignFixture');
-        expect(read('src/assets/js/pages/achievements-fixtures.js')).toContain('getRedesignFixture');
+        expect(read('src/assets/js/fixtures/fixture-mode.js')).toContain("new Set(['localhost', '127.0.0.1'");
+        expect(read('src/assets/js/pages/advanced-stats-fixtures.js')).toContain('getFixture');
+        expect(read('src/assets/js/pages/achievements-fixtures.js')).toContain('getFixture');
     });
 });

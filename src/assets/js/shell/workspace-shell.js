@@ -1,6 +1,6 @@
 import { AUTH_STATES, onAuthStateChange, resolveAuthState } from '../auth/auth-client.js?v=20260915-auth-policy-v1';
 import { buildLoginUrl, getCurrentReturnPath, redirectToLogin } from '../auth/auth-navigation.js?v=20260915-auth-policy-v1';
-import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
+import { isFixtureRequested } from '../fixtures/fixture-mode.js';
 import { initI18n, t } from '../i18n/i18n.js?v=20260831-master-live-v1';
 import { toggleTheme as toggleThemePreference } from '../theme/theme-manager.js?v=20260829-public-auth-v1';
 import { initWorkspaceGuidance } from './workspace-guidance.js?v=20260829-public-auth-v1';
@@ -153,13 +153,13 @@ function handleAuthTransition(body, currentPage, state) {
 }
 
 function subscribeWorkspaceAuth(body, currentPage) {
-    if (isRedesignFixtureRequested()) return;
+    if (isFixtureRequested()) return;
     onAuthStateChange((_session, state) => handleAuthTransition(body, currentPage, state));
 }
 
 async function loadInitialWorkspaceData(body, currentPage, force = false) {
     const access = getWorkspaceModule(currentPage).access;
-    if (isRedesignFixtureRequested()) {
+    if (isFixtureRequested()) {
         setAuthPresentation(body, { status: AUTH_STATES.GUEST, session: null }, access);
         return;
     }

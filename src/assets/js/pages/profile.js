@@ -1,6 +1,6 @@
 import { AUTH_STATES, resolveAuthState, signOut } from '../auth/auth-client.js?v=20260915-auth-policy-v1';
 import { redirectAfterLogout } from '../auth/auth-navigation.js?v=20260915-auth-policy-v1';
-import { getRedesignFixture } from '../fixtures/redesign-fixture-mode.js';
+import { getFixture } from '../fixtures/fixture-mode.js';
 import { initI18n, t } from '../i18n/i18n.js?v=20260829-public-auth-v1';
 import { getGroupsOfUser } from '../Supabase/Supabase-Group.js?v=20260829-public-auth-v1';
 import {
@@ -74,7 +74,7 @@ function renderCurrentFriends() {
 
 async function loadProfileData() {
     setStatus(t('profile.loading'), 'loading');
-    const fixture = await getRedesignFixture().catch(() => null);
+    const fixture = await getFixture().catch(() => null);
     if (fixture?.module === 'profile') {
         const fixtureState = profileFixtureData();
         if (fixture.id === 'profile-empty') {
@@ -236,7 +236,7 @@ function bindInteractions() {
 }
 
 async function init() {
-    const requestedFixture = await getRedesignFixture().catch(() => null);
+    const requestedFixture = await getFixture().catch(() => null);
     const fixtureMode = requestedFixture?.module === 'profile';
     if (!fixtureMode) {
         const authState = await resolveAuthState().catch(() => null);

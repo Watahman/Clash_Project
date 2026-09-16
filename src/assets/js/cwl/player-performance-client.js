@@ -1,6 +1,6 @@
 import { requestJson } from '../utils/request-json.js?v=20260829-public-auth-v1';
 import * as config from '../Data/config.js';
-import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
+import { isFixtureRequested } from '../fixtures/fixture-mode.js';
 
 const performanceByTag = new Map();
 const pendingTags = new Set();
@@ -85,7 +85,7 @@ export async function flushPlayerPerformanceBatch() {
 
 export async function loadPlayerPerformanceBatch(tags = []) {
     const normalized = Array.from(new Set(tags.map(normalizeTag).filter(Boolean)));
-    if (isRedesignFixtureRequested()) return Object.fromEntries(normalized.map(tag => [tag, null]));
+    if (isFixtureRequested()) return Object.fromEntries(normalized.map(tag => [tag, null]));
     schedulePlayerPerformanceBatch(normalized);
     const queuedRequest = flushPlayerPerformanceBatch();
     const activeRequests = normalized
@@ -105,7 +105,7 @@ export function primePlannerPlayerPerformance(root = document) {
 }
 
 export function initPlayerPerformanceClient(root = document) {
-    if (isRedesignFixtureRequested()) return;
+    if (isFixtureRequested()) return;
     // Performance is requested by the Auto Plan action or the player popover.
     // Avoid a full-roster request while the planner is still being assembled.
 }

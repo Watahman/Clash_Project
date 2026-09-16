@@ -21,11 +21,11 @@ import { makePlayerDraggable } from './cwl-player-drag.js?v=20260830-player-drag
 import { attachPlayerCardSettings } from './cwl-card-settings.js?v=20260830-player-drag-v3';
 import { rememberPlannerPlayers, updateAllPlayerCounters } from './cwl-planner-card-state.js?v=20260829-public-auth-v1';
 import { getTownHallAsset, installImageFallback } from '../assets/entity-assets.js';
-import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
+import { isFixtureRequested } from '../fixtures/fixture-mode.js';
 
 export function createPlayerCard(playerInfo, clanUuid, options = {}) {
     const players = uniquePlayers(playerInfo);
-    const persist = options.persist !== false && !isRedesignFixtureRequested();
+    const persist = options.persist !== false && !isFixtureRequested();
     let plannerChanged = false;
     let skipped = 0;
     let added = 0;

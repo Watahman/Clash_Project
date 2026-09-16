@@ -33,8 +33,8 @@ vi.mock('../../src/assets/js/auth/auth-client.js?v=20260915-auth-policy-v1', () 
     onAuthStateChange: mocks.onAuthStateChange,
     resolveAuthState: mocks.resolveAuthState
 }));
-vi.mock('../../src/assets/js/fixtures/redesign-fixture-mode.js', () => ({
-    isRedesignFixtureRequested: () => false
+vi.mock('../../src/assets/js/fixtures/fixture-mode.js', () => ({
+    isFixtureRequested: () => false
 }));
 vi.mock('../../src/assets/js/i18n/i18n.js?v=20260829-public-auth-v1', () => ({
     initI18n: vi.fn(),

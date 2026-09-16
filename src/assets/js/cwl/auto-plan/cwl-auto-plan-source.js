@@ -15,7 +15,7 @@ import {
     normalizeClanPriority,
     normalizePlayerPriority
 } from '../cwl-plan-schema.js';
-import { isRedesignFixtureRequested } from '../../fixtures/redesign-fixture-mode.js';
+import { isFixtureRequested } from '../../fixtures/fixture-mode.js';
 
 export async function collectAutoPlanInput(root = document) {
     const clanCards = Array.from(root.querySelectorAll('.cwl-clan-article'));
@@ -25,7 +25,7 @@ export async function collectAutoPlanInput(root = document) {
     ));
     const tags = playerCards.map(getCardTag).filter(Boolean);
     let lockData = emptyLocks();
-    if (!isRedesignFixtureRequested()) {
+    if (!isFixtureRequested()) {
         [, lockData] = await Promise.all([
             loadPlayerPerformanceBatch(tags),
             loadCwlRegistrationLocks(clans)

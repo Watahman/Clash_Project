@@ -12,7 +12,7 @@ import {
     updateClanCapacityCounter
 } from './cwl-planner-card-state.js?v=20260829-public-auth-v1';
 import { ASSET_FALLBACKS, installImageFallback } from '../assets/entity-assets.js';
-import { isRedesignFixtureRequested } from '../fixtures/redesign-fixture-mode.js';
+import { isFixtureRequested } from '../fixtures/fixture-mode.js';
 
 export function applyClanLeagueRestriction(article, leagueName, options = {}) {
     const select = article?.querySelector('.cwl-clan-capacity');
@@ -39,7 +39,7 @@ export function applyClanLeagueRestriction(article, leagueName, options = {}) {
 }
 
 export function createClanCard(clanInfo, playerAmount, uuid = '', options = {}) {
-    const persist = options.persist !== false && !isRedesignFixtureRequested();
+    const persist = options.persist !== false && !isFixtureRequested();
     const clanTag = normalizeTag(clanInfo?.tag);
     const clanName = clanInfo?.name || clanTag || t('cwl.clan');
     const leagueName = clanInfo?.warLeague?.name || '';

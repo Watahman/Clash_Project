@@ -6,11 +6,11 @@ import {
 } from '../../src/assets/js/war-operation-board/war-report-model.js?v=20260829-public-auth-v1';
 
 const cwlFixtures = JSON.parse(readFileSync(
-    'src/fixtures/redesign/compete-cwl.json',
+    'src/fixtures/development/compete-cwl.json',
     'utf8'
 ));
 const warFixtures = JSON.parse(readFileSync(
-    'src/fixtures/redesign/compete-war.json',
+    'src/fixtures/development/compete-war.json',
     'utf8'
 ));
 

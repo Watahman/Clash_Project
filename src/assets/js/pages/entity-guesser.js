@@ -24,10 +24,10 @@ import {
 } from '../minigames/entity-guesser-engine-v2.js?v=20260811-2';
 import { getEntityAsset, installImageFallback } from '../assets/entity-assets.js';
 import {
-    getRedesignFixture,
+    getFixture,
     isLocalFixtureHost,
-    isRedesignFixtureRequested
-} from '../fixtures/redesign-fixture-mode.js';
+    isFixtureRequested
+} from '../fixtures/fixture-mode.js';
 import { getEntityGameFixture } from '../minigames/minigames-fixtures.js?v=20260811-2';
 import {
     ENTITY_CATEGORY_LABELS,
@@ -84,7 +84,7 @@ let state;
 let category;
 let entities;
 let answer;
-let fixtureActive = isRedesignFixtureRequested();
+let fixtureActive = isFixtureRequested();
 const lifecycleAnalytics = createMinigameLifecycleTracker('entity_guesser');
 function language() {
     const code = document.documentElement.lang?.slice(0, 2).toLowerCase();
@@ -293,7 +293,7 @@ window.addEventListener('clashpanel:minigame-selected', event => {
 });
 window.addEventListener('clashtools:language-changed', render);
 
-getRedesignFixture().then(handleFixture).catch(() => {});
+getFixture().then(handleFixture).catch(() => {});
 hydrate(new URLSearchParams(location.search).get('mode') === 'practice' ? 'practice' : 'daily');
 render();
 lifecycleAnalytics.trackStarted(state);

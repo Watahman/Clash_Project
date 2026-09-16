@@ -71,7 +71,7 @@ function initPlannerFixtureBoundary(root) {
         root.querySelector('.workspace-planner')?.setAttribute('data-fixture-scenario', fixture.id);
         root.documentElement?.setAttribute('data-planner-fixture', fixture.id);
     };
-    const existing = document.documentElement.dataset.redesignFixture;
+    const existing = document.documentElement.dataset.fixture;
     if (existing?.startsWith('planner-')) applyFixture({ id: existing, module: 'planner' });
     window.addEventListener('clashpanel:fixture-ready', event => applyFixture(event.detail));
 }

@@ -2,15 +2,15 @@ import { readFileSync } from 'node:fs';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 
 const catalog = JSON.parse(readFileSync(
-    'src/fixtures/redesign/scenarios.json',
+    'src/fixtures/development/scenarios.json',
     'utf8'
 ));
 const cwlPayload = JSON.parse(readFileSync(
-    'src/fixtures/redesign/compete-cwl.json',
+    'src/fixtures/development/compete-cwl.json',
     'utf8'
 ));
 const warPayload = JSON.parse(readFileSync(
-    'src/fixtures/redesign/compete-war.json',
+    'src/fixtures/development/compete-war.json',
     'utf8'
 ));
 
@@ -21,13 +21,13 @@ describe('Compete fixture adapter', () => {
         vi.resetModules();
         globalThis.fetch = vi.fn(url => {
             const path = String(url);
-            if (path.endsWith('/fixtures/redesign/scenarios.json')) {
+            if (path.endsWith('/fixtures/development/scenarios.json')) {
                 return Promise.resolve(jsonResponse(catalog));
             }
-            if (path.endsWith('/fixtures/redesign/compete-cwl.json')) {
+            if (path.endsWith('/fixtures/development/compete-cwl.json')) {
                 return Promise.resolve(jsonResponse(cwlPayload));
             }
-            if (path.endsWith('/fixtures/redesign/compete-war.json')) {
+            if (path.endsWith('/fixtures/development/compete-war.json')) {
                 return Promise.resolve(jsonResponse(warPayload));
             }
             throw new Error(`Unexpected fixture request: ${path}`);
