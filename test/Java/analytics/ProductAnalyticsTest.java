@@ -62,9 +62,11 @@ class ProductAnalyticsTest {
             received.set(JsonParser.parseString(new String(
                     exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8
             )).getAsJsonObject());
-            exchange.sendResponseHeaders(200, -1);
+            exchange.sendResponseHeaders(200, 2);
             responded.set(true);
-            exchange.close();
+            try (var body = exchange.getResponseBody()) {
+                body.write("ok".getBytes(StandardCharsets.UTF_8));
+            }
         });
         server.start();
         try {
