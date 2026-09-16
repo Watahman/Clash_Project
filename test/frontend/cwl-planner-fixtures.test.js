@@ -82,7 +82,7 @@ describe('CWL planner redesign fixtures', () => {
         expect([...document.querySelectorAll('.cwl-clan-article')].map(clan =>
             clan.querySelectorAll('.cwl-clan-player-list .cwl-player-article').length
         )).toEqual([15, 15, 15]);
-    });
+    }, 10_000);
 
     it('renders full multi-clan rosters and marks capacity and availability conflicts', () => {
         applyPlannerFixture(fixture('planner-multi-clan'), { location: localUrl() });

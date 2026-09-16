@@ -14,7 +14,6 @@ await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 await cp(source, output, { recursive: true });
 await rm(resolve(output, 'Java'), { recursive: true, force: true });
-await rm(resolve(output, 'REDESIGN_NOTES.txt'), { force: true });
 
 const publicSiteUrl = String(
     process.env.PUBLIC_SITE_URL || 'https://clashpanel.com'

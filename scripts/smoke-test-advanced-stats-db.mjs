@@ -29,8 +29,7 @@ const env = {
   PGSSLMODE: url.searchParams.get('sslmode') || 'require',
 };
 
-// The raw-table scripts remain in the repository as historical diagnostics,
-// but the deployed V2 cutover only exposes the compact source-of-truth path.
+// Keep the maintained smoke suite focused on the current compact source-of-truth path.
 const scripts = [
   'check-advanced-stats-schema.sql',
   'smoke-test-advanced-stats-compact.sql',

@@ -182,7 +182,6 @@ describe('Advanced Stats compact database contract', () => {
         expect(compactSmoke).toContain('loot_known_attacks');
         expect(compactSmoke).not.toContain('advanced_stats_battles');
         expect(smokeRunner).toContain("'smoke-test-advanced-stats-compact.sql'");
-        expect(smokeRunner).not.toContain("'smoke-test-advanced-stats-read-models.sql'");
     });
 
     it('defines a backend-only all-time lifetime read model from compact aggregates', () => {

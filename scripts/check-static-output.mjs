@@ -17,7 +17,6 @@ const forbidden = files
     .map(file => relative(output, file).replaceAll('\\', '/'))
     .filter(file => file.startsWith('Java/')
         || extname(file).toLowerCase() === '.java'
-        || file === 'REDESIGN_NOTES.txt'
         || /(^|\/)\.env(?:\.|$)/i.test(file));
 
 if (forbidden.length) {

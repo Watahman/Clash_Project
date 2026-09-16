@@ -19,10 +19,10 @@ The shared catalog contains ten playable categories and 163 curated entities:
 
 The catalog currently powers:
 
-- Entity Guesser, phases 1 through 2B;
-- Higher or Lower, phase 3A.
+- Entity Guesser;
+- Higher or Lower.
 
-Phase 3A includes the complete Daily and Practice game loop. Advanced level-dependent combat comparisons, account synchronization and global leaderboards are not yet included.
+The current Higher or Lower implementation includes the complete Daily and Practice game loop. Advanced level-dependent combat comparisons, account synchronization and global leaderboards are not included.
 
 ## Daily eligibility
 

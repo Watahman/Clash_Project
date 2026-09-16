@@ -9,10 +9,10 @@ const audit = read('scripts/audit-gcp-secrets.ps1');
 const envExample = read('.env.example');
 const cloudRunEnvExample = read('cloudrun-env.example.yaml');
 const deploymentFiles = [
-    'deploy-cloud-run.ps1',
-    'deploy-cloud-run-phase8.ps1',
-    'configure-advanced-stats-production.ps1',
-    'configure-advanced-stats-phase8.ps1'
+    'scripts/deploy/deploy-cloud-run-production.ps1',
+    'scripts/deploy/deploy-cloud-run-preview.ps1',
+    'scripts/deploy/configure-advanced-stats-production.ps1',
+    'scripts/deploy/configure-advanced-stats-preview.ps1'
 ];
 
 function secretBindingText(source) {
@@ -42,7 +42,7 @@ function yamlValue(source, name) {
 
 describe('Cloud Run deployment safety contracts', () => {
     it('pins production deploys to clean origin/master and verifies the live revision', () => {
-        const code = read('deploy-cloud-run.ps1');
+        const code = read('scripts/deploy/deploy-cloud-run-production.ps1');
         expect(code).toMatch(/git status --porcelain/i);
         expect(code).toMatch(/git fetch origin master --quiet/i);
         expect(code).toMatch(/origin\/master/i);
@@ -58,7 +58,7 @@ describe('Cloud Run deployment safety contracts', () => {
     });
 
     it('pins preview deploys to clean origin/Development and enforces production secret parity', () => {
-        const code = read('deploy-cloud-run-phase8.ps1');
+        const code = read('scripts/deploy/deploy-cloud-run-preview.ps1');
         expect(code).toMatch(/git status --porcelain/i);
         expect(code).toMatch(/git fetch origin Development --quiet/i);
         expect(code).toMatch(/origin\/Development/i);
@@ -67,6 +67,9 @@ describe('Cloud Run deployment safety contracts', () => {
         expect(code).toMatch(/ADVANCED_STATS_SCHEDULER_SECRET=ADVANCED_STATS_SCHEDULER_SECRET:latest/i);
         expect(code).toMatch(/--cpu-throttling/i);
         expect(code).toMatch(/--service-account \$RuntimeServiceAccount/i);
+        expect(code).toMatch(/AUTH_GOOGLE_CALLBACK_URL=\$PreviewCallbackUrl/i);
+        expect(code).toMatch(/AUTH_EMAIL_CONFIRM_REDIRECT_URL=\$PreviewLoginUrl/i);
+        expect(code).toMatch(/AUTH_PASSWORD_RESET_REDIRECT_URL=\$PreviewLoginUrl/i);
     });
 });
 
@@ -97,7 +100,7 @@ describe('GCP Secret Manager cost-control contracts', () => {
         expect(code).not.toMatch(/--data-file|\b(?:Set|Add|Out|Remove)-Content\b|\bNew-Item\b/i);
     });
 
-    it('uses only the four approved Secret Manager binding names', () => {
+    it('uses only the three approved Secret Manager binding names', () => {
         const sources = deploymentFiles.map(read);
         const bindings = sources.map(secretBindingText).join('\n');
         const names = sources.flatMap(bindingNames);
@@ -112,7 +115,7 @@ describe('GCP Secret Manager cost-control contracts', () => {
         expect(bindings).toContain('SUPABASE_SERVICE_ROLE_KEY');
         expect(bindings).toContain('API_PROXY_SECRET');
         expect(bindings).toMatch(/ADVANCED_STATS_SCHEDULER_SECRET/);
-        expect(read('deploy-cloud-run.ps1')).toMatch(/Assert-SecretManagerBindingsExist/);
+        expect(read('scripts/deploy/deploy-cloud-run-production.ps1')).toMatch(/Assert-SecretManagerBindingsExist/);
     });
 
     it('keeps ordinary env values as placeholders and true secrets out of the YAML env file', () => {
@@ -132,7 +135,7 @@ describe('GCP Secret Manager cost-control contracts', () => {
     });
 
     it.each([
-        'configure-advanced-stats-production.ps1'
+        'scripts/deploy/configure-advanced-stats-production.ps1'
     ])('requires explicit scheduler-secret rotation in %s', (file) => {
         const code = withoutPowerShellComments(read(file));
         const compact = code.replace(/\s+/g, ' ');
@@ -148,11 +151,11 @@ describe('GCP Secret Manager cost-control contracts', () => {
         expect(rotationGuard[1]).toMatch(/(?:versions\s+add|(?:Add|New|Set)-\w*(?:Secret|Version))/i);
     });
 
-    it('keeps the explicit Phase 8 collector workflow on the shared production scheduler secret', () => {
-        const code = read('configure-advanced-stats-phase8.ps1');
+    it('keeps the explicit preview collector workflow on the shared production scheduler secret', () => {
+        const code = read('scripts/deploy/configure-advanced-stats-preview.ps1');
         expect(code).toMatch(/SecretName = "ADVANCED_STATS_SCHEDULER_SECRET"/);
         expect(code).not.toMatch(/clashpanel-advanced-stats-scheduler-secret-phase8/);
         expect(code).not.toMatch(/secrets versions add|secrets create/);
-        expect(read('enable-advanced-stats-phase8.ps1')).toMatch(/SecretName = "ADVANCED_STATS_SCHEDULER_SECRET"/);
+        expect(read('scripts/deploy/enable-advanced-stats-preview.ps1')).toMatch(/SecretName = "ADVANCED_STATS_SCHEDULER_SECRET"/);
     });
 });

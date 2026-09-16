@@ -68,7 +68,6 @@ try {
   Write-Host ""
   Write-Host "Done. Review:"
   Write-Host "  $Destination\game\manifest.json"
-  Write-Host "  $Destination\sources\COLLECTION_REPORT.md"
 }
 finally {
   if (Test-Path $TempRoot) {

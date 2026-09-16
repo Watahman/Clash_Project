@@ -6,7 +6,7 @@ out/
 !**/src/test/**/out/
 .kotlin
 cloudrun-env.yaml
-.wrangler.phase8-preview.generated.jsonc
+.wrangler.preview.generated.jsonc
 
 # Codex / agent generated context files
 agent_docs/
@@ -28,7 +28,6 @@ bin/
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
-/dist/
 /nbdist/
 /.nb-gradle/
 

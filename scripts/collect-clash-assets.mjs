@@ -221,27 +221,6 @@ const manifest = {
 ensure(gameRoot);
 fs.writeFileSync(path.join(gameRoot, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n", "utf8");
 
-const report = [
-  "# Clash asset collection report",
-  "",
-  `- Package: \`${packageName}@${detectedVersion}\``,
-  `- Generated: ${manifest._meta.generatedAt}`,
-  `- Entity images collected: **${manifest._meta.entityCount}**`,
-  "",
-  "## By category",
-  "",
-  ...Object.entries(counts).sort().map(([k,v]) => `- ${k}: ${v}`),
-  "",
-  "## Notes",
-  "",
-  "- League imagery is copied on a best-effort basis from package paths containing `league`.",
-  "- Clan badges remain dynamic.",
-  "- Product screenshots/social cards are intentionally post-redesign assets.",
-  "- Missing entities fall back to `placeholders/unavailable-entity.svg` in the application.",
-  ""
-].join("\n");
-fs.writeFileSync(path.join(sourceDir, "COLLECTION_REPORT.md"), report, "utf8");
-
 console.log("");
 console.log("ClashPanel asset collection complete.");
 console.log(`Entity images: ${manifest._meta.entityCount}`);

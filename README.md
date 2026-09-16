@@ -1,30 +1,22 @@
 # ClashPanel
 
-ClashPanel is a vanilla JavaScript and Java application for CWL planning and live operation tracking. It also includes groups, role management, availability polls, internal reminders, player-account verification, saved drafts and a local single-elimination bracket generator.
+ClashPanel is a Clash of Clans web application for CWL planning, operation tracking, clan-family management, polls, brackets, achievements, minigames, and player/clan analysis.
 
 ## Architecture
 
-- `src/`: static frontend and Java HTTP backend.
-- `src/assets/js/auth`: Supabase Auth browser session handling.
-- `src/assets/js/cache`: IndexedDB stale-while-revalidate cache.
-- `src/Java`: authenticated API gateway, authorization and the layered Clash response cache.
-- `database/migrations`: ordered PostgreSQL/Supabase schema and security migrations.
-- `test`: Vitest/JSDOM and JUnit regression tests.
+- `src/` contains the static frontend and Java HTTP backend.
+- `src/assets/js/` contains browser modules, API clients, workspace logic, caching, analytics, and feature code.
+- `src/Java/` contains the API gateway, authentication, authorization, Clash/ClashKing integrations, caching, and persistence logic.
+- `database/migrations/` is the immutable ordered PostgreSQL/Supabase migration history.
+- `test/` contains Vitest/JSDOM and JUnit regression tests.
+- `worker/` contains the Cloudflare Worker used for the public site and `/api` proxy.
+- `scripts/` contains maintained build, validation, database, asset, and operational helpers.
 
-The browser uses same-origin `/api` routes by default. During development, the small Node static server proxies those routes to `http://localhost:8080`. The Java server validates every protected bearer token with Supabase Auth and derives the acting profile server-side.
+The browser uses same-origin `/api` routes. Locally, the Node static server proxies those routes to the Java API. Production uses Cloudflare in front of Cloud Run.
 
-## Requirements
+## Local development
 
-- Node.js 22
-- JDK 21
-- Maven 3.9+
-- A Supabase project
-
-## Local setup
-
-1. Copy `.env.example` to `.env` and replace only the placeholder values.
-2. Apply the database migrations in the documented order.
-3. Install and start both processes:
+Requirements: Node.js, JDK 21, Maven 3.9+, and access to the configured Supabase project.
 
 ```text
 npm ci
@@ -32,57 +24,51 @@ mvn compile exec:java
 npm run dev
 ```
 
-Open `http://localhost:5173`. Set `DEV_API_TARGET` only when the Java API runs elsewhere. Never expose the Supabase service-role key through a frontend variable or static file.
+Open `http://localhost:5173`. Copy `.env.example` to `.env` for local configuration. Real credentials belong only in ignored local files or the hosting platform; never commit them.
 
-## Environment variables
+## Validation
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `_BASE_URL_SUPABASE` or `SUPABASE_URL` | yes | Supabase project URL |
-| `_API_KEY_SUPABASE` | yes | Supabase publishable/anon key used for server-side token validation |
-| `_API_KEY_SECR_SUPABASE` or `SUPABASE_SERVICE_ROLE_KEY` | yes | Server-only service-role key |
-| `CLASH_API_RATE_LIMIT_COOLDOWN_SECONDS` | no | Fallback cooldown for a key after HTTP 429 when no valid `Retry-After` is supplied; defaults to 60 seconds. |
-| `CLASH_API_MAX_COOLDOWN_SECONDS` | no | Upper bound for a server-requested key cooldown; defaults to 300 seconds. |
-| `_BASE_URL_CLASH` | no | Clash API base URL |
-| `CLASHKING_BASE_URL` | no | ClashKing V2 API base URL; defaults to `https://api.clashk.ing` |
-| `CLASHKING_RANKED_SEASON` | ranked history | Unix timestamp identifying the ranked season queried through ClashKing V2 |
-| `CLASHKING_FALLBACK_TO_OFFICIAL` | no | Use the official rolling battle log when a ClashKing V2 Advanced Stats scope is unavailable |
-| `CLASHKING_COUNTER_INTERVAL_SECONDS` | no | Console report interval for real outbound ClashKing requests; defaults to `60` seconds |
-| `SERVER_PORT` or `PORT` | no | Backend port; defaults to `8080` |
-| `PUBLIC_SITE_URL` | production | Absolute public origin used to generate `robots.txt` and `sitemap.xml` during the frontend build |
-| `ALLOWED_ORIGINS` | production | Comma-separated browser-origin allowlist |
-| `AUTH_GOOGLE_CALLBACK_URL` | production | Exact same-origin callback URL, for example `https://example.com/api/AuthGoogleCallback` |
-| `AUTH_COOKIE_SECURE` | production | Set to `true` when the public application uses HTTPS |
-| `AUTH_COOKIE_SAME_SITE` | no | Session-cookie SameSite mode; defaults to `Lax` |
-| `CACHE_ENABLED`, `CACHE_MODE` | no | Layered public Clash response cache configuration |
-| `MAX_REQUEST_BODY_BYTES` | no | Request body limit |
-| `PUBLIC_RATE_LIMIT_PER_MINUTE` | no | Public Clash route limit per IP and route |
-| `TRUST_PROXY_HEADERS` | no | Set to `true` only behind a trusted reverse proxy so rate limits use `X-Forwarded-For` |
-| `API_PROXY_SECRET` | production proxy | Shared server-only secret injected by Cloudflare and verified by Cloud Run; required by `/ready` when proxy headers are trusted |
-| `SENSITIVE_RATE_LIMIT_PER_MINUTE` | no | Token verification and legacy auth route limit |
-| `DATA_RATE_LIMIT_PER_MINUTE` | no | Authenticated data route limit |
+Run the complete frontend/repository gate with:
 
-### Google login
+```text
+npm run check
+```
 
-Google login uses a server-side PKCE flow. Enable Google in Supabase Authentication, enter the Google web Client ID and Client Secret there, and add the Supabase project callback shown by the Google provider page to Google Cloud's authorized redirect URIs. Add this application's `AUTH_GOOGLE_CALLBACK_URL` to the Supabase redirect allow list. For local development that application callback is `http://localhost:5173/api/AuthGoogleCallback`; production must use the HTTPS production domain.
+Run backend tests separately with:
+
+```text
+mvn test
+```
+
+The repository gate validates migration ordering, endpoint registration, filename casing, frontend tests, the static build, public output, and SEO contracts.
 
 ## Database
 
-See [DATABASE_MIGRATIONS.md](DATABASE_MIGRATIONS.md) for the apply order, preflight, backup and rollback notes. The Java cache persists public Clash responses in `api_cache`; private profile, auth and verification data must never be written there.
+Apply every migration in `database/migrations/` once and in filename order. Do not remove old applied migrations during cleanup; they are deployment history, not disposable scripts. See [docs/database.md](docs/database.md).
 
-## Build and test
+Optional Advanced Stats database checks are available through `npm run check:advanced-stats-db` and `npm run smoke:advanced-stats-db`; both require an explicit `SUPABASE_DB_URL`.
 
-```text
-npm ci
-npm run check
-mvn test
-mvn package
+## Deployment
+
+For normal releases, use the two root entrypoints:
+
+```powershell
+.\deploy-dev.ps1
+.\deploy-prod.ps1
 ```
 
-`mvn package` produces a runnable dependency-inclusive JAR in `target/`. Health probes are available at `/health`; `/ready` returns `503` and only the names of missing configuration categories until required configuration is present.
+`deploy-dev.ps1` stages and commits local Development changes when needed, runs the repository checks, pushes `Development` (which triggers the Cloudflare preview deployment), then deploys the zero-traffic Google Cloud preview. `deploy-prod.ps1` only accepts the exact clean commit already pushed to Development, fast-forwards that commit to `master` (triggering Cloudflare production), then deploys the same commit to Cloud Run production. Neither wrapper manually deploys Cloudflare.
 
-## Production notes
+The underlying Google Cloud helpers live in `scripts/deploy/`. `deploy-cloud-run-production.ps1` requires a clean commit already present on `origin/master`; `deploy-cloud-run-preview.ps1` requires the corresponding `origin/Development` commit and binds the stable preview OAuth callbacks while keeping 0% normal production traffic.
 
-Build the frontend with `PUBLIC_SITE_URL=https://your-domain.example npm run build`, serve `dist/` over HTTPS and reverse-proxy `/api` to the Java service. Run the packaged Java JAR with JDK 21. Configure an exact production origin allowlist, set the same strong `API_PROXY_SECRET` as a Cloudflare Worker secret and a Cloud Run secret, keep the remaining service credentials in the hosting secret store, apply migrations before new application code, configure the host to serve `404.html` for missing pages, and monitor `429`, `401`, `403`, upstream Clash errors and cache health.
+Cloudflare is intentionally not deployed by repository PowerShell helpers. Git pushes trigger the configured Cloudflare builds automatically: `Development` for preview and `master` for production. Production Cloud Run uses the dedicated `clashpanel-api-runtime` service account, request-based CPU billing, and only the three approved Secret Manager resources.
 
-Clash of Clans API credentials are server-only and maintained by the Java backend; never expose them through frontend code or deployment configuration. Before release, complete [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md). The CI workflow builds both sides, runs tests, validates migration ordering and performs a history-aware secret scan.
+## Maintained documentation
+
+- [docs/database.md](docs/database.md) — migration policy and database verification.
+- [docs/advanced-stats.md](docs/advanced-stats.md) — current Advanced Stats API and operational state.
+- [docs/analytics.md](docs/analytics.md) — PostHog event contract and reporting guidance.
+- [docs/minigames-data-maintenance.md](docs/minigames-data-maintenance.md) — curated minigame-data maintenance rules.
+- [docs/assets.md](docs/assets.md) — asset provenance and fan-content constraints.
+
+Historical redesign reports, one-off audits, completed checklists, rollout phase notes, and superseded database smoke scripts are intentionally not kept in the active repository. Git history remains the recovery source for that material.

@@ -81,7 +81,6 @@ const report = {
 };
 
 await writeJson(resolve(ROOT, 'scenery-manifest.json'), manifest);
-await writeJson(resolve(ROOT, 'acquisition-report.json'), report);
 if (failures.length) process.exitCode = 1;
 console.log(JSON.stringify(report, null, 2));
 
