@@ -5,6 +5,17 @@ import {
     WORKSPACE_MODULES,
     WORKSPACE_SECTIONS
 } from '../shell/module-registry.js?v=20260829-public-dashboard-v1';
+import {
+    getPreviewProgressAccess,
+    isPreviewProgressUnlocked,
+    onPreviewProgressAccessChange,
+    resolvePreviewProgressAccess
+} from '../shell/preview-progress-access.js?v=20260916-preview-progress-v1';
+
+let previewProgressEnabled = getPreviewProgressAccess().enabled === true;
+let latestAuthState = { status: 'loading', session: null };
+let previewProgressIdentity = null;
+let activeContainer = null;
 
 const visibleModules = WORKSPACE_MODULES.filter(module => (
     module.available && !['dashboard', 'explore'].includes(module.id)
@@ -41,8 +52,8 @@ function authPresentationStatus(state) {
     return 'loading';
 }
 
-function actionMarkup(module, authState) {
-    if (module.comingSoon) {
+function actionMarkup(module, authState, comingSoon) {
+    if (comingSoon) {
         return '<strong class="explore-card-status" data-i18n="common.comingSoon">Coming soon</strong>';
     }
     const authStatus = authPresentationStatus(authState);
@@ -66,23 +77,25 @@ function cardMarkup(module, authState) {
     const descriptionKey = `explore.${module.id}.description`;
     const section = WORKSPACE_SECTIONS.find(candidate => candidate.id === module.section);
     const authStatus = authPresentationStatus(authState);
+    const comingSoon = module.comingSoon
+        && !isPreviewProgressUnlocked(module, previewProgressEnabled);
     const unresolved = module.access === ACCESS.AUTH
         && ['loading', 'unavailable'].includes(authStatus);
-    const tag = module.comingSoon || unresolved ? 'div' : 'a';
+    const tag = comingSoon || unresolved ? 'div' : 'a';
     const requiresLogin = module.access === ACCESS.AUTH && authStatus === 'guest';
-    const state = module.comingSoon
+    const state = comingSoon
         ? 'aria-disabled="true"'
         : unresolved ? 'aria-disabled="true"'
             : `href="${requiresLogin ? loginHref(module) : module.href}"`;
-    const title = module.comingSoon
+    const title = comingSoon
         ? `<h2><span data-i18n="${module.key}">${module.fallback}</span> <span class="workspace-coming-soon-badge" data-i18n="common.comingSoon">(Coming soon)</span></h2>`
         : `<h2 data-i18n="${module.key}">${module.fallback}</h2>`;
-    const action = actionMarkup(module, authState);
-    const moduleState = module.comingSoon
+    const action = actionMarkup(module, authState, comingSoon);
+    const moduleState = comingSoon
         ? 'coming-soon'
         : unresolved ? `auth-${authStatus}`
             : requiresLogin ? 'auth-required' : 'available';
-    return `<${tag} class="cp-module-card explore-card explore-card--${module.id}${module.comingSoon ? ' explore-card--coming-soon' : ''}" data-module-id="${module.id}" data-module-access="${module.access}" data-module-state="${moduleState}" data-pillar="${module.section}" data-explore-card="${module.section}" ${state}>
+    return `<${tag} class="cp-module-card explore-card explore-card--${module.id}${comingSoon ? ' explore-card--coming-soon' : ''}" data-module-id="${module.id}" data-module-access="${module.access}" data-module-state="${moduleState}" data-pillar="${module.section}" data-explore-card="${module.section}" ${state}>
         <span class="explore-card-heading">${module.icon}<span class="page-kicker" data-i18n="${section.key}">${section.fallback}</span></span>
         ${title}
         <p data-i18n="${descriptionKey}">${t(descriptionKey)}</p>
@@ -118,12 +131,19 @@ async function init() {
     initI18n();
     const container = document.querySelector('.explore-grid');
     if (!container) return;
+    activeContainer = container;
     const initialState = { status: authExport('AUTH_STATES')?.LOADING || 'loading' };
     let renderedIdentity = '';
     const presentAuthState = state => {
         const identity = `${state?.status || 'loading'}:${state?.session?.user?.id || ''}`;
         if (identity === renderedIdentity) return;
         renderedIdentity = identity;
+        latestAuthState = state || initialState;
+        const userId = String(latestAuthState?.session?.user?.id || '').trim();
+        if (userId !== previewProgressIdentity) {
+            previewProgressIdentity = userId;
+            void resolvePreviewProgressAccess({ authState: latestAuthState });
+        }
         renderCards(container, state || initialState);
         initI18n(container);
     };
@@ -144,3 +164,10 @@ async function init() {
 
 const initialPageLoad = Promise.resolve().then(init);
 window.clashtoolsRegisterInitialLoad?.(initialPageLoad);
+
+onPreviewProgressAccessChange(state => {
+    previewProgressEnabled = state?.enabled === true;
+    if (!activeContainer) return;
+    renderCards(activeContainer, latestAuthState);
+    initI18n(activeContainer);
+});

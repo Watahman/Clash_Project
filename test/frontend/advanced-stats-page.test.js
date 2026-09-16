@@ -64,7 +64,9 @@ describe('Advanced Stats workspace page', () => {
         const source = readFileSync('src/subpages/advanced-stats.html', 'utf8');
         const document = documentFor('src/subpages/advanced-stats.html');
 
-        expect(source).toContain("window.location.replace('/dashboard')");
+        expect(source).toContain('preview-progress-guard.js');
+        expect(readFileSync('src/assets/js/shell/preview-progress-guard.js', 'utf8'))
+            .toContain('enforcePreviewProgressAccess');
         expect(document.title).toContain('Coming soon');
         expect(document.querySelector('.workspace-coming-soon-badge')).not.toBeNull();
     });
@@ -135,7 +137,7 @@ describe('Advanced Stats workspace page', () => {
         expect(html).toContain(`advanced-stats.css?v=${ADVANCED_STATS_CSS_CACHE_VERSION}`);
         expect(html).toContain(`advanced-stats-dashboard.css?v=${ADVANCED_STATS_CSS_CACHE_VERSION}`);
         expect(html).toContain(`advanced-stats-lifetime.css?v=${ADVANCED_STATS_CSS_CACHE_VERSION}`);
-        expect(html).toContain('workspace-shell.js?v=20260915-auth-policy-v1');
+        expect(html).toContain('workspace-shell.js?v=20260916-preview-progress-v1');
         expect(bootstrap).toContain(`advanced-stats.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(page).toContain(`advanced-stats-renderer.js?v=${ADVANCED_STATS_CACHE_VERSION}`);
         expect(page).toContain(`advanced-stats-data-loader.js?v=${ADVANCED_STATS_CACHE_VERSION}`);

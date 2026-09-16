@@ -10,7 +10,7 @@ import {
     renderDashboard,
     renderUser,
     setStatus
-} from './dashboard-view.js?v=20260915-auth-policy-v1';
+} from './dashboard-view.js?v=20260916-preview-progress-v1';
 
 const refs = {};
 const state = {

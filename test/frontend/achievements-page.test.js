@@ -39,7 +39,9 @@ describe('Achievements workspace page', () => {
         const source = readFileSync('src/subpages/achievements.html', 'utf8');
         const document = documentFor('src/subpages/achievements.html');
 
-        expect(source).toContain("window.location.replace('/dashboard')");
+        expect(source).toContain('preview-progress-guard.js');
+        expect(readFileSync('src/assets/js/shell/preview-progress-guard.js', 'utf8'))
+            .toContain('enforcePreviewProgressAccess');
         expect(document.title).toContain('Coming soon');
         expect(document.querySelector('.workspace-coming-soon-badge')).not.toBeNull();
     });

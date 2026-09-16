@@ -217,7 +217,7 @@ describe('workspace access registry and guest shell markup', () => {
         ];
         for (const page of pages) {
             const html = await readFile(resolve(process.cwd(), `src/subpages/${page}.html`), 'utf8');
-            expect(html, page).toContain('workspace-shell.js?v=20260915-auth-policy-v1');
+            expect(html, page).toContain('workspace-shell.js?v=20260916-preview-progress-v1');
         }
     });
 

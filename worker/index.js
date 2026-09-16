@@ -5,6 +5,14 @@ import {
     publicRouteRedirect
 } from './public-routes.js';
 import { adsContextResponse, isAdsContextPath } from './ads-context.js';
+import {
+    isPreviewProgressAccessPath,
+    isPreviewProgressConfigured,
+    previewProgressAccess,
+    previewProgressAccessResponse,
+    previewProgressCanonicalPath,
+    previewProgressRouteResponse
+} from './preview-progress.js';
 
 const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 const PERMANENT_REDIRECT_STATUS = 301;
@@ -282,7 +290,19 @@ export default {
             if (isAdsContextPath(incomingUrl.pathname)) {
                 return adsContextResponse(request);
             }
+            if (isPreviewProgressAccessPath(incomingUrl.pathname)) {
+                const access = await previewProgressAccess(request, env, incomingUrl, createBackendHeaders);
+                return previewProgressAccessResponse(request, access);
+            }
             return proxyApiRequest(request, env, incomingUrl);
+        }
+        const previewPath = previewProgressCanonicalPath(incomingUrl.pathname);
+        if (previewPath && isPreviewProgressConfigured(env)) {
+            const access = await previewProgressAccess(request, env, incomingUrl, createBackendHeaders);
+            const asset = access.enabled && normalizedPath(incomingUrl.pathname) === previewPath
+                ? await serveAppAsset(request, env, incomingUrl)
+                : null;
+            return previewProgressRouteResponse(request, incomingUrl, previewPath, access, asset);
         }
         if (redirect) return permanentRedirect(incomingUrl, redirect);
 

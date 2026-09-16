@@ -21,6 +21,12 @@ import {
     subscribeWorkspaceUserIdentity
 } from './workspace-user.js?v=20260829-public-auth-v1';
 import { ACCESS, getWorkspaceModule } from './module-registry.js?v=20260829-public-dashboard-v1';
+import {
+    isPreviewProgressModule,
+    onPreviewProgressAccessChange,
+    resolvePreviewProgressAccess
+} from './preview-progress-access.js?v=20260916-preview-progress-v1';
+import { applyPreviewNavigation, removePreviewComingSoonBadge } from './workspace-preview-progress.js?v=20260916-preview-progress-v1';
 
 const GUIDANCE_STYLESHEET = '../assets/css/workspace-guidance.css?v=20260812-redesign';
 let workspaceAuthGeneration = 0;
@@ -149,12 +155,36 @@ function applyResolvedAuthState(body, currentPage, state) {
 
 function handleAuthTransition(body, currentPage, state) {
     if (body.dataset.authInitialReady !== 'true') return;
+    const module = getWorkspaceModule(currentPage);
+    if (isPreviewProgressModule(module)) {
+        void applyPreviewProgressAccess(body, currentPage, state).then(allowed => {
+            if (allowed) applyResolvedAuthState(body, currentPage, state);
+        });
+        return;
+    }
     applyResolvedAuthState(body, currentPage, state);
+    void applyPreviewProgressAccess(body, currentPage, state);
 }
 
 function subscribeWorkspaceAuth(body, currentPage) {
     if (isFixtureRequested()) return;
     onAuthStateChange((_session, state) => handleAuthTransition(body, currentPage, state));
+}
+
+async function applyPreviewProgressAccess(body, currentPage, authState) {
+    if (isFixtureRequested()) {
+        applyPreviewNavigation({ enabled: true });
+        removePreviewComingSoonBadge();
+        return true;
+    }
+    const module = getWorkspaceModule(currentPage);
+    const state = await resolvePreviewProgressAccess({ authState });
+    applyPreviewNavigation(state);
+    if (isPreviewProgressModule(module) && !state.enabled) {
+        window.location.replace('/dashboard');
+        return false;
+    }
+    return true;
 }
 
 async function loadInitialWorkspaceData(body, currentPage, force = false) {
@@ -176,11 +206,20 @@ async function loadInitialWorkspaceData(body, currentPage, force = false) {
         error
     }));
     if (access === ACCESS.PUBLIC) {
-        void authRequest.then(state => applyResolvedAuthState(body, currentPage, state));
+        void authRequest.then(state => {
+            applyResolvedAuthState(body, currentPage, state);
+            void applyPreviewProgressAccess(body, currentPage, state);
+        });
         return;
     }
     const state = await authRequest;
-    applyResolvedAuthState(body, currentPage, state);
+    if (!isPreviewProgressModule(getWorkspaceModule(currentPage))) {
+        applyResolvedAuthState(body, currentPage, state);
+        void applyPreviewProgressAccess(body, currentPage, state);
+        return;
+    }
+    const allowed = await applyPreviewProgressAccess(body, currentPage, state);
+    if (allowed) applyResolvedAuthState(body, currentPage, state);
 }
 
 function ensureGuidanceStyles() {
@@ -221,6 +260,9 @@ function initMountedShell(body, sidebar, backdrop, currentPage) {
     initNotificationsPopover();
     subscribeWorkspaceUserIdentity();
     subscribeWorkspaceAuth(body, currentPage);
+    onPreviewProgressAccessChange(state => {
+        applyPreviewNavigation(state);
+    });
     window.addEventListener('clashtools:language-changed', updateThemeButton);
     window.addEventListener('clashtools:theme-changed', updateThemeButton);
 }

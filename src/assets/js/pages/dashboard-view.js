@@ -1,7 +1,17 @@
 import { getLanguage, t } from '../i18n/i18n.js?v=20260831-master-live-v1';
 import * as authClient from '../auth/auth-client.js?v=20260915-auth-policy-v1';
 import { ACCESS, WORKSPACE_MODULES } from '../shell/module-registry.js?v=20260829-public-dashboard-v1';
+import {
+    getPreviewProgressAccess,
+    isPreviewProgressUnlocked,
+    onPreviewProgressAccessChange,
+    resolvePreviewProgressAccess
+} from '../shell/preview-progress-access.js?v=20260916-preview-progress-v1';
 import { renderGroups, renderPlans } from './dashboard-tables.js?v=20260915-auth-policy-v1';
+
+let previewProgressEnabled = getPreviewProgressAccess().enabled === true;
+let latestDashboardAuthState = { status: 'loading', session: null };
+let previewProgressIdentity = null;
 
 export function formatUpdatedAt(value) {
     if (!value) return t('plans.unknownDate');
@@ -71,9 +81,39 @@ function moduleActionKey(module, element, action) {
     return 'explore.open';
 }
 
+function ensureComingSoonBadge(element) {
+    const heading = element.querySelector('h2, h3');
+    if (!heading || heading.querySelector('.workspace-coming-soon-badge')) return;
+    const badge = document.createElement('span');
+    badge.className = 'workspace-coming-soon-badge';
+    badge.dataset.i18n = 'common.comingSoon';
+    badge.textContent = `(Coming soon)`;
+    heading.append(' ', badge);
+}
+
+function replaceModuleElement(element, tagName) {
+    if (element.tagName.toLowerCase() === tagName) return element;
+    const replacement = document.createElement(tagName);
+    Array.from(element.attributes).forEach(attribute => {
+        if (!['href', 'aria-disabled', 'tabindex'].includes(attribute.name)) {
+            replacement.setAttribute(attribute.name, attribute.value);
+        }
+    });
+    replacement.innerHTML = element.innerHTML;
+    element.replaceWith(replacement);
+    return replacement;
+}
+
 function setModuleAction(element, authState) {
     const module = moduleForId(element.dataset.moduleId);
     if (!module) return;
+    const comingSoon = module.comingSoon
+        && !isPreviewProgressUnlocked(module, previewProgressEnabled);
+    if (module.comingSoon && !comingSoon) {
+        element = replaceModuleElement(element, 'a');
+    } else if (module.comingSoon && comingSoon) {
+        element = replaceModuleElement(element, 'div');
+    }
     const action = element.matches('[data-module-action]')
         ? element
         : element.querySelector('[data-module-action]');
@@ -83,15 +123,24 @@ function setModuleAction(element, authState) {
     const protectedModule = module.access === ACCESS.AUTH;
     const locked = protectedModule && authStatus === 'guest';
     const unresolved = protectedModule && ['loading', 'unavailable'].includes(authStatus);
-    const stateName = module.comingSoon ? 'coming-soon'
+    const stateName = comingSoon ? 'coming-soon'
         : unresolved ? `auth-${authStatus}`
             : locked ? 'auth-required' : 'available';
     element.dataset.moduleAccess = module.access;
     element.dataset.moduleState = stateName;
-    if (module.comingSoon) {
+    if (comingSoon) {
+        element.classList.add('cp-module-card--coming-soon');
+        element.setAttribute('aria-disabled', 'true');
+        ensureComingSoonBadge(element);
         if (element.matches('a')) element.removeAttribute('href');
         action.textContent = t('common.comingSoon');
         return;
+    }
+    if (module.comingSoon) {
+        element.classList.remove('cp-module-card--coming-soon');
+        element.removeAttribute('aria-disabled');
+        element.querySelector('.workspace-coming-soon-badge')?.remove();
+        element.href = module.href;
     }
     if (unresolved) {
         if (element.matches('a')) element.removeAttribute('href');
@@ -111,6 +160,22 @@ function setModuleAction(element, authState) {
 function applyModuleStates(authState) {
     document.querySelectorAll('[data-module-id]').forEach(element => setModuleAction(element, authState));
 }
+
+function previewIdentity(authState) {
+    return String(authState?.session?.user?.id || '').trim();
+}
+
+function refreshPreviewProgressAccess(authState) {
+    const identity = previewIdentity(authState);
+    if (identity === previewProgressIdentity) return;
+    previewProgressIdentity = identity;
+    void resolvePreviewProgressAccess({ authState });
+}
+
+onPreviewProgressAccessChange(state => {
+    previewProgressEnabled = state?.enabled === true;
+    applyModuleStates(latestDashboardAuthState);
+});
 
 export function renderUser(refs, state) {
     const privateData = hasPrivateDashboardData(state);
@@ -152,6 +217,8 @@ function renderDashboardPriority(refs, state, selectPlan) {
 
 export function renderDashboard(refs, state, selectPlan) {
     const presentationState = stateForPresentation(state);
+    latestDashboardAuthState = presentationState.authState || { status: 'loading', session: null };
+    refreshPreviewProgressAccess(latestDashboardAuthState);
     renderUser(refs, presentationState);
     const tools = { formatUpdatedAt, loginHref, moduleForId, selectPlan, setStatus };
     renderPlans(refs, presentationState, tools);
