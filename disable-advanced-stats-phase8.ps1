@@ -10,6 +10,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$RuntimeServiceAccount = "clashpanel-api-runtime@$ProjectId.iam.gserviceaccount.com"
+
 Write-Host "Applying Advanced Stats Phase 8 kill switch..." -ForegroundColor Yellow
 
 & gcloud scheduler jobs pause $SchedulerJobName --project $ProjectId --location $Region
@@ -20,6 +22,7 @@ if ($LASTEXITCODE -ne 0) {
 & gcloud run services update $ServiceName `
     --project $ProjectId `
     --region $Region `
+    --service-account $RuntimeServiceAccount `
     --update-env-vars="ADVANCED_STATS_COLLECTION_ENABLED=false,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false" `
     --no-traffic `
     --tag $TagName

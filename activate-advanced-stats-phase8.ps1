@@ -10,6 +10,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$RuntimeServiceAccount = "clashpanel-api-runtime@$ProjectId.iam.gserviceaccount.com"
+
 function Run-Gcloud {
     param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Args)
     & gcloud @Args
@@ -95,6 +97,7 @@ Write-Host "Enabling Advanced Stats collection on the zero-traffic Phase 8 revis
 Run-Gcloud run services update $ServiceName `
     --project $ProjectId `
     --region $Region `
+    --service-account $RuntimeServiceAccount `
     --update-env-vars="ADVANCED_STATS_COLLECTION_ENABLED=true,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false" `
     --no-traffic `
     --tag $TagName

@@ -9,6 +9,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$RuntimeServiceAccount = "clashpanel-api-runtime@$ProjectId.iam.gserviceaccount.com"
+
 
 function Assert-PreviewGitState {
     $status = @(git status --porcelain)
@@ -28,6 +30,9 @@ function Assert-PreviewRuntimeParity {
     param([Parameter(Mandatory = $true)][string]$RevisionName)
     $revision = (& gcloud run revisions describe $RevisionName --project $ProjectId --region $Region --format=json) | ConvertFrom-Json
     if ($LASTEXITCODE -ne 0 -or -not $revision) { throw "Could not inspect preview revision '$RevisionName'." }
+    if ([string]$revision.spec.serviceAccountName -ne $RuntimeServiceAccount) {
+        throw "Preview parity check failed: unexpected runtime service account."
+    }
     if ([string]$revision.metadata.annotations.'run.googleapis.com/cpu-throttling' -ne 'true') {
         throw "Preview parity check failed: CPU throttling is not enabled."
     }
@@ -169,6 +174,7 @@ Run-Gcloud run deploy $ServiceName `
     --region $Region `
     --memory 512Mi `
     --cpu 1 `
+    --service-account $RuntimeServiceAccount `
     --min-instances 0 `
     --max-instances 1 `
     --concurrency 40 `

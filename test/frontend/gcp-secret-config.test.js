@@ -49,6 +49,8 @@ describe('Cloud Run deployment safety contracts', () => {
         expect(code).toMatch(/run services update-traffic[\s\S]*--to-latest/i);
         expect(code).toMatch(/Assert-LiveCloudRunDeployment/);
         expect(code).toMatch(/cpu-throttling/);
+        expect(code).toMatch(/clashpanel-api-runtime@\$ProjectId\.iam\.gserviceaccount\.com/);
+        expect(code).toMatch(/--service-account \$RuntimeServiceAccount/);
         expect(code).toMatch(/\/health/);
         expect(code).toMatch(/\/ready/);
     });
@@ -62,6 +64,7 @@ describe('Cloud Run deployment safety contracts', () => {
         expect(code).toMatch(/ADVANCED_STATS_COLLECTION_ENABLED=false/i);
         expect(code).toMatch(/ADVANCED_STATS_SCHEDULER_SECRET=ADVANCED_STATS_SCHEDULER_SECRET:latest/i);
         expect(code).toMatch(/--cpu-throttling/i);
+        expect(code).toMatch(/--service-account \$RuntimeServiceAccount/i);
     });
 });
 

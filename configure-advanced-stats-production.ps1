@@ -11,6 +11,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$RuntimeServiceAccount = "clashpanel-api-runtime@$ProjectId.iam.gserviceaccount.com"
+
 function Format-SafeGcloudArgs {
     param([string[]]$Args)
     return ($Args | ForEach-Object {
@@ -190,6 +192,7 @@ Write-Host "Enabling the production collector and attaching the scheduler secret
 Run-Gcloud run services update $ServiceName `
     --project $ProjectId `
     --region $Region `
+    --service-account $RuntimeServiceAccount `
     --update-env-vars="ADVANCED_STATS_COLLECTION_ENABLED=true" `
     --update-secrets="ADVANCED_STATS_SCHEDULER_SECRET=${SecretName}:${schedulerVersion}"
 

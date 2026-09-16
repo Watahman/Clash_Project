@@ -9,6 +9,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$RuntimeServiceAccount = "clashpanel-api-runtime@$ProjectId.iam.gserviceaccount.com"
+
 
 function Assert-ProductionGitState {
     $status = @(git status --porcelain)
@@ -47,6 +49,9 @@ function Assert-LiveCloudRunDeployment {
 
     $revision = (& gcloud run revisions describe $latest --project $ProjectId --region $Region --format=json) | ConvertFrom-Json
     if ($LASTEXITCODE -ne 0 -or -not $revision) { throw "Post-deploy controle kon revision '$latest' niet lezen." }
+    if ([string]$revision.spec.serviceAccountName -ne $RuntimeServiceAccount) {
+        throw "Post-deploy controle: onverwachte runtime service account op '$latest'."
+    }
     if ([string]$revision.metadata.annotations.'run.googleapis.com/cpu-throttling' -ne 'true') {
         throw "Post-deploy controle: CPU throttling staat niet aan op '$latest'."
     }
@@ -167,6 +172,7 @@ gcloud run deploy $ServiceName `
     --allow-unauthenticated `
     --memory 512Mi `
     --cpu 1 `
+    --service-account $RuntimeServiceAccount `
     --min-instances 0 `
     --max-instances 1 `
     --concurrency 40 `

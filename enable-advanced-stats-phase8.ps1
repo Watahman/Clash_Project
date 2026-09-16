@@ -11,6 +11,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$RuntimeServiceAccount = "clashpanel-api-runtime@$ProjectId.iam.gserviceaccount.com"
+
 if ($SecretName -ne "ADVANCED_STATS_SCHEDULER_SECRET") {
     throw "Phase 8 must reuse ADVANCED_STATS_SCHEDULER_SECRET; separate preview secrets are not supported."
 }
@@ -114,6 +116,7 @@ Write-Host "Enabling collection only on the zero-traffic Phase 8 candidate..." -
 Run-Gcloud run services update $ServiceName `
     --project $ProjectId `
     --region $Region `
+    --service-account $RuntimeServiceAccount `
     --update-env-vars="ADVANCED_STATS_COLLECTION_ENABLED=true,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false" `
     --no-traffic `
     --tag $TagName
@@ -148,7 +151,7 @@ try {
 } catch {
     Write-Warning "Phase 8 enablement failed. Applying kill switch on the tagged candidate."
     & gcloud scheduler jobs pause $SchedulerJobName --project $ProjectId --location $Region | Out-Null
-    & gcloud run services update $ServiceName --project $ProjectId --region $Region --update-env-vars="ADVANCED_STATS_COLLECTION_ENABLED=false,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false" --no-traffic --tag $TagName | Out-Null
+    & gcloud run services update $ServiceName --project $ProjectId --region $Region --service-account $RuntimeServiceAccount --update-env-vars="ADVANCED_STATS_COLLECTION_ENABLED=false,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false" --no-traffic --tag $TagName | Out-Null
     throw
 } finally {
     $schedulerSecret = $null

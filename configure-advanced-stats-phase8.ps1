@@ -14,6 +14,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$RuntimeServiceAccount = "clashpanel-api-runtime@$ProjectId.iam.gserviceaccount.com"
+
 if ($SecretName -ne "ADVANCED_STATS_SCHEDULER_SECRET") {
     throw "Phase 8 must reuse ADVANCED_STATS_SCHEDULER_SECRET; separate preview secrets are not supported."
 }
@@ -120,6 +122,7 @@ if ($LASTEXITCODE -ne 0 -or -not $schedulerSecret) {
 Run-Gcloud run services update $ServiceName `
     --project $ProjectId `
     --region $Region `
+    --service-account $RuntimeServiceAccount `
     --update-env-vars="ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false,ADVANCED_STATS_COLLECTION_ENABLED=false,ADVANCED_STATS_ROLLOUT_USER_IDS=$DeveloperUserId" `
     --no-traffic `
     --tag $TagName
