@@ -94,7 +94,7 @@ Production `clashpanel.com` and the currently serving Cloud Run revision remain 
 1. Checkout/pull the current feature branch locally.
 2. Prepare `cloudrun-env.yaml` from the safe example with the existing production non-secret values and both Advanced Stats switches false.
 3. Run `deploy-cloud-run-phase8.ps1` and verify 0% normal traffic + health/ready + disabled poll.
-4. Run `configure-advanced-stats-phase8.ps1` with exactly one developer user UUID.
+4. Only when explicitly testing collection, run `configure-advanced-stats-phase8.ps1` with exactly one developer user UUID; it reuses the production Scheduler secret and creates a paused preview Scheduler job.
 5. Run `deploy-phase8-preview.ps1`.
 6. Sign into the isolated preview and start Advanced Stats for the allowlisted linked developer account.
 7. Run `enable-advanced-stats-phase8.ps1`.

@@ -128,7 +128,7 @@ disable-advanced-stats-phase8.ps1
 Purpose:
 
 - `deploy-cloud-run-phase8.ps1` — deploy candidate with `--no-traffic --tag phase8`, verify `/health`, `/ready` and disabled internal poll;
-- `configure-advanced-stats-phase8.ps1` — generate/store scheduler secret, configure exactly one developer UUID, create/update the scheduler target against the tag URL, keep scheduler paused and collection off;
+- `configure-advanced-stats-phase8.ps1` — reuse the shared production `ADVANCED_STATS_SCHEDULER_SECRET`, configure exactly one developer UUID, create/update the preview scheduler target against the tag URL, keep scheduler paused and collection off;
 - `deploy-phase8-preview.ps1` — build and deploy isolated `workers.dev` frontend against the tagged candidate, reusing the existing proxy secret without committing it;
 - `enable-advanced-stats-phase8.ps1` — enable collection only on a new zero-traffic tagged candidate, verify no-secret/wrong-secret rejection and one authorized collector request, then resume Scheduler;
 - `disable-advanced-stats-phase8.ps1` — emergency kill switch: pause Scheduler and disable collection/public enrollment on the tagged candidate without deleting history or moving production traffic.

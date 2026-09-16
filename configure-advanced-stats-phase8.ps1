@@ -9,11 +9,14 @@ param(
     [string]$ServiceName = "clashpanel-api",
     [string]$TagName = "phase8",
     [string]$SchedulerJobName = "clashpanel-advanced-stats-poll-phase8",
-    [string]$SecretName = "clashpanel-advanced-stats-scheduler-secret-phase8",
-    [switch]$RotateSchedulerSecret
+    [string]$SecretName = "ADVANCED_STATS_SCHEDULER_SECRET"
 )
 
 $ErrorActionPreference = "Stop"
+
+if ($SecretName -ne "ADVANCED_STATS_SCHEDULER_SECRET") {
+    throw "Phase 8 must reuse ADVANCED_STATS_SCHEDULER_SECRET; separate preview secrets are not supported."
+}
 
 function Format-SafeGcloudArgs {
     param([string[]]$Args)
@@ -80,65 +83,6 @@ function Secret-Exists {
     return $LASTEXITCODE -eq 0
 }
 
-function Add-GeneratedSchedulerSecretVersion {
-    $bytes = New-Object byte[] 48
-    $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
-    try {
-        $rng.GetBytes($bytes)
-    } finally {
-        $rng.Dispose()
-    }
-
-    $schedulerSecret = [Convert]::ToBase64String($bytes)
-    $tempSecretFile = [System.IO.Path]::GetTempFileName()
-    try {
-        [System.IO.File]::WriteAllText($tempSecretFile, $schedulerSecret, (New-Object System.Text.UTF8Encoding($false)))
-        Run-Gcloud secrets versions add $SecretName --project $ProjectId --data-file=$tempSecretFile
-    } finally {
-        Remove-Item $tempSecretFile -Force -ErrorAction SilentlyContinue
-        $schedulerSecret = $null
-        $bytes = $null
-    }
-}
-
-function Get-LatestEnabledSecretVersion {
-    $rows = @(& gcloud secrets versions list $SecretName `
-        --project $ProjectId `
-        --filter="state=ENABLED" `
-        --sort-by="~createTime" `
-        --limit=1 `
-        --format="value(name)" 2>&1)
-    if ($LASTEXITCODE -ne 0) {
-        throw "Could not list versions for scheduler secret '$SecretName'."
-    }
-
-    foreach ($row in $rows) {
-        $value = ([string]$row).Trim()
-        if ($value -match '/versions/([0-9]+)$') {
-            return $Matches[1]
-        }
-        if ($value -match '^([0-9]+)$') {
-            return $Matches[1]
-        }
-    }
-    return $null
-}
-
-function Get-SecretVersionValue {
-    param([Parameter(Mandatory = $true)][string]$Version)
-    $valueLines = @(& gcloud secrets versions access $Version `
-        --secret=$SecretName `
-        --project=$ProjectId 2>$null)
-    if ($LASTEXITCODE -ne 0) {
-        throw "Could not access scheduler secret '$SecretName' version '$Version'."
-    }
-    $value = ($valueLines | ForEach-Object { [string]$_ }) -join "`n"
-    if ([string]::IsNullOrWhiteSpace($value)) {
-        throw "Scheduler secret '$SecretName' version '$Version' is empty."
-    }
-    return $value.Trim()
-}
-
 function Get-SchedulerJobState {
     $rows = @(& gcloud scheduler jobs list --project $ProjectId --location $Region --format="csv[no-heading](name,state)")
     if ($LASTEXITCODE -ne 0) {
@@ -163,37 +107,13 @@ Run-Gcloud services enable run.googleapis.com secretmanager.googleapis.com cloud
 
 $candidateUrl = Get-TaggedCandidateUrl
 
-$serviceAccount = (& gcloud run services describe $ServiceName --project $ProjectId --region $Region --format="value(spec.template.spec.serviceAccountName)").Trim()
-if ($LASTEXITCODE -ne 0) {
-    throw "Could not resolve the Cloud Run service account."
+if (-not (Secret-Exists)) {
+    throw "Shared scheduler secret '$SecretName' does not exist. Configure production Advanced Stats first."
 }
-if (-not $serviceAccount) {
-    $projectNumber = (& gcloud projects describe $ProjectId --format="value(projectNumber)").Trim()
-    if ($LASTEXITCODE -ne 0 -or -not $projectNumber) {
-        throw "Could not resolve the project number for the default Cloud Run service account."
-    }
-    $serviceAccount = "$projectNumber-compute@developer.gserviceaccount.com"
+$schedulerSecret = (& gcloud secrets versions access latest --secret=$SecretName --project=$ProjectId).Trim()
+if ($LASTEXITCODE -ne 0 -or -not $schedulerSecret) {
+    throw "Could not access shared scheduler secret '$SecretName'."
 }
-
-$secretExists = Secret-Exists
-if (-not $secretExists) {
-    Run-Gcloud secrets create $SecretName --project $ProjectId --replication-policy="automatic"
-    Add-GeneratedSchedulerSecretVersion
-} elseif ($RotateSchedulerSecret) {
-    Write-Host "Rotating Phase 8 scheduler secret..." -ForegroundColor Cyan
-    Add-GeneratedSchedulerSecretVersion
-}
-
-$schedulerVersion = Get-LatestEnabledSecretVersion
-if (-not $schedulerVersion) {
-    throw "Scheduler secret '$SecretName' has no ENABLED version. Rerun with -RotateSchedulerSecret to add one."
-}
-$schedulerSecret = Get-SecretVersionValue -Version $schedulerVersion
-
-Run-Gcloud secrets add-iam-policy-binding $SecretName `
-    --project $ProjectId `
-    --member="serviceAccount:$serviceAccount" `
-    --role="roles/secretmanager.secretAccessor"
 
 # Create a new tagged candidate revision, still with 0% normal production traffic.
 # Collection intentionally remains disabled until activate-advanced-stats-phase8.ps1 is run.
@@ -201,7 +121,6 @@ Run-Gcloud run services update $ServiceName `
     --project $ProjectId `
     --region $Region `
     --update-env-vars="ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false,ADVANCED_STATS_COLLECTION_ENABLED=false,ADVANCED_STATS_ROLLOUT_USER_IDS=$DeveloperUserId" `
-    --update-secrets="ADVANCED_STATS_SCHEDULER_SECRET=${SecretName}:${schedulerVersion}" `
     --no-traffic `
     --tag $TagName
 
@@ -245,7 +164,7 @@ Write-Host "  Normal production traffic to candidate: 0%"
 Write-Host "  Public enrollment: OFF"
 Write-Host "  Collection: OFF until explicit activation"
 Write-Host "  Rollout allowlist: developer UUID only"
-Write-Host "  Scheduler secret: isolated Phase 8 Secret Manager secret"
+Write-Host "  Scheduler secret: shared production-parity ADVANCED_STATS_SCHEDULER_SECRET"
 Write-Host "  Preview scheduler job: $SchedulerJobName, every minute, PAUSED"
 Write-Host ""
 Write-Host "Next: run activate-advanced-stats-phase8.ps1 to enable collection only on the tagged preview revision." -ForegroundColor Yellow

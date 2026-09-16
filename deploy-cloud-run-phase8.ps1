@@ -4,13 +4,46 @@ param(
 
     [string]$Region = "europe-west1",
     [string]$ServiceName = "clashpanel-api",
-    [string]$TagName = "phase8",
-    [string]$SchedulerJobName = "clashpanel-advanced-stats-poll-phase8",
-    [string]$SecretName = "clashpanel-advanced-stats-scheduler-secret-phase8",
-    [Guid]$DeveloperUserId
+    [string]$TagName = "phase8"
 )
 
 $ErrorActionPreference = "Stop"
+
+
+function Assert-PreviewGitState {
+    $status = @(git status --porcelain)
+    if ($LASTEXITCODE -ne 0) { throw "Git status could not be read." }
+    if ($status.Count -gt 0) { throw "Preview deploy refused: the working tree contains local changes." }
+
+    git fetch origin Development --quiet
+    if ($LASTEXITCODE -ne 0) { throw "Preview deploy refused: origin/Development could not be fetched." }
+    $head = (git rev-parse HEAD).Trim()
+    $developmentHead = (git rev-parse origin/Development).Trim()
+    if ($head -ne $developmentHead) {
+        throw "Preview deploy refused: HEAD ($head) does not match origin/Development ($developmentHead)."
+    }
+}
+
+function Assert-PreviewRuntimeParity {
+    param([Parameter(Mandatory = $true)][string]$RevisionName)
+    $revision = (& gcloud run revisions describe $RevisionName --project $ProjectId --region $Region --format=json) | ConvertFrom-Json
+    if ($LASTEXITCODE -ne 0 -or -not $revision) { throw "Could not inspect preview revision '$RevisionName'." }
+    if ([string]$revision.metadata.annotations.'run.googleapis.com/cpu-throttling' -ne 'true') {
+        throw "Preview parity check failed: CPU throttling is not enabled."
+    }
+    $env = @($revision.spec.containers[0].env)
+    $secretNames = @($env | Where-Object { $_.valueFrom.secretKeyRef.name } | ForEach-Object { [string]$_.valueFrom.secretKeyRef.name } | Sort-Object -Unique)
+    $expectedSecrets = @('ADVANCED_STATS_SCHEDULER_SECRET','API_PROXY_SECRET','SUPABASE_SERVICE_ROLE_KEY')
+    if (($secretNames -join ',') -ne ($expectedSecrets -join ',')) {
+        throw "Preview parity check failed: unexpected Secret Manager bindings: $($secretNames -join ', ')."
+    }
+    foreach ($ordinaryName in @('_API_KEY_SUPABASE','POSTHOG_PROJECT_API_KEY')) {
+        $entry = $env | Where-Object { $_.name -eq $ordinaryName } | Select-Object -First 1
+        if (-not $entry -or $entry.valueFrom) { throw "Preview parity check failed: $ordinaryName is not a normal env var." }
+    }
+    $collection = $env | Where-Object { $_.name -eq 'ADVANCED_STATS_COLLECTION_ENABLED' } | Select-Object -First 1
+    if ([string]$collection.value -ne 'false') { throw "Preview parity check failed: Advanced Stats collection is not OFF." }
+}
 
 function Format-GcloudArgsForError {
     param([Parameter(Mandatory = $true)][string[]]$Args)
@@ -31,14 +64,6 @@ function Run-Gcloud {
     & gcloud @Args
     if ($LASTEXITCODE -ne 0) {
         throw "gcloud command failed: gcloud $(Format-GcloudArgsForError -Args $Args)"
-    }
-}
-
-function Run-GcloudQuiet {
-    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Args)
-    $null = & gcloud @Args
-    if ($LASTEXITCODE -ne 0) {
-        throw "gcloud command failed while updating the isolated Phase 8 runtime."
     }
 }
 
@@ -119,35 +144,6 @@ function Get-TaggedTraffic($service) {
     return @($service.status.traffic) | Where-Object { $_.tag -eq $TagName } | Select-Object -First 1
 }
 
-function Get-ExistingRolloutUserIds($tagTraffic) {
-    if (-not $tagTraffic -or -not $tagTraffic.revisionName) { return "" }
-    $revision = (& gcloud run revisions describe $tagTraffic.revisionName `
-        --project $ProjectId --region $Region --format=json) | ConvertFrom-Json
-    if ($LASTEXITCODE -ne 0 -or -not $revision) { return "" }
-    $entry = @($revision.spec.containers[0].env) `
-        | Where-Object { $_.name -eq "ADVANCED_STATS_ROLLOUT_USER_IDS" } `
-        | Select-Object -First 1
-    return [string]$entry.value
-}
-
-function Secret-Exists {
-    $name = (& gcloud secrets describe $SecretName --project $ProjectId --format="value(name)" 2>$null)
-    return $LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace(($name -join ""))
-}
-
-function Scheduler-Exists {
-    $name = (& gcloud scheduler jobs describe $SchedulerJobName `
-        --project $ProjectId --location $Region --format="value(name)" 2>$null)
-    return $LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace(($name -join ""))
-}
-
-function Get-SchedulerState {
-    $state = (& gcloud scheduler jobs describe $SchedulerJobName `
-        --project $ProjectId --location $Region --format="value(state)" 2>$null)
-    if ($LASTEXITCODE -ne 0) { return "" }
-    return ($state -join "").Trim()
-}
-
 if (-not (Test-Path "./Dockerfile")) {
     throw "Run this script from the Clash_Project root where Dockerfile exists."
 }
@@ -156,14 +152,15 @@ if (-not (Test-Path "./cloudrun-env.yaml")) {
     throw "Create cloudrun-env.yaml from cloudrun-env.example.yaml before deploying."
 }
 
+Assert-PreviewGitState
+
 $ordinaryEnv = Get-CloudRunOrdinaryEnv -Path "./cloudrun-env.yaml"
 $ordinaryEnvArgs = "_API_KEY_SUPABASE=$($ordinaryEnv['_API_KEY_SUPABASE']),POSTHOG_PROJECT_API_KEY=$($ordinaryEnv['POSTHOG_PROJECT_API_KEY'])"
 
 Write-Host "Preparing zero-traffic Phase 8 candidate..." -ForegroundColor Cyan
 Run-Gcloud config set project $ProjectId
-Run-Gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com secretmanager.googleapis.com cloudscheduler.googleapis.com
+Run-Gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com secretmanager.googleapis.com
 
-$before = Get-Service
 Write-Host "Deploying a zero-traffic preview with production-parity secrets and collection OFF..." -ForegroundColor Cyan
 
 Run-Gcloud run deploy $ServiceName `
@@ -198,6 +195,8 @@ if ($null -ne $tagTraffic.percent -and [string]$tagTraffic.percent -ne "") {
 if ($tagPercent -ne 0) {
     throw "Safety gate failed: tagged candidate unexpectedly has $tagPercent% normal production traffic."
 }
+
+Assert-PreviewRuntimeParity -RevisionName ([string]$tagTraffic.revisionName)
 
 $health = Get-HttpStatus -Url "$candidateUrl/health"
 $ready = Get-HttpStatus -Url "$candidateUrl/ready"

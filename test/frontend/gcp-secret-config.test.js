@@ -40,6 +40,31 @@ function yamlValue(source, name) {
     return match ? match[1].trim() : '';
 }
 
+describe('Cloud Run deployment safety contracts', () => {
+    it('pins production deploys to clean origin/master and verifies the live revision', () => {
+        const code = read('deploy-cloud-run.ps1');
+        expect(code).toMatch(/git status --porcelain/i);
+        expect(code).toMatch(/git fetch origin master --quiet/i);
+        expect(code).toMatch(/origin\/master/i);
+        expect(code).toMatch(/run services update-traffic[\s\S]*--to-latest/i);
+        expect(code).toMatch(/Assert-LiveCloudRunDeployment/);
+        expect(code).toMatch(/cpu-throttling/);
+        expect(code).toMatch(/\/health/);
+        expect(code).toMatch(/\/ready/);
+    });
+
+    it('pins preview deploys to clean origin/Development and enforces production secret parity', () => {
+        const code = read('deploy-cloud-run-phase8.ps1');
+        expect(code).toMatch(/git status --porcelain/i);
+        expect(code).toMatch(/git fetch origin Development --quiet/i);
+        expect(code).toMatch(/origin\/Development/i);
+        expect(code).toMatch(/Assert-PreviewRuntimeParity/);
+        expect(code).toMatch(/ADVANCED_STATS_COLLECTION_ENABLED=false/i);
+        expect(code).toMatch(/ADVANCED_STATS_SCHEDULER_SECRET=ADVANCED_STATS_SCHEDULER_SECRET:latest/i);
+        expect(code).toMatch(/--cpu-throttling/i);
+    });
+});
+
 describe('GCP Secret Manager cost-control contracts', () => {
     it('keeps the audit strictly read-only and value-blind', () => {
         const code = withoutPowerShellComments(audit);
@@ -74,8 +99,7 @@ describe('GCP Secret Manager cost-control contracts', () => {
         const allowed = new Set([
             'SUPABASE_SERVICE_ROLE_KEY',
             'API_PROXY_SECRET',
-            'ADVANCED_STATS_SCHEDULER_SECRET',
-            'clashpanel-advanced-stats-scheduler-secret-phase8'
+            'ADVANCED_STATS_SCHEDULER_SECRET'
         ]);
 
         expect(bindings).not.toMatch(/POSTHOG_PROJECT_API_KEY|_API_KEY_SUPABASE|_API_KEY_ALL(?:2|3)?\b/i);
@@ -96,15 +120,14 @@ describe('GCP Secret Manager cost-control contracts', () => {
 
         const activeYamlSecretLines = cloudRunEnvExample
             .split(/\r?\n/)
-            .filter((line) => /^\s*(SUPABASE_SERVICE_ROLE_KEY|API_PROXY_SECRET|ADVANCED_STATS_SCHEDULER_SECRET|clashpanel-advanced-stats-scheduler-secret-phase8)\s*:/.test(line))
+            .filter((line) => /^\s*(SUPABASE_SERVICE_ROLE_KEY|API_PROXY_SECRET|ADVANCED_STATS_SCHEDULER_SECRET)\s*:/.test(line))
             .join('\n');
         expect(activeYamlSecretLines).toBe('');
         expect(envExample).not.toMatch(/(?:SUPABASE_SERVICE_ROLE_KEY|API_PROXY_SECRET)\s*=\s*(?:sk_|eyJ|gsk_)/i);
     });
 
     it.each([
-        'configure-advanced-stats-production.ps1',
-        'configure-advanced-stats-phase8.ps1'
+        'configure-advanced-stats-production.ps1'
     ])('requires explicit scheduler-secret rotation in %s', (file) => {
         const code = withoutPowerShellComments(read(file));
         const compact = code.replace(/\s+/g, ' ');
@@ -118,5 +141,13 @@ describe('GCP Secret Manager cost-control contracts', () => {
         expect(rotationSwitch).toBeGreaterThan(-1);
         expect(rotationGuard).not.toBeNull();
         expect(rotationGuard[1]).toMatch(/(?:versions\s+add|(?:Add|New|Set)-\w*(?:Secret|Version))/i);
+    });
+
+    it('keeps the explicit Phase 8 collector workflow on the shared production scheduler secret', () => {
+        const code = read('configure-advanced-stats-phase8.ps1');
+        expect(code).toMatch(/SecretName = "ADVANCED_STATS_SCHEDULER_SECRET"/);
+        expect(code).not.toMatch(/clashpanel-advanced-stats-scheduler-secret-phase8/);
+        expect(code).not.toMatch(/secrets versions add|secrets create/);
+        expect(read('enable-advanced-stats-phase8.ps1')).toMatch(/SecretName = "ADVANCED_STATS_SCHEDULER_SECRET"/);
     });
 });

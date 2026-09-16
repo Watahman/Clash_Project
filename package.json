@@ -35,10 +35,10 @@
   },
   "homepage": "https://github.com/Watahman/Clash_Project#readme",
   "devDependencies": {
-    "fake-indexeddb": "^6.2.2",
+    "fake-indexeddb": "^6.2.5",
     "jsdom": "^26.1.0",
-    "sharp": "^0.35.3",
-    "vitest": "^3.2.6",
-    "wrangler": "^4.114.0"
+    "sharp": "^0.35.4",
+    "vitest": "^4.1.11",
+    "wrangler": "^4.132.0"
   }
 }

@@ -57,5 +57,4 @@ CLASHKING_RANKED_SEASON: ""
 # SUPABASE_SERVICE_ROLE_KEY
 # API_PROXY_SECRET
 # ADVANCED_STATS_SCHEDULER_SECRET
-# Phase 8 only: ADVANCED_STATS_SCHEDULER_SECRET maps to
-# clashpanel-advanced-stats-scheduler-secret-phase8.
+# Preview reuses the same ADVANCED_STATS_SCHEDULER_SECRET binding as production.

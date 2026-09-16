@@ -9,6 +9,65 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+
+function Assert-ProductionGitState {
+    $status = @(git status --porcelain)
+    if ($LASTEXITCODE -ne 0) { throw "Git status kon niet worden gelezen." }
+    if ($status.Count -gt 0) { throw "Production deploy geweigerd: de working tree bevat lokale wijzigingen." }
+
+    git fetch origin master --quiet
+    if ($LASTEXITCODE -ne 0) { throw "Production deploy geweigerd: origin/master kon niet worden opgehaald." }
+    $head = (git rev-parse HEAD).Trim()
+    $productionHead = (git rev-parse origin/master).Trim()
+    if ($head -ne $productionHead) {
+        throw "Production deploy geweigerd: HEAD ($head) is niet gelijk aan origin/master ($productionHead)."
+    }
+}
+
+function Get-HttpStatusWithRetry {
+    param([Parameter(Mandatory = $true)][string]$Url)
+    for ($attempt = 1; $attempt -le 3; $attempt++) {
+        try {
+            $response = Invoke-WebRequest -Uri $Url -UseBasicParsing -TimeoutSec 20
+            return [int]$response.StatusCode
+        } catch {
+            if ($attempt -eq 3) { throw }
+            Start-Sleep -Seconds 2
+        }
+    }
+}
+
+function Assert-LiveCloudRunDeployment {
+    $service = (& gcloud run services describe $ServiceName --project $ProjectId --region $Region --format=json) | ConvertFrom-Json
+    if ($LASTEXITCODE -ne 0 -or -not $service) { throw "Post-deploy controle kon Cloud Run service niet lezen." }
+    $latest = [string]$service.status.latestReadyRevisionName
+    if ([string]::IsNullOrWhiteSpace($latest)) { throw "Post-deploy controle vond geen latest ready revision." }
+    $liveTraffic = @($service.status.traffic) | Where-Object { $_.revisionName -eq $latest -and [int]$_.percent -eq 100 } | Select-Object -First 1
+    if (-not $liveTraffic) { throw "Post-deploy controle: latest revision '$latest' ontvangt niet 100% production traffic." }
+
+    $revision = (& gcloud run revisions describe $latest --project $ProjectId --region $Region --format=json) | ConvertFrom-Json
+    if ($LASTEXITCODE -ne 0 -or -not $revision) { throw "Post-deploy controle kon revision '$latest' niet lezen." }
+    if ([string]$revision.metadata.annotations.'run.googleapis.com/cpu-throttling' -ne 'true') {
+        throw "Post-deploy controle: CPU throttling staat niet aan op '$latest'."
+    }
+
+    $env = @($revision.spec.containers[0].env)
+    $secretNames = @($env | Where-Object { $_.valueFrom.secretKeyRef.name } | ForEach-Object { [string]$_.valueFrom.secretKeyRef.name } | Sort-Object -Unique)
+    $expectedSecrets = @('ADVANCED_STATS_SCHEDULER_SECRET','API_PROXY_SECRET','SUPABASE_SERVICE_ROLE_KEY')
+    if (($secretNames -join ',') -ne ($expectedSecrets -join ',')) {
+        throw "Post-deploy controle: onverwachte Secret Manager bindings: $($secretNames -join ', ')."
+    }
+    foreach ($ordinaryName in @('_API_KEY_SUPABASE','POSTHOG_PROJECT_API_KEY')) {
+        $entry = $env | Where-Object { $_.name -eq $ordinaryName } | Select-Object -First 1
+        if (-not $entry -or $entry.valueFrom) { throw "Post-deploy controle: $ordinaryName is niet als gewone env var geconfigureerd." }
+    }
+
+    $serviceUrl = [string]$service.status.url
+    if ((Get-HttpStatusWithRetry "$serviceUrl/health") -ne 200) { throw "Post-deploy controle: /health is niet 200." }
+    if ((Get-HttpStatusWithRetry "$serviceUrl/ready") -ne 200) { throw "Post-deploy controle: /ready is niet 200." }
+    Write-Host "Post-deploy verificatie geslaagd voor ${latest}: 100% traffic, CPU throttling, 3 secrets, health/ready OK." -ForegroundColor Green
+}
+
 if (-not (Test-Path "./Dockerfile")) {
     throw "Voer dit script uit vanuit de hoofdmap van Clash_Project, waar Dockerfile staat."
 }
@@ -63,6 +122,8 @@ function Assert-CloudRunEnvConfig {
 }
 
 Assert-CloudRunEnvConfig -Path "./cloudrun-env.yaml"
+
+Assert-ProductionGitState
 
 function Assert-SecretManagerBindingsExist {
     foreach ($name in @('SUPABASE_SERVICE_ROLE_KEY', 'API_PROXY_SECRET', 'ADVANCED_STATS_SCHEDULER_SECRET')) {
@@ -123,6 +184,8 @@ gcloud run services update-traffic $ServiceName --project $ProjectId --region $R
 if ($LASTEXITCODE -ne 0) {
     throw "Cloud Run revision is deployed, maar production traffic kon niet naar latest worden gezet."
 }
+
+Assert-LiveCloudRunDeployment
 
 Write-Host "Deploy klaar. Advanced Stats collection en scheduler blijven uit; start configure-advanced-stats-production.ps1 niet zonder aparte releasebeslissing." -ForegroundColor Green
 Write-Host "Secret Manager bindings actief voor: SUPABASE_SERVICE_ROLE_KEY, API_PROXY_SECRET en ADVANCED_STATS_SCHEDULER_SECRET." -ForegroundColor Cyan

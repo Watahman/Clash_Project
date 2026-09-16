@@ -31,7 +31,7 @@ GitHub Actions are intentionally disabled repository-wide. Release validation us
 ## Safe Phase 8 sequence
 
 1. `deploy-cloud-run-phase8.ps1` — zero-traffic tagged backend, collection/public enrollment off.
-2. `configure-advanced-stats-phase8.ps1` — one developer UUID, Scheduler secret in Secret Manager, Scheduler paused.
+2. `configure-advanced-stats-phase8.ps1` — one developer UUID, shared production Scheduler secret, preview Scheduler paused.
 3. `deploy-phase8-preview.ps1` — isolated workers.dev frontend against the tagged backend.
 4. Start Advanced Stats for the allowlisted linked developer account in that preview.
 5. `enable-advanced-stats-phase8.ps1` — auth checks + first collector request + resume Scheduler.

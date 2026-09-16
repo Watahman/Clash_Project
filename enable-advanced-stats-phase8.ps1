@@ -6,10 +6,14 @@ param(
     [string]$ServiceName = "clashpanel-api",
     [string]$TagName = "phase8",
     [string]$SchedulerJobName = "clashpanel-advanced-stats-poll-phase8",
-    [string]$SecretName = "clashpanel-advanced-stats-scheduler-secret-phase8"
+    [string]$SecretName = "ADVANCED_STATS_SCHEDULER_SECRET"
 )
 
 $ErrorActionPreference = "Stop"
+
+if ($SecretName -ne "ADVANCED_STATS_SCHEDULER_SECRET") {
+    throw "Phase 8 must reuse ADVANCED_STATS_SCHEDULER_SECRET; separate preview secrets are not supported."
+}
 
 function Run-Gcloud {
     param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Args)
@@ -154,6 +158,6 @@ Write-Host "Phase 8 developer collection is now enabled on the tagged candidate.
 Write-Host "  Normal production traffic to candidate: 0%"
 Write-Host "  Public enrollment: OFF"
 Write-Host "  Allowlist: exactly one developer UUID"
-Write-Host "  Scheduler: ACTIVE every 5 minutes against tagged candidate"
+Write-Host "  Scheduler: ACTIVE every minute against tagged candidate"
 Write-Host ""
 Write-Host "Observe real battle-log cycles before expanding the allowlist or moving any production traffic." -ForegroundColor Yellow
