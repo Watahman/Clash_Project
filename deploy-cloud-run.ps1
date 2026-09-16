@@ -119,6 +119,11 @@ if ($LASTEXITCODE -ne 0) {
     throw "Cloud Run deploy is mislukt."
 }
 
+gcloud run services update-traffic $ServiceName --project $ProjectId --region $Region --to-latest
+if ($LASTEXITCODE -ne 0) {
+    throw "Cloud Run revision is deployed, maar production traffic kon niet naar latest worden gezet."
+}
+
 Write-Host "Deploy klaar. Advanced Stats collection en scheduler blijven uit; start configure-advanced-stats-production.ps1 niet zonder aparte releasebeslissing." -ForegroundColor Green
 Write-Host "Secret Manager bindings actief voor: SUPABASE_SERVICE_ROLE_KEY, API_PROXY_SECRET en ADVANCED_STATS_SCHEDULER_SECRET." -ForegroundColor Cyan
 Write-Host "_API_KEY_SUPABASE en POSTHOG_PROJECT_API_KEY worden als gewone env vars uit cloudrun-env.yaml geladen." -ForegroundColor Cyan

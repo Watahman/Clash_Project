@@ -164,59 +164,23 @@ Run-Gcloud config set project $ProjectId
 Run-Gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com secretmanager.googleapis.com cloudscheduler.googleapis.com
 
 $before = Get-Service
-$existingTag = Get-TaggedTraffic $before
-$configured = $existingTag -and (Secret-Exists) -and (Scheduler-Exists)
+Write-Host "Deploying a zero-traffic preview with production-parity secrets and collection OFF..." -ForegroundColor Cyan
 
-if (-not $configured) {
-    # First-time bootstrap only. This creates the tagged candidate without enabling
-    # collection. configure-advanced-stats-phase8.ps1 + activation are required once.
-    Write-Host "Phase 8 has not been configured yet; creating the first safe tagged candidate." -ForegroundColor Yellow
-    Run-Gcloud run deploy $ServiceName `
-        --source . `
-        --project $ProjectId `
-        --region $Region `
-        --update-env-vars="$ordinaryEnvArgs,ADVANCED_STATS_COLLECTION_ENABLED=false,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false,POSTHOG_ENABLED=true,POSTHOG_HOST=https://eu.i.posthog.com,CLASHPANEL_ENVIRONMENT=development" `
-        --remove-env-vars="ADVANCED_STATS_ROLLOUT_USER_IDS" `
-        --update-secrets="SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:latest,API_PROXY_SECRET=API_PROXY_SECRET:latest" `
-        --remove-secrets="_API_KEY_SUPABASE,POSTHOG_PROJECT_API_KEY,_API_KEY_SECR_SUPABASE,CLASH_API_KEY_POOL,_API_KEY_ALL,_API_KEY_ALL2,_API_KEY_ALL3,ADVANCED_STATS_SCHEDULER_SECRET" `
-        --no-traffic `
-        --tag $TagName
-
-    $service = Get-Service
-    $tagTraffic = Get-TaggedTraffic $service
-    $candidateUrl = [string]$tagTraffic.url
-    if (-not $candidateUrl) { throw "Could not resolve the tagged '$TagName' revision URL." }
-
-    $health = Get-HttpStatus -Url "$candidateUrl/health"
-    $ready = Get-HttpStatus -Url "$candidateUrl/ready"
-    $disabledPoll = Get-HttpStatus -Url "$candidateUrl/InternalAdvancedStatsPoll" -Method "POST"
-    if ($health -ne 200 -or $ready -ne 200 -or $disabledPoll -ne 404) {
-        throw "First Phase 8 candidate checks failed (health=$health ready=$ready poll=$disabledPoll)."
-    }
-
-    Write-Host "First Phase 8 candidate deployed with 0% production traffic and collection OFF." -ForegroundColor Green
-    Write-Host "Run configure-advanced-stats-phase8.ps1 once, then activate-advanced-stats-phase8.ps1 once."
-    exit 0
-}
-
-# Phase 8 is already configured. Reuse its isolated scheduler secret and rollout
-# allowlist so a normal code update creates only ONE new Cloud Run revision.
-$rolloutUserIds = if ($DeveloperUserId -and $DeveloperUserId -ne [Guid]::Empty) {
-    $DeveloperUserId.ToString()
-} else {
-    Get-ExistingRolloutUserIds $existingTag
-}
-if ([string]::IsNullOrWhiteSpace($rolloutUserIds)) {
-    throw "Could not recover the Phase 8 rollout user id. Re-run with -DeveloperUserId <UUID>."
-}
-
-Write-Host "Configured Phase 8 detected. Deploying one active preview revision with 0% production traffic..." -ForegroundColor Cyan
 Run-Gcloud run deploy $ServiceName `
     --source . `
     --project $ProjectId `
     --region $Region `
-    --update-env-vars="$ordinaryEnvArgs,ADVANCED_STATS_COLLECTION_ENABLED=true,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false,ADVANCED_STATS_ROLLOUT_USER_IDS=$rolloutUserIds,POSTHOG_ENABLED=true,POSTHOG_HOST=https://eu.i.posthog.com,CLASHPANEL_ENVIRONMENT=development,POSTHOG_INTERNAL_USER_IDS=$rolloutUserIds" `
-    --update-secrets="SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:latest,API_PROXY_SECRET=API_PROXY_SECRET:latest,ADVANCED_STATS_SCHEDULER_SECRET=${SecretName}:latest" `
+    --memory 512Mi `
+    --cpu 1 `
+    --min-instances 0 `
+    --max-instances 1 `
+    --concurrency 40 `
+    --timeout 120s `
+    --cpu-boost `
+    --cpu-throttling `
+    --update-env-vars="$ordinaryEnvArgs,ADVANCED_STATS_COLLECTION_ENABLED=false,ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED=false,POSTHOG_ENABLED=true,POSTHOG_HOST=https://eu.i.posthog.com,CLASHPANEL_ENVIRONMENT=development" `
+    --remove-env-vars="ADVANCED_STATS_ROLLOUT_USER_IDS,POSTHOG_INTERNAL_USER_IDS" `
+    --update-secrets="SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:latest,API_PROXY_SECRET=API_PROXY_SECRET:latest,ADVANCED_STATS_SCHEDULER_SECRET=ADVANCED_STATS_SCHEDULER_SECRET:latest" `
     --remove-secrets="_API_KEY_SUPABASE,POSTHOG_PROJECT_API_KEY,_API_KEY_SECR_SUPABASE,CLASH_API_KEY_POOL,_API_KEY_ALL,_API_KEY_ALL2,_API_KEY_ALL3" `
     --no-traffic `
     --tag $TagName
@@ -237,38 +201,17 @@ if ($tagPercent -ne 0) {
 
 $health = Get-HttpStatus -Url "$candidateUrl/health"
 $ready = Get-HttpStatus -Url "$candidateUrl/ready"
-$unauthorizedPoll = Get-HttpStatus -Url "$candidateUrl/InternalAdvancedStatsPoll" -Method "GET"
+$disabledPoll = Get-HttpStatus -Url "$candidateUrl/InternalAdvancedStatsPoll" -Method "POST"
 if ($health -ne 200) { throw "/health returned $health instead of 200 on the tagged candidate." }
 if ($ready -ne 200) { throw "/ready returned $ready instead of 200 on the tagged candidate." }
-if ($unauthorizedPoll -ne 405) {
-    throw "/InternalAdvancedStatsPoll GET returned $unauthorizedPoll instead of 405 while collection is enabled."
+if ($disabledPoll -ne 404) {
+    throw "/InternalAdvancedStatsPoll POST returned $disabledPoll instead of 404 while collection is disabled."
 }
 
-# Keep the existing secret header untouched; only point the isolated preview job
-# at the newly tagged revision and keep its one-minute test cadence.
-Run-GcloudQuiet scheduler jobs update http $SchedulerJobName `
-    --project $ProjectId `
-    --location $Region `
-    --schedule="* * * * *" `
-    --time-zone="Etc/UTC" `
-    --uri="$candidateUrl/InternalAdvancedStatsPoll" `
-    --http-method=POST `
-    --attempt-deadline="120s" `
-    --max-retry-attempts=0
-
-if ((Get-SchedulerState) -eq "PAUSED") {
-    Run-GcloudQuiet scheduler jobs resume $SchedulerJobName --project $ProjectId --location $Region
-}
-
-# Trigger one pass immediately. A healthy tracker may still be scheduled for a
-# later poll; failed trackers become immediately due through the retry RPC.
-Run-GcloudQuiet scheduler jobs run $SchedulerJobName --project $ProjectId --location $Region
-
-Write-Host "Phase 8 update deployed." -ForegroundColor Green
-Write-Host "  Cloud Run revisions created by this update: 1"
+Write-Host "Preview deployed." -ForegroundColor Green
 Write-Host "  Tagged candidate URL: $candidateUrl"
 Write-Host "  Production traffic to candidate: 0%"
-Write-Host "  Collection: ON"
+Write-Host "  Secret Manager bindings: same three as production"
+Write-Host "  Collection: OFF"
 Write-Host "  Public enrollment: OFF"
-Write-Host "  Preview scheduler: updated + running"
-Write-Host "  No configure/activate step is needed for normal future Phase 8 code updates."
+Write-Host "  CPU billing: request-based"
