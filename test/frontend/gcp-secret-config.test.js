@@ -46,7 +46,9 @@ describe('Cloud Run deployment safety contracts', () => {
         expect(code).toMatch(/git status --porcelain/i);
         expect(code).toMatch(/git fetch origin master --quiet/i);
         expect(code).toMatch(/origin\/master/i);
-        expect(code).toMatch(/run services update-traffic[\s\S]*--to-latest/i);
+        expect(code).toMatch(/--revision-suffix \$revisionSuffix/i);
+        expect(code).toMatch(/run services update-traffic[\s\S]*--to-revisions="\$revisionName=100"/i);
+        expect(code).not.toMatch(/--to-latest/i);
         expect(code).toMatch(/Assert-LiveCloudRunDeployment/);
         expect(code).toMatch(/cpu-throttling/);
         expect(code).toMatch(/clashpanel-api-runtime@\$ProjectId\.iam\.gserviceaccount\.com/);

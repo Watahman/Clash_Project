@@ -40,20 +40,19 @@ function Get-HttpStatusWithRetry {
 }
 
 function Assert-LiveCloudRunDeployment {
+    param([Parameter(Mandatory = $true)][string]$RevisionName)
     $service = (& gcloud run services describe $ServiceName --project $ProjectId --region $Region --format=json) | ConvertFrom-Json
     if ($LASTEXITCODE -ne 0 -or -not $service) { throw "Post-deploy controle kon Cloud Run service niet lezen." }
-    $latest = [string]$service.status.latestReadyRevisionName
-    if ([string]::IsNullOrWhiteSpace($latest)) { throw "Post-deploy controle vond geen latest ready revision." }
-    $liveTraffic = @($service.status.traffic) | Where-Object { $_.revisionName -eq $latest -and [int]$_.percent -eq 100 } | Select-Object -First 1
-    if (-not $liveTraffic) { throw "Post-deploy controle: latest revision '$latest' ontvangt niet 100% production traffic." }
+    $liveTraffic = @($service.status.traffic) | Where-Object { $_.revisionName -eq $RevisionName -and [int]$_.percent -eq 100 } | Select-Object -First 1
+    if (-not $liveTraffic) { throw "Post-deploy controle: revision '$RevisionName' ontvangt niet 100% production traffic." }
 
-    $revision = (& gcloud run revisions describe $latest --project $ProjectId --region $Region --format=json) | ConvertFrom-Json
-    if ($LASTEXITCODE -ne 0 -or -not $revision) { throw "Post-deploy controle kon revision '$latest' niet lezen." }
+    $revision = (& gcloud run revisions describe $RevisionName --project $ProjectId --region $Region --format=json) | ConvertFrom-Json
+    if ($LASTEXITCODE -ne 0 -or -not $revision) { throw "Post-deploy controle kon revision '$RevisionName' niet lezen." }
     if ([string]$revision.spec.serviceAccountName -ne $RuntimeServiceAccount) {
-        throw "Post-deploy controle: onverwachte runtime service account op '$latest'."
+        throw "Post-deploy controle: onverwachte runtime service account op '$RevisionName'."
     }
     if ([string]$revision.metadata.annotations.'run.googleapis.com/cpu-throttling' -ne 'true') {
-        throw "Post-deploy controle: CPU throttling staat niet aan op '$latest'."
+        throw "Post-deploy controle: CPU throttling staat niet aan op '$RevisionName'."
     }
 
     $env = @($revision.spec.containers[0].env)
@@ -70,7 +69,7 @@ function Assert-LiveCloudRunDeployment {
     $serviceUrl = [string]$service.status.url
     if ((Get-HttpStatusWithRetry "$serviceUrl/health") -ne 200) { throw "Post-deploy controle: /health is niet 200." }
     if ((Get-HttpStatusWithRetry "$serviceUrl/ready") -ne 200) { throw "Post-deploy controle: /ready is niet 200." }
-    Write-Host "Post-deploy verificatie geslaagd voor ${latest}: 100% traffic, CPU throttling, 3 secrets, health/ready OK." -ForegroundColor Green
+    Write-Host "Post-deploy verificatie geslaagd voor ${RevisionName}: 100% traffic, CPU throttling, 3 secrets, health/ready OK." -ForegroundColor Green
 }
 
 if (-not (Test-Path "./Dockerfile")) {
@@ -166,8 +165,12 @@ Assert-SecretManagerBindingsExist
 
 # The same project key is used by Development and Production; the
 # environment label in cloudrun-env.yaml keeps their events separate.
+$revisionSuffix = "prod-" + (Get-Date -Format "yyyyMMddHHmmss")
+$revisionName = "$ServiceName-$revisionSuffix"
+
 gcloud run deploy $ServiceName `
     --source . `
+    --revision-suffix $revisionSuffix `
     --region $Region `
     --allow-unauthenticated `
     --memory 512Mi `
@@ -186,12 +189,12 @@ if ($LASTEXITCODE -ne 0) {
     throw "Cloud Run deploy is mislukt."
 }
 
-gcloud run services update-traffic $ServiceName --project $ProjectId --region $Region --to-latest
+gcloud run services update-traffic $ServiceName --project $ProjectId --region $Region --to-revisions="$revisionName=100"
 if ($LASTEXITCODE -ne 0) {
-    throw "Cloud Run revision is deployed, maar production traffic kon niet naar latest worden gezet."
+    throw "Cloud Run revision is deployed, maar production traffic kon niet expliciet naar $revisionName worden gezet."
 }
 
-Assert-LiveCloudRunDeployment
+Assert-LiveCloudRunDeployment -RevisionName $revisionName
 
 Write-Host "Deploy klaar. Advanced Stats collection en scheduler blijven uit; start configure-advanced-stats-production.ps1 niet zonder aparte releasebeslissing." -ForegroundColor Green
 Write-Host "Secret Manager bindings actief voor: SUPABASE_SERVICE_ROLE_KEY, API_PROXY_SECRET en ADVANCED_STATS_SCHEDULER_SECRET." -ForegroundColor Cyan
