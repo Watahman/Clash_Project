@@ -111,7 +111,7 @@ gcloud run deploy $ServiceName `
     --concurrency 40 `
     --timeout 120s `
     --cpu-boost `
-    --no-cpu-throttling `
+    --cpu-throttling `
     --env-vars-file ./cloudrun-env.yaml `
     --update-secrets="SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:latest,API_PROXY_SECRET=API_PROXY_SECRET:latest,ADVANCED_STATS_SCHEDULER_SECRET=ADVANCED_STATS_SCHEDULER_SECRET:latest"
 

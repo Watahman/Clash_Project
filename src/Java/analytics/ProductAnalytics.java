@@ -17,13 +17,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
-/** Fail-open, server-side product analytics capture with a deliberately bounded queue. */
-public final class ProductAnalytics implements AutoCloseable {
+/** Fail-open, request-scoped server-side product analytics capture. */
+public final class ProductAnalytics {
     public static final String ROUTE = "/ProductAnalytics";
-    private static final int QUEUE_CAPACITY = 256;
+    private static final Duration CAPTURE_TIMEOUT = Duration.ofMillis(200);
     private static final Gson GSON = new Gson();
     private static final ProductAnalytics NOOP = new ProductAnalytics();
 
@@ -34,9 +32,6 @@ public final class ProductAnalytics implements AutoCloseable {
     private final String environment;
     private final Set<String> internalUserIds;
     private final HttpClient client;
-    private final BlockingQueue<String> queue;
-    private final Thread worker;
-    private volatile boolean closed;
 
     public ProductAnalytics(Config config) {
         this.utils = new API_Utils(config);
@@ -45,11 +40,17 @@ public final class ProductAnalytics implements AutoCloseable {
         this.captureUri = captureUri(config.getPosthogHost());
         this.environment = safeEnvironment(config.getClashPanelEnvironment());
         this.internalUserIds = internalUserIds(config.getPosthogInternalUserIds());
-        this.client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(1)).build();
-        this.queue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
-        this.worker = new Thread(this::drain, "clashpanel-posthog-analytics");
-        this.worker.setDaemon(true);
-        if (enabled && captureUri != null) this.worker.start();
+        this.client = HttpClient.newBuilder().connectTimeout(CAPTURE_TIMEOUT).build();
+    }
+
+    ProductAnalytics(URI captureUri) {
+        this.utils = null;
+        this.enabled = true;
+        this.apiKey = "phc_test";
+        this.captureUri = captureUri;
+        this.environment = "test";
+        this.internalUserIds = Set.of();
+        this.client = HttpClient.newBuilder().connectTimeout(CAPTURE_TIMEOUT).build();
     }
 
     private ProductAnalytics() {
@@ -60,8 +61,6 @@ public final class ProductAnalytics implements AutoCloseable {
         this.environment = "development";
         this.internalUserIds = Set.of();
         this.client = null;
-        this.queue = new ArrayBlockingQueue<>(1);
-        this.worker = null;
     }
 
     public static ProductAnalytics noop() {
@@ -128,7 +127,7 @@ public final class ProductAnalytics implements AutoCloseable {
             boolean anonymousInternal
     ) {
         try {
-            if (!isEnabled() || closed || !AnalyticsEvent.isKnown(event)) return;
+            if (!isEnabled() || !AnalyticsEvent.isKnown(event)) return;
             AnalyticsEvent.validateServerProperties(properties);
             String distinctId = nonBlank(userId) ? userId.trim() : anonymousId;
             if (distinctId == null || distinctId.isBlank()) return;
@@ -140,7 +139,9 @@ public final class ProductAnalytics implements AutoCloseable {
                     apiKey, event, properties, distinctId, loggedIn,
                     environment, internal ? "internal" : "external"
             );
-            queue.offer(GSON.toJson(payload));
+            send(GSON.toJson(payload));
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
         } catch (Exception ignored) {
             // Analytics must never affect the product request that triggered it.
         }
@@ -169,32 +170,13 @@ public final class ProductAnalytics implements AutoCloseable {
         return payload;
     }
 
-    private void drain() {
-        while (!closed || !queue.isEmpty()) {
-            try {
-                String payload = queue.poll(1, java.util.concurrent.TimeUnit.SECONDS);
-                if (payload != null) send(payload);
-            } catch (InterruptedException interrupted) {
-                if (closed) break;
-            } catch (Exception ignored) {
-                // A failed PostHog request is intentionally dropped.
-            }
-        }
-    }
-
     private void send(String payload) throws Exception {
         HttpRequest request = HttpRequest.newBuilder(captureUri)
-                .timeout(Duration.ofSeconds(2))
+                .timeout(CAPTURE_TIMEOUT)
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(payload))
                 .build();
         client.send(request, HttpResponse.BodyHandlers.discarding());
-    }
-
-    @Override
-    public void close() {
-        closed = true;
-        if (worker != null) worker.interrupt();
     }
 
     private Map<String, String> clientProperties(JsonObject body) {

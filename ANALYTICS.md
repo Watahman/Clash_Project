@@ -1,11 +1,11 @@
 # ClashPanel product analytics
 
-Last reviewed: 12 September 2026
+Last reviewed: 16 September 2026
 
 This document describes the PostHog product analytics implementation currently
 present in ClashPanel. It is an operational contract, not a promise that
 analytics is enabled in every deployment. Analytics is fail-open: if the
-configuration, browser request, queue, or PostHog request fails, the feature
+configuration, browser request, or PostHog request fails, the feature
 request continues normally.
 
 ## Scope and privacy boundary
@@ -41,16 +41,17 @@ PostHog's capture endpoint documentation is available at
 3. The backend adds `logged_in`, `environment`, and `traffic_type`, and sets
    PostHog's top-level `distinct_id` to the internal user ID or anonymous ID.
    For anonymous events it also adds `$process_person_profile: false`.
-4. A bounded asynchronous queue (capacity 256) forwards the resulting payload
-   to `${POSTHOG_HOST}/i/v0/e/`. The worker uses short network timeouts and
-   drops failed or full-queue events. PostHog failures therefore cannot block
-   or slow normal requests.
+4. The backend sends the payload to `${POSTHOG_HOST}/i/v0/e/` within the
+   request, before responding, with a 200 ms request timeout. Failed or slow
+   deliveries are dropped and cannot fail the product request. A request that
+   emits two server events can spend up to roughly 400 ms on PostHog; signup
+   may also spend up to 300 ms on the existing profile-ID lookup (two 150 ms
+   attempts), then at most 200 ms on capture if an ID was found.
 
-The production Cloud Run deploy uses `--no-cpu-throttling` so an active
-instance keeps CPU available for this non-blocking queue drain after the
-request returns. `min-instances=0` remains enabled, so idle instances can
-still scale to zero; instance-based CPU/billing applies only while an instance
-is active.
+The Development deploy script now selects `--cpu-throttling` with
+`min-instances=0`, because no PostHog queue needs post-response CPU. The
+currently live production revision still uses instance-based CPU until a
+separately approved backend deployment.
 
 The allowlisted caller property keys are `tool`, `action`, `entity_type`,
 `mode`, `outcome`, `result_status`, and `source`. Values are scalar, bounded,
@@ -194,9 +195,9 @@ Recommended tool-specific funnels are:
 - Minigames: `tool_opened` → `core_action_completed` with
   `action=game_started` → `action=game_completed`.
 
-Planner and achievement backend events are queued asynchronously and may reach
-PostHog in a slightly different order. Use the funnel's conversion window and
-properties rather than assuming same-request ordering.
+Planner and achievement backend events are sent within their requests, but
+network delays or dropped best-effort events mean funnels should still rely on
+the conversion window and properties rather than guaranteed ordering.
 
 ## Recommended retention reports and filters
 

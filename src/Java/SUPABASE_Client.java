@@ -26,6 +26,10 @@ public class SUPABASE_Client {
         return sendRequest("GET", table + "?" + filter, null);
     }
 
+    public static String getWithBody(String table, String filter, Duration timeout) throws Exception {
+        return sendRequest("GET", table + "?" + filter, null, "return=representation", timeout);
+    }
+
     public static String post(String table, String body) throws Exception {
         return sendRequest("POST", table, body);
     }
@@ -71,12 +75,18 @@ public class SUPABASE_Client {
     }
 
     private static String sendRequest(String method, String table, String body, String prefer) throws Exception {
+        return sendRequest(method, table, body, prefer, Duration.ofSeconds(15));
+    }
+
+    private static String sendRequest(
+            String method, String table, String body, String prefer, Duration timeout
+    ) throws Exception {
         String baseUrl = CONF.getSupabaseUrl();
         String apiKey = CONF.getSupabaseServiceKey();
 
         HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/rest/v1/" + table))
-                .timeout(Duration.ofSeconds(15))
+                .timeout(timeout)
                 .header("apikey", apiKey)
                 .header("Authorization", "Bearer " + apiKey)
                 .header("Content-Type", "application/json")

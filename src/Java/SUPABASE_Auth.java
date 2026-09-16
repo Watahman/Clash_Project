@@ -11,11 +11,11 @@ import com.sun.net.httpserver.HttpServer;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public final class SUPABASE_Auth {
+    private static final Duration SIGNUP_PROFILE_LOOKUP_TIMEOUT = Duration.ofMillis(150);
     private final HttpServer server;
     private final Config conf;
     private final API_Utils utils;
@@ -128,11 +128,13 @@ public final class SUPABASE_Auth {
         if (authId.isBlank()) return "";
         try {
             JsonArray profiles = JsonParser.parseString(SUPABASE_Client.getWithBody(
-                    "users", "select=id&auth_user_id=" + SUPABASE_Client.eq(authId) + "&limit=1"
+                    "users", "select=id&auth_user_id=" + SUPABASE_Client.eq(authId) + "&limit=1",
+                    SIGNUP_PROFILE_LOOKUP_TIMEOUT
             )).getAsJsonArray();
             if (!profiles.isEmpty()) return profiles.get(0).getAsJsonObject().get("id").getAsString();
             JsonArray sameId = JsonParser.parseString(SUPABASE_Client.getWithBody(
-                    "users", "select=id&id=" + SUPABASE_Client.eq(authId) + "&limit=1"
+                    "users", "select=id&id=" + SUPABASE_Client.eq(authId) + "&limit=1",
+                    SIGNUP_PROFILE_LOOKUP_TIMEOUT
             )).getAsJsonArray();
             return sameId.isEmpty() ? "" : authId;
         } catch (Exception ignored) {
@@ -142,14 +144,11 @@ public final class SUPABASE_Auth {
 
     private void captureSignupAnalytics(JsonObject response) {
         if (!analytics.isEnabled()) return;
-        CompletableFuture.supplyAsync(() -> signupProfileId(response))
-                .orTimeout(1, TimeUnit.SECONDS)
-                .thenAccept(userId -> analytics.captureAuthenticated(
-                        AnalyticsEvent.ACCOUNT_CREATED,
-                        Map.of("tool", "auth", "action", "signup"),
-                        userId
-                ))
-                .exceptionally(ignored -> null);
+        analytics.captureAuthenticated(
+                AnalyticsEvent.ACCOUNT_CREATED,
+                Map.of("tool", "auth", "action", "signup"),
+                signupProfileId(response)
+        );
     }
 
     private String signupAuthId(JsonObject response) {

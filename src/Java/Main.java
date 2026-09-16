@@ -199,7 +199,6 @@ public class Main {
         });
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            productAnalytics.close();
             server.stop(2);
             executor.shutdown();
             try {
