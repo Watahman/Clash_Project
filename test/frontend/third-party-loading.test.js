@@ -1,9 +1,9 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const htmlFiles = listHtmlFiles('src');
-const directNetworkScript = /https:\/\/(?:www\.googletagmanager\.com|pagead2\.googlesyndication\.com|pl31261194\.profitableratecpmnetwork\.com|www\.highrevenueformat\.com)/i;
+const directNetworkScript = /https:\/\/(?:www\.googletagmanager\.com|pagead2\.googlesyndication\.com|resources\.infolinks\.com)/i;
 
 describe('Privacy-aware third-party loading', () => {
     it.each(htmlFiles)('%s does not start an advertising network directly from HTML', path => {
@@ -25,12 +25,8 @@ describe('Privacy-aware third-party loading', () => {
 
     it('keeps ad loading behind the central consent and route manager', () => {
         const adsSource = readFileSync('src/assets/js/Data/ads.js', 'utf8');
-        const source = [
-            adsSource,
-            existsSync('src/assets/js/Data/adsterra-manager.js')
-                ? readFileSync('src/assets/js/Data/adsterra-manager.js', 'utf8')
-                : ''
-        ].join('\n');
+        const managerSource = readFileSync('src/assets/js/Data/infolinks-manager.js', 'utf8');
+        const source = [adsSource, managerSource].join('\n');
 
         expect(source).toMatch(/(?:eligible|allowlist)/i);
         expect(source).toMatch(/(?:consent|adStorage|advertisingConsent)/i);
@@ -44,8 +40,36 @@ describe('Privacy-aware third-party loading', () => {
         expect(adsSource).toMatch(/protected/);
         expect(adsSource).toMatch(/non-eea|non-protected/);
         expect(adsSource).toContain('advertisingConsent');
-        expect(adsSource).toMatch(/!state\.advertisingConsent[\s\S]*import\(AD_MANAGER_URL\)/);
+        expect(adsSource).toMatch(/!state\.advertisingConsent[\s\S]*import\([^)]*MANAGER/);
         expect(adsSource).toContain('window.ClashToolsCMP');
+        expect(managerSource).toContain('initInfolinksAds');
+        expect(managerSource).toContain('hasConfiguredIntegration');
+        expect(managerSource).not.toMatch(/data-[a-z-]*slot|cp-ad-slot|placeholder/i);
+    });
+
+    it('skips CMP UI and regional context requests when the provider is disabled', () => {
+        const source = readFileSync('src/assets/js/Data/ads.js', 'utf8');
+        const disabledStart = source.indexOf('if (!state.providerConfigured)');
+        const configuredStart = source.indexOf('appendStylesheet(); installFacade(true)', disabledStart);
+        const disabledBranch = source.slice(disabledStart, configuredStart);
+
+        expect(disabledStart).toBeGreaterThan(-1);
+        expect(configuredStart).toBeGreaterThan(disabledStart);
+        expect(disabledBranch).toContain("state.reason = 'provider-disabled'");
+        expect(disabledBranch).toContain('installFacade(false)');
+        expect(disabledBranch).toContain('return;');
+        expect(disabledBranch).not.toContain('showPanel');
+        expect(disabledBranch).not.toContain('loadRegionContext');
+    });
+
+    it('keeps configured providers behind the existing CMP and regional consent flow', () => {
+        const source = readFileSync('src/assets/js/Data/ads.js', 'utf8');
+
+        expect(source).toContain('configuredProvider');
+        expect(source).toContain("config?.enabled !== true");
+        expect(source).toContain("new URL(source, window.location.origin).protocol === 'https:'");
+        expect(source).toContain('appendStylesheet(); installFacade(true)');
+        expect(source).toContain('updateFromContext(await loadRegionContext())');
     });
 
     it('reveals public content without waiting for registered application tasks', () => {

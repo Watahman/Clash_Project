@@ -12,8 +12,10 @@
 }
 
 .cp-ad-consent__panel {
+    box-sizing: border-box;
     display: flex;
     width: min(100%, 52rem);
+    min-width: 0;
     align-items: center;
     justify-content: space-between;
     gap: 1.25rem;
@@ -85,11 +87,14 @@
     }
 
     .cp-ad-consent__actions {
+        min-width: 0;
         justify-content: stretch;
     }
 
     .cp-ad-consent__actions .button {
         flex: 1 1 9rem;
+        min-width: 0;
+        white-space: normal;
     }
 }
 

@@ -14,7 +14,7 @@ const redirectingTargets = new Set([
     '/subpages/register.html'
 ]);
 const publicDocuments = [];
-const adLoader = '/assets/js/Data/ads.js?v=20260910-adsterra-v2';
+const adLoader = '/assets/js/Data/ads.js?v=20260916-infolinks-v1';
 const adEligibleFiles = new Set([
     'index.html',
     'guides.html',
@@ -23,9 +23,7 @@ const adEligibleFiles = new Set([
     'cwl-tracker.html',
     'clan-management.html',
     'bracket-generator.html',
-    'minigames.html',
     'about.html',
-    'changelog.html',
     'guides/cwl-attack-defense.html',
     'guides/cwl-availability.html',
     'guides/cwl-bonus-medals.html',
@@ -33,7 +31,16 @@ const adEligibleFiles = new Set([
     'guides/cwl-season-history.html',
     'guides/fair-cwl-roster.html',
     'guides/missed-attacks.html',
-    'guides/spreadsheet-vs-cwl-planner.html',
+    'guides/spreadsheet-vs-cwl-planner.html'
+]);
+const adExcludedFiles = new Set([
+    '404.html',
+    'advanced-stats.html',
+    'achievements.html',
+    'changelog.html',
+    'minigames.html',
+    'subpages/contact.html',
+    'subpages/cookies.html',
     'subpages/achievements.html',
     'subpages/advanced-stats.html',
     'subpages/bracket-generator.html',
@@ -43,22 +50,15 @@ const adEligibleFiles = new Set([
     'subpages/dashboard.html',
     'subpages/explore.html',
     'subpages/groups.html',
-    'subpages/minigames.html',
-    'subpages/war-operation-board.html'
-]);
-const adExcludedFiles = new Set([
-    '404.html',
-    'advanced-stats.html',
-    'achievements.html',
-    'subpages/contact.html',
-    'subpages/cookies.html',
     'subpages/login.html',
+    'subpages/minigames.html',
     'subpages/privacy.html',
     'subpages/profile.html',
     'subpages/register.html',
-    'subpages/terms.html'
+    'subpages/terms.html',
+    'subpages/war-operation-board.html'
 ]);
-const directNetworkScript = /https:\/\/(?:www\.googletagmanager\.com|pagead2\.googlesyndication\.com|pl31261194\.profitableratecpmnetwork\.com|www\.highrevenueformat\.com)/i;
+const directNetworkScript = /https:\/\/(?:www\.googletagmanager\.com|pagead2\.googlesyndication\.com|resources\.infolinks\.com)/i;
 
 for (const route of publicRoutes) {
     const source = await readFile(resolve('dist', route.file), 'utf8');

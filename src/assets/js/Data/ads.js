@@ -1,27 +1,26 @@
 (() => {
     'use strict';
 
-    const ADS_ENABLED = true;
-    if (!ADS_ENABLED) return;
-
-    const AD_MANAGER_URL = '/assets/js/Data/adsterra-manager.js?v=20260910-adsterra-v3';
+    const CONFIG_URL = '/assets/js/Data/infolinks-config.js?v=20260916-infolinks-v1';
+    const AD_MANAGER_URL = '/assets/js/Data/infolinks-manager.js?v=20260916-infolinks-v1';
     const STYLE_ID = 'clashpanel-ad-consent-css';
     const STYLE_URL = '/assets/css/ad-consent.css?v=20260910-ad-consent-v1';
-    const STORAGE_KEY = 'clashpanel:advertising-consent:v1';
-    const STORAGE_VERSION = 'v1';
+    const STORAGE_KEY = 'clashpanel:advertising-consent:v2';
+    const LEGACY_STORAGE_KEY = 'clashpanel:advertising-consent:v1';
+    const STORAGE_VERSION = 'v2';
     const DECISIONS = Object.freeze({ ACCEPTED: 'accepted', REJECTED: 'rejected' });
     const COPY = Object.freeze({
-        en: { title: 'Advertising choice', body: 'Allow Adsterra and its partners to use cookies or device data to show and measure ads. You can change this choice at any time.', privacy: 'Read the privacy policy', accept: 'Accept advertising', reject: 'Reject advertising', cancel: 'Cancel' },
-        nl: { title: 'Keuze voor advertenties', body: 'Sta Adsterra en partners toe cookies of apparaatgegevens te gebruiken om advertenties te tonen en te meten. Je kunt deze keuze altijd wijzigen.', privacy: 'Lees het privacybeleid', accept: 'Advertenties toestaan', reject: 'Advertenties weigeren', cancel: 'Annuleren' },
-        fr: { title: 'Choix publicitaire', body: 'Autorisez Adsterra et ses partenaires à utiliser des cookies ou des données de l’appareil pour afficher et mesurer les publicités. Vous pouvez modifier ce choix à tout moment.', privacy: 'Lire la politique de confidentialité', accept: 'Accepter la publicité', reject: 'Refuser la publicité', cancel: 'Annuler' },
-        de: { title: 'Werbeauswahl', body: 'Erlaube Adsterra und Partnern, Cookies oder Gerätedaten zum Anzeigen und Messen von Werbung zu verwenden. Du kannst diese Auswahl jederzeit ändern.', privacy: 'Datenschutzerklärung lesen', accept: 'Werbung akzeptieren', reject: 'Werbung ablehnen', cancel: 'Abbrechen' },
-        es: { title: 'Elección de publicidad', body: 'Permite que Adsterra y sus socios usen cookies o datos del dispositivo para mostrar y medir anuncios. Puedes cambiar esta elección cuando quieras.', privacy: 'Leer la política de privacidad', accept: 'Aceptar publicidad', reject: 'Rechazar publicidad', cancel: 'Cancelar' }
+        en: { title: 'Advertising choice', body: 'Allow Infolinks and its partners to use cookies or device data to show and measure ads. You can change this choice at any time.', privacy: 'Read the privacy policy', accept: 'Accept advertising', reject: 'Reject advertising', cancel: 'Cancel' },
+        nl: { title: 'Keuze voor advertenties', body: 'Sta Infolinks en partners toe cookies of apparaatgegevens te gebruiken om advertenties te tonen en te meten. Je kunt deze keuze altijd wijzigen.', privacy: 'Lees het privacybeleid', accept: 'Advertenties toestaan', reject: 'Advertenties weigeren', cancel: 'Annuleren' },
+        fr: { title: 'Choix publicitaire', body: 'Autorisez Infolinks et ses partenaires à utiliser des cookies ou des données de l’appareil pour afficher et mesurer les publicités. Vous pouvez modifier ce choix à tout moment.', privacy: 'Lire la politique de confidentialité', accept: 'Accepter la publicité', reject: 'Refuser la publicité', cancel: 'Annuler' },
+        de: { title: 'Werbeauswahl', body: 'Erlaube Infolinks und Partnern, Cookies oder Gerätedaten zum Anzeigen und Messen von Werbung zu verwenden. Du kannst diese Auswahl jederzeit ändern.', privacy: 'Datenschutzerklärung lesen', accept: 'Werbung akzeptieren', reject: 'Werbung ablehnen', cancel: 'Abbrechen' },
+        es: { title: 'Elección de publicidad', body: 'Permite que Infolinks y sus socios usen cookies o datos del dispositivo para mostrar y medir anuncios. Puedes cambiar esta elección cuando quieras.', privacy: 'Leer la política de privacidad', accept: 'Aceptar publicidad', reject: 'Rechazar publicidad', cancel: 'Cancelar' }
     });
     const state = {
         cmpLoaded: false, regionReady: false, classification: 'unknown', consentRequired: true,
         decision: null, advertisingConsent: false, consentReady: false, consentValues: null,
         reason: 'region-not-ready', managerPromise: null, panel: null, editing: false,
-        restoreFocus: null
+        restoreFocus: null, providerConfigured: false
     };
 
     function isTopLevelPage() {
@@ -47,7 +46,9 @@
             const stored = window.localStorage.getItem(STORAGE_KEY) || '';
             const prefix = `${STORAGE_VERSION}:`;
             const decision = stored.startsWith(prefix) ? stored.slice(prefix.length) : '';
-            return Object.values(DECISIONS).includes(decision) ? decision : null;
+            if (Object.values(DECISIONS).includes(decision)) return decision;
+            const legacy = window.localStorage.getItem(LEGACY_STORAGE_KEY) || '';
+            return legacy === 'v1:rejected' ? DECISIONS.REJECTED : null;
         } catch { return null; }
     }
 
@@ -130,7 +131,7 @@
         const detail = { advertisingConsent: state.advertisingConsent, consentRequired: state.consentRequired, classification: state.classification, regionReady: state.regionReady, decision: state.decision, reason: state.reason };
         window.dispatchEvent(new CustomEvent('clashtools:ad-consent-changed', { detail }));
         window.dispatchEvent(new CustomEvent('ad-consent-changed', { detail }));
-        if (state.advertisingConsent) initAdsterraAfterConsent();
+        if (state.advertisingConsent) initInfolinksAfterConsent();
     }
 
     function choose(decision) {
@@ -157,38 +158,60 @@
         dispatchConsentChange();
     }
 
-    function initAdsterraAfterConsent() {
+    function initInfolinksAfterConsent() {
         if (!state.advertisingConsent || state.managerPromise) return;
         state.managerPromise = import(AD_MANAGER_URL).then(manager => {
             if (!manager.isAdRouteEligible?.()) return null;
-            const init = manager.initAdsterraAds || manager.init;
+            const init = manager.initInfolinksAds || manager.init;
             if (typeof init === 'function') init();
             return manager;
         }).catch(() => null);
     }
 
-    function bindPreferenceControls() {
+    function bindPreferenceControls(enabled = true) {
         document.querySelectorAll('[data-cookie-preferences]').forEach(control => {
-            control.hidden = false;
-            control.onclick = () => window.ClashToolsCMP?.openPreferences?.();
+            control.hidden = !enabled;
+            control.onclick = enabled ? () => window.ClashToolsCMP?.openPreferences?.() : null;
         });
     }
 
-    function installFacade() {
+    function installFacade(providerConfigured = true) {
+        state.providerConfigured = providerConfigured;
         state.cmpLoaded = true;
         const api = {
             hasAdvertisingConsent: () => state.advertisingConsent === true,
-            openPreferences: () => showPanel(Boolean(state.decision)),
-            debug: () => ({ provider: 'clashpanel', cmpLoaded: state.cmpLoaded, regionReady: state.regionReady, classification: state.classification, consentRequired: state.consentRequired, consentReady: state.consentReady, consentValues: state.consentValues, decision: state.decision, advertisingConsent: state.advertisingConsent, reason: state.reason })
+            debug: () => ({ provider: 'clashpanel', providerConfigured: state.providerConfigured, cmpLoaded: state.cmpLoaded, regionReady: state.regionReady, classification: state.classification, consentRequired: state.consentRequired, consentReady: state.consentReady, consentValues: state.consentValues, decision: state.decision, advertisingConsent: state.advertisingConsent, reason: state.reason })
         };
+        if (providerConfigured) api.openPreferences = () => showPanel(Boolean(state.decision));
         window.ClashToolsAdvertisingConsent = api;
         window.ClashToolsCMP = api;
-        bindPreferenceControls();
+        bindPreferenceControls(providerConfigured);
         window.dispatchEvent(new CustomEvent('clashtools:cmp-ready'));
     }
 
+    function configuredProvider(module) {
+        const config = module?.INFOLINKS_CONFIG;
+        const source = String(config?.script?.src || '').trim();
+        if (config?.enabled !== true || !source) return false;
+        try { return new URL(source, window.location.origin).protocol === 'https:'; }
+        catch { return false; }
+    }
+
+    async function loadProviderConfiguration() {
+        try { return configuredProvider(await import(CONFIG_URL)); }
+        catch { return false; }
+    }
+
     async function start() {
-        appendStylesheet(); installFacade();
+        state.providerConfigured = await loadProviderConfiguration();
+        if (!state.providerConfigured) {
+            state.reason = 'provider-disabled';
+            state.consentRequired = false;
+            state.consentReady = true;
+            installFacade(false);
+            return;
+        }
+        appendStylesheet(); installFacade(true);
         updateFromContext(await loadRegionContext());
     }
 

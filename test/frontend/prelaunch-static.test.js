@@ -136,21 +136,20 @@ describe('Pre-launch static contract', () => {
         );
     });
 
-    it('keeps Adsterra policy links and origins constrained to the report-only ad script policy', () => {
+    it('keeps Infolinks disclosure links aligned with the report-only ad script policy', () => {
         const headers = readFileSync('src/_headers', 'utf8');
         const scriptPolicy = headers.match(/Content-Security-Policy-Report-Only:[^\r\n]+/)?.[0] || '';
         const privacy = readFileSync('src/subpages/privacy.html', 'utf8');
         const cookies = readFileSync('src/subpages/cookies.html', 'utf8');
 
-        expect(scriptPolicy).toContain('https://pl31261194.profitableratecpmnetwork.com');
-        expect(scriptPolicy).toContain('https://www.highrevenueformat.com');
         expect(scriptPolicy).toContain('script-src');
+        expect(scriptPolicy).toMatch(/script-src[^;]+https:\/\/resources\.infolinks\.com/);
         expect(scriptPolicy).toMatch(/script-src[^;]+https:\/\/fundingchoicesmessages\.google\.com/);
         expect(scriptPolicy).toMatch(/connect-src[^;]+https:\/\/fundingchoicesmessages\.google\.com/);
         expect(scriptPolicy).not.toMatch(/script-src[^;]*\*/);
         for (const document of [privacy, cookies]) {
-            expect(document).toContain('https://adsterra.com/privacy-policy-managed');
-            expect(document).toContain('https://adsterra.com/cookies/');
+            expect(document).toContain('Infolinks');
+            expect(document).toContain('https://sites0001.infolinks.com/privacy-policy');
         }
     });
 
