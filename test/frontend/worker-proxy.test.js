@@ -65,18 +65,8 @@ describe('Cloudflare API proxy', () => {
         expect(await response.text()).toBe('');
     });
 
-    it('checks backend health and readiness from the scheduled monitor', async () => {
-        vi.stubGlobal('fetch', vi.fn(async () => Response.json({ status: 'ok' })));
-        let scheduledPromise;
-
-        worker.scheduled({}, env(), { waitUntil: promise => { scheduledPromise = promise; } });
-        await scheduledPromise;
-
-        expect(fetch).toHaveBeenCalledTimes(2);
-        expect(fetch.mock.calls.map(([url]) => String(url))).toEqual([
-            'https://backend.example/health',
-            'https://backend.example/ready'
-        ]);
+    it('does not schedule periodic backend health requests', () => {
+        expect(worker.scheduled).toBeUndefined();
     });
     it.each([
         ['/privacy', '/subpages/privacy'],

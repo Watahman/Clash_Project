@@ -113,13 +113,12 @@ gcloud run deploy $ServiceName `
     --cpu-boost `
     --no-cpu-throttling `
     --env-vars-file ./cloudrun-env.yaml `
-    --update-secrets="SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:latest,API_PROXY_SECRET=API_PROXY_SECRET:latest,ADVANCED_STATS_SCHEDULER_SECRET=ADVANCED_STATS_SCHEDULER_SECRET:latest" `
-    --remove-secrets="_API_KEY_SUPABASE,POSTHOG_PROJECT_API_KEY,_API_KEY_SECR_SUPABASE,CLASH_API_KEY_POOL,_API_KEY_ALL,_API_KEY_ALL2,_API_KEY_ALL3"
+    --update-secrets="SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:latest,API_PROXY_SECRET=API_PROXY_SECRET:latest,ADVANCED_STATS_SCHEDULER_SECRET=ADVANCED_STATS_SCHEDULER_SECRET:latest"
 
 if ($LASTEXITCODE -ne 0) {
     throw "Cloud Run deploy is mislukt."
 }
 
-Write-Host "Deploy klaar. Controleer daarna de Advanced Stats scheduler met configure-advanced-stats-production.ps1." -ForegroundColor Green
+Write-Host "Deploy klaar. Advanced Stats collection en scheduler blijven uit; start configure-advanced-stats-production.ps1 niet zonder aparte releasebeslissing." -ForegroundColor Green
 Write-Host "Secret Manager bindings actief voor: SUPABASE_SERVICE_ROLE_KEY, API_PROXY_SECRET en ADVANCED_STATS_SCHEDULER_SECRET." -ForegroundColor Cyan
 Write-Host "_API_KEY_SUPABASE en POSTHOG_PROJECT_API_KEY worden als gewone env vars uit cloudrun-env.yaml geladen." -ForegroundColor Cyan

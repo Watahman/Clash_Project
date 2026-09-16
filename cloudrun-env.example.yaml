@@ -17,9 +17,9 @@ AUTH_PASSWORD_RESET_REDIRECT_URL: "https://clashpanel.com/subpages/login.html"
 AUTH_GOOGLE_CALLBACK_URL: "https://clashpanel.com/api/AuthGoogleCallback"
 
 # Advanced Stats runtime.
-# Collection and enrollment are separate switches: collection must stay enabled
-# for already-enrolled players even while new enrollment remains restricted.
-ADVANCED_STATS_COLLECTION_ENABLED: "true"
+# Keep collection off while Advanced Stats is Coming Soon and its scheduler is paused.
+# Re-enabling it requires a separate, explicit release decision.
+ADVANCED_STATS_COLLECTION_ENABLED: "false"
 ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED: "false"
 ADVANCED_STATS_ROLLOUT_USER_IDS: ""
 
