@@ -29,6 +29,8 @@ describe('Cloudflare deployment safety', () => {
         const code = read('deploy-phase8-preview.ps1');
         expect(code).toMatch(/git fetch origin Development --quiet/i);
         expect(code).toMatch(/Get-TaggedRevisionJson/);
+        expect(code).toMatch(/CandidateRevision\.spec\.containers/);
+        expect(code).toMatch(/request-based CPU billing/i);
         expect(code).toMatch(/latestCreatedRevisionName/);
         expect(code).toMatch(/tagged candidate is not the latest created revision/i);
         expect(code).toMatch(/service-account=clashpanel-api-runtime@\$ProjectId\.iam\.gserviceaccount\.com/i);

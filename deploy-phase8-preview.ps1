@@ -89,8 +89,8 @@ function Get-EnvValue {
         [Parameter(Mandatory = $true)]$Service,
         [Parameter(Mandatory = $true)][string]$Name
     )
-    $containers = @($Service.spec.template.spec.containers)
-    if ($containers.Count -lt 1) { $containers = @($Service.spec.containers) }
+    $containers = @($Service.spec.containers | Where-Object { $_ })
+    if ($containers.Count -lt 1) { $containers = @($Service.spec.template.spec.containers | Where-Object { $_ }) }
     if ($containers.Count -lt 1) { return $null }
     $entry = @($containers[0].env) | Where-Object { $_.name -eq $Name } | Select-Object -First 1
     if (-not $entry) { return $null }
@@ -106,6 +106,18 @@ function Assert-Phase8StillSafe {
     $tagPercent = 0
     if ($null -ne $tagTraffic.percent -and [string]$tagTraffic.percent -ne "") { $tagPercent = [int]$tagTraffic.percent }
     if ($tagPercent -ne 0) { throw "Phase 8 safety check failed: tagged candidate has $tagPercent% normal production traffic." }
+    if ([string]$CandidateRevision.spec.serviceAccountName -ne "clashpanel-api-runtime@$ProjectId.iam.gserviceaccount.com") {
+        throw "Phase 8 safety check failed: tagged candidate uses the wrong runtime service account."
+    }
+    if ([string]$CandidateRevision.metadata.annotations.'run.googleapis.com/cpu-throttling' -ne 'true') {
+        throw "Phase 8 safety check failed: tagged candidate does not use request-based CPU billing."
+    }
+    $candidateEnv = @($CandidateRevision.spec.containers[0].env)
+    $secretNames = @($candidateEnv | Where-Object { $_.valueFrom.secretKeyRef.name } | ForEach-Object { [string]$_.valueFrom.secretKeyRef.name } | Sort-Object -Unique)
+    $expectedSecrets = @('ADVANCED_STATS_SCHEDULER_SECRET','API_PROXY_SECRET','SUPABASE_SERVICE_ROLE_KEY')
+    if (($secretNames -join ',') -ne ($expectedSecrets -join ',')) {
+        throw "Phase 8 safety check failed: tagged candidate Secret Manager bindings do not match production parity."
+    }
     $collection = Get-EnvValue -Service $CandidateRevision -Name "ADVANCED_STATS_COLLECTION_ENABLED"
     $publicEnrollment = Get-EnvValue -Service $CandidateRevision -Name "ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED"
     if ($publicEnrollment -ne "false") { throw "Phase 8 safety check failed: ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED must still be false before preview auth setup." }
@@ -146,8 +158,8 @@ function Get-ProxySecretValue {
         [Parameter(Mandatory = $true)][string]$GcloudExecutable
     )
 
-    $containers = @($Service.spec.template.spec.containers)
-    if ($containers.Count -lt 1) { $containers = @($Service.spec.containers) }
+    $containers = @($Service.spec.containers | Where-Object { $_ })
+    if ($containers.Count -lt 1) { $containers = @($Service.spec.template.spec.containers | Where-Object { $_ }) }
     if ($containers.Count -lt 1) {
         throw "Cloud Run runtime configuration has no container configuration."
     }
