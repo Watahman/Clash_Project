@@ -13,6 +13,17 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Assert-PreviewGitState {
+    $status = @(git status --porcelain)
+    if ($LASTEXITCODE -ne 0) { throw "Git status could not be read." }
+    if ($status.Count -gt 0) { throw "Phase 8 frontend deploy refused: the working tree contains local changes." }
+    git fetch origin Development --quiet
+    if ($LASTEXITCODE -ne 0) { throw "Phase 8 frontend deploy refused: origin/Development could not be fetched." }
+    $head = (git rev-parse HEAD).Trim()
+    $developmentHead = (git rev-parse origin/Development).Trim()
+    if ($head -ne $developmentHead) { throw "Phase 8 frontend deploy refused: HEAD ($head) does not match origin/Development ($developmentHead)." }
+}
+
 function Require-Command {
     param([Parameter(Mandatory = $true)][string]$Name)
     $command = Get-Command $Name -ErrorAction SilentlyContinue
@@ -60,13 +71,26 @@ function Get-TaggedCandidateUrl {
     return $url
 }
 
+function Get-TaggedRevisionJson {
+    param(
+        [Parameter(Mandatory = $true)]$Service,
+        [Parameter(Mandatory = $true)][string]$GcloudExecutable
+    )
+    $tagTraffic = @($Service.status.traffic) | Where-Object { $_.tag -eq $TagName } | Select-Object -First 1
+    $revisionName = [string]$tagTraffic.revisionName
+    if (-not $revisionName) { throw "Tagged Cloud Run candidate '$TagName' has no revision." }
+    $raw = (& $GcloudExecutable run revisions describe $revisionName --project=$ProjectId --region=$Region --format=json)
+    if ($LASTEXITCODE -ne 0) { throw "Could not inspect tagged Cloud Run revision '$revisionName'." }
+    return (($raw -join "`n") | ConvertFrom-Json)
+}
+
 function Get-EnvValue {
     param(
         [Parameter(Mandatory = $true)]$Service,
         [Parameter(Mandatory = $true)][string]$Name
     )
-
     $containers = @($Service.spec.template.spec.containers)
+    if ($containers.Count -lt 1) { $containers = @($Service.spec.containers) }
     if ($containers.Count -lt 1) { return $null }
     $entry = @($containers[0].env) | Where-Object { $_.name -eq $Name } | Select-Object -First 1
     if (-not $entry) { return $null }
@@ -74,43 +98,26 @@ function Get-EnvValue {
 }
 
 function Assert-Phase8StillSafe {
-    param([Parameter(Mandatory = $true)]$Service)
-
+    param(
+        [Parameter(Mandatory = $true)]$Service,
+        [Parameter(Mandatory = $true)]$CandidateRevision
+    )
     $tagTraffic = @($Service.status.traffic) | Where-Object { $_.tag -eq $TagName } | Select-Object -First 1
     $tagPercent = 0
-    if ($null -ne $tagTraffic.percent -and [string]$tagTraffic.percent -ne "") {
-        $tagPercent = [int]$tagTraffic.percent
-    }
-    if ($tagPercent -ne 0) {
-        throw "Phase 8 safety check failed: tagged candidate has $tagPercent% normal production traffic."
-    }
-
-    $collection = Get-EnvValue -Service $Service -Name "ADVANCED_STATS_COLLECTION_ENABLED"
-    $publicEnrollment = Get-EnvValue -Service $Service -Name "ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED"
-    if ($publicEnrollment -ne "false") {
-        throw "Phase 8 safety check failed: ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED must still be false before preview auth setup."
-    }
+    if ($null -ne $tagTraffic.percent -and [string]$tagTraffic.percent -ne "") { $tagPercent = [int]$tagTraffic.percent }
+    if ($tagPercent -ne 0) { throw "Phase 8 safety check failed: tagged candidate has $tagPercent% normal production traffic." }
+    $collection = Get-EnvValue -Service $CandidateRevision -Name "ADVANCED_STATS_COLLECTION_ENABLED"
+    $publicEnrollment = Get-EnvValue -Service $CandidateRevision -Name "ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED"
+    if ($publicEnrollment -ne "false") { throw "Phase 8 safety check failed: ADVANCED_STATS_PUBLIC_ENROLLMENT_ENABLED must still be false before preview auth setup." }
     if ($collection -eq "false") { return }
-    if ($collection -ne "true" -or -not $AllowEnabledCollection) {
-        throw "Phase 8 safety check failed: enabled collection requires -AllowEnabledCollection."
-    }
-
-    $allowlist = Get-EnvValue -Service $Service -Name "ADVANCED_STATS_ROLLOUT_USER_IDS"
+    if ($collection -ne "true" -or -not $AllowEnabledCollection) { throw "Phase 8 safety check failed: enabled collection requires -AllowEnabledCollection." }
+    $allowlist = Get-EnvValue -Service $CandidateRevision -Name "ADVANCED_STATS_ROLLOUT_USER_IDS"
     $allowlistIds = @([string]$allowlist -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
-    if ($allowlistIds.Count -ne 1) {
-        throw "Phase 8 safety check failed: enabled collection must remain limited to one developer UUID."
-    }
-    try { [void][Guid]::Parse($allowlistIds[0]) } catch {
-        throw "Phase 8 safety check failed: rollout allowlist is not a valid developer UUID."
-    }
-
-    $containers = @($Service.spec.template.spec.containers)
-    $schedulerSecret = @($containers[0].env) |
-        Where-Object { $_.name -eq "ADVANCED_STATS_SCHEDULER_SECRET" } |
-        Select-Object -First 1
-    if (-not $schedulerSecret.valueFrom.secretKeyRef.name) {
-        throw "Phase 8 safety check failed: enabled collection has no Scheduler Secret Manager binding."
-    }
+    if ($allowlistIds.Count -ne 1) { throw "Phase 8 safety check failed: enabled collection must remain limited to one developer UUID." }
+    try { [void][Guid]::Parse($allowlistIds[0]) } catch { throw "Phase 8 safety check failed: rollout allowlist is not a valid developer UUID." }
+    $containers = @($CandidateRevision.spec.containers)
+    $schedulerSecret = @($containers[0].env) | Where-Object { $_.name -eq "ADVANCED_STATS_SCHEDULER_SECRET" } | Select-Object -First 1
+    if (-not $schedulerSecret.valueFrom.secretKeyRef.name) { throw "Phase 8 safety check failed: enabled collection has no Scheduler Secret Manager binding." }
 }
 
 function Normalize-PreviewOrigin {
@@ -140,8 +147,9 @@ function Get-ProxySecretValue {
     )
 
     $containers = @($Service.spec.template.spec.containers)
+    if ($containers.Count -lt 1) { $containers = @($Service.spec.containers) }
     if ($containers.Count -lt 1) {
-        throw "Cloud Run service '$ServiceName' has no container configuration."
+        throw "Cloud Run runtime configuration has no container configuration."
     }
 
     $envEntry = @($containers[0].env) |
@@ -191,6 +199,8 @@ if (-not (Test-Path "./worker/index.js")) {
     throw "worker/index.js is missing."
 }
 
+Assert-PreviewGitState
+
 $normalizedPreviewOrigin = ""
 if (-not [string]::IsNullOrWhiteSpace($PreviewOrigin)) {
     $normalizedPreviewOrigin = Normalize-PreviewOrigin -Origin $PreviewOrigin
@@ -214,13 +224,18 @@ Run-NativeChecked -Executable $wranglerExecutable -Arguments @("--version") -Fai
 Run-NativeChecked -Executable $wranglerExecutable -Arguments @("whoami") -FailureMessage "Cloudflare authentication check failed. Run 'npx wrangler login' and retry"
 
 $service = Get-ServiceJson -GcloudExecutable $gcloudExecutable
-Assert-Phase8StillSafe -Service $service
+$candidateRevision = Get-TaggedRevisionJson -Service $service -GcloudExecutable $gcloudExecutable
+Assert-Phase8StillSafe -Service $service -CandidateRevision $candidateRevision
 $candidateUrl = Get-TaggedCandidateUrl -Service $service
 
 if (-not $PreflightOnly) {
     $previewCallback = "$normalizedPreviewOrigin/api/AuthGoogleCallback"
-    $configuredCallback = Get-EnvValue -Service $service -Name "AUTH_GOOGLE_CALLBACK_URL"
+    $configuredCallback = Get-EnvValue -Service $candidateRevision -Name "AUTH_GOOGLE_CALLBACK_URL"
     if ($configuredCallback -ne $previewCallback) {
+        $tagTraffic = @($service.status.traffic) | Where-Object { $_.tag -eq $TagName } | Select-Object -First 1
+        if ([string]$service.status.latestCreatedRevisionName -ne [string]$tagTraffic.revisionName) {
+            throw "Phase 8 callback update refused: tagged candidate is not the latest created revision. Rerun deploy-cloud-run-phase8.ps1 first so the callback update cannot inherit production config."
+        }
         Write-Host "Binding Google OAuth callback to the isolated Phase 8 preview..." -ForegroundColor Cyan
         Run-NativeChecked `
             -Executable $gcloudExecutable `
@@ -228,6 +243,8 @@ if (-not $PreflightOnly) {
                 "run", "services", "update", $ServiceName,
                 "--project=$ProjectId",
                 "--region=$Region",
+                "--service-account=clashpanel-api-runtime@$ProjectId.iam.gserviceaccount.com",
+                "--cpu-throttling",
                 "--update-env-vars=AUTH_GOOGLE_CALLBACK_URL=$previewCallback",
                 "--no-traffic",
                 "--tag=$TagName"
@@ -235,16 +252,17 @@ if (-not $PreflightOnly) {
             -FailureMessage "Could not bind the Phase 8 Google OAuth callback to the workers.dev preview"
 
         $service = Get-ServiceJson -GcloudExecutable $gcloudExecutable
-        Assert-Phase8StillSafe -Service $service
+        $candidateRevision = Get-TaggedRevisionJson -Service $service -GcloudExecutable $gcloudExecutable
+        Assert-Phase8StillSafe -Service $service -CandidateRevision $candidateRevision
         $candidateUrl = Get-TaggedCandidateUrl -Service $service
-        $configuredCallback = Get-EnvValue -Service $service -Name "AUTH_GOOGLE_CALLBACK_URL"
+        $configuredCallback = Get-EnvValue -Service $candidateRevision -Name "AUTH_GOOGLE_CALLBACK_URL"
     }
     if ($configuredCallback -ne $previewCallback) {
         throw "Phase 8 callback verification failed: Cloud Run did not retain the expected workers.dev callback URL."
     }
 }
 
-$proxySecret = Get-ProxySecretValue -Service $service -GcloudExecutable $gcloudExecutable
+$proxySecret = Get-ProxySecretValue -Service $candidateRevision -GcloudExecutable $gcloudExecutable
 
 Write-Host "Building the current Advanced Stats candidate locally..." -ForegroundColor Cyan
 Run-NativeChecked -Executable $npmExecutable -Arguments @("run", "build") -FailureMessage "Frontend build failed"
@@ -286,7 +304,7 @@ try {
         Write-Host "  Tagged backend candidate: found"
         Write-Host "  Normal production traffic: unchanged"
         Write-Host "  Public enrollment: still OFF"
-        Write-Host "  Collection: $((Get-EnvValue -Service $service -Name 'ADVANCED_STATS_COLLECTION_ENABLED').ToUpperInvariant())"
+        Write-Host "  Collection: $((Get-EnvValue -Service $candidateRevision -Name 'ADVANCED_STATS_COLLECTION_ENABLED').ToUpperInvariant())"
         Write-Host "  Existing proxy credential: resolved without guessing its Secret Manager name"
         Write-Host "  Local Wrangler: available and authenticated"
         Write-Host "  Frontend build: passed"
@@ -320,7 +338,7 @@ Write-Host "  Normal production traffic to candidate: 0%"
 Write-Host "  Preview Worker: separate workers.dev Worker"
 Write-Host "  Preview origin: $normalizedPreviewOrigin"
 Write-Host "  Google OAuth callback: $normalizedPreviewOrigin/api/AuthGoogleCallback"
-Write-Host "  Collection: $((Get-EnvValue -Service $service -Name 'ADVANCED_STATS_COLLECTION_ENABLED').ToUpperInvariant())"
+Write-Host "  Collection: $((Get-EnvValue -Service $candidateRevision -Name 'ADVANCED_STATS_COLLECTION_ENABLED').ToUpperInvariant())"
 Write-Host "  Public enrollment: OFF"
 Write-Host "  Custom-domain route: none"
 Write-Host "  Cron trigger: none"
