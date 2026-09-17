@@ -28,6 +28,36 @@ class AnalyticsEventTest {
     }
 
     @Test
+    void acceptsSanitizedPageView() {
+        JsonObject body = pageViewEnvelope("https://clashpanel.com/app/cwl-planner");
+        assertDoesNotThrow(() -> AnalyticsEvent.validateClientEnvelope(body));
+    }
+
+    @Test
+    void rejectsPageViewWithQueryFragmentOrExtraProperties() {
+        assertThrows(IllegalArgumentException.class, () -> AnalyticsEvent.validateClientEnvelope(
+                pageViewEnvelope("https://clashpanel.com/app/cwl-planner?token=secret")
+        ));
+        assertThrows(IllegalArgumentException.class, () -> AnalyticsEvent.validateClientEnvelope(
+                pageViewEnvelope("https://clashpanel.com/app/cwl-planner#private")
+        ));
+
+        JsonObject body = pageViewEnvelope("https://clashpanel.com/app/cwl-planner");
+        body.getAsJsonObject("properties").addProperty("email", "not-allowed");
+        assertThrows(IllegalArgumentException.class, () -> AnalyticsEvent.validateClientEnvelope(body));
+    }
+
+    @Test
+    void rejectsPageViewWithoutCurrentUrl() {
+        JsonObject body = new JsonObject();
+        body.addProperty("event", AnalyticsEvent.PAGE_VIEW);
+        body.addProperty("anonymous_id", "anon_123");
+        body.add("properties", new JsonObject());
+
+        assertThrows(IllegalArgumentException.class, () -> AnalyticsEvent.validateClientEnvelope(body));
+    }
+
+    @Test
     void rejectsUnknownPropertiesAndTopLevelFields() {
         JsonObject body = new JsonObject();
         body.addProperty("event", AnalyticsEvent.DATA_SAVED);
@@ -42,5 +72,15 @@ class AnalyticsEventTest {
         body.add("properties", new JsonObject());
         body.addProperty("response", "never-allowed");
         assertThrows(IllegalArgumentException.class, () -> AnalyticsEvent.validateClientEnvelope(body));
+    }
+
+    private static JsonObject pageViewEnvelope(String currentUrl) {
+        JsonObject body = new JsonObject();
+        body.addProperty("event", AnalyticsEvent.PAGE_VIEW);
+        body.addProperty("anonymous_id", "anon_123");
+        JsonObject properties = new JsonObject();
+        properties.addProperty("$current_url", currentUrl);
+        body.add("properties", properties);
+        return body;
     }
 }
