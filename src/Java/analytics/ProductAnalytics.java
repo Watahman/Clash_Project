@@ -80,7 +80,7 @@ public final class ProductAnalytics {
             Map<String, String> properties,
             String userId
     ) {
-        capture(event, properties, userId, null, false);
+        capture(event, properties, userId, null, false, false);
     }
 
     public void captureAuthenticated(
@@ -98,7 +98,9 @@ public final class ProductAnalytics {
         String anonymousId = body.get("anonymous_id").getAsString();
         boolean anonymousInternal = booleanValue(body, "anonymous_internal");
         String userId = isEnabled() ? optionalAuthenticatedUser(exchange) : "";
-        capture(event, clientProperties(body), userId, anonymousId, anonymousInternal);
+        Map<String, String> properties = clientProperties(body);
+        enrichPageViewProperties(event, properties);
+        capture(event, properties, userId, anonymousId, anonymousInternal, true);
         utils.sendJsonResponse(exchange, "", 204);
     }
 
@@ -124,11 +126,15 @@ public final class ProductAnalytics {
             Map<String, String> properties,
             String userId,
             String anonymousId,
-            boolean anonymousInternal
+            boolean anonymousInternal,
+            boolean clientValidated
     ) {
         try {
             if (!isEnabled() || !AnalyticsEvent.isKnown(event)) return;
-            AnalyticsEvent.validateServerProperties(properties);
+            if (!clientValidated) {
+                if (AnalyticsEvent.PAGE_VIEW.equals(event)) return;
+                AnalyticsEvent.validateServerProperties(properties);
+            }
             String distinctId = nonBlank(userId) ? userId.trim() : anonymousId;
             if (distinctId == null || distinctId.isBlank()) return;
             boolean loggedIn = nonBlank(userId);
@@ -185,6 +191,20 @@ public final class ProductAnalytics {
             properties.put(entry.getKey(), entry.getValue().getAsString());
         }
         return properties;
+    }
+
+    private void enrichPageViewProperties(String event, Map<String, String> properties) {
+        if (!AnalyticsEvent.PAGE_VIEW.equals(event)) return;
+        try {
+            URI uri = URI.create(properties.get("$current_url"));
+            String host = uri.getHost();
+            if (uri.getPort() >= 0) host += ":" + uri.getPort();
+            String pathname = uri.getRawPath();
+            properties.put("$host", host);
+            properties.put("$pathname", pathname == null || pathname.isBlank() ? "/" : pathname);
+        } catch (Exception ignored) {
+            // The client envelope already validated the URL; enrichment is best-effort only.
+        }
     }
 
     private boolean booleanValue(JsonObject body, String field) {

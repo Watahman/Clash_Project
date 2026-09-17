@@ -3,11 +3,13 @@ package Java.analytics;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.net.URI;
 import java.util.Map;
 import java.util.Set;
 
 /** The deliberately small product-event contract shared by client and server capture. */
 public final class AnalyticsEvent {
+    public static final String PAGE_VIEW = "$pageview";
     public static final String TOOL_OPENED = "tool_opened";
     public static final String TAG_SUBMITTED = "tag_submitted";
     public static final String ENTITY_LOAD_SUCCEEDED = "entity_load_succeeded";
@@ -21,6 +23,7 @@ public final class AnalyticsEvent {
             "event", "properties", "anonymous_id", "anonymous_internal"
     );
     private static final Map<String, Set<String>> CLIENT_PROPERTIES = Map.of(
+            PAGE_VIEW, Set.of("$current_url"),
             TOOL_OPENED, clientPropertySet(),
             TAG_SUBMITTED, clientPropertySet(),
             ENTITY_LOAD_SUCCEEDED, clientPropertySet(),
@@ -83,13 +86,20 @@ public final class AnalyticsEvent {
     }
 
     private static void validateProperties(String event, JsonObject properties, Set<String> allowed) {
+        if (PAGE_VIEW.equals(event) && !properties.has("$current_url")) {
+            throw new IllegalArgumentException("Pageview mist current URL");
+        }
         for (String field : properties.keySet()) {
             if (!allowed.contains(field)) throw new IllegalArgumentException("Onbekend analytics property");
             JsonElement value = properties.get(field);
             if (value == null || !value.isJsonPrimitive()) {
                 throw new IllegalArgumentException("Analytics property moet scalar zijn");
             }
-            validateValue(value.getAsString());
+            if (PAGE_VIEW.equals(event) && "$current_url".equals(field)) {
+                validateCurrentUrl(value.getAsString());
+            } else {
+                validateValue(value.getAsString());
+            }
         }
     }
 
@@ -106,6 +116,27 @@ public final class AnalyticsEvent {
             throw new IllegalArgumentException("Ongeldige anonymous_id");
         }
         return text;
+    }
+
+    private static void validateCurrentUrl(String value) {
+        if (value == null || value.isBlank() || value.length() > 2048) {
+            throw new IllegalArgumentException("Ongeldige pageview URL");
+        }
+        try {
+            URI uri = URI.create(value);
+            String scheme = uri.getScheme();
+            if (scheme == null
+                    || (!("http".equalsIgnoreCase(scheme)) && !("https".equalsIgnoreCase(scheme)))
+                    || uri.getHost() == null
+                    || uri.getHost().isBlank()
+                    || uri.getUserInfo() != null
+                    || uri.getRawQuery() != null
+                    || uri.getRawFragment() != null) {
+                throw new IllegalArgumentException("Ongeldige pageview URL");
+            }
+        } catch (IllegalArgumentException invalidUrl) {
+            throw new IllegalArgumentException("Ongeldige pageview URL");
+        }
     }
 
     private static void validateValue(String value) {

@@ -8,6 +8,7 @@ const PRODUCT_EVENTS = Object.freeze([
     'account_created',
     'tracking_enabled'
 ]);
+const STANDARD_EVENTS = Object.freeze(['$pageview']);
 
 const PROPERTY_KEYS = Object.freeze([
     'tool',
@@ -18,11 +19,15 @@ const PROPERTY_KEYS = Object.freeze([
     'result_status',
     'source'
 ]);
-const EVENT_SET = new Set(PRODUCT_EVENTS);
+const EVENT_SET = new Set([...PRODUCT_EVENTS, ...STANDARD_EVENTS]);
 const PROPERTY_SET = new Set(PROPERTY_KEYS);
+const PAGE_VIEW_EVENT = '$pageview';
+const PAGE_VIEW_URL_PROPERTY = '$current_url';
 const INTERNAL_FLAG_KEY = 'clashpanel_analytics_internal';
 const OPENED_TOOLS_KEY = '__clashpanel_product_analytics_opened_tools';
+const PAGEVIEW_SENT_KEY = '__clashpanel_product_analytics_pageview_sent';
 const MAX_VALUE_LENGTH = 80;
+const MAX_URL_LENGTH = 2048;
 
 const TOOL_ROUTE_GROUPS = Object.freeze({
     cwl_planner: Object.freeze([
@@ -147,7 +152,31 @@ function safePropertyValue(value) {
     return undefined;
 }
 
-function sanitizeProperties(properties) {
+function sanitizePageViewProperties(properties) {
+    if (!properties || typeof properties !== 'object' || Array.isArray(properties)) return {};
+    const rawUrl = typeof properties[PAGE_VIEW_URL_PROPERTY] === 'string'
+        ? properties[PAGE_VIEW_URL_PROPERTY].trim()
+        : '';
+    if (!rawUrl || rawUrl.length > MAX_URL_LENGTH) return {};
+
+    try {
+        const url = new URL(rawUrl);
+        if (!['http:', 'https:'].includes(url.protocol) || !url.hostname) return {};
+        url.username = '';
+        url.password = '';
+        url.search = '';
+        url.hash = '';
+        const cleanUrl = `${url.origin}${url.pathname || '/'}`;
+        return cleanUrl.length <= MAX_URL_LENGTH
+            ? { [PAGE_VIEW_URL_PROPERTY]: cleanUrl }
+            : {};
+    } catch {
+        return {};
+    }
+}
+
+function sanitizeProperties(event, properties) {
+    if (event === PAGE_VIEW_EVENT) return sanitizePageViewProperties(properties);
     if (!properties || typeof properties !== 'object' || Array.isArray(properties)) return {};
     const safe = {};
     Object.entries(properties).forEach(([key, value]) => {
@@ -205,9 +234,11 @@ function dispatch(payload) {
 export function captureProductEvent(event, properties = {}) {
     try {
         if (!EVENT_SET.has(event)) return false;
+        const safeProperties = sanitizeProperties(event, properties);
+        if (event === PAGE_VIEW_EVENT && !safeProperties[PAGE_VIEW_URL_PROPERTY]) return false;
         const payload = {
             event,
-            properties: sanitizeProperties(properties),
+            properties: safeProperties,
             anonymous_id: getAnonymousId(),
             anonymous_internal: isInternalTrafficFlagSet()
         };
@@ -215,6 +246,22 @@ export function captureProductEvent(event, properties = {}) {
     } catch {
         return false;
     }
+}
+
+export function trackPageView() {
+    const currentBrowser = browser();
+    if (currentBrowser[PAGEVIEW_SENT_KEY] === true) return false;
+    const href = currentBrowser.location?.href;
+    if (!href) return false;
+    const sent = captureProductEvent(PAGE_VIEW_EVENT, { [PAGE_VIEW_URL_PROPERTY]: href });
+    if (sent) {
+        try {
+            currentBrowser[PAGEVIEW_SENT_KEY] = true;
+        } catch {
+            // A non-extensible global is unusual; duplicate prevention is best-effort.
+        }
+    }
+    return sent;
 }
 
 export function trackTagSubmitted(properties = {}) {
@@ -274,6 +321,7 @@ export function trackToolOpened(tool) {
 }
 
 export function initializeProductAnalytics(pathname = browser().location?.pathname) {
+    trackPageView();
     const tool = getToolForPath(pathname);
     return tool ? trackToolOpened(tool) : false;
 }
@@ -286,7 +334,8 @@ export {
     INTERNAL_FLAG_KEY,
     PRODUCT_EVENTS,
     PROPERTY_KEYS,
-    ROUTE_TOOL_MAP
+    ROUTE_TOOL_MAP,
+    STANDARD_EVENTS
 };
 
 if (typeof window !== 'undefined') {
