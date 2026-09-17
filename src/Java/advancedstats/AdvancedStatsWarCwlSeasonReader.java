@@ -265,8 +265,15 @@ final class AdvancedStatsWarCwlSeasonReader {
             String seasonBasis,
             AdvancedStatsWarCwlMetrics.AttackMetrics metrics,
             List<RoundData> rounds,
-            List<String> unknown
+            List<String> unknown,
+            String clanName
     ) {
+        SeasonData(String season, String league, Integer position, String seasonBasis,
+                   AdvancedStatsWarCwlMetrics.AttackMetrics metrics, List<RoundData> rounds,
+                   List<String> unknown) {
+            this(season, league, position, seasonBasis, metrics, rounds, unknown, null);
+        }
+
         SeasonData {
             rounds = rounds == null ? List.of() : List.copyOf(rounds);
             unknown = unknown == null ? List.of() : List.copyOf(unknown);
@@ -277,6 +284,7 @@ final class AdvancedStatsWarCwlSeasonReader {
             result.addProperty("season", season);
             AdvancedStatsWarCwlJson.addNullable(result, "league", league);
             AdvancedStatsWarCwlJson.addNullable(result, "position", position);
+            AdvancedStatsWarCwlJson.addNullable(result, "clanName", clanName);
             result.addProperty("seasonBasis", seasonBasis);
             JsonArray roundRows = new JsonArray();
             rounds.stream().sorted(java.util.Comparator.comparingInt(RoundData::round)).forEach(round -> {

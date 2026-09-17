@@ -41,12 +41,12 @@ describe('redesign shared foundation', () => {
     });
 
     it('serves clean app routes and preserves old aliases', () => {
-        expect(APP_ASSETS.get('/app/explore')).toBe('/subpages/explore');
-        expect(APP_ASSETS.get('/app/war-board')).toBe('/subpages/war-operation-board');
-        expect(APP_ASSETS.get('/app/brackets')).toBe('/subpages/bracket-generator');
-        expect(APP_ASSETS.get('/app/minigames')).toBe('/subpages/minigames');
+        expect(APP_ASSETS.get('/app/explore')).toBe('/subPages/explore');
+        expect(APP_ASSETS.get('/app/war-board')).toBe('/subPages/war-operation-board');
+        expect(APP_ASSETS.get('/app/brackets')).toBe('/subPages/bracket-generator');
+        expect(APP_ASSETS.get('/app/minigames')).toBe('/subPages/minigames');
         expect(APP_ALIASES.get('/app/minigames.html')).toBe('/app/minigames');
-        expect(APP_ASSETS.get('/app/profile')).toBe('/subpages/profile');
+        expect(APP_ASSETS.get('/app/profile')).toBe('/subPages/profile');
         expect(APP_ALIASES.get('/app/war-operation-board')).toBe('/app/war-board');
     });
 

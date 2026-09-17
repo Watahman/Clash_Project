@@ -15,14 +15,24 @@ public final class AdvancedStatsWarCwlExistingProvider
         implements AdvancedStatsWarCwlProvider {
     private final HistoricalPlayerDataProvider playerProvider;
     private final HistoricalCwlService cwlService;
+    private final AdvancedStatsPlayerCwlHistory playerCwlHistory;
 
     public AdvancedStatsWarCwlExistingProvider(
             HistoricalPlayerDataProvider playerProvider,
             HistoricalCwlService cwlService
     ) {
+        this(playerProvider, cwlService, null);
+    }
+
+    public AdvancedStatsWarCwlExistingProvider(
+            HistoricalPlayerDataProvider playerProvider,
+            HistoricalCwlService cwlService,
+            AdvancedStatsPlayerCwlHistory playerCwlHistory
+    ) {
         if (playerProvider == null) throw new IllegalArgumentException("playerProvider is required");
         this.playerProvider = playerProvider;
         this.cwlService = cwlService;
+        this.playerCwlHistory = playerCwlHistory;
     }
 
     @Override
@@ -48,6 +58,13 @@ public final class AdvancedStatsWarCwlExistingProvider
 
     @Override
     public String sourceName() {
-        return "clashpanel-performance-and-cwl";
+        return AdvancedStatsSourcePresentation.fromInternalId(playerProvider.providerName()).label();
+    }
+
+    @Override
+    public List<AdvancedStatsWarCwlSeasonReader.SeasonData> playerCwlSeasons(
+            String playerTag, int limit) throws Exception {
+        return playerCwlHistory == null ? null
+                : playerCwlHistory.seasons(CacheKeys.requireValidTag(playerTag), limit);
     }
 }

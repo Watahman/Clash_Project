@@ -23,5 +23,10 @@ public interface AdvancedStatsWarCwlProvider {
         return null;
     }
 
+    default List<AdvancedStatsWarCwlSeasonReader.SeasonData> playerCwlSeasons(
+            String playerTag, int limit) throws Exception {
+        return null;
+    }
+
     String sourceName();
 }

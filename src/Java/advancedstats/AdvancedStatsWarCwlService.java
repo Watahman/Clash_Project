@@ -40,6 +40,14 @@ public final class AdvancedStatsWarCwlService {
         this(new AdvancedStatsWarCwlExistingProvider(playerProvider, cwlService));
     }
 
+    public AdvancedStatsWarCwlService(
+            HistoricalPlayerDataProvider playerProvider,
+            HistoricalCwlService cwlService,
+            AdvancedStatsPlayerCwlHistory playerCwlHistory
+    ) {
+        this(new AdvancedStatsWarCwlExistingProvider(playerProvider, cwlService, playerCwlHistory));
+    }
+
     AdvancedStatsWarCwlService(AdvancedStatsWarCwlProvider provider, Clock clock) {
         if (provider == null) throw new IllegalArgumentException("provider is required");
         this.provider = provider;
@@ -139,20 +147,49 @@ public final class AdvancedStatsWarCwlService {
         Map<String, AdvancedStatsWarCwlSeasonReader.SeasonData> seasons =
                 AdvancedStatsWarCwlSeasonReader.build(
                         provider, playerTag, clanTag, summaries,
-                        attacks, participation, from, now, unknown
-                );
-        if (clanTag == null) unknown.add("cwl_league_position_unavailable");
+                        attacks, participation, from, now, unknown);
+        boolean playerSourceAvailable = clanTag == null
+                && addPlayerSeasons(playerTag, seasons, from, now, unknown);
         JsonObject result = new JsonObject();
-        result.addProperty("status", cwlStatus(seasons, clanTag));
+        result.addProperty("status", cwlStatus(seasons, clanTag, playerSourceAvailable));
         JsonArray rows = new JsonArray();
-        seasons.values().forEach(item -> rows.add(item.json()));
+        seasons.values().stream()
+                .sorted(java.util.Comparator.comparing(
+                        AdvancedStatsWarCwlSeasonReader.SeasonData::season).reversed())
+                .forEach(item -> rows.add(item.json()));
         result.add("seasons", rows);
         AdvancedStatsWarCwlMetrics.AttackMetrics all = AdvancedStatsWarCwlMetrics.aggregate(
                 attacks, participation, from, now, false
         );
-        result.add("trend", AdvancedStatsWarCwlJson.trend(all.trend()));
+        result.add("trend", AdvancedStatsWarCwlJson.trend(
+                playerSourceAvailable && !seasons.isEmpty()
+                        ? seasonTrend(seasons) : all.trend()));
         AdvancedStatsWarCwlJson.addUnknown(result, unknown);
         return result;
+    }
+
+    private boolean addPlayerSeasons(
+            String playerTag,
+            Map<String, AdvancedStatsWarCwlSeasonReader.SeasonData> seasons,
+            Instant from, Instant now, List<String> unknown
+    ) {
+        try {
+            var sourceRows = provider.playerCwlSeasons(playerTag, MAX_CWL_SEASONS);
+            if (sourceRows == null) {
+                unknown.add("cwl_league_position_unavailable");
+                return false;
+            }
+            for (var season : sourceRows) {
+                if (season != null && seasonInWindow(season.season(), from, now)) {
+                    seasons.put(season.season(), season);
+                }
+            }
+            return true;
+        } catch (Exception failure) {
+            unknown.add("cwl_player_history_unavailable");
+            unknown.add("cwl_league_position_unavailable");
+            return false;
+        }
     }
 
     private List<HistoricalCwlSeasonSummary> loadSeasonIndex(
@@ -172,9 +209,11 @@ public final class AdvancedStatsWarCwlService {
 
     private static String cwlStatus(
             Map<String, AdvancedStatsWarCwlSeasonReader.SeasonData> seasons,
-            String clanTag
+            String clanTag,
+            boolean playerSourceAvailable
     ) {
-        if (seasons.isEmpty()) return clanTag == null ? "unavailable" : "no_data";
+        if (seasons.isEmpty()) return clanTag == null && !playerSourceAvailable
+                ? "unavailable" : "no_data";
         boolean ready = seasons.values().stream().anyMatch(item ->
                 "ready".equals(item.metrics().status()));
         boolean complete = seasons.values().stream().allMatch(item -> item.unknown().isEmpty());
@@ -195,6 +234,38 @@ public final class AdvancedStatsWarCwlService {
 
     private static String optionalTag(String value) {
         return value == null || value.isBlank() ? null : CacheKeys.requireValidTag(value);
+    }
+
+    private static AdvancedStatsWarCwlMetrics.Trend seasonTrend(
+            Map<String, AdvancedStatsWarCwlSeasonReader.SeasonData> seasons) {
+        var points = seasons.values().stream()
+                .filter(item -> "clashking_player_cwl_history".equals(item.seasonBasis()))
+                .filter(item -> item.metrics().attackCount() != null)
+                .sorted(java.util.Comparator.comparing(
+                        AdvancedStatsWarCwlSeasonReader.SeasonData::season))
+                .map(item -> new AdvancedStatsWarCwlMetrics.TrendPoint(
+                        item.season(), item.metrics().attackCount(),
+                        item.metrics().avgStars(), item.metrics().avgDestruction()))
+                .toList();
+        if (points.size() < 2) return new AdvancedStatsWarCwlMetrics.Trend(
+                "insufficient_data", null, points);
+        Double first = points.getFirst().avgStars();
+        Double last = points.getLast().avgStars();
+        if (first == null || last == null) return new AdvancedStatsWarCwlMetrics.Trend(
+                "insufficient_data", null, points);
+        double delta = Math.round((last - first) * 100.0) / 100.0;
+        String direction = delta >= 0.25 ? "up" : delta <= -0.25 ? "down" : "stable";
+        return new AdvancedStatsWarCwlMetrics.Trend(direction, delta, points);
+    }
+
+    private static boolean seasonInWindow(String season, Instant from, Instant now) {
+        try {
+            var month = java.time.YearMonth.parse(season);
+            var first = month.atDay(1).atStartOfDay(java.time.ZoneOffset.UTC).toInstant();
+            return (from == null || !first.isBefore(from)) && !first.isAfter(now);
+        } catch (RuntimeException invalid) {
+            return false;
+        }
     }
 
     private record HistoricalRead(HistoricalPlayerData data, Exception failure) {}

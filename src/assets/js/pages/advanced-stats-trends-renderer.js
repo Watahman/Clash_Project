@@ -19,6 +19,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 const CHART_WIDTH = 720;
 const CHART_HEIGHT = 240;
 const CHART_PADDING = { top: 18, right: 18, bottom: 34, left: 18 };
+const CHART_POINT_SPACING = 72;
 
 function setVisibility(element, visible) {
     if (element) element.hidden = !visible;
@@ -56,6 +57,12 @@ function chartY(value, maximum) {
     const plotHeight = CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bottom;
     const safeMaximum = Math.max(1, maximum);
     return CHART_PADDING.top + ((safeMaximum - value) / safeMaximum) * plotHeight;
+}
+
+function chartWidthFor(points) {
+    const pointCount = Math.max(1, points.length);
+    const plotWidth = Math.max(1, pointCount - 1) * CHART_POINT_SPACING;
+    return Math.max(CHART_WIDTH, CHART_PADDING.left + plotWidth + CHART_PADDING.right);
 }
 
 export function trendScale(points, metric = 'attacks') {
@@ -138,12 +145,12 @@ function createTrendLine(segment, xForIndex, maximum) {
     return path;
 }
 
-function appendChartGuides(svg, scale, metric) {
+function appendChartGuides(svg, scale, metric, chartWidth) {
     [0, scale.midpoint, scale.maximum].forEach(value => {
         const y = chartY(value, scale.maximum);
         svg.append(svgElement('line', {
             class: 'advanced-stats__trend-grid-line', x1: CHART_PADDING.left,
-            x2: CHART_WIDTH - CHART_PADDING.right, y1: y, y2: y
+            x2: chartWidth - CHART_PADDING.right, y1: y, y2: y
         }));
         const label = svgElement('text', { class: 'advanced-stats__trend-grid-label', x: 0, y: y + 3 });
         label.textContent = formatMetric(value, metric);
@@ -175,16 +182,18 @@ export function renderTrends(elements, state) {
     if (!root || !points.length) return;
 
     const scale = trendScale(points, metric);
-    const plotWidth = CHART_WIDTH - CHART_PADDING.left - CHART_PADDING.right;
+    const chartWidth = chartWidthFor(points);
+    const plotWidth = chartWidth - CHART_PADDING.left - CHART_PADDING.right;
     const xForIndex = index => points.length === 1
         ? CHART_PADDING.left + plotWidth / 2
         : CHART_PADDING.left + (index / (points.length - 1)) * plotWidth;
     const svg = svgElement('svg', {
-        class: 'advanced-stats__trend-svg', viewBox: `0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`,
+        class: 'advanced-stats__trend-svg', viewBox: `0 0 ${chartWidth} ${CHART_HEIGHT}`,
         role: 'img', 'aria-label': t('advancedStats.trendsTitle')
     });
+    svg.style.minWidth = `${chartWidth}px`;
     svg.dataset.metric = metric;
-    appendChartGuides(svg, scale, metric);
+    appendChartGuides(svg, scale, metric, chartWidth);
     trendLineSegments(points, metric).forEach(segment => svg.append(createTrendLine(segment, xForIndex, scale.maximum)));
     const labelStep = Math.max(1, Math.ceil(points.length / 8));
     let previousDate = null;

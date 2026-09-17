@@ -99,6 +99,9 @@ function warRow(block, mode, period = null) {
         avgDestruction: readField(block, ['avgDestruction', 'averageDestruction']),
         tripleRate: readField(block, ['tripleRate', 'threeStarRate']),
         thMatchup: matchupValue(block),
+        clanName: readField(block, ['clanName']),
+        league: readField(block, ['league']),
+        position: readField(block, ['position']),
         sample: readField(block, ['warCount', 'seasonCount', 'sample', 'sampleSize'])
     };
 }

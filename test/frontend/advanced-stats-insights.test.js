@@ -90,7 +90,7 @@ describe('Advanced Stats insights tabs', () => {
     it('renders regular and CWL summaries from the scoped war response', () => {
         const document = page();
         const root = document.querySelector('#advanced-stats-war-cwl-root');
-        renderWarCwl(root, {
+        const response = {
             section: 'warCwl', playerTag: '#PLAYER', period: '30d', status: 'ACTIVE',
             data: {
                 status: 'partial',
@@ -104,7 +104,8 @@ describe('Advanced Stats insights tabs', () => {
                 },
                 coverage: { state: 'partial', warCount: 2 }
             }
-        });
+        };
+        renderWarCwl(root, response);
 
         expect(root.dataset.state).toBe('partial');
         expect(root.querySelectorAll('tbody tr')).toHaveLength(1);
@@ -118,6 +119,52 @@ describe('Advanced Stats insights tabs', () => {
         expect(root.querySelector('.advanced-stats__insights-summary')?.textContent).toContain('19/33');
         expect(root.querySelector('.advanced-stats__insights-trends')?.textContent).toContain('2026-08');
         expect(root.querySelector('[data-insights-mode="cwl"] .advanced-stats__insights-no-summary')).not.toBeNull();
+    });
+
+    it('replaces rendered insight content when the same response is rendered again', () => {
+        const document = page();
+        const root = document.querySelector('#advanced-stats-war-cwl-root');
+        const response = {
+            state: 'ready',
+            rows: [{ season: '2026-09', mode: 'war', attacks: 2 }],
+            coverage: { state: 'ready', warCount: 1 }
+        };
+
+        renderWarCwl(root, response);
+        renderWarCwl(root, response);
+
+        expect(root.querySelectorAll('.advanced-stats__insights-coverage')).toHaveLength(1);
+        expect(root.querySelectorAll('.advanced-stats__insights-table-wrap')).toHaveLength(1);
+        expect(root.querySelectorAll('tbody tr')).toHaveLength(1);
+    });
+
+    it('shows source-backed CWL league and clan position only for a season', () => {
+        const document = page();
+        const root = document.querySelector('#advanced-stats-war-cwl-root');
+        renderWarCwl(root, {
+            data: {
+                status: 'partial', regular: { status: 'ready', attackCount: 2 },
+                cwl: { status: 'partial', seasons: [{
+                    season: '2026-09', seasonBasis: 'clashking_player_cwl_history',
+                    clanName: 'Old Clan', league: 'Master League II', position: 2, attackCount: 3,
+                    missedAttacks: 1
+                }] },
+                coverage: { state: 'partial', source: 'ClashKing V2' }
+            }
+        });
+
+        const headings = [...root.querySelectorAll('thead th')].map(cell => cell.textContent);
+        const rows = [...root.querySelectorAll('tbody tr')];
+        expect(headings).toContain('League');
+        expect(headings).toContain('Clan');
+        expect(headings).toContain('CWL position');
+        expect(rows).toHaveLength(3);
+        expect(rows[0].textContent).not.toContain('Master League II');
+        expect(rows[2].textContent).toContain('Master League II');
+        expect(rows[2].textContent).toContain('Old Clan');
+        expect(rows[2].textContent).toContain('2');
+        expect(root.querySelector('.advanced-stats__insights-coverage')?.textContent)
+            .toContain('ClashKing V2');
     });
 
     it('renders progression events without inventing dates or levels', () => {

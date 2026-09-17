@@ -126,4 +126,21 @@ describe('Advanced Stats lifetime and metric renderers', () => {
         expect(refs.trendChart.children).toHaveLength(0);
         expect(refs.trendEmpty.hidden).toBe(false);
     });
+
+    it('keeps dense month points readable in a horizontally scrollable chart', () => {
+        const refs = { trendChart: document.createElement('div'), trendEmpty: document.createElement('p') };
+        const trends = Array.from({ length: 18 }, (_, index) => {
+            const year = 2025 + Math.floor(index / 12);
+            const month = String((index % 12) + 1).padStart(2, '0');
+            return { date: `${year}-${month}-01`, attacks: index + 1 };
+        });
+
+        renderTrends(refs, { trends, trendMetric: 'attacks' });
+
+        const svg = refs.trendChart.querySelector('svg');
+        const chartWidth = Number(svg?.getAttribute('viewBox')?.split(' ')[2]);
+        expect(chartWidth).toBeGreaterThan(720);
+        expect(Number.parseFloat(svg?.style.minWidth || '0')).toBe(chartWidth);
+        expect(refs.trendChart.querySelectorAll('.advanced-stats__trend-point')).toHaveLength(18);
+    });
 });

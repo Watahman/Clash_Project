@@ -4,6 +4,7 @@ import Java.advancedstats.AdvancedStatsInsightsService;
 import Java.advancedstats.AdvancedStatsLeagueReader;
 import Java.advancedstats.AdvancedStatsLifecycleService;
 import Java.advancedstats.AdvancedStatsProgressionService;
+import Java.advancedstats.AdvancedStatsPlayerCwlHistory;
 import Java.advancedstats.AdvancedStatsWarCwlService;
 import Java.cwlhistory.HistoricalCwlService;
 import Java.performance.HistoricalProviderFactory;
@@ -34,7 +35,9 @@ final class SUPABASE_AdvancedStatsInsights {
     ) {
         var readers = new EnumMap<AdvancedStatsInsightsService.Section,
                 AdvancedStatsInsightsService.SectionReader>(AdvancedStatsInsightsService.Section.class);
-        var warCwl = new AdvancedStatsWarCwlService(HistoricalProviderFactory.create(config), cwlHistory);
+        var playerCwl = new AdvancedStatsPlayerCwlHistory(config.getClashKingBaseUrl());
+        var warCwl = new AdvancedStatsWarCwlService(
+                HistoricalProviderFactory.create(config), cwlHistory, playerCwl);
         var progression = new AdvancedStatsProgressionService(config);
         var league = new AdvancedStatsLeagueReader(config);
         readers.put(AdvancedStatsInsightsService.Section.WAR_CWL, warCwl::read);

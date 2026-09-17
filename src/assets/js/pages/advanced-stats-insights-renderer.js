@@ -14,6 +14,9 @@ const COLUMNS = Object.freeze({
     warCwl: Object.freeze([
         ['period', 'advancedStats.insightsPeriod', ['period', 'season']],
         ['mode', 'advancedStats.insightsMode', ['mode', 'type', 'scope']],
+        ['clanName', 'advancedStats.insightsClan', ['clanName'], true],
+        ['league', 'advancedStats.insightsLeague', ['league'], true],
+        ['position', 'advancedStats.insightsCwlPosition', ['position'], true],
         ['attacks', 'advancedStats.insightsAttacks', ['attacks', 'attackCount', 'playerAttacks']],
         ['available', 'advancedStats.insightsAvailable', ['availableAttacks']],
         ['used', 'advancedStats.insightsUsed', ['usedAttacks']],
@@ -221,6 +224,7 @@ function renderInsights(root, section, data) {
     setStateVisibility(root, state, showContent);
     const content = root.querySelector('[data-insights-content]');
     if (!content) return;
+    content.replaceChildren();
     if (showContent) {
         const doc = documentFor(root);
         renderCoverageMeta(doc, content, payload, data);
@@ -232,7 +236,6 @@ function renderInsights(root, section, data) {
         renderTable(doc, tableContent, section, visibleRows);
         content.append(tableContent.firstElementChild);
     }
-    else content.replaceChildren();
     if (state === 'ready' && !visibleRows.length) {
         const doc = documentFor(root);
         const empty = doc.createElement('p');
