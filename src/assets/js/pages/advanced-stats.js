@@ -12,6 +12,7 @@ import {
     getAdvancedStatsTrends,
     getAdvancedStatsUnits,
     getAdvancedStatsLifetime,
+    getAdvancedStatsInsights,
     pauseAdvancedStatsTracking,
     resumeAdvancedStatsTracking,
     startAdvancedStatsTracking,
@@ -48,6 +49,7 @@ import {
 } from './advanced-stats-dom.js?v=20260913-advanced-dashboard-v2';
 import { createAdvancedStatsPageUi } from './advanced-stats-page-ui.js?v=20260913-advanced-dashboard-v2';
 import { createLifetimeLoader } from './advanced-stats-lifetime-state.js?v=20260913-advanced-dashboard-v2';
+import { createInsightsController } from './advanced-stats-insights-controller.js?v=20260916-advanced-insights-v1';
 
 const PERIOD_DEFAULT = '30d';
 const ACCOUNT_STORAGE_KEY = 'clashpanel_advanced_stats_account';
@@ -66,6 +68,7 @@ const realApi = {
     getArmies: (tag, period) => getAdvancedStatsArmies(tag, period, FAVORITE_ARMY_LIMIT),
     getTrends: getAdvancedStatsTrends,
     getLifetime: getAdvancedStatsLifetime,
+    getInsights: getAdvancedStatsInsights,
     getBattles: getAdvancedStatsBattles
 };
 
@@ -102,6 +105,7 @@ const state = {
 
 const elements = {};
 let trackingActions;
+let insightsController;
 
 const pageUi = createAdvancedStatsPageUi({ elements, state, renderAccountSelector });
 const { setDataStatus, setBusy, setPageStatus } = pageUi;
@@ -116,6 +120,7 @@ function renderPage() {
     syncPeriodButtons(elements, state.period);
     syncAttackCategoryButtons(elements, state.attackCategory);
     syncTrendMetricButtons(elements, state.trendMetric);
+    insightsController?.render();
 }
 
 function clearStatisticsState() {
@@ -126,6 +131,7 @@ function clearStatisticsState() {
 
 function resetRangeData({ clearTracking = false } = {}) {
     clearStatisticsState();
+    insightsController?.reset();
     if (clearTracking) { state.tracking = null; state.analysis = null; state.analysisRequested = false; state.trackingError = false; }
     state.requestVersion += 1;
     renderPage();
@@ -159,6 +165,17 @@ async function initialize() {
         if (authState?.status !== AUTH_STATES.AUTHENTICATED) return;
     }
     Object.assign(elements, cacheAdvancedStatsElements());
+    insightsController = createInsightsController({
+        document,
+        getPlayerTag: () => state.playerTag,
+        getPeriod: () => state.period,
+        getTracking: () => state.tracking,
+        getReader: () => state.api.getInsights,
+        onOverviewSelected: () => {
+            if (state.tracking?.trackingExists && !state.overview) void loadStatistics();
+        }
+    });
+    insightsController.bind();
     trackingActions = createTrackingActions({
         state, elements, setBusy, setDataStatus, refreshTrackingAndData,
         onStartRequested: beginHistoricalAnalysis,
@@ -200,6 +217,7 @@ async function retryProfileLoad() {
 async function refreshTrackingAndData({ preserveBusy = false } = {}) {
     if (!state.playerTag) { renderPage(); return; }
     const version = ++state.requestVersion;
+    insightsController?.reset();
     if (!preserveBusy) setBusy(true);
     setPageStatus(t('advancedStats.loadingTracking'));
     try {
@@ -217,11 +235,20 @@ async function refreshTrackingAndData({ preserveBusy = false } = {}) {
         const status = String(state.tracking?.status || 'DISABLED').toUpperCase();
         const hasHistory = Number(state.tracking?.battlesProcessed || 0) > 0;
         if (state.analysis.active) await waitForHistoricalAnalysis({
-            state, version, tracking, renderPage, loadStatistics, setDataStatus,
+            state, version, tracking, renderPage,
+            loadStatistics: options => insightsController?.selected() === 'overview'
+                ? loadStatistics(options) : insightsController?.refreshActive(),
+            setDataStatus,
             errorMessage: t('advancedStats.analysisLoadFailed')
         });
         else if (state.analysis.error && !hasHistory) setDataStatus(t('advancedStats.analysisLoadFailed'), 'error');
-        else if (state.tracking?.trackingExists && (status !== 'INITIALIZING' || hasHistory)) await loadStatistics({ requestVersion: version, manageBusy: false });
+        else if (state.tracking?.trackingExists && (status !== 'INITIALIZING' || hasHistory)) {
+            if (insightsController?.selected() === 'overview') {
+                await loadStatistics({ requestVersion: version, manageBusy: false });
+            } else {
+                void insightsController.refreshActive();
+            }
+        }
         else { clearStatisticsState(); renderPage(); }
     } catch (error) {
         if (version !== state.requestVersion) return;
@@ -250,6 +277,7 @@ function loadMoreBattles() {
 function bindEvents() {
     elements.account.addEventListener('change', () => {
         state.playerTag = normalizeTag(elements.account.value);
+        insightsController?.clearSeason();
         writeAdvancedStatsPreference(ACCOUNT_STORAGE_KEY, state.playerTag);
         resetLifetimeState();
         resetRangeData({ clearTracking: true });
@@ -269,7 +297,10 @@ function bindEvents() {
     elements.periods?.addEventListener('click', event => {
         const period = event.target.closest('[data-period]')?.dataset.period;
         if (!period || period === state.period) return;
-        state.period = period; writeAdvancedStatsPreference(PERIOD_STORAGE_KEY, period); resetRangeData(); void loadStatistics();
+        insightsController?.clearSeason();
+        state.period = period; writeAdvancedStatsPreference(PERIOD_STORAGE_KEY, period); resetRangeData();
+        if (insightsController?.selected() === 'overview') void loadStatistics();
+        else void insightsController?.refreshActive();
     });
     elements.attackCategories?.addEventListener('click', event => {
         const value = event.target.closest('[data-attack-category]')?.dataset.attackCategory;

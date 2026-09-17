@@ -23,6 +23,8 @@ import { achievementLocales } from './achievement-locales.js?v=20260823-achievem
 import { advancedStatsLocales } from './advanced-stats-locales.js?v=20260830-monthly-trends-v1';
 import { advancedStatsExtraLocales } from './advanced-stats-extra-locales.js?v=20260830-monthly-trends-v1';
 import { advancedStatsUiLocales } from './advanced-stats-ui-locales.js?v=20260909-battledata-v1';
+import { advancedStatsInsightsLocales } from './advanced-stats-insights-locales.js?v=20260916-advanced-insights-v1';
+import { advancedStatsInsightsControlsLocales } from './advanced-stats-insights-controls-locales.js?v=20260917-advanced-insights-v2';
 import { profilePageLocales } from './profile-page-locales.js';
 import { navigationV2Locales } from './navigation-v2-locales.js';
 
@@ -37,7 +39,9 @@ function buildDictionary(language, base, workspace, publicCopy, completion = {})
     const advancedStats = {
         ...(advancedStatsLocales[language] || {}),
         ...(advancedStatsExtraLocales[language] || {}),
-        ...(advancedStatsUiLocales[language] || {})
+        ...(advancedStatsUiLocales[language] || {}),
+        ...(advancedStatsInsightsLocales[language] || {}),
+        ...(advancedStatsInsightsControlsLocales[language] || {})
     };
     return Object.freeze({
         ...fallback,

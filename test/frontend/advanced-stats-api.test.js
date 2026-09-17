@@ -6,6 +6,7 @@ vi.mock('../../src/assets/js/Supabase/Supabase-Client.js?v=20260913-advanced-das
 
 import {
     attackCategoryScope,
+    getAdvancedStatsInsights,
     getAdvancedStatsLifetime,
     getAdvancedStatsOverview,
     getAdvancedStatsTrends
@@ -45,5 +46,11 @@ describe('Advanced Stats scoped API client', () => {
         await getAdvancedStatsLifetime('#PLAYER');
         expect(databaseRequestWithBody.mock.calls[0][0]).toBe('/AdvancedStatsLifetime');
         expect(databaseRequestWithBody.mock.calls[0][1]).toEqual({ playerTag: '#PLAYER' });
+    });
+
+    it('requests only the selected historical insight section', async () => {
+        await getAdvancedStatsInsights('#PLAYER', '90d', 'warCwl');
+        expect(databaseRequestWithBody.mock.calls[0][0]).toBe('/AdvancedStatsInsights');
+        expect(databaseRequestWithBody.mock.calls[0][1]).toEqual({ playerTag: '#PLAYER', period: '90d', section: 'warCwl' });
     });
 });

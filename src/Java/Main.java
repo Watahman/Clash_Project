@@ -129,6 +129,7 @@ public class Main {
         supaAuth.registerRoutes();
         supaAchievements.registerRoutes();
         supaAdvancedStats.registerRoutes();
+        SUPABASE_AdvancedStatsInsights.configured(server, conf, cwlHistoryService).registerRoute();
         advancedStatsInternalPoll.registerRoute();
         publicIntake.registerRoutes();
 

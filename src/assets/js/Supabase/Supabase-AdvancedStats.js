@@ -69,3 +69,7 @@ export function getAdvancedStatsTrends(playerTag, period = '30d', category = 'AL
 export function getAdvancedStatsLifetime(playerTag) {
     return request(config._EXT_ADVANCED_STATS_LIFETIME, { playerTag });
 }
+
+export function getAdvancedStatsInsights(playerTag, period, section) {
+    return request(config._EXT_ADVANCED_STATS_INSIGHTS, { playerTag, period, section });
+}

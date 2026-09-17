@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="../assets/css/advanced-stats-dashboard.css?v=20260913-advanced-dashboard-v3">
     <link rel="stylesheet" href="../assets/css/advanced-stats-lifetime.css?v=20260913-advanced-dashboard-v3">
     <link rel="stylesheet" href="../assets/css/advanced-stats-analysis.css?v=20260814-advanced-stats-v4">
+    <link rel="stylesheet" href="../assets/css/advanced-stats-insights.css?v=20260916-advanced-insights-v1">
     <script src="../assets/js/Data/runtime-config.js"></script>
     <script type="module" src="../assets/js/shell/workspace-shell.js?v=20260916-preview-progress-v1"></script>
     <script type="module" src="../assets/js/pages/advanced-stats-bootstrap.js?v=20260913-advanced-dashboard-v2"></script>
@@ -157,7 +158,7 @@
             <div><strong id="advanced-stats-warning-title"></strong><p id="advanced-stats-warning-text"></p><span id="advanced-stats-complete-since"></span></div>
         </section>
 
-        <div class="advanced-stats__toolbar">
+        <div class="advanced-stats__toolbar advanced-stats__toolbar--global">
             <div class="advanced-stats__toolbar-group advanced-stats__toolbar-group--primary">
                 <strong data-i18n="advancedStats.periodLabel">Time range</strong>
                 <div class="advanced-stats__segmented" id="advanced-stats-periods" role="group" aria-label="Time range" data-i18n-aria-label="advancedStats.periodLabel">
@@ -167,6 +168,17 @@
                     <button class="cp-button cp-button--secondary" type="button" data-period="all" aria-pressed="false" data-i18n="advancedStats.periodAll">All tracked time</button>
                 </div>
             </div>
+        </div>
+
+        <nav id="advanced-stats-tabs" class="advanced-stats__tabs cp-tabs" role="tablist" aria-label="Advanced Stats sections" data-i18n-aria-label="advancedStats.tabsLabel">
+            <button id="advanced-stats-tab-overview" class="advanced-stats__tab cp-tab" type="button" role="tab" aria-controls="advanced-stats-panel-overview" aria-selected="true" tabindex="0" data-advanced-stats-tab="overview" data-tab="overview" data-i18n="advancedStats.tabOverview">Overview</button>
+            <button id="advanced-stats-tab-war-cwl" class="advanced-stats__tab cp-tab" type="button" role="tab" aria-controls="advanced-stats-panel-war-cwl" aria-selected="false" tabindex="-1" data-advanced-stats-tab="warCwl" data-tab="warCwl" data-i18n="advancedStats.tabWarCwl">War &amp; CWL</button>
+            <button id="advanced-stats-tab-progression" class="advanced-stats__tab cp-tab" type="button" role="tab" aria-controls="advanced-stats-panel-progression" aria-selected="false" tabindex="-1" data-advanced-stats-tab="progression" data-tab="progression" data-i18n="advancedStats.tabProgression">Progression</button>
+            <button id="advanced-stats-tab-league" class="advanced-stats__tab cp-tab" type="button" role="tab" aria-controls="advanced-stats-panel-league" aria-selected="false" tabindex="-1" data-advanced-stats-tab="league" data-tab="league" data-i18n="advancedStats.tabLeague">Legends &amp; Ranked</button>
+        </nav>
+
+        <section id="advanced-stats-panel-overview" class="advanced-stats__tab-panel advanced-stats__tab-panel--overview" role="tabpanel" aria-labelledby="advanced-stats-tab-overview" data-advanced-stats-panel="overview" tabindex="0">
+        <div class="advanced-stats__toolbar">
             <div class="advanced-stats__toolbar-group advanced-stats__toolbar-group--secondary">
                 <strong data-i18n="advancedStats.attackCategoryLabel">Attack type</strong>
                 <div class="advanced-stats__segmented advanced-stats__segmented--compact" id="advanced-stats-categories" role="group" aria-label="Attack type" data-i18n-aria-label="advancedStats.attackCategoryLabel">
@@ -297,6 +309,46 @@
             <div id="advanced-stats-battles" class="advanced-stats__timeline"></div>
             <p id="advanced-stats-battles-empty" class="advanced-stats__empty-copy" data-i18n="advancedStats.noBattles" hidden>No tracked attacks in this period yet.</p>
             <button id="advanced-stats-load-more" class="cp-button cp-button--secondary advanced-stats__load-more" type="button" data-i18n="advancedStats.loadMore" hidden>Load more</button>
+        </section>
+        </section>
+
+        <section id="advanced-stats-panel-war-cwl" class="advanced-stats__tab-panel advanced-stats__tab-panel--insights" role="tabpanel" aria-labelledby="advanced-stats-tab-war-cwl" data-advanced-stats-panel="warCwl" tabindex="0" hidden>
+            <div id="advanced-stats-war-cwl-root" class="advanced-stats__insights" data-advanced-stats-root="warCwl" data-state="idle" aria-live="polite">
+                <div class="advanced-stats__insights-heading"><p class="advanced-stats__section-kicker" data-i18n="advancedStats.warCwlKicker">Competition</p><h2 data-i18n="advancedStats.warCwlTitle">War &amp; CWL</h2><p data-i18n="advancedStats.warCwlText">Compare war participation and CWL seasons when the source reports enough detail.</p></div>
+                <div class="advanced-stats__insights-state" data-insights-state="idle"><strong data-i18n="advancedStats.insightsIdleTitle">Ready when you are</strong><p data-i18n="advancedStats.insightsIdleText">Select this tab to load its available history.</p></div>
+                <div class="advanced-stats__insights-state" data-insights-state="loading" hidden><strong data-i18n="advancedStats.insightsLoadingTitle">Loading available history</strong><p data-i18n="advancedStats.insightsLoadingText">ClashPanel is reading the available records for this account.</p></div>
+                <div class="advanced-stats__insights-state" data-insights-state="empty" hidden><strong data-i18n="advancedStats.insightsEmptyTitle">No recorded history yet</strong><p data-i18n="advancedStats.insightsEmptyText">No records are available for this account and period.</p></div>
+                <div class="advanced-stats__insights-state" data-insights-state="partial" hidden><strong data-i18n="advancedStats.insightsPartialTitle">Partial history</strong><p data-i18n="advancedStats.insightsPartialText">Some history is available. Missing values remain unknown.</p></div>
+                <div class="advanced-stats__insights-state" data-insights-state="unavailable" hidden><strong data-i18n="advancedStats.insightsUnavailableTitle">History unavailable</strong><p data-i18n="advancedStats.insightsUnavailableText">This history is not available for the selected account or period.</p></div>
+                <div class="advanced-stats__insights-state" data-insights-state="error" role="alert" hidden><strong data-i18n="advancedStats.insightsErrorTitle">This section could not be loaded</strong><p data-i18n="advancedStats.insightsErrorText">Try again to request the available history.</p></div>
+                <div class="advanced-stats__insights-content" data-insights-content hidden></div>
+            </div>
+        </section>
+
+        <section id="advanced-stats-panel-progression" class="advanced-stats__tab-panel advanced-stats__tab-panel--insights" role="tabpanel" aria-labelledby="advanced-stats-tab-progression" data-advanced-stats-panel="progression" tabindex="0" hidden>
+            <div id="advanced-stats-progression-root" class="advanced-stats__insights" data-advanced-stats-root="progression" data-state="idle" aria-live="polite">
+                <div class="advanced-stats__insights-heading"><p class="advanced-stats__section-kicker" data-i18n="advancedStats.progressionKicker">Growth over time</p><h2 data-i18n="advancedStats.progressionTitle">Player progression</h2><p data-i18n="advancedStats.progressionText">Follow recorded upgrades and milestones from the available history.</p></div>
+                <div class="advanced-stats__insights-state" data-insights-state="idle"><strong data-i18n="advancedStats.insightsIdleTitle">Ready when you are</strong><p data-i18n="advancedStats.insightsIdleText">Select this tab to load its available history.</p></div>
+                <div class="advanced-stats__insights-state" data-insights-state="loading" hidden><strong data-i18n="advancedStats.insightsLoadingTitle">Loading available history</strong><p data-i18n="advancedStats.insightsLoadingText">ClashPanel is reading the available records for this account.</p></div>
+                <div class="advanced-stats__insights-state" data-insights-state="empty" hidden><strong data-i18n="advancedStats.insightsEmptyTitle">No recorded history yet</strong><p data-i18n="advancedStats.insightsEmptyText">No records are available for this account and period.</p></div>
+                <div class="advanced-stats__insights-state" data-insights-state="partial" hidden><strong data-i18n="advancedStats.insightsPartialTitle">Partial history</strong><p data-i18n="advancedStats.insightsPartialText">Some history is available. Missing values remain unknown.</p></div>
+                <div class="advanced-stats__insights-state" data-insights-state="unavailable" hidden><strong data-i18n="advancedStats.insightsUnavailableTitle">History unavailable</strong><p data-i18n="advancedStats.insightsUnavailableText">This history is not available for the selected account or period.</p></div>
+                <div class="advanced-stats__insights-state" data-insights-state="error" role="alert" hidden><strong data-i18n="advancedStats.insightsErrorTitle">This section could not be loaded</strong><p data-i18n="advancedStats.insightsErrorText">Try again to request the available history.</p></div>
+                <div class="advanced-stats__insights-content" data-insights-content hidden></div>
+            </div>
+        </section>
+
+        <section id="advanced-stats-panel-league" class="advanced-stats__tab-panel advanced-stats__tab-panel--insights" role="tabpanel" aria-labelledby="advanced-stats-tab-league" data-advanced-stats-panel="league" tabindex="0" hidden>
+            <div id="advanced-stats-league-root" class="advanced-stats__insights" data-advanced-stats-root="league" data-state="idle" aria-live="polite">
+                <div class="advanced-stats__insights-heading advanced-stats__insights-heading--with-action"><div><p class="advanced-stats__section-kicker" data-i18n="advancedStats.leagueKicker">Season context</p><h2 data-i18n="advancedStats.leagueTitle">Legends &amp; Ranked</h2><p data-i18n="advancedStats.leagueText">Review season results and league context when they are recorded.</p></div><button class="cp-button cp-button--secondary" type="button" data-insights-current-season="true" aria-pressed="false" data-i18n="advancedStats.insightsCurrentSeason">Current season</button></div>
+                <div class="advanced-stats__insights-state" data-insights-state="idle"><strong data-i18n="advancedStats.insightsIdleTitle">Ready when you are</strong><p data-i18n="advancedStats.insightsIdleText">Select this tab to load its available history.</p></div>
+                <div class="advanced-stats__insights-state" data-insights-state="loading" hidden><strong data-i18n="advancedStats.insightsLoadingTitle">Loading available history</strong><p data-i18n="advancedStats.insightsLoadingText">ClashPanel is reading the available records for this account.</p></div>
+                <div class="advanced-stats__insights-state" data-insights-state="empty" hidden><strong data-i18n="advancedStats.insightsEmptyTitle">No recorded history yet</strong><p data-i18n="advancedStats.insightsEmptyText">No records are available for this account and period.</p></div>
+                <div class="advanced-stats__insights-state" data-insights-state="partial" hidden><strong data-i18n="advancedStats.insightsPartialTitle">Partial history</strong><p data-i18n="advancedStats.insightsPartialText">Some history is available. Missing values remain unknown.</p></div>
+                <div class="advanced-stats__insights-state" data-insights-state="unavailable" hidden><strong data-i18n="advancedStats.insightsUnavailableTitle">History unavailable</strong><p data-i18n="advancedStats.insightsUnavailableText">This history is not available for the selected account or period.</p></div>
+                <div class="advanced-stats__insights-state" data-insights-state="error" role="alert" hidden><strong data-i18n="advancedStats.insightsErrorTitle">This section could not be loaded</strong><p data-i18n="advancedStats.insightsErrorText">Try again to request the available history.</p></div>
+                <div class="advanced-stats__insights-content" data-insights-content hidden></div>
+            </div>
         </section>
     </div>
 </main>
