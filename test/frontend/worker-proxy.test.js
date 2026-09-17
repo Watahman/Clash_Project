@@ -69,10 +69,10 @@ describe('Cloudflare API proxy', () => {
         expect(worker.scheduled).toBeUndefined();
     });
     it.each([
-        ['/privacy', '/subpages/privacy'],
-        ['/cookies', '/subpages/cookies'],
-        ['/terms', '/subpages/terms'],
-        ['/contact', '/subpages/contact']
+        ['/privacy', '/subPages/privacy.html'],
+        ['/cookies', '/subPages/cookies.html'],
+        ['/terms', '/subPages/terms.html'],
+        ['/contact', '/subPages/contact.html']
     ])('serves preferred legal route %s from its existing public HTML asset', async (route, assetPath) => {
         const bindings = env({
             ASSETS: {
@@ -122,14 +122,14 @@ describe('Cloudflare API proxy', () => {
     });
 
     it.each([
-        ['/subpages/privacy', '/privacy', '/subpages/privacy'],
-        ['/subpages/privacy.html', '/privacy', '/subpages/privacy'],
-        ['/subpages/cookies', '/cookies', '/subpages/cookies'],
-        ['/subpages/cookies.html', '/cookies', '/subpages/cookies'],
-        ['/subpages/terms', '/terms', '/subpages/terms'],
-        ['/subpages/terms.html', '/terms', '/subpages/terms'],
-        ['/subpages/contact', '/contact', '/subpages/contact'],
-        ['/subpages/contact.html', '/contact', '/subpages/contact']
+        ['/subpages/privacy', '/privacy', '/subPages/privacy.html'],
+        ['/subpages/privacy.html', '/privacy', '/subPages/privacy.html'],
+        ['/subpages/cookies', '/cookies', '/subPages/cookies.html'],
+        ['/subpages/cookies.html', '/cookies', '/subPages/cookies.html'],
+        ['/subpages/terms', '/terms', '/subPages/terms.html'],
+        ['/subpages/terms.html', '/terms', '/subPages/terms.html'],
+        ['/subpages/contact', '/contact', '/subPages/contact.html'],
+        ['/subpages/contact.html', '/contact', '/subPages/contact.html']
     ])('resolves legacy legal route %s with at most one redirect', async (
         source,
         destination,
@@ -254,7 +254,7 @@ describe('Cloudflare API proxy', () => {
             bindings
         );
 
-        expect(await response.text()).toBe('asset:/subpages/cwl-operation-board');
+        expect(await response.text()).toBe('asset:/subPages/cwl-operation-board.html');
         expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
     });
 
@@ -273,10 +273,27 @@ describe('Cloudflare API proxy', () => {
             bindings
         );
 
-        expect(await response.text()).toBe('asset:/subpages/dashboard');
+        expect(await response.text()).toBe('asset:/subPages/dashboard.html');
         expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
     });
 
+    it.each([
+        ['/subpages/login', '/subPages/login.html'],
+        ['/subpages/register', '/subPages/register.html']
+    ])('serves auth route %s from the case-correct HTML asset', async (route, assetPath) => {
+        const bindings = env({
+            ASSETS: {
+                fetch: vi.fn(async request => new Response(
+                    `asset:${new URL(request.url).pathname}`,
+                    { headers: { 'Content-Type': 'text/html' } }
+                ))
+            }
+        });
+        const response = await worker.fetch(new Request(`https://clashpanel.com${route}`), bindings);
+        expect(response.status).toBe(200);
+        expect(await response.text()).toBe(`asset:${assetPath}`);
+        expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
+    });
     it('maps API paths and replaces client-controlled forwarding headers', async () => {
         const upstream = vi.fn(async (_url, init) => {
             expect(_url).toBe('https://backend.example/Player?tag=%23ABC');

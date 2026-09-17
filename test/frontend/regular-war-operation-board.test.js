@@ -15,7 +15,7 @@ describe('regular Clan War operation board', () => {
         const registry = readFileSync('src/assets/js/shell/module-registry.js', 'utf8');
         const routes = readFileSync('worker/app-routes.js', 'utf8');
         expect(registry).toContain("['warOperation', 'nav.warOperation', 'War Board', 'compete', '/app/war-board', true]");
-        expect(routes).toContain('["/app/war-board", "/subpages/war-operation-board"]');
+        expect(routes).toContain('["/app/war-board", "/subPages/war-operation-board.html"]');
         expect(routes).toContain('["/app/war-operation-board", "/app/war-board"]');
     });
 
