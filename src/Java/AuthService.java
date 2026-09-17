@@ -121,11 +121,30 @@ public final class AuthService {
 
         return config.getSupabaseUrl()
                 + "/auth/v1/authorize?provider=google"
-                + "&redirect_to=" + encode(config.getAuthGoogleCallbackUrl())
+                + "&redirect_to=" + encode(resolveGoogleCallbackUrl(exchange))
                 + "&code_challenge=" + encode(flow.challenge())
                 + "&code_challenge_method=s256";
     }
 
+    private String resolveGoogleCallbackUrl(HttpExchange exchange) {
+        String forwardedProto = headerValue(exchange, "X-Forwarded-Proto");
+        String forwardedHost = headerValue(exchange, "X-Forwarded-Host").toLowerCase();
+        if ("https".equalsIgnoreCase(forwardedProto) && isAllowedGoogleCallbackHost(forwardedHost)) {
+            return "https://" + forwardedHost + "/api/AuthGoogleCallback";
+        }
+        return config.getAuthGoogleCallbackUrl();
+    }
+
+    private boolean isAllowedGoogleCallbackHost(String host) {
+        return "clashpanel.com".equals(host)
+                || "clashpanel-phase8-preview.emile-vandewaetere.workers.dev".equals(host)
+                || "advanced-stats-clashpanel-phase8-preview.emile-vandewaetere.workers.dev".equals(host);
+    }
+
+    private String headerValue(HttpExchange exchange, String name) {
+        String value = exchange.getRequestHeaders().getFirst(name);
+        return value == null ? "" : value.trim();
+    }
     public String completeGoogleOAuth(HttpExchange exchange, String authCode) throws Exception {
         String verifier = readCookie(exchange, GOOGLE_VERIFIER_COOKIE);
         String destination = decodeNextCookie(readCookie(exchange, GOOGLE_NEXT_COOKIE));
