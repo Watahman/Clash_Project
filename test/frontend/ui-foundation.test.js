@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import {
     ASSET_FALLBACKS,
     getLeagueAsset,
@@ -14,6 +14,7 @@ import {
     isFixtureRequested
 } from '../../src/assets/js/fixtures/fixture-mode.js';
 import { APP_ALIASES, APP_ASSETS } from '../../worker/app-routes.js';
+import { PUBLIC_ASSETS } from '../../worker/public-routes.js';
 
 describe('redesign shared foundation', () => {
     it('keeps the exact workspace taxonomy in one registry', () => {
@@ -41,13 +42,22 @@ describe('redesign shared foundation', () => {
     });
 
     it('serves clean app routes and preserves old aliases', () => {
-        expect(APP_ASSETS.get('/app/explore')).toBe('/subPages/explore');
-        expect(APP_ASSETS.get('/app/war-board')).toBe('/subPages/war-operation-board');
-        expect(APP_ASSETS.get('/app/brackets')).toBe('/subPages/bracket-generator');
-        expect(APP_ASSETS.get('/app/minigames')).toBe('/subPages/minigames');
+        expect(APP_ASSETS.get('/app/explore')).toBe('/subpages/explore');
+        expect(APP_ASSETS.get('/app/war-board')).toBe('/subpages/war-operation-board');
+        expect(APP_ASSETS.get('/app/brackets')).toBe('/subpages/bracket-generator');
+        expect(APP_ASSETS.get('/app/minigames')).toBe('/subpages/minigames');
         expect(APP_ALIASES.get('/app/minigames.html')).toBe('/app/minigames');
-        expect(APP_ASSETS.get('/app/profile')).toBe('/subPages/profile');
+        expect(APP_ASSETS.get('/app/profile')).toBe('/subpages/profile');
         expect(APP_ALIASES.get('/app/war-operation-board')).toBe('/app/war-board');
+    });
+
+    it('maps Worker pages to the exact published asset paths', () => {
+        expect(readdirSync('src')).toContain('subpages');
+        const publishedPages = new Set(readdirSync('src/subpages'));
+        for (const assetPath of [...APP_ASSETS.values(), ...PUBLIC_ASSETS.values()]) {
+            expect(assetPath).toMatch(/^\/subpages\/[a-z-]+$/);
+            expect(publishedPages.has(`${assetPath.slice('/subpages/'.length)}.html`)).toBe(true);
+        }
     });
 
     it('loads the new foundation after legacy compatibility styles', () => {

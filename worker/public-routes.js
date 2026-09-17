@@ -1,8 +1,8 @@
 export const PUBLIC_ASSETS = new Map([
-    ['/privacy', '/subPages/privacy'],
-    ['/cookies', '/subPages/cookies'],
-    ['/terms', '/subPages/terms'],
-    ['/contact', '/subPages/contact']
+    ['/privacy', '/subpages/privacy'],
+    ['/cookies', '/subpages/cookies'],
+    ['/terms', '/subpages/terms'],
+    ['/contact', '/subpages/contact']
 ]);
 
 const PUBLIC_ROUTE_REDIRECTS = new Map([

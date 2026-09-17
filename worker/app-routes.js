@@ -1,18 +1,18 @@
 export const APP_ASSETS = new Map([
-    ["/dashboard", "/subPages/dashboard"],
-    ["/subpages/login", "/subPages/login"],
-    ["/subpages/register", "/subPages/register"],
-    ["/app/explore", "/subPages/explore"],
-    ["/app/cwl-planner", "/subPages/cwl-planner"],
-    ["/app/cwl-planner-drafts", "/subPages/cwl-planner-drafts"],
-    ["/app/cwl-tracker", "/subPages/cwl-operation-board"],
-    ["/app/clan-management", "/subPages/groups"],
-    ["/app/war-board", "/subPages/war-operation-board"],
-    ["/app/brackets", "/subPages/bracket-generator"],
-    ["/app/minigames", "/subPages/minigames"],
-    ["/app/advanced-stats", "/subPages/advanced-stats"],
-    ["/app/achievements", "/subPages/achievements"],
-    ["/app/profile", "/subPages/profile"]
+    ["/dashboard", "/subpages/dashboard"],
+    ["/subpages/login", "/subpages/login"],
+    ["/subpages/register", "/subpages/register"],
+    ["/app/explore", "/subpages/explore"],
+    ["/app/cwl-planner", "/subpages/cwl-planner"],
+    ["/app/cwl-planner-drafts", "/subpages/cwl-planner-drafts"],
+    ["/app/cwl-tracker", "/subpages/cwl-operation-board"],
+    ["/app/clan-management", "/subpages/groups"],
+    ["/app/war-board", "/subpages/war-operation-board"],
+    ["/app/brackets", "/subpages/bracket-generator"],
+    ["/app/minigames", "/subpages/minigames"],
+    ["/app/advanced-stats", "/subpages/advanced-stats"],
+    ["/app/achievements", "/subpages/achievements"],
+    ["/app/profile", "/subpages/profile"]
 ]);
 export const APP_ALIASES = new Map([
     ["/dashboard.html", "/dashboard"],

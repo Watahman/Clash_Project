@@ -69,10 +69,10 @@ describe('Cloudflare API proxy', () => {
         expect(worker.scheduled).toBeUndefined();
     });
     it.each([
-        ['/privacy', '/subPages/privacy'],
-        ['/cookies', '/subPages/cookies'],
-        ['/terms', '/subPages/terms'],
-        ['/contact', '/subPages/contact']
+        ['/privacy', '/subpages/privacy'],
+        ['/cookies', '/subpages/cookies'],
+        ['/terms', '/subpages/terms'],
+        ['/contact', '/subpages/contact']
     ])('serves preferred legal route %s from its existing public HTML asset', async (route, assetPath) => {
         const bindings = env({
             ASSETS: {
@@ -122,14 +122,14 @@ describe('Cloudflare API proxy', () => {
     });
 
     it.each([
-        ['/subpages/privacy', '/privacy', '/subPages/privacy'],
-        ['/subpages/privacy.html', '/privacy', '/subPages/privacy'],
-        ['/subpages/cookies', '/cookies', '/subPages/cookies'],
-        ['/subpages/cookies.html', '/cookies', '/subPages/cookies'],
-        ['/subpages/terms', '/terms', '/subPages/terms'],
-        ['/subpages/terms.html', '/terms', '/subPages/terms'],
-        ['/subpages/contact', '/contact', '/subPages/contact'],
-        ['/subpages/contact.html', '/contact', '/subPages/contact']
+        ['/subpages/privacy', '/privacy', '/subpages/privacy'],
+        ['/subpages/privacy.html', '/privacy', '/subpages/privacy'],
+        ['/subpages/cookies', '/cookies', '/subpages/cookies'],
+        ['/subpages/cookies.html', '/cookies', '/subpages/cookies'],
+        ['/subpages/terms', '/terms', '/subpages/terms'],
+        ['/subpages/terms.html', '/terms', '/subpages/terms'],
+        ['/subpages/contact', '/contact', '/subpages/contact'],
+        ['/subpages/contact.html', '/contact', '/subpages/contact']
     ])('resolves legacy legal route %s with at most one redirect', async (
         source,
         destination,
@@ -164,7 +164,7 @@ describe('Cloudflare API proxy', () => {
 
     it.each([
         ['/subpages/cwl-planner.html', '/cwl-planner'],
-        ['/subPages/cwl-operation-board', '/cwl-tracker'],
+        ['/subpages/cwl-operation-board', '/cwl-tracker'],
         ['/subpages/groups/', '/clan-management'],
         ['/subpages/bracket-generator.html', '/bracket-generator'],
         ['/subpages/privacy', '/privacy'],
@@ -254,7 +254,7 @@ describe('Cloudflare API proxy', () => {
             bindings
         );
 
-        expect(await response.text()).toBe('asset:/subPages/cwl-operation-board');
+        expect(await response.text()).toBe('asset:/subpages/cwl-operation-board');
         expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
     });
 
@@ -273,13 +273,13 @@ describe('Cloudflare API proxy', () => {
             bindings
         );
 
-        expect(await response.text()).toBe('asset:/subPages/dashboard');
+        expect(await response.text()).toBe('asset:/subpages/dashboard');
         expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
     });
 
     it.each([
-        ['/subpages/login', '/subPages/login'],
-        ['/subpages/register', '/subPages/register']
+        ['/subpages/login', '/subpages/login'],
+        ['/subpages/register', '/subpages/register']
     ])('serves auth route %s from the case-correct HTML asset', async (route, assetPath) => {
         const bindings = env({
             ASSETS: {
