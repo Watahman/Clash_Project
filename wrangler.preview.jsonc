@@ -4,7 +4,7 @@
   "compatibility_date": "2026-07-24",
   "main": "./worker/index.js",
   "workers_dev": true,
-  "preview_urls": false,
+  "preview_urls": true,
 
   "assets": {
     "directory": "./dist",
