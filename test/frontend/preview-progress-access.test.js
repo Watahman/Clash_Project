@@ -47,8 +47,8 @@ describe('Development preview Progress access', () => {
         const env = bindings();
 
         for (const [path, assetPath] of [
-            ['/app/advanced-stats', '/subPages/advanced-stats.html'],
-            ['/app/achievements', '/subPages/achievements.html']
+            ['/app/advanced-stats', '/subPages/advanced-stats'],
+            ['/app/achievements', '/subPages/achievements']
         ]) {
             const response = await worker.fetch(request(path), env);
             expect(response.status).toBe(200);

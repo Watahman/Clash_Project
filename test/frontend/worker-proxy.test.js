@@ -69,10 +69,10 @@ describe('Cloudflare API proxy', () => {
         expect(worker.scheduled).toBeUndefined();
     });
     it.each([
-        ['/privacy', '/subPages/privacy.html'],
-        ['/cookies', '/subPages/cookies.html'],
-        ['/terms', '/subPages/terms.html'],
-        ['/contact', '/subPages/contact.html']
+        ['/privacy', '/subPages/privacy'],
+        ['/cookies', '/subPages/cookies'],
+        ['/terms', '/subPages/terms'],
+        ['/contact', '/subPages/contact']
     ])('serves preferred legal route %s from its existing public HTML asset', async (route, assetPath) => {
         const bindings = env({
             ASSETS: {
@@ -122,14 +122,14 @@ describe('Cloudflare API proxy', () => {
     });
 
     it.each([
-        ['/subpages/privacy', '/privacy', '/subPages/privacy.html'],
-        ['/subpages/privacy.html', '/privacy', '/subPages/privacy.html'],
-        ['/subpages/cookies', '/cookies', '/subPages/cookies.html'],
-        ['/subpages/cookies.html', '/cookies', '/subPages/cookies.html'],
-        ['/subpages/terms', '/terms', '/subPages/terms.html'],
-        ['/subpages/terms.html', '/terms', '/subPages/terms.html'],
-        ['/subpages/contact', '/contact', '/subPages/contact.html'],
-        ['/subpages/contact.html', '/contact', '/subPages/contact.html']
+        ['/subpages/privacy', '/privacy', '/subPages/privacy'],
+        ['/subpages/privacy.html', '/privacy', '/subPages/privacy'],
+        ['/subpages/cookies', '/cookies', '/subPages/cookies'],
+        ['/subpages/cookies.html', '/cookies', '/subPages/cookies'],
+        ['/subpages/terms', '/terms', '/subPages/terms'],
+        ['/subpages/terms.html', '/terms', '/subPages/terms'],
+        ['/subpages/contact', '/contact', '/subPages/contact'],
+        ['/subpages/contact.html', '/contact', '/subPages/contact']
     ])('resolves legacy legal route %s with at most one redirect', async (
         source,
         destination,
@@ -254,7 +254,7 @@ describe('Cloudflare API proxy', () => {
             bindings
         );
 
-        expect(await response.text()).toBe('asset:/subPages/cwl-operation-board.html');
+        expect(await response.text()).toBe('asset:/subPages/cwl-operation-board');
         expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
     });
 
@@ -273,13 +273,13 @@ describe('Cloudflare API proxy', () => {
             bindings
         );
 
-        expect(await response.text()).toBe('asset:/subPages/dashboard.html');
+        expect(await response.text()).toBe('asset:/subPages/dashboard');
         expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
     });
 
     it.each([
-        ['/subpages/login', '/subPages/login.html'],
-        ['/subpages/register', '/subPages/register.html']
+        ['/subpages/login', '/subPages/login'],
+        ['/subpages/register', '/subPages/register']
     ])('serves auth route %s from the case-correct HTML asset', async (route, assetPath) => {
         const bindings = env({
             ASSETS: {
