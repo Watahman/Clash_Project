@@ -48,10 +48,8 @@ PostHog's capture endpoint documentation is available at
    may also spend up to 300 ms on the existing profile-ID lookup (two 150 ms
    attempts), then at most 200 ms on capture if an ID was found.
 
-The Development deploy script now selects `--cpu-throttling` with
-`min-instances=0`, because no PostHog queue needs post-response CPU. The
-currently live production revision still uses instance-based CPU until a
-separately approved backend deployment.
+The Development and Production deploy scripts select `--cpu-throttling` with
+`min-instances=0`, because no PostHog queue needs post-response CPU.
 
 The allowlisted caller property keys are `tool`, `action`, `entity_type`,
 `mode`, `outcome`, `result_status`, and `source`. Values are scalar, bounded,
