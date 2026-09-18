@@ -83,11 +83,35 @@ class ProductAnalyticsTest {
     }
 
     @Test
+    void normalCrossRegionLatencyStillCompletesCapture() throws Exception {
+        AtomicBoolean responded = new AtomicBoolean();
+        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/i/v0/e/", exchange -> {
+            try {
+                Thread.sleep(350);
+                exchange.sendResponseHeaders(200, -1);
+                responded.set(true);
+            } catch (Exception ignored) {
+            } finally {
+                exchange.close();
+            }
+        });
+        server.start();
+        try {
+            new ProductAnalytics(endpoint(server)).captureAuthenticated(
+                    AnalyticsEvent.DATA_SAVED, Map.of("tool", "cwl_planner"), "profile-123");
+            assertTrue(responded.get(), "Capture should tolerate normal cross-region latency");
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
     void slowPosthogTimesOutWithoutFailingTheProductRequest() throws Exception {
         HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext("/i/v0/e/", exchange -> {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(1500);
                 exchange.sendResponseHeaders(200, -1);
             } catch (Exception ignored) {
                 // The client has already timed out and dropped the event.
@@ -101,7 +125,7 @@ class ProductAnalyticsTest {
             new ProductAnalytics(endpoint(server)).captureAuthenticated(
                     AnalyticsEvent.DATA_SAVED, Map.of("tool", "cwl_planner"), "profile-123");
             long elapsedMillis = (System.nanoTime() - started) / 1_000_000;
-            assertTrue(elapsedMillis < 750, "Analytics must not wait for a slow PostHog response");
+            assertTrue(elapsedMillis < 1200, "Analytics must not wait indefinitely for a slow PostHog response");
         } finally {
             server.stop(0);
         }

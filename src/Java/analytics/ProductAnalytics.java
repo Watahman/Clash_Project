@@ -21,7 +21,8 @@ import java.util.Set;
 /** Fail-open, request-scoped server-side product analytics capture. */
 public final class ProductAnalytics {
     public static final String ROUTE = "/ProductAnalytics";
-    private static final Duration CAPTURE_TIMEOUT = Duration.ofMillis(200);
+    private static final Duration CONNECT_TIMEOUT = Duration.ofMillis(300);
+    private static final Duration CAPTURE_TIMEOUT = Duration.ofMillis(750);
     private static final Gson GSON = new Gson();
     private static final ProductAnalytics NOOP = new ProductAnalytics();
 
@@ -40,7 +41,7 @@ public final class ProductAnalytics {
         this.captureUri = captureUri(config.getPosthogHost());
         this.environment = safeEnvironment(config.getClashPanelEnvironment());
         this.internalUserIds = internalUserIds(config.getPosthogInternalUserIds());
-        this.client = HttpClient.newBuilder().connectTimeout(CAPTURE_TIMEOUT).build();
+        this.client = HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT).build();
     }
 
     ProductAnalytics(URI captureUri) {
@@ -50,7 +51,7 @@ public final class ProductAnalytics {
         this.captureUri = captureUri;
         this.environment = "test";
         this.internalUserIds = Set.of();
-        this.client = HttpClient.newBuilder().connectTimeout(CAPTURE_TIMEOUT).build();
+        this.client = HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT).build();
     }
 
     private ProductAnalytics() {
@@ -145,10 +146,15 @@ public final class ProductAnalytics {
                     apiKey, event, properties, distinctId, loggedIn,
                     environment, internal ? "internal" : "external"
             );
-            send(GSON.toJson(payload));
+            int status = send(GSON.toJson(payload));
+            if (status < 200 || status >= 300) {
+                System.err.println("[analytics] PostHog capture rejected event=" + event + " status=" + status);
+            }
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
-        } catch (Exception ignored) {
+        } catch (Exception failure) {
+            System.err.println("[analytics] PostHog capture failed event=" + event
+                    + " error=" + failure.getClass().getSimpleName());
             // Analytics must never affect the product request that triggered it.
         }
     }
@@ -176,13 +182,13 @@ public final class ProductAnalytics {
         return payload;
     }
 
-    private void send(String payload) throws Exception {
+    private int send(String payload) throws Exception {
         HttpRequest request = HttpRequest.newBuilder(captureUri)
                 .timeout(CAPTURE_TIMEOUT)
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(payload))
                 .build();
-        client.send(request, HttpResponse.BodyHandlers.discarding());
+        return client.send(request, HttpResponse.BodyHandlers.discarding()).statusCode();
     }
 
     private Map<String, String> clientProperties(JsonObject body) {
